@@ -9,6 +9,52 @@ const STATS = [
   { label: "Avg. time to first join", value: "18m" },
 ];
 
+const WHY_PILLARS = [
+  {
+    title: "You already know the domain",
+    blurb:
+      "Nobody has to explain what a WR route tree or a waiver claim is — you've lived it every Sunday for years. That's an entire layer of learning most courses make you fight through, gone before you write a single query.",
+    accent: "teal" as const,
+  },
+  {
+    title: "Real data, real mess",
+    blurb:
+      "No Titanic.csv, no invented SaaS company. Live NFL and fantasy data — byes, injuries, trades, ties — the same kind of imperfect data you'll actually query on the job.",
+    accent: "amber" as const,
+  },
+  {
+    title: "Practice rides a habit you already have",
+    blurb:
+      "You already check the standings obsessively. SQL Sports turns that exact habit into query practice, instead of asking you to build a study habit from nothing.",
+    accent: "teal" as const,
+  },
+  {
+    title: "A portfolio story anyone gets instantly",
+    blurb:
+      "“I built an analytics tool on fantasy football data” needs zero setup in an interview. It's memorable, easy to talk through, and still real analytical work.",
+    accent: "amber" as const,
+  },
+];
+
+const WHY_COMPARISON = [
+  {
+    old: "Toy datasets you memorize, don't understand",
+    now: "Real, living NFL & fantasy data",
+  },
+  {
+    old: "Business scenarios you've never lived",
+    now: "Questions you already ask out loud every week",
+  },
+  {
+    old: "Practice that feels like homework",
+    now: "Practice that piggybacks on a habit you already have",
+  },
+  {
+    old: "A portfolio project that looks like everyone else's",
+    now: "A capstone built on a domain any interviewer instantly gets",
+  },
+];
+
 const ROADMAP = [
   {
     phase: "01",
@@ -101,6 +147,12 @@ export default function Home() {
             </span>
           </a>
           <nav className="flex items-center gap-6">
+            <a
+              href="#why"
+              className="hidden font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors duration-150 hover:text-teal sm:inline"
+            >
+              Why SQL Sports
+            </a>
             <a
               href="#curriculum"
               className="hidden font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors duration-150 hover:text-teal sm:inline"
@@ -242,6 +294,101 @@ export default function Home() {
                 </p>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* ── Why SQL Sports ───────────────────────────── */}
+        <section id="why" className="border-t border-panel-border">
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+            <p className="label-broadcast mb-3">
+              <span className="mr-2 inline-block h-1.5 w-1.5 bg-teal align-middle" />
+              Why SQL Sports
+            </p>
+            <h2 className="max-w-2xl font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
+              The fastest way to actually learn SQL
+            </h2>
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-[#C5CCD9]">
+              Most people don&apos;t fail at SQL because it&apos;s hard. They
+              fail because they&apos;re learning new syntax and an unfamiliar
+              business scenario at the same time, on data they don&apos;t
+              care about. Remove the second problem, and the syntax stops
+              being the hard part.
+            </p>
+
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {WHY_PILLARS.map((pillar) => (
+                <div
+                  key={pillar.title}
+                  className={`border border-panel-border bg-panel p-5 transition-colors duration-150 ${
+                    pillar.accent === "teal"
+                      ? "hover:border-teal/50"
+                      : "hover:border-amber/50"
+                  }`}
+                >
+                  <span
+                    className={`mb-3 inline-block h-1.5 w-1.5 ${
+                      pillar.accent === "teal" ? "bg-teal" : "bg-amber"
+                    }`}
+                  />
+                  <h3 className="font-display text-lg font-semibold leading-snug text-pop">
+                    {pillar.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-[#C5CCD9]">
+                    {pillar.blurb}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Old way vs. SQL Sports comparison */}
+            <div className="mt-12 overflow-hidden border border-panel-border">
+              <div className="grid grid-cols-2">
+                <div className="border-b border-r border-panel-border bg-panel/60 px-4 py-3 sm:px-5">
+                  <span className="label-broadcast text-[10px] text-ink-muted">
+                    The old way
+                  </span>
+                </div>
+                <div className="border-b border-panel-border bg-teal/5 px-4 py-3 sm:px-5">
+                  <span className="label-broadcast text-[10px] text-teal">
+                    SQL Sports
+                  </span>
+                </div>
+              </div>
+              {WHY_COMPARISON.map((row, i) => (
+                <div key={row.old} className="grid grid-cols-2">
+                  <div
+                    className={`border-r border-panel-border px-4 py-4 text-sm leading-relaxed text-ink-muted sm:px-5 ${
+                      i !== WHY_COMPARISON.length - 1
+                        ? "border-b border-panel-border/60"
+                        : ""
+                    }`}
+                  >
+                    {row.old}
+                  </div>
+                  <div
+                    className={`bg-teal/[0.03] px-4 py-4 text-sm leading-relaxed text-ink sm:px-5 ${
+                      i !== WHY_COMPARISON.length - 1
+                        ? "border-b border-panel-border/60"
+                        : ""
+                    }`}
+                  >
+                    {row.now}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Worth-the-money close */}
+            <p className="mt-10 max-w-2xl text-base leading-relaxed text-[#C5CCD9]">
+              A data analytics bootcamp runs $10,000–20,000. A specialized
+              analytics master&apos;s can run $20,000–50,000. Both are
+              betting that immersion works — dropping you into a domain
+              until it clicks. SQL Sports makes the same bet, except it&apos;s
+              a domain you&apos;ve already got years of immersion in. You&apos;re
+              not paying to learn a new industry and a new skill at once.
+              You&apos;re paying to learn one skill, faster, on a dataset
+              that&apos;s been running in your head since you were a kid.
+            </p>
           </div>
         </section>
 

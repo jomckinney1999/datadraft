@@ -35,6 +35,18 @@ At $1–5K, Andy is functionally expecting something adjacent to career coaching
 
 Career Track is a **small, high-value slice** of the user base, not the bulk of it. Most users will stay in the cheap/free tiers for the hobby use case. Career Track is a few hundred serious career-changers paying a lot, not thousands of casual fans paying a little. Both segments matter for revenue, but they serve different motivations within the same audience — pricing and messaging for each tier should reflect that (don't sell Career Track to casual hobbyists, don't gate the fun stuff behind it).
 
+## Core "why" argument (positioning)
+
+The landing page has a dedicated "Why SQL Sports" section (`app/page.tsx`, `#why`, between the hero and the curriculum) making the explicit case for why learning SQL through sports is worth paying for. The argument, in order:
+
+1. **You already know the domain** — most SQL courses make you learn unfamiliar syntax and an unfamiliar business scenario (fictional SaaS churn, etc.) at the same time. SQL Sports removes the second problem because the learner already understands fantasy football, so only the syntax is actually new.
+2. **Real data, real mess** — live NFL/fantasy data (byes, injuries, trades) instead of toy datasets (Titanic, Iris), which is closer to what real analyst work looks like.
+3. **Practice rides an existing habit** — checking standings/scores is a habit the learner already has; SQL Sports repurposes it instead of requiring a new study habit built from zero.
+4. **A portfolio story anyone gets instantly** — "I built an analytics tool on fantasy football data" needs no setup in an interview, unlike a generic bootcamp project.
+5. **Cheaper than the alternatives** — direct cost comparison to data analytics bootcamps ($10–20K) and specialized analytics master's programs ($20–50K), framed as the same "immersion" bet those make, minus the cost of also learning a brand-new industry.
+
+This is the same reasoning as the Andy persona section above, generalized into on-page copy — keep the two in sync. Point 5 in particular is a direct restatement of Andy's math (see above) and should move together with any changes to that reasoning or to the bootcamp/master's price comparisons.
+
 ## Product ladder
 
 | Tier | What's included | Price | Who it's for |
