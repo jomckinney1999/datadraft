@@ -1,0 +1,6 @@
+---
+description: Product/pricing planning doc — always load for context on this project
+alwaysApply: true
+---
+
+Before changing pricing, product tiers, or landing page positioning, read [docs/PLAN.md](../../docs/PLAN.md). It documents the product ladder (Free / Practice / Roadmap / Career Track), the reasoning behind each tier's price (target-user "Andy" analysis), and open questions not yet resolved. The `PLANS` array in `app/page.tsx` should stay in sync with that doc — if a request conflicts with what's documented there, flag it rather than silently overriding it, and update the doc alongside any code change that alters the plan itself.
