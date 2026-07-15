@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+
+# Database
+*.sqlite
+*.db
+
+# Editor
+.vscode/
+.idea/
