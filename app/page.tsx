@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Sandbox from "@/components/sandbox";
+import SuccessStories from "@/components/success-stories";
+import SupportWidget from "@/components/support-widget";
 
 const STATS = [
   { label: "Queries run", value: "12.4k" },
@@ -373,6 +375,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* ── Success stories ───────────────────────────── */}
+        <SuccessStories />
       </main>
 
       {/* ── Footer ──────────────────────────────────────── */}
@@ -391,6 +396,8 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      <SupportWidget />
     </div>
   );
 }

@@ -49,6 +49,7 @@ const config = {
       animation: {
         "fade-up": "fadeUp 0.5s ease-out forwards",
         "count-glow": "countGlow 1.2s ease-out forwards",
+        marquee: "marquee 42s linear infinite",
       },
       keyframes: {
         fadeUp: {
@@ -58,6 +59,10 @@ const config = {
         countGlow: {
           "0%": { opacity: "0.4" },
           "100%": { opacity: "1" },
+        },
+        marquee: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
         },
       },
     },
