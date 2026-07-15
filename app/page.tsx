@@ -36,39 +36,51 @@ const ROADMAP = [
 
 const PLANS = [
   {
-    name: "Scout",
+    name: "Free",
     price: "0",
     period: "forever",
     accent: "teal" as const,
-    features: ["Live SQL sandbox", "First 8 lessons", "Sample season dataset"],
+    features: ["Limited SQL sandbox", "Free content library", "Sample season dataset"],
     cta: "Start free",
   },
   {
-    name: "Analyst",
-    price: "29",
-    period: "/mo",
-    accent: "amber" as const,
-    features: [
-      "Full curriculum",
-      "Weekly live datasets",
-      "Query notebooks",
-      "Certificate track",
-    ],
-    cta: "Go Analyst",
-    featured: true,
-  },
-  {
-    name: "War Room",
-    price: "79",
+    name: "Practice",
+    price: "15–30",
     period: "/mo",
     accent: "teal" as const,
     features: [
-      "Everything in Analyst",
-      "Team seats (5)",
-      "Private league data import",
-      "Office hours",
+      "Unlimited sandbox access",
+      "Ongoing weekly problem sets",
+      "Live season datasets",
     ],
-    cta: "Contact sales",
+    cta: "Start practicing",
+  },
+  {
+    name: "Roadmap",
+    price: "200–500",
+    period: "one-time",
+    accent: "amber" as const,
+    features: [
+      "Full Beginner → Advanced pathway",
+      "Portfolio capstone project",
+      "Completion credential",
+    ],
+    cta: "Unlock the Roadmap",
+  },
+  {
+    name: "Career Track",
+    price: "1k–5k",
+    period: "/yr",
+    accent: "amber" as const,
+    badge: "premium",
+    features: [
+      "Everything in Roadmap",
+      "Resume & portfolio review",
+      "Mock interview practice",
+      "Application strategy support",
+    ],
+    cta: "Apply for Career Track",
+    featured: true,
   },
 ];
 
@@ -98,6 +110,12 @@ export default function Home() {
               className="hidden font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors duration-150 hover:text-teal sm:inline"
             >
               Pricing
+            </a>
+            <a
+              href="#career-track"
+              className="hidden font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors duration-150 hover:text-amber sm:inline"
+            >
+              Career Track
             </a>
             <a
               href="#sandbox"
@@ -285,18 +303,19 @@ export default function Home() {
               Pricing
             </p>
             <h2 className="font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
-              Pick your seat in the booth
+              From first query to career change
             </h2>
             <p className="mt-3 max-w-xl text-base leading-relaxed text-[#C5CCD9]">
-              Start in the free sandbox. Upgrade when you want the full season
-              track.
+              Practice for fun, follow the roadmap to get good, or go all the
+              way with hands-on support landing a data role.
             </p>
 
-            <div className="mt-10 grid gap-4 md:grid-cols-3">
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {PLANS.map((plan) => (
                 <div
                   key={plan.name}
-                  className={`flex flex-col border bg-panel p-5 transition-colors duration-150 ${
+                  id={plan.name === "Career Track" ? "career-track" : undefined}
+                  className={`flex scroll-mt-20 flex-col border bg-panel p-5 transition-colors duration-150 ${
                     plan.featured
                       ? "border-amber/40 hover:border-amber"
                       : "border-panel-border hover:border-teal/50"
@@ -304,9 +323,9 @@ export default function Home() {
                 >
                   <div className="flex items-center justify-between">
                     <span className="label-broadcast text-ink">{plan.name}</span>
-                    {plan.featured && (
+                    {plan.badge && (
                       <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-amber">
-                        popular
+                        {plan.badge}
                       </span>
                     )}
                   </div>
