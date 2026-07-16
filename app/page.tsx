@@ -263,8 +263,37 @@ export default function Home() {
         </section>
 
         {/* ── Why SQL Sports ───────────────────────────── */}
-        <section id="why" className="border-t border-panel-border">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+        <section
+          id="why"
+          className="relative overflow-hidden border-t border-panel-border"
+        >
+          {/* Decorative energy backdrop — diagonal rays + jersey-number
+              watermarks, no photography, evokes the broadcast-graphics
+              look without depicting any real athlete. */}
+          <div aria-hidden className="pointer-events-none absolute inset-0">
+            <div
+              className="absolute inset-0 opacity-[0.05]"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(115deg, #4FD1C5 0px, #4FD1C5 2px, transparent 2px, transparent 64px)",
+              }}
+            />
+            <div
+              className="absolute inset-0 opacity-[0.04]"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(115deg, #E8A33D 32px, #E8A33D 34px, transparent 34px, transparent 96px)",
+              }}
+            />
+            <span className="stat-number-teal absolute -right-6 -top-10 select-none font-display text-[260px] font-bold leading-none opacity-[0.05] sm:text-[320px]">
+              07
+            </span>
+            <span className="stat-number absolute -bottom-16 -left-8 select-none font-display text-[220px] font-bold leading-none opacity-[0.05] sm:text-[280px]">
+              18
+            </span>
+          </div>
+
+          <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
             <p className="label-broadcast mb-3">
               <span className="mr-2 inline-block h-1.5 w-1.5 bg-teal align-middle" />
               Why SQL Sports
