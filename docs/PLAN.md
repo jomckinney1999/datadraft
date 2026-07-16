@@ -15,6 +15,10 @@ The bigger bet: sports is a generalizable teaching *lens* for technical skills, 
 
 This vision currently lives **in this document, not on the live marketing site**. The site stays tightly focused on the SQL/fantasy-football flagship for now — publicly promising a multi-sport, multi-language platform before the first product has proven itself would dilute the pitch and create expectations the business can't yet back up. Revisit this once there's real traction data to point to.
 
+### Sister product: NFL Stat Guru
+
+Decided 2026-07-16: the landing page cross-promotes **NFL Stat Guru** (`https://gridiq-eight.vercel.app/`, Vercel project `gridiq`) — a separate, already-live product from the same builder. It's an AI-powered NFL stats Q&A platform ("ask any NFL question in plain English"), not part of the SQL Sports curriculum or codebase. It's linked via a nav tab (`#stat-guru`) and an on-page promo section (`app/page.tsx`) that links out to the external app — not embedded, not merged. Treat it as a distinct brand/business; don't fold its pricing or features into the SQL Sports ladder above.
+
 ## Making SQL Sports a "must buy" (not just a nice-to-have)
 
 The mechanisms this plan leans on to make the product feel essential rather than optional, roughly in order of leverage:

@@ -542,6 +542,90 @@ export default function Home() {
 
         {/* ── Success stories ───────────────────────────── */}
         <SuccessStories />
+
+        {/* ── NFL Stat Guru cross-promo ─────────────────── */}
+        <section id="stat-guru" className="border-t border-panel-border bg-night/60">
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+            <p className="label-broadcast mb-6">
+              <span className="mr-2 inline-block h-1.5 w-1.5 bg-amber align-middle" />
+              From the same team
+            </p>
+
+            <div className="relative border border-panel-border bg-panel p-6 sm:p-10">
+              <div className="pointer-events-none absolute -inset-px border border-amber/40" />
+              <div className="absolute -top-px left-6 h-px w-20 bg-amber shadow-[0_0_12px_rgba(232,163,61,0.8)]" />
+              <div className="absolute -left-px top-6 h-20 w-px bg-amber shadow-[0_0_12px_rgba(232,163,61,0.8)]" />
+
+              <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
+                <div className="lg:col-span-7">
+                  <h2 className="font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
+                    NFL Stat Guru
+                  </h2>
+                  <p className="mt-2 font-mono text-xs font-semibold uppercase tracking-wider text-amber">
+                    Ask any NFL question. Get an instant answer.
+                  </p>
+                  <p className="mt-4 max-w-xl text-base leading-relaxed text-[#C5CCD9]">
+                    Our sister platform for the truly obsessed — the questions
+                    ESPN can&apos;t answer, answered in plain English. Ask a
+                    question, get a real answer, pulled straight from decades
+                    of NFL play-by-play data.
+                  </p>
+
+                  <ul className="mt-6 grid gap-2 sm:grid-cols-2">
+                    {[
+                      "AI-powered search — ask in plain English",
+                      "340+ advanced metrics: EPA, YPRR, CPOE",
+                      "Route tracking & coverage data",
+                      "Prospect profiles with grades & comps",
+                    ].map((f) => (
+                      <li key={f} className="flex gap-2 text-sm text-[#C5CCD9]">
+                        <span className="text-amber">▸</span>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-8 flex flex-wrap items-center gap-3">
+                    <a
+                      href="https://gridiq-eight.vercel.app/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 border border-amber bg-amber px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-amber-dim"
+                    >
+                      Try NFL Stat Guru ↗
+                    </a>
+                    <span className="font-mono text-[11px] text-ink-muted">
+                      Free to start — no card required
+                    </span>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-5">
+                  <div className="grid grid-cols-2 gap-px border border-amber/25 bg-amber/20">
+                    {[
+                      { label: "Tracked plays", value: "2.8M+" },
+                      { label: "Seasons covered", value: "1999–2024" },
+                      { label: "Advanced metrics", value: "340+" },
+                      { label: "Players profiled", value: "1,847" },
+                    ].map((stat) => (
+                      <div
+                        key={stat.label}
+                        className="bg-night/60 px-3 py-4 backdrop-blur-sm sm:px-4"
+                      >
+                        <p className="label-broadcast mb-1.5 text-[10px]">
+                          {stat.label}
+                        </p>
+                        <p className="stat-number text-xl sm:text-2xl">
+                          {stat.value}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* ── Footer ──────────────────────────────────────── */}
