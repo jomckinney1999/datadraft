@@ -2,7 +2,39 @@
 
 This is the source of truth for product structure, pricing, and positioning decisions. Update it whenever the business model changes, *before* or alongside code changes — this is what future Claude/Cursor sessions read to understand why the landing page is shaped the way it is.
 
-Last updated: 2026-07-15.
+Last updated: 2026-07-15 (added big-picture vision, must-buy strategy, and founding-cohort pricing decision).
+
+## Big picture vision
+
+SQL Sports launches as **one course, one sport, one language** — SQL taught through fantasy football — and stays that way deliberately until this flagship proves itself. That narrowness is a launch strategy, not the ceiling.
+
+The bigger bet: sports is a generalizable teaching *lens* for technical skills, not a one-off gimmick tied to SQL specifically. Once the SQL + fantasy football flagship has real traction (paying users, retention, a working Career Track cohort), the natural expansion axes are:
+
+- **More languages/skills** through the same sports lens — Python, R, and eventually AI/ML (e.g. predicting player performance, not just querying historical stats). This is the "coding, AI, tech" part of the long-term mission — SQL is the first course, not the only one.
+- **More sports** — basketball, soccer, baseball — for learners whose "Sunday obsession" isn't football.
+
+This vision currently lives **in this document, not on the live marketing site**. The site stays tightly focused on the SQL/fantasy-football flagship for now — publicly promising a multi-sport, multi-language platform before the first product has proven itself would dilute the pitch and create expectations the business can't yet back up. Revisit this once there's real traction data to point to.
+
+## Making SQL Sports a "must buy" (not just a nice-to-have)
+
+The mechanisms this plan leans on to make the product feel essential rather than optional, roughly in order of leverage:
+
+1. **Utility before mastery.** The single biggest lever. Most courses only pay off after you finish them. SQL Sports pays off mid-lesson: a learner can query their own league's data to make *this week's* lineup call before they've finished the roadmap. This turns "I should learn this eventually" into "I need this before Sunday." Reflected on-site as the lead pillar in the Why section.
+2. **Appointment-based habit loop.** Fantasy football already has a weekly cadence (waivers, lineups, matchups). SQL Sports rides that same clock — new problems/datasets drop weekly, in-season — instead of competing with it. This is what makes the product something people return to on their own, not something they have to force themselves back to.
+3. **Honest trust over fabricated traction.** No fake usage numbers, no fake testimonials, no fake urgency countdowns. Pre-launch, credibility compounds faster than hype does, and a single caught fabrication (a stat, a review, a "3 spots left" that isn't true) undermines every other claim on the page. Where the site doesn't have real numbers yet, it says so plainly (see the success-stories section) or shows structural facts instead of invented usage metrics.
+4. **Real, non-fake exclusivity at the top of the ladder.** Career Track stays intentionally small (see Volume expectations above) — not as a fake-scarcity trick, but because 1:1 review and mock interviews genuinely don't scale, and saying so plainly is more convincing than a countdown timer would be.
+5. **Founding-cohort pricing.** Decided 2026-07-15: current prices across the ladder are framed on-site as founding/early pricing that will rise once SQL Sports is out of early access. This is a real commitment, not just copy — whoever signs up now keeps their price; new sign-ups later pay more. Before raising prices, make sure existing members are actually grandfathered as promised.
+6. **Production quality signals competence.** For a product whose whole pitch is "we'll make you good at working with data," the site itself has to look like it was built by people who are good at their craft — polished dark UI, considered motion, working mobile nav, real OG/share metadata. Sloppy production on the marketing site undercuts the pitch before a visitor ever reads a word of copy.
+
+### Illustrative path to $100k/month (not a forecast)
+
+A rough, illustrative mix showing which tier does the heavy lifting — useful for prioritizing where to spend growth effort, not a commitment:
+
+- ~3,000 active **Practice** subscribers @ ~$20/mo ≈ $60k/mo — the volume tier; growth here is mostly top-of-funnel/conversion work.
+- ~100 active **Career Track** members @ ~$3k/yr (~$250/mo equivalent) ≈ $25k/mo — low volume, high leverage; a handful of members moves this number meaningfully.
+- ~40 **Roadmap** purchases/mo @ ~$350 ≈ $14k/mo — the one-time-purchase middle rung.
+
+Total ≈ $99k/mo. Takeaway: Practice-tier volume is the main lever at this scale, but Career Track's per-unit economics mean it's worth disproportionate product investment (see must-buy mechanisms above) even though it'll never be the biggest tier by headcount.
 
 ## Business structure
 
@@ -37,15 +69,16 @@ Career Track is a **small, high-value slice** of the user base, not the bulk of 
 
 ## Core "why" argument (positioning)
 
-The landing page has a dedicated "Why SQL Sports" section (`app/page.tsx`, `#why`, between the hero and the curriculum) making the explicit case for why learning SQL through sports is worth paying for. The argument, in order:
+The landing page has a dedicated "Why SQL Sports" section (`app/page.tsx`, `#why`, between the hero and the curriculum) making the explicit case for why learning SQL through sports is worth paying for. The argument, in order (utility-first — this is the must-buy lever, see above):
 
-1. **You already know the domain** — most SQL courses make you learn unfamiliar syntax and an unfamiliar business scenario (fictional SaaS churn, etc.) at the same time. SQL Sports removes the second problem because the learner already understands fantasy football, so only the syntax is actually new.
-2. **Real data, real mess** — live NFL/fantasy data (byes, injuries, trades) instead of toy datasets (Titanic, Iris), which is closer to what real analyst work looks like.
-3. **Practice rides an existing habit** — checking standings/scores is a habit the learner already has; SQL Sports repurposes it instead of requiring a new study habit built from zero.
-4. **A portfolio story anyone gets instantly** — "I built an analytics tool on fantasy football data" needs no setup in an interview, unlike a generic bootcamp project.
-5. **Cheaper than the alternatives** — direct cost comparison to data analytics bootcamps ($10–20K) and specialized analytics master's programs ($20–50K), framed as the same "immersion" bet those make, minus the cost of also learning a brand-new industry.
+1. **Useful before you're "done."** You don't need to finish the roadmap to get value — query your own league's data to make this week's lineup call while you're still learning. The skill pays for itself before the course does.
+2. **You already know the domain** — most SQL courses make you learn unfamiliar syntax and an unfamiliar business scenario (fictional SaaS churn, etc.) at the same time. SQL Sports removes the second problem because the learner already understands fantasy football, so only the syntax is actually new.
+3. **Real data, real mess** — live NFL/fantasy data (byes, injuries, trades) instead of toy datasets (Titanic, Iris), which is closer to what real analyst work looks like.
+4. **Practice rides an existing habit** — checking standings/scores is a habit the learner already has, on the same weekly clock the NFL season already runs on; SQL Sports repurposes it instead of requiring a new study habit built from zero.
+5. **A portfolio story anyone gets instantly** — "I built an analytics tool on fantasy football data" needs no setup in an interview, unlike a generic bootcamp project.
+6. **Cheaper than the alternatives** — direct cost comparison to data analytics bootcamps ($10–20K) and specialized analytics master's programs ($20–50K), framed as the same "immersion" bet those make, minus the cost of also learning a brand-new industry.
 
-This is the same reasoning as the Andy persona section above, generalized into on-page copy — keep the two in sync. Point 5 in particular is a direct restatement of Andy's math (see above) and should move together with any changes to that reasoning or to the bootcamp/master's price comparisons.
+This is the same reasoning as the Andy persona section above, generalized into on-page copy — keep the two in sync. Point 6 in particular is a direct restatement of Andy's math (see above) and should move together with any changes to that reasoning or to the bootcamp/master's price comparisons.
 
 ## Product ladder
 
@@ -56,7 +89,7 @@ This is the same reasoning as the Andy persona section above, generalized into o
 | **Roadmap** | Full Beginner → Advanced course pathway, portfolio capstone, completion credential | $200–500 one-time | Serious learners, not yet job-hunting |
 | **Career Track** | Everything in Roadmap + resume/portfolio review + mock interview practice + application strategy support | $1,000–5,000/yr | Andy, once he's decided this is a career move, not a hobby |
 
-This ladder is implemented on the landing page pricing section (`app/page.tsx`, `PLANS` array) and linked from the nav (`Career Track` tab → `#career-track` anchor on the Career Track card).
+This ladder is implemented on the landing page pricing section (`app/page.tsx`, `PLANS` array) and linked from the nav (`Career Track` tab → `#career-track` anchor on the Career Track card). The pricing section also carries a **founding-cohort pricing badge** (see Must-buy mechanisms, #5) — all four tiers are framed as early/founding pricing.
 
 ## Open questions / things to revisit
 
@@ -64,6 +97,8 @@ This ladder is implemented on the landing page pricing section (`app/page.tsx`, 
 - What the cohort/community mechanism actually is (Discord? scheduled cohorts? always-on?)
 - Whether "application strategy support" is self-serve async review or live calls — affects margin and how many Career Track seats can be supported at once
 - Certification: self-issued badge vs. something with outside credibility
+- **Founding-cohort mechanics**: what specifically triggers "out of early access" (a member count? a date? a funding/revenue milestone?), and how existing members get grandfathered in practice (a tagged account flag, a manually maintained list?). Decide before the first price increase, not after.
+- Whether/when to surface the multi-sport, multi-language vision publicly on the site (see Big picture vision above) — currently deliberately kept off the live page.
 
 ## How to use this doc
 

@@ -2,14 +2,21 @@ import Image from "next/image";
 import Sandbox from "@/components/sandbox";
 import SuccessStories from "@/components/success-stories";
 import SupportWidget from "@/components/support-widget";
+import SiteNav from "@/components/site-nav";
 
 const STATS = [
-  { label: "Queries run", value: "12.4k" },
-  { label: "Lessons", value: "48" },
-  { label: "Avg. time to first join", value: "18m" },
+  { label: "Skill phases", value: "4" },
+  { label: "Dataset", value: "Full season" },
+  { label: "New data", value: "Weekly" },
 ];
 
 const WHY_PILLARS = [
+  {
+    title: "Useful before you're “done”",
+    blurb:
+      "You don't need to finish the roadmap to get value. Query your own league's data to make this week's lineup call while you're still learning — the skill pays for itself before the course does.",
+    accent: "amber" as const,
+  },
   {
     title: "You already know the domain",
     blurb:
@@ -25,7 +32,7 @@ const WHY_PILLARS = [
   {
     title: "Practice rides a habit you already have",
     blurb:
-      "You already check the standings obsessively. SQL Sports turns that exact habit into query practice, instead of asking you to build a study habit from nothing.",
+      "You already check the standings obsessively, on the same weekly clock the season already runs on. SQL Sports turns that exact habit into query practice, instead of asking you to build a study habit from nothing.",
     accent: "teal" as const,
   },
   {
@@ -136,50 +143,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* ── Nav ─────────────────────────────────────────── */}
-      <header className="relative z-20 border-b border-panel-border/80">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <a href="#" className="flex items-baseline gap-2">
-            <span className="font-display text-lg font-bold tracking-tight text-pop">
-              SQL<span className="text-teal">Sports</span>
-            </span>
-            <span className="hidden font-mono text-[10px] uppercase tracking-[0.18em] text-ink-muted sm:inline">
-              v0.1
-            </span>
-          </a>
-          <nav className="flex items-center gap-6">
-            <a
-              href="#why"
-              className="hidden font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors duration-150 hover:text-teal sm:inline"
-            >
-              Why SQL Sports
-            </a>
-            <a
-              href="#curriculum"
-              className="hidden font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors duration-150 hover:text-teal sm:inline"
-            >
-              Curriculum
-            </a>
-            <a
-              href="#pricing"
-              className="hidden font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors duration-150 hover:text-teal sm:inline"
-            >
-              Pricing
-            </a>
-            <a
-              href="#career-track"
-              className="hidden font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors duration-150 hover:text-amber sm:inline"
-            >
-              Career Track
-            </a>
-            <a
-              href="#sandbox"
-              className="border border-teal/50 bg-teal/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-teal transition-colors duration-150 hover:border-teal hover:bg-teal/20"
-            >
-              Open sandbox
-            </a>
-          </nav>
-        </div>
-      </header>
+      <SiteNav />
 
       <main>
         {/* ── HERO ──────────────────────────────────────── */}
@@ -239,8 +203,9 @@ export default function Home() {
 
                 <p className="mt-4 max-w-sm text-base leading-relaxed text-[#C5CCD9] animate-[fadeUp_0.45s_ease-out_0.15s_forwards] opacity-0">
                   Learn SQL and data analytics against live fantasy football
-                  data — the same questions you already ask on Sundays, written
-                  as queries.
+                  data — the same questions you already ask on Sundays,
+                  written as queries you can use for this week&apos;s lineup,
+                  not just for someday.
                 </p>
 
                 <div className="mt-8 flex flex-wrap items-center gap-3 animate-[fadeUp_0.45s_ease-out_0.2s_forwards] opacity-0">
@@ -315,7 +280,7 @@ export default function Home() {
               being the hard part.
             </p>
 
-            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {WHY_PILLARS.map((pillar) => (
                 <div
                   key={pillar.title}
@@ -459,6 +424,17 @@ export default function Home() {
               way with hands-on support landing a data role.
             </p>
 
+            <div className="mt-6 inline-flex items-center gap-2 border border-amber/30 bg-amber/5 px-3 py-2">
+              <span className="inline-block h-1.5 w-1.5 shrink-0 bg-amber shadow-[0_0_8px_rgba(232,163,61,0.8)]" />
+              <span className="font-mono text-[11px] leading-snug text-ink-soft">
+                <span className="font-semibold uppercase tracking-wider text-amber">
+                  Founding cohort pricing
+                </span>{" "}
+                — locked in for early members, rises once we&apos;re out of
+                early access.
+              </span>
+            </div>
+
             <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {PLANS.map((plan) => (
                 <div
@@ -517,6 +493,13 @@ export default function Home() {
                   >
                     {plan.cta}
                   </a>
+                  {plan.name === "Career Track" && (
+                    <p className="mt-3 text-center font-mono text-[10px] leading-relaxed text-ink-muted">
+                      Kept intentionally small — 1:1 review and mock
+                      interviews don&apos;t scale, so we don&apos;t pretend
+                      they do.
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

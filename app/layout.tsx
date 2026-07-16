@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -21,10 +21,39 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
+const TITLE = "SQL Sports — Learn SQL through fantasy football";
+const DESCRIPTION =
+  "An education platform that teaches SQL and data analytics through fantasy football. Query live season data. Think like an analyst.";
+
 export const metadata: Metadata = {
-  title: "SQL Sports — Learn SQL through fantasy football",
-  description:
-    "An education platform that teaches SQL and data analytics through fantasy football. Query live season data. Think like an analyst.",
+  metadataBase: new URL("https://sql-sports.vercel.app"),
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: "https://sql-sports.vercel.app",
+    siteName: "SQL Sports",
+    type: "website",
+    images: [
+      {
+        url: "/hero-stadium-night.png",
+        width: 1536,
+        height: 1024,
+        alt: "SQL Sports",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ["/hero-stadium-night.png"],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0b0e14",
 };
 
 export default function RootLayout({
