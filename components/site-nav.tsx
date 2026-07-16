@@ -7,6 +7,7 @@ const NAV_LINKS = [
   { href: "#curriculum", label: "Curriculum", accent: "teal" as const },
   { href: "#pricing", label: "Pricing", accent: "teal" as const },
   { href: "#career-track", label: "Career Track", accent: "amber" as const },
+  { href: "#challenge", label: "Challenge", accent: "teal" as const },
   { href: "#stat-guru", label: "NFL Stat Guru", accent: "amber" as const },
 ];
 

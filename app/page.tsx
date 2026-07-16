@@ -540,6 +540,90 @@ export default function Home() {
           </div>
         </section>
 
+        {/* ── Weekly Challenge & Leaderboard (preview) ──── */}
+        <section id="challenge" className="border-t border-panel-border bg-night/60">
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+            <p className="label-broadcast mb-3">
+              <span className="mr-2 inline-block h-1.5 w-1.5 animate-pulse bg-teal align-middle" />
+              Coming soon
+            </p>
+            <h2 className="max-w-2xl font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
+              Weekly Challenge &amp; Leaderboard
+            </h2>
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-[#C5CCD9]">
+              Every Monday night, that week&apos;s live stats drop as a new
+              SQL challenge. Answer correctly, earn points, climb the board.
+              What&apos;s below is a preview of the idea — not live data yet.
+            </p>
+
+            <div className="mt-10 grid gap-6 lg:grid-cols-12">
+              {/* Challenge card preview */}
+              <div className="lg:col-span-7">
+                <div className="relative h-full border border-panel-border bg-panel p-5">
+                  <div className="flex items-center justify-between">
+                    <span className="label-broadcast text-teal">
+                      this week&apos;s challenge
+                    </span>
+                    <span className="border border-amber/40 bg-amber/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-amber">
+                      preview
+                    </span>
+                  </div>
+                  <p className="mt-5 font-mono text-sm leading-relaxed text-ink">
+                    Which RB had the highest average PPG across the 2018
+                    season?
+                  </p>
+                  <div className="mt-6 flex items-center gap-3 border-t border-panel-border pt-4">
+                    <span className="stat-number text-lg">+50</span>
+                    <span className="font-mono text-[11px] uppercase tracking-wider text-ink-muted">
+                      points
+                    </span>
+                    <span className="ml-auto font-mono text-[11px] text-ink-muted">
+                      Drops Monday nights
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Leaderboard skeleton preview — no fake usernames/scores */}
+              <div className="lg:col-span-5">
+                <div className="h-full border border-panel-border bg-panel p-5">
+                  <div className="flex items-center justify-between">
+                    <span className="label-broadcast text-teal">
+                      leaderboard
+                    </span>
+                    <span className="border border-amber/40 bg-amber/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-amber">
+                      preview
+                    </span>
+                  </div>
+                  <ul className="mt-5 space-y-3">
+                    {[1, 2, 3, 4].map((rank) => (
+                      <li key={rank} className="flex items-center gap-3">
+                        <span className="w-4 font-mono text-xs text-ink-muted">
+                          {rank}
+                        </span>
+                        <span className="h-3 flex-1 animate-pulse bg-panel-hover" />
+                        <span className="h-3 w-10 animate-pulse bg-panel-hover" />
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-4 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+                    Real usernames, once this is live
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <a
+                href="mailto:jomckinney1999@gmail.com?subject=Notify%20me%20%E2%80%94%20Weekly%20Challenge&body=Let%20me%20know%20when%20the%20Weekly%20Challenge%20%26%20Leaderboard%20launches!"
+                className="inline-flex items-center gap-2 border border-teal bg-teal px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-teal-dim"
+              >
+                Notify me when this launches
+              </a>
+            </div>
+          </div>
+        </section>
+
         {/* ── Success stories ───────────────────────────── */}
         <SuccessStories />
 

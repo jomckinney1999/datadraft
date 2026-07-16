@@ -95,6 +95,20 @@ This is the same reasoning as the Andy persona section above, generalized into o
 
 This ladder is implemented on the landing page pricing section (`app/page.tsx`, `PLANS` array) and linked from the nav (`Career Track` tab → `#career-track` anchor on the Career Track card). The pricing section also carries a **founding-cohort pricing badge** (see Must-buy mechanisms, #5) — all four tiers are framed as early/founding pricing.
 
+## Weekly Challenge & Leaderboard (planned, not built)
+
+The vision: every Monday night, that week's live NFL stats drop as a new SQL challenge (tied to the "ongoing weekly problem sets" already promised in the Practice tier). Users answer for points and perks; a leaderboard shows real usernames.
+
+Decided 2026-07-16: **this needs a real backend the site doesn't have yet** — persistent accounts, a database, and a real content-authoring workflow — so rather than fake it with hardcoded usernames/scores (the same fabricated-social-proof problem as the testimonials section), the site currently shows an honestly-labeled "Coming Soon" preview instead (`app/page.tsx`, `#challenge`): a mocked-up challenge card and a skeleton-style leaderboard (no invented names/scores), plus a "notify me" mailto link. Nav tab: "Challenge".
+
+Before building the real version, these need real decisions (not made yet):
+
+- **Auth**: how do people log in? (email magic-link vs. username+PIN vs. full OAuth — tradeoffs are security/complexity vs. friction)
+- **Database/hosting**: adds ongoing cost/maintenance to what's currently a zero-backend static site (e.g. Vercel Postgres, Supabase, Vercel KV)
+- **Content-authoring workflow**: who writes/grades each week's question, and how? A manually-edited config file (fast, matches the `PLANS`/`ROADMAP` pattern already in the codebase) vs. a real admin UI (more work, nicer long-term)
+- **Data source**: is there a real live NFL stats feed to grade answers against, or are questions manually authored/verified each week using stats you look up yourself? (Note: the SQL sandbox's `week_results` data is entirely synthetic/generated — not a real stats feed — so it can't be the source of truth for a real weekly challenge without separate work.)
+- **Perks**: what do points actually unlock? (Free month of Practice, a badge, something else?)
+
 ## Open questions / things to revisit
 
 - Exact price points within each range (e.g. is Career Track $1.5K flat, or tiered by cohort vs. 1:1 support level?)
@@ -103,6 +117,7 @@ This ladder is implemented on the landing page pricing section (`app/page.tsx`, 
 - Certification: self-issued badge vs. something with outside credibility
 - **Founding-cohort mechanics**: what specifically triggers "out of early access" (a member count? a date? a funding/revenue milestone?), and how existing members get grandfathered in practice (a tagged account flag, a manually maintained list?). Decide before the first price increase, not after.
 - Whether/when to surface the multi-sport, multi-language vision publicly on the site (see Big picture vision above) — currently deliberately kept off the live page.
+- Weekly Challenge & Leaderboard build-out (see above) — auth, database, content workflow, data source, and perks all still need real decisions.
 
 ## How to use this doc
 
