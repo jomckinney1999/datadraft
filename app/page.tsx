@@ -3,6 +3,7 @@ import Sandbox from "@/components/sandbox";
 import SuccessStories from "@/components/success-stories";
 import SupportWidget from "@/components/support-widget";
 import SiteNav from "@/components/site-nav";
+import ActionGallery from "@/components/action-gallery";
 
 const STATS = [
   { label: "Skill phases", value: "4" },
@@ -261,6 +262,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* ── Action gallery ────────────────────────────── */}
+        <ActionGallery />
 
         {/* ── Why SQL Sports ───────────────────────────── */}
         <section
