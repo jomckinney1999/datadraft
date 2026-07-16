@@ -1,33 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { Database, QueryExecResult, SqlJsStatic } from "sql.js";
+import { PRESETS, SCHEMA, buildSeedSql } from "@/lib/fantasy-data";
 
-type Position = "QB" | "RB" | "WR" | "TE" | "K" | "DEF" | "TEAM";
-
-type ResultRow = {
-  name: string;
-  sub: string;
-  position: Position;
-  stat: string;
-  trend?: "up" | "down";
-};
-
-type Dataset = {
-  id: string;
-  label: string;
-  query: string;
-  statLabel: string;
-  rows: ResultRow[];
-};
-
-const POSITION_STYLES: Record<Position, string> = {
+const POSITION_STYLES: Record<string, string> = {
   QB: "bg-amber/15 text-amber",
   RB: "bg-teal/15 text-teal",
   WR: "bg-teal/15 text-teal",
   TE: "bg-amber/15 text-amber",
   K: "bg-panel-hover text-ink-muted",
   DEF: "bg-panel-hover text-ink-muted",
-  TEAM: "bg-amber/15 text-amber",
 };
 
 function initials(name: string) {
@@ -40,91 +23,102 @@ function initials(name: string) {
     .toUpperCase();
 }
 
-const DATASETS: Dataset[] = [
-  {
-    id: "top-scorers",
-    label: "Top Scorers",
-    statLabel: "PTS",
-    query: `SELECT player, team, position, fantasy_pts
-FROM week_results
-WHERE week = 12
-ORDER BY fantasy_pts DESC
-LIMIT 5;`,
-    rows: [
-      { name: "Tyreek Hill", sub: "MIA · WR", position: "WR", stat: "28.4", trend: "up" },
-      { name: "CeeDee Lamb", sub: "DAL · WR", position: "WR", stat: "24.1", trend: "up" },
-      { name: "Amon-Ra St. Brown", sub: "DET · WR", position: "WR", stat: "22.7" },
-      { name: "A.J. Brown", sub: "PHI · WR", position: "WR", stat: "19.8", trend: "down" },
-      { name: "Puka Nacua", sub: "LAR · WR", position: "WR", stat: "18.2", trend: "up" },
-    ],
-  },
-  {
-    id: "waiver-wire",
-    label: "Waiver Wire",
-    statLabel: "% ROST",
-    query: `SELECT player, team, position, pct_rostered
-FROM waiver_wire
-WHERE pct_rostered < 50
-ORDER BY trend DESC
-LIMIT 5;`,
-    rows: [
-      { name: "Jaylen Warren", sub: "PIT · RB", position: "RB", stat: "42%", trend: "up" },
-      { name: "Tank Dell", sub: "HOU · WR", position: "WR", stat: "38%", trend: "up" },
-      { name: "Ray Davis", sub: "BUF · RB", position: "RB", stat: "31%", trend: "up" },
-      { name: "Rome Odunze", sub: "CHI · WR", position: "WR", stat: "27%" },
-      { name: "Tyler Allgeier", sub: "ATL · RB", position: "RB", stat: "19%", trend: "down" },
-    ],
-  },
-  {
-    id: "matchup",
-    label: "My Matchup",
-    statLabel: "TOTAL",
-    query: `SELECT team_name, SUM(fantasy_pts) AS total
-FROM roster
-JOIN week_results USING (player)
-WHERE week = 12
-GROUP BY team_name
-ORDER BY total DESC;`,
-    rows: [
-      { name: "Your Team", sub: "7-4 · This week", position: "TEAM", stat: "118.4", trend: "up" },
-      { name: "Kupp's Krew", sub: "6-5 · Opponent", position: "TEAM", stat: "104.2", trend: "down" },
-    ],
-  },
-];
+type EngineStatus = "loading" | "ready" | "error";
+type ExecStatus = "idle" | "running" | "done" | "error";
 
 export default function Sandbox() {
-  const [activeId, setActiveId] = useState(DATASETS[0].id);
-  const active = DATASETS.find((d) => d.id === activeId) ?? DATASETS[0];
+  const dbRef = useRef<Database | null>(null);
+  const [engineStatus, setEngineStatus] = useState<EngineStatus>("loading");
+  const [engineError, setEngineError] = useState<string | null>(null);
 
-  const [query, setQuery] = useState(active.query);
-  const [status, setStatus] = useState<"idle" | "running" | "done">("idle");
-  const [rows, setRows] = useState<ResultRow[] | null>(null);
+  const [query, setQuery] = useState(PRESETS[0].query);
+  const [activePreset, setActivePreset] = useState<string | null>(PRESETS[0].id);
+  const [execStatus, setExecStatus] = useState<ExecStatus>("idle");
+  const [result, setResult] = useState<QueryExecResult | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [ms, setMs] = useState<number | null>(null);
+  const [schemaOpen, setSchemaOpen] = useState(false);
 
-  function runQuery(dataset: Dataset) {
-    setStatus("running");
-    setRows(null);
-    setMs(null);
-    window.setTimeout(() => {
-      setRows(dataset.rows);
-      setMs(Math.round(28 + Math.random() * 34));
-      setStatus("done");
-    }, 380);
-  }
-
-  function selectDataset(dataset: Dataset) {
-    setActiveId(dataset.id);
-    setQuery(dataset.query);
-    runQuery(dataset);
+  function seedDatabase(SQL: SqlJsStatic) {
+    const db = new SQL.Database();
+    db.run(buildSeedSql());
+    dbRef.current = db;
   }
 
   useEffect(() => {
-    runQuery(active);
+    let cancelled = false;
+
+    import("sql.js")
+      .then((mod) => mod.default({ locateFile: () => "/sql-wasm.wasm" }))
+      .then((SQL) => {
+        if (cancelled) return;
+        seedDatabase(SQL);
+        setEngineStatus("ready");
+        runQuery(PRESETS[0].query);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setEngineStatus("error");
+        setEngineError(err instanceof Error ? err.message : String(err));
+      });
+
+    return () => {
+      cancelled = true;
+      dbRef.current?.close();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function runQuery(sql: string) {
+    const db = dbRef.current;
+    if (!db) return;
+    setExecStatus("running");
+    setResult(null);
+    setErrorMessage(null);
+    setMs(null);
+
+    try {
+      const t0 = performance.now();
+      const res = db.exec(sql);
+      const t1 = performance.now();
+      setResult(res[0] ?? { columns: [], values: [] });
+      setMs(Math.max(1, Math.round(t1 - t0)));
+      setExecStatus("done");
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : String(err));
+      setExecStatus("error");
+    }
+  }
+
+  function handleRun() {
+    setActivePreset(null);
+    runQuery(query);
+  }
+
+  function selectPreset(preset: (typeof PRESETS)[number]) {
+    setActivePreset(preset.id);
+    setQuery(preset.query);
+    runQuery(preset.query);
+  }
+
+  function handleReset() {
+    import("sql.js")
+      .then((mod) => mod.default({ locateFile: () => "/sql-wasm.wasm" }))
+      .then((SQL) => {
+        dbRef.current?.close();
+        seedDatabase(SQL);
+        selectPreset(PRESETS[0]);
+      });
+  }
+
+  const columns = result?.columns ?? [];
+  const lowerCols = columns.map((c) => c.toLowerCase());
+  const playerColIdx = lowerCols.findIndex((c) => c === "player" || c === "name");
+  const positionColIdx = lowerCols.findIndex((c) => c === "position");
+  const teamColIdx = lowerCols.findIndex((c) => c === "team");
+
   return (
-    <div className="flex h-full min-h-[460px] flex-col border border-panel-border bg-night/95 shadow-scoreboard backdrop-blur-md">
+    <div className="flex h-full min-h-[500px] flex-col border border-panel-border bg-night/95 shadow-scoreboard backdrop-blur-md">
       {/* Title bar — editor chrome */}
       <div className="flex items-center justify-between border-b border-panel-border px-3 py-2">
         <div className="flex items-center gap-3">
@@ -135,11 +129,11 @@ export default function Sandbox() {
           </div>
           <span className="label-broadcast text-teal">live sandbox</span>
           <span className="hidden font-mono text-[10px] text-ink-muted sm:inline">
-            · Sample League · Week 12
+            · 2016–2018 · 16 players
           </span>
         </div>
         <div className="flex items-center gap-3">
-          {ms !== null && (
+          {ms !== null && execStatus === "done" && (
             <span className="stat-number text-[11px] text-ink-muted">
               {ms}
               <span className="ml-0.5 text-ink-muted/70">ms</span>
@@ -147,35 +141,76 @@ export default function Sandbox() {
           )}
           <span
             className={`font-mono text-[10px] uppercase tracking-widest ${
-              status === "running"
-                ? "text-amber"
-                : status === "done"
-                  ? "text-teal"
-                  : "text-ink-muted"
+              engineStatus === "loading"
+                ? "text-ink-muted"
+                : execStatus === "running"
+                  ? "text-amber"
+                  : execStatus === "error"
+                    ? "text-amber"
+                    : execStatus === "done"
+                      ? "text-teal"
+                      : "text-ink-muted"
             }`}
           >
-            {status === "running" ? "executing" : status === "done" ? "ready" : "idle"}
+            {engineStatus === "loading"
+              ? "loading engine"
+              : execStatus === "running"
+                ? "executing"
+                : execStatus === "error"
+                  ? "error"
+                  : execStatus === "done"
+                    ? "ready"
+                    : "idle"}
           </span>
         </div>
       </div>
 
-      {/* Dataset tabs — app-nav flavor (Lineup / Waiver / Matchup) */}
-      <div className="flex border-b border-panel-border">
-        {DATASETS.map((d) => (
+      {/* Preset queries + schema toggle */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-panel-border px-3 py-2">
+        {PRESETS.map((preset) => (
           <button
-            key={d.id}
+            key={preset.id}
             type="button"
-            onClick={() => selectDataset(d)}
-            className={`flex-1 border-r border-panel-border px-2 py-2 font-mono text-[10px] uppercase tracking-wider transition-colors duration-150 last:border-r-0 sm:text-[11px] ${
-              d.id === activeId
-                ? "bg-teal/10 text-teal"
-                : "text-ink-muted hover:bg-panel-hover hover:text-ink"
+            onClick={() => selectPreset(preset)}
+            disabled={engineStatus !== "ready"}
+            className={`border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider transition-colors duration-150 disabled:opacity-40 ${
+              activePreset === preset.id
+                ? "border-teal/50 bg-teal/10 text-teal"
+                : "border-panel-border text-ink-muted hover:border-teal/40 hover:text-ink"
             }`}
           >
-            {d.label}
+            {preset.label}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => setSchemaOpen((v) => !v)}
+          className={`ml-auto border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider transition-colors duration-150 ${
+            schemaOpen
+              ? "border-amber/50 bg-amber/10 text-amber"
+              : "border-panel-border text-ink-muted hover:border-amber/40 hover:text-ink"
+          }`}
+        >
+          {schemaOpen ? "Hide schema" : "Schema"}
+        </button>
       </div>
+
+      {schemaOpen && (
+        <div className="border-b border-panel-border bg-night/60 px-3 py-3">
+          <div className="grid gap-3 sm:grid-cols-3">
+            {SCHEMA.map((t) => (
+              <div key={t.table}>
+                <p className="font-mono text-[11px] font-semibold text-amber">
+                  {t.table}
+                </p>
+                <p className="mt-1 font-mono text-[10px] leading-relaxed text-ink-muted">
+                  {t.columns.join(", ")}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Query pane */}
       <div className="relative flex-1 border-b border-panel-border">
@@ -186,101 +221,179 @@ export default function Sandbox() {
         </div>
         <textarea
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setActivePreset(null);
+          }}
           spellCheck={false}
           className="h-full min-h-[140px] w-full resize-none bg-transparent py-3 pl-10 pr-3 font-mono text-[13px] leading-5 text-ink outline-none caret-teal"
           aria-label="SQL query editor"
         />
       </div>
 
-      {/* Results pane — fantasy-app-style roster rows */}
+      {/* Results pane */}
       <div className="flex flex-col">
         <div className="flex items-center justify-between border-b border-panel-border px-3 py-2">
           <span className="label-broadcast">
             result set
-            {rows && (
-              <span className="ml-2 text-amber">{rows.length} rows</span>
+            {result && execStatus === "done" && (
+              <span className="ml-2 text-amber">
+                {result.values.length} rows
+              </span>
             )}
           </span>
-          <button
-            type="button"
-            onClick={() => runQuery(active)}
-            disabled={status === "running"}
-            className="inline-flex items-center gap-2 border border-teal/40 bg-teal/10 px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-teal transition-colors duration-150 hover:border-teal hover:bg-teal/20 disabled:opacity-50"
-          >
-            <span className="inline-block h-0 w-0 border-y-[4px] border-l-[6px] border-y-transparent border-l-teal" />
-            Run
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleReset}
+              className="font-mono text-[10px] uppercase tracking-wider text-ink-muted transition-colors duration-150 hover:text-ink"
+            >
+              Reset data
+            </button>
+            <button
+              type="button"
+              onClick={handleRun}
+              disabled={engineStatus !== "ready" || execStatus === "running"}
+              className="inline-flex items-center gap-2 border border-teal/40 bg-teal/10 px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-teal transition-colors duration-150 hover:border-teal hover:bg-teal/20 disabled:opacity-50"
+            >
+              <span className="inline-block h-0 w-0 border-y-[4px] border-l-[6px] border-y-transparent border-l-teal" />
+              Run
+            </button>
+          </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[280px] text-left">
-            <thead>
-              <tr className="border-b border-panel-border">
-                <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-ink-muted font-medium">
-                  player
-                </th>
-                <th className="px-3 py-2 text-right font-mono text-[10px] uppercase tracking-widest text-ink-muted font-medium">
-                  {active.statLabel}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {status === "running" && (
-                <tr>
-                  <td
-                    colSpan={2}
-                    className="px-3 py-6 font-mono text-xs text-ink-muted"
-                  >
-                    executing query…
-                  </td>
-                </tr>
-              )}
-              {rows?.map((row, i) => (
-                <tr
-                  key={row.name}
-                  className="border-b border-panel-border/50 transition-colors duration-100 hover:bg-teal/5"
-                  style={{
-                    animation: "fadeUp 0.35s ease-out forwards",
-                    animationDelay: `${i * 40}ms`,
-                    opacity: 0,
-                  }}
-                >
-                  <td className="px-3 py-2.5">
-                    <div className="flex items-center gap-2.5">
-                      <span
-                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-mono text-[10px] font-semibold ${POSITION_STYLES[row.position]}`}
+        {engineStatus === "loading" && (
+          <p className="px-3 py-6 font-mono text-xs text-ink-muted">
+            Loading SQL engine…
+          </p>
+        )}
+
+        {engineStatus === "error" && (
+          <p className="px-3 py-6 font-mono text-xs text-amber">
+            Couldn&apos;t load the SQL engine{engineError ? `: ${engineError}` : ""}.
+          </p>
+        )}
+
+        {engineStatus === "ready" && execStatus === "error" && (
+          <div className="px-3 py-4">
+            <p className="border border-amber/40 bg-amber/5 px-3 py-2 font-mono text-[12px] leading-relaxed text-amber">
+              ⚠ {errorMessage}
+            </p>
+          </div>
+        )}
+
+        {engineStatus === "ready" &&
+          execStatus !== "error" &&
+          result &&
+          result.columns.length === 0 && (
+            <p className="px-3 py-6 font-mono text-xs text-ink-muted">
+              Query ran, but returned no columns — try a SELECT statement.
+            </p>
+          )}
+
+        {engineStatus === "ready" &&
+          execStatus === "done" &&
+          result &&
+          result.columns.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[280px] text-left">
+                <thead>
+                  <tr className="border-b border-panel-border">
+                    {columns.map((col, i) => (
+                      <th
+                        key={col + i}
+                        className={`px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-ink-muted font-medium ${
+                          i === playerColIdx ? "" : "text-right"
+                        }`}
                       >
-                        {initials(row.name)}
-                      </span>
-                      <div className="min-w-0">
-                        <p className="truncate font-mono text-[13px] font-medium text-ink">
-                          {row.name}
-                        </p>
-                        <p className="truncate font-mono text-[10px] uppercase tracking-wide text-ink-muted">
-                          {row.sub}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-3 py-2.5 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      {row.trend === "up" && (
-                        <span className="text-[9px] text-teal">▲</span>
-                      )}
-                      {row.trend === "down" && (
-                        <span className="text-[9px] text-ink-muted">▼</span>
-                      )}
-                      <span className="stat-number text-[15px]">
-                        {row.stat}
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                        {col}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {result.values.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={columns.length}
+                        className="px-3 py-6 font-mono text-xs text-ink-muted"
+                      >
+                        0 rows returned.
+                      </td>
+                    </tr>
+                  )}
+                  {result.values.map((row, rowIdx) => (
+                    <tr
+                      key={rowIdx}
+                      className="border-b border-panel-border/50 transition-colors duration-100 hover:bg-teal/5"
+                      style={{
+                        animation: "fadeUp 0.35s ease-out forwards",
+                        animationDelay: `${rowIdx * 40}ms`,
+                        opacity: 0,
+                      }}
+                    >
+                      {row.map((cell, colIdx) => {
+                        const isPlayerCol = colIdx === playerColIdx;
+                        const position =
+                          positionColIdx !== -1
+                            ? String(row[positionColIdx])
+                            : undefined;
+                        const team =
+                          teamColIdx !== -1 ? String(row[teamColIdx]) : undefined;
+
+                        if (isPlayerCol) {
+                          const name = String(cell);
+                          return (
+                            <td key={colIdx} className="px-3 py-2.5">
+                              <div className="flex items-center gap-2.5">
+                                <span
+                                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-mono text-[10px] font-semibold ${
+                                    position && POSITION_STYLES[position]
+                                      ? POSITION_STYLES[position]
+                                      : "bg-panel-hover text-ink-muted"
+                                  }`}
+                                >
+                                  {initials(name)}
+                                </span>
+                                <div className="min-w-0">
+                                  <p className="truncate font-mono text-[13px] font-medium text-ink">
+                                    {name}
+                                  </p>
+                                  {(team || position) && (
+                                    <p className="truncate font-mono text-[10px] uppercase tracking-wide text-ink-muted">
+                                      {[team, position].filter(Boolean).join(" · ")}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                          );
+                        }
+
+                        const isNumeric = typeof cell === "number";
+                        return (
+                          <td
+                            key={colIdx}
+                            className={`px-3 py-2.5 ${
+                              isNumeric
+                                ? "text-right stat-number text-[14px]"
+                                : "font-mono text-[13px] text-[#C5CCD9]"
+                            }`}
+                          >
+                            {cell === null ? (
+                              <span className="text-ink-muted/60">null</span>
+                            ) : (
+                              String(cell)
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
       </div>
     </div>
   );

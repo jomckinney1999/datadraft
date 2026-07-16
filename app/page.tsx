@@ -255,8 +255,9 @@ export default function Home() {
                   <Sandbox />
                 </div>
                 <p className="mt-3 font-mono text-[12px] font-medium text-[#C5CCD9]">
-                  <span className="text-teal">→</span> Edit the query. Hit run.
-                  Results are sample season data — no account required.
+                  <span className="text-teal">→</span> Write real SQL, try a
+                  preset, or check the schema. Runs against sample season
+                  data, right in your browser — no account required.
                 </p>
               </div>
             </div>
