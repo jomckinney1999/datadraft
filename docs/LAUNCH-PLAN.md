@@ -1,133 +1,190 @@
-# SQL Sports — 24-Week Launch Plan
+# SQL Sports — Full Launch Plan
 
-Solo founder, ~20–30 hrs/week. Goal: a real, chargeable beta live for NFL kickoff (~8 weeks out), full v1 shipped by end of the NFL regular season (~24 weeks out). This is the schedule and the explicit scope tradeoffs to get there — not an aspirational everything-by-September plan, which isn't achievable solo at this capacity and would be dishonest to promise.
-
-Start date: **Monday, July 20, 2026**. Dates below are real calendar weeks, aligned to the actual 2026 NFL season.
+No calendar dates in this version — this is every phase of work needed to build the complete, fully realized product, ordered by dependency (what has to exist before the next thing can be built), not by a deadline. Where the previous 8-week-beta framing of this doc cut something for time, it's called out explicitly below and folded back in as a real phase.
 
 Last updated: 2026-07-16.
 
 ---
 
-## The core bet
+## What changed from the time-boxed version
 
-You cannot build the full 12-week certified program, real fantasy-platform integrations, a full autograder, and a staffed Career Track before September. Nobody could, solo, in 8 weeks. So the plan doesn't try.
+The prior version of this doc scoped a thin beta for a September deadline and explicitly cut five things to hit it. All five are back in, as full phases:
 
-Instead: **ship a real, honest, thin beta at kickoff, and let the weekly content-drop cadence — which is already your core engagement mechanic per `docs/PLAN.md` — cover for the fact that not all 12 weeks exist yet.** A new curriculum week and a new Weekly Challenge question drop every Monday, in sync with the live season, whether or not that week's content existed before this Monday. That's not a limitation you're hiding; per the "must-buy" strategy already documented, appointment-based weekly delivery *is* the product.
+- **Real fantasy-platform sync** (ESPN/Sleeper/Yahoo) — now **Phase 5**
+- **Server-side autograder** with golden datasets — now folded into **Phase 4**
+- **Video lesson content** — now folded into **Phase 4**
+- **A real live NFL stats data pipeline** (replacing the sandbox's synthetic data) — now **Phase 3**
+- **Multi-sport / multi-language expansion** — now **Phase 11**, still correctly last: it depends on the flagship having real traction, per the reasoning already in `docs/PLAN.md`'s Big Picture Vision. That's a dependency, not an arbitrary deadline cut, so it stays last even with the clock removed.
 
----
-
-## What ships at beta (Week 8 / Sept 7–13) vs. what doesn't
-
-**Live at beta:**
-- Free tier (as-is) + **Practice tier** ($15–30/mo), real Stripe subscription checkout
-- Real accounts (magic-link email — no passwords to manage)
-- Weeks 1–3 (Phase 1: Select & Filter) fully real: written lessons + labs, checkable against the existing SQL sandbox engine
-- Progress tracking (what a logged-in learner has completed)
-- Weekly Challenge + Leaderboard v1 (real usernames, real persisted points — replacing the "Coming Soon" preview)
-
-**Explicitly NOT live at beta (shown honestly as "waitlist" / "apply," not fake checkout):**
-- **Roadmap** ($200–500 one-time) — the full 12-week content doesn't exist yet; selling it as complete would be dishonest. Waitlist instead.
-- **Career Track** ($1–5K/yr) — this is a human service (you, doing reviews/mock interviews) with no operational process built yet. Waitlist/apply instead, consistent with the "intentionally small" positioning already in `docs/PLAN.md`.
-- Any real fantasy-platform import (ESPN/Sleeper/Yahoo league sync) — a substantial OAuth-integration project on its own. **Cut from this 24-week window entirely**, not deferred-and-forgotten — revisit only after v1 ships.
-- Server-side autograding with a golden-answer engine — betas use client-side result-set comparison against the same sql.js sandbox already built. Real, but lighter than the full vision in `docs/CURRICULUM.md`.
-- Video lessons — text-first for v1. Video is a major production undertaking on its own; don't let it block shipping.
+Career Track's "intentionally small" scope was never a time cutback — that's a permanent business-model decision in `docs/PLAN.md` (1:1 review doesn't scale, and pretending otherwise would undercut the reason people pay $1–5K for it). Phase 7 builds *real operational tooling* around it, not a plan to make it mass-scale.
 
 ---
 
-## Division of labor (what I can actually do vs. what's on you)
+## Division of labor
 
-I can write code, lesson copy, docs, and marketing copy drafts, and I can execute anything that's a file change + deploy. I **cannot**: create your Stripe/Supabase accounts (needs your identity/banking info), appear on camera, do outreach/sales calls, give real legal sign-off on Terms of Service, or manually source that week's real NFL stat for the Weekly Challenge (someone has to actually look that up — that's a standing weekly task on you, not automatable without a real stats API, which is out of scope for now). Each week below flags which parts are "you" vs. "us."
-
----
-
-## Phase 1 — Beta Sprint (Weeks 1–8, Jul 20 – Sep 13)
-
-Priority order when time is short: **auth → payments → lesson/lab delivery → progress tracking → weekly challenge → QA/legal.** Content production for Weeks 1–3 runs in parallel at low weekly hours, not as a separate full-time track.
-
-### Week 1 (Jul 20–26) — Stack decisions & foundations
-- **Ships:** Backend stack locked and provisioned. Recommendation: **Supabase** (Postgres + built-in magic-link auth in one provider — minimizes integration surface for a solo dev) + **Stripe** (test mode).
-- **You:** Create the Supabase and Stripe accounts (needs your identity/business info). Confirm business entity exists / decide on Terms of Service provider (e.g., Termly template, or a real lawyer review before charging real money — I can draft, I'm not a substitute for that review).
-- **Us:** Schema design (users, subscriptions, progress, weekly_challenges, leaderboard_points), migrations written.
-
-### Week 2 (Jul 27–Aug 2) — Auth
-- **Ships:** Working magic-link sign-up/sign-in, session-aware nav, minimal account page.
-- **Content (background, low hours):** Script the real Week 1 lesson (not just the syllabus bullet from `docs/CURRICULUM.md` — actual lesson text).
-
-### Week 3 (Aug 3–9) — Payments
-- **Ships:** Stripe Checkout for Practice subscription, webhook marking a user "active Practice" in the DB, Stripe-hosted billing portal link (handles cancel/card-update for free — don't build that yourself).
-- **Content:** Week 1 lesson + labs written and checkable in the sandbox.
-
-### Week 4 (Aug 10–16) — Lesson/lab delivery
-- **Ships:** Lesson-page template pairing written content with the existing sandbox; a "check my answer" comparison against a stored expected result set (client-side, reusing sql.js — no new backend for correctness-checking).
-- **Content:** Week 2 lesson + labs written.
-
-### Week 5 (Aug 17–23) — Progress tracking
-- **Ships:** `completions` table, a "My Progress" dashboard, persists across devices for logged-in users.
-- **Content:** Week 3 lesson + labs written — **Phase 1 (Weeks 1–3) fully real as of this week.**
-
-### Week 6 (Aug 24–30) — Weekly Challenge + Leaderboard v1
-- **Ships:** `weekly_challenges` table (you author each question — start with a simple manually-edited config, no admin UI yet), a points/submissions table, a public leaderboard page. Replace the marketing site's "Coming Soon" preview with the real thing.
-- **You:** Source and write the actual Week 8 kickoff-week challenge question (needs a real stat — this becomes your standing weekly task starting now).
-
-### Week 7 (Aug 31–Sep 6) — QA & legal
-- **Ships:** Full funnel tested end-to-end (signup → subscribe → complete Weeks 1–3 → leaderboard), mobile pass on new account/lesson pages, real Terms of Service / Privacy Policy / Refund Policy live.
-- **You:** Legal review/sign-off on the policies before real money moves. Start posting launch-preview content on Free-tier channels (YouTube/LinkedIn/Substack) — building the audience that lands on launch day, not starting cold.
-
-### Week 8 (Sep 7–13) — 🚀 BETA LAUNCH
-- **Ships:** Public beta live for NFL kickoff week. Free + Practice tiers chargeable. Weeks 1–3 real. Weekly Challenge live with a real Week 1 question. Leaderboard live. Roadmap/Career Track shown honestly as waitlist.
-- **You:** Launch push — personal network, relevant communities (mindful of self-promotion norms), first real Weekly Challenge question goes out Monday night.
+I can write code, lesson copy, docs, marketing copy, and data pipeline logic. I cannot: create accounts requiring your identity/banking info (Stripe, Supabase, a stats-data vendor, Sleeper/ESPN/Yahoo developer registrations), appear on camera for video lessons, do outreach/sales/partnership calls, give real legal sign-off on Terms of Service, or make the underlying business decisions each phase surfaces (pricing calibration, what Career Track applicants get accepted, what leaderboard perks actually are). Each phase below flags the real decisions that are yours to make, not mine to assume.
 
 ---
 
-## Phase 2 — In-Season Build-Out (Weeks 9–16, Sep 14 – Nov 8)
+## Phase 0 — Foundation Decisions
 
-**The weekly rhythm starts now and doesn't stop:** every Monday, a new curriculum week's content drops and a new Weekly Challenge question posts, timed to the live season. This is no longer "a sprint task" — it's the standing operational commitment the whole business now runs on.
+**Goal:** lock the decisions that are expensive to reverse once other phases build on top of them.
 
-| Week | Dates | Ships | Notes |
-|---|---|---|---|
-| 9 | Sep 14–20 | Week 4 content (Joins & Matchups begins) + challenge | Establish the Monday rhythm as routine |
-| 10 | Sep 21–27 | Week 5 content + challenge | Decide & document: real fantasy-platform (ESPN/Sleeper/Yahoo) import stays **cut** from this cycle — note it, don't half-build it |
-| 11 | Sep 28–Oct 4 | Week 6 content + midterm checkpoint UI + challenge | |
-| 12 | Oct 5–11 | Week 7 content + challenge | Start collecting real user feedback/quotes — first candidates to eventually replace the illustrative Success Stories examples |
-| 13 | Oct 12–18 | Week 8 content + challenge | Evaluate: is there enough content to sell Roadmap for real yet? |
-| 14 | Oct 19–25 | Week 9 content + challenge — **Phase 3 (Aggregations) complete** | Launch real Roadmap purchase if ready, framed honestly if Weeks 10–12 are still landing |
-| 15 | Oct 26–Nov 1 | **Buffer week** (built in on purpose) | If on schedule: start Career Track ops — booking tool (Cal.com/Calendly), review rubric doc, application form |
-| 16 | Nov 2–8 | Career Track soft-launch to a small hand-picked first cohort | You personally deliver reviews/mock interviews — matches the "intentionally small, doesn't scale" positioning already decided |
-
----
-
-## Phase 3 — Harden & Full Ship (Weeks 17–24, Nov 9 – Jan 3)
-
-| Week | Dates | Ships | Notes |
-|---|---|---|---|
-| 17 | Nov 9–15 | Week 10 content (Window Functions I) + challenge | |
-| 18 | Nov 16–22 | Week 11 content + challenge | Build capstone submission flow (link + README submission, a review queue you check manually — no need for anything fancier yet) |
-| 19 | Nov 23–29 | **Light week (Thanksgiving)** | Real NFL Thanksgiving games are a natural marketing moment (special challenge), but don't schedule build work this week |
-| 20 | Nov 30–Dec 6 | Week 12 content + capstone studio support | First beta cohort (started ~Aug/Sep) hits their capstone right on schedule — nice cohort math, not a coincidence |
-| 21 | Dec 7–13 | First real capstones reviewed; certificate issuance (even a simple generated PDF is fine for v1) | |
-| 22 | Dec 14–20 | Full regression pass across all 12 weeks + all tier checkout flows; pricing calibration from real conversion data | Revisit the founding-cohort grandfathering mechanics flagged as an open question in `docs/PLAN.md` |
-| 23 | Dec 21–27 | **Light week (Christmas)** | |
-| 24 | Dec 28–Jan 3 | 🏁 **Full v1 ship**: all 12 weeks live and polished, all three tiers real (Career Track intentionally manual, documented as such), first graduates, real testimonials replacing illustrative ones, off-season plan drafted | Regular season ends right around here — a deliberate, natural full-ship line |
+- **Backend stack.** Recommendation: Supabase (Postgres + built-in auth + storage in one provider — minimizes integration surface). Alternative: custom Node/Postgres + a separate auth provider (Clerk/NextAuth) if you want more control later at the cost of more moving parts now.
+- **Payments provider.** Stripe — the standard choice, handles PCI compliance and subscription billing for you.
+- **Real stats data vendor** — this decision gates Phase 3 entirely:
+  - **nflverse / nflfastR** (free, open-source, community-maintained play-by-play data, weekly updates in-season) — recommended starting point given cost.
+  - **SportsDataIO / Sportradar** (paid, more polished/supported, includes projections) — revisit once revenue justifies the cost.
+  - **ESPN's undocumented endpoints** (free but unsupported and can break without notice) — avoid as a primary source; fine as a backup/cross-check.
+- **Fantasy-platform integration order** (gates Phase 5): **Sleeper first** — it has a fully public API with no OAuth required, by far the easiest integration. ESPN and Yahoo both require real OAuth app registration and are meaningfully more work; sequence them after Sleeper proves the feature out.
+- **Business entity, banking, and tax setup** — needed before real revenue flows, if not already in place.
+- **Terms of Service, Privacy Policy, Refund Policy** — I can draft these; they need your (or a real lawyer's) sign-off before any real charge happens. Not optional once Phase 2 goes live.
 
 ---
 
-## Standing risks worth naming now
+## Phase 1 — Backend & Accounts
 
-- **Bus factor / burnout:** this is a solo 20–30 hr/week plan with a recurring weekly content+challenge commitment starting Week 8 that does not pause. Missing even one Monday breaks the "appointment" mechanic the whole engagement thesis depends on. Build a buffer of 1–2 pre-written challenge questions ahead at all times, not week-of.
-- **Manual weekly stat-sourcing is real ongoing labor**, not a one-time setup cost — there is no live stats API in this plan. If this becomes unsustainable, revisit sourcing a real feed (a genuine future project, not a Week-whatever afternoon task).
-- **Content pace is the real constraint**, not engineering. If a week's content isn't ready by Monday, the honest move is to say so (or push a lighter/reused problem set) — not silently ship nothing and let the "weekly drop" promise quietly break.
-- **Roadmap and Career Track going live mid-plan are conditional**, not guaranteed dates — they're gated on "is the content/process actually ready," and the schedule above says so explicitly rather than picking dates and hoping.
+**Goal:** real users can sign up, log in, and be recognized across sessions and devices.
+**Depends on:** Phase 0 (stack decision).
+
+- Provision the chosen backend; schema for `users`, `subscriptions`, `progress`, `weekly_challenges`, `leaderboard_points`, `capstones`, `fantasy_platform_links`.
+- Magic-link email auth (no passwords to manage/leak).
+- Account page: profile, subscription status, connected fantasy platform (once Phase 5 exists).
+- Session-aware nav — extends the `SiteNav` component already on the marketing site.
 
 ---
 
-## What's cut from this cycle entirely (revisit after v1, not during)
+## Phase 2 — Payments
 
-- Real fantasy-platform (ESPN/Sleeper/Yahoo) league import/OAuth
-- Server-side autograder with a golden-dataset engine
-- Video lesson content
-- Multi-sport / multi-language expansion (already deferred in `docs/PLAN.md`'s Big Picture Vision)
-- A real live NFL stats API feed (Weekly Challenge stays manually authored for this cycle)
+**Goal:** real money moves for all three tiers, correctly gated by subscription/purchase status.
+**Depends on:** Phase 1 (a user must exist before a payment can attach to one).
+
+- Stripe Checkout: Practice (recurring subscription), Roadmap (one-time), Career Track (application-gated — likely a deposit or full charge *after* acceptance, not open self-serve checkout, matching Phase 7's intake process).
+- Webhooks syncing subscription status (active/canceled/past_due) into the database.
+- Stripe's hosted billing portal for self-serve cancel/card-update — don't build this yourself.
+- Transactional emails (receipts, welcome, renewal reminders) via a provider like Resend or Postmark.
+- **Your decision:** exact Career Track payment structure (deposit vs. full charge vs. milestone-based) — a real business-model call, not a technical one.
+
+---
+
+## Phase 3 — Real Data Pipeline
+
+**Goal:** replace the sandbox's synthetic, generated dataset with a real, automatically refreshing NFL stats pipeline — this single pipeline becomes the source of truth for the sandbox, the curriculum labs, and the Weekly Challenge.
+**Depends on:** Phase 0 (vendor decision).
+
+- Integrate the chosen data vendor; build a scheduled ETL job (e.g., a cron function) that pulls each week's stats after Monday Night Football concludes.
+- Data-quality checks on ingestion — row counts, no duplicate players, bye weeks handled correctly. This mirrors the "gotcha" pedagogy already built into `docs/CURRICULUM.md`, now applied to production data reliability instead of just teaching content.
+- Historical backfill across multiple past seasons, so SQL Sports has genuine multi-year depth (the kind NFL Stat Guru already advertises) instead of the current 3-season synthetic dataset.
+- This is the one phase everything else quietly depends on: once real, it upgrades the sandbox, every curriculum lab's "correct answer," and the Weekly Challenge simultaneously.
+
+---
+
+## Phase 4 — Full Curriculum Production
+
+**Goal:** all 12 weeks of `docs/CURRICULUM.md` exist as real, deliverable content — including the two production-heavy pieces the time-boxed plan deferred.
+**Depends on:** Phase 1 (progress tracking needs accounts), Phase 3 (labs need real data to check answers against).
+
+- Write all lesson content (12 weeks × ~5 lessons) as real lesson pages, not just the syllabus outline.
+- Build all labs with checkable answers.
+- **Server-side autograder** (previously cut): golden-answer datasets per lab, a grading service that runs a learner's submitted query against the golden dataset and diffs the result precisely (column order, rounding, unspecified row order handled correctly) — a real step up from simple client-side result comparison.
+- **Video lesson content** (previously cut): script, record, edit, and host a video per lesson. Decide the production quality bar *before* starting so all 12 weeks are consistent rather than drifting from Week 1 to Week 12. This is real camera time on you — budget for it explicitly rather than assuming it happens "in the background."
+- The "season notebook" tooling from `docs/CURRICULUM.md` — a persistent per-learner workspace of saved queries, not just pass/fail on individual labs.
+- Exit quizzes, War Room challenge sets, and the Week 6 midterm checkpoint, all built as real interactive content, not placeholders.
+
+---
+
+## Phase 5 — Fantasy Platform Sync
+
+**Goal:** a learner queries *their own* real team/league, not just the sample dataset — this is a major differentiator and the clearest possible expression of the "useful before you're done" positioning already in `docs/PLAN.md`.
+**Depends on:** Phase 1 (accounts to attach a synced league to), Phase 3 (a real data pipeline the synced league data joins against).
+
+- **Sleeper first** (public API, no OAuth) — link a username/league ID, pull real roster/league data into the learner's own queryable schema.
+- **ESPN Fantasy** next (semi-official, cookie-based — more fragile; budget extra hardening time and expect it to need maintenance as ESPN changes things).
+- **Yahoo Fantasy** last (official OAuth API — the most "proper" integration, but the most setup overhead: app registration, OAuth consent flow).
+- Decide refresh cadence for synced leagues (real-time vs. daily vs. weekly) — a cost/complexity tradeoff, not just a technical one.
+- Privacy/security review: this pulls a user's real league data, which may include league-mates' names/info. Handle access tokens properly and think through what you're storing about people who never signed up for SQL Sports themselves.
+
+---
+
+## Phase 6 — Weekly Challenge & Leaderboard, Full Version
+
+**Goal:** move from "founder manually writes and grades one question a week" (the beta-scope version) to a real, automated, scalable engagement system.
+**Depends on:** Phase 1 (accounts), Phase 3 (real data to generate questions from), optionally Phase 5 (for personalization).
+
+- Auto-generate challenge questions from the real data pipeline via templated question types ("who led the league in X in week Y"), with answers computed automatically — removes the standing manual weekly labor the beta version required.
+- Points system with streaks and badges.
+- **Your decision:** what points actually unlock (discounts, a free month, recognition, something else) — this is a real business/marketing call, not something to leave undefined once the system is live.
+- Personalized challenges once Phase 5 exists ("beat your own league's average this week" — much stronger hook than a generic global question).
+- Friends/league-only leaderboard views alongside the public one — competing within your actual fantasy league is a more natural social hook than a global leaderboard of strangers.
+- Notifications (email, and push if there's an app) for the Monday-night drop.
+
+---
+
+## Phase 7 — Career Track Operational Build-Out
+
+**Goal:** a real, well-run *and still intentionally small* paid service — this phase builds tooling, not headcount.
+**Depends on:** Phase 1, Phase 2 (payment/application flow), Phase 4 (there needs to be a completed Roadmap to base Career Track on).
+
+- Application/intake form with a real acceptance rubric — keeps quality high for a deliberately small cohort by design, not first-come-first-served.
+- Booking/scheduling (Cal.com or similar) for 1:1 reviews and mock interviews.
+- A documented review rubric and resume/portfolio feedback template, so quality stays consistent even before you'd ever consider bringing on a second reviewer.
+- A structured mini-syllabus for "application strategy support" instead of unstructured ad-hoc calls.
+- A real, verifiable credential: a unique public URL a graduate can link on LinkedIn, not just a PDF that can't be checked.
+
+---
+
+## Phase 8 — Capstone & Certification System
+
+**Goal:** the capstone tracks already fully specified in `docs/CURRICULUM.md`'s Capstone Project Briefs get real submission, review, and graduation infrastructure.
+**Depends on:** Phase 1, Phase 4.
+
+- Submission flow: repo/notebook link + README + a short form.
+- A review queue with rubric-assist scoring against the 100-point rubric already defined in the curriculum doc.
+- A public, opt-in showcase of graduate capstones — this doubles as real marketing material, and is what finally lets the landing page's Success Stories section replace its clearly-labeled illustrative examples with real ones.
+- Certificate generation plus a public verification page, tying into Phase 7's credential work.
+
+---
+
+## Phase 9 — Quality, Testing & Operations
+
+**Goal:** the product is reliable enough that real paying customers don't lose progress or hit broken payment flows. The current codebase has zero automated tests — this phase is not optional once real money and real user data are involved, and it should run continuously alongside every other phase above, not as a single late pass.
+
+- Automated test suite: unit tests for the data pipeline and grading logic, integration tests for signup → pay → learn flows.
+- CI pipeline running tests on every push before deploy.
+- Error monitoring (e.g. Sentry) and uptime/health monitoring specifically on the Phase 3 data pipeline — a silent Monday pipeline failure breaks the entire weekly-drop promise the business is built on.
+- Real customer support: the support widget already on the marketing site is UI-only; wire it to a real inbox/ticketing flow now that a real backend exists.
+- Backup and disaster-recovery plan for the database — it now holds real payment history and learner progress, not just marketing copy.
+
+---
+
+## Phase 10 — Marketing & Growth Engine
+
+**Goal:** a repeatable growth motion, not a one-time launch spike.
+
+- A real content calendar across the Free-tier channels (YouTube/LinkedIn/Substack) — consistent cadence beats launch-week bursts.
+- SEO pass on the marketing site.
+- A referral program — a natural fit given the leaderboard/competitive mechanics already in Phase 6.
+- A community space (Discord or similar) for learners — this is the "cohort/community" element `docs/PLAN.md` already identifies as something Career Track buyers specifically want.
+- Cross-promotion beyond NFL Stat Guru — other fantasy football creators and communities.
+
+---
+
+## Phase 11 — Expansion
+
+**Goal:** prove the "sports as a teaching lens" thesis generalizes — per the Big Picture Vision already in `docs/PLAN.md`.
+**Depends on:** real traction (paying users, retention, a working Career Track cohort) from Phases 0–10. This is a dependency, not a deadline — don't start this phase to fill time; start it when the flagship has proven itself.
+
+- Additional language: Python is the natural next step — huge existing demand, reuses the same fantasy-football dataset built out in Phases 3–5.
+- Additional sport (basketball, soccer) for learners whose "Sunday obsession" isn't football.
+- AI/ML content eventually — predicting performance, not just querying it — the "coding, AI, tech" part of the long-term mission.
+- Keep this off the public marketing site until it's real, consistent with the existing decision in `docs/PLAN.md` not to overpromise a platform before the first product has proven itself.
+
+---
+
+## How the phases relate
+
+Phase 0 gates everything. Phases 1 and 3 can run in parallel (accounts and data pipeline are independent of each other) but both gate Phase 4. Phase 2 needs Phase 1. Phase 5 needs Phase 1 and Phase 3. Phase 6 needs Phase 1 and Phase 3, and gets stronger once Phase 5 exists. Phase 7 and Phase 8 both need Phase 4 to have real content to review and certify. Phase 9 isn't really a phase at all — it's a discipline that should run underneath every other phase from Phase 1 onward, not a cleanup pass at the end. Phase 10 can ramp throughout, growing as there's more to promote. Phase 11 is last on purpose: it's gated on proof, not patience.
 
 ## How to use this doc
 
-Update the phase/week tables as reality diverges from plan — a schedule nobody updates is worse than no schedule. If a week's ship slips, move it and say why, rather than silently letting later weeks absorb the debt.
+This replaces the time-boxed version of the launch plan — if a calendar/deadline framing is useful again later (e.g., committing to a specific season), rebuild it from this phase list rather than starting over, so the dependency ordering isn't lost.
