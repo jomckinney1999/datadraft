@@ -1,8 +1,10 @@
 # Refund Policy — DRAFT
 
-**Status: draft. Do not publish or rely on this until it has been reviewed by you and ideally a real lawyer. Placeholders in brackets need real values before this goes live.**
+**Status: draft. Do not publish or rely on this until it has been reviewed by you and ideally a real lawyer. This is dated ahead of actual commercial launch — update "Last updated" again once this is actually published live, not just drafted.**
 
-Last updated: [DATE]
+Last updated: July 18, 2026
+
+This policy is issued by Jojo Lee McKinney, doing business as SQL Sports (a sole proprietorship, PO Box 550, Flint Hill, VA [ZIP]).
 
 ---
 
@@ -15,7 +17,7 @@ Last updated: [DATE]
 ## Roadmap (one-time purchase)
 
 - **Because the full 12-week curriculum may still be rolling out week-by-week during the beta/build-out period** (see `docs/LAUNCH-PLAN.md`), Roadmap purchases made before all 12 weeks are live come with an explicit right to a full refund, on request, at any point before you've completed the weeks that *are* available, if you feel the pace of remaining content doesn't match what you expected at purchase. [This is a placeholder policy reflecting the current honest state of the product — revisit and likely simplify this section once the full 12-week curriculum is actually complete (LAUNCH-PLAN.md Phase 4), since the ongoing-rollout caveat won't apply anymore.]
-- Once the full curriculum is complete and delivered as advertised: refund requests within **[14/30] days** of purchase, no questions asked, become the standard rather than the beta-specific exception above.
+- Once the full curriculum is complete and delivered as advertised: refund requests within **30 days** of purchase, no questions asked, become the standard rather than the beta-specific exception above. [30 days is a reasonable, generous-but-common default — tighten to 14 if you'd rather, this is a real business call, not a fixed legal requirement.]
 - No refunds for capstone review/certification once a capstone has actually been reviewed and a certificate issued.
 
 ## Career Track
@@ -25,7 +27,7 @@ Last updated: [DATE]
 
 ## How to request a refund
 
-Email [support email] with your account email and the reason for the request. We aim to respond within [2 business days] and process approved refunds within [5-10 business days] back to the original payment method via Stripe.
+Email jomckinney1999@gmail.com with your account email and the reason for the request. We aim to respond within 2 business days and process approved refunds within 5-10 business days back to the original payment method via Stripe.
 
 ## Chargebacks
 

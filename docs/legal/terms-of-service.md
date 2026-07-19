@@ -1,14 +1,16 @@
 # Terms of Service — DRAFT
 
-**Status: draft. Do not publish or rely on this until it has been reviewed by you and ideally a real lawyer. Placeholders in brackets need real values before this goes live.**
+**Status: draft. Do not publish or rely on this until it has been reviewed by you and ideally a real lawyer. This is dated ahead of actual commercial launch (see docs/BUSINESS-SETUP.md) — update "Last updated" again once this is actually published live, not just drafted.**
 
-Last updated: [DATE]
+Last updated: July 18, 2026
 
 ---
 
 ## 1. Who this agreement is with
 
-These Terms of Service ("Terms") are a legal agreement between you and **[Company Legal Name, e.g. "SQL Sports LLC"]** ("SQL Sports," "we," "us"), governing your use of the SQL Sports website, sandbox, curriculum, Weekly Challenge, leaderboard, and related services (the "Service"). By creating an account or using the Service, you agree to these Terms.
+These Terms of Service ("Terms") are a legal agreement between you and **Jojo Lee McKinney, an individual doing business as SQL Sports** ("SQL Sports," "we," "us"), a sole proprietorship operating from PO Box 550, Flint Hill, VA [ZIP], governing your use of the SQL Sports website, sandbox, curriculum, Weekly Challenge, leaderboard, and related services (the "Service"). By creating an account or using the Service, you agree to these Terms.
+
+**Note on business structure:** SQL Sports currently operates as a sole proprietorship, not a separate legal entity (see `docs/BUSINESS-SETUP.md`). This means Jojo Lee McKinney personally, not a shielded company, is the counterparty to this agreement — the Limitation of Liability section (11) is what does the practical work of limiting exposure here, and it matters more for a sole proprietorship than it would for an LLC. Have a lawyer confirm this section is as strong as it can be before real money changes hands.
 
 ## 2. Eligibility
 
@@ -71,8 +73,8 @@ We may update these Terms; material changes will be communicated (e.g., via emai
 
 ## 13. Governing law
 
-These Terms are governed by the laws of [Your State], without regard to conflict-of-law principles. [Confirm once the LLC's home state is finalized per docs/BUSINESS-SETUP.md.]
+These Terms are governed by the laws of the Commonwealth of Virginia, without regard to conflict-of-law principles.
 
 ## 14. Contact
 
-Questions about these Terms: [support email — currently jomckinney1999@gmail.com, update once a dedicated support address exists].
+Questions about these Terms: jomckinney1999@gmail.com, or by mail at PO Box 550, Flint Hill, VA [ZIP].
