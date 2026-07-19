@@ -8,7 +8,7 @@ Last updated: July 18, 2026
 
 ## 1. Who we are
 
-**Jojo Lee McKinney, an individual doing business as SQL Sports** ("SQL Sports," "we," "us"), a sole proprietorship operating from PO Box 550, Flint Hill, VA [ZIP], operates the SQL Sports website and Service. This policy explains what data we collect, why, and what your options are.
+**Jojo Lee McKinney, an individual doing business as SQL Sports** ("SQL Sports," "we," "us"), a sole proprietorship operating from 6617 Rock Lawn Dr, Clifton, VA 20124, operates the SQL Sports website and Service. This policy explains what data we collect, why, and what your options are.
 
 ## 2. What we collect
 
@@ -68,4 +68,4 @@ We'll post updates here and, for material changes, notify you via email or an in
 
 ## 10. Contact
 
-Questions about this policy or your data: jomckinney1999@gmail.com, or by mail at PO Box 550, Flint Hill, VA [ZIP].
+Questions about this policy or your data: jomckinney1999@gmail.com, or by mail at 6617 Rock Lawn Dr, Clifton, VA 20124.

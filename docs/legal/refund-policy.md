@@ -4,7 +4,7 @@
 
 Last updated: July 18, 2026
 
-This policy is issued by Jojo Lee McKinney, doing business as SQL Sports (a sole proprietorship, PO Box 550, Flint Hill, VA [ZIP]).
+This policy is issued by Jojo Lee McKinney, doing business as SQL Sports (a sole proprietorship, 6617 Rock Lawn Dr, Clifton, VA 20124).
 
 ---
 
