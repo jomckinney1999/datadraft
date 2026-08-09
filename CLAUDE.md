@@ -1,6 +1,16 @@
 # SQL Sports
 
-Education platform teaching SQL and data analytics through fantasy football. Next.js 14 (App Router), TypeScript, Tailwind — currently a single-page marketing/landing site (`app/page.tsx`), deployed to Vercel at https://sql-sports.vercel.app.
+Education platform teaching SQL and data analytics through fantasy football. Next.js 14 (App Router), TypeScript, Tailwind — a marketing/landing site (`app/page.tsx`) plus a gamified learning MVP (`app/learn/`), deployed to Vercel at https://sql-sports.vercel.app.
+
+## Gamified learning MVP (`/learn`)
+
+Duolingo-style lesson player + DataCamp-style course roadmap, fully client-side (no accounts, no backend):
+
+- **Content:** `lib/curriculum.ts` — 4 live units / 11 lessons / ~55 exercises (mc, tap-the-word fill, write-real-SQL), units 5–6 declared `coming-soon`. Unit structure mirrors the `docs/CURRICULUM.md` phases — keep them aligned when either changes.
+- **Grading:** query exercises run learner SQL and the `expected` answer key against the same in-browser sql.js database (seeded from `lib/fantasy-data.ts`) and compare result values; `orderMatters: false` sorts rows first. **When adding exercises, verify answer keys against the seeded data** — especially ORDER BY + LIMIT exercises where a points tie at the LIMIT boundary makes correct learner queries grade wrong (this happened; tie-breaks in the prompt are the fix).
+- **Progress:** localStorage only (`lib/progress.ts`, key `sqlsports.progress.v1`) — XP, daily streak, completed lessons. Swaps for the Supabase `progress` table when accounts land (LAUNCH-PLAN Phase 1).
+- **Mascot:** Coach Blitz, `components/coach.tsx` — inline SVG with a `mood` prop; no image assets.
+- `middleware.ts` deliberately no-ops when `NEXT_PUBLIC_SUPABASE_URL` isn't a real http(s) URL (placeholder env values) — same lazy-init contract as `lib/stripe.ts`. Don't revert; with placeholder keys the Supabase client throws in middleware and takes down every route locally.
 
 ## Before changing pricing, tiers, or positioning
 

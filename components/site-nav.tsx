@@ -4,6 +4,7 @@ import { useState } from "react";
 
 const NAV_LINKS = [
   { href: "#why", label: "Why SQL Sports", accent: "teal" as const },
+  { href: "#sandbox", label: "Sandbox", accent: "teal" as const },
   { href: "#curriculum", label: "Curriculum", accent: "teal" as const },
   { href: "#pricing", label: "Pricing", accent: "teal" as const },
   { href: "#career-track", label: "Career Track", accent: "amber" as const },
@@ -39,10 +40,10 @@ export default function SiteNav() {
             </a>
           ))}
           <a
-            href="#sandbox"
+            href="/learn"
             className="border border-teal/50 bg-teal/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-teal transition-colors duration-150 hover:border-teal hover:bg-teal/20"
           >
-            Open sandbox
+            Start learning
           </a>
         </nav>
 
@@ -89,11 +90,11 @@ export default function SiteNav() {
               </a>
             ))}
             <a
-              href="#sandbox"
+              href="/learn"
               onClick={() => setOpen(false)}
               className="mt-2 border border-teal/50 bg-teal/10 px-3 py-2.5 text-center font-mono text-xs uppercase tracking-wider text-teal transition-colors duration-150 hover:border-teal hover:bg-teal/20"
             >
-              Open sandbox
+              Start learning
             </a>
           </div>
         </nav>

@@ -7,6 +7,14 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
 
+  // Same lazy-init contract as lib/stripe.ts: with placeholder env values
+  // (no real Supabase project yet), skip session refresh instead of
+  // crashing every request. No-op in production where real keys exist.
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    return response;
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
