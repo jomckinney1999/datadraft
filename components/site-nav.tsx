@@ -4,7 +4,7 @@ import { useState } from "react";
 
 const NAV_LINKS = [
   { href: "#why", label: "Why SQL Sports", accent: "teal" as const },
-  { href: "#sandbox", label: "Sandbox", accent: "teal" as const },
+  { href: "/field", label: "Practice Field", accent: "amber" as const },
   { href: "#curriculum", label: "Curriculum", accent: "teal" as const },
   { href: "#pricing", label: "Pricing", accent: "teal" as const },
   { href: "#career-track", label: "Career Track", accent: "amber" as const },

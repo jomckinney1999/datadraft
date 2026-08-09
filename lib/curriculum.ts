@@ -10,6 +10,9 @@ export type MCExercise = {
   options: string[];
   answer: number;
   explain: string;
+  // Pure-recall concept checks Gunslinger mode skips (the concept still
+  // appears in drill feedback). Never tag load-bearing gotcha questions.
+  drillSkip?: boolean;
 };
 
 export type FillExercise = {
@@ -35,11 +38,15 @@ export type QueryExercise = {
 
 export type Exercise = MCExercise | FillExercise | QueryExercise;
 
+export type TheoryCard = { title: string; text: string; code?: string };
+
 export type Lesson = {
   id: string;
   title: string;
   blurb: string;
-  intro: { title: string; text: string; code?: string };
+  intro: TheoryCard;
+  // Bonus film-study cards shown only in Film Room General mode.
+  film?: TheoryCard[];
   exercises: Exercise[];
 };
 
@@ -78,6 +85,17 @@ export const COURSE = {
             text: "A database is a set of tables. Each table is a grid: columns are the stat categories, rows are the entries. Our league has three tables — week_results (one row per player per week), rosters, and waiver_wire. SELECT * FROM a table reads the whole sheet.",
             code: "SELECT * FROM week_results;",
           },
+          film: [
+            {
+              title: "Anatomy of a query",
+              text: "Every query you'll ever write has the same skeleton: SELECT (what columns), FROM (which table), and a semicolon to end the statement. Everything else — filtering, sorting, grouping — bolts onto that frame. Keywords are conventionally UPPERCASE, but SQL doesn't care; readability does.",
+              code: "SELECT *          -- what to bring back\nFROM week_results -- which stat sheet\n;                 -- end of play",
+            },
+            {
+              title: "Scout all three stat sheets",
+              text: "week_results: one row per player per week per season — the game log. rosters: one row per (fantasy team, player) — who owns whom. waiver_wire: one row per free agent with roster percentage and trend. Knowing each table's grain — what one row means — is the first question every pro analyst asks.",
+            },
+          ],
           exercises: [
             {
               type: "mc",
@@ -85,6 +103,7 @@ export const COURSE = {
                 "Our league database has three tables. Which one holds one row per player, per week, per season — the weekly scoring log?",
               options: ["week_results", "rosters", "waiver_wire", "playbook"],
               answer: 0,
+              drillSkip: true,
               explain:
                 "week_results is the weekly scoring log. rosters maps players to fantasy teams, and waiver_wire tracks free agents. There's no playbook table — yet.",
             },
@@ -133,6 +152,7 @@ export const COURSE = {
                 "Every table in the database",
               ],
               answer: 0,
+              drillSkip: true,
               explain:
                 "SELECT * with no other clauses returns the full table: all columns, all rows.",
             },
@@ -147,6 +167,13 @@ export const COURSE = {
             text: "A good coordinator calls specific routes. List column names after SELECT, separated by commas, and you get only those columns — in the order you asked for them.",
             code: "SELECT player, team FROM week_results;",
           },
+          film: [
+            {
+              title: "Column order is your call",
+              text: "Columns come back in exactly the order you list them — the table's own order doesn't matter. And with AS you can rename any column on the way out, which is how analysts make results readable for coaches who don't speak database.",
+              code: "SELECT player AS name, fantasy_pts AS points\nFROM week_results;",
+            },
+          ],
           exercises: [
             {
               type: "mc",
@@ -159,6 +186,7 @@ export const COURSE = {
                 "SELECT FROM week_results player, team;",
               ],
               answer: 0,
+              drillSkip: true,
               explain:
                 "Name the columns right after SELECT, separated by commas. Without the comma, SQL thinks `team` is a nickname (alias) for `player`.",
             },
@@ -188,6 +216,7 @@ export const COURSE = {
               prompt: "What separates column names in a SELECT list?",
               options: ["A comma", "The word AND", "A semicolon", "Just spaces"],
               answer: 0,
+              drillSkip: true,
               explain:
                 "Commas separate columns. AND belongs to filtering (next unit), and the semicolon ends the whole statement.",
             },
@@ -213,6 +242,13 @@ export const COURSE = {
             text: "week_results has over 2,000 rows. When you just want a feel for the data, add LIMIT n at the very end of the query to cap how many rows come back.",
             code: "SELECT * FROM week_results LIMIT 10;",
           },
+          film: [
+            {
+              title: "Why analysts LIMIT everything",
+              text: "First move on any unfamiliar table: SELECT * ... LIMIT 10. It's a free peek at the columns and typical values before you commit to a real question. On production databases with millions of rows it's also what keeps your quick look from becoming an expensive full-table scan.",
+              code: "-- the analyst's opening move on any new table\nSELECT * FROM rosters LIMIT 10;",
+            },
+          ],
           exercises: [
             {
               type: "mc",
@@ -220,6 +256,7 @@ export const COURSE = {
                 "week_results has 2,160 rows. You want a quick 10-row peek. Which clause caps the rows returned?",
               options: ["LIMIT", "CAP", "WHERE", "ORDER BY"],
               answer: 0,
+              drillSkip: true,
               explain:
                 "LIMIT n returns at most n rows. WHERE filters by condition and ORDER BY sorts — both coming soon.",
             },
@@ -288,6 +325,13 @@ export const COURSE = {
             text: "WHERE goes after FROM and keeps only rows matching a condition. Text values must be wrapped in single quotes — 'Josh Allen', 'KC' — while numbers go bare.",
             code: "SELECT * FROM week_results\nWHERE player = 'Josh Allen';",
           },
+          film: [
+            {
+              title: "Text wears quotes, numbers don't",
+              text: "WHERE player = 'Josh Allen' works; WHERE player = Josh Allen makes SQL hunt for a column named Josh. Numbers go bare: WHERE week = 5. One more scouting note: text matching is exact — capitalization and spelling must match the data, so 'josh allen' finds nothing.",
+              code: "WHERE player = 'Josh Allen'  -- text: quoted, exact\nWHERE week = 5               -- number: bare",
+            },
+          ],
           exercises: [
             {
               type: "mc",
@@ -295,6 +339,7 @@ export const COURSE = {
                 "Which clause filters rows — keeping only the ones that match a condition?",
               options: ["WHERE", "LIMIT", "SELECT", "FROM"],
               answer: 0,
+              drillSkip: true,
               explain:
                 "WHERE is the filter. LIMIT caps row count with no opinion about which rows.",
             },
@@ -362,6 +407,13 @@ export const COURSE = {
             text: "Numbers compare with > < >= <= — no quotes. Chain conditions with AND when every condition must hit.",
             code: "SELECT * FROM week_results\nWHERE season = 2018\n  AND fantasy_pts > 20;",
           },
+          film: [
+            {
+              title: "Compound conditions and parentheses",
+              text: "AND binds tighter than OR — like order of operations in math. Mixing them without parentheses is a classic bust: WHERE season = 2018 AND week = 1 OR week = 2 actually returns ALL week-2 rows from every season. Parentheses make your read explicit.",
+              code: "-- what you meant:\nWHERE season = 2018 AND (week = 1 OR week = 2)",
+            },
+          ],
           exercises: [
             {
               type: "mc",
@@ -374,6 +426,7 @@ export const COURSE = {
                 "fantasy_pts < 20",
               ],
               answer: 0,
+              drillSkip: true,
               explain:
                 "> is strictly more than. >= would also keep games at exactly 20.",
             },
@@ -442,6 +495,13 @@ export const COURSE = {
             text: "OR keeps a row if either condition hits. IN ('A','B','C') is a cleaner way to say “any of these.” BETWEEN a AND b keeps a range — both ends included.",
             code: "WHERE position IN ('QB', 'TE')\n  AND week BETWEEN 1 AND 4",
           },
+          film: [
+            {
+              title: "Choosing your read: OR vs IN vs BETWEEN",
+              text: "All three keep rows matching “any of these,” but each has a natural down-and-distance: OR for two unrelated conditions, IN for a list of values in one column, BETWEEN for a continuous range. They compile to the same result — pick the one that reads like the question you were asked.",
+              code: "WHERE team = 'KC' OR fantasy_pts > 25   -- unrelated\nWHERE team IN ('KC', 'BUF', 'MIA')      -- value list\nWHERE week BETWEEN 5 AND 9              -- range",
+            },
+          ],
           exercises: [
             {
               type: "mc",
@@ -483,6 +543,7 @@ export const COURSE = {
                 "Every week except 1 and 4",
               ],
               answer: 0,
+              drillSkip: true,
               explain:
                 "BETWEEN is inclusive on both ends. It's shorthand for week >= 1 AND week <= 4.",
             },
@@ -534,12 +595,20 @@ export const COURSE = {
             text: "ORDER BY column sorts your results — smallest first by default (ASC). Add DESC for biggest first. It goes after WHERE, before LIMIT.",
             code: "SELECT player, fantasy_pts\nFROM week_results\nORDER BY fantasy_pts DESC;",
           },
+          film: [
+            {
+              title: "Sorting text, numbers, and ties",
+              text: "Numbers sort numerically, text sorts alphabetically — and you can stack sort keys: the second key only kicks in when the first one ties. ORDER BY team, fantasy_pts DESC gives you an alphabetical team list with each team's best games first. Deterministic order is what separates a real report from a lucky screenshot.",
+              code: "ORDER BY team, fantasy_pts DESC\n--       ↑ first    ↑ tiebreak within team",
+            },
+          ],
           exercises: [
             {
               type: "mc",
               prompt: "Which clause sorts your results?",
               options: ["ORDER BY", "SORT BY", "GROUP BY", "RANK"],
               answer: 0,
+              drillSkip: true,
               explain:
                 "ORDER BY is the sorter. GROUP BY (next unit) squashes rows — different job entirely.",
             },
@@ -549,6 +618,7 @@ export const COURSE = {
                 "You want the biggest scores at the top. Which direction keyword?",
               options: ["DESC", "ASC", "TOP", "DOWN"],
               answer: 0,
+              drillSkip: true,
               explain:
                 "DESC = descending, biggest first. ASC (the default) is smallest first.",
             },
@@ -603,6 +673,13 @@ export const COURSE = {
             text: "“Top 5 anything” is always the same play: ORDER BY the stat DESC, then LIMIT 5. You can also sort by several columns — the second breaks ties in the first.",
             code: "ORDER BY fantasy_pts DESC, player\nLIMIT 5;",
           },
+          film: [
+            {
+              title: "The clause pipeline never changes",
+              text: "SELECT → FROM → WHERE → ORDER BY → LIMIT. That's the fixed snap count for every top-N question: filter to the population you care about, rank it, trim it. Memorize the order once and “top 5 rushers in week 10” becomes pure fill-in-the-blanks.",
+              code: "SELECT player, fantasy_pts\nFROM week_results\nWHERE season = 2018 AND week = 10\nORDER BY fantasy_pts DESC\nLIMIT 5;",
+            },
+          ],
           exercises: [
             {
               type: "mc",
@@ -614,6 +691,7 @@ export const COURSE = {
                 "ORDER BY fantasy_pts ASC LIMIT 5",
               ],
               answer: 0,
+              drillSkip: true,
               explain:
                 "Sort descending so the best are first, then cut to 5. (ORDER BY always comes before LIMIT.)",
             },
@@ -695,12 +773,20 @@ export const COURSE = {
             text: "Aggregate functions squash many rows into one: COUNT(*) counts rows, SUM adds a column up, AVG averages it. AS gives the result a readable name, and ROUND(x, 1) trims decimals.",
             code: "SELECT ROUND(AVG(fantasy_pts), 1) AS ppg\nFROM week_results\nWHERE player = 'Josh Allen';",
           },
+          film: [
+            {
+              title: "The aggregate family",
+              text: "Five workhorses: COUNT(*) counts rows, SUM adds, AVG means, MIN and MAX find the floor and ceiling. They all collapse many rows into one answer, and they all skip NULLs (missing values) except COUNT(*), which counts the row no matter what — a subtle difference that decides real stat lines.",
+              code: "SELECT COUNT(*), SUM(fantasy_pts),\n       AVG(fantasy_pts), MIN(fantasy_pts), MAX(fantasy_pts)\nFROM week_results;",
+            },
+          ],
           exercises: [
             {
               type: "mc",
               prompt: "Which function counts how many rows matched?",
               options: ["COUNT(*)", "SUM(*)", "TOTAL()", "ROWS()"],
               answer: 0,
+              drillSkip: true,
               explain:
                 "COUNT(*) counts rows. SUM adds up values in a column — related, but a different question.",
             },
@@ -714,6 +800,7 @@ export const COURSE = {
                 "The number of games",
               ],
               answer: 0,
+              drillSkip: true,
               explain:
                 "AVG is the mean — points per game if each row is a game. MAX, SUM, and COUNT answer the others.",
             },
@@ -767,6 +854,13 @@ export const COURSE = {
             text: "GROUP BY splits the table into buckets — one per distinct value — then aggregates run inside each bucket. SELECT the grouping column plus your aggregates and you've built a leaderboard.",
             code: "SELECT player, SUM(fantasy_pts) AS total\nFROM week_results\nGROUP BY player;",
           },
+          film: [
+            {
+              title: "Grain — the question that prevents wrong answers",
+              text: "GROUP BY changes the grain of your result: week_results is one row per player-week, but GROUP BY player makes it one row per player. Rule of thumb the pros live by: every column in your SELECT should either be in the GROUP BY or wrapped in an aggregate. Anything else is asking the database to guess.",
+              code: "SELECT player, team, SUM(fantasy_pts)  -- team: in neither!\nFROM week_results\nGROUP BY player  -- ⚠ works in SQLite, lies in interviews",
+            },
+          ],
           exercises: [
             {
               type: "mc",
@@ -774,6 +868,7 @@ export const COURSE = {
                 "You want ONE row per player, each showing that player's total points. Which clause creates the per-player split?",
               options: ["GROUP BY", "ORDER BY", "SPLIT BY", "WHERE"],
               answer: 0,
+              drillSkip: true,
               explain:
                 "GROUP BY player makes a bucket per player; SUM then runs once per bucket.",
             },
@@ -841,6 +936,13 @@ export const COURSE = {
             text: "WHERE filters raw rows before grouping. HAVING filters groups after aggregation — it's how you say “only players averaging 15+.” In SQLite you can reuse your AS alias inside HAVING.",
             code: "SELECT player, AVG(fantasy_pts) AS ppg\nFROM week_results\nGROUP BY player\nHAVING ppg >= 15;",
           },
+          film: [
+            {
+              title: "The full order of operations",
+              text: "How the database actually runs your query: FROM (get the table) → WHERE (cut rows) → GROUP BY (bucket) → aggregates compute → HAVING (cut groups) → SELECT (shape output) → ORDER BY → LIMIT. Every “why doesn't this work” in SQL traces back to this pipeline — WHERE can't see averages because averages don't exist yet when WHERE runs.",
+              code: "FROM → WHERE → GROUP BY → HAVING\n     → SELECT → ORDER BY → LIMIT",
+            },
+          ],
           exercises: [
             {
               type: "mc",
@@ -848,6 +950,7 @@ export const COURSE = {
                 "WHERE filters rows before grouping. What filters the groups AFTER aggregation?",
               options: ["HAVING", "WHERE, again", "LIMIT", "FILTER BY"],
               answer: 0,
+              drillSkip: true,
               explain:
                 "HAVING is WHERE's post-aggregation counterpart. It sees totals and averages; WHERE never does.",
             },

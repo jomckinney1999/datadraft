@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { COURSE, liveLessons, type Lesson, type Unit } from "@/lib/curriculum";
 import { loadProgress, displayStreak, type Progress } from "@/lib/progress";
+import { getStyle } from "@/lib/playbook";
 import Coach from "@/components/coach";
 
 const NODE_OFFSETS = [0, 48, 0, -48];
@@ -59,6 +60,7 @@ export default function LearnPage() {
     completedLessons: [],
     streak: 0,
     lastActiveDay: "",
+    playbookStyle: null,
   });
 
   useEffect(() => {
@@ -91,6 +93,12 @@ export default function LearnPage() {
           </span>
         </Link>
         <div className="flex items-center gap-3">
+          <Link
+            href="/field"
+            className="hidden border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-teal/40 hover:text-teal sm:inline"
+          >
+            Practice Field
+          </Link>
           <span className="flex items-center gap-1.5 border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs text-amber">
             <FlameIcon />
             {streak} day{streak === 1 ? "" : "s"}
@@ -148,17 +156,42 @@ export default function LearnPage() {
             ))}
         </div>
 
-        {current && (
+        {!progress.playbookStyle ? (
           <Link
-            href={`/learn/${current.lesson.id}`}
-            className="mt-6 block w-full border border-teal bg-teal/15 px-6 py-3 text-center font-mono text-sm font-semibold uppercase tracking-widest text-teal transition-colors hover:bg-teal/25"
+            href="/learn/playbook"
+            className="mt-6 block w-full border border-amber bg-amber/15 px-6 py-3 text-center font-mono text-sm font-semibold uppercase tracking-widest text-amber transition-colors hover:bg-amber/25"
           >
-            {completedCount === 0
-              ? "Start the season"
-              : pct === 100
-                ? "Replay the last drive"
-                : `Continue · ${current.lesson.title}`}
+            Take the quiz · Choose your playbook style
           </Link>
+        ) : (
+          current && (
+            <Link
+              href={`/learn/${current.lesson.id}`}
+              className="mt-6 block w-full border border-teal bg-teal/15 px-6 py-3 text-center font-mono text-sm font-semibold uppercase tracking-widest text-teal transition-colors hover:bg-teal/25"
+            >
+              {completedCount === 0
+                ? "Start the season"
+                : pct === 100
+                  ? "Replay the last drive"
+                  : `Continue · ${current.lesson.title}`}
+            </Link>
+          )
+        )}
+
+        {progress.playbookStyle && (
+          <p className="mt-3 text-center font-mono text-[11px] text-ink-muted">
+            Playbook style:{" "}
+            <span className="text-teal">
+              {getStyle(progress.playbookStyle).name}
+            </span>{" "}
+            ·{" "}
+            <Link
+              href="/learn/playbook"
+              className="underline decoration-panel-border underline-offset-4 transition-colors hover:text-amber"
+            >
+              retake the quiz
+            </Link>
+          </p>
         )}
       </section>
 

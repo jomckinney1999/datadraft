@@ -1,11 +1,14 @@
 // localStorage-backed learner progress for the /learn MVP.
 // Deliberately no backend yet — swaps for Supabase `progress` later.
 
+import type { PlaybookStyle } from "@/lib/playbook";
+
 export type Progress = {
   xp: number;
   completedLessons: string[];
   streak: number;
   lastActiveDay: string; // YYYY-MM-DD
+  playbookStyle: PlaybookStyle | null;
 };
 
 const KEY = "sqlsports.progress.v1";
@@ -15,7 +18,10 @@ const EMPTY: Progress = {
   completedLessons: [],
   streak: 0,
   lastActiveDay: "",
+  playbookStyle: null,
 };
+
+const STYLE_IDS: PlaybookStyle[] = ["film-room", "gunslinger", "dual-threat"];
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
@@ -41,10 +47,19 @@ export function loadProgress(): Progress {
       streak: typeof parsed.streak === "number" ? parsed.streak : 0,
       lastActiveDay:
         typeof parsed.lastActiveDay === "string" ? parsed.lastActiveDay : "",
+      playbookStyle: STYLE_IDS.includes(parsed.playbookStyle as PlaybookStyle)
+        ? (parsed.playbookStyle as PlaybookStyle)
+        : null,
     };
   } catch {
     return EMPTY;
   }
+}
+
+export function setPlaybookStyle(style: PlaybookStyle): Progress {
+  const next = { ...loadProgress(), playbookStyle: style };
+  save(next);
+  return next;
 }
 
 function save(progress: Progress) {
@@ -79,6 +94,7 @@ export function completeLesson(lessonId: string, earnedXp: number): Progress {
       : [...p.completedLessons, lessonId],
     streak,
     lastActiveDay: t,
+    playbookStyle: p.playbookStyle,
   };
   save(next);
   return next;
