@@ -4,22 +4,22 @@ const GALLERY = [
   {
     src: "/stadium-dusk.jpg",
     alt: "Stadium exterior at dusk",
-    accent: "teal" as const,
+    accent: "turf" as const,
   },
   {
     src: "/action-tackle.jpg",
     alt: "Football action mid-play",
-    accent: "amber" as const,
+    accent: "gold" as const,
   },
   {
     src: "/park-football.jpg",
     alt: "Casual football practice",
-    accent: "teal" as const,
+    accent: "turf" as const,
   },
   {
     src: "/fantasy-trophy.jpg",
     alt: "Football and championship trophy",
-    accent: "amber" as const,
+    accent: "gold" as const,
   },
 ];
 
@@ -32,9 +32,9 @@ export default function ActionGallery() {
             <div
               key={item.src}
               className={`group relative aspect-[3/4] overflow-hidden border border-panel-border transition-colors duration-150 ${
-                item.accent === "teal"
-                  ? "hover:border-teal/50"
-                  : "hover:border-amber/50"
+                item.accent === "turf"
+                  ? "hover:border-turf/50"
+                  : "hover:border-gold/50"
               }`}
             >
               <Image
@@ -49,7 +49,7 @@ export default function ActionGallery() {
                 aria-hidden
                 className="pointer-events-none absolute inset-0 mix-blend-color"
                 style={{
-                  backgroundColor: item.accent === "teal" ? "#4FD1C5" : "#E8A33D",
+                  backgroundColor: item.accent === "turf" ? "#3FD973" : "#F2C94C",
                 }}
               />
               <div

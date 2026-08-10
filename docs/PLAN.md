@@ -122,3 +122,9 @@ Before building the real version, these need real decisions (not made yet):
 ## How to use this doc
 
 When asked to change pricing, positioning, or add/remove tiers on the site: update this document first (or in the same change) so it stays the single source of truth, then update `app/page.tsx` to match. If a requested change conflicts with something decided here (e.g. "make Career Track the popular default"), flag the conflict rather than silently overriding the documented reasoning.
+
+## Non-fan positioning (decided 2026-08-09)
+
+"You don't have to watch football" is now stated explicitly across the funnel: a gold callout in the landing Why section ("Don't watch football? You're still in the right place."), plus one-liners on the Draft Day name screen, the /learn course card, and the Practice Field intro.
+
+Reasoning: the fantasy hook remains the lead pitch (see Target user: Andy — it's what gets fans in the door), but requiring fandom was never real — CURRICULUM.md has always listed fantasy experience as "helpful but not required." This message removes a signup barrier for non-fans without repositioning the product. The claims are kept honest per the trust pillar: football context genuinely is taught in-line, one sentence at a time, and the SQL genuinely transfers unchanged to work data. Don't escalate this into a "sports-agnostic" pitch — that's the multi-sport expansion decision, which stays off the live site until the flagship proves itself.

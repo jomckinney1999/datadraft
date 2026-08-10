@@ -66,14 +66,14 @@ export default function Coach({
       <path
         d="M28 52 Q60 24 92 52"
         fill="none"
-        stroke="#1e2533"
+        stroke="#232A4E"
         strokeWidth="5"
         strokeLinecap="round"
       />
-      <circle cx="28" cy="56" r="7" fill="#1e2533" stroke="#4FD1C5" strokeWidth="2" />
-      <circle cx="92" cy="56" r="7" fill="#1e2533" stroke="#4FD1C5" strokeWidth="2" />
-      <path d="M34 60 Q42 74 52 76" fill="none" stroke="#1e2533" strokeWidth="3" />
-      <circle cx="53" cy="76" r="3.5" fill="#4FD1C5" />
+      <circle cx="28" cy="56" r="7" fill="#232A4E" stroke="#3FD973" strokeWidth="2" />
+      <circle cx="92" cy="56" r="7" fill="#232A4E" stroke="#3FD973" strokeWidth="2" />
+      <path d="M34 60 Q42 74 52 76" fill="none" stroke="#232A4E" strokeWidth="3" />
+      <circle cx="53" cy="76" r="3.5" fill="#3FD973" />
 
       {/* eyes */}
       {mood === "sad" ? (
@@ -121,8 +121,8 @@ export default function Coach({
         <line x1="50" y1="102" x2="48" y2="112" />
         <line x1="70" y1="102" x2="72" y2="112" />
       </g>
-      <ellipse cx="46" cy="114" rx="7" ry="3.5" fill="#1e2533" />
-      <ellipse cx="74" cy="114" rx="7" ry="3.5" fill="#1e2533" />
+      <ellipse cx="46" cy="114" rx="7" ry="3.5" fill="#232A4E" />
+      <ellipse cx="74" cy="114" rx="7" ry="3.5" fill="#232A4E" />
     </svg>
   );
 }

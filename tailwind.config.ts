@@ -1,4 +1,7 @@
 /** @type {import('tailwindcss').Config} */
+// Fantasy-football palette: draft-night indigo darks, turf green primary,
+// championship gold secondary. Token names (turf/gold/night/panel/ink) are
+// used across every page — change values here, not in components.
 const config = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,31 +12,31 @@ const config = {
     extend: {
       colors: {
         night: {
-          DEFAULT: "#0B0E14",
-          50: "#1A1F2B",
-          100: "#141820",
-          200: "#10141C",
-          300: "#0B0E14",
+          DEFAULT: "#0C1022",
+          50: "#1E2542",
+          100: "#171C36",
+          200: "#121629",
+          300: "#0C1022",
         },
-        teal: {
-          DEFAULT: "#4FD1C5",
-          dim: "#3AA99F",
-          glow: "rgba(79, 209, 197, 0.15)",
+        turf: {
+          DEFAULT: "#3FD973",
+          dim: "#2FAD5C",
+          glow: "rgba(63, 217, 115, 0.15)",
         },
-        amber: {
-          DEFAULT: "#E8A33D",
-          dim: "#C4862E",
-          glow: "rgba(232, 163, 61, 0.15)",
+        gold: {
+          DEFAULT: "#F2C94C",
+          dim: "#C9A032",
+          glow: "rgba(242, 201, 76, 0.15)",
         },
         ink: {
-          muted: "#8B93A7",
-          soft: "#B8BFC9",
-          DEFAULT: "#E8ECF4",
+          muted: "#8D95B5",
+          soft: "#BEC5DE",
+          DEFAULT: "#ECEFFA",
         },
         panel: {
-          DEFAULT: "#12161F",
-          border: "#1E2533",
-          hover: "#252D3D",
+          DEFAULT: "#141936",
+          border: "#262E55",
+          hover: "#2E3866",
         },
       },
       fontFamily: {
@@ -42,9 +45,9 @@ const config = {
         mono: ["var(--font-ibm-plex-mono)", "monospace"],
       },
       boxShadow: {
-        scoreboard: "0 0 0 1px #1E2533",
-        "scoreboard-teal": "0 0 0 1px #4FD1C5",
-        "scoreboard-amber": "0 0 0 1px #E8A33D",
+        scoreboard: "0 0 0 1px #262E55",
+        "scoreboard-turf": "0 0 0 1px #3FD973",
+        "scoreboard-gold": "0 0 0 1px #F2C94C",
       },
       animation: {
         "fade-up": "fadeUp 0.5s ease-out forwards",

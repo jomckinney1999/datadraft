@@ -2,6 +2,10 @@
 
 Education platform teaching SQL and data analytics through fantasy football. Next.js 14 (App Router), TypeScript, Tailwind — a marketing/landing site (`app/page.tsx`) plus a gamified learning MVP (`app/learn/`), deployed to Vercel at https://sql-sports.vercel.app.
 
+## Design system
+
+Fantasy-football palette, defined once in `tailwind.config.ts` + `app/globals.css` CSS vars: `night` (draft-night indigo #0C1022 family), `turf` (green #3FD973, primary accent), `gold` (championship gold #F2C94C, secondary), plus `ink`/`panel` neutrals. These replaced an older teal/amber scheme in Aug 2026 — never reintroduce `teal`/`amber` token names, and change colors by editing token values, not component classes. A few SVGs (Coach's headset, heart/flame icons) hard-code the accent hexes; grep for `#3FD973`/`#F2C94C` when changing them.
+
 ## Gamified learning MVP (`/learn`)
 
 Duolingo-style lesson player + DataCamp-style course roadmap, fully client-side (no accounts, no backend):
@@ -10,6 +14,7 @@ Duolingo-style lesson player + DataCamp-style course roadmap, fully client-side 
 - **Grading:** query exercises run learner SQL and the `expected` answer key against the same in-browser sql.js database (seeded from `lib/fantasy-data.ts`) and compare result values; `orderMatters: false` sorts rows first. **When adding exercises, verify answer keys against the seeded data** — especially ORDER BY + LIMIT exercises where a points tie at the LIMIT boundary makes correct learner queries grade wrong (this happened; tie-breaks in the prompt are the fix).
 - **Progress:** localStorage only (`lib/progress.ts`, key `sqlsports.progress.v1`) — XP, daily streak, completed lessons. Swaps for the Supabase `progress` table when accounts land (LAUNCH-PLAN Phase 1).
 - **Mascot:** Coach Blitz, `components/coach.tsx` — inline SVG with a `mood` prop; no image assets.
+- **Draft Day:** `app/learn/draft/` is the course-selection ceremony — username ("name on the jersey"), a draft board of tracks from `lib/draft.ts` (one live, three "declaring next season"), and the commissioner announcement ("With the first pick of the SQLSports Draft, {username} selects …"). Stored as `username`/`draftedTrack` in progress. Onboarding gate order in the lesson player: draft → playbook quiz → lessons.
 - **Playbook styles:** `lib/playbook.ts` defines three learning modes (Film Room General / Gunslinger / Dual-Threat) + the onboarding quiz at `app/learn/playbook/`. The lesson player redirects to the quiz until a style is stored in progress. Tailoring hooks in `lib/curriculum.ts`: `film` cards on a lesson = bonus theory shown only to Film Room; `drillSkip: true` on an mc exercise = removed for Gunslingers (only tag pure-recall checks, never gotcha questions). Gunslingers also get hints behind a toggle and a collapsible chalkboard instead of the intro.
 - **Practice Field (`/field`):** ungraded free-play sandbox over real NFL data. `scripts/build-field-dataset.mjs` downloads nflverse `stats_player` weekly CSVs (note: the *new* release tag — the older `player_stats` tag used by `lib/data/nflverse.ts` stops at 2024) and bakes `public/field-data.json` (~300 KB: latest-season weekly + 3-season summaries + 32 teams). Re-run it each season with `WEEKLY_SEASON` bumped. `lib/field-data.ts` holds the schema/seed builder and the drill-book prompts; UI in `components/field-sandbox.tsx`.
 - `middleware.ts` deliberately no-ops when `NEXT_PUBLIC_SUPABASE_URL` isn't a real http(s) URL (placeholder env values) — same lazy-init contract as `lib/stripe.ts`. Don't revert; with placeholder keys the Supabase client throws in middleware and takes down every route locally.

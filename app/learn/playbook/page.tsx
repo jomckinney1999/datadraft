@@ -55,7 +55,7 @@ function PlaybookQuiz() {
           href="/learn"
           className="font-display text-lg font-bold tracking-tight text-ink"
         >
-          SQL<span className="text-teal">Sports</span>
+          SQL<span className="text-turf">Sports</span>
           <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-muted">
             playbook style
           </span>
@@ -67,9 +67,9 @@ function PlaybookQuiz() {
                 key={i}
                 className={`h-2 w-2 rounded-full ${
                   i < answers.length
-                    ? "bg-teal"
+                    ? "bg-turf"
                     : i === answers.length
-                      ? "bg-amber"
+                      ? "bg-gold"
                       : "bg-panel-hover"
                 }`}
               />
@@ -82,7 +82,7 @@ function PlaybookQuiz() {
         <div className="flex flex-1 flex-col items-center gap-6 pt-6">
           <Coach mood="think" size={120} />
           <div className="w-full border border-panel-border bg-panel/80 p-6 shadow-scoreboard">
-            <p className="label-broadcast text-amber">
+            <p className="label-broadcast text-gold">
               coach blitz · question {step + 1} of {QUIZ.length}
             </p>
             <h1 className="mt-2 font-display text-xl font-bold text-ink sm:text-2xl">
@@ -94,7 +94,7 @@ function PlaybookQuiz() {
                   key={opt.style}
                   type="button"
                   onClick={() => answer(opt.style)}
-                  className="border border-panel-border bg-night/60 px-4 py-3.5 text-left text-[14px] leading-relaxed text-ink-soft transition-colors hover:border-teal/50 hover:bg-teal/5 hover:text-ink"
+                  className="border border-panel-border bg-night/60 px-4 py-3.5 text-left text-[14px] leading-relaxed text-ink-soft transition-colors hover:border-turf/50 hover:bg-turf/5 hover:text-ink"
                 >
                   {opt.label}
                 </button>
@@ -112,7 +112,7 @@ function PlaybookQuiz() {
         <div className="flex flex-1 flex-col items-center gap-6 pt-2">
           <Coach mood="cheer" size={120} />
           <div className="text-center">
-            <p className="label-broadcast text-teal">scouting report is in</p>
+            <p className="label-broadcast text-turf">scouting report is in</p>
             <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
               You play like a {getStyle(recommended).name}.
             </h1>
@@ -133,20 +133,20 @@ function PlaybookQuiz() {
                   onClick={() => setPicked(style.id)}
                   className={`border p-5 text-left transition-colors ${
                     isSelected
-                      ? "border-teal bg-teal/10"
-                      : "border-panel-border bg-panel/70 hover:border-teal/40"
+                      ? "border-turf bg-turf/10"
+                      : "border-panel-border bg-panel/70 hover:border-turf/40"
                   }`}
                 >
                   <div className="flex items-baseline justify-between gap-3">
                     <h2
                       className={`font-display text-lg font-bold ${
-                        isSelected ? "text-teal" : "text-ink"
+                        isSelected ? "text-turf" : "text-ink"
                       }`}
                     >
                       {style.name}
                     </h2>
                     {isRecommended && (
-                      <span className="shrink-0 border border-amber/50 bg-amber/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-amber">
+                      <span className="shrink-0 border border-gold/50 bg-gold/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-gold">
                         Coach&apos;s pick
                       </span>
                     )}
@@ -160,7 +160,7 @@ function PlaybookQuiz() {
                         key={c}
                         className="text-[13px] leading-relaxed text-ink-soft"
                       >
-                        <span className="mr-2 text-teal">▸</span>
+                        <span className="mr-2 text-turf">▸</span>
                         {c}
                       </li>
                     ))}
@@ -185,7 +185,7 @@ function PlaybookQuiz() {
             type="button"
             onClick={lockIn}
             disabled={!selection}
-            className="w-full max-w-sm border border-teal bg-teal/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-teal transition-colors hover:bg-teal/25 disabled:opacity-40"
+            className="w-full max-w-sm border border-turf bg-turf/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25 disabled:opacity-40"
           >
             Lock in {selection ? getStyle(selection).name : "a style"}
           </button>

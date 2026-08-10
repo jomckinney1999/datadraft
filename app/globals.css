@@ -3,11 +3,11 @@
 @tailwind utilities;
 
 :root {
-  --night: #0b0e14;
-  --teal: #4fd1c5;
-  --amber: #e8a33d;
-  --panel: #12161f;
-  --panel-border: #1e2533;
+  --night: #0c1022;
+  --turf: #3fd973;
+  --gold: #f2c94c;
+  --panel: #141936;
+  --panel-border: #262e55;
 }
 
 html {
@@ -16,21 +16,21 @@ html {
 
 body {
   background-color: var(--night);
-  color: #e8ecf4;
+  color: #eceffa;
   min-height: 100vh;
 }
 
-/* Stadium-night atmosphere — not flat black */
+/* Draft-night atmosphere: turf glow under the lights, gold from the stage */
 .bg-stadium {
-  background-color: #0b0e14;
+  background-color: #0c1022;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(79, 209, 197, 0.07), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(232, 163, 61, 0.04), transparent 45%),
-    linear-gradient(180deg, #0b0e14 0%, #0d1118 50%, #0b0e14 100%);
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(63, 217, 115, 0.08), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(242, 201, 76, 0.05), transparent 45%),
+    linear-gradient(180deg, #0c1022 0%, #10142b 50%, #0c1022 100%);
 }
 
 .border-scoreboard {
-  border: 1px solid #1e2533;
+  border: 1px solid #262e55;
 }
 
 .label-broadcast {
@@ -38,24 +38,24 @@ body {
 }
 
 .stat-number {
-  @apply font-mono font-semibold tabular-nums tracking-tight text-amber;
-  text-shadow: 0 0 24px rgba(232, 163, 61, 0.35);
+  @apply font-mono font-semibold tabular-nums tracking-tight text-gold;
+  text-shadow: 0 0 24px rgba(242, 201, 76, 0.35);
 }
 
-.stat-number-teal {
-  @apply font-mono font-semibold tabular-nums tracking-tight text-teal;
-  text-shadow: 0 0 24px rgba(79, 209, 197, 0.3);
+.stat-number-turf {
+  @apply font-mono font-semibold tabular-nums tracking-tight text-turf;
+  text-shadow: 0 0 24px rgba(63, 217, 115, 0.3);
 }
 
 .text-pop {
-  color: #f4f7fc;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55), 0 0 40px rgba(11, 14, 20, 0.8);
+  color: #f5f7ff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55), 0 0 40px rgba(12, 16, 34, 0.8);
 }
 
 .hero-media-scrim {
   background:
-    linear-gradient(90deg, rgba(11, 14, 20, 0.92) 0%, rgba(11, 14, 20, 0.72) 42%, rgba(11, 14, 20, 0.55) 70%, rgba(11, 14, 20, 0.78) 100%),
-    linear-gradient(180deg, rgba(11, 14, 20, 0.55) 0%, rgba(11, 14, 20, 0.35) 45%, rgba(11, 14, 20, 0.95) 100%);
+    linear-gradient(90deg, rgba(12, 16, 34, 0.92) 0%, rgba(12, 16, 34, 0.72) 42%, rgba(12, 16, 34, 0.55) 70%, rgba(12, 16, 34, 0.78) 100%),
+    linear-gradient(180deg, rgba(12, 16, 34, 0.55) 0%, rgba(12, 16, 34, 0.35) 45%, rgba(12, 16, 34, 0.95) 100%);
 }
 
 @layer utilities {

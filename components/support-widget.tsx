@@ -20,7 +20,7 @@ export default function SupportWidget() {
         <div className="flex w-[320px] max-w-[calc(100vw-2.5rem)] flex-col border border-panel-border bg-panel shadow-[0_24px_60px_rgba(0,0,0,0.55)] sm:w-[360px]">
           <div className="flex items-center justify-between border-b border-panel-border px-4 py-3">
             <span className="font-display text-sm font-bold text-pop">
-              SQL<span className="text-teal">Sports</span>
+              SQL<span className="text-turf">Sports</span>
               <span className="ml-2 label-broadcast align-middle text-[10px] text-ink-muted">
                 support
               </span>
@@ -51,11 +51,11 @@ export default function SupportWidget() {
                 }}
                 placeholder="Send us a message"
                 rows={3}
-                className="w-full resize-none border border-panel-border bg-night/60 px-3 py-2.5 font-sans text-sm text-ink outline-none placeholder:text-ink-muted focus:border-teal/50"
+                className="w-full resize-none border border-panel-border bg-night/60 px-3 py-2.5 font-sans text-sm text-ink outline-none placeholder:text-ink-muted focus:border-turf/50"
               />
               <button
                 type="submit"
-                className="mt-2 flex w-full items-center justify-center gap-2 border border-teal/50 bg-teal/10 px-3 py-2 font-mono text-[11px] uppercase tracking-wider text-teal transition-colors duration-150 hover:border-teal hover:bg-teal/20"
+                className="mt-2 flex w-full items-center justify-center gap-2 border border-turf/50 bg-turf/10 px-3 py-2 font-mono text-[11px] uppercase tracking-wider text-turf transition-colors duration-150 hover:border-turf hover:bg-turf/20"
               >
                 Send
               </button>
@@ -74,7 +74,7 @@ export default function SupportWidget() {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Close support chat" : "Open support chat"}
-        className="flex h-12 w-12 items-center justify-center rounded-full border border-teal/50 bg-teal text-night shadow-[0_8px_24px_rgba(79,209,197,0.35)] transition-transform duration-150 hover:scale-105"
+        className="flex h-12 w-12 items-center justify-center rounded-full border border-turf/50 bg-turf text-night shadow-[0_8px_24px_rgba(79,209,197,0.35)] transition-transform duration-150 hover:scale-105"
       >
         {open ? (
           <span className="text-xl leading-none">✕</span>

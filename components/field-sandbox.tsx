@@ -132,11 +132,11 @@ export default function FieldSandbox() {
         </div>
 
         <div className="border border-panel-border bg-panel/70 p-4">
-          <p className="label-broadcast text-amber">the stat sheets</p>
+          <p className="label-broadcast text-gold">the stat sheets</p>
           <div className="mt-3 space-y-4">
             {FIELD_SCHEMA.map((t) => (
               <div key={t.table}>
-                <p className="font-mono text-[12px] font-semibold text-teal">
+                <p className="font-mono text-[12px] font-semibold text-turf">
                   {t.table}
                 </p>
                 <p className="mt-0.5 font-mono text-[10px] text-ink-muted">
@@ -159,7 +159,7 @@ export default function FieldSandbox() {
         </div>
 
         <div className="border border-panel-border bg-panel/70 p-4">
-          <p className="label-broadcast text-amber">drill book</p>
+          <p className="label-broadcast text-gold">drill book</p>
           {TIERS.map((tier) => (
             <div key={tier} className="mt-3">
               <p className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
@@ -173,8 +173,8 @@ export default function FieldSandbox() {
                     onClick={() => pickDrill(drill)}
                     className={`block w-full border px-2.5 py-1.5 text-left font-mono text-[11px] transition-colors ${
                       activeDrill?.id === drill.id
-                        ? "border-teal/50 bg-teal/10 text-teal"
-                        : "border-panel-border text-ink-soft hover:border-teal/40 hover:text-ink"
+                        ? "border-turf/50 bg-turf/10 text-turf"
+                        : "border-panel-border text-ink-soft hover:border-turf/40 hover:text-ink"
                     }`}
                   >
                     {drill.title}
@@ -189,7 +189,7 @@ export default function FieldSandbox() {
       {/* main: editor + results */}
       <div className="flex min-h-[540px] flex-col border border-panel-border bg-night/95 shadow-scoreboard">
         <div className="flex items-center justify-between border-b border-panel-border px-3 py-2">
-          <span className="label-broadcast text-teal">
+          <span className="label-broadcast text-turf">
             practice field · live sql
           </span>
           <div className="flex items-center gap-3">
@@ -201,8 +201,8 @@ export default function FieldSandbox() {
                 status === "loading"
                   ? "text-ink-muted"
                   : status === "error"
-                    ? "text-amber"
-                    : "text-teal"
+                    ? "text-gold"
+                    : "text-turf"
               }`}
             >
               {status === "loading"
@@ -217,7 +217,7 @@ export default function FieldSandbox() {
         {activeDrill && (
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-panel-border bg-panel/40 px-3 py-2">
             <p className="text-[12px] text-ink-soft">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-amber">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-gold">
                 {activeDrill.tier} ·{" "}
               </span>
               {activeDrill.prompt}
@@ -226,7 +226,7 @@ export default function FieldSandbox() {
               <button
                 type="button"
                 onClick={revealSolution}
-                className="shrink-0 border border-panel-border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-muted transition-colors hover:border-amber/50 hover:text-amber"
+                className="shrink-0 border border-panel-border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-muted transition-colors hover:border-gold/50 hover:text-gold"
               >
                 Show a solution
               </button>
@@ -238,7 +238,7 @@ export default function FieldSandbox() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           spellCheck={false}
-          className="min-h-[180px] w-full flex-none resize-y bg-transparent px-4 py-3 font-mono text-[13px] leading-relaxed text-ink outline-none caret-teal"
+          className="min-h-[180px] w-full flex-none resize-y bg-transparent px-4 py-3 font-mono text-[13px] leading-relaxed text-ink outline-none caret-turf"
           aria-label="SQL editor"
         />
 
@@ -246,7 +246,7 @@ export default function FieldSandbox() {
           <span className="label-broadcast">
             result set
             {result && (
-              <span className="ml-2 text-amber">
+              <span className="ml-2 text-gold">
                 {result.values.length} rows
               </span>
             )}
@@ -268,9 +268,9 @@ export default function FieldSandbox() {
               type="button"
               onClick={() => runQuery(query)}
               disabled={status !== "ready"}
-              className="inline-flex items-center gap-2 border border-teal/40 bg-teal/10 px-4 py-1.5 font-mono text-[11px] uppercase tracking-wider text-teal transition-colors hover:border-teal hover:bg-teal/20 disabled:opacity-50"
+              className="inline-flex items-center gap-2 border border-turf/40 bg-turf/10 px-4 py-1.5 font-mono text-[11px] uppercase tracking-wider text-turf transition-colors hover:border-turf hover:bg-turf/20 disabled:opacity-50"
             >
-              <span className="inline-block h-0 w-0 border-y-[4px] border-l-[6px] border-y-transparent border-l-teal" />
+              <span className="inline-block h-0 w-0 border-y-[4px] border-l-[6px] border-y-transparent border-l-turf" />
               Run
             </button>
           </div>
@@ -278,13 +278,13 @@ export default function FieldSandbox() {
 
         <div className="flex-1 overflow-auto">
           {status === "error" && (
-            <p className="px-3 py-6 font-mono text-xs text-amber">
+            <p className="px-3 py-6 font-mono text-xs text-gold">
               Couldn&apos;t load the field
               {statusError ? `: ${statusError}` : ""}.
             </p>
           )}
           {error && (
-            <p className="m-3 border border-amber/40 bg-amber/5 px-3 py-2 font-mono text-[12px] text-amber">
+            <p className="m-3 border border-gold/40 bg-gold/5 px-3 py-2 font-mono text-[12px] text-gold">
               ⚠ {error}
             </p>
           )}
@@ -306,7 +306,7 @@ export default function FieldSandbox() {
                 {result.values.slice(0, 100).map((row, ri) => (
                   <tr
                     key={ri}
-                    className="border-b border-panel-border/40 transition-colors hover:bg-teal/5"
+                    className="border-b border-panel-border/40 transition-colors hover:bg-turf/5"
                   >
                     {row.map((cell, ci) => (
                       <td

@@ -75,8 +75,8 @@ function HeartIcon({ filled }: { filled: boolean }) {
     <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
       <path
         d="M12 21c-5.5-4.1-9-7.3-9-11a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 3.7-3.5 6.9-9 11z"
-        fill={filled ? "#E8A33D" : "none"}
-        stroke={filled ? "#E8A33D" : "#3a4356"}
+        fill={filled ? "#F2C94C" : "none"}
+        stroke={filled ? "#F2C94C" : "#3B4470"}
         strokeWidth="1.6"
       />
     </svg>
@@ -86,13 +86,13 @@ function HeartIcon({ filled }: { filled: boolean }) {
 function TheoryCardView({ card }: { card: TheoryCard }) {
   return (
     <div className="w-full border border-panel-border bg-panel/80 p-6 text-left shadow-scoreboard">
-      <p className="label-broadcast text-teal">coach blitz&apos;s chalkboard</p>
+      <p className="label-broadcast text-turf">coach blitz&apos;s chalkboard</p>
       <h1 className="mt-2 font-display text-2xl font-bold text-ink">
         {card.title}
       </h1>
       <p className="mt-3 text-sm leading-relaxed text-ink-soft">{card.text}</p>
       {card.code && (
-        <pre className="mt-4 overflow-x-auto border border-panel-border bg-night px-4 py-3 font-mono text-[13px] leading-relaxed text-teal">
+        <pre className="mt-4 overflow-x-auto border border-panel-border bg-night px-4 py-3 font-mono text-[13px] leading-relaxed text-turf">
           {card.code}
         </pre>
       )}
@@ -147,14 +147,18 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       ? entry.lesson.exercises[currentIdx]
       : undefined;
 
-  // The playbook-style gate: no style chosen → quiz first.
+  // Onboarding gates, in ceremony order: get drafted, then pick a playbook.
   useEffect(() => {
-    const chosen = loadProgress().playbookStyle;
-    if (!chosen) {
+    const p = loadProgress();
+    if (!p.username || !p.draftedTrack) {
+      router.replace(`/learn/draft?from=${lessonId}`);
+      return;
+    }
+    if (!p.playbookStyle) {
       router.replace(`/learn/playbook?from=${lessonId}`);
       return;
     }
-    setStyle(chosen);
+    setStyle(p.playbookStyle);
   }, [router, lessonId]);
 
   // Once the style is known, deal the queue and pick the opening screen.
@@ -386,7 +390,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
         </Link>
         <div className="h-3 flex-1 overflow-hidden rounded-full bg-panel">
           <div
-            className="h-full rounded-full bg-teal transition-all duration-500"
+            className="h-full rounded-full bg-turf transition-all duration-500"
             style={{ width: `${total > 0 ? (done / total) * 100 : 0}%` }}
           />
         </div>
@@ -417,7 +421,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 <span
                   key={i}
                   className={`h-1.5 w-6 ${
-                    i === introStep ? "bg-teal" : "bg-panel-hover"
+                    i === introStep ? "bg-turf" : "bg-panel-hover"
                   }`}
                 />
               ))}
@@ -427,7 +431,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             <button
               type="button"
               onClick={() => setIntroStep((s) => s + 1)}
-              className="w-full max-w-xs border border-panel-border bg-panel/70 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-ink transition-colors hover:border-teal/50 hover:text-teal"
+              className="w-full max-w-xs border border-panel-border bg-panel/70 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-ink transition-colors hover:border-turf/50 hover:text-turf"
             >
               Next film card
             </button>
@@ -435,7 +439,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             <button
               type="button"
               onClick={() => setPhase("exercise")}
-              className="w-full max-w-xs border border-teal bg-teal/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-teal transition-colors hover:bg-teal/25"
+              className="w-full max-w-xs border border-turf bg-turf/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25"
             >
               Take the field
             </button>
@@ -451,20 +455,20 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
               <button
                 type="button"
                 onClick={() => setChalkboardOpen((v) => !v)}
-                className="font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors hover:text-teal"
+                className="font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors hover:text-turf"
               >
                 {chalkboardOpen ? "▾ hide chalkboard" : "▸ peek at the chalkboard"}
               </button>
               {chalkboardOpen && (
                 <div className="mt-2 border border-panel-border bg-panel/60 p-4">
-                  <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-teal">
+                  <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-turf">
                     {lesson.intro.title}
                   </p>
                   <p className="mt-1.5 text-[13px] leading-relaxed text-ink-soft">
                     {lesson.intro.text}
                   </p>
                   {lesson.intro.code && (
-                    <pre className="mt-2 overflow-x-auto border border-panel-border bg-night px-3 py-2 font-mono text-[12px] leading-relaxed text-teal">
+                    <pre className="mt-2 overflow-x-auto border border-panel-border bg-night px-3 py-2 font-mono text-[12px] leading-relaxed text-turf">
                       {lesson.intro.code}
                     </pre>
                   )}
@@ -484,7 +488,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 {exercise.prompt}
               </p>
               {exercise.type === "mc" && exercise.code && (
-                <pre className="mt-3 overflow-x-auto border border-panel-border bg-night px-3 py-2 font-mono text-[13px] leading-relaxed text-amber">
+                <pre className="mt-3 overflow-x-auto border border-panel-border bg-night px-3 py-2 font-mono text-[13px] leading-relaxed text-gold">
                   {exercise.code}
                 </pre>
               )}
@@ -503,8 +507,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                     onClick={() => setMcChoice(i)}
                     className={`border px-4 py-3 text-left font-mono text-[13px] transition-colors ${
                       mcChoice === i
-                        ? "border-teal bg-teal/10 text-teal"
-                        : "border-panel-border bg-panel/60 text-ink-soft hover:border-teal/40 hover:text-ink"
+                        ? "border-turf bg-turf/10 text-turf"
+                        : "border-panel-border bg-panel/60 text-ink-soft hover:border-turf/40 hover:text-ink"
                     } disabled:cursor-default`}
                   >
                     <span className="mr-3 text-ink-muted">{i + 1}</span>
@@ -538,7 +542,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                           }
                           className={`mx-0.5 inline-block min-w-[72px] border-b-2 px-2 py-0.5 text-center align-baseline transition-colors ${
                             value
-                              ? "border-teal bg-teal/10 text-teal"
+                              ? "border-turf bg-turf/10 text-turf"
                               : "border-ink-muted/50 text-ink-muted"
                           }`}
                         >
@@ -568,7 +572,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                         className={`border px-3 py-2 font-mono text-[13px] transition-colors ${
                           used
                             ? "border-panel-border bg-panel text-panel-hover"
-                            : "border-panel-border bg-panel/80 text-ink hover:border-teal/50 hover:text-teal"
+                            : "border-panel-border bg-panel/80 text-ink hover:border-turf/50 hover:text-turf"
                         }`}
                       >
                         {chip}
@@ -582,7 +586,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             {exercise.type === "query" && (
               <div className="border border-panel-border bg-night/95 shadow-scoreboard">
                 <div className="flex items-center justify-between border-b border-panel-border px-3 py-2">
-                  <span className="label-broadcast text-teal">
+                  <span className="label-broadcast text-turf">
                     your sql · 3 tables loaded
                   </span>
                   <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
@@ -595,7 +599,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                   spellCheck={false}
                   rows={5}
                   disabled={!!feedback}
-                  className="w-full resize-none bg-transparent px-4 py-3 font-mono text-[13px] leading-relaxed text-ink outline-none caret-teal"
+                  className="w-full resize-none bg-transparent px-4 py-3 font-mono text-[13px] leading-relaxed text-ink outline-none caret-turf"
                   aria-label="SQL answer editor"
                 />
                 <div className="flex items-center justify-between border-t border-panel-border px-3 py-2">
@@ -606,13 +610,13 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                     type="button"
                     onClick={handleRun}
                     disabled={!engineReady || !!feedback}
-                    className="border border-panel-border px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors hover:border-teal/50 hover:text-teal disabled:opacity-40"
+                    className="border border-panel-border px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors hover:border-turf/50 hover:text-turf disabled:opacity-40"
                   >
                     ▸ Run preview
                   </button>
                 </div>
                 {(runError || softError) && (
-                  <p className="border-t border-amber/40 bg-amber/5 px-3 py-2 font-mono text-[12px] text-amber">
+                  <p className="border-t border-gold/40 bg-gold/5 px-3 py-2 font-mono text-[12px] text-gold">
                     ⚠ {softError ?? runError}
                     {softError && " — no flag on the play. Fix it and check again."}
                   </p>
@@ -676,7 +680,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                     <button
                       type="button"
                       onClick={() => setHintShown(true)}
-                      className="font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors hover:text-amber"
+                      className="font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors hover:text-gold"
                     >
                       Need a hint, gunslinger?
                     </button>
@@ -693,7 +697,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                       fillSlots.some((s) => s === null)) ||
                     (exercise.type === "query" && !engineReady)
                   }
-                  className="shrink-0 border border-teal bg-teal/15 px-8 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-teal transition-colors hover:bg-teal/25 disabled:cursor-not-allowed disabled:border-panel-border disabled:bg-panel disabled:text-ink-muted"
+                  className="shrink-0 border border-turf bg-turf/15 px-8 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25 disabled:cursor-not-allowed disabled:border-panel-border disabled:bg-panel disabled:text-ink-muted"
                 >
                   Check
                 </button>
@@ -702,14 +706,14 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
               <div
                 className={`border p-4 ${
                   feedback.correct
-                    ? "border-teal/60 bg-teal/10"
-                    : "border-amber/60 bg-amber/10"
+                    ? "border-turf/60 bg-turf/10"
+                    : "border-gold/60 bg-gold/10"
                 }`}
               >
                 <div className="flex items-center justify-between gap-4">
                   <p
                     className={`font-display text-lg font-bold ${
-                      feedback.correct ? "text-teal" : "text-amber"
+                      feedback.correct ? "text-turf" : "text-gold"
                     }`}
                   >
                     {feedback.headline}
@@ -724,8 +728,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                     onClick={handleContinue}
                     className={`shrink-0 border px-6 py-2.5 font-mono text-sm font-semibold uppercase tracking-widest transition-colors ${
                       feedback.correct
-                        ? "border-teal bg-teal/15 text-teal hover:bg-teal/25"
-                        : "border-amber bg-amber/15 text-amber hover:bg-amber/25"
+                        ? "border-turf bg-turf/15 text-turf hover:bg-turf/25"
+                        : "border-gold bg-gold/15 text-gold hover:bg-gold/25"
                     }`}
                   >
                     Continue
@@ -754,25 +758,25 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
         <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
           <Coach mood="cheer" size={150} />
           <div>
-            <p className="label-broadcast text-teal">drive complete</p>
+            <p className="label-broadcast text-turf">drive complete</p>
             <h1 className="mt-2 font-display text-3xl font-bold text-ink">
               Touchdown! Lesson complete.
             </h1>
           </div>
           <div className="grid w-full max-w-sm grid-cols-2 gap-3">
-            <div className="border border-amber/40 bg-amber/5 p-4">
+            <div className="border border-gold/40 bg-gold/5 p-4">
               <p className="label-broadcast">xp earned</p>
               <p className="stat-number mt-1 text-2xl">{finalXp}</p>
             </div>
-            <div className="border border-teal/40 bg-teal/5 p-4">
+            <div className="border border-turf/40 bg-turf/5 p-4">
               <p className="label-broadcast">first-try accuracy</p>
-              <p className="stat-number-teal mt-1 text-2xl">
+              <p className="stat-number-turf mt-1 text-2xl">
                 {total > 0 ? Math.round((firstTryCorrect / total) * 100) : 0}%
               </p>
             </div>
           </div>
           {perfect && (
-            <p className="font-mono text-xs uppercase tracking-widest text-amber">
+            <p className="font-mono text-xs uppercase tracking-widest text-gold">
               Perfect drive · +{PERFECT_BONUS} XP bonus
             </p>
           )}
@@ -780,7 +784,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             {nextLessonId(lesson.id) ? (
               <Link
                 href={`/learn/${nextLessonId(lesson.id)}`}
-                className="border border-teal bg-teal/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-teal transition-colors hover:bg-teal/25"
+                className="border border-turf bg-turf/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25"
               >
                 Next lesson
               </Link>
@@ -791,7 +795,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             )}
             <Link
               href="/learn"
-              className="border border-panel-border px-6 py-3 font-mono text-sm uppercase tracking-widest text-ink-muted transition-colors hover:border-teal/40 hover:text-ink"
+              className="border border-panel-border px-6 py-3 font-mono text-sm uppercase tracking-widest text-ink-muted transition-colors hover:border-turf/40 hover:text-ink"
             >
               Back to the field
             </Link>
@@ -803,7 +807,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
         <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
           <Coach mood="sad" size={140} />
           <div>
-            <p className="label-broadcast text-amber">timeout</p>
+            <p className="label-broadcast text-gold">timeout</p>
             <h1 className="mt-2 font-display text-2xl font-bold text-ink">
               Coach calls a timeout.
             </h1>
@@ -816,13 +820,13 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             <button
               type="button"
               onClick={restart}
-              className="border border-teal bg-teal/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-teal transition-colors hover:bg-teal/25"
+              className="border border-turf bg-turf/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25"
             >
               Rerun the drive
             </button>
             <Link
               href="/learn"
-              className="border border-panel-border px-6 py-3 font-mono text-sm uppercase tracking-widest text-ink-muted transition-colors hover:border-teal/40 hover:text-ink"
+              className="border border-panel-border px-6 py-3 font-mono text-sm uppercase tracking-widest text-ink-muted transition-colors hover:border-turf/40 hover:text-ink"
             >
               Back to the field
             </Link>

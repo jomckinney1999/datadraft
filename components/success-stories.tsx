@@ -2,7 +2,7 @@ const STORIES = [
   {
     initials: "FH",
     title: "Fantasy hobbyist → data analyst",
-    accent: "teal" as const,
+    accent: "turf" as const,
     quote:
       "Spent every Sunday arguing about who should've started. Ran those same arguments as SQL queries instead — and the capstone project turned into the portfolio piece that got me interviews.",
     stat: "6 mo",
@@ -11,7 +11,7 @@ const STORIES = [
   {
     initials: "SR",
     title: "Spreadsheet user → SQL at work",
-    accent: "amber" as const,
+    accent: "gold" as const,
     quote:
       "Used to fight VLOOKUP for every roster question. Learned joins on fantasy data first, then used the exact same logic to automate reports at my actual job.",
     stat: "3 mo",
@@ -20,7 +20,7 @@ const STORIES = [
   {
     initials: "CS",
     title: "College student → data internship",
-    accent: "teal" as const,
+    accent: "turf" as const,
     quote:
       "Needed a portfolio project that wasn't another Titanic dataset. Built a fantasy analytics dashboard from the Roadmap capstone and used it to land a summer internship.",
     stat: "1",
@@ -29,7 +29,7 @@ const STORIES = [
   {
     initials: "CC",
     title: "Career switcher → junior analyst",
-    accent: "amber" as const,
+    accent: "gold" as const,
     quote:
       "Ten years in retail management, no technical background. The mock interview practice was what finally got me comfortable talking through a SQL problem out loud.",
     stat: "1 yr",
@@ -38,7 +38,7 @@ const STORIES = [
   {
     initials: "CF",
     title: "Casual fan → confident with SQL",
-    accent: "teal" as const,
+    accent: "turf" as const,
     quote:
       "Just wanted to stop losing my league on vibes. Didn't expect GROUP BY to become the most useful thing I learned all year.",
     stat: "8 wk",
@@ -54,9 +54,9 @@ function StoryCard({ story }: { story: (typeof STORIES)[number] }) {
           <div className="flex items-center gap-3">
             <span
               className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-mono text-xs font-semibold ${
-                story.accent === "teal"
-                  ? "bg-teal/15 text-teal"
-                  : "bg-amber/15 text-amber"
+                story.accent === "turf"
+                  ? "bg-turf/15 text-turf"
+                  : "bg-gold/15 text-gold"
               }`}
             >
               {story.initials}
@@ -66,7 +66,7 @@ function StoryCard({ story }: { story: (typeof STORIES)[number] }) {
             </p>
           </div>
         </div>
-        <p className="mt-4 text-sm leading-relaxed text-[#C5CCD9]">
+        <p className="mt-4 text-sm leading-relaxed text-[#BEC5DE]">
           &ldquo;{story.quote}&rdquo;
         </p>
       </div>
@@ -78,7 +78,7 @@ function StoryCard({ story }: { story: (typeof STORIES)[number] }) {
         <div className="text-right">
           <p
             className={`stat-number text-lg leading-none ${
-              story.accent === "teal" ? "stat-number-teal" : ""
+              story.accent === "turf" ? "stat-number-turf" : ""
             }`}
           >
             {story.stat}
@@ -102,13 +102,13 @@ export default function SuccessStories() {
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <p className="label-broadcast mb-3">
-          <span className="mr-2 inline-block h-1.5 w-1.5 bg-teal align-middle" />
+          <span className="mr-2 inline-block h-1.5 w-1.5 bg-turf align-middle" />
           What the path can look like
         </p>
         <h2 className="max-w-2xl font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
           Fantasy football in, SQL skills out.
         </h2>
-        <p className="mt-3 max-w-xl text-base leading-relaxed text-[#C5CCD9]">
+        <p className="mt-3 max-w-xl text-base leading-relaxed text-[#BEC5DE]">
           SQL Sports is brand new — these are illustrative example paths
           showing what the curriculum is designed to do, not verified
           testimonials from real members.

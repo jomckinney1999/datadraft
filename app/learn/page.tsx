@@ -8,6 +8,7 @@ import Link from "next/link";
 import { COURSE, liveLessons, type Lesson, type Unit } from "@/lib/curriculum";
 import { loadProgress, displayStreak, type Progress } from "@/lib/progress";
 import { getStyle } from "@/lib/playbook";
+import { getTrack } from "@/lib/draft";
 import Coach from "@/components/coach";
 
 const NODE_OFFSETS = [0, 48, 0, -48];
@@ -17,7 +18,7 @@ function FlameIcon() {
     <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
       <path
         d="M12 2c1 4-3 5.5-3 9a3 3 0 0 0 6 0c0-1.5-.8-2.6-.8-2.6S17 10 17 13a5 5 0 0 1-10 0c0-4.5 4-6.5 5-11z"
-        fill="#E8A33D"
+        fill="#F2C94C"
       />
     </svg>
   );
@@ -61,6 +62,8 @@ export default function LearnPage() {
     streak: 0,
     lastActiveDay: "",
     playbookStyle: null,
+    username: null,
+    draftedTrack: null,
   });
 
   useEffect(() => {
@@ -87,23 +90,28 @@ export default function LearnPage() {
       {/* header */}
       <header className="flex items-center justify-between py-5">
         <Link href="/" className="font-display text-lg font-bold tracking-tight text-ink">
-          SQL<span className="text-teal">Sports</span>
+          SQL<span className="text-turf">Sports</span>
           <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-muted">
             learn
           </span>
         </Link>
         <div className="flex items-center gap-3">
+          {progress.username && (
+            <span className="hidden border border-gold/40 bg-gold/5 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-gold md:inline">
+              GM · {progress.username}
+            </span>
+          )}
           <Link
             href="/field"
-            className="hidden border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-teal/40 hover:text-teal sm:inline"
+            className="hidden border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-turf/40 hover:text-turf sm:inline"
           >
             Practice Field
           </Link>
-          <span className="flex items-center gap-1.5 border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs text-amber">
+          <span className="flex items-center gap-1.5 border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs text-gold">
             <FlameIcon />
             {streak} day{streak === 1 ? "" : "s"}
           </span>
-          <span className="border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs text-teal">
+          <span className="border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs text-turf">
             {progress.xp} XP
           </span>
         </div>
@@ -113,12 +121,16 @@ export default function LearnPage() {
       <section className="border border-panel-border bg-panel/80 p-6 shadow-scoreboard">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="label-broadcast text-teal">course 1 · sql roadmap</p>
+            <p className="label-broadcast text-turf">course 1 · sql roadmap</p>
             <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
               {COURSE.title}
             </h1>
             <p className="mt-3 max-w-lg text-sm leading-relaxed text-ink-soft">
               {COURSE.tagline}
+            </p>
+            <p className="mt-2 max-w-lg font-mono text-[11px] leading-relaxed text-ink-muted">
+              No football knowledge required — the game is just the dataset,
+              and Coach explains any context as you go.
             </p>
           </div>
           <div className="hidden shrink-0 sm:block">
@@ -136,7 +148,7 @@ export default function LearnPage() {
           </div>
           <div className="mt-2 h-3 overflow-hidden rounded-full bg-night">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-teal to-amber transition-all duration-700"
+              className="h-full rounded-full bg-gradient-to-r from-turf to-gold transition-all duration-700"
               style={{ width: `${Math.max(pct, 2)}%` }}
             />
           </div>
@@ -156,10 +168,17 @@ export default function LearnPage() {
             ))}
         </div>
 
-        {!progress.playbookStyle ? (
+        {!progress.username || !progress.draftedTrack ? (
+          <Link
+            href="/learn/draft"
+            className="mt-6 block w-full border border-gold bg-gold/15 px-6 py-3 text-center font-mono text-sm font-semibold uppercase tracking-widest text-gold transition-colors hover:bg-gold/25"
+          >
+            🏈 Enter the SQLSports Draft · claim pick 1.01
+          </Link>
+        ) : !progress.playbookStyle ? (
           <Link
             href="/learn/playbook"
-            className="mt-6 block w-full border border-amber bg-amber/15 px-6 py-3 text-center font-mono text-sm font-semibold uppercase tracking-widest text-amber transition-colors hover:bg-amber/25"
+            className="mt-6 block w-full border border-gold bg-gold/15 px-6 py-3 text-center font-mono text-sm font-semibold uppercase tracking-widest text-gold transition-colors hover:bg-gold/25"
           >
             Take the quiz · Choose your playbook style
           </Link>
@@ -167,7 +186,7 @@ export default function LearnPage() {
           current && (
             <Link
               href={`/learn/${current.lesson.id}`}
-              className="mt-6 block w-full border border-teal bg-teal/15 px-6 py-3 text-center font-mono text-sm font-semibold uppercase tracking-widest text-teal transition-colors hover:bg-teal/25"
+              className="mt-6 block w-full border border-turf bg-turf/15 px-6 py-3 text-center font-mono text-sm font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25"
             >
               {completedCount === 0
                 ? "Start the season"
@@ -178,19 +197,29 @@ export default function LearnPage() {
           )
         )}
 
-        {progress.playbookStyle && (
-          <p className="mt-3 text-center font-mono text-[11px] text-ink-muted">
-            Playbook style:{" "}
-            <span className="text-teal">
-              {getStyle(progress.playbookStyle).name}
-            </span>{" "}
-            ·{" "}
-            <Link
-              href="/learn/playbook"
-              className="underline decoration-panel-border underline-offset-4 transition-colors hover:text-amber"
-            >
-              retake the quiz
-            </Link>
+        {progress.username && progress.draftedTrack && (
+          <p className="mt-3 text-center font-mono text-[11px] leading-relaxed text-ink-muted">
+            Pick 1.01: <span className="text-gold">{progress.username}</span>{" "}
+            drafted{" "}
+            <span className="text-ink-soft">
+              {getTrack(progress.draftedTrack)?.name ?? progress.draftedTrack}
+            </span>
+            {progress.playbookStyle && (
+              <>
+                {" "}
+                · running the{" "}
+                <span className="text-turf">
+                  {getStyle(progress.playbookStyle).name}
+                </span>{" "}
+                playbook ·{" "}
+                <Link
+                  href="/learn/playbook"
+                  className="underline decoration-panel-border underline-offset-4 transition-colors hover:text-gold"
+                >
+                  retake the quiz
+                </Link>
+              </>
+            )}
           </p>
         )}
       </section>
@@ -237,7 +266,7 @@ function UnitSection({
       >
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="label-broadcast text-amber">{unit.drive}</p>
+            <p className="label-broadcast text-gold">{unit.drive}</p>
             <h2 className="mt-1 font-display text-xl font-bold text-ink">
               Unit {unit.number} · {unit.title}
             </h2>
@@ -286,16 +315,16 @@ function UnitSection({
                 style={{ transform: `translateX(${offset}px)` }}
               >
                 {state === "current" && (
-                  <span className="absolute -top-9 animate-bounce border border-amber bg-night px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-amber">
+                  <span className="absolute -top-9 animate-bounce border border-gold bg-night px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-gold">
                     Start
                   </span>
                 )}
                 <span
                   className={`flex h-16 w-16 items-center justify-center rounded-full border-2 transition-transform ${
                     state === "completed"
-                      ? "border-teal bg-teal/20 text-teal"
+                      ? "border-turf bg-turf/20 text-turf"
                       : state === "current"
-                        ? "border-amber bg-amber/15 text-amber shadow-scoreboard-amber"
+                        ? "border-gold bg-gold/15 text-gold shadow-scoreboard-gold"
                         : "border-panel-border bg-panel text-ink-muted"
                   } ${state !== "locked" ? "hover:scale-105" : ""}`}
                 >

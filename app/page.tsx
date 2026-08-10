@@ -16,31 +16,31 @@ const WHY_PILLARS = [
     title: "Useful before you're “done”",
     blurb:
       "You don't need to finish the roadmap to get value. Query your own league's data to make this week's lineup call while you're still learning — the skill pays for itself before the course does.",
-    accent: "amber" as const,
+    accent: "gold" as const,
   },
   {
     title: "You already know the domain",
     blurb:
       "Nobody has to explain what a WR route tree or a waiver claim is — you've lived it every Sunday for years. That's an entire layer of learning most courses make you fight through, gone before you write a single query.",
-    accent: "teal" as const,
+    accent: "turf" as const,
   },
   {
     title: "Real data, real mess",
     blurb:
       "No Titanic.csv, no invented SaaS company. Live NFL and fantasy data — byes, injuries, trades, ties — the same kind of imperfect data you'll actually query on the job.",
-    accent: "amber" as const,
+    accent: "gold" as const,
   },
   {
     title: "Practice rides a habit you already have",
     blurb:
       "You already check the standings obsessively, on the same weekly clock the season already runs on. SQL Sports turns that exact habit into query practice, instead of asking you to build a study habit from nothing.",
-    accent: "teal" as const,
+    accent: "turf" as const,
   },
   {
     title: "A portfolio story anyone gets instantly",
     blurb:
       "“I built an analytics tool on fantasy football data” needs zero setup in an interview. It's memorable, easy to talk through, and still real analytical work.",
-    accent: "amber" as const,
+    accent: "gold" as const,
   },
 ];
 
@@ -68,25 +68,25 @@ const ROADMAP = [
     phase: "01",
     title: "Select & Filter",
     blurb: "Pull week results. Rank players. Learn WHERE before you memorize syntax.",
-    accent: "teal" as const,
+    accent: "turf" as const,
   },
   {
     phase: "02",
     title: "Joins & Matchups",
     blurb: "Connect rosters to schedules. One join at a time — defense vs. offense context.",
-    accent: "amber" as const,
+    accent: "gold" as const,
   },
   {
     phase: "03",
     title: "Aggregations",
     blurb: "Season totals, rolling averages, share of team targets. GROUP BY that earns its keep.",
-    accent: "teal" as const,
+    accent: "turf" as const,
   },
   {
     phase: "04",
     title: "Window Functions",
     blurb: "Rank within position. Compare to league median. See the play the way analysts do.",
-    accent: "amber" as const,
+    accent: "gold" as const,
   },
 ];
 
@@ -95,7 +95,7 @@ const PLANS = [
     name: "Free",
     price: "0",
     period: "forever",
-    accent: "teal" as const,
+    accent: "turf" as const,
     features: ["Limited SQL sandbox", "Free content library", "Sample season dataset"],
     cta: "Start free",
   },
@@ -103,7 +103,7 @@ const PLANS = [
     name: "Practice",
     price: "15–30",
     period: "/mo",
-    accent: "teal" as const,
+    accent: "turf" as const,
     features: [
       "Unlimited sandbox access",
       "Ongoing weekly problem sets",
@@ -115,7 +115,7 @@ const PLANS = [
     name: "Roadmap",
     price: "200–500",
     period: "one-time",
-    accent: "amber" as const,
+    accent: "gold" as const,
     features: [
       "Full Beginner → Advanced pathway",
       "Portfolio capstone project",
@@ -127,7 +127,7 @@ const PLANS = [
     name: "Career Track",
     price: "1k–5k",
     period: "/yr",
-    accent: "amber" as const,
+    accent: "gold" as const,
     badge: "premium",
     features: [
       "Everything in Roadmap",
@@ -182,8 +182,8 @@ export default function Home() {
 
           <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 sm:pb-24 sm:pt-14">
             {/* Broadcast lower-third label */}
-            <p className="label-broadcast mb-4 text-amber animate-[fadeUp_0.4s_ease-out_forwards]">
-              <span className="mr-2 inline-block h-1.5 w-1.5 bg-amber align-middle shadow-[0_0_8px_rgba(232,163,61,0.8)]" />
+            <p className="label-broadcast mb-4 text-gold animate-[fadeUp_0.4s_ease-out_forwards]">
+              <span className="mr-2 inline-block h-1.5 w-1.5 bg-gold align-middle shadow-[0_0_8px_rgba(232,163,61,0.8)]" />
               Education platform · Fantasy football as the dataset
             </p>
 
@@ -192,17 +192,17 @@ export default function Home() {
               <div className="lg:col-span-5 lg:pt-4">
                 <h1 className="font-display text-5xl font-bold leading-[0.98] tracking-tight text-pop sm:text-6xl animate-[fadeUp_0.45s_ease-out_0.05s_forwards] opacity-0">
                   SQL
-                  <span className="text-teal drop-shadow-[0_0_28px_rgba(79,209,197,0.45)]">
+                  <span className="text-turf drop-shadow-[0_0_28px_rgba(79,209,197,0.45)]">
                     Sports
                   </span>
                 </h1>
 
                 <p className="mt-6 max-w-md font-display text-2xl font-medium leading-snug text-pop sm:text-[1.75rem] animate-[fadeUp_0.45s_ease-out_0.1s_forwards] opacity-0">
                   Query the season.{" "}
-                  <span className="text-amber">Think like an analyst.</span>
+                  <span className="text-gold">Think like an analyst.</span>
                 </p>
 
-                <p className="mt-4 max-w-sm text-base leading-relaxed text-[#C5CCD9] animate-[fadeUp_0.45s_ease-out_0.15s_forwards] opacity-0">
+                <p className="mt-4 max-w-sm text-base leading-relaxed text-[#BEC5DE] animate-[fadeUp_0.45s_ease-out_0.15s_forwards] opacity-0">
                   Learn SQL and data analytics against live fantasy football
                   data — the same questions you already ask on Sundays,
                   written as queries you can use for this week&apos;s lineup,
@@ -212,20 +212,20 @@ export default function Home() {
                 <div className="mt-8 flex flex-wrap items-center gap-3 animate-[fadeUp_0.45s_ease-out_0.2s_forwards] opacity-0">
                   <a
                     href="#sandbox"
-                    className="inline-flex items-center gap-2 border border-teal bg-teal px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-teal-dim"
+                    className="inline-flex items-center gap-2 border border-turf bg-turf px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-turf-dim"
                   >
                     Try the sandbox
                   </a>
                   <a
                     href="#curriculum"
-                    className="inline-flex items-center gap-2 border border-white/20 bg-night/40 px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-ink transition-colors duration-150 hover:border-amber/70 hover:text-amber backdrop-blur-sm"
+                    className="inline-flex items-center gap-2 border border-white/20 bg-night/40 px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-ink transition-colors duration-150 hover:border-gold/70 hover:text-gold backdrop-blur-sm"
                   >
                     See curriculum
                   </a>
                 </div>
 
                 {/* Scoreboard strip */}
-                <div className="mt-10 grid grid-cols-3 gap-px border border-amber/25 bg-amber/20 animate-[fadeUp_0.45s_ease-out_0.25s_forwards] opacity-0">
+                <div className="mt-10 grid grid-cols-3 gap-px border border-gold/25 bg-gold/20 animate-[fadeUp_0.45s_ease-out_0.25s_forwards] opacity-0">
                   {STATS.map((stat) => (
                     <div
                       key={stat.label}
@@ -249,13 +249,13 @@ export default function Home() {
               >
                 <div className="relative shadow-[0_24px_80px_rgba(0,0,0,0.55)]">
                   {/* Teal frame — tech/data accent; sharp corners */}
-                  <div className="pointer-events-none absolute -inset-px border border-teal/45" />
-                  <div className="absolute -top-px left-4 h-px w-20 bg-teal shadow-[0_0_12px_rgba(79,209,197,0.8)]" />
-                  <div className="absolute -left-px top-4 h-20 w-px bg-teal shadow-[0_0_12px_rgba(79,209,197,0.8)]" />
+                  <div className="pointer-events-none absolute -inset-px border border-turf/45" />
+                  <div className="absolute -top-px left-4 h-px w-20 bg-turf shadow-[0_0_12px_rgba(79,209,197,0.8)]" />
+                  <div className="absolute -left-px top-4 h-20 w-px bg-turf shadow-[0_0_12px_rgba(79,209,197,0.8)]" />
                   <Sandbox />
                 </div>
-                <p className="mt-3 font-mono text-[12px] font-medium text-[#C5CCD9]">
-                  <span className="text-teal">→</span> Write real SQL, try a
+                <p className="mt-3 font-mono text-[12px] font-medium text-[#BEC5DE]">
+                  <span className="text-turf">→</span> Write real SQL, try a
                   preset, or check the schema. Runs against sample season
                   data, right in your browser — no account required.
                 </p>
@@ -280,17 +280,17 @@ export default function Home() {
               className="absolute inset-0 opacity-[0.05]"
               style={{
                 backgroundImage:
-                  "repeating-linear-gradient(115deg, #4FD1C5 0px, #4FD1C5 2px, transparent 2px, transparent 64px)",
+                  "repeating-linear-gradient(115deg, #3FD973 0px, #3FD973 2px, transparent 2px, transparent 64px)",
               }}
             />
             <div
               className="absolute inset-0 opacity-[0.04]"
               style={{
                 backgroundImage:
-                  "repeating-linear-gradient(115deg, #E8A33D 32px, #E8A33D 34px, transparent 34px, transparent 96px)",
+                  "repeating-linear-gradient(115deg, #F2C94C 32px, #F2C94C 34px, transparent 34px, transparent 96px)",
               }}
             />
-            <span className="stat-number-teal absolute -right-6 -top-10 select-none font-display text-[260px] font-bold leading-none opacity-[0.05] sm:text-[320px]">
+            <span className="stat-number-turf absolute -right-6 -top-10 select-none font-display text-[260px] font-bold leading-none opacity-[0.05] sm:text-[320px]">
               07
             </span>
             <span className="stat-number absolute -bottom-16 -left-8 select-none font-display text-[220px] font-bold leading-none opacity-[0.05] sm:text-[280px]">
@@ -300,13 +300,13 @@ export default function Home() {
 
           <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
             <p className="label-broadcast mb-3">
-              <span className="mr-2 inline-block h-1.5 w-1.5 bg-teal align-middle" />
+              <span className="mr-2 inline-block h-1.5 w-1.5 bg-turf align-middle" />
               Why SQL Sports
             </p>
             <h2 className="max-w-2xl font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
               The fastest way to actually learn SQL
             </h2>
-            <p className="mt-3 max-w-xl text-base leading-relaxed text-[#C5CCD9]">
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-[#BEC5DE]">
               Most people don&apos;t fail at SQL because it&apos;s hard. They
               fail because they&apos;re learning new syntax and an unfamiliar
               business scenario at the same time, on data they don&apos;t
@@ -319,20 +319,20 @@ export default function Home() {
                 <div
                   key={pillar.title}
                   className={`border border-panel-border bg-panel p-5 transition-colors duration-150 ${
-                    pillar.accent === "teal"
-                      ? "hover:border-teal/50"
-                      : "hover:border-amber/50"
+                    pillar.accent === "turf"
+                      ? "hover:border-turf/50"
+                      : "hover:border-gold/50"
                   }`}
                 >
                   <span
                     className={`mb-3 inline-block h-1.5 w-1.5 ${
-                      pillar.accent === "teal" ? "bg-teal" : "bg-amber"
+                      pillar.accent === "turf" ? "bg-turf" : "bg-gold"
                     }`}
                   />
                   <h3 className="font-display text-lg font-semibold leading-snug text-pop">
                     {pillar.title}
                   </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-[#C5CCD9]">
+                  <p className="mt-2 text-sm leading-relaxed text-[#BEC5DE]">
                     {pillar.blurb}
                   </p>
                 </div>
@@ -347,8 +347,8 @@ export default function Home() {
                     The old way
                   </span>
                 </div>
-                <div className="border-b border-panel-border bg-teal/5 px-4 py-3 sm:px-5">
-                  <span className="label-broadcast text-[10px] text-teal">
+                <div className="border-b border-panel-border bg-turf/5 px-4 py-3 sm:px-5">
+                  <span className="label-broadcast text-[10px] text-turf">
                     SQL Sports
                   </span>
                 </div>
@@ -365,7 +365,7 @@ export default function Home() {
                     {row.old}
                   </div>
                   <div
-                    className={`bg-teal/[0.03] px-4 py-4 text-sm leading-relaxed text-ink sm:px-5 ${
+                    className={`bg-turf/[0.03] px-4 py-4 text-sm leading-relaxed text-ink sm:px-5 ${
                       i !== WHY_COMPARISON.length - 1
                         ? "border-b border-panel-border/60"
                         : ""
@@ -378,7 +378,7 @@ export default function Home() {
             </div>
 
             {/* Worth-the-money close */}
-            <p className="mt-10 max-w-2xl text-base leading-relaxed text-[#C5CCD9]">
+            <p className="mt-10 max-w-2xl text-base leading-relaxed text-[#BEC5DE]">
               A data analytics bootcamp runs $10,000–20,000. A specialized
               analytics master&apos;s can run $20,000–50,000. Both are
               betting that immersion works — dropping you into a domain
@@ -388,6 +388,42 @@ export default function Home() {
               You&apos;re paying to learn one skill, faster, on a dataset
               that&apos;s been running in your head since you were a kid.
             </p>
+
+            {/* Non-fan reassurance */}
+            <div className="mt-10 border border-gold/40 bg-gold/[0.04] p-6 sm:p-8">
+              <p className="label-broadcast text-gold">
+                Don&apos;t watch football?
+              </p>
+              <h3 className="mt-2 max-w-xl font-display text-2xl font-bold tracking-tight text-pop">
+                You&apos;re still in the right place.
+              </h3>
+              <div className="mt-5 grid gap-4 sm:grid-cols-3">
+                <p className="text-sm leading-relaxed text-[#BEC5DE]">
+                  <span className="font-semibold text-ink">
+                    The football is just the dataset
+                  </span>{" "}
+                  — rows, columns, and numbers. If you can read &ldquo;this
+                  player scored 22.4 points in week 5,&rdquo; you already know
+                  all the football this course requires.
+                </p>
+                <p className="text-sm leading-relaxed text-[#BEC5DE]">
+                  <span className="font-semibold text-ink">
+                    Context arrives when it matters
+                  </span>{" "}
+                  — one plain sentence at a time, right in the lesson. What a
+                  quarterback is, what fantasy points measure. No homework, no
+                  jargon walls.
+                </p>
+                <p className="text-sm leading-relaxed text-[#BEC5DE]">
+                  <span className="font-semibold text-ink">
+                    The skill transfers one-to-one
+                  </span>{" "}
+                  — filtering, ranking, and aggregating player stats is the
+                  exact SQL you&apos;ll run on sales, product, or finance data
+                  at work. Only the column names change.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -398,13 +434,13 @@ export default function Home() {
         >
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
             <p className="label-broadcast mb-3">
-              <span className="mr-2 inline-block h-1.5 w-1.5 bg-teal align-middle" />
+              <span className="mr-2 inline-block h-1.5 w-1.5 bg-turf align-middle" />
               Curriculum roadmap
             </p>
             <h2 className="font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
               From SELECT to window functions
             </h2>
-            <p className="mt-3 max-w-xl text-base leading-relaxed text-[#C5CCD9]">
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-[#BEC5DE]">
               Four phases. Each one unlocks a real fantasy question you couldn&apos;t
               answer in a spreadsheet alone.
             </p>
@@ -414,16 +450,16 @@ export default function Home() {
                 <li
                   key={step.phase}
                   className={`group border border-panel-border bg-panel p-5 transition-colors duration-150 ${
-                    step.accent === "teal"
-                      ? "hover:border-teal/50"
-                      : "hover:border-amber/50"
+                    step.accent === "turf"
+                      ? "hover:border-turf/50"
+                      : "hover:border-gold/50"
                   }`}
                 >
                   <div className="flex items-baseline justify-between gap-3">
                     <span
                       className={`text-2xl ${
-                        step.accent === "teal"
-                          ? "stat-number-teal"
+                        step.accent === "turf"
+                          ? "stat-number-turf"
                           : "stat-number"
                       }`}
                     >
@@ -434,7 +470,7 @@ export default function Home() {
                   <h3 className="mt-3 font-display text-xl font-semibold text-pop">
                     {step.title}
                   </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-[#C5CCD9]">
+                  <p className="mt-2 text-sm leading-relaxed text-[#BEC5DE]">
                     {step.blurb}
                   </p>
                 </li>
@@ -447,21 +483,21 @@ export default function Home() {
         <section id="pricing" className="border-t border-panel-border">
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
             <p className="label-broadcast mb-3">
-              <span className="mr-2 inline-block h-1.5 w-1.5 bg-amber align-middle" />
+              <span className="mr-2 inline-block h-1.5 w-1.5 bg-gold align-middle" />
               Pricing
             </p>
             <h2 className="font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
               From first query to career change
             </h2>
-            <p className="mt-3 max-w-xl text-base leading-relaxed text-[#C5CCD9]">
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-[#BEC5DE]">
               Practice for fun, follow the roadmap to get good, or go all the
               way with hands-on support landing a data role.
             </p>
 
-            <div className="mt-6 inline-flex items-center gap-2 border border-amber/30 bg-amber/5 px-3 py-2">
-              <span className="inline-block h-1.5 w-1.5 shrink-0 bg-amber shadow-[0_0_8px_rgba(232,163,61,0.8)]" />
+            <div className="mt-6 inline-flex items-center gap-2 border border-gold/30 bg-gold/5 px-3 py-2">
+              <span className="inline-block h-1.5 w-1.5 shrink-0 bg-gold shadow-[0_0_8px_rgba(232,163,61,0.8)]" />
               <span className="font-mono text-[11px] leading-snug text-ink-soft">
-                <span className="font-semibold uppercase tracking-wider text-amber">
+                <span className="font-semibold uppercase tracking-wider text-gold">
                   Founding cohort pricing
                 </span>{" "}
                 — locked in for early members, rises once we&apos;re out of
@@ -476,14 +512,14 @@ export default function Home() {
                   id={plan.name === "Career Track" ? "career-track" : undefined}
                   className={`flex scroll-mt-20 flex-col border bg-panel p-5 transition-colors duration-150 ${
                     plan.featured
-                      ? "border-amber/40 hover:border-amber"
-                      : "border-panel-border hover:border-teal/50"
+                      ? "border-gold/40 hover:border-gold"
+                      : "border-panel-border hover:border-turf/50"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="label-broadcast text-ink">{plan.name}</span>
                     {plan.badge && (
-                      <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-amber">
+                      <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-gold">
                         {plan.badge}
                       </span>
                     )}
@@ -491,12 +527,12 @@ export default function Home() {
                   <div className="mt-4 flex items-baseline gap-1">
                     <span
                       className={`text-4xl ${
-                        plan.featured ? "stat-number" : "stat-number-teal"
+                        plan.featured ? "stat-number" : "stat-number-turf"
                       }`}
                     >
                       ${plan.price}
                     </span>
-                    <span className="font-mono text-xs font-medium text-[#C5CCD9]">
+                    <span className="font-mono text-xs font-medium text-[#BEC5DE]">
                       {plan.period}
                     </span>
                   </div>
@@ -504,11 +540,11 @@ export default function Home() {
                     {plan.features.map((f) => (
                       <li
                         key={f}
-                        className="flex gap-2 text-sm text-[#C5CCD9]"
+                        className="flex gap-2 text-sm text-[#BEC5DE]"
                       >
                         <span
                           className={
-                            plan.accent === "amber" ? "text-amber" : "text-teal"
+                            plan.accent === "gold" ? "text-gold" : "text-turf"
                           }
                         >
                           ▸
@@ -521,8 +557,8 @@ export default function Home() {
                     href="#sandbox"
                     className={`mt-6 block border px-4 py-2.5 text-center font-mono text-xs uppercase tracking-wider transition-colors duration-150 ${
                       plan.featured
-                        ? "border-amber bg-amber/10 text-amber hover:bg-amber/20"
-                        : "border-teal/40 bg-teal/5 text-teal hover:border-teal hover:bg-teal/15"
+                        ? "border-gold bg-gold/10 text-gold hover:bg-gold/20"
+                        : "border-turf/40 bg-turf/5 text-turf hover:border-turf hover:bg-turf/15"
                     }`}
                   >
                     {plan.cta}
@@ -544,13 +580,13 @@ export default function Home() {
         <section id="challenge" className="border-t border-panel-border bg-night/60">
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
             <p className="label-broadcast mb-3">
-              <span className="mr-2 inline-block h-1.5 w-1.5 animate-pulse bg-teal align-middle" />
+              <span className="mr-2 inline-block h-1.5 w-1.5 animate-pulse bg-turf align-middle" />
               Coming soon
             </p>
             <h2 className="max-w-2xl font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
               Weekly Challenge &amp; Leaderboard
             </h2>
-            <p className="mt-3 max-w-xl text-base leading-relaxed text-[#C5CCD9]">
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-[#BEC5DE]">
               Every Monday night, that week&apos;s live stats drop as a new
               SQL challenge. Answer correctly, earn points, climb the board.
               What&apos;s below is a preview of the idea — not live data yet.
@@ -561,10 +597,10 @@ export default function Home() {
               <div className="lg:col-span-7">
                 <div className="relative h-full border border-panel-border bg-panel p-5">
                   <div className="flex items-center justify-between">
-                    <span className="label-broadcast text-teal">
+                    <span className="label-broadcast text-turf">
                       this week&apos;s challenge
                     </span>
-                    <span className="border border-amber/40 bg-amber/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-amber">
+                    <span className="border border-gold/40 bg-gold/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-gold">
                       preview
                     </span>
                   </div>
@@ -588,10 +624,10 @@ export default function Home() {
               <div className="lg:col-span-5">
                 <div className="h-full border border-panel-border bg-panel p-5">
                   <div className="flex items-center justify-between">
-                    <span className="label-broadcast text-teal">
+                    <span className="label-broadcast text-turf">
                       leaderboard
                     </span>
-                    <span className="border border-amber/40 bg-amber/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-amber">
+                    <span className="border border-gold/40 bg-gold/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-gold">
                       preview
                     </span>
                   </div>
@@ -616,7 +652,7 @@ export default function Home() {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <a
                 href="mailto:jomckinney1999@gmail.com?subject=Notify%20me%20%E2%80%94%20Weekly%20Challenge&body=Let%20me%20know%20when%20the%20Weekly%20Challenge%20%26%20Leaderboard%20launches!"
-                className="inline-flex items-center gap-2 border border-teal bg-teal px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-teal-dim"
+                className="inline-flex items-center gap-2 border border-turf bg-turf px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-turf-dim"
               >
                 Notify me when this launches
               </a>
@@ -631,24 +667,24 @@ export default function Home() {
         <section id="stat-guru" className="border-t border-panel-border bg-night/60">
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
             <p className="label-broadcast mb-6">
-              <span className="mr-2 inline-block h-1.5 w-1.5 bg-amber align-middle" />
+              <span className="mr-2 inline-block h-1.5 w-1.5 bg-gold align-middle" />
               From the same team
             </p>
 
             <div className="relative border border-panel-border bg-panel p-6 sm:p-10">
-              <div className="pointer-events-none absolute -inset-px border border-amber/40" />
-              <div className="absolute -top-px left-6 h-px w-20 bg-amber shadow-[0_0_12px_rgba(232,163,61,0.8)]" />
-              <div className="absolute -left-px top-6 h-20 w-px bg-amber shadow-[0_0_12px_rgba(232,163,61,0.8)]" />
+              <div className="pointer-events-none absolute -inset-px border border-gold/40" />
+              <div className="absolute -top-px left-6 h-px w-20 bg-gold shadow-[0_0_12px_rgba(232,163,61,0.8)]" />
+              <div className="absolute -left-px top-6 h-20 w-px bg-gold shadow-[0_0_12px_rgba(232,163,61,0.8)]" />
 
               <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
                 <div className="lg:col-span-7">
                   <h2 className="font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
                     NFL Stat Guru
                   </h2>
-                  <p className="mt-2 font-mono text-xs font-semibold uppercase tracking-wider text-amber">
+                  <p className="mt-2 font-mono text-xs font-semibold uppercase tracking-wider text-gold">
                     Ask any NFL question. Get an instant answer.
                   </p>
-                  <p className="mt-4 max-w-xl text-base leading-relaxed text-[#C5CCD9]">
+                  <p className="mt-4 max-w-xl text-base leading-relaxed text-[#BEC5DE]">
                     Our sister platform for the truly obsessed — the questions
                     ESPN can&apos;t answer, answered in plain English. Ask a
                     question, get a real answer, pulled straight from decades
@@ -662,8 +698,8 @@ export default function Home() {
                       "Route tracking & coverage data",
                       "Prospect profiles with grades & comps",
                     ].map((f) => (
-                      <li key={f} className="flex gap-2 text-sm text-[#C5CCD9]">
-                        <span className="text-amber">▸</span>
+                      <li key={f} className="flex gap-2 text-sm text-[#BEC5DE]">
+                        <span className="text-gold">▸</span>
                         {f}
                       </li>
                     ))}
@@ -674,7 +710,7 @@ export default function Home() {
                       href="https://gridiq-eight.vercel.app/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 border border-amber bg-amber px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-amber-dim"
+                      className="inline-flex items-center gap-2 border border-gold bg-gold px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-gold-dim"
                     >
                       Try NFL Stat Guru ↗
                     </a>
@@ -685,7 +721,7 @@ export default function Home() {
                 </div>
 
                 <div className="lg:col-span-5">
-                  <div className="grid grid-cols-2 gap-px border border-amber/25 bg-amber/20">
+                  <div className="grid grid-cols-2 gap-px border border-gold/25 bg-gold/20">
                     {[
                       { label: "Tracked plays", value: "2.8M+" },
                       { label: "Seasons covered", value: "1999–2024" },
@@ -717,7 +753,7 @@ export default function Home() {
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-4 py-8 sm:flex-row sm:items-center sm:px-6">
           <div>
             <p className="font-display text-sm font-semibold text-ink">
-              SQL<span className="text-teal">Sports</span>
+              SQL<span className="text-turf">Sports</span>
             </p>
             <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
               Code education · Sports as the hook

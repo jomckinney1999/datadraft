@@ -5,10 +5,10 @@ import type { Database, QueryExecResult, SqlJsStatic } from "sql.js";
 import { PRESETS, SCHEMA, buildSeedSql } from "@/lib/fantasy-data";
 
 const POSITION_STYLES: Record<string, string> = {
-  QB: "bg-amber/15 text-amber",
-  RB: "bg-teal/15 text-teal",
-  WR: "bg-teal/15 text-teal",
-  TE: "bg-amber/15 text-amber",
+  QB: "bg-gold/15 text-gold",
+  RB: "bg-turf/15 text-turf",
+  WR: "bg-turf/15 text-turf",
+  TE: "bg-gold/15 text-gold",
   K: "bg-panel-hover text-ink-muted",
   DEF: "bg-panel-hover text-ink-muted",
 };
@@ -127,7 +127,7 @@ export default function Sandbox() {
             <span className="h-2.5 w-2.5 rounded-full bg-panel-hover" />
             <span className="h-2.5 w-2.5 rounded-full bg-panel-hover" />
           </div>
-          <span className="label-broadcast text-teal">live sandbox</span>
+          <span className="label-broadcast text-turf">live sandbox</span>
           <span className="hidden font-mono text-[10px] text-ink-muted sm:inline">
             · 2016–2018 · 16 players
           </span>
@@ -144,11 +144,11 @@ export default function Sandbox() {
               engineStatus === "loading"
                 ? "text-ink-muted"
                 : execStatus === "running"
-                  ? "text-amber"
+                  ? "text-gold"
                   : execStatus === "error"
-                    ? "text-amber"
+                    ? "text-gold"
                     : execStatus === "done"
-                      ? "text-teal"
+                      ? "text-turf"
                       : "text-ink-muted"
             }`}
           >
@@ -175,8 +175,8 @@ export default function Sandbox() {
             disabled={engineStatus !== "ready"}
             className={`border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider transition-colors duration-150 disabled:opacity-40 ${
               activePreset === preset.id
-                ? "border-teal/50 bg-teal/10 text-teal"
-                : "border-panel-border text-ink-muted hover:border-teal/40 hover:text-ink"
+                ? "border-turf/50 bg-turf/10 text-turf"
+                : "border-panel-border text-ink-muted hover:border-turf/40 hover:text-ink"
             }`}
           >
             {preset.label}
@@ -187,8 +187,8 @@ export default function Sandbox() {
           onClick={() => setSchemaOpen((v) => !v)}
           className={`ml-auto border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider transition-colors duration-150 ${
             schemaOpen
-              ? "border-amber/50 bg-amber/10 text-amber"
-              : "border-panel-border text-ink-muted hover:border-amber/40 hover:text-ink"
+              ? "border-gold/50 bg-gold/10 text-gold"
+              : "border-panel-border text-ink-muted hover:border-gold/40 hover:text-ink"
           }`}
         >
           {schemaOpen ? "Hide schema" : "Schema"}
@@ -200,7 +200,7 @@ export default function Sandbox() {
           <div className="grid gap-3 sm:grid-cols-3">
             {SCHEMA.map((t) => (
               <div key={t.table}>
-                <p className="font-mono text-[11px] font-semibold text-amber">
+                <p className="font-mono text-[11px] font-semibold text-gold">
                   {t.table}
                 </p>
                 <p className="mt-1 font-mono text-[10px] leading-relaxed text-ink-muted">
@@ -226,7 +226,7 @@ export default function Sandbox() {
             setActivePreset(null);
           }}
           spellCheck={false}
-          className="h-full min-h-[140px] w-full resize-none bg-transparent py-3 pl-10 pr-3 font-mono text-[13px] leading-5 text-ink outline-none caret-teal"
+          className="h-full min-h-[140px] w-full resize-none bg-transparent py-3 pl-10 pr-3 font-mono text-[13px] leading-5 text-ink outline-none caret-turf"
           aria-label="SQL query editor"
         />
       </div>
@@ -237,7 +237,7 @@ export default function Sandbox() {
           <span className="label-broadcast">
             result set
             {result && execStatus === "done" && (
-              <span className="ml-2 text-amber">
+              <span className="ml-2 text-gold">
                 {result.values.length} rows
               </span>
             )}
@@ -254,9 +254,9 @@ export default function Sandbox() {
               type="button"
               onClick={handleRun}
               disabled={engineStatus !== "ready" || execStatus === "running"}
-              className="inline-flex items-center gap-2 border border-teal/40 bg-teal/10 px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-teal transition-colors duration-150 hover:border-teal hover:bg-teal/20 disabled:opacity-50"
+              className="inline-flex items-center gap-2 border border-turf/40 bg-turf/10 px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-turf transition-colors duration-150 hover:border-turf hover:bg-turf/20 disabled:opacity-50"
             >
-              <span className="inline-block h-0 w-0 border-y-[4px] border-l-[6px] border-y-transparent border-l-teal" />
+              <span className="inline-block h-0 w-0 border-y-[4px] border-l-[6px] border-y-transparent border-l-turf" />
               Run
             </button>
           </div>
@@ -269,14 +269,14 @@ export default function Sandbox() {
         )}
 
         {engineStatus === "error" && (
-          <p className="px-3 py-6 font-mono text-xs text-amber">
+          <p className="px-3 py-6 font-mono text-xs text-gold">
             Couldn&apos;t load the SQL engine{engineError ? `: ${engineError}` : ""}.
           </p>
         )}
 
         {engineStatus === "ready" && execStatus === "error" && (
           <div className="px-3 py-4">
-            <p className="border border-amber/40 bg-amber/5 px-3 py-2 font-mono text-[12px] leading-relaxed text-amber">
+            <p className="border border-gold/40 bg-gold/5 px-3 py-2 font-mono text-[12px] leading-relaxed text-gold">
               ⚠ {errorMessage}
             </p>
           </div>
@@ -325,7 +325,7 @@ export default function Sandbox() {
                   {result.values.map((row, rowIdx) => (
                     <tr
                       key={rowIdx}
-                      className="border-b border-panel-border/50 transition-colors duration-100 hover:bg-teal/5"
+                      className="border-b border-panel-border/50 transition-colors duration-100 hover:bg-turf/5"
                       style={{
                         animation: "fadeUp 0.35s ease-out forwards",
                         animationDelay: `${rowIdx * 40}ms`,
@@ -377,7 +377,7 @@ export default function Sandbox() {
                             className={`px-3 py-2.5 ${
                               isNumeric
                                 ? "text-right stat-number text-[14px]"
-                                : "font-mono text-[13px] text-[#C5CCD9]"
+                                : "font-mono text-[13px] text-[#BEC5DE]"
                             }`}
                           >
                             {cell === null ? (

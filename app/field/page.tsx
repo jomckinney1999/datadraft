@@ -16,21 +16,21 @@ export default function FieldPage() {
           href="/"
           className="font-display text-lg font-bold tracking-tight text-ink"
         >
-          SQL<span className="text-teal">Sports</span>
+          SQL<span className="text-turf">Sports</span>
           <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-muted">
             practice field
           </span>
         </Link>
         <Link
           href="/learn"
-          className="border border-teal/50 bg-teal/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-teal transition-colors hover:border-teal hover:bg-teal/20"
+          className="border border-turf/50 bg-turf/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-turf transition-colors hover:border-turf hover:bg-turf/20"
         >
           Back to lessons
         </Link>
       </header>
 
       <div className="mb-6 max-w-2xl">
-        <p className="label-broadcast text-amber">open practice · no refs</p>
+        <p className="label-broadcast text-gold">open practice · no refs</p>
         <h1 className="mt-2 font-display text-3xl font-bold text-ink">
           The Practice Field
         </h1>
@@ -38,7 +38,9 @@ export default function FieldPage() {
           Real NFL stat sheets, a live SQL engine, and nothing on the line.
           This is where players get their reps between lessons — run the
           drills from the drill book, or freelance and chase your own
-          questions. Data: free, community-maintained nflverse stats.
+          questions. Data: free, community-maintained nflverse stats. Never
+          watch football? Doesn&apos;t matter — out here it&apos;s just rows
+          and columns with better storylines.
         </p>
       </div>
 

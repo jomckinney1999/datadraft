@@ -9,6 +9,8 @@ export type Progress = {
   streak: number;
   lastActiveDay: string; // YYYY-MM-DD
   playbookStyle: PlaybookStyle | null;
+  username: string | null;
+  draftedTrack: string | null;
 };
 
 const KEY = "sqlsports.progress.v1";
@@ -19,6 +21,8 @@ const EMPTY: Progress = {
   streak: 0,
   lastActiveDay: "",
   playbookStyle: null,
+  username: null,
+  draftedTrack: null,
 };
 
 const STYLE_IDS: PlaybookStyle[] = ["film-room", "gunslinger", "dual-threat"];
@@ -50,6 +54,12 @@ export function loadProgress(): Progress {
       playbookStyle: STYLE_IDS.includes(parsed.playbookStyle as PlaybookStyle)
         ? (parsed.playbookStyle as PlaybookStyle)
         : null,
+      username:
+        typeof parsed.username === "string" && parsed.username.trim()
+          ? parsed.username
+          : null,
+      draftedTrack:
+        typeof parsed.draftedTrack === "string" ? parsed.draftedTrack : null,
     };
   } catch {
     return EMPTY;
@@ -58,6 +68,16 @@ export function loadProgress(): Progress {
 
 export function setPlaybookStyle(style: PlaybookStyle): Progress {
   const next = { ...loadProgress(), playbookStyle: style };
+  save(next);
+  return next;
+}
+
+export function setDraftPick(username: string, trackId: string): Progress {
+  const next = {
+    ...loadProgress(),
+    username: username.trim().slice(0, 24),
+    draftedTrack: trackId,
+  };
   save(next);
   return next;
 }
@@ -95,6 +115,8 @@ export function completeLesson(lessonId: string, earnedXp: number): Progress {
     streak,
     lastActiveDay: t,
     playbookStyle: p.playbookStyle,
+    username: p.username,
+    draftedTrack: p.draftedTrack,
   };
   save(next);
   return next;
