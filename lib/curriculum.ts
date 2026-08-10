@@ -76,10 +76,30 @@ export type Exercise =
 
 export type TheoryCard = { title: string; text: string; code?: string };
 
+/**
+ * The grounding step, shown to EVERY playbook style before the first drill —
+ * including Gunslingers, who previously landed cold on questions like "one row
+ * in week_results represents…" without ever having been told what a row is or
+ * shown the table.
+ *
+ * `goal` is what you'll be able to do; `setup` is the minimum context needed to
+ * attempt drill #1. `previewSql` (SQL units only) runs live against the seeded
+ * database so the learner literally sees the rows before being asked about
+ * them — reading real data is the whole point of the lesson.
+ */
+export type LessonBrief = {
+  goal: string;
+  setup: string;
+  previewSql?: string;
+  previewCaption?: string;
+};
+
 export type Lesson = {
   id: string;
   title: string;
   blurb: string;
+  /** Grounding step every style sees before drilling. See LessonBrief. */
+  brief: LessonBrief;
   intro: TheoryCard;
   // Bonus film-study cards shown only in Film Room General mode.
   film?: TheoryCard[];
@@ -116,6 +136,13 @@ export const COURSE = {
           id: "u1-l1",
           title: "Meet the Stat Sheet",
           blurb: "Tables, rows, columns — and your first SELECT *.",
+          brief: {
+            goal: "Read any table in the database with SELECT.",
+            setup:
+              "A database is a set of tables. A table is a grid: each column is a stat category, each row is one entry. Our league has three — week_results, rosters, and waiver_wire. Before we ask you anything about it, look at what one row of week_results actually holds.",
+            previewSql: "SELECT * FROM week_results LIMIT 5;",
+            previewCaption: "week_results · first 5 rows",
+          },
           intro: {
             title: "Databases are stat sheets",
             text: "A database is a set of tables. Each table is a grid: columns are the stat categories, rows are the entries. Our league has three tables — week_results (one row per player per week), rosters, and waiver_wire. SELECT * FROM a table reads the whole sheet.",
@@ -178,6 +205,17 @@ export const COURSE = {
                 "SELECT * FROM waiver_wire; reads the whole free-agent board. Five rows — a quick scouting read.",
             },
             {
+              type: "query",
+              prompt:
+                "Now the roster sheet: pull every column and every row from rosters.",
+              starter: "SELECT ",
+              expected: "SELECT * FROM rosters;",
+              orderMatters: false,
+              hint: "Same shape as the last one — SELECT * FROM rosters;",
+              explain:
+                "Three tables, one pattern. Once SELECT * FROM <table> is muscle memory, every other clause bolts onto it.",
+            },
+            {
               type: "mc",
               prompt: "You run this. What comes back?",
               code: "SELECT * FROM rosters;",
@@ -198,6 +236,13 @@ export const COURSE = {
           id: "u1-l2",
           title: "Calling Specific Routes",
           blurb: "Select only the columns you need.",
+          brief: {
+            goal: "Pull only the columns you actually need.",
+            setup:
+              "SELECT * gives you everything, which is noisy once a table gets wide. Naming columns instead gives you a clean, readable answer. Here's the difference — same rows, fewer columns.",
+            previewSql: "SELECT player, position, fantasy_pts FROM week_results LIMIT 5;",
+            previewCaption: "three columns instead of six",
+          },
           intro: {
             title: "Don't audible to SELECT * every play",
             text: "A good coordinator calls specific routes. List column names after SELECT, separated by commas, and you get only those columns — in the order you asked for them.",
@@ -273,6 +318,13 @@ export const COURSE = {
           id: "u1-l3",
           title: "Clock Management",
           blurb: "LIMIT: take a quick look without the whole game tape.",
+          brief: {
+            goal: "Cap how many rows come back with LIMIT.",
+            setup:
+              "Real tables have millions of rows. LIMIT takes a quick look without pulling the whole game tape — it's the first thing analysts type when they meet a new table. This returns exactly 3 rows.",
+            previewSql: "SELECT player, week, fantasy_pts FROM week_results LIMIT 3;",
+            previewCaption: "LIMIT 3 · a quick peek",
+          },
           intro: {
             title: "Take a knee with LIMIT",
             text: "week_results has over 2,000 rows. When you just want a feel for the data, add LIMIT n at the very end of the query to cap how many rows come back.",
@@ -356,6 +408,13 @@ export const COURSE = {
           id: "u2-l1",
           title: "Scouting One Player",
           blurb: "WHERE + equality. Text wears quotes.",
+          brief: {
+            goal: "Filter to the rows you care about with WHERE.",
+            setup:
+              "WHERE keeps only rows that pass a test. Text values go in single quotes; numbers don't. Here's every row for one player — the same table you've been reading, narrowed to one name.",
+            previewSql: "SELECT player, week, fantasy_pts FROM week_results WHERE player = 'Josh Allen' LIMIT 5;",
+            previewCaption: "WHERE player = 'Josh Allen'",
+          },
           intro: {
             title: "WHERE cuts the roster",
             text: "WHERE goes after FROM and keeps only rows matching a condition. Text values must be wrapped in single quotes — 'Josh Allen', 'KC' — while numbers go bare.",
@@ -438,6 +497,13 @@ export const COURSE = {
           id: "u2-l2",
           title: "Setting the Line",
           blurb: "Comparisons and AND: numbers, thresholds, combos.",
+          brief: {
+            goal: "Filter on numbers and combine tests with AND.",
+            setup:
+              "Beyond equality you get >, <, >=, <=. AND requires both sides to be true, which is how you express \"big game, this season\" in one line. Here's a threshold in action.",
+            previewSql: "SELECT player, season, week, fantasy_pts FROM week_results WHERE fantasy_pts > 30 LIMIT 5;",
+            previewCaption: "only rows scoring over 30",
+          },
           intro: {
             title: "Set the over/under",
             text: "Numbers compare with > < >= <= — no quotes. Chain conditions with AND when every condition must hit.",
@@ -526,6 +592,13 @@ export const COURSE = {
           id: "u2-l3",
           title: "Multiple Reads",
           blurb: "OR, IN, and BETWEEN: matching more than one option.",
+          brief: {
+            goal: "Match several options at once with OR, IN, and BETWEEN.",
+            setup:
+              "When you want any of a set of values, IN beats stacking ORs. BETWEEN covers an inclusive range. Both are shorthand for tests you could write the long way — they just read better.",
+            previewSql: "SELECT player, position, fantasy_pts FROM week_results WHERE position IN ('QB','TE') LIMIT 5;",
+            previewCaption: "position IN ('QB','TE')",
+          },
           intro: {
             title: "Progress through your reads",
             text: "OR keeps a row if either condition hits. IN ('A','B','C') is a cleaner way to say “any of these.” BETWEEN a AND b keeps a range — both ends included.",
@@ -626,6 +699,13 @@ export const COURSE = {
           id: "u3-l1",
           title: "Ranking the Board",
           blurb: "ORDER BY, ascending and descending.",
+          brief: {
+            goal: "Put rows in a deliberate order with ORDER BY.",
+            setup:
+              "Without ORDER BY, row order is not guaranteed — it just happens to look stable. ORDER BY makes it explicit: ASC is smallest-first (the default), DESC is largest-first. Here's the top of the board.",
+            previewSql: "SELECT player, week, fantasy_pts FROM week_results ORDER BY fantasy_pts DESC LIMIT 5;",
+            previewCaption: "highest scoring weeks first",
+          },
           intro: {
             title: "Sort the draft board",
             text: "ORDER BY column sorts your results — smallest first by default (ASC). Add DESC for biggest first. It goes after WHERE, before LIMIT.",
@@ -686,6 +766,18 @@ export const COURSE = {
                 "Now the board reads like a waiver priority list. Sorting turns raw rows into a decision.",
             },
             {
+              type: "query",
+              prompt:
+                "Sort the waiver wire the other way — least-rostered player first. Show player and pct_rostered.",
+              starter: "SELECT player, pct_rostered FROM waiver_wire\n",
+              expected:
+                "SELECT player, pct_rostered FROM waiver_wire ORDER BY pct_rostered ASC;",
+              orderMatters: true,
+              hint: "ASC is smallest-first. It's also the default, so ORDER BY pct_rostered alone works too.",
+              explain:
+                "Lowest rostered percentage first — that's where the genuinely unclaimed players are.",
+            },
+            {
               type: "mc",
               prompt: "Without ASC or DESC, ORDER BY sorts…",
               options: [
@@ -704,6 +796,13 @@ export const COURSE = {
           id: "u3-l2",
           title: "Top Plays",
           blurb: "ORDER BY + LIMIT: every top-N question, answered.",
+          brief: {
+            goal: "Answer any \"top N\" question with ORDER BY + LIMIT.",
+            setup:
+              "Sort first, then cut. That order matters: LIMIT before sorting would grab arbitrary rows and sort only those. Every \"best/worst N\" question you'll ever be asked is this pattern.",
+            previewSql: "SELECT player, fantasy_pts FROM week_results ORDER BY fantasy_pts DESC LIMIT 3;",
+            previewCaption: "the 3 biggest weeks in the data",
+          },
           intro: {
             title: "The highlight reel formula",
             text: "“Top 5 anything” is always the same play: ORDER BY the stat DESC, then LIMIT 5. You can also sort by several columns — the second breaks ties in the first.",
@@ -804,6 +903,13 @@ export const COURSE = {
           id: "u4-l1",
           title: "Season Totals",
           blurb: "COUNT, SUM, AVG: collapse many rows into one number.",
+          brief: {
+            goal: "Collapse many rows into one number with COUNT, SUM, and AVG.",
+            setup:
+              "Aggregates answer \"how many / how much / what's typical\" by folding a whole column into a single value. Notice this returns one row, not many — that's the shift this lesson is about.",
+            previewSql: "SELECT COUNT(*) AS rows_total, ROUND(AVG(fantasy_pts), 1) AS avg_pts FROM week_results;",
+            previewCaption: "the whole table, as one row",
+          },
           intro: {
             title: "From game tape to box score",
             text: "Aggregate functions squash many rows into one: COUNT(*) counts rows, SUM adds a column up, AVG averages it. AS gives the result a readable name, and ROUND(x, 1) trims decimals.",
@@ -885,6 +991,13 @@ export const COURSE = {
           id: "u4-l2",
           title: "Splitting the Film by Player",
           blurb: "GROUP BY: one aggregate row per player, position, or team.",
+          brief: {
+            goal: "Get one aggregate row per player, position, or team with GROUP BY.",
+            setup:
+              "GROUP BY splits rows into buckets and runs the aggregate inside each one. Instead of one number for the table, you get one number per group — which is what almost every real report is.",
+            previewSql: "SELECT player, ROUND(SUM(fantasy_pts), 1) AS total FROM week_results GROUP BY player ORDER BY total DESC LIMIT 5;",
+            previewCaption: "one row per player",
+          },
           intro: {
             title: "One row per player",
             text: "GROUP BY splits the table into buckets — one per distinct value — then aggregates run inside each bucket. SELECT the grouping column plus your aggregates and you've built a leaderboard.",
@@ -967,6 +1080,13 @@ export const COURSE = {
           id: "u4-l3",
           title: "The Cut Line",
           blurb: "HAVING: filter the aggregated groups themselves.",
+          brief: {
+            goal: "Filter the groups themselves with HAVING.",
+            setup:
+              "WHERE filters rows before grouping; HAVING filters the groups after. That's the whole distinction, and it's the one interviewers ask about. Here it keeps only the high-volume players.",
+            previewSql: "SELECT player, COUNT(*) AS games FROM week_results GROUP BY player HAVING COUNT(*) > 30 LIMIT 5;",
+            previewCaption: "only groups with more than 30 games",
+          },
           intro: {
             title: "Cuts happen after the film session",
             text: "WHERE filters raw rows before grouping. HAVING filters groups after aggregation — it's how you say “only players averaging 15+.” In SQLite you can reuse your AS alias inside HAVING.",
@@ -1091,6 +1211,11 @@ export const COURSE = {
           id: "u7-l1",
           title: "Your First Python Line",
           blurb: "Variables, numbers, strings — naming things you'll reuse.",
+          brief: {
+            goal: "Write and run your first real Python.",
+            setup:
+              "Python runs live in your browser here — nothing is simulated. A variable is a name attached to a value. Numbers do math; text goes in quotes and doesn't. Getting those two confused is the most common beginner error, so we start there.",
+          },
           intro: {
             title: "A variable is a jersey number",
             text: "A variable is a name you attach to a value so you can call it later. Python doesn't need you to declare a type — assign it and move on. Numbers do math, strings are text in quotes, and mixing them up is the single most common beginner error.",
@@ -1162,12 +1287,29 @@ export const COURSE = {
               explain:
                 "16.0 — Python's / always returns a float. Your code ran for real; nothing here is simulated.",
             },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Build a one-line scouting note. Print exactly: Nacua went for 31.0",
+              starter:
+                'player = "Nacua"\npoints = 31.0\n\n# print: Nacua went for 31.0\n',
+              expected: 'print("Nacua went for 31.0")',
+              hint: 'An f-string is the tidy way: print(f"{player} went for {points}").',
+              explain:
+                "f-strings drop variables straight into text. This is how nearly every readable Python report line gets built.",
+            },
           ],
         },
         {
           id: "u7-l2",
           title: "Lists & Loops",
           blurb: "Hold a whole roster, then do the same thing to every player.",
+          brief: {
+            goal: "Store a whole roster in a list and loop over it.",
+            setup:
+              "A list holds many values in order. A for loop runs the same code once per item. Together they're how you process a season: write the logic once, let it run over every row. Indexing starts at 0, which trips up everyone at first.",
+          },
           intro: {
             title: "A list is a roster",
             text: "A list holds many values in order, written in square brackets. A for loop walks the list one item at a time and runs the same code for each. That's the whole idea behind processing a season: write the logic once, let it run over every row.",
@@ -1253,6 +1395,11 @@ export const COURSE = {
           id: "u7-l3",
           title: "pandas: SQL for Python",
           blurb: "DataFrames, filtering, and groupby — the same moves you know.",
+          brief: {
+            goal: "Use pandas to do in Python what you already do in SQL.",
+            setup:
+              "pandas gives Python a table type called a DataFrame. Every SQL verb has a twin: WHERE is a filter, GROUP BY is .groupby(), ORDER BY is .sort_values(). You already know the concepts — this is the spelling.",
+          },
           intro: {
             title: "A DataFrame is a table",
             text: "pandas gives Python a table type called a DataFrame. If you know SQL, you already know pandas — every verb has a twin. WHERE becomes a boolean filter, GROUP BY becomes .groupby(), ORDER BY becomes .sort_values(). Same thinking, different syntax.",
@@ -1326,6 +1473,19 @@ export const COURSE = {
               explain:
                 "['Nacua', 'Hurts', 'Kelce'] — filter, then sort, then select. That's WHERE + ORDER BY + SELECT, in pandas.",
             },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "GROUP BY, in pandas. Print each position's mean points.",
+              starter:
+                'import pandas as pd\n\ndf = pd.DataFrame({\n    "position": ["RB", "WR", "RB", "WR"],\n    "points": [18.2, 31.0, 12.4, 22.4],\n})\n\n# print the mean points per position\n',
+              expected:
+                'import pandas as pd\ndf = pd.DataFrame({"position":["RB","WR","RB","WR"],"points":[18.2,31.0,12.4,22.4]})\nprint(df.groupby("position")["points"].mean())',
+              hint: 'df.groupby("position")["points"].mean() — then wrap it in print().',
+              explain:
+                "RB 15.3, WR 26.7. groupby + an aggregate is GROUP BY + AVG, and it's the single most-used move in analyst Python.",
+            },
           ],
         },
       ],
@@ -1344,6 +1504,11 @@ export const COURSE = {
           id: "u8-l1",
           title: "Averages Lie",
           blurb: "Mean, median, and when each one misleads you.",
+          brief: {
+            goal: "Know when the mean misleads and the median doesn't.",
+            setup:
+              "The mean adds everything and divides; one huge outlier drags it. The median is the middle value and barely moves. When they disagree, that gap is itself the finding — and reporting only the mean is how people recommend the wrong player.",
+          },
           intro: {
             title: "One huge week breaks the mean",
             text: "The mean adds everything and divides by the count, so a single outlier drags it. The median is the middle value once sorted, so outliers barely move it. When a distribution is skewed, reporting only the mean is how you end up recommending the wrong player.",
@@ -1419,6 +1584,11 @@ export const COURSE = {
           id: "u8-l2",
           title: "Small Samples Lie Louder",
           blurb: "Why three great games proves almost nothing.",
+          brief: {
+            goal: "Judge whether a result has enough data behind it to trust.",
+            setup:
+              "Any small sample can look extreme by luck. Three-for-three isn't elite hands, it's Tuesday. The fix is a habit, not a formula: always ask for the denominator before you believe a rate.",
+          },
           intro: {
             title: "Noise shrinks as n grows",
             text: "Any small sample can look extreme by chance. Flip a fair coin three times and all-heads happens one time in eight — that's not a magic coin, that's Tuesday. The same is true of a receiver's first three games. The more observations you have, the harder it is for luck alone to fake a pattern.",
@@ -1492,6 +1662,11 @@ export const COURSE = {
           id: "u8-l3",
           title: "Regression to the Mean",
           blurb: "Why the hot hand cools — and it isn't a jinx.",
+          brief: {
+            goal: "Recognise regression to the mean instead of inventing a story.",
+            setup:
+              "If a performance is part skill and part luck, an extreme result probably had good luck in it — and luck doesn't repeat. The drift back toward normal isn't a slump or a jinx. It's the most misread pattern in sports analytics.",
+          },
           intro: {
             title: "Extremes drift back toward normal",
             text: "If a performance is partly skill and partly luck, then an extreme result probably had unusually good luck in it. Luck doesn't repeat, so the next stretch lands closer to the player's true level. That drift is regression to the mean, and it's the most misread pattern in all of sports analytics.",
@@ -1577,6 +1752,11 @@ export const COURSE = {
           id: "u9-l1",
           title: "Pick the Right Chart",
           blurb: "Match the chart to the question, not to your mood.",
+          brief: {
+            goal: "Choose the chart the question actually calls for.",
+            setup:
+              "The question decides the chart, not your mood. Amounts across categories → bars. Something over time → a line. Relationship between two numbers → scatter. Shape of one distribution → histogram. Most bad charts are right data in the wrong container.",
+          },
           intro: {
             title: "The chart type is decided by the question",
             text: "Comparing amounts across categories? Bar chart. Tracking something over time? Line chart. Looking for a relationship between two numbers? Scatter plot. Showing how one distribution is shaped? Histogram. Most bad charts are the right data in the wrong container.",
@@ -1640,6 +1820,11 @@ export const COURSE = {
           id: "u9-l2",
           title: "Axes That Don't Lie",
           blurb: "The truncated y-axis and other honest-mistake territory.",
+          brief: {
+            goal: "Build charts that don't overstate what the data says.",
+            setup:
+              "Bars encode value by length, so their baseline must be zero — truncate it and a 5% gap looks like a landslide. Lines encode change, so a non-zero baseline can be the honest choice. Knowing which rule applies is the skill.",
+          },
           intro: {
             title: "Where the axis starts changes the story",
             text: "Start a bar chart's y-axis at 20 instead of 0 and a 5% difference looks like a landslide. Bars encode value by length, so their baseline must be zero. Line charts are different — they encode change, so a non-zero baseline is often fine and sometimes necessary.",
@@ -1711,6 +1896,11 @@ export const COURSE = {
           id: "u9-l3",
           title: "One Chart, One Point",
           blurb: "Cut everything that isn't the argument.",
+          brief: {
+            goal: "Cut a chart down to the one thing it's arguing.",
+            setup:
+              "Every gridline, legend, and colour competes for attention. Say your finding out loud in one sentence, then delete anything on the chart that isn't helping you say it. A title that states the finding does more work than any styling.",
+          },
           intro: {
             title: "If it doesn't serve the point, delete it",
             text: "Every gridline, legend, color, and label competes for attention. A chart making one clear claim beats a dashboard making eight vague ones. Before you ship, say your finding out loud in a sentence — then delete anything on the chart that isn't helping you say it.",
@@ -1789,6 +1979,11 @@ export const COURSE = {
           id: "u10-l1",
           title: "Save States for Code",
           blurb: "add, commit, and why analysis_final_v3_REAL.py must die.",
+          brief: {
+            goal: "Save your work in git so you can delete boldly.",
+            setup:
+              "Git records snapshots. You stage changes with `git add`, then save them with `git commit -m \"message\"`. Every commit is recoverable forever — which is exactly what frees you to stop hoarding files called analysis_final_v3_REAL.py.",
+          },
           intro: {
             title: "A commit is a save point",
             text: "Git records snapshots of your project. You stage the changes you want to keep with `git add`, then save them with `git commit -m \"message\"`. Every commit is recoverable forever, which is what frees you to delete boldly instead of hoarding files named final_v2_actually_final.",
@@ -1863,6 +2058,11 @@ export const COURSE = {
           id: "u10-l2",
           title: "Branches",
           blurb: "Try something risky without breaking what works.",
+          brief: {
+            goal: "Experiment on a branch without risking what works.",
+            setup:
+              "A branch is an independent line of work. main keeps running while you try something; if the idea fails you delete the branch and nothing was ever at risk. If it works, you merge it back.",
+          },
           intro: {
             title: "A branch is a parallel drive",
             text: "A branch is an independent line of work. You leave main untouched and safe, experiment on a branch, and merge back only if it pans out. If it doesn't, you delete the branch and nothing was ever at risk.",
@@ -1924,6 +2124,11 @@ export const COURSE = {
           id: "u10-l3",
           title: "Pull Requests & Your Portfolio",
           blurb: "How work gets reviewed — and how a hiring manager finds it.",
+          brief: {
+            goal: "Get work reviewed, and make a repo a hiring manager can read.",
+            setup:
+              "A pull request proposes a change and opens it for review — it's how nearly every data team ships. It's also the artifact an interviewer can actually read: your reasoning, in public, in your own words.",
+          },
           intro: {
             title: "A pull request is a proposal",
             text: "You push a branch to GitHub and open a pull request: here's what I changed, here's why, please review. It's how essentially every data team ships work. It's also the artifact a hiring manager can read — your reasoning, in public, in your own words.",
@@ -2007,6 +2212,11 @@ export const COURSE = {
           id: "u11-l1",
           title: "Why R Is Still Here",
           blurb: "Where R wins, and why sports analytics leans on it.",
+          brief: {
+            goal: "Understand where R fits next to Python.",
+            setup:
+              "R was designed for statistics from the start, so tables and models are native rather than bolted on. A large share of public sports analytics — nflverse included — ships as R packages, so reading R is a real advantage even if you write mostly Python.",
+          },
           intro: {
             title: "R was built for data, not general programming",
             text: "Python is a general language that grew great data tools. R was designed for statistics from the start, so tables, factors, and models are native rather than bolted on. In sports specifically, an enormous amount of public work — nflverse included — ships as R packages.",
@@ -2065,6 +2275,11 @@ export const COURSE = {
           id: "u11-l2",
           title: "dplyr Is SQL With Pipes",
           blurb: "filter, group_by, summarise, arrange — same five moves.",
+          brief: {
+            goal: "Run real dplyr and see it's the SQL you already know.",
+            setup:
+              "R runs live in your browser here, dplyr included. The pipe |> feeds the left side into the right, so a chain reads in the order you'd say it: take the data, filter it, group it, summarise it, sort it. Same five moves as SQL.",
+          },
           intro: {
             title: "The pipe passes data along",
             text: "The pipe (|>, or %>% in older code) takes the thing on the left and feeds it to the function on the right. It lets you write a chain in the order you'd say it out loud: take the data, filter it, group it, summarise it, sort it.",
@@ -2141,12 +2356,30 @@ export const COURSE = {
               explain:
                 'Same three moves as SQL and pandas — filter, arrange, select — just spelled in dplyr.',
             },
+            {
+              type: "code",
+              lang: "r",
+              prompt:
+                "GROUP BY in dplyr. Print the mean points per position.",
+              starter:
+                'suppressMessages(library(dplyr))\n\ndf <- data.frame(\n  position = c("RB", "WR", "RB", "WR"),\n  points = c(18.2, 31.0, 12.4, 22.4)\n)\n\n# group by position, summarise the mean, then print it\n',
+              expected:
+                'suppressMessages(library(dplyr))\ndf <- data.frame(position=c("RB","WR","RB","WR"), points=c(18.2,31.0,12.4,22.4))\nout <- df |> group_by(position) |> summarise(avg = mean(points))\nprint(as.data.frame(out))',
+              hint: "df |> group_by(position) |> summarise(avg = mean(points)), then print(as.data.frame(out)).",
+              explain:
+                "group_by + summarise is GROUP BY + AVG. You've now written the same aggregation in three languages.",
+            },
           ],
         },
         {
           id: "u11-l3",
           title: "ggplot2 in Layers",
           blurb: "Build a chart by stacking pieces, not by picking a template.",
+          brief: {
+            goal: "Build a chart in layers with ggplot2.",
+            setup:
+              "ggplot2 joins layers with +. You name the data, map columns to visual properties with aes(), then add a geometry. Swap the geometry and the same mapping becomes a different chart — that's the payoff of the layered grammar.",
+          },
           intro: {
             title: "Data, mapping, geometry",
             text: "ggplot2 builds a chart in layers joined by +. You name the data, map columns to visual properties (x, y, color) with aes(), then add a geometry — geom_point() for a scatter, geom_col() for bars, geom_line() for lines. Change the geom and the same mapping becomes a different chart.",

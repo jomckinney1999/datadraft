@@ -6,9 +6,13 @@
 //
 // The experience adapts to the learner's playbook style (lib/playbook.ts):
 //   film-room  — chalkboard intro + bonus film cards, hints always visible
-//   gunslinger — straight to drills, drillSkip concept MCs removed, hints
-//                behind a toggle, chalkboard available on demand
+//   gunslinger — brief, then straight to hands-on drills (all MCs dropped on
+//                lessons with enough runnable work), hints behind a toggle,
+//                chalkboard available on demand
 //   dual-threat — chalkboard intro, full exercise mix, hints visible
+//
+// Every style starts on the brief: goal, setup, and — for SQL lessons — the
+// actual rows, run live, before any question is asked about them.
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
@@ -36,11 +40,18 @@ import {
   type Lang,
 } from "@/lib/runtimes";
 import { useModule } from "@/lib/use-module";
+import { useSport } from "@/lib/use-sport";
 import { completeLesson, loadProgress } from "@/lib/progress";
 import { getStyle, type PlaybookStyle } from "@/lib/playbook";
 import Coach, { type CoachMood } from "@/components/coach";
 
-type Phase = "loading" | "intro" | "exercise" | "complete" | "timeout";
+type Phase =
+  | "loading"
+  | "brief"
+  | "intro"
+  | "exercise"
+  | "complete"
+  | "timeout";
 
 type Feedback = {
   correct: boolean;
@@ -122,6 +133,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const [engineReady, setEngineReady] = useState(false);
   const savedRef = useRef(false);
   const { moduleId } = useModule();
+  const { sport } = useSport();
 
   const [style, setStyle] = useState<PlaybookStyle | undefined>(undefined);
   const [phase, setPhase] = useState<Phase>("loading");
@@ -143,6 +155,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const [softError, setSoftError] = useState<string | null>(null);
   const [hintShown, setHintShown] = useState(false);
   const [chalkboardOpen, setChalkboardOpen] = useState(false);
+  const [briefRows, setBriefRows] = useState<QueryExecResult | null>(null);
 
   // live-code exercises (Python / R / SQL executed for real)
   const [codeText, setCodeText] = useState("");
@@ -152,15 +165,33 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const [checking, setChecking] = useState(false);
   const [runtimeLoading, setRuntimeLoading] = useState<Lang | null>(null);
 
-  // Gunslingers skip pure-recall concept checks; everyone else runs them all.
+  /**
+   * Gunslingers want to type, not tick boxes. They always skip pure-recall
+   * concept checks (drillSkip), and on lessons that have enough hands-on work
+   * they skip the remaining multiple-choice too, leaving a DataCamp-style run
+   * of write-it-yourself drills.
+   *
+   * The MIN_HANDS_ON floor matters: concept-only units (statistics, chart
+   * choice, git) have no runnable exercises, and stripping their MCs would
+   * leave a lesson with nothing in it.
+   */
   const activeIdx = useMemo(() => {
     if (!entry) return [];
-    return entry.lesson.exercises
-      .map((_, i) => i)
-      .filter((i) => {
-        const ex = entry.lesson.exercises[i];
-        return !(style === "gunslinger" && ex.type === "mc" && ex.drillSkip);
-      });
+    const all = entry.lesson.exercises;
+    const idx = all.map((_, i) => i);
+    if (style !== "gunslinger") return idx;
+
+    const MIN_HANDS_ON = 3;
+    const handsOn = all.filter(
+      (ex) => ex.type === "query" || ex.type === "code" || ex.type === "fill",
+    ).length;
+    const dropAllMc = handsOn >= MIN_HANDS_ON;
+
+    return idx.filter((i) => {
+      const ex = all[i];
+      if (ex.type !== "mc") return true;
+      return dropAllMc ? false : !ex.drillSkip;
+    });
   }, [entry, style]);
 
   const total = activeIdx.length;
@@ -188,7 +219,10 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   useEffect(() => {
     if (!style || phase !== "loading") return;
     setQueue(activeIdx);
-    setPhase(style === "gunslinger" ? "exercise" : "intro");
+    // Every style starts at the brief. Gunslingers skip the theory cards that
+    // follow it, not the grounding itself — landing cold on drill #1 with no
+    // idea what the table looks like was the old behaviour and it was wrong.
+    setPhase("brief");
   }, [style, phase, activeIdx]);
 
   useEffect(() => {
@@ -231,6 +265,20 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     setChalkboardOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIdx, phase]);
+
+  // Run the brief's preview query once the engine is up, so the learner sees
+  // real rows before the first question about them.
+  useEffect(() => {
+    if (phase !== "brief" || !engineReady || !entry?.lesson.brief.previewSql) {
+      return;
+    }
+    try {
+      const res = dbRef.current?.exec(entry.lesson.brief.previewSql)[0];
+      setBriefRows(res ?? { columns: [], values: [] });
+    } catch {
+      setBriefRows(null); // a broken preview must never block the lesson
+    }
+  }, [phase, engineReady, entry]);
 
   // Start downloading Python/R the moment a code exercise appears, rather than
   // making the learner wait for a multi-MB fetch after they hit Run.
@@ -280,6 +328,10 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   // Advance within whichever module the learner picked on the roadmap, so a
   // "just Python" learner isn't dropped into a SQL lesson at the end.
   const nextId = nextLessonId(lesson.id, moduleId);
+  // XP in the learner's own sport's language — yards for football, and the
+  // equivalent unit of ground gained for the other two.
+  const gainNoun =
+    sport === "basketball" ? "pts" : sport === "baseball" ? "bases" : "yards";
   const styleDef = getStyle(style);
   const introCards: TheoryCard[] =
     style === "film-room"
@@ -465,7 +517,10 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     setAttempted({});
     setFeedback(null);
     setIntroStep(0);
-    setPhase(style === "gunslinger" ? "exercise" : "intro");
+    // Every style starts at the brief. Gunslingers skip the theory cards that
+    // follow it, not the grounding itself — landing cold on drill #1 with no
+    // idea what the table looks like was the old behaviour and it was wrong.
+    setPhase("brief");
   }
 
   const coachMood: CoachMood =
@@ -526,6 +581,84 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
           {styleDef.name}
         </span>
       </div>
+
+      {phase === "brief" && (
+        <div className="flex flex-1 flex-col justify-center gap-5">
+          <div className="flex items-start gap-4">
+            <div className="hidden shrink-0 sm:block">
+              <Coach mood="happy" size={104} />
+            </div>
+            <div className="min-w-0">
+              <p className="label-broadcast text-turf">the brief</p>
+              <h2 className="mt-1 font-display text-2xl font-bold leading-snug text-ink">
+                {lesson.brief.goal}
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+                {lesson.brief.setup}
+              </p>
+            </div>
+          </div>
+
+          {/* Real rows from the real database, before we ask about them. */}
+          {lesson.brief.previewSql && (
+            <div className="border border-panel-border bg-night/95 shadow-scoreboard">
+              <div className="flex items-center justify-between border-b border-panel-border px-3 py-2">
+                <span className="label-broadcast text-[10px] text-turf">
+                  {lesson.brief.previewCaption ?? "the data"}
+                </span>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+                  {briefRows ? `${briefRows.values.length} rows` : "loading…"}
+                </span>
+              </div>
+              <pre className="overflow-x-auto border-b border-panel-border px-3 py-2 font-mono text-[11px] text-ink-muted">
+                {lesson.brief.previewSql}
+              </pre>
+              {briefRows && briefRows.columns.length > 0 && (
+                <div className="max-h-56 overflow-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="border-b border-panel-border">
+                        {briefRows.columns.map((c) => (
+                          <th
+                            key={c}
+                            className="px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-ink-muted"
+                          >
+                            {c}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {briefRows.values.map((row, i) => (
+                        <tr key={i} className="border-b border-panel-border/50">
+                          {row.map((cell, j) => (
+                            <td
+                              key={j}
+                              className="px-3 py-1.5 font-mono text-[12px] text-ink"
+                            >
+                              {cell === null ? "null" : String(cell)}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() =>
+              setPhase(style === "gunslinger" ? "exercise" : "intro")
+            }
+            className="w-full border border-turf bg-turf/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25"
+          >
+            {style === "gunslinger" ? "Snap the ball" : "Walk me through it"}
+          </button>
+        </div>
+      )}
 
       {phase === "intro" && (
         <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
@@ -893,6 +1026,10 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                     {feedback.correct && (
                       <span className="ml-3 font-mono text-sm font-semibold">
                         +{firstTry[currentIdx] ? XP_PER_EXERCISE : XP_RETRY} XP
+                        <span className="ml-2 text-ink-muted">
+                          · {firstTry[currentIdx] ? XP_PER_EXERCISE : XP_RETRY}{" "}
+                          {gainNoun}
+                        </span>
                       </span>
                     )}
                   </p>
