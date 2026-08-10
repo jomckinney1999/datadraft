@@ -24,8 +24,18 @@ import {
   type Exercise,
   type FillExercise,
   type QueryExercise,
+  type CodeExercise,
   type TheoryCard,
 } from "@/lib/curriculum";
+import {
+  runCode,
+  ensureRuntime,
+  outputsMatch,
+  LANG_LABEL,
+  LANG_WEIGHT,
+  type Lang,
+} from "@/lib/runtimes";
+import { useModule } from "@/lib/use-module";
 import { completeLesson, loadProgress } from "@/lib/progress";
 import { getStyle, type PlaybookStyle } from "@/lib/playbook";
 import Coach, { type CoachMood } from "@/components/coach";
@@ -111,6 +121,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const dbRef = useRef<Database | null>(null);
   const [engineReady, setEngineReady] = useState(false);
   const savedRef = useRef(false);
+  const { moduleId } = useModule();
 
   const [style, setStyle] = useState<PlaybookStyle | undefined>(undefined);
   const [phase, setPhase] = useState<Phase>("loading");
@@ -132,6 +143,14 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const [softError, setSoftError] = useState<string | null>(null);
   const [hintShown, setHintShown] = useState(false);
   const [chalkboardOpen, setChalkboardOpen] = useState(false);
+
+  // live-code exercises (Python / R / SQL executed for real)
+  const [codeText, setCodeText] = useState("");
+  const [codeOutput, setCodeOutput] = useState<string | null>(null);
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const [running, setRunning] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [runtimeLoading, setRuntimeLoading] = useState<Lang | null>(null);
 
   // Gunslingers skip pure-recall concept checks; everyone else runs them all.
   const activeIdx = useMemo(() => {
@@ -202,11 +221,35 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
         : [],
     );
     setQueryText(exercise.type === "query" ? exercise.starter : "");
+    setCodeText(exercise.type === "code" ? exercise.starter : "");
+    setCodeOutput(null);
+    setCodeError(null);
     setRunResult(null);
     setRunError(null);
     setSoftError(null);
     setHintShown(false);
     setChalkboardOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIdx, phase]);
+
+  // Start downloading Python/R the moment a code exercise appears, rather than
+  // making the learner wait for a multi-MB fetch after they hit Run.
+  useEffect(() => {
+    if (!exercise || exercise.type !== "code") {
+      setRuntimeLoading(null);
+      return;
+    }
+    const lang = exercise.lang;
+    let cancelled = false;
+    setRuntimeLoading(lang);
+    ensureRuntime(lang)
+      .catch(() => undefined)
+      .then(() => {
+        if (!cancelled) setRuntimeLoading(null);
+      });
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIdx, phase]);
 
@@ -234,6 +277,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
 
   if (!entry || !style || phase === "loading") return null;
   const { lesson, unit } = entry;
+  // Advance within whichever module the learner picked on the roadmap, so a
+  // "just Python" learner isn't dropped into a SQL lesson at the end.
+  const nextId = nextLessonId(lesson.id, moduleId);
   const styleDef = getStyle(style);
   const introCards: TheoryCard[] =
     style === "film-room"
@@ -257,6 +303,59 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       setRunResult(null);
       setRunError(err instanceof Error ? err.message : String(err));
     }
+  }
+
+  /** Run a live-code exercise without grading it — the console button. */
+  async function handleRunCode(ex: CodeExercise) {
+    if (running) return;
+    setRunning(true);
+    setCodeError(null);
+    try {
+      const res = await runCode(ex.lang, codeText);
+      setCodeOutput(res.error ? null : res.stdout);
+      setCodeError(res.error);
+    } finally {
+      setRunning(false);
+    }
+  }
+
+  /**
+   * Grade by executing the learner's code and the reference solution in the
+   * same runtime and comparing what they printed. A crash or syntax error
+   * returns null so it costs no heart — same forgiveness the SQL path gives.
+   */
+  async function gradeCode(
+    ex: CodeExercise,
+  ): Promise<{ correct: boolean; solution?: string } | null> {
+    const mine = await runCode(ex.lang, codeText);
+    if (mine.error) {
+      setCodeOutput(null);
+      setCodeError(mine.error);
+      setSoftError(mine.error);
+      return null;
+    }
+    setCodeOutput(mine.stdout);
+    setCodeError(null);
+
+    if (!mine.stdout.trim()) {
+      setSoftError(
+        "That ran, but printed nothing — wrap your answer in print() so it can be checked.",
+      );
+      return null;
+    }
+
+    const reference = await runCode(ex.lang, ex.expected);
+    if (reference.error) {
+      // Our answer key is broken, not the learner's code. Never penalise them.
+      setSoftError(
+        "The answer key failed to run — that's our bug, not yours. Skipping the check.",
+      );
+      return null;
+    }
+    return {
+      correct: outputsMatch(mine.stdout, reference.stdout),
+      solution: ex.expected,
+    };
   }
 
   function grade(): { correct: boolean; solution?: string } | null {
@@ -292,10 +391,23 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     };
   }
 
-  function handleCheck() {
-    if (!exercise || currentIdx === undefined) return;
-    const result = grade();
-    if (!result) return; // soft error (query didn't parse)
+  async function handleCheck() {
+    if (!exercise || currentIdx === undefined || checking) return;
+
+    let result: { correct: boolean; solution?: string } | null;
+    if (exercise.type === "code") {
+      // Live runtimes are async (and may still be downloading), so this path
+      // can't reuse the synchronous grade() the other exercise types use.
+      setChecking(true);
+      try {
+        result = await gradeCode(exercise);
+      } finally {
+        setChecking(false);
+      }
+    } else {
+      result = grade();
+    }
+    if (!result) return; // soft error (code didn't run) — no heart lost
 
     const isFirstAttempt = !attempted[currentIdx];
     setAttempted((m) => ({ ...m, [currentIdx]: true }));
@@ -587,6 +699,61 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
               </div>
             )}
 
+            {exercise.type === "code" && (
+              <div className="border border-panel-border bg-night/95 shadow-scoreboard">
+                <div className="flex items-center justify-between border-b border-panel-border px-3 py-2">
+                  <span className="label-broadcast text-turf">
+                    your {LANG_LABEL[exercise.lang].toLowerCase()} · runs for real
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+                    {runtimeLoading === exercise.lang
+                      ? `loading ${LANG_LABEL[exercise.lang]} ${LANG_WEIGHT[exercise.lang]}…`
+                      : "runtime ready"}
+                  </span>
+                </div>
+                <textarea
+                  value={codeText}
+                  onChange={(e) => setCodeText(e.target.value)}
+                  spellCheck={false}
+                  rows={9}
+                  disabled={!!feedback}
+                  className="w-full resize-none bg-transparent px-4 py-3 font-mono text-[13px] leading-relaxed text-ink outline-none caret-turf"
+                  aria-label={`${LANG_LABEL[exercise.lang]} answer editor`}
+                />
+                <div className="flex items-center justify-between border-t border-panel-border px-3 py-2">
+                  <p className="font-mono text-[10px] text-ink-muted">
+                    print your answer so it can be checked
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => handleRunCode(exercise)}
+                    disabled={
+                      running || !!runtimeLoading || !!feedback || checking
+                    }
+                    className="border border-panel-border px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors hover:border-turf/50 hover:text-turf disabled:opacity-40"
+                  >
+                    {running ? "running…" : "▸ Run"}
+                  </button>
+                </div>
+                {(codeError || softError) && (
+                  <p className="border-t border-gold/40 bg-gold/5 px-3 py-2 font-mono text-[12px] leading-relaxed text-gold">
+                    ⚠ {softError ?? codeError}
+                    {" — no flag on the play. Fix it and check again."}
+                  </p>
+                )}
+                {codeOutput !== null && !codeError && (
+                  <div className="max-h-48 overflow-auto border-t border-panel-border bg-night px-4 py-3">
+                    <p className="label-broadcast mb-1 text-[10px] text-ink-muted">
+                      output
+                    </p>
+                    <pre className="whitespace-pre-wrap font-mono text-[12px] leading-relaxed text-ink">
+                      {codeOutput || "(nothing printed)"}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            )}
+
             {exercise.type === "query" && (
               <div className="border border-panel-border bg-night/95 shadow-scoreboard">
                 <div className="flex items-center justify-between border-b border-panel-border px-3 py-2">
@@ -675,10 +842,10 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
           <div className="mt-6">
             {!feedback ? (
               <div className="flex items-center justify-between gap-4">
-                {exercise.type === "query" ? (
+                {exercise.type === "query" || exercise.type === "code" ? (
                   hintsVisible ? (
                     <p className="font-mono text-[11px] text-ink-muted">
-                      Hint: {(exercise as QueryExercise).hint}
+                      Hint: {(exercise as QueryExercise | CodeExercise).hint}
                     </p>
                   ) : (
                     <button
@@ -699,11 +866,13 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                     (exercise.type === "mc" && mcChoice === null) ||
                     (exercise.type === "fill" &&
                       fillSlots.some((s) => s === null)) ||
-                    (exercise.type === "query" && !engineReady)
+                    (exercise.type === "query" && !engineReady) ||
+                    (exercise.type === "code" &&
+                      (!!runtimeLoading || running || checking))
                   }
                   className="shrink-0 border border-turf bg-turf/15 px-8 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25 disabled:cursor-not-allowed disabled:border-panel-border disabled:bg-panel disabled:text-ink-muted"
                 >
-                  Check
+                  {checking ? "Checking…" : "Check"}
                 </button>
               </div>
             ) : (
@@ -785,16 +954,17 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             </p>
           )}
           <div className="flex w-full max-w-sm flex-col gap-2">
-            {nextLessonId(lesson.id) ? (
+            {nextId ? (
               <Link
-                href={`/learn/${nextLessonId(lesson.id)}`}
+                href={`/learn/${nextId}`}
                 className="border border-turf bg-turf/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25"
               >
                 Next lesson
               </Link>
             ) : (
               <p className="font-mono text-xs text-ink-muted">
-                You&apos;ve cleared every live lesson. More drives coming soon.
+                You&apos;ve cleared every live lesson in this module. Switch
+                modules on the roadmap to keep going.
               </p>
             )}
             <Link

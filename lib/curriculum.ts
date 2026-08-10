@@ -4,10 +4,13 @@
 // Units 7–11 cover the non-SQL half of the promise on the landing page:
 // Python, statistics, visualization, Git, and R.
 //
-// `query` exercises run against the sql.js dataset in lib/fantasy-data.ts and
-// are therefore SQL-only. The non-SQL units use `mc` and `fill`, which grade
-// in plain JS — so nothing there pretends to execute the learner's Python or
-// R. Running real Python would mean shipping Pyodide; see docs/PLAN.md.
+// Exercise types:
+//   `query` — SQL-only; compares result sets in sql.js (lib/fantasy-data.ts).
+//   `code`  — live Python / R / SQL via lib/runtimes.ts (Pyodide / WebR /
+//             sql.js); grades by comparing printed output.
+//   `mc` / `fill` — plain JS; used for concepts (and still fine for any lang).
+// Modules (MODULES below) let learners take SQL, Python, R, etc. on their own
+// or follow the all-in-one pathway.
 
 export type MCExercise = {
   type: "mc";
@@ -44,7 +47,32 @@ export type QueryExercise = {
   explain: string;
 };
 
-export type Exercise = MCExercise | FillExercise | QueryExercise;
+/**
+ * Live-coding exercise for any language. The learner's code and the reference
+ * solution both run in the real runtime (Pyodide / WebR / sql.js) and their
+ * printed output is compared — so the learner must print the answer, same as
+ * they would in a real console.
+ *
+ * `query` (SQL-only, compares result sets) still exists and is the better fit
+ * for pure SELECT drills. Use `code` when the point is writing and running a
+ * program rather than shaping a result set.
+ */
+export type CodeExercise = {
+  type: "code";
+  lang: "python" | "r" | "sql";
+  prompt: string;
+  starter: string;
+  /** Reference solution, executed in the same runtime to produce the target output. */
+  expected: string;
+  hint: string;
+  explain: string;
+};
+
+export type Exercise =
+  | MCExercise
+  | FillExercise
+  | QueryExercise
+  | CodeExercise;
 
 export type TheoryCard = { title: string; text: string; code?: string };
 
@@ -1045,11 +1073,10 @@ export const COURSE = {
     },
 
     // ── Non-SQL skills ──────────────────────────────────────────────
-    // These units use only `mc` and `fill` exercises. `query` exercises run
-    // against sql.js, which can't execute Python, R, or git — so nothing here
-    // claims to run the learner's code. Concept checks and code-assembly
-    // drills are honest at this stage; a real Python runtime (Pyodide) is the
-    // upgrade path if these units earn it. See docs/PLAN.md.
+    // Python and R mix `mc`/`fill` concept drills with live `code` exercises
+    // (Pyodide / WebR via lib/runtimes.ts). Never use `query` here — that
+    // type is SQL-only (sql.js result sets). Stats/viz/Git stay on mc/fill
+    // because they aren't languages with a single in-browser REPL.
     {
       id: "u7",
       number: 7,
@@ -1124,6 +1151,17 @@ export const COURSE = {
               explain:
                 "float() turns text into a decimal number. This is the first thing you do to almost every column in a real dataset.",
             },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "This is real Python, running in your browser. Print this player's yards per catch — 128 yards on 8 catches.",
+              starter: "yards = 128\ncatches = 8\n\n# print yards per catch\n",
+              expected: "print(128 / 8)",
+              hint: "Divide with /, then wrap it in print(...) so the answer shows up.",
+              explain:
+                "16.0 — Python's / always returns a float. Your code ran for real; nothing here is simulated.",
+            },
           ],
         },
         {
@@ -1197,6 +1235,18 @@ export const COURSE = {
               explain:
                 "It's a silent wrong answer, not a crash. Bugs that produce plausible-but-wrong numbers are the dangerous ones — the code runs, the report ships, and nobody notices.",
             },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Loop over the weeks and print this player's season total.",
+              starter:
+                "weeks = [24.6, 18.2, 31.0, 12.5]\n\n# add them up, then print the total\n",
+              expected: "print(24.6 + 18.2 + 31.0 + 12.5)",
+              hint: "Start a variable at 0, loop with `for w in weeks:`, and use total += w. Then print(total).",
+              explain:
+                "86.3. A loop plus an accumulator is the shape of almost every season-long calculation you'll write.",
+            },
           ],
         },
         {
@@ -1262,6 +1312,19 @@ export const COURSE = {
               explain:
                 ".sort_values() is pandas' ORDER BY. (.arrange() is R's — you'll meet it in the R unit.)",
               drillSkip: true,
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Real pandas, running live. Print the names of every player who scored more than 20 — highest scorer first.",
+              starter:
+                'import pandas as pd\n\ndf = pd.DataFrame({\n    "player": ["Hurts", "Bijan", "Nacua", "Kelce"],\n    "points": [24.6, 18.2, 31.0, 22.4],\n})\n\n# filter to > 20, sort high to low, print the player column as a list\n',
+              expected:
+                'import pandas as pd\ndf = pd.DataFrame({"player":["Hurts","Bijan","Nacua","Kelce"],"points":[24.6,18.2,31.0,22.4]})\nprint(df[df["points"] > 20].sort_values("points", ascending=False)["player"].tolist())',
+              hint: 'Filter with df[df["points"] > 20], then .sort_values("points", ascending=False), then ["player"].tolist() inside print().',
+              explain:
+                "['Nacua', 'Hurts', 'Kelce'] — filter, then sort, then select. That's WHERE + ORDER BY + SELECT, in pandas.",
             },
           ],
         },
@@ -2065,6 +2128,19 @@ export const COURSE = {
               explain:
                 "It threads data through steps in reading order, which is why dplyr chains scan like sentences instead of nested function calls.",
             },
+            {
+              type: "code",
+              lang: "r",
+              prompt:
+                "Real R with dplyr, running in your browser. Print the players who scored over 20, highest first.",
+              starter:
+                'suppressMessages(library(dplyr))\n\ndf <- data.frame(\n  player = c("Hurts", "Bijan", "Nacua", "Kelce"),\n  points = c(24.6, 18.2, 31.0, 22.4)\n)\n\n# filter to points > 20, arrange descending, then print(out$player)\n',
+              expected:
+                'suppressMessages(library(dplyr))\ndf <- data.frame(player=c("Hurts","Bijan","Nacua","Kelce"), points=c(24.6,18.2,31.0,22.4))\nout <- df |> filter(points > 20) |> arrange(desc(points))\nprint(out$player)',
+              hint: "df |> filter(points > 20) |> arrange(desc(points)), store it in `out`, then print(out$player).",
+              explain:
+                'Same three moves as SQL and pandas — filter, arrange, select — just spelled in dplyr.',
+            },
           ],
         },
         {
@@ -2144,8 +2220,83 @@ export const XP_PER_EXERCISE = 10;
 export const XP_RETRY = 5;
 export const PERFECT_BONUS = 20;
 
-export function liveLessons(): { lesson: Lesson; unit: Unit }[] {
-  return COURSE.units
+/**
+ * Modules let a learner take one skill on its own instead of the whole
+ * roadmap — "just teach me Python" is a completely legitimate reason to show
+ * up. ALL_MODULE is the combined pathway and stays the default.
+ *
+ * Progress (`completedLessons`) is global on purpose: a lesson you finished
+ * inside the SQL module still counts when you switch to the all-in-one view.
+ */
+export type Module = {
+  id: string;
+  name: string;
+  blurb: string;
+  unitIds: string[];
+};
+
+export const ALL_MODULE = "all";
+
+export const MODULES: Module[] = [
+  {
+    id: ALL_MODULE,
+    name: "All-in-one pathway",
+    blurb:
+      "Every skill in order, the way a career-changer should take it: SQL, Python, statistics, charts, Git, R.",
+    unitIds: ["u1", "u2", "u3", "u4", "u5", "u6", "u7", "u8", "u9", "u10", "u11"],
+  },
+  {
+    id: "sql",
+    name: "SQL",
+    blurb: "Select, filter, rank, and aggregate real stat sheets.",
+    unitIds: ["u1", "u2", "u3", "u4", "u5", "u6"],
+  },
+  {
+    id: "python",
+    name: "Python & pandas",
+    blurb: "Variables, loops, and DataFrames — with code that really runs.",
+    unitIds: ["u7"],
+  },
+  {
+    id: "stats",
+    name: "Statistics",
+    blurb: "Averages, sample size, and regression to the mean.",
+    unitIds: ["u8"],
+  },
+  {
+    id: "viz",
+    name: "Visualization",
+    blurb: "Chart choice, honest axes, and making a point land.",
+    unitIds: ["u9"],
+  },
+  {
+    id: "git",
+    name: "Git & GitHub",
+    blurb: "Commits, branches, pull requests, portfolio READMEs.",
+    unitIds: ["u10"],
+  },
+  {
+    id: "r",
+    name: "R & the tidyverse",
+    blurb: "dplyr and ggplot2, executed live in your browser.",
+    unitIds: ["u11"],
+  },
+];
+
+export function getModule(id: string | null | undefined): Module {
+  return MODULES.find((m) => m.id === id) ?? MODULES[0];
+}
+
+/** Units belonging to a module, in course order (includes coming-soon ones). */
+export function moduleUnits(moduleId: string): Unit[] {
+  const mod = getModule(moduleId);
+  return (COURSE.units as Unit[]).filter((u) => mod.unitIds.includes(u.id));
+}
+
+export function liveLessons(
+  moduleId: string = ALL_MODULE,
+): { lesson: Lesson; unit: Unit }[] {
+  return moduleUnits(moduleId)
     .filter((u) => u.status === "live")
     .flatMap((unit) => unit.lessons.map((lesson) => ({ lesson, unit })));
 }
@@ -2153,11 +2304,16 @@ export function liveLessons(): { lesson: Lesson; unit: Unit }[] {
 export function getLesson(
   id: string,
 ): { lesson: Lesson; unit: Unit } | undefined {
-  return liveLessons().find((entry) => entry.lesson.id === id);
+  // Always resolves against the full course — a lesson URL must work no
+  // matter which module the learner currently has selected.
+  return liveLessons(ALL_MODULE).find((entry) => entry.lesson.id === id);
 }
 
-export function nextLessonId(id: string): string | null {
-  const all = liveLessons();
+export function nextLessonId(
+  id: string,
+  moduleId: string = ALL_MODULE,
+): string | null {
+  const all = liveLessons(moduleId);
   const idx = all.findIndex((entry) => entry.lesson.id === id);
   if (idx === -1 || idx === all.length - 1) return null;
   return all[idx + 1].lesson.id;

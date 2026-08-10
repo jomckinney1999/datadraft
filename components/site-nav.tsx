@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ThemeToggle from "@/components/theme-toggle";
 
 const NAV_LINKS = [
@@ -14,8 +14,40 @@ const NAV_LINKS = [
   { href: "#stat-guru", label: "NFL Stat Guru", accent: "gold" as const },
 ];
 
+/** Primary skill tracks shown in the Learn dropdown. */
+const LEARN_TRACKS = [
+  {
+    id: "all",
+    label: "All-in-one pathway",
+    blurb: "SQL → Python → stats → viz → Git → R",
+  },
+  { id: "sql", label: "SQL", blurb: "Select, filter, rank, aggregate" },
+  { id: "python", label: "Python", blurb: "pandas — code that runs live" },
+  { id: "r", label: "R", blurb: "tidyverse — executed in-browser" },
+];
+
 export default function SiteNav() {
   const [open, setOpen] = useState(false);
+  const [learnOpen, setLearnOpen] = useState(false);
+  const learnRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!learnOpen) return;
+    function onPointer(e: MouseEvent) {
+      if (learnRef.current && !learnRef.current.contains(e.target as Node)) {
+        setLearnOpen(false);
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setLearnOpen(false);
+    }
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [learnOpen]);
 
   return (
     <header className="relative z-20 border-b border-panel-border/80">
@@ -41,12 +73,59 @@ export default function SiteNav() {
               {link.label}
             </a>
           ))}
-          <a
-            href="/learn"
-            className="border border-turf/50 bg-turf/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-turf transition-colors duration-150 hover:border-turf hover:bg-turf/20"
-          >
-            Start learning
-          </a>
+
+          <div className="relative" ref={learnRef}>
+            <button
+              type="button"
+              aria-expanded={learnOpen}
+              aria-haspopup="menu"
+              onClick={() => setLearnOpen((v) => !v)}
+              className="inline-flex items-center gap-1.5 border border-turf/50 bg-turf/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-turf transition-colors duration-150 hover:border-turf hover:bg-turf/20"
+            >
+              Learn
+              <svg
+                aria-hidden
+                viewBox="0 0 12 12"
+                className={`h-2.5 w-2.5 transition-transform duration-150 ${
+                  learnOpen ? "rotate-180" : ""
+                }`}
+              >
+                <path
+                  d="M2 4l4 4 4-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+
+            {learnOpen && (
+              <div
+                role="menu"
+                className="absolute right-0 top-full z-30 mt-2 w-64 border border-panel-border bg-night/95 py-1 shadow-scoreboard backdrop-blur-sm"
+              >
+                {LEARN_TRACKS.map((track) => (
+                  <a
+                    key={track.id}
+                    role="menuitem"
+                    href={`/learn?module=${track.id}`}
+                    onClick={() => setLearnOpen(false)}
+                    className="block px-3 py-2.5 transition-colors duration-150 hover:bg-turf/10"
+                  >
+                    <span className="block font-mono text-[11px] uppercase tracking-wider text-turf">
+                      {track.label}
+                    </span>
+                    <span className="mt-0.5 block text-[12px] leading-snug text-ink-muted">
+                      {track.blurb}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+
           <ThemeToggle />
         </nav>
 
@@ -95,13 +174,23 @@ export default function SiteNav() {
                 {link.label}
               </a>
             ))}
-            <a
-              href="/learn"
-              onClick={() => setOpen(false)}
-              className="mt-2 border border-turf/50 bg-turf/10 px-3 py-2.5 text-center font-mono text-xs uppercase tracking-wider text-turf transition-colors duration-150 hover:border-turf hover:bg-turf/20"
-            >
-              Start learning
-            </a>
+
+            <p className="mt-3 px-2 label-broadcast text-[10px] text-ink-muted">
+              Learn
+            </p>
+            {LEARN_TRACKS.map((track) => (
+              <a
+                key={track.id}
+                href={`/learn?module=${track.id}`}
+                onClick={() => setOpen(false)}
+                className="px-2 py-2.5 font-mono text-xs uppercase tracking-wider text-turf transition-colors duration-150 hover:bg-turf/10"
+              >
+                {track.label}
+                <span className="mt-0.5 block font-sans text-[11px] normal-case tracking-normal text-ink-muted">
+                  {track.blurb}
+                </span>
+              </a>
+            ))}
           </div>
         </nav>
       )}

@@ -58,7 +58,7 @@ Four commits on `main`, all deployed:
 
 - **Positioning pivot** — the site now sells the full data-analyst toolkit (SQL, Python, R, Git, stats) across three sports, with a sport picker on the landing page (`#pick-your-sport`, `lib/sports.ts`, `lib/use-sport.ts`). Football is the only `live` sport; NBA/MLB are labeled "In build". Reasoning and the risks it creates are logged in `docs/PLAN.md`.
 - **Non-SQL curriculum shipped** — `lib/curriculum.ts` units 7–11 (Python/pandas, statistics, visualization, Git/GitHub, R/tidyverse): 15 lessons, ~60 exercises, same XP/hearts/streak flow as the SQL units. `COURSE.title` is now "Analyst Fundamentals: Rookie Season" and the `rookie-season` draft track was rewritten to match — the track **id** was kept stable so existing drafted picks don't orphan.
-- **Hard constraint on those units:** they use only `mc` and `fill`. `query` runs on sql.js and is SQL-only, so a Python `query` exercise would silently never grade. Nothing in those units claims to execute learner code, and copy shouldn't either.
+- **Live coding shipped** — Python (Pyodide) and R (WebR) run in-browser via `lib/runtimes.ts`; `code` exercises grade printed output. SQL keeps `query` result-set grading. Modules (`MODULES` / `lib/use-module.ts`) let learners take SQL, Python, R, or the all-in-one pathway. Still don't add `query` exercises to units 7–11 — use `code` instead.
 - **Still football-only.** Every example in all 11 units uses football data, while the picker offers three sports. That's the live gap now — see `docs/PLAN.md` → Open questions.
 - **Sport choice is a standalone localStorage key** (`sqlsports-sport`), deliberately *not* in `lib/progress.ts`, to avoid touching the progress schema. Fold it into `Progress` when accounts land.
 

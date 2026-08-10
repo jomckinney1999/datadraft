@@ -1,0 +1,73 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+/**
+ * Cycles the job title in the hero to show the same skills open several doors.
+ *
+ * Accessibility: the animation is decorative, so the rotating word is hidden
+ * from assistive tech and the full list is exposed once as static text. It
+ * also honours prefers-reduced-motion by holding on the first role rather
+ * than animating — a looping element is a real problem for some vestibular
+ * and attention conditions.
+ */
+
+export const ROLES = [
+  "data analyst",
+  "data scientist",
+  "software engineer",
+  "forward deployed engineer",
+  "AI expert",
+  "analytics engineer",
+  "BI developer",
+];
+
+const INTERVAL_MS = 2200;
+
+export default function RotatingRoles() {
+  const [index, setIndex] = useState(0);
+  const [leaving, setLeaving] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (media.matches) return;
+
+    let swapTimer: number;
+    const tick = window.setInterval(() => {
+      setLeaving(true);
+      swapTimer = window.setTimeout(() => {
+        setIndex((i) => (i + 1) % ROLES.length);
+        setLeaving(false);
+      }, 260);
+    }, INTERVAL_MS);
+
+    return () => {
+      window.clearInterval(tick);
+      window.clearTimeout(swapTimer);
+    };
+  }, []);
+
+  return (
+    <span className="relative inline-block align-baseline">
+      {/* Reserves the width of the longest role so the line never reflows. */}
+      <span aria-hidden className="invisible whitespace-nowrap">
+        forward deployed engineer
+      </span>
+
+      <span
+        aria-hidden
+        className={`absolute inset-0 whitespace-nowrap text-gold transition-all duration-[260ms] ease-out ${
+          leaving
+            ? "-translate-y-1 opacity-0 blur-[1px]"
+            : "translate-y-0 opacity-100 blur-0"
+        }`}
+      >
+        {ROLES[index]}
+      </span>
+
+      <span className="sr-only">
+        {ROLES.slice(0, -1).join(", ")}, or {ROLES[ROLES.length - 1]}
+      </span>
+    </span>
+  );
+}

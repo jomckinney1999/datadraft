@@ -5,7 +5,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { COURSE, liveLessons, type Lesson, type Unit } from "@/lib/curriculum";
+import {
+  COURSE,
+  liveLessons,
+  moduleUnits,
+  getModule,
+  MODULES,
+  type Lesson,
+  type Unit,
+} from "@/lib/curriculum";
+import { useModule } from "@/lib/use-module";
 import { loadProgress, displayStreak, type Progress } from "@/lib/progress";
 import { getStyle } from "@/lib/playbook";
 import { getTrack } from "@/lib/draft";
@@ -67,11 +76,21 @@ export default function LearnPage() {
     draftedTrack: null,
   });
 
+  const { moduleId, setModule, hydrated } = useModule();
+
   useEffect(() => {
     setProgress(loadProgress());
   }, []);
 
-  const all = liveLessons();
+  // Deep-link from the site nav Learn dropdown: /learn?module=python
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("module");
+    if (q && MODULES.some((m) => m.id === q)) setModule(q);
+  }, [setModule]);
+
+  const activeModule = getModule(moduleId);
+  const visibleUnits = moduleUnits(moduleId);
+  const all = liveLessons(moduleId);
   const completed = new Set(progress.completedLessons);
   const current =
     all.find((e) => !completed.has(e.lesson.id)) ?? all[all.length - 1];
@@ -124,13 +143,13 @@ export default function LearnPage() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="label-broadcast text-turf">
-              course 1 · analyst roadmap
+              {moduleId === "all" ? "course 1 · analyst roadmap" : "module"}
             </p>
             <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
-              {COURSE.title}
+              {moduleId === "all" ? COURSE.title : activeModule.name}
             </h1>
             <p className="mt-3 max-w-lg text-sm leading-relaxed text-ink-soft">
-              {COURSE.tagline}
+              {moduleId === "all" ? COURSE.tagline : activeModule.blurb}
             </p>
             <p className="mt-2 max-w-lg font-mono text-[11px] leading-relaxed text-ink-muted">
               No football knowledge required — the game is just the dataset,
@@ -139,6 +158,34 @@ export default function LearnPage() {
           </div>
           <div className="hidden shrink-0 sm:block">
             <Coach mood={pct === 100 ? "cheer" : "idle"} size={110} />
+          </div>
+        </div>
+
+        {/* Module picker — take one skill on its own, or the whole roadmap. */}
+        <div className="mt-5 border-t border-panel-border pt-4">
+          <label
+            htmlFor="module-select"
+            className="label-broadcast block text-[10px]"
+          >
+            What do you want to learn?
+          </label>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <select
+              id="module-select"
+              value={hydrated ? moduleId : "all"}
+              onChange={(e) => setModule(e.target.value)}
+              className="min-w-[220px] border border-panel-border bg-night px-3 py-2 font-mono text-sm text-ink outline-none transition-colors focus:border-turf"
+            >
+              {MODULES.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
+            <span className="font-mono text-[11px] text-ink-muted">
+              {all.length} lesson{all.length === 1 ? "" : "s"} ·{" "}
+              {completedCount} done
+            </span>
           </div>
         </div>
 
@@ -159,7 +206,7 @@ export default function LearnPage() {
         </div>
 
         <div className="mt-5 flex flex-wrap items-center gap-2">
-          {COURSE.units
+          {visibleUnits
             .filter((u) => u.status === "live")
             .flatMap((u) => u.skills)
             .map((skill) => (
@@ -228,8 +275,8 @@ export default function LearnPage() {
         )}
       </section>
 
-      {/* the field — unit by unit */}
-      {COURSE.units.map((unit) => (
+      {/* the field — unit by unit, scoped to the selected module */}
+      {visibleUnits.map((unit) => (
         <UnitSection
           key={unit.id}
           unit={unit}

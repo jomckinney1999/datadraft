@@ -5,6 +5,7 @@ import SupportWidget from "@/components/support-widget";
 import SiteNav from "@/components/site-nav";
 import ActionGallery from "@/components/action-gallery";
 import SportPicker from "@/components/sport-picker";
+import RotatingRoles from "@/components/rotating-roles";
 
 const STATS = [
   { label: "Skills taught", value: "6" },
@@ -202,8 +203,9 @@ export default function Home() {
                   </span>
                 </h1>
 
-                <p className="mt-6 max-w-md font-display text-2xl font-medium leading-snug text-pop sm:text-[1.75rem] animate-[fadeUp_0.45s_ease-out_0.1s_forwards] opacity-0">
-                  Become a data analyst.{" "}
+                <p className="mt-6 max-w-lg font-display text-2xl font-medium leading-snug text-pop sm:text-[1.75rem] animate-[fadeUp_0.45s_ease-out_0.1s_forwards] opacity-0">
+                  Become a <RotatingRoles />.
+                  <br />
                   <span className="text-gold">Sports are the lens.</span>
                 </p>
 
