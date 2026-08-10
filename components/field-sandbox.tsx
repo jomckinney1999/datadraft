@@ -14,6 +14,7 @@ import {
   type FieldData,
 } from "@/lib/field-data";
 import Coach from "@/components/coach";
+import CodeEditor from "@/components/code-editor";
 
 type EngineStatus = "loading" | "ready" | "error";
 
@@ -234,12 +235,13 @@ export default function FieldSandbox() {
           </div>
         )}
 
-        <textarea
+        <CodeEditor
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          spellCheck={false}
-          className="min-h-[180px] w-full flex-none resize-y bg-transparent px-4 py-3 font-mono text-[13px] leading-relaxed text-ink outline-none caret-turf"
-          aria-label="SQL editor"
+          onChange={setQuery}
+          lang="sql"
+          rows={9}
+          ariaLabel="SQL editor"
+          className="min-h-[180px] flex-none"
         />
 
         <div className="flex items-center justify-between border-y border-panel-border px-3 py-2">

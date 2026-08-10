@@ -45,6 +45,15 @@
   --shadow-float: 0 24px 60px rgba(0, 0, 0, 0.55);
   --shadow-hero-panel: 0 24px 80px rgba(0, 0, 0, 0.55);
   --photo-scrim: 0.35;
+
+  /* Syntax highlighting. Keywords borrow turf and strings borrow gold so the
+     editor reads as part of the brand rather than a pasted-in IDE theme. */
+  --c-syn-keyword: 63 217 115;
+  --c-syn-string: 242 201 76;
+  --c-syn-number: 125 211 252;
+  --c-syn-func: 196 181 253;
+  --c-syn-comment: 141 149 181;
+  --c-syn-punct: 190 197 222;
 }
 
 :root[data-theme="light"] {
@@ -81,6 +90,15 @@
   --shadow-float: 0 18px 45px rgba(19, 24, 34, 0.14);
   --shadow-hero-panel: 0 20px 60px rgba(19, 24, 34, 0.16);
   --photo-scrim: 0.12;
+
+  /* Syntax colours darkened for white editors — the dark-mode set is
+     unreadable on light. Each clears 4.5:1 against the panel background. */
+  --c-syn-keyword: 21 122 62;
+  --c-syn-string: 140 90 10;
+  --c-syn-number: 12 74 110;
+  --c-syn-func: 91 33 182;
+  --c-syn-comment: 92 101 127;
+  --c-syn-punct: 58 66 86;
 }
 
 html {
@@ -253,6 +271,44 @@ body {
 .theme-switching *::before,
 .theme-switching *::after {
   transition: none !important;
+}
+
+/* ── Code editor ──────────────────────────────────────────── */
+
+/* The highlighted <pre> and the transparent <textarea> stacked on top of it
+   MUST lay out text identically or the caret drifts away from the glyphs.
+   Every property that affects glyph position lives here, applied to both
+   layers, so the two can't silently diverge. */
+.code-layer {
+  margin: 0;
+  border: 0;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  letter-spacing: normal;
+  tab-size: 2;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.tok-keyword {
+  color: rgb(var(--c-syn-keyword));
+  font-weight: 600;
+}
+.tok-string {
+  color: rgb(var(--c-syn-string));
+}
+.tok-number {
+  color: rgb(var(--c-syn-number));
+}
+.tok-func {
+  color: rgb(var(--c-syn-func));
+}
+.tok-comment {
+  color: rgb(var(--c-syn-comment));
+  font-style: italic;
+}
+.tok-punct {
+  color: rgb(var(--c-syn-punct));
 }
 
 /* Toggle icon swap — driven by the root attribute rather than React state, so

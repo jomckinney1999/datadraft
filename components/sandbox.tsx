@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Database, QueryExecResult, SqlJsStatic } from "sql.js";
 import { PRESETS, SCHEMA, buildSeedSql } from "@/lib/fantasy-data";
+import CodeEditor from "@/components/code-editor";
 
 const POSITION_STYLES: Record<string, string> = {
   QB: "bg-gold/15 text-gold",
@@ -219,15 +220,18 @@ export default function Sandbox() {
             <span key={i}>{i + 1}</span>
           ))}
         </div>
-        <textarea
+        <CodeEditor
           value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
+          onChange={(next) => {
+            setQuery(next);
             setActivePreset(null);
           }}
-          spellCheck={false}
-          className="h-full min-h-[140px] w-full resize-none bg-transparent py-3 pl-10 pr-3 font-mono text-[13px] leading-5 text-ink outline-none caret-turf"
-          aria-label="SQL query editor"
+          lang="sql"
+          rows={8}
+          ariaLabel="SQL query editor"
+          className="min-h-[140px]"
+          padding="py-3 pl-10 pr-3"
+          textSize="text-[13px] leading-5"
         />
       </div>
 

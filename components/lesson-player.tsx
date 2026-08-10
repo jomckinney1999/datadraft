@@ -44,6 +44,7 @@ import { useSport } from "@/lib/use-sport";
 import { completeLesson, loadProgress } from "@/lib/progress";
 import { getStyle, type PlaybookStyle } from "@/lib/playbook";
 import Coach, { type CoachMood } from "@/components/coach";
+import CodeEditor from "@/components/code-editor";
 
 type Phase =
   | "loading"
@@ -844,14 +845,13 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                       : "runtime ready"}
                   </span>
                 </div>
-                <textarea
+                <CodeEditor
                   value={codeText}
-                  onChange={(e) => setCodeText(e.target.value)}
-                  spellCheck={false}
+                  onChange={setCodeText}
+                  lang={exercise.lang}
                   rows={9}
                   disabled={!!feedback}
-                  className="w-full resize-none bg-transparent px-4 py-3 font-mono text-[13px] leading-relaxed text-ink outline-none caret-turf"
-                  aria-label={`${LANG_LABEL[exercise.lang]} answer editor`}
+                  ariaLabel={`${LANG_LABEL[exercise.lang]} answer editor`}
                 />
                 <div className="flex items-center justify-between border-t border-panel-border px-3 py-2">
                   <p className="font-mono text-[10px] text-ink-muted">
@@ -897,14 +897,13 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                     {engineReady ? "engine ready" : "loading engine…"}
                   </span>
                 </div>
-                <textarea
+                <CodeEditor
                   value={queryText}
-                  onChange={(e) => setQueryText(e.target.value)}
-                  spellCheck={false}
+                  onChange={setQueryText}
+                  lang="sql"
                   rows={5}
                   disabled={!!feedback}
-                  className="w-full resize-none bg-transparent px-4 py-3 font-mono text-[13px] leading-relaxed text-ink outline-none caret-turf"
-                  aria-label="SQL answer editor"
+                  ariaLabel="SQL answer editor"
                 />
                 <div className="flex items-center justify-between border-t border-panel-border px-3 py-2">
                   <p className="font-mono text-[10px] text-ink-muted">
