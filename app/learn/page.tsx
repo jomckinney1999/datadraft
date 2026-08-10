@@ -123,7 +123,9 @@ export default function LearnPage() {
       <section className="border border-panel-border bg-panel/80 p-6 shadow-scoreboard">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="label-broadcast text-turf">course 1 · sql roadmap</p>
+            <p className="label-broadcast text-turf">
+              course 1 · analyst roadmap
+            </p>
             <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
               {COURSE.title}
             </h1>

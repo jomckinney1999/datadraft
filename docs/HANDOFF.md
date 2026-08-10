@@ -57,7 +57,9 @@ Four commits on `main`, all deployed:
 ## Added 2026-08-10 (after this doc was written)
 
 - **Positioning pivot** — the site now sells the full data-analyst toolkit (SQL, Python, R, Git, stats) across three sports, with a sport picker on the landing page (`#pick-your-sport`, `lib/sports.ts`, `lib/use-sport.ts`). Football is the only `live` sport; NBA/MLB are labeled "In build". Reasoning and the risks it creates are logged in `docs/PLAN.md`.
-- **The biggest open gap this created:** the landing page promises six skills; `/learn` ships SQL-on-football. Every non-SQL claim in the hero is currently unbacked by lesson content. See the top item under `docs/PLAN.md` → Open questions.
+- **Non-SQL curriculum shipped** — `lib/curriculum.ts` units 7–11 (Python/pandas, statistics, visualization, Git/GitHub, R/tidyverse): 15 lessons, ~60 exercises, same XP/hearts/streak flow as the SQL units. `COURSE.title` is now "Analyst Fundamentals: Rookie Season" and the `rookie-season` draft track was rewritten to match — the track **id** was kept stable so existing drafted picks don't orphan.
+- **Hard constraint on those units:** they use only `mc` and `fill`. `query` runs on sql.js and is SQL-only, so a Python `query` exercise would silently never grade. Nothing in those units claims to execute learner code, and copy shouldn't either.
+- **Still football-only.** Every example in all 11 units uses football data, while the picker offers three sports. That's the live gap now — see `docs/PLAN.md` → Open questions.
 - **Sport choice is a standalone localStorage key** (`sqlsports-sport`), deliberately *not* in `lib/progress.ts`, to avoid touching the progress schema. Fold it into `Progress` when accounts land.
 
 ## Open threads (roughly in priority order)

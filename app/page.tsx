@@ -64,29 +64,48 @@ const WHY_COMPARISON = [
   },
 ];
 
+// Mirrors the live units in lib/curriculum.ts — keep the two in sync.
 const ROADMAP = [
   {
     phase: "01",
-    title: "Select & Filter",
-    blurb: "Pull week results. Rank players. Learn WHERE before you memorize syntax.",
+    title: "SQL",
+    blurb:
+      "Select, filter, rank, and aggregate real stat sheets. Four units, written against live data.",
     accent: "turf" as const,
   },
   {
     phase: "02",
-    title: "Joins & Matchups",
-    blurb: "Connect rosters to schedules. One join at a time — defense vs. offense context.",
+    title: "Python & pandas",
+    blurb:
+      "Variables, loops, and DataFrames. Every SQL verb you know has a pandas twin.",
     accent: "gold" as const,
   },
   {
     phase: "03",
-    title: "Aggregations",
-    blurb: "Season totals, rolling averages, share of team targets. GROUP BY that earns its keep.",
+    title: "Statistical thinking",
+    blurb:
+      "Mean vs. median, sample size, regression to the mean. Stop reporting flukes.",
     accent: "turf" as const,
   },
   {
     phase: "04",
-    title: "Window Functions",
-    blurb: "Rank within position. Compare to league median. See the play the way analysts do.",
+    title: "Visualization",
+    blurb:
+      "Pick the right chart, label it honestly, cut everything that isn't the argument.",
+    accent: "gold" as const,
+  },
+  {
+    phase: "05",
+    title: "Git & GitHub",
+    blurb:
+      "Commits, branches, pull requests — what turns your capstone into something hiring managers can open.",
+    accent: "turf" as const,
+  },
+  {
+    phase: "06",
+    title: "R & the tidyverse",
+    blurb:
+      "dplyr and ggplot2. A huge share of public sports analytics is written in R.",
     accent: "gold" as const,
   },
 ];
@@ -416,11 +435,12 @@ export default function Home() {
               Curriculum roadmap
             </p>
             <h2 className="font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
-              From SELECT to window functions
+              From your first SELECT to a portfolio anyone can open
             </h2>
             <p className="mt-3 max-w-xl text-base leading-relaxed text-ink-soft">
-              Four phases. Each one unlocks a real fantasy question you couldn&apos;t
-              answer in a spreadsheet alone.
+              Six skills, one roadmap. Each phase unlocks a real question you
+              couldn&apos;t answer in a spreadsheet alone — and all of it is
+              playable now, no account required.
             </p>
 
             <ol className="mt-10 grid gap-4 sm:grid-cols-2">

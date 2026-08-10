@@ -14,12 +14,12 @@ export type Track = {
 export const TRACKS: Track[] = [
   {
     id: "rookie-season",
-    name: "SQL Fundamentals: Rookie Season",
+    name: "Analyst Fundamentals: Rookie Season",
     classOf: "Available now",
     status: "live",
     scoutingReport:
-      "The consensus #1 overall. Takes you from zero SQL to filtering, ranking, and aggregating real football data — the beginner-to-expert roadmap starts here.",
-    skills: ["SELECT", "WHERE", "ORDER BY", "GROUP BY", "HAVING"],
+      "The consensus #1 overall. Zero to job-ready fundamentals on real sports data: SQL first, then Python, statistics, visualization, Git, and R.",
+    skills: ["SQL", "Python", "Statistics", "Charts", "Git", "R"],
   },
   {
     id: "contender-season",
@@ -41,12 +41,12 @@ export const TRACKS: Track[] = [
   },
   {
     id: "dynasty-mode",
-    name: "Dynasty Mode: Python & Dashboards",
+    name: "Dynasty Mode: Prediction & Machine Learning",
     classOf: "Future class",
     status: "declaring",
     scoutingReport:
-      "The franchise-player extension: notebooks, visualization, and BI on top of your SQL base.",
-    skills: ["Python", "Dashboards", "Pipelines"],
+      "The franchise-player extension: build models that project performance instead of just describing it, then measure honestly whether they beat a coin flip.",
+    skills: ["Modeling", "Validation", "Pipelines"],
   },
 ];
 
