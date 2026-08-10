@@ -4,7 +4,23 @@ Education platform teaching SQL and data analytics through fantasy football. Nex
 
 ## Design system
 
-Fantasy-football palette, defined once in `tailwind.config.ts` + `app/globals.css` CSS vars: `night` (draft-night indigo #0C1022 family), `turf` (green #3FD973, primary accent), `gold` (championship gold #F2C94C, secondary), plus `ink`/`panel` neutrals. These replaced an older teal/amber scheme in Aug 2026 — never reintroduce `teal`/`amber` token names, and change colors by editing token values, not component classes. A few SVGs (Coach's headset, heart/flame icons) hard-code the accent hexes; grep for `#3FD973`/`#F2C94C` when changing them.
+Fantasy-football palette, defined once in `tailwind.config.ts` + `app/globals.css`: `night` (draft-night indigo #0C1022 family), `turf` (green #3FD973, primary accent), `gold` (championship gold #F2C94C, secondary), plus `ink`/`panel` neutrals. These replaced an older teal/amber scheme in Aug 2026 — never reintroduce `teal`/`amber` token names, and change colors by editing token values, not component classes.
+
+### Light + dark mode
+
+Both themes ship. Every token resolves through a CSS variable holding an `"r g b"` channel triplet — declared in `app/globals.css` under `:root` (dark, the default) and `:root[data-theme="light"]`, wired into Tailwind as `rgb(var(--c-x) / <alpha-value>)`. That indirection is what keeps the ~186 alpha modifiers (`bg-turf/10`, `border-panel-border/60`) working while the palette flips.
+
+- **Use the tokens.** Never hardcode a hex, `rgba()`, or `text-[#...]` in a component — it won't flip. For glows/scrims/gradients that need per-theme tuning, add a class in `globals.css` (see `.rays-turf`, `.yard-lines`, `.edge-glow-gold`) rather than an inline `style`. Coach Blitz (`components/coach.tsx`) is the deliberate exception — it's an illustration, and its hexes stay fixed in both themes.
+- **Light-mode turf and gold are far darker** than their dark-mode values, calibrated against the tightest real pairing (accent text on an accent/10 chip), not against plain white. Every token pair clears WCAG AA 4.5:1 in both themes — re-measure if you change them.
+- `--glow-strength` is `1` in dark and `0` in light, so the scoreboard glow classes multiply to nothing on white instead of smearing.
+- `.theme-dark` re-asserts the dark values on any subtree, if a section ever needs to stay dark in light mode.
+- **The toggle lives in every route's header** (`components/theme-toggle.tsx`), except the lesson player — its top bar is deliberately minimal (quit / progress / hearts). Choice persists in `localStorage` under `sqlsports-theme` and defaults to the OS preference until the visitor picks explicitly.
+- `app/layout.tsx` runs a blocking inline script that sets `data-theme` before first paint. It mirrors the resolution order in `theme-toggle.tsx` — **change both or neither**, or the page flashes the wrong theme on load.
+- **Don't remove the `.theme-switching` transition suppression.** Chrome does not re-resolve a `var()`-derived color on an element with an active `transition-colors`, so without it every button, card, and nav link stays painted in the *previous* theme's colors after a toggle. It is a correctness fix, not polish.
+
+## Sport selection
+
+The learner picks football, basketball, or baseball as their lens (`lib/sports.ts`, `components/sport-picker.tsx`, persisted via `lib/use-sport.ts` under `sqlsports-sport`). Football is `status: "live"` — it's the only one with a real dataset (`public/field-data.json`); basketball and baseball are `status: "building"` and are labeled that way everywhere they appear. Don't mark a sport live until a pipeline actually backs it. The choice is kept in its own localStorage key rather than in `lib/progress.ts` to avoid touching the progress schema — fold it into `Progress` when accounts land (LAUNCH-PLAN Phase 1).
 
 ## Gamified learning MVP (`/learn`)
 

@@ -7,6 +7,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import ThemeToggle from "@/components/theme-toggle";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   QUIZ,
@@ -60,22 +61,25 @@ function PlaybookQuiz() {
             playbook style
           </span>
         </Link>
-        {!done && (
-          <div className="flex items-center gap-1.5">
-            {QUIZ.map((_, i) => (
-              <span
-                key={i}
-                className={`h-2 w-2 rounded-full ${
-                  i < answers.length
-                    ? "bg-turf"
-                    : i === answers.length
-                      ? "bg-gold"
-                      : "bg-panel-hover"
-                }`}
-              />
-            ))}
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          {!done && (
+            <div className="flex items-center gap-1.5">
+              {QUIZ.map((_, i) => (
+                <span
+                  key={i}
+                  className={`h-2 w-2 rounded-full ${
+                    i < answers.length
+                      ? "bg-turf"
+                      : i === answers.length
+                        ? "bg-gold"
+                        : "bg-panel-hover"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+          <ThemeToggle />
+        </div>
       </header>
 
       {!done ? (

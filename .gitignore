@@ -21,6 +21,9 @@
 # local reference images (curated copies live in /public)
 /Pictures
 
+# local editor/tooling state
+/.claude
+
 # debug
 npm-debug.log*
 yarn-debug.log*

@@ -377,7 +377,7 @@ export default function Sandbox() {
                             className={`px-3 py-2.5 ${
                               isNumeric
                                 ? "text-right stat-number text-[14px]"
-                                : "font-mono text-[13px] text-[#BEC5DE]"
+                                : "font-mono text-[13px] text-ink-soft"
                             }`}
                           >
                             {cell === null ? (

@@ -10,33 +10,37 @@ const config = {
   ],
   theme: {
     extend: {
+      // Each token resolves through a CSS variable holding an "r g b" channel
+      // triplet, so `data-theme` on <html> flips the whole palette at once and
+      // Tailwind's alpha modifiers (bg-turf/10, border-panel-border/60) still
+      // compose. Values live in app/globals.css.
       colors: {
         night: {
-          DEFAULT: "#0C1022",
-          50: "#1E2542",
-          100: "#171C36",
-          200: "#121629",
-          300: "#0C1022",
+          DEFAULT: "rgb(var(--c-night) / <alpha-value>)",
+          50: "rgb(var(--c-night-50) / <alpha-value>)",
+          100: "rgb(var(--c-night-100) / <alpha-value>)",
+          200: "rgb(var(--c-night-200) / <alpha-value>)",
+          300: "rgb(var(--c-night-300) / <alpha-value>)",
         },
         turf: {
-          DEFAULT: "#3FD973",
-          dim: "#2FAD5C",
-          glow: "rgba(63, 217, 115, 0.15)",
+          DEFAULT: "rgb(var(--c-turf) / <alpha-value>)",
+          dim: "rgb(var(--c-turf-dim) / <alpha-value>)",
+          glow: "rgb(var(--c-turf) / 0.15)",
         },
         gold: {
-          DEFAULT: "#F2C94C",
-          dim: "#C9A032",
-          glow: "rgba(242, 201, 76, 0.15)",
+          DEFAULT: "rgb(var(--c-gold) / <alpha-value>)",
+          dim: "rgb(var(--c-gold-dim) / <alpha-value>)",
+          glow: "rgb(var(--c-gold) / 0.15)",
         },
         ink: {
-          muted: "#8D95B5",
-          soft: "#BEC5DE",
-          DEFAULT: "#ECEFFA",
+          muted: "rgb(var(--c-ink-muted) / <alpha-value>)",
+          soft: "rgb(var(--c-ink-soft) / <alpha-value>)",
+          DEFAULT: "rgb(var(--c-ink) / <alpha-value>)",
         },
         panel: {
-          DEFAULT: "#141936",
-          border: "#262E55",
-          hover: "#2E3866",
+          DEFAULT: "rgb(var(--c-panel) / <alpha-value>)",
+          border: "rgb(var(--c-panel-border) / <alpha-value>)",
+          hover: "rgb(var(--c-panel-hover) / <alpha-value>)",
         },
       },
       fontFamily: {
@@ -45,9 +49,9 @@ const config = {
         mono: ["var(--font-ibm-plex-mono)", "monospace"],
       },
       boxShadow: {
-        scoreboard: "0 0 0 1px #262E55",
-        "scoreboard-turf": "0 0 0 1px #3FD973",
-        "scoreboard-gold": "0 0 0 1px #F2C94C",
+        scoreboard: "0 0 0 1px rgb(var(--c-panel-border))",
+        "scoreboard-turf": "0 0 0 1px rgb(var(--c-turf))",
+        "scoreboard-gold": "0 0 0 1px rgb(var(--c-gold))",
       },
       animation: {
         "fade-up": "fadeUp 0.5s ease-out forwards",

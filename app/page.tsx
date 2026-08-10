@@ -4,42 +4,43 @@ import SuccessStories from "@/components/success-stories";
 import SupportWidget from "@/components/support-widget";
 import SiteNav from "@/components/site-nav";
 import ActionGallery from "@/components/action-gallery";
+import SportPicker from "@/components/sport-picker";
 
 const STATS = [
-  { label: "Skill phases", value: "4" },
-  { label: "Dataset", value: "Full season" },
+  { label: "Skills taught", value: "6" },
+  { label: "Sports", value: "3" },
   { label: "New data", value: "Weekly" },
 ];
 
 const WHY_PILLARS = [
   {
-    title: "Useful before you're “done”",
+    title: "The whole toolkit, not one language",
     blurb:
-      "You don't need to finish the roadmap to get value. Query your own league's data to make this week's lineup call while you're still learning — the skill pays for itself before the course does.",
+      "SQL, Python, R, Git, statistics, visualization — the actual list on a data analyst job posting, on one throughline. Not six disconnected courses you have to stitch together yourself.",
     accent: "gold" as const,
   },
   {
-    title: "You already know the domain",
+    title: "A domain that explains itself",
     blurb:
-      "Nobody has to explain what a WR route tree or a waiver claim is — you've lived it every Sunday for years. That's an entire layer of learning most courses make you fight through, gone before you write a single query.",
+      "Nobody needs a primer on “who scored more points.” Sports data is legible on sight, whether you follow a team or not — that's an entire layer of learning most courses make you fight through, gone before you write a single query.",
     accent: "turf" as const,
   },
   {
     title: "Real data, real mess",
     blurb:
-      "No Titanic.csv, no invented SaaS company. Live NFL and fantasy data — byes, injuries, trades, ties — the same kind of imperfect data you'll actually query on the job.",
+      "No Titanic.csv, no invented SaaS company. Live sports data — byes, injuries, trades, mid-season roster moves — the same kind of imperfect data you'll actually query on the job.",
     accent: "gold" as const,
   },
   {
-    title: "Practice rides a habit you already have",
+    title: "Useful before you're “done”",
     blurb:
-      "You already check the standings obsessively, on the same weekly clock the season already runs on. SQL Sports turns that exact habit into query practice, instead of asking you to build a study habit from nothing.",
+      "You don't need to finish the roadmap to get value. Answer a real question about a real season while you're still learning — the skill pays for itself before the course does.",
     accent: "turf" as const,
   },
   {
     title: "A portfolio story anyone gets instantly",
     blurb:
-      "“I built an analytics tool on fantasy football data” needs zero setup in an interview. It's memorable, easy to talk through, and still real analytical work.",
+      "“I built an analytics tool on NBA shot data” needs zero setup in an interview. It's memorable, easy to talk through, and still real analytical work.",
     accent: "gold" as const,
   },
 ];
@@ -47,15 +48,15 @@ const WHY_PILLARS = [
 const WHY_COMPARISON = [
   {
     old: "Toy datasets you memorize, don't understand",
-    now: "Real, living NFL & fantasy data",
+    now: "Real, living NFL, NBA & MLB data",
+  },
+  {
+    old: "One language, then start over somewhere else",
+    now: "SQL, Python, R, Git & stats on one throughline",
   },
   {
     old: "Business scenarios you've never lived",
-    now: "Questions you already ask out loud every week",
-  },
-  {
-    old: "Practice that feels like homework",
-    now: "Practice that piggybacks on a habit you already have",
+    now: "A domain that explains itself on sight",
   },
   {
     old: "A portfolio project that looks like everyone else's",
@@ -161,30 +162,15 @@ export default function Home() {
             />
             <div className="hero-media-scrim absolute inset-0" />
             {/* Floodlight wash + scoreboard grid */}
-            <div
-              className="absolute inset-0 opacity-40"
-              style={{
-                backgroundImage:
-                  "radial-gradient(ellipse 50% 35% at 55% 18%, rgba(255,255,255,0.12), transparent 60%), radial-gradient(ellipse 40% 30% at 80% 25%, rgba(79,209,197,0.08), transparent 55%)",
-              }}
-            />
-            <div
-              className="absolute inset-0 opacity-[0.22]"
-              style={{
-                backgroundImage:
-                  "linear-gradient(rgba(30,37,51,0.9) 1px, transparent 1px), linear-gradient(90deg, rgba(30,37,51,0.9) 1px, transparent 1px)",
-                backgroundSize: "48px 48px",
-                maskImage:
-                  "radial-gradient(ellipse 75% 65% at 68% 42%, black 15%, transparent 75%)",
-              }}
-            />
+            <div className="hero-floodlight absolute inset-0 opacity-40" />
+            <div className="hero-grid absolute inset-0 opacity-[0.22]" />
           </div>
 
           <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 sm:pb-24 sm:pt-14">
             {/* Broadcast lower-third label */}
             <p className="label-broadcast mb-4 text-gold animate-[fadeUp_0.4s_ease-out_forwards]">
-              <span className="mr-2 inline-block h-1.5 w-1.5 bg-gold align-middle shadow-[0_0_8px_rgba(232,163,61,0.8)]" />
-              Education platform · Fantasy football as the dataset
+              <span className="mr-2 dot-glow-gold inline-block h-1.5 w-1.5 bg-gold align-middle" />
+              Tech education · Sports as the lens
             </p>
 
             <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-8">
@@ -192,21 +178,22 @@ export default function Home() {
               <div className="lg:col-span-5 lg:pt-4">
                 <h1 className="font-display text-5xl font-bold leading-[0.98] tracking-tight text-pop sm:text-6xl animate-[fadeUp_0.45s_ease-out_0.05s_forwards] opacity-0">
                   SQL
-                  <span className="text-turf drop-shadow-[0_0_28px_rgba(79,209,197,0.45)]">
+                  <span className="title-glow-turf text-turf">
                     Sports
                   </span>
                 </h1>
 
                 <p className="mt-6 max-w-md font-display text-2xl font-medium leading-snug text-pop sm:text-[1.75rem] animate-[fadeUp_0.45s_ease-out_0.1s_forwards] opacity-0">
-                  Query the season.{" "}
-                  <span className="text-gold">Think like an analyst.</span>
+                  Become a data analyst.{" "}
+                  <span className="text-gold">Sports are the lens.</span>
                 </p>
 
-                <p className="mt-4 max-w-sm text-base leading-relaxed text-[#BEC5DE] animate-[fadeUp_0.45s_ease-out_0.15s_forwards] opacity-0">
-                  Learn SQL and data analytics against live fantasy football
-                  data — the same questions you already ask on Sundays,
-                  written as queries you can use for this week&apos;s lineup,
-                  not just for someday.
+                <p className="mt-4 max-w-md text-base leading-relaxed text-ink-soft animate-[fadeUp_0.45s_ease-out_0.15s_forwards] opacity-0">
+                  SQL, Python, R, Git, statistics — the whole toolkit an
+                  aspiring data analyst or data scientist actually needs, taught
+                  through football, basketball, or baseball. Pick your sport;
+                  the tech is the only new thing. You don&apos;t have to watch
+                  the games.
                 </p>
 
                 <div className="mt-8 flex flex-wrap items-center gap-3 animate-[fadeUp_0.45s_ease-out_0.2s_forwards] opacity-0">
@@ -247,14 +234,14 @@ export default function Home() {
                 id="sandbox"
                 className="lg:col-span-7 animate-[fadeUp_0.5s_ease-out_0.15s_forwards] opacity-0"
               >
-                <div className="relative shadow-[0_24px_80px_rgba(0,0,0,0.55)]">
+                <div className="shadow-hero-panel relative">
                   {/* Teal frame — tech/data accent; sharp corners */}
                   <div className="pointer-events-none absolute -inset-px border border-turf/45" />
-                  <div className="absolute -top-px left-4 h-px w-20 bg-turf shadow-[0_0_12px_rgba(79,209,197,0.8)]" />
-                  <div className="absolute -left-px top-4 h-20 w-px bg-turf shadow-[0_0_12px_rgba(79,209,197,0.8)]" />
+                  <div className="absolute -top-px left-4 h-px w-20 bg-turf edge-glow-turf" />
+                  <div className="absolute -left-px top-4 h-20 w-px bg-turf edge-glow-turf" />
                   <Sandbox />
                 </div>
-                <p className="mt-3 font-mono text-[12px] font-medium text-[#BEC5DE]">
+                <p className="mt-3 font-mono text-[12px] font-medium text-ink-soft">
                   <span className="text-turf">→</span> Write real SQL, try a
                   preset, or check the schema. Runs against sample season
                   data, right in your browser — no account required.
@@ -267,6 +254,9 @@ export default function Home() {
         {/* ── Action gallery ────────────────────────────── */}
         <ActionGallery />
 
+        {/* ── Pick your sport ───────────────────────────── */}
+        <SportPicker />
+
         {/* ── Why SQL Sports ───────────────────────────── */}
         <section
           id="why"
@@ -276,20 +266,8 @@ export default function Home() {
               watermarks, no photography, evokes the broadcast-graphics
               look without depicting any real athlete. */}
           <div aria-hidden className="pointer-events-none absolute inset-0">
-            <div
-              className="absolute inset-0 opacity-[0.05]"
-              style={{
-                backgroundImage:
-                  "repeating-linear-gradient(115deg, #3FD973 0px, #3FD973 2px, transparent 2px, transparent 64px)",
-              }}
-            />
-            <div
-              className="absolute inset-0 opacity-[0.04]"
-              style={{
-                backgroundImage:
-                  "repeating-linear-gradient(115deg, #F2C94C 32px, #F2C94C 34px, transparent 34px, transparent 96px)",
-              }}
-            />
+            <div className="rays-turf absolute inset-0 opacity-[0.05]" />
+            <div className="rays-gold absolute inset-0 opacity-[0.04]" />
             <span className="stat-number-turf absolute -right-6 -top-10 select-none font-display text-[260px] font-bold leading-none opacity-[0.05] sm:text-[320px]">
               07
             </span>
@@ -306,7 +284,7 @@ export default function Home() {
             <h2 className="max-w-2xl font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
               The fastest way to actually learn SQL
             </h2>
-            <p className="mt-3 max-w-xl text-base leading-relaxed text-[#BEC5DE]">
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-ink-soft">
               Most people don&apos;t fail at SQL because it&apos;s hard. They
               fail because they&apos;re learning new syntax and an unfamiliar
               business scenario at the same time, on data they don&apos;t
@@ -332,7 +310,7 @@ export default function Home() {
                   <h3 className="font-display text-lg font-semibold leading-snug text-pop">
                     {pillar.title}
                   </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-[#BEC5DE]">
+                  <p className="mt-2 text-sm leading-relaxed text-ink-soft">
                     {pillar.blurb}
                   </p>
                 </div>
@@ -378,7 +356,7 @@ export default function Home() {
             </div>
 
             {/* Worth-the-money close */}
-            <p className="mt-10 max-w-2xl text-base leading-relaxed text-[#BEC5DE]">
+            <p className="mt-10 max-w-2xl text-base leading-relaxed text-ink-soft">
               A data analytics bootcamp runs $10,000–20,000. A specialized
               analytics master&apos;s can run $20,000–50,000. Both are
               betting that immersion works — dropping you into a domain
@@ -392,13 +370,13 @@ export default function Home() {
             {/* Non-fan reassurance */}
             <div className="mt-10 border border-gold/40 bg-gold/[0.04] p-6 sm:p-8">
               <p className="label-broadcast text-gold">
-                Don&apos;t watch football?
+                Don&apos;t watch sports?
               </p>
               <h3 className="mt-2 max-w-xl font-display text-2xl font-bold tracking-tight text-pop">
                 You&apos;re still in the right place.
               </h3>
               <div className="mt-5 grid gap-4 sm:grid-cols-3">
-                <p className="text-sm leading-relaxed text-[#BEC5DE]">
+                <p className="text-sm leading-relaxed text-ink-soft">
                   <span className="font-semibold text-ink">
                     The football is just the dataset
                   </span>{" "}
@@ -406,7 +384,7 @@ export default function Home() {
                   player scored 22.4 points in week 5,&rdquo; you already know
                   all the football this course requires.
                 </p>
-                <p className="text-sm leading-relaxed text-[#BEC5DE]">
+                <p className="text-sm leading-relaxed text-ink-soft">
                   <span className="font-semibold text-ink">
                     Context arrives when it matters
                   </span>{" "}
@@ -414,7 +392,7 @@ export default function Home() {
                   quarterback is, what fantasy points measure. No homework, no
                   jargon walls.
                 </p>
-                <p className="text-sm leading-relaxed text-[#BEC5DE]">
+                <p className="text-sm leading-relaxed text-ink-soft">
                   <span className="font-semibold text-ink">
                     The skill transfers one-to-one
                   </span>{" "}
@@ -440,7 +418,7 @@ export default function Home() {
             <h2 className="font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
               From SELECT to window functions
             </h2>
-            <p className="mt-3 max-w-xl text-base leading-relaxed text-[#BEC5DE]">
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-ink-soft">
               Four phases. Each one unlocks a real fantasy question you couldn&apos;t
               answer in a spreadsheet alone.
             </p>
@@ -470,7 +448,7 @@ export default function Home() {
                   <h3 className="mt-3 font-display text-xl font-semibold text-pop">
                     {step.title}
                   </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-[#BEC5DE]">
+                  <p className="mt-2 text-sm leading-relaxed text-ink-soft">
                     {step.blurb}
                   </p>
                 </li>
@@ -483,19 +461,19 @@ export default function Home() {
         <section id="pricing" className="border-t border-panel-border">
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
             <p className="label-broadcast mb-3">
-              <span className="mr-2 inline-block h-1.5 w-1.5 bg-gold align-middle" />
+              <span className="mr-2 dot-glow-gold inline-block h-1.5 w-1.5 bg-gold align-middle" />
               Pricing
             </p>
             <h2 className="font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
               From first query to career change
             </h2>
-            <p className="mt-3 max-w-xl text-base leading-relaxed text-[#BEC5DE]">
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-ink-soft">
               Practice for fun, follow the roadmap to get good, or go all the
               way with hands-on support landing a data role.
             </p>
 
             <div className="mt-6 inline-flex items-center gap-2 border border-gold/30 bg-gold/5 px-3 py-2">
-              <span className="inline-block h-1.5 w-1.5 shrink-0 bg-gold shadow-[0_0_8px_rgba(232,163,61,0.8)]" />
+              <span className="dot-glow-gold inline-block h-1.5 w-1.5 shrink-0 bg-gold" />
               <span className="font-mono text-[11px] leading-snug text-ink-soft">
                 <span className="font-semibold uppercase tracking-wider text-gold">
                   Founding cohort pricing
@@ -532,7 +510,7 @@ export default function Home() {
                     >
                       ${plan.price}
                     </span>
-                    <span className="font-mono text-xs font-medium text-[#BEC5DE]">
+                    <span className="font-mono text-xs font-medium text-ink-soft">
                       {plan.period}
                     </span>
                   </div>
@@ -540,7 +518,7 @@ export default function Home() {
                     {plan.features.map((f) => (
                       <li
                         key={f}
-                        className="flex gap-2 text-sm text-[#BEC5DE]"
+                        className="flex gap-2 text-sm text-ink-soft"
                       >
                         <span
                           className={
@@ -586,7 +564,7 @@ export default function Home() {
             <h2 className="max-w-2xl font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
               Weekly Challenge &amp; Leaderboard
             </h2>
-            <p className="mt-3 max-w-xl text-base leading-relaxed text-[#BEC5DE]">
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-ink-soft">
               Every Monday night, that week&apos;s live stats drop as a new
               SQL challenge. Answer correctly, earn points, climb the board.
               What&apos;s below is a preview of the idea — not live data yet.
@@ -667,14 +645,14 @@ export default function Home() {
         <section id="stat-guru" className="border-t border-panel-border bg-night/60">
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
             <p className="label-broadcast mb-6">
-              <span className="mr-2 inline-block h-1.5 w-1.5 bg-gold align-middle" />
+              <span className="mr-2 dot-glow-gold inline-block h-1.5 w-1.5 bg-gold align-middle" />
               From the same team
             </p>
 
             <div className="relative border border-panel-border bg-panel p-6 sm:p-10">
               <div className="pointer-events-none absolute -inset-px border border-gold/40" />
-              <div className="absolute -top-px left-6 h-px w-20 bg-gold shadow-[0_0_12px_rgba(232,163,61,0.8)]" />
-              <div className="absolute -left-px top-6 h-20 w-px bg-gold shadow-[0_0_12px_rgba(232,163,61,0.8)]" />
+              <div className="absolute -top-px left-6 h-px w-20 bg-gold edge-glow-gold" />
+              <div className="absolute -left-px top-6 h-20 w-px bg-gold edge-glow-gold" />
 
               <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
                 <div className="lg:col-span-7">
@@ -684,7 +662,7 @@ export default function Home() {
                   <p className="mt-2 font-mono text-xs font-semibold uppercase tracking-wider text-gold">
                     Ask any NFL question. Get an instant answer.
                   </p>
-                  <p className="mt-4 max-w-xl text-base leading-relaxed text-[#BEC5DE]">
+                  <p className="mt-4 max-w-xl text-base leading-relaxed text-ink-soft">
                     Our sister platform for the truly obsessed — the questions
                     ESPN can&apos;t answer, answered in plain English. Ask a
                     question, get a real answer, pulled straight from decades
@@ -698,7 +676,7 @@ export default function Home() {
                       "Route tracking & coverage data",
                       "Prospect profiles with grades & comps",
                     ].map((f) => (
-                      <li key={f} className="flex gap-2 text-sm text-[#BEC5DE]">
+                      <li key={f} className="flex gap-2 text-sm text-ink-soft">
                         <span className="text-gold">▸</span>
                         {f}
                       </li>

@@ -66,7 +66,7 @@ function StoryCard({ story }: { story: (typeof STORIES)[number] }) {
             </p>
           </div>
         </div>
-        <p className="mt-4 text-sm leading-relaxed text-[#BEC5DE]">
+        <p className="mt-4 text-sm leading-relaxed text-ink-soft">
           &ldquo;{story.quote}&rdquo;
         </p>
       </div>
@@ -108,7 +108,7 @@ export default function SuccessStories() {
         <h2 className="max-w-2xl font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
           Fantasy football in, SQL skills out.
         </h2>
-        <p className="mt-3 max-w-xl text-base leading-relaxed text-[#BEC5DE]">
+        <p className="mt-3 max-w-xl text-base leading-relaxed text-ink-soft">
           SQL Sports is brand new — these are illustrative example paths
           showing what the curriculum is designed to do, not verified
           testimonials from real members.

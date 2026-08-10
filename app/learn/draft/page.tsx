@@ -8,6 +8,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import ThemeToggle from "@/components/theme-toggle";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TRACKS, getTrack, type Track } from "@/lib/draft";
 import { loadProgress, setDraftPick } from "@/lib/progress";
@@ -57,9 +58,12 @@ function DraftDay() {
             draft day
           </span>
         </Link>
-        <span className="font-mono text-[10px] uppercase tracking-widest text-gold">
-          {act === "podium" ? "the pick is in" : "live from the war room"}
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-gold">
+            {act === "podium" ? "the pick is in" : "live from the war room"}
+          </span>
+          <ThemeToggle />
+        </div>
       </header>
 
       {act === "jersey" && (

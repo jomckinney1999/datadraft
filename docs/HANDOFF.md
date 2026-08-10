@@ -35,7 +35,8 @@ Four commits on `main`, all deployed:
 - **Style tailoring hooks**: `film` cards on a lesson = extra theory shown only to Film Room Generals; `drillSkip: true` on an mc = removed for Gunslingers (only tag pure-recall checks, never gotcha questions); Gunslingers get hints behind a toggle + a collapsible chalkboard.
 - **Draft board**: `lib/draft.ts` TRACKS — one live track, three "declaring next season" (Contender Season / Analytics Combine / Dynasty Mode). These future names are placeholders; PLAN.md governs what's publicly promised.
 - **Practice Field data**: `scripts/build-field-dataset.mjs` downloads nflverse `stats_player` weekly CSVs (the NEW release tag — the old `player_stats` tag used by `lib/data/nflverse.ts` stops at 2024) → bakes `public/field-data.json` (~300 KB). Bump `WEEKLY_SEASON` and re-run each season. Schema/seed/drills in `lib/field-data.ts`, UI in `components/field-sandbox.tsx`.
-- **Palette** (fantasy football): tokens in `tailwind.config.ts` + CSS vars in `app/globals.css` — `night` #0C1022 indigo, `turf` #3FD973, `gold` #F2C94C, `ink`/`panel` neutrals. The old `teal`/`amber` names are dead — never reintroduce them. A few SVGs hard-code accent hexes (grep `#3FD973` / `#F2C94C`).
+- **Palette** (fantasy football): tokens in `tailwind.config.ts` + CSS vars in `app/globals.css` — `night` #0C1022 indigo, `turf` #3FD973, `gold` #F2C94C, `ink`/`panel` neutrals. The old `teal`/`amber` names are dead — never reintroduce them. Coach Blitz's SVG hard-codes accent hexes by design (grep `#3FD973` / `#F2C94C`); nothing else should.
+- **Light + dark mode** (added 2026-08-10): tokens are now `"r g b"` triplets behind `rgb(var(--c-x) / <alpha-value>)`, flipped by `data-theme` on `<html>`. Toggle in every header except the lesson player; blocking script in `app/layout.tsx` prevents a flash and must stay in sync with `components/theme-toggle.tsx`. **Don't delete the `.theme-switching` rule** — Chrome won't re-resolve `var()`-derived colors on elements with `transition-colors`, so without it everything stays painted in the old theme after a toggle. Full detail in `CLAUDE.md`. Note this pass also fixed leftover dead-teal/amber `rgba()` values still hardcoded in glow shadows and the `/learn` yard-lines gradient.
 - **Coach Blitz**: `components/coach.tsx`, inline SVG, `mood` prop (`idle|happy|sad|cheer|think`).
 
 ## Operational gotchas (learned the hard way)
@@ -52,6 +53,12 @@ Four commits on `main`, all deployed:
 2. Browser test as a fresh user: `localStorage.removeItem("sqlsports.progress.v1")`, reload `/learn`, walk draft → quiz → lesson → completion; confirm XP/streak persist and the roadmap unlocks.
 3. For new query exercises: run every `expected` against the seeded data (non-empty results, no boundary ties).
 4. Deploy, then curl the new routes for 200s.
+
+## Added 2026-08-10 (after this doc was written)
+
+- **Positioning pivot** — the site now sells the full data-analyst toolkit (SQL, Python, R, Git, stats) across three sports, with a sport picker on the landing page (`#pick-your-sport`, `lib/sports.ts`, `lib/use-sport.ts`). Football is the only `live` sport; NBA/MLB are labeled "In build". Reasoning and the risks it creates are logged in `docs/PLAN.md`.
+- **The biggest open gap this created:** the landing page promises six skills; `/learn` ships SQL-on-football. Every non-SQL claim in the hero is currently unbacked by lesson content. See the top item under `docs/PLAN.md` → Open questions.
+- **Sport choice is a standalone localStorage key** (`sqlsports-sport`), deliberately *not* in `lib/progress.ts`, to avoid touching the progress schema. Fold it into `Progress` when accounts land.
 
 ## Open threads (roughly in priority order)
 

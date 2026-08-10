@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import FieldSandbox from "@/components/field-sandbox";
+import ThemeToggle from "@/components/theme-toggle";
 
 export const metadata: Metadata = {
   title: "The Practice Field — SQL Sports",
@@ -21,12 +22,15 @@ export default function FieldPage() {
             practice field
           </span>
         </Link>
-        <Link
-          href="/learn"
-          className="border border-turf/50 bg-turf/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-turf transition-colors hover:border-turf hover:bg-turf/20"
-        >
-          Back to lessons
-        </Link>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Link
+            href="/learn"
+            className="border border-turf/50 bg-turf/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-turf transition-colors hover:border-turf hover:bg-turf/20"
+          >
+            Back to lessons
+          </Link>
+        </div>
       </header>
 
       <div className="mb-6 max-w-2xl">

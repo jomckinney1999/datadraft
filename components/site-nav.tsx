@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import ThemeToggle from "@/components/theme-toggle";
 
 const NAV_LINKS = [
+  { href: "#pick-your-sport", label: "Your sport", accent: "turf" as const },
   { href: "#why", label: "Why SQL Sports", accent: "turf" as const },
   { href: "/field", label: "Practice Field", accent: "gold" as const },
   { href: "#curriculum", label: "Curriculum", accent: "turf" as const },
@@ -45,33 +47,37 @@ export default function SiteNav() {
           >
             Start learning
           </a>
+          <ThemeToggle />
         </nav>
 
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
-          className="flex h-9 w-9 items-center justify-center text-ink transition-colors duration-150 hover:text-turf sm:hidden"
-        >
-          <svg aria-hidden viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-            {open ? (
-              <path
-                d="M6 6l12 12M18 6L6 18"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-              />
-            ) : (
-              <path
-                d="M4 7h16M4 12h16M4 17h16"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-              />
-            )}
-          </svg>
-        </button>
+        <div className="flex items-center gap-1 sm:hidden">
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            className="flex h-9 w-9 items-center justify-center text-ink transition-colors duration-150 hover:text-turf"
+          >
+            <svg aria-hidden viewBox="0 0 24 24" fill="none" className="h-5 w-5">
+              {open ? (
+                <path
+                  d="M6 6l12 12M18 6L6 18"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+              ) : (
+                <path
+                  d="M4 7h16M4 12h16M4 17h16"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+              )}
+            </svg>
+          </button>
+        </div>
       </div>
 
       {open && (

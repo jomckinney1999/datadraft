@@ -47,14 +47,15 @@ export default function ActionGallery() {
               {/* Duotone via mix-blend-mode: color, keeps real photos in the brand palette */}
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-0 mix-blend-color"
-                style={{
-                  backgroundColor: item.accent === "turf" ? "#3FD973" : "#F2C94C",
-                }}
+                className={`pointer-events-none absolute inset-0 mix-blend-color ${
+                  item.accent === "turf"
+                    ? "photo-duotone-turf"
+                    : "photo-duotone-gold"
+                }`}
               />
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-0 bg-night/35"
+                className="photo-scrim pointer-events-none absolute inset-0"
               />
             </div>
           ))}

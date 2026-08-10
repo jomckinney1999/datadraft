@@ -72,11 +72,15 @@ function fillSolution(ex: FillExercise): string {
 
 function HeartIcon({ filled }: { filled: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
+    <svg
+      viewBox="0 0 24 24"
+      className={`h-4 w-4 ${filled ? "text-gold" : "text-panel-hover"}`}
+      aria-hidden
+    >
       <path
         d="M12 21c-5.5-4.1-9-7.3-9-11a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 3.7-3.5 6.9-9 11z"
-        fill={filled ? "#F2C94C" : "none"}
-        stroke={filled ? "#F2C94C" : "#3B4470"}
+        fill={filled ? "currentColor" : "none"}
+        stroke="currentColor"
         strokeWidth="1.6"
       />
     </svg>

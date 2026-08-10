@@ -10,15 +10,16 @@ import { loadProgress, displayStreak, type Progress } from "@/lib/progress";
 import { getStyle } from "@/lib/playbook";
 import { getTrack } from "@/lib/draft";
 import Coach from "@/components/coach";
+import ThemeToggle from "@/components/theme-toggle";
 
 const NODE_OFFSETS = [0, 48, 0, -48];
 
 function FlameIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
+    <svg viewBox="0 0 24 24" className="h-4 w-4 text-gold" aria-hidden>
       <path
         d="M12 2c1 4-3 5.5-3 9a3 3 0 0 0 6 0c0-1.5-.8-2.6-.8-2.6S17 10 17 13a5 5 0 0 1-10 0c0-4.5 4-6.5 5-11z"
-        fill="#F2C94C"
+        fill="currentColor"
       />
     </svg>
   );
@@ -101,6 +102,7 @@ export default function LearnPage() {
               GM · {progress.username}
             </span>
           )}
+          <ThemeToggle />
           <Link
             href="/field"
             className="hidden border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-turf/40 hover:text-turf sm:inline"
@@ -299,13 +301,7 @@ function UnitSection({
 
       {/* winding lesson path over faint yard lines */}
       {!comingSoon && (
-        <div
-          className="relative mt-2 flex flex-col items-center gap-7 py-8"
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(180deg, transparent 0px, transparent 55px, rgba(79,209,197,0.06) 55px, rgba(79,209,197,0.06) 57px)",
-          }}
-        >
+        <div className="yard-lines relative mt-2 flex flex-col items-center gap-7 py-8">
           {unit.lessons.map((lesson, i) => {
             const state = nodeState(lesson);
             const offset = NODE_OFFSETS[i % NODE_OFFSETS.length];

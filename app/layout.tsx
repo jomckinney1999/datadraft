@@ -21,9 +21,9 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-const TITLE = "SQL Sports — Learn SQL through fantasy football";
+const TITLE = "SQL Sports — Become a data analyst. Sports are the lens.";
 const DESCRIPTION =
-  "An education platform that teaches SQL and data analytics through fantasy football. Query live season data. Think like an analyst.";
+  "SQL, Python, R, Git, and statistics — everything an aspiring data analyst or data scientist needs, taught through football, basketball, or baseball. You don't have to watch the games.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://sql-sports.vercel.app"),
@@ -53,8 +53,22 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0c1022",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0c1022" },
+    { media: "(prefers-color-scheme: light)", color: "#f6f7fc" },
+  ],
 };
+
+// Runs before first paint so the page never flashes the wrong theme. Mirrors
+// the resolution order in components/theme-toggle.tsx — keep the two in sync.
+// Any failure leaves the document with no data-theme, which renders dark.
+const THEME_SCRIPT = `
+(function(){try{
+var s=localStorage.getItem("sqlsports-theme");
+var t=(s==="light"||s==="dark")?s:(window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");
+document.documentElement.setAttribute("data-theme",t);
+}catch(e){}})();
+`;
 
 export default function RootLayout({
   children,
@@ -64,8 +78,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-theme="dark"
+      suppressHydrationWarning
       className={`${spaceGrotesk.variable} ${inter.variable} ${ibmPlexMono.variable}`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="font-sans antialiased bg-stadium">{children}</body>
     </html>
   );

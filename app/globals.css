@@ -2,12 +2,85 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --night: #0c1022;
-  --turf: #3fd973;
-  --gold: #f2c94c;
-  --panel: #141936;
-  --panel-border: #262e55;
+/* ────────────────────────────────────────────────────────────
+   Theme tokens
+
+   Values are "r g b" channel triplets so Tailwind can compose them with
+   alpha modifiers (bg-turf/10, border-panel-border/60). Dark is the
+   default — a document with no data-theme attribute renders dark, so a
+   blocked/failed theme script degrades to the original draft-night design
+   rather than a half-styled page.
+   ──────────────────────────────────────────────────────────── */
+
+:root,
+:root[data-theme="dark"],
+.theme-dark {
+  color-scheme: dark;
+
+  --c-night: 12 16 34;
+  --c-night-50: 30 37 66;
+  --c-night-100: 23 28 54;
+  --c-night-200: 18 22 41;
+  --c-night-300: 12 16 34;
+
+  --c-turf: 63 217 115;
+  --c-turf-dim: 47 173 92;
+  --c-gold: 242 201 76;
+  --c-gold-dim: 201 160 50;
+
+  --c-ink: 236 239 250;
+  --c-ink-soft: 190 197 222;
+  --c-ink-muted: 141 149 181;
+
+  --c-panel: 20 25 54;
+  --c-panel-border: 38 46 85;
+  --c-panel-hover: 46 56 102;
+
+  /* Atmosphere — tuned per theme rather than flipped mechanically */
+  --pop-text: 245 247 255;
+  --pop-shadow: 0 1px 2px rgba(0, 0, 0, 0.55), 0 0 40px rgba(12, 16, 34, 0.8);
+  --glow-strength: 1;
+  --hero-photo-opacity: 1;
+  --hero-scrim-strong: 0.92;
+  --shadow-float: 0 24px 60px rgba(0, 0, 0, 0.55);
+  --shadow-hero-panel: 0 24px 80px rgba(0, 0, 0, 0.55);
+  --photo-scrim: 0.35;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --c-night: 246 247 252;
+  --c-night-50: 232 236 245;
+  --c-night-100: 238 241 248;
+  --c-night-200: 242 244 250;
+  --c-night-300: 246 247 252;
+
+  /* Turf and gold are darkened hard for light mode — the draft-night green
+     and gold are unreadable as text or borders on white. Each is calibrated
+     against the tightest real pairing (accent text on an accent/10 chip),
+     not against plain white. */
+  --c-turf: 21 122 62;
+  --c-turf-dim: 15 92 46;
+  --c-gold: 140 90 10;
+  --c-gold-dim: 112 72 8;
+
+  --c-ink: 19 24 34;
+  --c-ink-soft: 58 66 86;
+  --c-ink-muted: 92 101 127;
+
+  --c-panel: 255 255 255;
+  --c-panel-border: 219 224 236;
+  --c-panel-hover: 232 236 245;
+
+  --pop-text: 10 14 26;
+  --pop-shadow: none;
+  --glow-strength: 0;
+  --hero-photo-opacity: 0.28;
+  --hero-scrim-strong: 0.96;
+  --shadow-float: 0 18px 45px rgba(19, 24, 34, 0.14);
+  --shadow-hero-panel: 0 20px 60px rgba(19, 24, 34, 0.16);
+  --photo-scrim: 0.12;
 }
 
 html {
@@ -15,47 +88,189 @@ html {
 }
 
 body {
-  background-color: var(--night);
-  color: #eceffa;
+  background-color: rgb(var(--c-night));
+  color: rgb(var(--c-ink));
   min-height: 100vh;
 }
 
 /* Draft-night atmosphere: turf glow under the lights, gold from the stage */
 .bg-stadium {
-  background-color: #0c1022;
+  background-color: rgb(var(--c-night));
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(63, 217, 115, 0.08), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(242, 201, 76, 0.05), transparent 45%),
-    linear-gradient(180deg, #0c1022 0%, #10142b 50%, #0c1022 100%);
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgb(var(--c-turf) / 0.08), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgb(var(--c-gold) / 0.05), transparent 45%),
+    linear-gradient(180deg, rgb(var(--c-night)) 0%, rgb(var(--c-night-100)) 50%, rgb(var(--c-night)) 100%);
 }
 
 .border-scoreboard {
-  border: 1px solid #262e55;
+  border: 1px solid rgb(var(--c-panel-border));
 }
 
 .label-broadcast {
   @apply font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-ink-soft;
 }
 
+/* Glows read as light bleeding off a scoreboard on dark; on white they just
+   look like smudged text, so --glow-strength zeroes them out. */
 .stat-number {
   @apply font-mono font-semibold tabular-nums tracking-tight text-gold;
-  text-shadow: 0 0 24px rgba(242, 201, 76, 0.35);
+  text-shadow: 0 0 24px rgb(var(--c-gold) / calc(0.35 * var(--glow-strength)));
 }
 
 .stat-number-turf {
   @apply font-mono font-semibold tabular-nums tracking-tight text-turf;
-  text-shadow: 0 0 24px rgba(63, 217, 115, 0.3);
+  text-shadow: 0 0 24px rgb(var(--c-turf) / calc(0.3 * var(--glow-strength)));
 }
 
 .text-pop {
-  color: #f5f7ff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55), 0 0 40px rgba(12, 16, 34, 0.8);
+  color: rgb(var(--pop-text));
+  text-shadow: var(--pop-shadow);
+}
+
+/* ── Hero media ───────────────────────────────────────────── */
+
+.hero-photo {
+  opacity: var(--hero-photo-opacity);
 }
 
 .hero-media-scrim {
   background:
-    linear-gradient(90deg, rgba(12, 16, 34, 0.92) 0%, rgba(12, 16, 34, 0.72) 42%, rgba(12, 16, 34, 0.55) 70%, rgba(12, 16, 34, 0.78) 100%),
-    linear-gradient(180deg, rgba(12, 16, 34, 0.55) 0%, rgba(12, 16, 34, 0.35) 45%, rgba(12, 16, 34, 0.95) 100%);
+    linear-gradient(
+      90deg,
+      rgb(var(--c-night) / var(--hero-scrim-strong)) 0%,
+      rgb(var(--c-night) / 0.72) 42%,
+      rgb(var(--c-night) / 0.55) 70%,
+      rgb(var(--c-night) / 0.78) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgb(var(--c-night) / 0.55) 0%,
+      rgb(var(--c-night) / 0.35) 45%,
+      rgb(var(--c-night) / 0.95) 100%
+    );
+}
+
+.hero-floodlight {
+  background-image:
+    radial-gradient(ellipse 50% 35% at 55% 18%, rgb(var(--c-ink) / 0.12), transparent 60%),
+    radial-gradient(ellipse 40% 30% at 80% 25%, rgb(var(--c-turf) / 0.08), transparent 55%);
+}
+
+.hero-grid {
+  background-image:
+    linear-gradient(rgb(var(--c-panel-border) / 0.9) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--c-panel-border) / 0.9) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 75% 65% at 68% 42%, black 15%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 65% at 68% 42%, black 15%, transparent 75%);
+}
+
+/* Diagonal broadcast rays */
+.rays-turf {
+  background-image: repeating-linear-gradient(
+    115deg,
+    rgb(var(--c-turf)) 0px,
+    rgb(var(--c-turf)) 2px,
+    transparent 2px,
+    transparent 64px
+  );
+}
+
+.rays-gold {
+  background-image: repeating-linear-gradient(
+    115deg,
+    rgb(var(--c-gold)) 32px,
+    rgb(var(--c-gold)) 34px,
+    transparent 34px,
+    transparent 96px
+  );
+}
+
+/* ── Accent glows & shadows ───────────────────────────────── */
+
+.dot-glow-gold {
+  box-shadow: 0 0 8px rgb(var(--c-gold) / calc(0.8 * var(--glow-strength)));
+}
+
+.edge-glow-turf {
+  box-shadow: 0 0 12px rgb(var(--c-turf) / calc(0.8 * var(--glow-strength)));
+}
+
+.edge-glow-gold {
+  box-shadow: 0 0 12px rgb(var(--c-gold) / calc(0.8 * var(--glow-strength)));
+}
+
+.title-glow-turf {
+  filter: drop-shadow(0 0 28px rgb(var(--c-turf) / calc(0.45 * var(--glow-strength))));
+}
+
+.shadow-float {
+  box-shadow: var(--shadow-float);
+}
+
+.shadow-hero-panel {
+  box-shadow: var(--shadow-hero-panel);
+}
+
+.shadow-fab {
+  box-shadow: 0 8px 24px rgb(var(--c-turf) / 0.35);
+}
+
+.photo-duotone-turf {
+  background-color: rgb(var(--c-turf));
+}
+
+.photo-duotone-gold {
+  background-color: rgb(var(--c-gold));
+}
+
+.photo-scrim {
+  background-color: rgb(var(--c-night) / var(--photo-scrim));
+}
+
+/* Faint yard lines behind the winding lesson path on /learn */
+.yard-lines {
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent 0px,
+    transparent 55px,
+    rgb(var(--c-turf) / 0.06) 55px,
+    rgb(var(--c-turf) / 0.06) 57px
+  );
+}
+
+/* ── Theme switching ──────────────────────────────────────── */
+
+/* Applied for one frame while data-theme changes.
+   Two reasons this is required, not cosmetic:
+   1. Chrome does not re-resolve a var()-derived color on an element with an
+      active color transition — the specified value is textually unchanged, so
+      elements with `transition-colors` stay stuck on the OLD theme's colors
+      indefinitely. Killing transitions across the swap forces a clean recompute.
+   2. Without it, every bordered element crossfades for 150ms, which reads as
+      lag rather than a deliberate switch. */
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
+
+/* Toggle icon swap — driven by the root attribute rather than React state, so
+   the correct glyph is painted on the first frame, before hydration. */
+.icon-when-dark {
+  display: block;
+}
+
+.icon-when-light {
+  display: none;
+}
+
+:root[data-theme="light"] .icon-when-dark {
+  display: none;
+}
+
+:root[data-theme="light"] .icon-when-light {
+  display: block;
 }
 
 @layer utilities {

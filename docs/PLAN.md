@@ -2,18 +2,29 @@
 
 This is the source of truth for product structure, pricing, and positioning decisions. Update it whenever the business model changes, *before* or alongside code changes — this is what future Claude/Cursor sessions read to understand why the landing page is shaped the way it is.
 
-Last updated: 2026-07-15 (added big-picture vision, must-buy strategy, and founding-cohort pricing decision).
+Last updated: 2026-08-10 (**positioning pivot** — the narrow single-language/single-sport launch strategy was reversed by owner decision; see Big picture vision).
 
 ## Big picture vision
 
-SQL Sports launches as **one course, one sport, one language** — SQL taught through fantasy football — and stays that way deliberately until this flagship proves itself. That narrowness is a launch strategy, not the ceiling.
+**Decided 2026-08-10 (reverses the prior launch strategy):** SQL Sports positions publicly as a **full data-skills platform with sports as the lens** — SQL, Python, R, Git, statistics, and visualization, taught through football (NFL), basketball (NBA), or baseball (MLB), which the learner picks as their base "language."
 
-The bigger bet: sports is a generalizable teaching *lens* for technical skills, not a one-off gimmick tied to SQL specifically. Once the SQL + fantasy football flagship has real traction (paying users, retention, a working Career Track cohort), the natural expansion axes are:
+The public value proposition is now: *everything an aspiring data analyst or data scientist needs, through the lens of sports.* The differentiator is the lens, not the subject.
 
-- **More languages/skills** through the same sports lens — Python, R, and eventually AI/ML (e.g. predicting player performance, not just querying historical stats). This is the "coding, AI, tech" part of the long-term mission — SQL is the first course, not the only one.
-- **More sports** — basketball, soccer, baseball — for learners whose "Sunday obsession" isn't football.
+### What this replaced, and the risk that came with it
 
-This vision currently lives **in this document, not on the live marketing site**. The site stays tightly focused on the SQL/fantasy-football flagship for now — publicly promising a multi-sport, multi-language platform before the first product has proven itself would dilute the pitch and create expectations the business can't yet back up. Revisit this once there's real traction data to point to.
+The previous version of this plan committed to **one course, one sport, one language** — SQL through fantasy football — and deliberately kept the multi-sport/multi-language vision *off* the live site, reasoning that "publicly promising a multi-sport, multi-language platform before the first product has proven itself would dilute the pitch and create expectations the business can't yet back up."
+
+That risk didn't disappear with the decision; it's now something to actively manage:
+
+- **Only football has a real dataset.** NBA and MLB are labeled "In build" in `lib/sports.ts` and on the picker, not presented as finished. Don't flip a sport to `live` until a pipeline backs it — the same honesty principle as #3 under Must-buy mechanisms, applied to sport availability.
+- **Only SQL has real lesson content.** `lib/curriculum.ts` is 4 live units of SQL; `docs/CURRICULUM.md` is a 12-week SQL syllabus. The Python/R/stats/Git skills named in the hero have no lessons behind them yet — the landing page currently promises more breadth than `/learn` delivers. **This is the largest open gap created by the pivot.**
+- **Breadth multiplies the production bill.** Six skills × three sports is a far larger content surface than one syllabus; `docs/LAUNCH-PLAN.md` Phase 4 was scoped for a single 12-week SQL curriculum and Phase 11 (Expansion) is largely pulled forward into the core product.
+
+This decision is reversible, and the narrow version is documented above if it needs to come back. Revisit once there's real traffic data on whether the broader pitch converts better.
+
+### Sport selection ("your lens")
+
+The learner picks one sport; the skills taught are identical across all three and only the dataset changes. Implemented in `lib/sports.ts`, `components/sport-picker.tsx` (the landing page's `#pick-your-sport` section), and `lib/use-sport.ts` (localStorage, no account required). Move it onto the user profile when accounts land (`docs/LAUNCH-PLAN.md` Phase 1) so it follows people across devices.
 
 ### Sister product: NFL Stat Guru
 
@@ -116,7 +127,9 @@ Before building the real version, these need real decisions (not made yet):
 - Whether "application strategy support" is self-serve async review or live calls — affects margin and how many Career Track seats can be supported at once
 - Certification: self-issued badge vs. something with outside credibility
 - **Founding-cohort mechanics**: what specifically triggers "out of early access" (a member count? a date? a funding/revenue milestone?), and how existing members get grandfathered in practice (a tagged account flag, a manually maintained list?). Decide before the first price increase, not after.
-- Whether/when to surface the multi-sport, multi-language vision publicly on the site (see Big picture vision above) — currently deliberately kept off the live page.
+- **Close the promise gap opened by the 2026-08-10 pivot.** The landing page now sells six skills across three sports; `/learn` ships SQL-on-football. Decide the real production order (which skill next after SQL? which sport?) rather than leaving every non-SQL claim equally unbacked. This is the highest-priority item on this list.
+- **What "in build" means in calendar terms for NBA/MLB.** The site tells visitors those sports are coming; that's a promise with no date behind it. Decide the trigger for starting each.
+- **Whether the name still fits.** "SQL Sports" now sells Python, R, Git, and statistics too. Renaming is expensive (domain, Vercel project, Stripe, legal docs) and wasn't part of the pivot decision — but the mismatch is real and deserves an explicit keep-or-change call.
 - Weekly Challenge & Leaderboard build-out (see above) — auth, database, content workflow, data source, and perks all still need real decisions.
 
 ## How to use this doc
