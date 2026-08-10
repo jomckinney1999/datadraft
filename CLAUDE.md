@@ -33,7 +33,7 @@ Read [docs/PLAN.md](docs/PLAN.md) first. It's the source of truth for the produc
 - Vercel project `sql-sports` under `jomckinney1999s-projects`, linked via `.vercel/` (gitignored).
 - Production branch is `main` (not `master` — `master` is a stale GitHub default branch with no app code, left over from initial repo setup).
 - Framework preset on Vercel is explicitly set to `nextjs` — don't let this get unset, it previously caused production to silently serve only `/public` with everything else 404ing.
-- Deploy with `npx vercel --prod` after pushing to `main`.
+- Deploy with `npx vercel deploy --prod --scope jomckinney1999s-projects` after pushing to `main`. The `--scope` flag is required — without it the CLI fails with a misleading `Not authorized` even when `npx vercel whoami` shows you logged in.
 
 ## Backend (Phase 0/1/2/3 of LAUNCH-PLAN.md — scaffolded, not yet live)
 
