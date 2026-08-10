@@ -2213,6 +2213,17 @@ export const COURSE = {
         },
       ],
     },
+    {
+      id: "u12",
+      number: 12,
+      title: "AI — Shipping Features, Not Demos",
+      drive: "12th Drive · Red Zone",
+      description:
+        "Prompts that survive users, evals that catch regressions, and retrieval over real sports text. Placeholder unit — drills arrive with the AI Engineer playbook.",
+      skills: ["Prompts", "Evals", "RAG", "Guardrails"],
+      status: "coming-soon",
+      lessons: [],
+    },
   ] as Unit[],
 };
 
@@ -2280,6 +2291,13 @@ export const MODULES: Module[] = [
     name: "R & the tidyverse",
     blurb: "dplyr and ggplot2, executed live in your browser.",
     unitIds: ["u11"],
+  },
+  {
+    id: "ai",
+    name: "AI & LLMs",
+    blurb:
+      "Prompts, evals, retrieval, and shipping AI features — declaring next season.",
+    unitIds: ["u12"],
   },
 ];
 

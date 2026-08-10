@@ -6,6 +6,7 @@ import SiteNav from "@/components/site-nav";
 import ActionGallery from "@/components/action-gallery";
 import SportPicker from "@/components/sport-picker";
 import RotatingRoles from "@/components/rotating-roles";
+import CareerPlaybooks from "@/components/career-playbooks";
 
 const STATS = [
   { label: "Skills taught", value: "6" },
@@ -17,19 +18,19 @@ const WHY_PILLARS = [
   {
     title: "The whole toolkit, not one language",
     blurb:
-      "SQL, Python, R, Git, statistics, visualization — the actual list on a data analyst job posting, on one throughline. Not six disconnected courses you have to stitch together yourself.",
+      "SQL, Python, R, Git, statistics, visualization — the actual list on a data & tech job posting, on one throughline. Not six disconnected courses you have to stitch together yourself.",
     accent: "gold" as const,
   },
   {
     title: "A domain that explains itself",
     blurb:
-      "Nobody needs a primer on “who scored more points.” Sports data is legible on sight, whether you follow a team or not — that's an entire layer of learning most courses make you fight through, gone before you write a single query.",
+      "Nobody needs a primer on “who scored more points.” Sports data is legible on sight, whether you follow a team or not — that's an entire layer of learning most courses make you fight through, gone before you write a single line of code.",
     accent: "turf" as const,
   },
   {
     title: "Real data, real mess",
     blurb:
-      "No Titanic.csv, no invented SaaS company. Live sports data — byes, injuries, trades, mid-season roster moves — the same kind of imperfect data you'll actually query on the job.",
+      "No Titanic.csv, no invented SaaS company. Live sports data — byes, injuries, trades, mid-season roster moves — the same kind of imperfect data you'll actually work with on the job.",
     accent: "gold" as const,
   },
   {
@@ -41,7 +42,7 @@ const WHY_PILLARS = [
   {
     title: "A portfolio story anyone gets instantly",
     blurb:
-      "“I built an analytics tool on NBA shot data” needs zero setup in an interview. It's memorable, easy to talk through, and still real analytical work.",
+      "“I built an analytics tool on NBA shot data” needs zero setup in an interview. It's memorable, easy to talk through, and still real technical work.",
     accent: "gold" as const,
   },
 ];
@@ -152,6 +153,7 @@ const PLANS = [
     badge: "premium",
     features: [
       "Everything in Roadmap",
+      "Role-specific career playbook",
       "Resume & portfolio review",
       "Mock interview practice",
       "Application strategy support",
@@ -204,7 +206,7 @@ export default function Home() {
                 </h1>
 
                 <p className="mt-6 max-w-lg font-display text-2xl font-medium leading-snug text-pop sm:text-[1.75rem] animate-[fadeUp_0.45s_ease-out_0.1s_forwards] opacity-0">
-                  Become a <RotatingRoles />.
+                  Become a <RotatingRoles />
                   <br />
                   <span className="text-gold">Sports are the lens.</span>
                 </p>
@@ -303,14 +305,14 @@ export default function Home() {
               Why SQL Sports
             </p>
             <h2 className="max-w-2xl font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
-              The fastest way to actually learn SQL
+              The fastest way to actually learn the stack
             </h2>
             <p className="mt-3 max-w-xl text-base leading-relaxed text-ink-soft">
-              Most people don&apos;t fail at SQL because it&apos;s hard. They
-              fail because they&apos;re learning new syntax and an unfamiliar
-              business scenario at the same time, on data they don&apos;t
-              care about. Remove the second problem, and the syntax stops
-              being the hard part.
+              Most people don&apos;t fail at code because the syntax is hard.
+              They fail because they&apos;re learning new tools and an
+              unfamiliar business scenario at the same time, on data they
+              don&apos;t care about. Remove the second problem, and the tech
+              stops being the hard part.
             </p>
 
             <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -383,8 +385,8 @@ export default function Home() {
               betting that immersion works — dropping you into a domain
               until it clicks. SQL Sports makes the same bet, except it&apos;s
               a domain you&apos;ve already got years of immersion in. You&apos;re
-              not paying to learn a new industry and a new skill at once.
-              You&apos;re paying to learn one skill, faster, on a dataset
+              not paying to learn a new industry and a new stack at once.
+              You&apos;re paying to learn the tech, faster, on a dataset
               that&apos;s been running in your head since you were a kid.
             </p>
 
@@ -417,9 +419,9 @@ export default function Home() {
                   <span className="font-semibold text-ink">
                     The skill transfers one-to-one
                   </span>{" "}
-                  — filtering, ranking, and aggregating player stats is the
-                  exact SQL you&apos;ll run on sales, product, or finance data
-                  at work. Only the column names change.
+                  — filtering, ranking, modeling, and shipping on player stats
+                  is the same code you&apos;ll run on sales, product, or
+                  finance data at work. Only the column names change.
                 </p>
               </div>
             </div>
@@ -479,6 +481,9 @@ export default function Home() {
           </div>
         </section>
 
+        {/* ── Career Track playbooks ────────────────────── */}
+        <CareerPlaybooks />
+
         {/* ── Pricing ───────────────────────────────────── */}
         <section id="pricing" className="border-t border-panel-border">
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
@@ -487,11 +492,12 @@ export default function Home() {
               Pricing
             </p>
             <h2 className="font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
-              From first query to career change
+              From first line of code to career change
             </h2>
             <p className="mt-3 max-w-xl text-base leading-relaxed text-ink-soft">
               Practice for fun, follow the roadmap to get good, or go all the
-              way with hands-on support landing a data role.
+              way with a role-specific playbook and hands-on support landing
+              the job.
             </p>
 
             <div className="mt-6 inline-flex items-center gap-2 border border-gold/30 bg-gold/5 px-3 py-2">
@@ -509,8 +515,7 @@ export default function Home() {
               {PLANS.map((plan) => (
                 <div
                   key={plan.name}
-                  id={plan.name === "Career Track" ? "career-track" : undefined}
-                  className={`flex scroll-mt-20 flex-col border bg-panel p-5 transition-colors duration-150 ${
+                  className={`flex flex-col border bg-panel p-5 transition-colors duration-150 ${
                     plan.featured
                       ? "border-gold/40 hover:border-gold"
                       : "border-panel-border hover:border-turf/50"
@@ -565,9 +570,14 @@ export default function Home() {
                   </a>
                   {plan.name === "Career Track" && (
                     <p className="mt-3 text-center font-mono text-[10px] leading-relaxed text-ink-muted">
-                      Kept intentionally small — 1:1 review and mock
-                      interviews don&apos;t scale, so we don&apos;t pretend
-                      they do.
+                      Role-specific playbooks —{" "}
+                      <a
+                        href="#career-track"
+                        className="text-gold underline decoration-gold/40 underline-offset-2 hover:decoration-gold"
+                      >
+                        see the pathways
+                      </a>
+                      . Kept intentionally small so 1:1 review stays real.
                     </p>
                   )}
                 </div>

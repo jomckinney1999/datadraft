@@ -5,6 +5,10 @@ import { useEffect, useState } from "react";
 /**
  * Cycles the job title in the hero to show the same skills open several doors.
  *
+ * The trailing period lives *inside* the absolutely positioned role (and the
+ * width reserve) so it never floats out at the end of the longest title while
+ * a shorter one is showing.
+ *
  * Accessibility: the animation is decorative, so the rotating word is hidden
  * from assistive tech and the full list is exposed once as static text. It
  * also honours prefers-reduced-motion by holding on the first role rather
@@ -23,6 +27,7 @@ export const ROLES = [
 ];
 
 const INTERVAL_MS = 2200;
+const LONGEST = "forward deployed engineer";
 
 export default function RotatingRoles() {
   const [index, setIndex] = useState(0);
@@ -49,24 +54,24 @@ export default function RotatingRoles() {
 
   return (
     <span className="relative inline-block align-baseline">
-      {/* Reserves the width of the longest role so the line never reflows. */}
+      {/* Reserves the width of the longest role + period so the line never reflows. */}
       <span aria-hidden className="invisible whitespace-nowrap">
-        forward deployed engineer
+        {LONGEST}.
       </span>
 
       <span
         aria-hidden
-        className={`absolute inset-0 whitespace-nowrap text-gold transition-all duration-[260ms] ease-out ${
+        className={`absolute left-0 top-0 whitespace-nowrap text-gold transition-all duration-[260ms] ease-out ${
           leaving
             ? "-translate-y-1 opacity-0 blur-[1px]"
             : "translate-y-0 opacity-100 blur-0"
         }`}
       >
-        {ROLES[index]}
+        {ROLES[index]}.
       </span>
 
       <span className="sr-only">
-        {ROLES.slice(0, -1).join(", ")}, or {ROLES[ROLES.length - 1]}
+        {ROLES.slice(0, -1).join(", ")}, or {ROLES[ROLES.length - 1]}.
       </span>
     </span>
   );

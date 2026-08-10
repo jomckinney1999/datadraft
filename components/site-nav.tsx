@@ -24,6 +24,11 @@ const LEARN_TRACKS = [
   { id: "sql", label: "SQL", blurb: "Select, filter, rank, aggregate" },
   { id: "python", label: "Python", blurb: "pandas — code that runs live" },
   { id: "r", label: "R", blurb: "tidyverse — executed in-browser" },
+  {
+    id: "ai",
+    label: "AI",
+    blurb: "Prompts, evals, shipping AI features — in camp soon",
+  },
 ];
 
 export default function SiteNav() {

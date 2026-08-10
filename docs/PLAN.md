@@ -84,16 +84,24 @@ Career Track is a **small, high-value slice** of the user base, not the bulk of 
 
 ## Core "why" argument (positioning)
 
-The landing page has a dedicated "Why SQL Sports" section (`app/page.tsx`, `#why`, between the hero and the curriculum) making the explicit case for why learning SQL through sports is worth paying for. The argument, in order (utility-first — this is the must-buy lever, see above):
+The landing page has a dedicated "Why SQL Sports" section (`app/page.tsx`, `#why`, between the hero and the curriculum) making the explicit case for why learning **code & data skills** through sports is worth paying for — not SQL alone. The argument, in order (utility-first — this is the must-buy lever, see above):
 
-1. **Useful before you're "done."** You don't need to finish the roadmap to get value — query your own league's data to make this week's lineup call while you're still learning. The skill pays for itself before the course does.
-2. **You already know the domain** — most SQL courses make you learn unfamiliar syntax and an unfamiliar business scenario (fictional SaaS churn, etc.) at the same time. SQL Sports removes the second problem because the learner already understands fantasy football, so only the syntax is actually new.
-3. **Real data, real mess** — live NFL/fantasy data (byes, injuries, trades) instead of toy datasets (Titanic, Iris), which is closer to what real analyst work looks like.
-4. **Practice rides an existing habit** — checking standings/scores is a habit the learner already has, on the same weekly clock the NFL season already runs on; SQL Sports repurposes it instead of requiring a new study habit built from zero.
+1. **Useful before you're "done."** You don't need to finish the roadmap to get value — answer a real question about a real season while you're still learning. The skill pays for itself before the course does.
+2. **You already know the domain** — most tech courses make you learn unfamiliar syntax and an unfamiliar business scenario (fictional SaaS churn, etc.) at the same time. SQL Sports removes the second problem because the learner already understands sports, so only the tech is actually new.
+3. **Real data, real mess** — live NFL/fantasy (and eventually NBA/MLB) data (byes, injuries, trades) instead of toy datasets (Titanic, Iris), which is closer to what real analyst/engineering work looks like.
+4. **Practice rides an existing habit** — checking standings/scores is a habit the learner already has, on the same weekly clock the season already runs on; SQL Sports repurposes it instead of requiring a new study habit built from zero.
 5. **A portfolio story anyone gets instantly** — "I built an analytics tool on fantasy football data" needs no setup in an interview, unlike a generic bootcamp project.
 6. **Cheaper than the alternatives** — direct cost comparison to data analytics bootcamps ($10–20K) and specialized analytics master's programs ($20–50K), framed as the same "immersion" bet those make, minus the cost of also learning a brand-new industry.
 
 This is the same reasoning as the Andy persona section above, generalized into on-page copy — keep the two in sync. Point 6 in particular is a direct restatement of Andy's math (see above) and should move together with any changes to that reasoning or to the bootcamp/master's price comparisons.
+
+### Career Track playbooks (added 2026-08-10)
+
+Career Track is no longer just a pricing card with "resume review" bullets. The landing page (`#career-track`, `components/career-playbooks.tsx`, data in `lib/career-playbooks.ts`) shows **role-specific playbooks**: Data Analyst, Data Scientist, AI Engineer, Software Engineer, Analytics Engineer, Forward Deployed Engineer.
+
+Each playbook follows the same arc a first-job seeker needs — skills foundation → projects → portfolio/capstone → resume/LinkedIn → interviews → applications → 1:1 coaching — with stations renamed to the learner's sport lens (football: Training Camp / Scrimmages / The Combine / Draft Board; basketball: Summer League / Workouts / Free Agency; baseball: Spring Training / Showcase / Call-Up Board).
+
+Most drills are honest `placeholder` stubs; Data Analyst foundation drills that already exist in `/learn` are marked `live`. Expanding a playbook means filling those placeholders, not inventing a second product.
 
 ## Product ladder
 
@@ -102,9 +110,9 @@ This is the same reasoning as the Andy persona section above, generalized into o
 | **Free** | Free content (YouTube/LinkedIn/Substack), limited sandbox access | $0 | Top-of-funnel, everyone |
 | **Practice** | Full sandbox subscription, ongoing problem sets, live season datasets | $15–30/mo | Hobbyists, casual skill-builders |
 | **Roadmap** | Full Beginner → Advanced course pathway, portfolio capstone, completion credential | $200–500 one-time | Serious learners, not yet job-hunting |
-| **Career Track** | Everything in Roadmap + resume/portfolio review + mock interview practice + application strategy support | $1,000–5,000/yr | Andy, once he's decided this is a career move, not a hobby |
+| **Career Track** | Everything in Roadmap + role-specific playbook (DA / DS / AI Eng / SWE / AE / FDE) + resume/portfolio review + mock interview practice + application strategy support | $1,000–5,000/yr | Andy, once he's decided this is a career move, not a hobby |
 
-This ladder is implemented on the landing page pricing section (`app/page.tsx`, `PLANS` array) and linked from the nav (`Career Track` tab → `#career-track` anchor on the Career Track card). The pricing section also carries a **founding-cohort pricing badge** (see Must-buy mechanisms, #5) — all four tiers are framed as early/founding pricing.
+This ladder is implemented on the landing page pricing section (`app/page.tsx`, `PLANS` array). Nav `Career Track` → `#career-track` anchors the playbooks section (`components/career-playbooks.tsx`). The pricing section also carries a **founding-cohort pricing badge** (see Must-buy mechanisms, #5) — all four tiers are framed as early/founding pricing.
 
 ## Weekly Challenge & Leaderboard (planned, not built)
 
