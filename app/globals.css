@@ -273,6 +273,21 @@ body {
   transition: none !important;
 }
 
+/* Broadcast band behind the gallery headline. Fades out top and bottom so the
+   photos still read at the edges, and sits inside a `.theme-dark` subtree so
+   it stays dark indigo in light mode too — the duotone photos are dark in both
+   themes, so the headline over them is always light-on-dark. */
+.gallery-band {
+  background: linear-gradient(
+    180deg,
+    rgb(var(--c-night) / 0) 0%,
+    rgb(var(--c-night) / 0.86) 26%,
+    rgb(var(--c-night) / 0.93) 50%,
+    rgb(var(--c-night) / 0.86) 74%,
+    rgb(var(--c-night) / 0) 100%
+  );
+}
+
 /* ── Code editor ──────────────────────────────────────────── */
 
 /* The highlighted <pre> and the transparent <textarea> stacked on top of it
