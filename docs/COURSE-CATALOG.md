@@ -42,7 +42,7 @@ Tableau, Power BI and Excel cannot execute in the browser. Those courses teach t
 ## Course 1 — SQL
 
 **Outcome:** query a real relational database confidently, from `SELECT` to window functions, and pass a SQL screen.
-**Depth:** beginner → advanced · ~62 lessons
+**Depth:** beginner → advanced · 72 lessons
 
 ### 1.1 Reading Data (8)
 1. What a database actually is — tables, rows, columns · *a stat sheet is a table*
@@ -139,7 +139,7 @@ Tableau, Power BI and Excel cannot execute in the browser. Those courses teach t
 ## Course 2 — Excel
 
 **Outcome:** do real analysis in the tool most jobs actually run on, and stop being the person who does it by hand.
-**Depth:** beginner → advanced · ~52 lessons
+**Depth:** beginner → advanced · 52 lessons
 
 ### 2.1 Foundations (7)
 1. Workbooks, sheets, cells, ranges · *one sheet per season*
@@ -212,7 +212,7 @@ Tableau, Power BI and Excel cannot execute in the browser. Those courses teach t
 ## Course 3 — Statistics
 
 **Outcome:** reason about data honestly — know what a number supports, what it doesn't, and how to say so out loud.
-**Depth:** beginner → advanced · ~54 lessons
+**Depth:** beginner → advanced · 54 lessons
 
 ### 3.1 Describing Data (8)
 1. Populations vs samples · *this season vs every season ever*
@@ -287,7 +287,7 @@ Tableau, Power BI and Excel cannot execute in the browser. Those courses teach t
 ## Course 4 — Python
 
 **Outcome:** write Python that loads, cleans, analyses and ships real data — the language most analytics jobs assume.
-**Depth:** beginner → advanced · ~64 lessons
+**Depth:** beginner → advanced · 64 lessons
 
 ### 4.1 Language Foundations (9)
 1. Variables and assignment · *name a stat and reuse it*
@@ -374,7 +374,7 @@ Tableau, Power BI and Excel cannot execute in the browser. Those courses teach t
 ## Course 5 — R
 
 **Outcome:** read and write the R that a huge share of public sports analytics is published in, and use it where it beats Python.
-**Depth:** beginner → intermediate-advanced · ~46 lessons
+**Depth:** beginner → intermediate-advanced · 46 lessons
 
 ### 5.1 R Foundations (8)
 1. Why R exists alongside Python · *stats-first by design*
@@ -439,7 +439,7 @@ Tableau, Power BI and Excel cannot execute in the browser. Those courses teach t
 ## Course 6 — Tableau
 
 **Outcome:** build dashboards a stakeholder can use without you in the room, and speak the BI language most analyst postings list.
-**Depth:** beginner → advanced · ~48 lessons
+**Depth:** beginner → advanced · 48 lessons
 **Format note:** no browser runtime — every module is a guided build against a provided dataset, in real Tableau Public (free).
 
 ### 6.1 Getting Started (7)
@@ -507,7 +507,7 @@ Tableau, Power BI and Excel cannot execute in the browser. Those courses teach t
 ## Course 7 — Power BI
 
 **Outcome:** build and model reports in the Microsoft stack, including real DAX — the BI tool most enterprises actually run.
-**Depth:** beginner → advanced · ~50 lessons
+**Depth:** beginner → advanced · 50 lessons
 **Format note:** guided builds in Power BI Desktop (free, Windows).
 
 ### 7.1 Getting Started (7)
@@ -577,7 +577,7 @@ Tableau, Power BI and Excel cannot execute in the browser. Those courses teach t
 ## Course 8 — Git & GitHub
 
 **Outcome:** work like a professional on a team — version control, branches, pull requests, and a portfolio a hiring manager can actually open.
-**Depth:** beginner → intermediate-advanced · ~40 lessons
+**Depth:** beginner → intermediate-advanced · 40 lessons
 
 ### 8.1 Version Control Basics (8)
 1. What version control solves · *the end of `final_v3_REAL.py`*
@@ -634,7 +634,7 @@ Tableau, Power BI and Excel cannot execute in the browser. Those courses teach t
 ## Course 9 — LLMs & AI
 
 **Outcome:** use AI as a working analyst does — as a tool with known failure modes — and build something real with an API.
-**Depth:** beginner → intermediate-advanced · ~44 lessons
+**Depth:** beginner → intermediate-advanced · 44 lessons
 
 ### 9.1 How LLMs Actually Work (8)
 1. What a language model is doing · *next-token prediction, plainly*
@@ -706,18 +706,18 @@ Honest state of what exists in `lib/curriculum.ts` today versus this spec:
 
 | Course | Spec'd | Built | Live runtime |
 |---|---|---|---|
-| SQL | ~62 | 11 lessons (units 1–4) | Yes — sql.js |
-| Python | ~64 | 3 lessons (unit 7) | Yes — Pyodide |
-| Statistics | ~54 | 3 lessons (unit 8) | No |
+| SQL | 72 | 11 lessons (units 1–4) | Yes — sql.js |
+| Python | 64 | 3 lessons (unit 7) | Yes — Pyodide |
+| Statistics | 54 | 3 lessons (unit 8) | No |
 | Visualization (generic) | — | 3 lessons (unit 9) | No |
-| Git & GitHub | ~40 | 3 lessons (unit 10) | No |
-| R | ~46 | 3 lessons (unit 11) | Yes — WebR |
-| Excel | ~52 | 0 | n/a |
-| Tableau | ~48 | 0 | n/a |
-| Power BI | ~50 | 0 | n/a |
-| LLMs & AI | ~44 | 0 (unit 12 is a stub) | Planned — Pyodide |
+| Git & GitHub | 40 | 3 lessons (unit 10) | No |
+| R | 46 | 3 lessons (unit 11) | Yes — WebR |
+| Excel | 52 | 0 | n/a |
+| Tableau | 48 | 0 | n/a |
+| Power BI | 50 | 0 | n/a |
+| LLMs & AI | 44 | 0 (unit 12 is a stub) | Planned — Pyodide |
 
-**Roughly 26 of ~460 lessons exist.** The catalog page marks unbuilt courses "In build" rather than implying they're ready — keep it that way until the lessons land.
+**23 of 470 lessons exist** (the 3 visualization lessons in unit 9 are folded into Tableau/Power BI above, so they aren't counted here). The catalog page marks unbuilt courses "In build" rather than implying they're ready — keep it that way until the lessons land.
 
 **Suggested build order**, by demand and by what the existing runtimes already support:
 
