@@ -45,6 +45,9 @@
   --shadow-float: 0 24px 60px rgba(0, 0, 0, 0.55);
   --shadow-hero-panel: 0 24px 80px rgba(0, 0, 0, 0.55);
   --photo-scrim: 0.35;
+  --course-photo-opacity: 1;
+  --course-scrim-top: 0.62;
+  --course-scrim-bottom: 0.88;
 
   /* Syntax highlighting. Keywords borrow turf and strings borrow gold so the
      editor reads as part of the brand rather than a pasted-in IDE theme. */
@@ -90,6 +93,9 @@
   --shadow-float: 0 18px 45px rgba(19, 24, 34, 0.14);
   --shadow-hero-panel: 0 20px 60px rgba(19, 24, 34, 0.16);
   --photo-scrim: 0.12;
+  --course-photo-opacity: 0.32;
+  --course-scrim-top: 0.80;
+  --course-scrim-bottom: 0.93;
 
   /* Syntax colours darkened for white editors — the dark-mode set is
      unreadable on light. Each clears 4.5:1 against the panel background. */
@@ -285,6 +291,23 @@ body {
     rgb(var(--c-night) / 0.93) 50%,
     rgb(var(--c-night) / 0.86) 74%,
     rgb(var(--c-night) / 0) 100%
+  );
+}
+
+/* Course card thumbnails reuse the homepage gallery recipe — a grayscale photo,
+   a duotone blend into the brand palette, then a scrim — but push the scrim
+   harder because line art and a title sit on top. In light mode the photo also
+   drops to ~a third opacity and the scrim resolves near-white, so dark art
+   reads on a pale ghost of the image rather than fighting a mid-tone photo. */
+.course-photo {
+  opacity: var(--course-photo-opacity);
+}
+
+.course-scrim {
+  background: linear-gradient(
+    180deg,
+    rgb(var(--c-night) / var(--course-scrim-top)) 0%,
+    rgb(var(--c-night) / var(--course-scrim-bottom)) 100%
   );
 }
 

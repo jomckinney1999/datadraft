@@ -1,27 +1,57 @@
 /**
  * Original artwork for each course card.
  *
- * Drawn here rather than sourced, for two reasons. The obvious one: every
- * real BI/database logo (the MySQL dolphin, the Tableau wordmark, the Python
- * logo) is a trademark we have no licence to use, and stock photo libraries
- * are "free to use" rather than genuinely public domain. Original SVG has no
- * third-party rights attached at all.
+ * Drawn rather than sourced. Every real logo in this space — the MySQL
+ * dolphin, the Tableau wordmark, the Python logo — is a trademark we have no
+ * licence to use, and stock libraries are "free to use" rather than genuinely
+ * public domain. Original SVG carries no third-party rights at all.
  *
- * The second: these theme correctly. Everything is stroked in `currentColor`
- * at varying opacity, so the parent sets `text-turf` or `text-gold` and the
- * art follows the palette into light mode without a second asset.
+ * Each piece has to do two jobs at once: say what the course teaches AND read
+ * as football, because that pairing is the whole product. So the Git branch
+ * graph merges at a goalpost, the stats distribution is a field-goal arc, the
+ * AI network is an X-and-O play diagram, and Python's nesting is a route tree.
  *
- * Shared visual language: a yard-line backdrop behind every piece ties the set
- * together, and each foreground encodes what the course actually teaches —
- * a table grain for SQL, a branch graph for Git, a distribution for stats.
+ * Everything is stroked in `currentColor` at varying opacity, so the card sets
+ * `text-turf` or `text-gold` and the art follows the palette into light mode
+ * without a second asset.
  */
 
 type Props = { id: string; className?: string };
 
-/** Field stripes behind every card, so the nine read as one set. */
+/** Shared prop for the football shape used across several pieces. */
+function Football({ x, y, r = 1, o = 0.95 }: { x: number; y: number; r?: number; o?: number }) {
+  return (
+    <g transform={`translate(${x} ${y}) rotate(-24) scale(${r})`} opacity={o}>
+      <ellipse rx="7.5" ry="4.6" fill="currentColor" stroke="none" />
+      <line x1="-3.4" y1="0" x2="3.4" y2="0" stroke="rgb(var(--c-night))" strokeWidth="1.1" />
+      <line x1="-1.6" y1="-1.5" x2="-1.6" y2="1.5" stroke="rgb(var(--c-night))" strokeWidth="1.1" />
+      <line x1="0" y1="-1.7" x2="0" y2="1.7" stroke="rgb(var(--c-night))" strokeWidth="1.1" />
+      <line x1="1.6" y1="-1.5" x2="1.6" y2="1.5" stroke="rgb(var(--c-night))" strokeWidth="1.1" />
+    </g>
+  );
+}
+
+/** Goalpost — the uprights, from behind. */
+function Goalpost({ x, y, s = 1, o = 0.8 }: { x: number; y: number; s?: number; o?: number }) {
+  return (
+    <g
+      transform={`translate(${x} ${y}) scale(${s})`}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      opacity={o}
+    >
+      <line x1="0" y1="0" x2="0" y2="-12" />
+      <line x1="-13" y1="-12" x2="13" y2="-12" />
+      <line x1="-13" y1="-12" x2="-13" y2="-30" />
+      <line x1="13" y1="-12" x2="13" y2="-30" />
+    </g>
+  );
+}
+
 function YardLines() {
   return (
-    <g opacity="0.16">
+    <g opacity="0.14">
       {[20, 40, 60, 80, 100, 120, 140].map((x) => (
         <line key={x} x1={x} y1="6" x2={x} y2="84" stroke="currentColor" strokeWidth="1" />
       ))}
@@ -30,206 +60,251 @@ function YardLines() {
   );
 }
 
+/** SQL — a stat sheet with one row picked out, ball sitting on it. */
 function Sql() {
-  // A table with one row picked out — "what one row represents" is lesson one.
   return (
     <g fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="34" y="22" width="92" height="46" opacity="0.5" />
-      <line x1="34" y1="34" x2="126" y2="34" opacity="0.5" />
-      <line x1="64" y1="22" x2="64" y2="68" opacity="0.28" />
-      <line x1="95" y1="22" x2="95" y2="68" opacity="0.28" />
-      <line x1="34" y1="45" x2="126" y2="45" opacity="0.28" />
-      <line x1="34" y1="57" x2="126" y2="57" opacity="0.28" />
-      <rect x="34" y="45" width="92" height="12" fill="currentColor" opacity="0.22" stroke="none" />
-      <rect x="34" y="45" width="92" height="12" opacity="0.9" />
+      <rect x="28" y="20" width="104" height="50" opacity="0.45" />
+      <line x1="28" y1="32" x2="132" y2="32" opacity="0.55" />
+      <line x1="60" y1="20" x2="60" y2="70" opacity="0.22" />
+      <line x1="98" y1="20" x2="98" y2="70" opacity="0.22" />
+      <line x1="28" y1="45" x2="132" y2="45" opacity="0.22" />
+      <line x1="28" y1="58" x2="132" y2="58" opacity="0.22" />
+      <rect x="28" y="45" width="104" height="13" fill="currentColor" opacity="0.2" stroke="none" />
+      <rect x="28" y="45" width="104" height="13" opacity="0.95" />
+      <Football x={44} y={51.5} r={0.78} />
+      <rect x="34" y="24.5" width="18" height="4" fill="currentColor" stroke="none" opacity="0.5" />
+      <rect x="66" y="24.5" width="24" height="4" fill="currentColor" stroke="none" opacity="0.5" />
+      <rect x="104" y="24.5" width="20" height="4" fill="currentColor" stroke="none" opacity="0.5" />
     </g>
   );
 }
 
+/** Python — a route tree: branching logic drawn the way a playbook draws it. */
 function Python() {
-  // Indented blocks stepping down — the shape of a loop body.
-  return (
-    <g stroke="currentColor" fill="none" strokeWidth="2">
-      <rect x="30" y="24" width="52" height="9" opacity="0.75" />
-      <rect x="44" y="38" width="52" height="9" opacity="0.55" />
-      <rect x="58" y="52" width="52" height="9" opacity="0.4" />
-      <rect x="72" y="66" width="46" height="9" opacity="0.28" />
-      <path d="M24 24v55" opacity="0.5" />
-      <circle cx="24" cy="24" r="3" fill="currentColor" stroke="none" opacity="0.9" />
-    </g>
-  );
-}
-
-function Stats() {
-  // A distribution with the tail outlier that every stats lesson argues about.
   return (
     <g fill="none" stroke="currentColor" strokeWidth="2">
-      <path
-        d="M24 70c14 0 16-38 32-38s18 38 32 38"
-        opacity="0.35"
-        transform="translate(14,0)"
-      />
-      <path d="M24 70c16 0 18-44 36-44s20 44 36 44" opacity="0.85" transform="translate(10,0)" />
-      <line x1="24" y1="70" x2="136" y2="70" opacity="0.5" />
-      <circle cx="122" cy="58" r="3.5" fill="currentColor" stroke="none" opacity="0.95" />
-      <line x1="122" y1="62" x2="122" y2="70" opacity="0.6" strokeDasharray="3 3" />
-    </g>
-  );
-}
-
-function Excel() {
-  // A grid with a formula cell — the moment a spreadsheet becomes analysis.
-  return (
-    <g fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="32" y="20" width="96" height="50" opacity="0.5" />
-      {[32, 56, 80, 104].map((x) => (
-        <line key={x} x1={x} y1="20" x2={x} y2="70" opacity="0.25" />
-      ))}
-      {[33, 45, 57].map((y) => (
-        <line key={y} x1="32" y1={y} x2="128" y2={y} opacity="0.25" />
-      ))}
-      <rect x="80" y="45" width="24" height="12" fill="currentColor" opacity="0.28" stroke="none" />
-      <rect x="80" y="45" width="24" height="12" opacity="0.95" />
-      <path d="M86 51h12" opacity="0.9" strokeWidth="2" />
-      <path d="M92 47v8" opacity="0.9" strokeWidth="2" />
-    </g>
-  );
-}
-
-function Tableau() {
-  // Scattered marks resolving into a dashboard grid.
-  return (
-    <g stroke="currentColor" fill="none" strokeWidth="2">
-      <rect x="28" y="20" width="44" height="28" opacity="0.45" />
-      <rect x="80" y="20" width="52" height="28" opacity="0.45" />
-      <rect x="28" y="54" width="104" height="18" opacity="0.45" />
-      <path d="M34 42l8-10 8 6 8-14 8 8" opacity="0.95" />
+      <line x1="24" y1="76" x2="136" y2="76" opacity="0.45" />
+      <path d="M52 76V34" opacity="0.9" />
+      <path d="M52 46h-18" opacity="0.6" strokeDasharray="4 3" />
+      <path d="M52 40l22-12" opacity="0.6" strokeDasharray="4 3" />
+      <path d="M52 34h26" opacity="0.75" strokeDasharray="4 3" />
+      <path d="M52 34c18 0 20-12 34-12" opacity="0.6" strokeDasharray="4 3" />
+      <path d="M52 58l26 10" opacity="0.5" strokeDasharray="4 3" />
+      <circle cx="52" cy="76" r="4" fill="currentColor" stroke="none" opacity="0.9" />
       {[
-        [88, 40],
-        [100, 32],
-        [112, 36],
-        [124, 27],
+        [34, 46],
+        [74, 28],
+        [78, 34],
+        [86, 22],
       ].map(([cx, cy]) => (
-        <circle key={cx} cx={cx} cy={cy} r="3" fill="currentColor" stroke="none" opacity="0.85" />
+        <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="2.8" fill="currentColor" stroke="none" opacity="0.75" />
       ))}
-      <rect x="34" y="60" width="30" height="6" fill="currentColor" stroke="none" opacity="0.7" />
-      <rect x="70" y="60" width="18" height="6" fill="currentColor" stroke="none" opacity="0.4" />
+      <Football x={112} y={40} r={0.72} o={0.85} />
     </g>
   );
 }
 
-function PowerBi() {
-  // Columns plus a KPI tile — the two halves of every BI report.
+/** Statistics — a field-goal arc as the distribution, plus the outlier miss. */
+function Stats() {
   return (
-    <g stroke="currentColor" fill="none" strokeWidth="2">
-      <rect x="28" y="18" width="46" height="22" opacity="0.5" />
-      <path d="M35 32l7-7 6 5 7-9" opacity="0.9" />
-      <line x1="28" y1="72" x2="132" y2="72" opacity="0.5" />
+    <g fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="22" y1="74" x2="138" y2="74" opacity="0.45" />
+      <path d="M34 74C46 26 86 26 100 74" opacity="0.9" />
+      <path d="M34 74C50 40 84 40 100 74" opacity="0.3" />
+      <Goalpost x={100} y={74} s={0.85} o={0.7} />
       {[
-        [84, 30],
-        [98, 44],
-        [112, 22],
-        [126, 38],
-      ].map(([x, y]) => (
+        [50, 48],
+        [62, 39],
+        [74, 37],
+        [86, 43],
+      ].map(([cx, cy]) => (
+        <circle key={cx} cx={cx} cy={cy} r="2.8" fill="currentColor" stroke="none" opacity="0.6" />
+      ))}
+      <circle cx="128" cy="34" r="3.4" fill="currentColor" stroke="none" opacity="0.95" />
+      <line x1="128" y1="38" x2="128" y2="74" opacity="0.45" strokeDasharray="3 3" />
+    </g>
+  );
+}
+
+/** Excel — the stadium scoreboard as a grid, with one cell doing the maths. */
+function Excel() {
+  return (
+    <g fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="26" y="16" width="108" height="48" opacity="0.5" />
+      <line x1="26" y1="28" x2="134" y2="28" opacity="0.5" />
+      {[53, 80, 107].map((x) => (
+        <line key={x} x1={x} y1="28" x2={x} y2="64" opacity="0.22" />
+      ))}
+      <line x1="26" y1="46" x2="134" y2="46" opacity="0.22" />
+      <rect x="80" y="46" width="27" height="18" fill="currentColor" opacity="0.22" stroke="none" />
+      <rect x="80" y="46" width="27" height="18" opacity="0.95" />
+      <path d="M88 55h11M93.5 49.5v11" opacity="0.95" />
+      <rect x="32" y="20" width="22" height="4" fill="currentColor" stroke="none" opacity="0.55" />
+      <rect x="106" y="20" width="22" height="4" fill="currentColor" stroke="none" opacity="0.55" />
+      <line x1="44" y1="64" x2="44" y2="74" opacity="0.5" />
+      <line x1="116" y1="64" x2="116" y2="74" opacity="0.5" />
+      <line x1="34" y1="74" x2="54" y2="74" opacity="0.5" />
+      <line x1="106" y1="74" x2="126" y2="74" opacity="0.5" />
+    </g>
+  );
+}
+
+/** Tableau — dashboard tiles, one of them holding a helmet. */
+function Tableau() {
+  return (
+    <g fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="24" y="18" width="46" height="30" opacity="0.4" />
+      <rect x="78" y="18" width="58" height="30" opacity="0.4" />
+      <rect x="24" y="54" width="112" height="20" opacity="0.4" />
+      {/* helmet: dome + facemask */}
+      <path d="M34 42c0-11 7-17 15-17s12 6 12 14v3" opacity="0.95" />
+      <path d="M47 42h14" opacity="0.9" />
+      <path d="M50 36h11" opacity="0.6" />
+      <circle cx="44" cy="33" r="2" fill="currentColor" stroke="none" opacity="0.7" />
+      {/* trend tile */}
+      <path d="M84 42l10-12 9 7 10-15 12 10" opacity="0.9" />
+      {[
+        [30, 64],
+        [58, 64],
+        [86, 64],
+      ].map(([x]) => (
+        <rect key={x} x={x} y="60" width="22" height="8" fill="currentColor" stroke="none" opacity="0.4" />
+      ))}
+      <rect x="114" y="60" width="16" height="8" fill="currentColor" stroke="none" opacity="0.75" />
+    </g>
+  );
+}
+
+/** Power BI — the stands as a bar chart, scoreboard tile above. */
+function PowerBi() {
+  return (
+    <g fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="24" y="14" width="50" height="22" opacity="0.45" />
+      <path d="M31 29l8-8 7 6 8-11" opacity="0.9" />
+      <line x1="24" y1="76" x2="136" y2="76" opacity="0.5" />
+      {[
+        [82, 44],
+        [95, 32],
+        [108, 24],
+        [121, 36],
+      ].map(([x, y], i) => (
         <rect
           key={x}
           x={x}
           y={y}
-          width="10"
-          height={72 - y}
+          width="11"
+          height={76 - y}
           fill="currentColor"
           stroke="none"
-          opacity="0.55"
+          opacity={i === 2 ? 0.9 : 0.45}
         />
       ))}
-      <rect x="112" y="22" width="10" height="50" opacity="0.95" />
-      <rect x="34" y="52" width="34" height="6" fill="currentColor" stroke="none" opacity="0.35" />
-      <rect x="34" y="62" width="22" height="6" fill="currentColor" stroke="none" opacity="0.2" />
+      {/* crowd tiers on the left */}
+      {[62, 52, 42].map((y, i) => (
+        <line key={y} x1={30 + i * 5} y1={y} x2={66 - i * 4} y2={y} opacity="0.3" strokeWidth="3" />
+      ))}
+      <Football x={108} y={16} r={0.7} o={0.9} />
     </g>
   );
 }
 
+/** Git — commits as footballs down the drive, the branch merging at the posts. */
 function Git() {
-  // A branch leaving main and merging back — the whole course in one graph.
   return (
     <g fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M32 60h96" opacity="0.5" />
-      <path d="M56 60c0-16 12-24 26-24h14" opacity="0.85" />
-      <path d="M96 36c14 0 22 8 22 24" opacity="0.85" />
-      {[32, 60, 90, 128].map((cx) => (
-        <circle key={cx} cx={cx} cy="60" r="4.5" fill="currentColor" stroke="none" opacity="0.55" />
-      ))}
-      <circle cx="78" cy="36" r="4.5" fill="currentColor" stroke="none" opacity="0.95" />
-      <circle cx="104" cy="38" r="4.5" fill="currentColor" stroke="none" opacity="0.95" />
+      <line x1="20" y1="60" x2="120" y2="60" opacity="0.45" />
+      <path d="M46 60c0-16 12-22 26-22h10" opacity="0.85" />
+      <path d="M82 38c16 0 20 8 20 22" opacity="0.85" />
+      <Football x={26} y={60} r={0.62} o={0.7} />
+      <Football x={64} y={60} r={0.62} o={0.7} />
+      <Football x={72} y={38} r={0.72} o={0.95} />
+      <Goalpost x={126} y={72} s={0.8} o={0.85} />
+      <line x1="20" y1="72" x2="112" y2="72" opacity="0.2" strokeDasharray="4 4" />
     </g>
   );
 }
 
+/** R — the pass trajectory as the fitted line, receivers scattered around it. */
 function RLang() {
-  // Scatter with a fitted line — what R was built to do.
   return (
     <g fill="none" stroke="currentColor" strokeWidth="2">
-      <line x1="30" y1="72" x2="132" y2="72" opacity="0.5" />
-      <line x1="30" y1="16" x2="30" y2="72" opacity="0.5" />
-      <path d="M38 66L126 26" opacity="0.9" />
+      <line x1="26" y1="74" x2="136" y2="74" opacity="0.45" />
+      <line x1="26" y1="14" x2="26" y2="74" opacity="0.45" />
+      <path d="M36 68C64 22 104 22 128 52" opacity="0.9" />
+      <Football x={38} y={66} r={0.68} o={0.95} />
       {[
-        [46, 62],
-        [58, 60],
-        [70, 50],
-        [82, 48],
-        [94, 38],
+        [52, 52],
+        [64, 42],
+        [78, 36],
+        [92, 33],
         [106, 36],
-        [118, 28],
+        [118, 44],
       ].map(([cx, cy]) => (
-        <circle key={cx} cx={cx} cy={cy} r="3.2" fill="currentColor" stroke="none" opacity="0.7" />
+        <circle key={cx} cx={cx} cy={cy} r="3" fill="currentColor" stroke="none" opacity="0.6" />
       ))}
+      <circle cx="128" cy="52" r="4" opacity="0.95" />
     </g>
   );
 }
 
+/** AI — the network as an X-and-O play diagram, one node lit up. */
 function Ai() {
-  // A small network — nodes and weights, not a glowing brain.
-  const nodes: [number, number][] = [
-    [40, 30],
-    [40, 58],
+  const os: [number, number][] = [
+    [38, 30],
+    [38, 58],
+  ];
+  const mid: [number, number][] = [
     [80, 22],
     [80, 44],
     [80, 66],
-    [120, 34],
-    [120, 58],
   ];
-  const edges: [number, number][] = [
-    [0, 2],
-    [0, 3],
-    [1, 3],
-    [1, 4],
-    [2, 5],
-    [3, 5],
-    [3, 6],
-    [4, 6],
+  const xs: [number, number][] = [
+    [124, 34],
+    [124, 58],
+  ];
+  const edges: [[number, number], [number, number]][] = [
+    [os[0], mid[0]],
+    [os[0], mid[1]],
+    [os[1], mid[1]],
+    [os[1], mid[2]],
+    [mid[0], xs[0]],
+    [mid[1], xs[0]],
+    [mid[1], xs[1]],
+    [mid[2], xs[1]],
   ];
   return (
-    <g stroke="currentColor" fill="none" strokeWidth="1.6">
+    <g fill="none" stroke="currentColor" strokeWidth="1.7">
       {edges.map(([a, b], i) => (
         <line
           key={i}
-          x1={nodes[a][0]}
-          y1={nodes[a][1]}
-          x2={nodes[b][0]}
-          y2={nodes[b][1]}
-          opacity={i % 3 === 0 ? 0.8 : 0.3}
+          x1={a[0]}
+          y1={a[1]}
+          x2={b[0]}
+          y2={b[1]}
+          opacity={i === 2 || i === 6 ? 0.85 : 0.28}
+          strokeDasharray={i % 2 ? "4 3" : undefined}
         />
       ))}
-      {nodes.map(([cx, cy], i) => (
+      {os.map(([cx, cy]) => (
+        <circle key={cx + cy} cx={cx} cy={cy} r="5.5" opacity="0.8" strokeWidth="2.2" />
+      ))}
+      {mid.map(([cx, cy], i) => (
         <circle
-          key={i}
+          key={cx + cy}
           cx={cx}
           cy={cy}
           r="5"
           fill="currentColor"
           stroke="none"
-          opacity={i === 3 ? 0.95 : 0.55}
+          opacity={i === 1 ? 0.95 : 0.45}
         />
+      ))}
+      {xs.map(([cx, cy]) => (
+        <g key={cx + cy} opacity="0.85" strokeWidth="2.4">
+          <line x1={cx - 5} y1={cy - 5} x2={cx + 5} y2={cy + 5} />
+          <line x1={cx + 5} y1={cy - 5} x2={cx - 5} y2={cy + 5} />
+        </g>
       ))}
     </g>
   );
