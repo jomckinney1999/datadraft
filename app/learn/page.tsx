@@ -10,6 +10,7 @@ import { COURSES, ALL_IN_ONE, type Course } from "@/lib/courses";
 import { liveLessons, ALL_MODULE } from "@/lib/curriculum";
 import { loadProgress, displayStreak, type Progress } from "@/lib/progress";
 import Coach from "@/components/coach";
+import CourseArt from "@/components/course-art";
 import ThemeToggle from "@/components/theme-toggle";
 
 function ClockIcon() {
@@ -74,12 +75,11 @@ function CourseCard({
             {course.lessons * 10}
           </span>
         </div>
-        <div className="relative flex min-h-[132px] flex-col items-center justify-center px-5 py-5 text-center">
-          <span
-            className={`font-display text-3xl font-bold tracking-tight ${accentText}`}
-          >
-            {course.mark}
-          </span>
+        <div className="relative flex min-h-[152px] flex-col items-center justify-center px-5 pb-5 pt-2 text-center">
+          <CourseArt
+            id={course.id}
+            className={`h-[74px] w-full max-w-[190px] ${accentText}`}
+          />
           <h3 className="mt-2 font-display text-lg font-bold uppercase leading-tight tracking-tight text-pop">
             {course.title}
           </h3>
