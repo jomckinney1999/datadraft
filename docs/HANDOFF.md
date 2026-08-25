@@ -62,6 +62,11 @@ Four commits on `main`, all deployed:
 - **Still football-only.** Every example in all 11 units uses football data, while the picker offers three sports. That's the live gap now — see `docs/PLAN.md` → Open questions.
 - **Sport choice is a standalone localStorage key** (`sqlsports-sport`), deliberately *not* in `lib/progress.ts`, to avoid touching the progress schema. Fold it into `Progress` when accounts land.
 
+## Added 2026-08-25
+
+- **Course catalog** — `/learn` is now a card grid over `lib/courses.ts` (nine courses), replacing the nav dropdown and the in-page module `<select>`. Course roadmaps moved to `/learn/track/[moduleId]`.
+- **`docs/COURSE-CATALOG.md`** — the full content spec: every module and lesson for all nine courses, with the sports angle per lesson. ~460 lessons spec'd, ~26 built. It carries a build-status table and a suggested build order.
+
 ## Open threads (roughly in priority order)
 
 - **Unit 5: JOINs** ("Trade Desk") — schema already supports it (`rosters` + `week_results`; the Field's `teams` join drill warms learners up). Unit 6: window functions.

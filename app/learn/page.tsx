@@ -1,31 +1,29 @@
 "use client";
 
-// The course roadmap: DataCamp-style syllabus clarity on top,
-// Duolingo-style winding lesson path per unit below.
+// The course catalog: every course as a card you can browse, replacing the
+// old module dropdown. Cards for courses with lessons link into their roadmap
+// (/learn/track/[moduleId]); the rest are honestly marked "In build".
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  COURSE,
-  liveLessons,
-  moduleUnits,
-  getModule,
-  MODULES,
-  type Lesson,
-  type Unit,
-} from "@/lib/curriculum";
-import { useModule } from "@/lib/use-module";
+import { COURSES, ALL_IN_ONE, type Course } from "@/lib/courses";
+import { liveLessons, ALL_MODULE } from "@/lib/curriculum";
 import { loadProgress, displayStreak, type Progress } from "@/lib/progress";
-import { getStyle } from "@/lib/playbook";
-import { getTrack } from "@/lib/draft";
 import Coach from "@/components/coach";
 import ThemeToggle from "@/components/theme-toggle";
 
-const NODE_OFFSETS = [0, 48, 0, -48];
+function ClockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+      <path d="M12 7v5l3 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 function FlameIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 text-gold" aria-hidden>
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-gold" aria-hidden>
       <path
         d="M12 2c1 4-3 5.5-3 9a3 3 0 0 0 6 0c0-1.5-.8-2.6-.8-2.6S17 10 17 13a5 5 0 0 1-10 0c0-4.5 4-6.5 5-11z"
         fill="currentColor"
@@ -34,38 +32,134 @@ function FlameIcon() {
   );
 }
 
-function LockIcon() {
+/** Lessons actually built for this course right now. */
+function builtCount(course: Course): number {
+  return course.moduleId ? liveLessons(course.moduleId).length : 0;
+}
+
+function CourseCard({
+  course,
+  completed,
+}: {
+  course: Course;
+  completed: Set<string>;
+}) {
+  const built = builtCount(course);
+  const done = course.moduleId
+    ? liveLessons(course.moduleId).filter((e) => completed.has(e.lesson.id))
+        .length
+    : 0;
+  const isLive = course.status === "live";
+  const accentText = course.accent === "turf" ? "text-turf" : "text-gold";
+  const accentBorder =
+    course.accent === "turf" ? "hover:border-turf/60" : "hover:border-gold/60";
+
+  const body = (
+    <>
+      {/* thumbnail */}
+      <div className="relative overflow-hidden border-b border-panel-border bg-night">
+        <div
+          aria-hidden
+          className={`absolute inset-0 ${
+            course.accent === "turf" ? "rays-turf" : "rays-gold"
+          } opacity-[0.07]`}
+        />
+        <div className="relative flex items-center justify-between px-4 pt-4">
+          <span className="inline-flex items-center gap-1.5 border border-panel-border bg-panel/80 px-2 py-1 font-mono text-[10px] text-ink-soft">
+            <ClockIcon />
+            {course.hours}h
+          </span>
+          <span className="inline-flex items-center gap-1.5 border border-panel-border bg-panel/80 px-2 py-1 font-mono text-[10px] text-ink-soft">
+            <FlameIcon />
+            {course.lessons * 10}
+          </span>
+        </div>
+        <div className="relative flex min-h-[132px] flex-col items-center justify-center px-5 py-5 text-center">
+          <span
+            className={`font-display text-3xl font-bold tracking-tight ${accentText}`}
+          >
+            {course.mark}
+          </span>
+          <h3 className="mt-2 font-display text-lg font-bold uppercase leading-tight tracking-tight text-pop">
+            {course.title}
+          </h3>
+        </div>
+      </div>
+
+      {/* stat strip */}
+      <div className="grid grid-cols-3 divide-x divide-panel-border border-b border-panel-border bg-panel/60 text-center">
+        <span className="px-1 py-2 font-mono text-[10px] text-ink-muted">
+          <span className={accentText}>{course.lessons}</span> Lessons
+        </span>
+        <span className="px-1 py-2 font-mono text-[10px] text-ink-muted">
+          <span className={accentText}>{course.projects}</span> Project
+          {course.projects === 1 ? "" : "s"}
+        </span>
+        <span className="px-1 py-2 font-mono text-[10px] text-ink-muted">
+          {isLive ? (
+            <>
+              <span className={accentText}>{built}</span> Live
+            </>
+          ) : (
+            <span className="text-gold">In build</span>
+          )}
+        </span>
+      </div>
+
+      <div className="flex flex-1 flex-col p-4">
+        <p className="flex-1 text-sm leading-relaxed text-ink-soft">
+          {course.blurb}
+        </p>
+
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="border border-panel-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+            {course.level}
+          </span>
+          {course.liveCode && (
+            <span className="border border-turf/40 bg-turf/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-turf">
+              Runs your code
+            </span>
+          )}
+          {isLive && done > 0 && (
+            <span className="font-mono text-[10px] uppercase tracking-wider text-gold">
+              {done}/{built} done
+            </span>
+          )}
+        </div>
+
+        <span
+          className={`mt-4 block border px-4 py-2.5 text-center font-mono text-xs font-semibold uppercase tracking-wider transition-colors ${
+            isLive
+              ? "border-turf bg-turf text-night group-hover:bg-turf-dim"
+              : "cursor-default border-panel-border bg-panel text-ink-muted"
+          }`}
+        >
+          {isLive ? "Learn More →" : "Coming soon"}
+        </span>
+      </div>
+    </>
+  );
+
+  const shell = `group flex flex-col border border-panel-border bg-panel transition-colors duration-150 ${
+    isLive ? accentBorder : "opacity-75"
+  }`;
+
+  if (!isLive || !course.moduleId) {
+    return (
+      <div className={shell} aria-label={`${course.title} — in build`}>
+        {body}
+      </div>
+    );
+  }
+
   return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
-      <rect x="5" y="10" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" strokeWidth="1.8" />
-    </svg>
+    <Link href={`/learn/track/${course.moduleId}`} className={shell}>
+      {body}
+    </Link>
   );
 }
 
-function CheckIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" aria-hidden>
-      <path
-        d="M5 13l5 5L19 7"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function PlayIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-6 w-6" aria-hidden>
-      <path d="M8 5.5v13l11-6.5z" fill="currentColor" />
-    </svg>
-  );
-}
-
-export default function LearnPage() {
+export default function LearnCatalogPage() {
   const [progress, setProgress] = useState<Progress>({
     xp: 0,
     completedLessons: [],
@@ -76,40 +170,23 @@ export default function LearnPage() {
     draftedTrack: null,
   });
 
-  const { moduleId, setModule, hydrated } = useModule();
-
   useEffect(() => {
     setProgress(loadProgress());
   }, []);
 
-  // Deep-link from the site nav Learn dropdown: /learn?module=python
-  useEffect(() => {
-    const q = new URLSearchParams(window.location.search).get("module");
-    if (q && MODULES.some((m) => m.id === q)) setModule(q);
-  }, [setModule]);
-
-  const activeModule = getModule(moduleId);
-  const visibleUnits = moduleUnits(moduleId);
-  const all = liveLessons(moduleId);
   const completed = new Set(progress.completedLessons);
-  const current =
-    all.find((e) => !completed.has(e.lesson.id)) ?? all[all.length - 1];
-  const completedCount = all.filter((e) => completed.has(e.lesson.id)).length;
-  const pct = Math.round((completedCount / all.length) * 100);
-  const yardLine = Math.min(100, pct);
+  const allLessons = liveLessons(ALL_MODULE);
+  const allDone = allLessons.filter((e) => completed.has(e.lesson.id)).length;
   const streak = displayStreak(progress);
-
-  function nodeState(lesson: Lesson): "completed" | "current" | "locked" {
-    if (completed.has(lesson.id)) return "completed";
-    if (current && lesson.id === current.lesson.id) return "current";
-    return "locked";
-  }
+  const liveCourses = COURSES.filter((c) => c.status === "live").length;
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-2xl px-4 pb-24">
-      {/* header */}
+    <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-24 sm:px-6">
       <header className="flex items-center justify-between py-5">
-        <Link href="/" className="font-display text-lg font-bold tracking-tight text-ink">
+        <Link
+          href="/"
+          className="font-display text-lg font-bold tracking-tight text-ink"
+        >
           SQL<span className="text-turf">Sports</span>
           <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-muted">
             learn
@@ -138,275 +215,56 @@ export default function LearnPage() {
         </div>
       </header>
 
-      {/* course overview — the DataCamp layer */}
       <section className="border border-panel-border bg-panel/80 p-6 shadow-scoreboard">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="label-broadcast text-turf">
-              {moduleId === "all" ? "course 1 · analyst roadmap" : "module"}
-            </p>
+            <p className="label-broadcast text-turf">the course board</p>
             <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
-              {moduleId === "all" ? COURSE.title : activeModule.name}
+              Pick your course.
             </h1>
-            <p className="mt-3 max-w-lg text-sm leading-relaxed text-ink-soft">
-              {moduleId === "all" ? COURSE.tagline : activeModule.blurb}
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-soft">
+              {liveCourses} courses open now, more in build. Take one on its
+              own, or run the all-in-one pathway in order. Progress carries
+              across every course either way.
             </p>
-            <p className="mt-2 max-w-lg font-mono text-[11px] leading-relaxed text-ink-muted">
-              No football knowledge required — the game is just the dataset,
+            <p className="mt-2 max-w-xl font-mono text-[11px] leading-relaxed text-ink-muted">
+              No football knowledge required — the sport is just the dataset,
               and Coach explains any context as you go.
             </p>
           </div>
           <div className="hidden shrink-0 sm:block">
-            <Coach mood={pct === 100 ? "cheer" : "idle"} size={110} />
+            <Coach mood={allDone > 0 ? "happy" : "idle"} size={110} />
           </div>
         </div>
 
-        {/* Module picker — take one skill on its own, or the whole roadmap. */}
-        <div className="mt-5 border-t border-panel-border pt-4">
-          <label
-            htmlFor="module-select"
-            className="label-broadcast block text-[10px]"
-          >
-            What do you want to learn?
-          </label>
-          <div className="mt-2 flex flex-wrap items-center gap-3">
-            <select
-              id="module-select"
-              value={hydrated ? moduleId : "all"}
-              onChange={(e) => setModule(e.target.value)}
-              className="min-w-[220px] border border-panel-border bg-night px-3 py-2 font-mono text-sm text-ink outline-none transition-colors focus:border-turf"
-            >
-              {MODULES.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-            <span className="font-mono text-[11px] text-ink-muted">
-              {all.length} lesson{all.length === 1 ? "" : "s"} ·{" "}
-              {completedCount} done
+        <Link
+          href={`/learn/track/${ALL_IN_ONE.moduleId}`}
+          className="mt-5 flex flex-wrap items-center justify-between gap-3 border border-gold/50 bg-gold/10 px-5 py-4 transition-colors hover:bg-gold/20"
+        >
+          <span>
+            <span className="block font-display text-base font-bold text-ink">
+              🏈 {ALL_IN_ONE.title}
             </span>
-          </div>
-        </div>
-
-        <div className="mt-5">
-          <div className="flex items-baseline justify-between">
-            <p className="font-mono text-[11px] uppercase tracking-widest text-ink-muted">
-              {completedCount}/{all.length} lessons ·{" "}
-              {pct === 100 ? "END ZONE — course complete" : `ball on the ${yardLine}-yard line`}
-            </p>
-            <p className="stat-number text-sm">{pct}%</p>
-          </div>
-          <div className="mt-2 h-3 overflow-hidden rounded-full bg-night">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-turf to-gold transition-all duration-700"
-              style={{ width: `${Math.max(pct, 2)}%` }}
-            />
-          </div>
-        </div>
-
-        <div className="mt-5 flex flex-wrap items-center gap-2">
-          {visibleUnits
-            .filter((u) => u.status === "live")
-            .flatMap((u) => u.skills)
-            .map((skill) => (
-              <span
-                key={skill}
-                className="border border-panel-border px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-muted"
-              >
-                {skill}
-              </span>
-            ))}
-        </div>
-
-        {!progress.username || !progress.draftedTrack ? (
-          <Link
-            href="/learn/draft"
-            className="mt-6 block w-full border border-gold bg-gold/15 px-6 py-3 text-center font-mono text-sm font-semibold uppercase tracking-widest text-gold transition-colors hover:bg-gold/25"
-          >
-            🏈 Enter the SQLSports Draft · claim pick 1.01
-          </Link>
-        ) : !progress.playbookStyle ? (
-          <Link
-            href="/learn/playbook"
-            className="mt-6 block w-full border border-gold bg-gold/15 px-6 py-3 text-center font-mono text-sm font-semibold uppercase tracking-widest text-gold transition-colors hover:bg-gold/25"
-          >
-            Take the quiz · Choose your playbook style
-          </Link>
-        ) : (
-          current && (
-            <Link
-              href={`/learn/${current.lesson.id}`}
-              className="mt-6 block w-full border border-turf bg-turf/15 px-6 py-3 text-center font-mono text-sm font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25"
-            >
-              {completedCount === 0
-                ? "Start the season"
-                : pct === 100
-                  ? "Replay the last drive"
-                  : `Continue · ${current.lesson.title}`}
-            </Link>
-          )
-        )}
-
-        {progress.username && progress.draftedTrack && (
-          <p className="mt-3 text-center font-mono text-[11px] leading-relaxed text-ink-muted">
-            Pick 1.01: <span className="text-gold">{progress.username}</span>{" "}
-            drafted{" "}
-            <span className="text-ink-soft">
-              {getTrack(progress.draftedTrack)?.name ?? progress.draftedTrack}
+            <span className="mt-0.5 block text-sm leading-relaxed text-ink-soft">
+              {ALL_IN_ONE.blurb}
             </span>
-            {progress.playbookStyle && (
-              <>
-                {" "}
-                · running the{" "}
-                <span className="text-turf">
-                  {getStyle(progress.playbookStyle).name}
-                </span>{" "}
-                playbook ·{" "}
-                <Link
-                  href="/learn/playbook"
-                  className="underline decoration-panel-border underline-offset-4 transition-colors hover:text-gold"
-                >
-                  retake the quiz
-                </Link>
-              </>
-            )}
-          </p>
-        )}
+          </span>
+          <span className="shrink-0 font-mono text-xs font-semibold uppercase tracking-widest text-gold">
+            {allDone}/{allLessons.length} · Start →
+          </span>
+        </Link>
       </section>
 
-      {/* the field — unit by unit, scoped to the selected module */}
-      {visibleUnits.map((unit) => (
-        <UnitSection
-          key={unit.id}
-          unit={unit}
-          nodeState={nodeState}
-          completedCount={
-            unit.lessons.filter((l) => completed.has(l.id)).length
-          }
-        />
-      ))}
-
-      <p className="mt-16 text-center font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-        Progress is saved in this browser · full accounts coming with the season launch
-      </p>
-    </main>
-  );
-}
-
-function UnitSection({
-  unit,
-  nodeState,
-  completedCount,
-}: {
-  unit: Unit;
-  nodeState: (lesson: Lesson) => "completed" | "current" | "locked";
-  completedCount: number;
-}) {
-  const comingSoon = unit.status === "coming-soon";
-
-  return (
-    <section className={`mt-10 ${comingSoon ? "opacity-60" : ""}`}>
-      {/* unit header band */}
-      <div
-        className={`border p-5 shadow-scoreboard ${
-          comingSoon
-            ? "border-panel-border bg-panel/40"
-            : "border-panel-border bg-panel/80"
-        }`}
-      >
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="label-broadcast text-gold">{unit.drive}</p>
-            <h2 className="mt-1 font-display text-xl font-bold text-ink">
-              Unit {unit.number} · {unit.title}
-            </h2>
-          </div>
-          {comingSoon ? (
-            <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-              <LockIcon />
-              In the playbook
-            </span>
-          ) : (
-            <span className="font-mono text-xs text-ink-muted">
-              {completedCount}/{unit.lessons.length}
-            </span>
-          )}
-        </div>
-        <p className="mt-2 max-w-xl text-[13px] leading-relaxed text-ink-soft">
-          {unit.description}
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {unit.skills.map((skill) => (
-            <span
-              key={skill}
-              className="border border-panel-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-ink-muted"
-            >
-              {skill}
-            </span>
-          ))}
-        </div>
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {COURSES.map((course) => (
+          <CourseCard key={course.id} course={course} completed={completed} />
+        ))}
       </div>
 
-      {/* winding lesson path over faint yard lines */}
-      {!comingSoon && (
-        <div className="yard-lines relative mt-2 flex flex-col items-center gap-7 py-8">
-          {unit.lessons.map((lesson, i) => {
-            const state = nodeState(lesson);
-            const offset = NODE_OFFSETS[i % NODE_OFFSETS.length];
-            const node = (
-              <div
-                className="relative flex flex-col items-center"
-                style={{ transform: `translateX(${offset}px)` }}
-              >
-                {state === "current" && (
-                  <span className="absolute -top-9 animate-bounce border border-gold bg-night px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-gold">
-                    Start
-                  </span>
-                )}
-                <span
-                  className={`flex h-16 w-16 items-center justify-center rounded-full border-2 transition-transform ${
-                    state === "completed"
-                      ? "border-turf bg-turf/20 text-turf"
-                      : state === "current"
-                        ? "border-gold bg-gold/15 text-gold shadow-scoreboard-gold"
-                        : "border-panel-border bg-panel text-ink-muted"
-                  } ${state !== "locked" ? "hover:scale-105" : ""}`}
-                >
-                  {state === "completed" ? (
-                    <CheckIcon />
-                  ) : state === "current" ? (
-                    <PlayIcon />
-                  ) : (
-                    <LockIcon />
-                  )}
-                </span>
-                <span
-                  className={`mt-2 max-w-[140px] text-center font-mono text-[11px] leading-tight ${
-                    state === "locked" ? "text-ink-muted/60" : "text-ink-soft"
-                  }`}
-                >
-                  {lesson.title}
-                </span>
-              </div>
-            );
-
-            return state === "locked" ? (
-              <div key={lesson.id}>{node}</div>
-            ) : (
-              <Link
-                key={lesson.id}
-                href={`/learn/${lesson.id}`}
-                aria-label={`${lesson.title} — ${
-                  state === "completed" ? "replay" : "start"
-                }`}
-              >
-                {node}
-              </Link>
-            );
-          })}
-        </div>
-      )}
-    </section>
+      <p className="mt-12 text-center font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+        Lesson counts show the full syllabus · &ldquo;Live&rdquo; is what&apos;s
+        playable today
+      </p>
+    </main>
   );
 }
