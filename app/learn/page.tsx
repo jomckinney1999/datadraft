@@ -222,6 +222,12 @@ export default function LearnCatalogPage() {
           >
             Practice Field
           </Link>
+          <Link
+            href="/account"
+            className="border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-turf/40 hover:text-turf"
+          >
+            Account
+          </Link>
           <span className="flex items-center gap-1.5 border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs text-gold">
             <FlameIcon />
             {streak} day{streak === 1 ? "" : "s"}

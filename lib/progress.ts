@@ -82,6 +82,11 @@ export function setDraftPick(username: string, trackId: string): Progress {
   return next;
 }
 
+/** Exported so progress-sync can write a merged remote+local state back. */
+export function saveProgress(progress: Progress) {
+  save(progress);
+}
+
 function save(progress: Progress) {
   try {
     window.localStorage.setItem(KEY, JSON.stringify(progress));

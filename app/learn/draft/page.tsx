@@ -11,6 +11,7 @@ import Link from "next/link";
 import ThemeToggle from "@/components/theme-toggle";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TRACKS, getTrack, type Track } from "@/lib/draft";
+import { readStoredModule } from "@/lib/use-module";
 import { loadProgress, setDraftPick } from "@/lib/progress";
 import Coach from "@/components/coach";
 
@@ -30,6 +31,15 @@ function DraftDay() {
     const p = loadProgress();
     if (p.username) setName(p.username);
     setHasStyle(!!p.playbookStyle);
+
+    // They already chose a course on the catalog — don't make them choose
+    // twice. Pre-select it so the ceremony confirms the pick instead of
+    // re-asking, and skip straight to the board.
+    const chosen = getTrack(readStoredModule());
+    if (chosen && chosen.status === "live") {
+      setPick(chosen);
+      if (p.username) setAct("clock");
+    }
   }, []);
 
   const trimmed = name.trim();
@@ -122,8 +132,9 @@ function DraftDay() {
                 Make your selection.
               </h1>
               <p className="mt-1 text-sm text-ink-soft">
-                One track is draft-eligible today. The rest of the class is
-                still declaring — they hit the board in future seasons.
+                {TRACKS.filter((t) => t.status === "live").length} courses are
+                draft-eligible today. The rest of the class is still declaring —
+                they hit the board once their lessons are built.
               </p>
             </div>
           </div>

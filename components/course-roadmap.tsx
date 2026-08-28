@@ -18,7 +18,7 @@ import {
 import { useModule } from "@/lib/use-module";
 import { loadProgress, displayStreak, type Progress } from "@/lib/progress";
 import { getStyle } from "@/lib/playbook";
-import { getTrack } from "@/lib/draft";
+import { getTrack, normalizeTrackId } from "@/lib/draft";
 import Coach from "@/components/coach";
 import ThemeToggle from "@/components/theme-toggle";
 
@@ -229,7 +229,8 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
             Pick 1.01: <span className="text-gold">{progress.username}</span>{" "}
             drafted{" "}
             <span className="text-ink-soft">
-              {getTrack(progress.draftedTrack)?.name ?? progress.draftedTrack}
+              {getTrack(normalizeTrackId(progress.draftedTrack))?.name ??
+                progress.draftedTrack}
             </span>
             {progress.playbookStyle && (
               <>

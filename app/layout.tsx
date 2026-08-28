@@ -23,7 +23,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 
 const TITLE = "SQL Sports — Become a data analyst. Sports are the lens.";
 const DESCRIPTION =
-  "SQL, Python, R, Git, and statistics — everything an aspiring data analyst or data scientist needs, taught through football, basketball, or baseball. You don't have to watch the games.";
+  "SQL, Python, R, Git, and statistics — everything an aspiring data analyst or data scientist needs, taught through real NFL data. You don't have to watch the games.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://sql-sports.vercel.app"),

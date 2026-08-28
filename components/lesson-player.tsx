@@ -42,6 +42,7 @@ import {
 import { useModule } from "@/lib/use-module";
 import { useSport } from "@/lib/use-sport";
 import { completeLesson, loadProgress } from "@/lib/progress";
+import { pushProgress } from "@/lib/progress-sync";
 import { getStyle, type PlaybookStyle } from "@/lib/playbook";
 import Coach, { type CoachMood } from "@/components/coach";
 import CodeEditor from "@/components/code-editor";
@@ -320,6 +321,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     if (phase === "complete" && !savedRef.current && entry) {
       savedRef.current = true;
       completeLesson(entry.lesson.id, finalXp);
+      // Fire-and-forget: no-op when signed out, and a failed sync must never
+      // block the completion screen the learner just earned.
+      void pushProgress();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);

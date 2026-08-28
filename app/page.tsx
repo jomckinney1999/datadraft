@@ -7,10 +7,11 @@ import ActionGallery from "@/components/action-gallery";
 import SportPicker from "@/components/sport-picker";
 import RotatingRoles from "@/components/rotating-roles";
 import CareerPlaybooks from "@/components/career-playbooks";
+import WaitlistForm from "@/components/waitlist-form";
 
 const STATS = [
   { label: "Skills taught", value: "6" },
-  { label: "Sports", value: "3" },
+  { label: "Live lessons", value: "26" },
   { label: "New data", value: "Weekly" },
 ];
 
@@ -50,7 +51,7 @@ const WHY_PILLARS = [
 const WHY_COMPARISON = [
   {
     old: "Toy datasets you memorize, don't understand",
-    now: "Real, living NFL, NBA & MLB data",
+    now: "Real, living NFL data — NBA & MLB next",
   },
   {
     old: "One language, then start over somewhere else",
@@ -119,7 +120,9 @@ const PLANS = [
     period: "forever",
     accent: "turf" as const,
     features: ["Limited SQL sandbox", "Free content library", "Sample season dataset"],
-    cta: "Start free",
+    cta: "Start learning",
+    // Everything currently built is free and open — no account, no card.
+    available: true,
   },
   {
     name: "Practice",
@@ -132,6 +135,7 @@ const PLANS = [
       "Live season datasets",
     ],
     cta: "Start practicing",
+    available: false,
   },
   {
     name: "Roadmap",
@@ -144,6 +148,7 @@ const PLANS = [
       "Completion credential",
     ],
     cta: "Unlock the Roadmap",
+    available: false,
   },
   {
     name: "Career Track",
@@ -159,6 +164,7 @@ const PLANS = [
       "Application strategy support",
     ],
     cta: "Apply for Career Track",
+    available: false,
     featured: true,
   },
 ];
@@ -214,9 +220,8 @@ export default function Home() {
                 <p className="mt-4 max-w-md text-base leading-relaxed text-ink-soft animate-[fadeUp_0.45s_ease-out_0.15s_forwards] opacity-0">
                   SQL, Python, R, Git, statistics — the whole toolkit an
                   aspiring data analyst or data scientist actually needs, taught
-                  through football, basketball, or baseball. Pick your sport;
-                  the tech is the only new thing. You don&apos;t have to watch
-                  the games.
+                  through real NFL data. The sport is the lens; the tech is the
+                  only new thing. You don&apos;t have to watch the games.
                 </p>
 
                 <div className="mt-8 flex flex-wrap items-center gap-3 animate-[fadeUp_0.45s_ease-out_0.2s_forwards] opacity-0">
@@ -500,15 +505,30 @@ export default function Home() {
               the job.
             </p>
 
-            <div className="mt-6 inline-flex items-center gap-2 border border-gold/30 bg-gold/5 px-3 py-2">
-              <span className="dot-glow-gold inline-block h-1.5 w-1.5 shrink-0 bg-gold" />
-              <span className="font-mono text-[11px] leading-snug text-ink-soft">
-                <span className="font-semibold uppercase tracking-wider text-gold">
-                  Founding cohort pricing
-                </span>{" "}
-                — locked in for early members, rises once we&apos;re out of
-                early access.
-              </span>
+            {/* Nothing is for sale yet — the legal docs are still in review and
+                the entity work in docs/BUSINESS-SETUP.md is unfinished. Saying
+                so plainly beats a checkout button that can't charge. */}
+            <div className="mt-6 flex flex-col gap-2">
+              <div className="inline-flex items-center gap-2 border border-turf/40 bg-turf/10 px-3 py-2">
+                <span className="inline-block h-1.5 w-1.5 shrink-0 bg-turf" />
+                <span className="font-mono text-[11px] leading-snug text-ink-soft">
+                  <span className="font-semibold uppercase tracking-wider text-turf">
+                    Everything built is free right now
+                  </span>{" "}
+                  — every live lesson, the sandbox and the Practice Field, no
+                  account and no card. We&apos;re in beta.
+                </span>
+              </div>
+              <div className="inline-flex items-center gap-2 border border-gold/30 bg-gold/5 px-3 py-2">
+                <span className="dot-glow-gold inline-block h-1.5 w-1.5 shrink-0 bg-gold" />
+                <span className="font-mono text-[11px] leading-snug text-ink-soft">
+                  <span className="font-semibold uppercase tracking-wider text-gold">
+                    Prices below are the plan, not a live checkout
+                  </span>{" "}
+                  — founding-cohort rates, locked in for anyone on the list
+                  before the paid tiers open.
+                </span>
+              </div>
             </div>
 
             <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -558,16 +578,26 @@ export default function Home() {
                       </li>
                     ))}
                   </ul>
-                  <a
-                    href="#sandbox"
-                    className={`mt-6 block border px-4 py-2.5 text-center font-mono text-xs uppercase tracking-wider transition-colors duration-150 ${
-                      plan.featured
-                        ? "border-gold bg-gold/10 text-gold hover:bg-gold/20"
-                        : "border-turf/40 bg-turf/5 text-turf hover:border-turf hover:bg-turf/15"
-                    }`}
-                  >
-                    {plan.cta}
-                  </a>
+                  {plan.available ? (
+                    <a
+                      href="/learn"
+                      className="mt-6 block border border-turf bg-turf px-4 py-2.5 text-center font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-turf-dim"
+                    >
+                      {plan.cta}
+                    </a>
+                  ) : (
+                    <div className="mt-6">
+                      <p className="mb-2 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+                        Not open yet — get first access
+                      </p>
+                      <WaitlistForm
+                        interest={`tier:${plan.name.toLowerCase().replace(/\s+/g, "-")}`}
+                        source="pricing"
+                        label="Notify me"
+                        compact
+                      />
+                    </div>
+                  )}
                   {plan.name === "Career Track" && (
                     <p className="mt-3 text-center font-mono text-[10px] leading-relaxed text-ink-muted">
                       Role-specific playbooks —{" "}
@@ -660,12 +690,13 @@ export default function Home() {
             </div>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <a
-                href="mailto:jomckinney1999@gmail.com?subject=Notify%20me%20%E2%80%94%20Weekly%20Challenge&body=Let%20me%20know%20when%20the%20Weekly%20Challenge%20%26%20Leaderboard%20launches!"
-                className="inline-flex items-center gap-2 border border-turf bg-turf px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-turf-dim"
-              >
-                Notify me when this launches
-              </a>
+              <div className="w-full max-w-md">
+                <WaitlistForm
+                  interest="weekly-challenge"
+                  source="challenge"
+                  label="Notify me"
+                />
+              </div>
             </div>
           </div>
         </section>

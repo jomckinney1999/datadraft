@@ -43,6 +43,13 @@ export default function SiteNav() {
           ))}
 
           <a
+            href="/account"
+            className="font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors duration-150 hover:text-turf"
+          >
+            Account
+          </a>
+
+          <a
             href="/learn"
             className="border border-turf/50 bg-turf/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-turf transition-colors duration-150 hover:border-turf hover:bg-turf/20"
           >

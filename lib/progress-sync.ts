@@ -1,0 +1,129 @@
+"use client";
+
+/**
+ * Bridges localStorage progress (lib/progress.ts) and the learner_progress
+ * table, so signing in makes progress portable without changing how the
+ * anonymous experience works.
+ *
+ * Merge rule: union the completed lessons and take the max of the counters.
+ * Last-write-wins would silently delete work — finish two lessons on your
+ * phone, open your laptop where the older row lives, and the laptop's row
+ * would overwrite them. Union never loses a completed lesson, which is the
+ * thing a learner would actually be upset to lose.
+ */
+
+import { createClient } from "@/lib/supabase/client";
+import { loadProgress, saveProgress, type Progress } from "@/lib/progress";
+import { readStoredSport, SPORT_STORAGE_KEY } from "@/lib/use-sport";
+import { readStoredModule, MODULE_STORAGE_KEY } from "@/lib/use-module";
+
+type Row = {
+  user_id: string;
+  xp: number;
+  completed_lessons: string[];
+  streak: number;
+  last_active_day: string;
+  playbook_style: string | null;
+  username: string | null;
+  drafted_track: string | null;
+  sport: string | null;
+  module_id: string | null;
+};
+
+function merge(local: Progress, remote: Row | null): Progress {
+  if (!remote) return local;
+  const lessons = new Set([
+    ...local.completedLessons,
+    ...(remote.completed_lessons ?? []),
+  ]);
+  const newer =
+    local.lastActiveDay >= (remote.last_active_day ?? "") ? local : null;
+  return {
+    xp: Math.max(local.xp, remote.xp ?? 0),
+    completedLessons: Array.from(lessons),
+    streak: Math.max(local.streak, remote.streak ?? 0),
+    lastActiveDay:
+      local.lastActiveDay > (remote.last_active_day ?? "")
+        ? local.lastActiveDay
+        : (remote.last_active_day ?? ""),
+    // Prefer whichever side was active most recently for the single-value
+    // fields, falling back to whichever one actually has a value.
+    playbookStyle:
+      (newer?.playbookStyle ??
+        (remote.playbook_style as Progress["playbookStyle"])) ||
+      local.playbookStyle ||
+      null,
+    username: newer?.username ?? remote.username ?? local.username ?? null,
+    draftedTrack:
+      newer?.draftedTrack ?? remote.drafted_track ?? local.draftedTrack ?? null,
+  };
+}
+
+/**
+ * Pull the signed-in learner's row, merge it with whatever is on this device,
+ * write the result back to both. Safe to call on every sign-in and page load.
+ */
+export async function syncProgress(): Promise<Progress | null> {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const local = loadProgress();
+
+  const { data: remote } = await supabase
+    .from("learner_progress")
+    .select("*")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const merged = merge(local, (remote as Row | null) ?? null);
+
+  // Local first, so the learner sees the merged state even if the write fails.
+  saveProgress(merged);
+  if (remote?.sport && !readStoredSport()) {
+    try {
+      window.localStorage.setItem(SPORT_STORAGE_KEY, remote.sport);
+    } catch {
+      /* storage blocked — not fatal */
+    }
+  }
+  if (remote?.module_id) {
+    try {
+      window.localStorage.setItem(MODULE_STORAGE_KEY, remote.module_id);
+    } catch {
+      /* storage blocked — not fatal */
+    }
+  }
+
+  await pushProgress(merged);
+  return merged;
+}
+
+/** Write the current device's progress up. No-op when signed out. */
+export async function pushProgress(progress?: Progress): Promise<void> {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const p = progress ?? loadProgress();
+  const { error } = await supabase.from("learner_progress").upsert(
+    {
+      user_id: user.id,
+      xp: p.xp,
+      completed_lessons: p.completedLessons,
+      streak: p.streak,
+      last_active_day: p.lastActiveDay,
+      playbook_style: p.playbookStyle,
+      username: p.username,
+      drafted_track: p.draftedTrack,
+      sport: readStoredSport(),
+      module_id: readStoredModule(),
+    },
+    { onConflict: "user_id" },
+  );
+  if (error) console.error("progress sync failed", error.message);
+}

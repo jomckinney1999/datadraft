@@ -2,6 +2,17 @@
 
 import { useState } from "react";
 
+const SUPPORT_EMAIL = "jomckinney1999@gmail.com";
+
+/**
+ * Support panel.
+ *
+ * This used to swallow the message: handleSend set a "thanks, we'll get back
+ * to you" flag and discarded the text, so anyone who asked a real question got
+ * a reply that never came. Until there's a real inbox behind it (LAUNCH-PLAN
+ * Phase 9 wires ticketing), it hands the message to the visitor's own mail
+ * client — which actually reaches a human — and says so before they type.
+ */
 export default function SupportWidget() {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
@@ -9,7 +20,13 @@ export default function SupportWidget() {
 
   function handleSend(e: React.FormEvent) {
     e.preventDefault();
-    if (!message.trim()) return;
+    const body = message.trim();
+    if (!body) return;
+    const href =
+      `mailto:${SUPPORT_EMAIL}` +
+      `?subject=${encodeURIComponent("SQL Sports — support")}` +
+      `&body=${encodeURIComponent(body)}`;
+    window.location.href = href;
     setSent(true);
     setMessage("");
   }
@@ -49,7 +66,7 @@ export default function SupportWidget() {
                   setMessage(e.target.value);
                   setSent(false);
                 }}
-                placeholder="Send us a message"
+                placeholder="What's on your mind?"
                 rows={3}
                 className="w-full resize-none border border-panel-border bg-night/60 px-3 py-2.5 font-sans text-sm text-ink outline-none placeholder:text-ink-muted focus:border-turf/50"
               />
@@ -57,13 +74,19 @@ export default function SupportWidget() {
                 type="submit"
                 className="mt-2 flex w-full items-center justify-center gap-2 border border-turf/50 bg-turf/10 px-3 py-2 font-mono text-[11px] uppercase tracking-wider text-turf transition-colors duration-150 hover:border-turf hover:bg-turf/20"
               >
-                Send
+                Open in email
               </button>
             </form>
 
+            <p className="mt-2 font-mono text-[10px] leading-relaxed text-ink-muted">
+              This opens your email app addressed to us — no account needed, and
+              nothing is sent until you hit send there.
+            </p>
+
             {sent && (
-              <p className="mt-3 font-mono text-[11px] text-ink-muted">
-                Thanks — we&apos;ll get back to you soon.
+              <p className="mt-3 font-mono text-[11px] text-turf">
+                Your email app should be open. If it didn&apos;t launch, write
+                to {SUPPORT_EMAIL}.
               </p>
             )}
           </div>

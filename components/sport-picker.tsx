@@ -2,6 +2,7 @@
 
 import { SPORTS } from "@/lib/sports";
 import { useSport } from "@/lib/use-sport";
+import WaitlistForm from "@/components/waitlist-form";
 
 export default function SportPicker() {
   const { sport, setSport, hydrated } = useSport();
@@ -18,9 +19,10 @@ export default function SportPicker() {
         </h2>
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink-soft">
           The skills are identical whichever you choose — SQL, Python, R, Git,
-          statistics. The sport only decides what the data is about. And you
-          still don&apos;t have to watch the games: anything you need to know
-          gets explained in a sentence, right where it matters.
+          statistics. The sport only decides what the data is about. Football is
+          the lens we&apos;ve built so far; you still don&apos;t have to watch
+          the games, since anything you need to know gets explained in a
+          sentence right where it matters.
         </p>
 
         <div
@@ -36,11 +38,14 @@ export default function SportPicker() {
                 type="button"
                 role="radio"
                 aria-checked={selected}
-                onClick={() => setSport(s.id)}
+                onClick={() => s.status === "live" && setSport(s.id)}
+                disabled={s.status !== "live"}
                 className={`group flex flex-col items-start border p-5 text-left transition-colors duration-150 ${
                   selected
                     ? "border-turf bg-turf/10"
-                    : "border-panel-border bg-panel hover:border-turf/50"
+                    : s.status === "live"
+                      ? "border-panel-border bg-panel hover:border-turf/50"
+                      : "cursor-default border-panel-border bg-panel/60"
                 }`}
               >
                 <div className="flex w-full items-start justify-between gap-3">
@@ -73,23 +78,48 @@ export default function SportPicker() {
 
                 <span
                   className={`mt-5 font-mono text-[11px] uppercase tracking-wider ${
-                    selected ? "text-turf" : "text-ink-muted group-hover:text-turf"
+                    selected
+                      ? "text-turf"
+                      : s.status === "live"
+                        ? "text-ink-muted group-hover:text-turf"
+                        : "text-gold"
                   }`}
                 >
-                  {selected ? "✓ Selected" : "Choose this sport"}
+                  {selected
+                    ? "✓ Selected"
+                    : s.status === "live"
+                      ? "Choose this sport"
+                      : "Not ready yet"}
                 </span>
               </button>
             );
           })}
         </div>
 
-        {/* Football is the only sport with a real dataset today, and the site
-            says so rather than implying three finished products. */}
-        <p className="mt-6 max-w-2xl font-mono text-[11px] leading-relaxed text-ink-muted">
-          Football runs on real NFL data today. Basketball and baseball are in
-          active build — pick one now and you&apos;ll start on the football
-          dataset, then switch your lens the week your sport goes live.
-        </p>
+        {/* Basketball and baseball aren't selectable because selecting them
+            would change nothing: every lesson, the sandbox and the Practice
+            Field are NFL data. Offering a choice that does nothing costs more
+            trust than not offering it. */}
+        <div className="mt-6 max-w-2xl border border-gold/30 bg-gold/5 p-4">
+          <p className="font-mono text-[11px] leading-relaxed text-ink-soft">
+            <span className="font-semibold uppercase tracking-wider text-gold">
+              Football only, for now
+            </span>{" "}
+            — every lesson, the sandbox and the Practice Field run on real NFL
+            data. Basketball and baseball need their own datasets before the
+            choice means anything, so we&apos;re not pretending otherwise.
+          </p>
+          <p className="mt-3 font-mono text-[11px] text-ink-muted">
+            Want your sport first? Tell us and we&apos;ll build it next.
+          </p>
+          <div className="mt-2">
+            <WaitlistForm
+              interest="sport:basketball-or-baseball"
+              source="sport-picker"
+              label="Vote for my sport"
+            />
+          </div>
+        </div>
 
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <a
