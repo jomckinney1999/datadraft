@@ -500,9 +500,10 @@ export const COURSE = {
           brief: {
             goal: "Filter on numbers and combine tests with AND.",
             setup:
-              "Beyond equality you get >, <, >=, <=. AND requires both sides to be true, which is how you express \"big game, this season\" in one line. Here's a threshold in action.",
-            previewSql: "SELECT player, season, week, fantasy_pts FROM week_results WHERE fantasy_pts > 30 LIMIT 5;",
-            previewCaption: "only rows scoring over 30",
+              "Beyond equality you get >, <, >=, <=. AND requires both sides to be true, which is how you express \"big game, this season\" in one line. Nothing in this dataset clears 30, so 25 is what a big game actually looks like here.",
+            previewSql:
+              "SELECT player, season, week, fantasy_pts FROM week_results WHERE fantasy_pts > 25 ORDER BY fantasy_pts DESC LIMIT 5;",
+            previewCaption: "only rows scoring over 25",
           },
           intro: {
             title: "Set the over/under",
@@ -1173,23 +1174,712 @@ export const COURSE = {
       id: "u5",
       number: 5,
       title: "Trade Desk — JOINs",
-      drive: "5th Drive · Coming Soon",
+      drive: "5th Drive · Midfield",
       description:
-        "Combine tables: match rosters to week_results and score entire fantasy matchups. The relational thinking phase of the full curriculum.",
-      skills: ["JOIN", "ON", "Table aliases"],
-      status: "coming-soon",
-      lessons: [],
+        "Combine tables: match rosters to week_results and score entire fantasy matchups. The relational thinking phase of the curriculum.",
+      skills: ["JOIN", "ON", "LEFT JOIN", "Anti-joins"],
+      status: "live",
+      lessons: [
+        {
+          id: "u5-l1",
+          title: "Two Sheets, One Question",
+          blurb: "INNER JOIN: connect the roster to the game log.",
+          brief: {
+            goal: "Answer a question that needs two tables at once.",
+            setup:
+              "week_results knows who scored what. rosters knows who owns whom. Neither can tell you how your fantasy team did — that needs both, stitched together on the column they share. Here's the roster you'll be joining to.",
+            previewSql: "SELECT * FROM rosters;",
+            previewCaption: "rosters · 10 rows, two fantasy teams",
+          },
+          intro: {
+            title: "A join matches rows across tables",
+            text: "JOIN takes two tables and pairs up rows that agree on something. The ON clause says what has to match — here it's the player name, which appears in both tables. Every matched pair becomes one wide row containing columns from both sides.",
+            code: "SELECT rosters.team_name, week_results.player, week_results.fantasy_pts\nFROM rosters\nJOIN week_results ON rosters.player = week_results.player;",
+          },
+          film: [
+            {
+              title: "The shared column is the hinge",
+              text: "A join is only possible when the two tables have a value in common — here, the player's name. In a production database that link is usually an id rather than a name, precisely because names are messy: two players can share one, and spelling drifts between sources. The idea is identical either way.",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt:
+                "Why can't week_results alone tell you how your fantasy team scored?",
+              options: [
+                "It doesn't have a points column",
+                "It has no idea which players you own — that lives in rosters",
+                "It only covers one season",
+                "It's too large to query",
+              ],
+              answer: 1,
+              drillSkip: true,
+              explain:
+                "week_results is every player in the league. Which of them are yours is a fact that only exists in rosters, so the question needs both tables.",
+            },
+            {
+              type: "fill",
+              prompt: "Connect the two tables on the column they share.",
+              parts: [
+                "SELECT rosters.team_name, week_results.fantasy_pts\nFROM rosters\n",
+                null,
+                " week_results ",
+                null,
+                " rosters.player = week_results.player;",
+              ],
+              bank: ["JOIN", "ON", "WHERE", "AND"],
+              answer: ["JOIN", "ON"],
+              explain:
+                "JOIN names the second table, ON states the matching rule. Swap ON for WHERE here and SQL won't know how to pair the rows.",
+            },
+            {
+              type: "query",
+              prompt:
+                "Pull every scoring row that belongs to a rostered player in week 1 of 2018. Show team_name, player and fantasy_pts.",
+              starter:
+                "SELECT rosters.team_name, week_results.player, week_results.fantasy_pts\nFROM rosters\n",
+              expected:
+                "SELECT rosters.team_name, week_results.player, week_results.fantasy_pts FROM rosters JOIN week_results ON rosters.player = week_results.player WHERE week_results.season = 2018 AND week_results.week = 1;",
+              orderMatters: false,
+              hint: "JOIN week_results ON rosters.player = week_results.player, then filter with WHERE on season and week.",
+              explain:
+                "Nine rows — not ten. Ten players are rostered, so one is missing. That's the whole point of the next lesson.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "Ten players are on rosters, but that query returned nine rows for week 1. What's the most likely reason?",
+              options: [
+                "The join is broken",
+                "One rostered player has no week-1 row — a bye week",
+                "SQL caps results at nine",
+                "One player was traded",
+              ],
+              answer: 1,
+              explain:
+                "A plain JOIN only keeps pairs that match. Travis Kelce is on a bye that week, so he has no row in week_results to pair with, and he silently disappears.",
+            },
+          ],
+        },
+        {
+          id: "u5-l2",
+          title: "Aliases and Qualified Names",
+          blurb: "Stop typing table names twice. Start reading joins fast.",
+          brief: {
+            goal: "Write joins that stay readable past two tables.",
+            setup:
+              "Spelling out week_results.fantasy_pts every time gets unbearable quickly. Aliases give each table a short name for the length of the query. Same result, a third of the typing — this is how every join you'll read in the wild is written.",
+            previewSql:
+              "SELECT r.team_name, w.player, w.fantasy_pts FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2018 AND w.week = 3 ORDER BY w.fantasy_pts DESC;",
+            previewCaption: "the same join, written with aliases",
+          },
+          intro: {
+            title: "One letter per table",
+            text: "Put a short name after the table in FROM or JOIN and it becomes that table's handle everywhere else in the query: rosters r, week_results w. Then qualify every column as r.something or w.something. Qualifying isn't just tidy — when both tables have a column called player, an unqualified `player` is ambiguous and SQL will refuse to run.",
+            code: "SELECT r.team_name, w.player, w.fantasy_pts\nFROM rosters r\nJOIN week_results w ON r.player = w.player;",
+          },
+          exercises: [
+            {
+              type: "mc",
+              prompt:
+                "Both tables have a column named `player`. What happens if you SELECT it unqualified in a join?",
+              options: [
+                "SQL picks the left table",
+                "SQL errors — the name is ambiguous",
+                "You get both columns",
+                "It returns NULL",
+              ],
+              answer: 1,
+              explain:
+                "SQL won't guess. Qualify it — r.player or w.player — and the ambiguity disappears.",
+            },
+            {
+              type: "fill",
+              prompt: "Give each table a one-letter alias.",
+              parts: [
+                "SELECT r.team_name, w.fantasy_pts\nFROM rosters ",
+                null,
+                "\nJOIN week_results ",
+                null,
+                " ON r.player = w.player;",
+              ],
+              bank: ["r", "w", "AS r", "rosters"],
+              answer: ["r", "w"],
+              explain:
+                "The alias goes straight after the table name. AS is allowed but almost nobody writes it for tables.",
+            },
+            {
+              type: "query",
+              prompt:
+                "Using aliases r and w, show team_name, player and fantasy_pts for rostered players who scored more than 25 points in 2018.",
+              starter: "SELECT r.team_name, w.player, w.fantasy_pts\nFROM rosters r\n",
+              expected:
+                "SELECT r.team_name, w.player, w.fantasy_pts FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2018 AND w.fantasy_pts > 25;",
+              orderMatters: false,
+              hint: "JOIN week_results w ON r.player = w.player, then WHERE w.season = 2018 AND w.fantasy_pts > 25.",
+              explain:
+                "Aliases make the filter readable at a glance: you can see instantly which table each condition is testing.",
+            },
+            {
+              type: "query",
+              prompt:
+                "Which fantasy team owns Derrick Henry? Return just the team_name.",
+              starter: "SELECT r.team_name\nFROM rosters r\n",
+              expected: "SELECT team_name FROM rosters WHERE player = 'Derrick Henry';",
+              orderMatters: false,
+              hint: "This one needs no join at all — rosters already has both columns.",
+              explain:
+                "Kupp's Krew. Worth noticing: not every question about two tables actually needs both. Reach for a join when the answer genuinely spans them.",
+            },
+          ],
+        },
+        {
+          id: "u5-l3",
+          title: "Keep Everyone: LEFT JOIN",
+          blurb: "The bye week that vanished, and how to get it back.",
+          brief: {
+            goal: "Keep rows that have no match on the other side.",
+            setup:
+              "A plain JOIN silently drops anything unmatched — that's how Travis Kelce disappeared from week 1. LEFT JOIN keeps every row from the left table and fills the missing side with NULL, so absence becomes visible instead of invisible.",
+            previewSql:
+              "SELECT r.player, w.fantasy_pts FROM rosters r LEFT JOIN week_results w ON r.player = w.player AND w.season = 2018 AND w.week = 1 ORDER BY r.player;",
+            previewCaption: "10 rows now — look at Travis Kelce",
+          },
+          intro: {
+            title: "LEFT JOIN keeps the left side whole",
+            text: "LEFT JOIN returns every row from the first table no matter what, and attaches matching columns from the second where they exist. Where they don't, you get NULL. Nothing is lost — and a NULL is information, not an error.",
+            code: "SELECT r.player, w.fantasy_pts\nFROM rosters r\nLEFT JOIN week_results w\n  ON r.player = w.player AND w.week = 1;",
+          },
+          film: [
+            {
+              title: "ON versus WHERE on a LEFT JOIN",
+              text: "This is the subtlest trap in joins. Conditions on the right-hand table belong in ON. Move them to WHERE and you filter out the NULL rows you just worked to keep — quietly turning your LEFT JOIN back into an INNER JOIN. If a LEFT JOIN mysteriously loses rows, this is almost always why.",
+              code: "-- keeps Kelce, points NULL\n... LEFT JOIN week_results w ON r.player = w.player AND w.week = 1\n\n-- drops Kelce again\n... LEFT JOIN week_results w ON r.player = w.player WHERE w.week = 1",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt: "What does LEFT JOIN put in the columns of an unmatched row?",
+              options: ["0", "An empty string", "NULL", "It skips the row"],
+              answer: 2,
+              explain:
+                "NULL — meaning 'no value here'. That's different from zero: Kelce didn't score 0 points, he had no game at all.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "You LEFT JOIN, then add `WHERE w.week = 1`. Kelce disappears again. Why?",
+              options: [
+                "LEFT JOIN doesn't work with WHERE",
+                "His row has NULL for week, and NULL = 1 is never true, so WHERE removes him",
+                "The join order is wrong",
+                "week is the wrong column",
+              ],
+              answer: 1,
+              explain:
+                "The NULL row can't satisfy a WHERE test on the right-hand table. Put that condition in ON instead and he stays.",
+            },
+            {
+              type: "fill",
+              prompt: "Keep every rostered player, matched or not.",
+              parts: [
+                "SELECT r.player, w.fantasy_pts\nFROM rosters r\n",
+                null,
+                " week_results w\n  ON r.player = w.player ",
+                null,
+                " w.season = 2018 AND w.week = 1;",
+              ],
+              bank: ["LEFT JOIN", "AND", "JOIN", "WHERE"],
+              answer: ["LEFT JOIN", "AND"],
+              explain:
+                "LEFT JOIN keeps all ten, and the extra conditions ride along in ON with AND so the unmatched row survives.",
+            },
+            {
+              type: "query",
+              prompt:
+                "List every rostered player and their week 2 points in 2018, keeping players who didn't play. Show player and fantasy_pts.",
+              starter: "SELECT r.player, w.fantasy_pts\nFROM rosters r\n",
+              expected:
+                "SELECT r.player, w.fantasy_pts FROM rosters r LEFT JOIN week_results w ON r.player = w.player AND w.season = 2018 AND w.week = 2;",
+              orderMatters: false,
+              hint: "LEFT JOIN, and keep the season/week conditions inside ON with AND — not in a WHERE.",
+              explain:
+                "Ten rows every time, whoever is on a bye. That's a report you can hand someone without it quietly lying about roster size.",
+            },
+          ],
+        },
+        {
+          id: "u5-l4",
+          title: "Finding What's Missing",
+          blurb: "Anti-joins: the players nobody rostered.",
+          brief: {
+            goal: "Find rows in one table that have no counterpart in another.",
+            setup:
+              "Some of the most useful questions are about absence: which players is nobody starting, which customers never ordered, which games have no result yet. The pattern is always the same — LEFT JOIN, then keep only the rows where the match came back NULL.",
+            previewSql:
+              "SELECT DISTINCT w.player FROM week_results w LEFT JOIN rosters r ON w.player = r.player WHERE r.player IS NULL ORDER BY w.player;",
+            previewCaption: "six players in the league, on nobody's roster",
+          },
+          intro: {
+            title: "LEFT JOIN, then keep the NULLs",
+            text: "An anti-join is a LEFT JOIN with `WHERE right.column IS NULL` bolted on. The LEFT JOIN keeps everything; the WHERE then throws away everything that DID match, leaving only the unmatched. It reads backwards at first and becomes second nature fast.",
+            code: "SELECT DISTINCT w.player\nFROM week_results w\nLEFT JOIN rosters r ON w.player = r.player\nWHERE r.player IS NULL;",
+          },
+          exercises: [
+            {
+              type: "mc",
+              prompt: "In an anti-join, what is `WHERE r.player IS NULL` doing?",
+              options: [
+                "Removing players with no name",
+                "Keeping only rows where the LEFT JOIN found no match",
+                "Filling in missing names",
+                "Sorting the nulls last",
+              ],
+              answer: 1,
+              explain:
+                "The NULL is the fingerprint of a failed match. Filtering to it is what turns 'everything' into 'only the unmatched'.",
+            },
+            {
+              type: "mc",
+              prompt: "Why does the query need DISTINCT?",
+              options: [
+                "To sort the results",
+                "week_results has one row per player per week, so each unrostered player appears dozens of times",
+                "DISTINCT is required with LEFT JOIN",
+                "To remove NULLs",
+              ],
+              answer: 1,
+              drillSkip: true,
+              explain:
+                "The table's grain is player-week. Without DISTINCT you'd get every one of their games, not a list of names.",
+            },
+            {
+              type: "query",
+              prompt:
+                "Find the free agents: every distinct player in week_results who is on nobody's roster. Return just player.",
+              starter:
+                "SELECT DISTINCT w.player\nFROM week_results w\nLEFT JOIN rosters r ON w.player = r.player\n",
+              expected:
+                "SELECT DISTINCT w.player FROM week_results w LEFT JOIN rosters r ON w.player = r.player WHERE r.player IS NULL;",
+              orderMatters: false,
+              hint: "Finish it with WHERE r.player IS NULL.",
+              explain:
+                "Six names — the waiver pool. This exact shape answers 'who hasn't done X' in every job you'll ever have.",
+            },
+            {
+              type: "query",
+              prompt:
+                "Now flip it: which rostered players are NOT on the waiver wire? Return player from rosters.",
+              starter: "SELECT r.player\nFROM rosters r\n",
+              expected:
+                "SELECT r.player FROM rosters r LEFT JOIN waiver_wire ww ON r.player = ww.player WHERE ww.player IS NULL;",
+              orderMatters: false,
+              hint: "Same shape, different tables: LEFT JOIN waiver_wire ww ON r.player = ww.player, then WHERE ww.player IS NULL.",
+              explain:
+                "Eight of the ten rostered players aren't on the wire. Same pattern, new question — that's what makes it worth memorising.",
+            },
+          ],
+        },
+        {
+          id: "u5-l5",
+          title: "Score the Matchup",
+          blurb: "Joins plus GROUP BY: settle it with one query.",
+          brief: {
+            goal: "Combine a join with aggregation to answer a real question.",
+            setup:
+              "Everything so far has produced rows. This produces a verdict. Join the roster to the game log, group by fantasy team, sum the points — and you have the season matchup settled in five lines.",
+            previewSql:
+              "SELECT r.team_name, ROUND(SUM(w.fantasy_pts), 1) AS total FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2018 GROUP BY r.team_name ORDER BY total DESC;",
+            previewCaption: "the 2018 season, settled",
+          },
+          intro: {
+            title: "Join first, then group",
+            text: "SQL builds the joined rows first, then GROUP BY collapses them. So you can group by a column from either table and aggregate a column from the other — which is exactly what 'total points per fantasy team' needs.",
+            code: "SELECT r.team_name, ROUND(SUM(w.fantasy_pts), 1) AS total\nFROM rosters r\nJOIN week_results w ON r.player = w.player\nGROUP BY r.team_name;",
+          },
+          film: [
+            {
+              title: "Watch for fan-out",
+              text: "If the right-hand table has several rows per match, the left row is duplicated once per match — and any SUM over left-hand columns is then inflated. Here that's fine because we're summing the right side. But if you ever join and your totals suddenly double, fan-out is the first thing to check.",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt: "In a join with GROUP BY, which happens first?",
+              options: [
+                "GROUP BY, then the join",
+                "The join builds combined rows, then GROUP BY collapses them",
+                "They run at the same time",
+                "Depends on the table order",
+              ],
+              answer: 1,
+              explain:
+                "Join, then group. That's why you can group by a column from one table and aggregate one from the other.",
+            },
+            {
+              type: "query",
+              prompt:
+                "Total each fantasy team's points for the 2018 season. Show team_name and a rounded total, highest first.",
+              starter:
+                "SELECT r.team_name, ROUND(SUM(w.fantasy_pts), 1) AS total\nFROM rosters r\n",
+              expected:
+                "SELECT r.team_name, ROUND(SUM(w.fantasy_pts), 1) AS total FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2018 GROUP BY r.team_name ORDER BY total DESC;",
+              orderMatters: true,
+              hint: "JOIN, WHERE w.season = 2018, GROUP BY r.team_name, ORDER BY total DESC.",
+              explain:
+                "Your Team 1243 to Kupp's Krew 1104.6. One query, whole season, no spreadsheet.",
+            },
+            {
+              type: "query",
+              prompt:
+                "Which rostered player scored the most total points in 2018? Show player and rounded total, top 1 only.",
+              starter: "SELECT r.player, ROUND(SUM(w.fantasy_pts), 1) AS total\nFROM rosters r\n",
+              expected:
+                "SELECT r.player, ROUND(SUM(w.fantasy_pts), 1) AS total FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2018 GROUP BY r.player ORDER BY total DESC LIMIT 1;",
+              orderMatters: true,
+              hint: "Group by r.player instead of team, then ORDER BY total DESC LIMIT 1.",
+              explain:
+                "Josh Allen. Change one line — the GROUP BY — and the same query answers a different question entirely.",
+            },
+            {
+              type: "query",
+              prompt:
+                "Per fantasy team, how many rostered players scored a 25-point game in 2018? Show team_name and the count.",
+              starter: "SELECT r.team_name, COUNT(*) AS big_games\nFROM rosters r\n",
+              expected:
+                "SELECT r.team_name, COUNT(*) AS big_games FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2018 AND w.fantasy_pts >= 25 GROUP BY r.team_name;",
+              orderMatters: false,
+              hint: "Add AND w.fantasy_pts >= 25 to the WHERE, then GROUP BY r.team_name with COUNT(*).",
+              explain:
+                "Counting rows that survive a filter, grouped by team — join, filter, group, count. That's the shape of most real reports.",
+            },
+          ],
+        },
+      ],
     },
     {
       id: "u6",
       number: 6,
       title: "Two-Minute Drill — Window Functions",
-      drive: "6th Drive · Coming Soon",
+      drive: "6th Drive · Red Zone",
       description:
-        "Rolling averages, ranks within groups, week-over-week trends — the analyst toolkit that separates job-ready from beginner.",
-      skills: ["OVER", "PARTITION BY", "Rolling stats"],
-      status: "coming-soon",
-      lessons: [],
+        "Rolling averages, ranks within groups, week-over-week trends — the toolkit that separates job-ready from beginner on a SQL screen.",
+      skills: ["OVER", "PARTITION BY", "RANK", "LAG", "Running totals"],
+      status: "live",
+      lessons: [
+        {
+          id: "u6-l1",
+          title: "Keep the Row, Add the Context",
+          blurb: "OVER(): aggregate without collapsing.",
+          brief: {
+            goal: "Add a summary number to every row without losing the rows.",
+            setup:
+              "GROUP BY answers 'what's the total' by throwing the detail away. Window functions answer 'how does this row compare to the total' and keep every row. Same aggregate maths, no collapse — notice the season average repeating beside each game.",
+            previewSql:
+              "SELECT player, week, fantasy_pts, ROUND(AVG(fantasy_pts) OVER (), 1) AS league_avg FROM week_results WHERE season = 2018 AND week = 1 ORDER BY fantasy_pts DESC;",
+            previewCaption: "every row keeps its detail AND gets the average",
+          },
+          intro: {
+            title: "OVER() is the whole idea",
+            text: "Put OVER() after an aggregate and it stops collapsing rows. AVG(fantasy_pts) with GROUP BY gives you one row. AVG(fantasy_pts) OVER () gives you the same average printed next to every original row — so you can compare each game to it without a second query.",
+            code: "SELECT player, fantasy_pts,\n       AVG(fantasy_pts) OVER () AS league_avg\nFROM week_results\nWHERE season = 2018 AND week = 1;",
+          },
+          film: [
+            {
+              title: "Window vs GROUP BY, side by side",
+              text: "GROUP BY reduces: many rows in, one row out per group. A window function annotates: many rows in, the same many rows out, with an extra column. When a question is 'compare this to that' rather than 'summarise this', it's almost always a window function.",
+              code: "-- 1 row\nSELECT AVG(fantasy_pts) FROM week_results;\n\n-- every row, plus the average\nSELECT player, AVG(fantasy_pts) OVER () FROM week_results;",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt:
+                "What's the difference between AVG(x) and AVG(x) OVER ()?",
+              options: [
+                "Nothing, OVER is decoration",
+                "AVG(x) collapses to one row; AVG(x) OVER () keeps every row and adds the average as a column",
+                "OVER makes it faster",
+                "OVER only works on integers",
+              ],
+              answer: 1,
+              explain:
+                "That's the entire concept. Everything else in this unit is a variation on it.",
+            },
+            {
+              type: "fill",
+              prompt: "Show each week-1 score next to the average of all of them.",
+              parts: [
+                "SELECT player, fantasy_pts,\n       AVG(fantasy_pts) ",
+                null,
+                " (",
+                null,
+                ") AS league_avg\nFROM week_results\nWHERE season = 2018 AND week = 1;",
+              ],
+              bank: ["OVER", "", "GROUP BY", "PARTITION"],
+              answer: ["OVER", ""],
+              explain:
+                "Empty parentheses mean 'the window is every row in the result'. You'll narrow that window in the next lesson.",
+            },
+            {
+              type: "query",
+              prompt:
+                "For week 5 of 2018, show player, fantasy_pts, and the highest score that week as a column called top_score.",
+              starter: "SELECT player, fantasy_pts,\n",
+              expected:
+                "SELECT player, fantasy_pts, MAX(fantasy_pts) OVER () AS top_score FROM week_results WHERE season = 2018 AND week = 5;",
+              orderMatters: false,
+              hint: "MAX(fantasy_pts) OVER () AS top_score, with the WHERE filtering to season 2018 and week 5.",
+              explain:
+                "Every row now carries the week's ceiling, so 'how far off the pace was this player' becomes simple subtraction.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "Could you get that same result with GROUP BY instead?",
+              options: [
+                "Yes, identically",
+                "No — GROUP BY would collapse to a single row and lose every player",
+                "Yes, but only with HAVING",
+                "No, GROUP BY can't use MAX",
+              ],
+              answer: 1,
+              explain:
+                "You'd have to run a second query and join it back. The window function does both jobs in one pass.",
+            },
+          ],
+        },
+        {
+          id: "u6-l2",
+          title: "Rank Within the Position",
+          blurb: "PARTITION BY and RANK: WR1 through WR7.",
+          brief: {
+            goal: "Rank rows inside groups without running a query per group.",
+            setup:
+              "Comparing a tight end to a quarterback is meaningless — you want each player ranked against their own position. PARTITION BY splits the window into groups and restarts the calculation in each one, so the ranking begins again at 1 for every position.",
+            previewSql:
+              "SELECT player, position, ROUND(AVG(fantasy_pts), 1) AS ppg, RANK() OVER (PARTITION BY position ORDER BY AVG(fantasy_pts) DESC) AS pos_rank FROM week_results WHERE season = 2018 GROUP BY player, position ORDER BY position, pos_rank;",
+            previewCaption: "rank restarts at 1 for QB, RB, TE and WR",
+          },
+          intro: {
+            title: "PARTITION BY is GROUP BY for windows",
+            text: "PARTITION BY splits rows into groups; ORDER BY inside OVER decides the order within each group. RANK() then numbers them, restarting at 1 in every partition. Read it as: rank these, within each position, by points, highest first.",
+            code: "RANK() OVER (\n  PARTITION BY position\n  ORDER BY AVG(fantasy_pts) DESC\n) AS pos_rank",
+          },
+          film: [
+            {
+              title: "RANK, DENSE_RANK, ROW_NUMBER",
+              text: "They differ only in how they treat ties. RANK leaves gaps: 1, 2, 2, 4. DENSE_RANK doesn't: 1, 2, 2, 3. ROW_NUMBER refuses to tie at all and picks arbitrarily: 1, 2, 3, 4. Choose deliberately — 'joint second' is a real answer and ROW_NUMBER will hide it from you.",
+              code: "-- scores 20, 18, 18, 15\nRANK()       -> 1, 2, 2, 4\nDENSE_RANK() -> 1, 2, 2, 3\nROW_NUMBER() -> 1, 2, 3, 4",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt: "Two players tie for second. What does RANK() give the next player?",
+              options: ["3", "4", "2", "It errors"],
+              answer: 1,
+              explain:
+                "RANK skips the gap the tie consumed: 1, 2, 2, 4. DENSE_RANK would say 3.",
+            },
+            {
+              type: "mc",
+              prompt: "What does PARTITION BY position do?",
+              options: [
+                "Filters to one position",
+                "Restarts the window calculation separately for each position",
+                "Sorts by position",
+                "Splits the table into four tables",
+              ],
+              answer: 1,
+              explain:
+                "It carves the rows into groups and runs the window function inside each independently — no filtering, no row loss.",
+            },
+            {
+              type: "fill",
+              prompt: "Rank players inside their own position.",
+              parts: [
+                "SELECT player, position,\n       RANK() OVER (",
+                null,
+                " position ",
+                null,
+                " AVG(fantasy_pts) DESC) AS pos_rank\nFROM week_results\nWHERE season = 2018\nGROUP BY player, position;",
+              ],
+              bank: ["PARTITION BY", "ORDER BY", "GROUP BY", "SORT BY"],
+              answer: ["PARTITION BY", "ORDER BY"],
+              explain:
+                "PARTITION BY makes the groups, ORDER BY decides who's first inside each one.",
+            },
+            {
+              type: "query",
+              prompt:
+                "Rank every 2018 wide receiver by average points, best first. Show player and a rank column called wr_rank.",
+              starter:
+                "SELECT player,\n       RANK() OVER (ORDER BY AVG(fantasy_pts) DESC) AS wr_rank\nFROM week_results\n",
+              expected:
+                "SELECT player, RANK() OVER (ORDER BY AVG(fantasy_pts) DESC) AS wr_rank FROM week_results WHERE season = 2018 AND position = 'WR' GROUP BY player;",
+              orderMatters: false,
+              hint: "Filter to season 2018 and position = 'WR', then GROUP BY player.",
+              explain:
+                "Tyreek Hill is WR1 at 19.5. Note Amon-Ra and CeeDee are separated by four hundredths — rank sees the real numbers, not the rounded display.",
+            },
+          ],
+        },
+        {
+          id: "u6-l3",
+          title: "This Week vs Last Week",
+          blurb: "LAG and LEAD: reach across rows.",
+          brief: {
+            goal: "Compare a row to the one before or after it.",
+            setup:
+              "Trend questions need two rows at once, and until now every tool you have works one row at a time. LAG reaches backwards to the previous row; LEAD reaches forwards. Here's a quarterback's season with last week's score pulled onto each line.",
+            previewSql:
+              "SELECT week, fantasy_pts, LAG(fantasy_pts) OVER (ORDER BY week) AS prev_week FROM week_results WHERE player = 'Patrick Mahomes' AND season = 2018 ORDER BY week LIMIT 8;",
+            previewCaption: "week 1 has no previous week — hence NULL",
+          },
+          intro: {
+            title: "LAG looks back, LEAD looks forward",
+            text: "LAG(column) OVER (ORDER BY something) gives you that column's value from the previous row in that order. The first row has nothing behind it, so it returns NULL. Subtract the two and you have a week-over-week change — the basis of every trend chart you'll ever build.",
+            code: "SELECT week, fantasy_pts,\n       fantasy_pts - LAG(fantasy_pts) OVER (ORDER BY week) AS swing\nFROM week_results\nWHERE player = 'Josh Allen' AND season = 2018;",
+          },
+          exercises: [
+            {
+              type: "mc",
+              prompt: "Why is prev_week NULL on the first row?",
+              options: [
+                "The data is missing",
+                "There is no earlier row to look back at",
+                "LAG always skips row one",
+                "It needs PARTITION BY",
+              ],
+              answer: 1,
+              explain:
+                "Nothing precedes the first row, so LAG has nothing to return. That NULL is correct, not a defect.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "You LAG across a table holding several players. What breaks without PARTITION BY player?",
+              options: [
+                "Nothing",
+                "The last week of one player becomes the 'previous week' of the next player",
+                "It returns all NULLs",
+                "The query errors",
+              ],
+              answer: 1,
+              explain:
+                "The window spills across players and quietly produces nonsense. Partition by player and each one gets their own sequence.",
+            },
+            {
+              type: "fill",
+              prompt: "Pull the previous week's score onto each row.",
+              parts: [
+                "SELECT week, fantasy_pts,\n       ",
+                null,
+                "(fantasy_pts) OVER (",
+                null,
+                " week) AS prev_week\nFROM week_results\nWHERE player = 'Josh Allen' AND season = 2018;",
+              ],
+              bank: ["LAG", "ORDER BY", "LEAD", "PARTITION BY"],
+              answer: ["LAG", "ORDER BY"],
+              explain:
+                "LAG plus an ORDER BY that defines what 'previous' means. Without the ORDER BY there's no sequence to look back along.",
+            },
+            {
+              type: "query",
+              prompt:
+                "For Josh Allen in 2018, show week, fantasy_pts, and the previous week's score as prev_week, in week order.",
+              starter: "SELECT week, fantasy_pts,\n",
+              expected:
+                "SELECT week, fantasy_pts, LAG(fantasy_pts) OVER (ORDER BY week) AS prev_week FROM week_results WHERE player = 'Josh Allen' AND season = 2018 ORDER BY week;",
+              orderMatters: true,
+              hint: "LAG(fantasy_pts) OVER (ORDER BY week) AS prev_week, filtered to the player and season, then ORDER BY week.",
+              explain:
+                "Now every row carries its own comparison. Subtract the two columns and you've built a momentum metric.",
+            },
+          ],
+        },
+        {
+          id: "u6-l4",
+          title: "Running Totals and Rolling Form",
+          blurb: "Window frames: cumulative points and a 3-game average.",
+          brief: {
+            goal: "Build a running total and a moving average.",
+            setup:
+              "A window can cover just part of its partition. Add ORDER BY and the window becomes everything up to the current row — which turns SUM into a running total for free. Watch it accumulate week by week.",
+            previewSql:
+              "SELECT week, fantasy_pts, ROUND(SUM(fantasy_pts) OVER (ORDER BY week), 1) AS season_to_date FROM week_results WHERE player = 'Josh Allen' AND season = 2018 ORDER BY week LIMIT 8;",
+            previewCaption: "season_to_date grows every week",
+          },
+          intro: {
+            title: "ORDER BY inside OVER creates a running window",
+            text: "SUM(x) OVER () totals everything. Add ORDER BY and it totals everything from the start up to the current row instead — a running total. Add an explicit frame like ROWS BETWEEN 2 PRECEDING AND CURRENT ROW and you get a moving average over the last three rows.",
+            code: "-- running total\nSUM(fantasy_pts) OVER (ORDER BY week)\n\n-- rolling 3-game average\nAVG(fantasy_pts) OVER (\n  ORDER BY week\n  ROWS BETWEEN 2 PRECEDING AND CURRENT ROW\n)",
+          },
+          film: [
+            {
+              title: "Why rolling averages exist",
+              text: "A single week is mostly noise; a season average is too slow to react. A rolling three-game window sits between them — recent enough to show a real change in role, smooth enough to ignore one fluke. It's the same reason analysts quote a seven-day average rather than yesterday's number.",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt:
+                "What does adding ORDER BY inside OVER change about SUM?",
+              options: [
+                "Nothing, it just sorts",
+                "It limits the window to rows up to the current one, producing a running total",
+                "It makes the sum descending",
+                "It groups the rows",
+              ],
+              answer: 1,
+              explain:
+                "ORDER BY inside OVER introduces the idea of 'so far', which is exactly what a running total is.",
+            },
+            {
+              type: "mc",
+              prompt: "What does ROWS BETWEEN 2 PRECEDING AND CURRENT ROW cover?",
+              options: [
+                "The whole partition",
+                "This row and the two before it — three rows",
+                "Two rows only",
+                "Everything after this row",
+              ],
+              answer: 1,
+              explain:
+                "Three rows total. That's the frame a rolling 3-game average needs.",
+            },
+            {
+              type: "query",
+              prompt:
+                "For Christian McCaffrey in 2018, show week, fantasy_pts, and a running season total called season_to_date (rounded to 1 decimal), in week order.",
+              starter: "SELECT week, fantasy_pts,\n",
+              expected:
+                "SELECT week, fantasy_pts, ROUND(SUM(fantasy_pts) OVER (ORDER BY week), 1) AS season_to_date FROM week_results WHERE player = 'Christian McCaffrey' AND season = 2018 ORDER BY week;",
+              orderMatters: true,
+              hint: "ROUND(SUM(fantasy_pts) OVER (ORDER BY week), 1) AS season_to_date.",
+              explain:
+                "The cumulative line every fantasy app draws — and you just built it in one clause.",
+            },
+            {
+              type: "query",
+              prompt:
+                "Same player and season: show week, fantasy_pts, and a rolling 3-game average called form (rounded to 1 decimal), in week order.",
+              starter: "SELECT week, fantasy_pts,\n",
+              expected:
+                "SELECT week, fantasy_pts, ROUND(AVG(fantasy_pts) OVER (ORDER BY week ROWS BETWEEN 2 PRECEDING AND CURRENT ROW), 1) AS form FROM week_results WHERE player = 'Christian McCaffrey' AND season = 2018 ORDER BY week;",
+              orderMatters: true,
+              hint: "AVG(...) OVER (ORDER BY week ROWS BETWEEN 2 PRECEDING AND CURRENT ROW).",
+              explain:
+                "Early weeks average fewer rows because there aren't three yet — which is correct, and worth knowing before someone asks why week 1 looks odd.",
+            },
+          ],
+        },
+      ],
     },
 
     // ── Non-SQL skills ──────────────────────────────────────────────

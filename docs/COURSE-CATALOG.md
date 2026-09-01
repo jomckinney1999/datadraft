@@ -706,7 +706,7 @@ Honest state of what exists in `lib/curriculum.ts` today versus this spec:
 
 | Course | Spec'd | Built | Live runtime |
 |---|---|---|---|
-| SQL | 72 | 11 lessons (units 1–4) | Yes — sql.js |
+| SQL | 72 | **20 lessons (units 1–6, joins and windows now live)** | Yes — sql.js |
 | Python | 64 | 3 lessons (unit 7) | Yes — Pyodide |
 | Statistics | 54 | 3 lessons (unit 8) | No |
 | Visualization (generic) | — | 3 lessons (unit 9) | No |
@@ -717,7 +717,7 @@ Honest state of what exists in `lib/curriculum.ts` today versus this spec:
 | Power BI | 50 | 0 | n/a |
 | LLMs & AI | 44 | 0 (unit 12 is a stub) | Planned — Pyodide |
 
-**23 of 470 lessons exist** (the 3 visualization lessons in unit 9 are folded into Tableau/Power BI above, so they aren't counted here). The catalog page marks unbuilt courses "In build" rather than implying they're ready — keep it that way until the lessons land.
+**32 of 470 lessons exist** (the 3 visualization lessons in unit 9 are folded into Tableau/Power BI above, so they aren't counted here). The catalog page marks unbuilt courses "In build" rather than implying they're ready — keep it that way until the lessons land.
 
 **Suggested build order**, by demand and by what the existing runtimes already support:
 
