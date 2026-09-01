@@ -51,15 +51,13 @@ export async function loadTs(absPath, repoRoot) {
   // Two import forms need rewriting, both to a transpiled sibling in outDir:
   //   `@/lib/foo`  the project path alias, which Node knows nothing about
   //   `./foo`      a relative import with no extension, which ESM rejects
-  const rewritten = outputText
-    .replace(
-      /from\s+["']@\/(.+?)["']/g,
-      (_m, rel) => `from "./${basename(rel)}.mjs"`,
-    )
-    .replace(
-      /from\s+["']\.\.?\/([^"']+?)["']/g,
-      (_m, rel) => `from "./${basename(rel)}.mjs"`,
-    );
+  // ONE pass over both forms. Running them as two sequential .replace() calls
+  // is wrong: the alias pass emits `./foo.mjs`, which the relative pass then
+  // matches and rewrites again to `./foo.mjs.mjs`.
+  const rewritten = outputText.replace(
+    /from\s+["'](?:@\/|\.\.?\/)([^"']+?)["']/g,
+    (_m, rel) => `from "./${basename(rel).replace(/\.mjs$/, "")}.mjs"`,
+  );
 
   // Compile each dependency first so the sibling it now points at exists.
   const deps = [

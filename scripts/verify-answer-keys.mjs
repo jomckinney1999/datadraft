@@ -23,41 +23,15 @@
 
 import initSqlJs from "sql.js";
 import { loadPyodide } from "pyodide";
-import { readFileSync, writeFileSync, mkdtempSync } from "node:fs";
-import { createRequire } from "node:module";
-import { tmpdir } from "node:os";
 import path from "node:path";
 import { loadTs as loadProjectTs } from "./load-ts.mjs";
 
-const require = createRequire(import.meta.url);
-const ts = require("typescript");
 const root = process.cwd();
 
-/** Transpile a project .ts module and import it. */
-async function loadTs(relPath, outDir, name) {
-  const src = readFileSync(path.join(root, relPath), "utf8");
-  const js = ts.transpileModule(src, {
-    compilerOptions: {
-      module: ts.ModuleKind.ESNext,
-      target: ts.ScriptTarget.ES2020,
-    },
-  }).outputText;
-  const file = path.join(outDir, name);
-  writeFileSync(file, js);
-  return import(new URL(`file:///${file.replace(/\\/g, "/")}`).href);
-}
-
-// The Excel engine imports a real npm package and uses the `@/` alias, so it
-// needs the alias-aware loader that writes inside the repo (node_modules has
-// to be resolvable from the transpiled output).
+const data = await loadProjectTs(path.join(root, "lib/fantasy-data.ts"), root);
+const curriculum = await loadProjectTs(path.join(root, "lib/curriculum.ts"), root);
 const excel = await loadProjectTs(path.join(root, "lib/excel-engine.ts"), root);
 const excelData = await loadProjectTs(path.join(root, "lib/excel-data.ts"), root);
-
-const work = mkdtempSync(path.join(tmpdir(), "sqlsports-verify-"));
-const data = await loadTs("lib/fantasy-data.ts", work, "fantasy-data.mjs");
-
-// curriculum.ts imports nothing at runtime, so it transpiles standalone.
-const curriculum = await loadTs("lib/curriculum.ts", work, "curriculum.mjs");
 
 const SQL = await initSqlJs();
 const db = new SQL.Database();

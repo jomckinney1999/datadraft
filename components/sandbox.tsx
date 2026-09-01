@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Database, QueryExecResult, SqlJsStatic } from "sql.js";
 import { PRESETS, SCHEMA, buildSeedSql } from "@/lib/fantasy-data";
+import { SHORT_CREDIT } from "@/lib/data-source";
 import CodeEditor from "@/components/code-editor";
 
 const POSITION_STYLES: Record<string, string> = {
@@ -130,7 +131,7 @@ export default function Sandbox() {
           </div>
           <span className="label-broadcast text-turf">live sandbox</span>
           <span className="hidden font-mono text-[10px] text-ink-muted sm:inline">
-            · 2016–2018 · 16 players
+            · 2022–2024 · 20 players · real
           </span>
         </div>
         <div className="flex items-center gap-3">
@@ -210,6 +211,12 @@ export default function Sandbox() {
               </div>
             ))}
           </div>
+          <p className="mt-3 border-t border-panel-border pt-2 font-mono text-[10px] leading-relaxed text-ink-muted">
+            {SHORT_CREDIT} ·{" "}
+            <a href="/data" className="underline underline-offset-2 hover:text-turf">
+              source &amp; download
+            </a>
+          </p>
         </div>
       )}
 

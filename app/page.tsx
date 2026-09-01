@@ -645,7 +645,7 @@ export default function Home() {
                     </span>
                   </div>
                   <p className="mt-5 font-mono text-sm leading-relaxed text-ink">
-                    Which RB had the highest average PPG across the 2018
+                    Which RB had the highest average PPG across the 2024
                     season?
                   </p>
                   <div className="mt-6 flex items-center gap-3 border-t border-panel-border pt-4">
@@ -800,9 +800,17 @@ export default function Home() {
               Code education · Sports as the hook
             </p>
           </div>
-          <p className="font-mono text-[11px] text-ink-muted">
-            © {new Date().getFullYear()} SQL Sports
-          </p>
+          <div className="flex flex-col items-start gap-1 sm:items-end">
+            <a
+              href="/data"
+              className="font-mono text-[11px] text-ink-muted underline underline-offset-2 transition-colors hover:text-turf"
+            >
+              Real NFL data from nflverse · source &amp; download
+            </a>
+            <p className="font-mono text-[11px] text-ink-muted">
+              © {new Date().getFullYear()} SQL Sports
+            </p>
+          </div>
         </div>
       </footer>
 

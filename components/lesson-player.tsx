@@ -56,6 +56,7 @@ import {
   valuesMatch,
 } from "@/lib/excel-engine";
 import { MAIN_SHEET, type CellValue } from "@/lib/excel-data";
+import { SHORT_CREDIT } from "@/lib/data-source";
 
 type Phase =
   | "loading"
@@ -138,7 +139,12 @@ function TheoryCardView({ card }: { card: TheoryCard }) {
 }
 
 export default function LessonPlayer({ lessonId }: { lessonId: string }) {
-  const entry = getLesson(lessonId);
+  // Memoised because getLesson() rebuilds its {lesson, unit} wrapper on every
+  // call. An unmemoised `entry` is a new object each render, and two effects
+  // below depend on it — the brief-preview one then re-ran forever, setting
+  // state with a fresh result object each pass ("Maximum update depth
+  // exceeded" on every SQL lesson brief).
+  const entry = useMemo(() => getLesson(lessonId), [lessonId]);
   const router = useRouter();
 
   const dbRef = useRef<Database | null>(null);
@@ -750,6 +756,19 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 </div>
               )}
             </div>
+          )}
+
+          {/* Real data deserves a visible source, not a footnote nobody reads. */}
+          {(lesson.brief.previewSql || lesson.brief.previewSheet) && (
+            <p className="font-mono text-[10px] leading-relaxed text-ink-muted">
+              {SHORT_CREDIT} ·{" "}
+              <Link
+                href="/data"
+                className="underline underline-offset-2 hover:text-turf"
+              >
+                source &amp; free download
+              </Link>
+            </p>
           )}
 
           {/* Excel lessons: the real grid, before we ask anything about it. */}

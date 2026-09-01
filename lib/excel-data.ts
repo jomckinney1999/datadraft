@@ -8,12 +8,22 @@
  *            genuinely dirty input, and mixing it into Roster would break
  *            every SUM in the rest of the course.
  *
- * Values are hand-authored and fixed. Nothing here is generated, because the
- * answer keys are graded by evaluating them against this exact grid — a
- * shifting dataset would silently change what "correct" means.
+ * WHAT IS REAL: Player, Team, Pos, Games and Points are real 2024 NFL regular
+ * season results (PPR scoring) from nflverse-data — the same source the SQL
+ * lessons use. See lib/data-source.ts for attribution, and
+ * public/data/season_totals.csv for the full download.
  *
- * Player names match lib/fantasy-data.ts so a learner moving between the SQL
- * and Excel courses sees the same league.
+ * WHAT IS NOT: Salary and Owner are the invented fantasy-league layer. There
+ * is no real source for what one private league paid for a player. They are
+ * set to plausible *preseason* auction values, which is also why they don't
+ * track final points — Derrick Henry returned 336 points on a cheap bid while
+ * Tyreek Hill returned 218 on an expensive one. That spread is what makes the
+ * cost-per-point lesson worth doing; a salary computed from points would make
+ * every answer identical.
+ *
+ * Values are fixed, not generated. The answer keys are graded by evaluating
+ * them against this exact grid, so a shifting dataset would silently change
+ * what "correct" means.
  */
 
 export type CellValue = string | number | null;
@@ -24,46 +34,46 @@ export const MAIN_SHEET = "Roster";
 export const IMPORT_SHEET = "Import";
 
 /**
- * A1 = "Player" … G1 = "Owner"; data runs rows 2–17.
+ * A1 = "Player" … G1 = "Owner"; data runs rows 2–17, ordered by points.
  *
- * Salary is in dollars so the currency-formatting and absolute-reference
- * lessons have something to point at. Owner repeats across rows so COUNTIF /
- * SUMIF have a real grouping column.
+ * Games varies from 13 to 17 because these are real seasons with real missed
+ * time — which is exactly what makes the per-game lessons in unit 15 mean
+ * something.
  */
 const ROSTER: Sheet = [
   ["Player", "Team", "Pos", "Games", "Points", "Salary", "Owner"],
-  ["Josh Allen", "BUF", "QB", 17, 402.5, 41000, "Jordan"],
-  ["Patrick Mahomes", "KC", "QB", 16, 361.2, 38500, "Riley"],
-  ["Christian McCaffrey", "SF", "RB", 14, 318.7, 44000, "Jordan"],
-  ["Derrick Henry", "BAL", "RB", 17, 279.4, 33000, "Sam"],
-  ["Jaylen Warren", "PIT", "RB", 15, 162.3, 14500, "Riley"],
-  ["Ray Davis", "BUF", "RB", 16, 141.8, 11000, "Sam"],
-  ["Tyler Allgeier", "ATL", "RB", 17, 128.6, 9500, "Jordan"],
-  ["Tyreek Hill", "MIA", "WR", 16, 301.9, 39000, "Riley"],
-  ["CeeDee Lamb", "DAL", "WR", 17, 288.4, 37500, "Sam"],
-  ["Amon-Ra St. Brown", "DET", "WR", 16, 264.1, 32000, "Jordan"],
-  ["A.J. Brown", "PHI", "WR", 15, 241.6, 30500, "Riley"],
-  ["Puka Nacua", "LAR", "WR", 14, 208.3, 26000, "Sam"],
-  ["Tank Dell", "HOU", "WR", 12, 138.9, 12500, "Jordan"],
-  ["Rome Odunze", "CHI", "WR", 16, 119.4, 8000, "Riley"],
-  ["Travis Kelce", "KC", "TE", 16, 212.8, 28000, "Sam"],
-  ["George Kittle", "SF", "TE", 15, 189.5, 24500, "Jordan"],
+  ["Lamar Jackson", "BAL", "QB", 17, 430.4, 38000, "Jordan"],
+  ["Ja'Marr Chase", "CIN", "WR", 17, 403.0, 44000, "Riley"],
+  ["Josh Allen", "BUF", "QB", 16, 379.1, 40000, "Sam"],
+  ["Jahmyr Gibbs", "DET", "RB", 17, 362.9, 33000, "Jordan"],
+  ["Saquon Barkley", "PHI", "RB", 16, 355.3, 30000, "Riley"],
+  ["Bijan Robinson", "ATL", "RB", 17, 341.7, 36000, "Sam"],
+  ["Derrick Henry", "BAL", "RB", 17, 336.4, 24000, "Jordan"],
+  ["Justin Jefferson", "MIN", "WR", 17, 317.5, 45000, "Riley"],
+  ["Amon-Ra St. Brown", "DET", "WR", 17, 316.2, 34000, "Sam"],
+  ["Jalen Hurts", "PHI", "QB", 15, 315.0, 37000, "Jordan"],
+  ["Patrick Mahomes", "KC", "QB", 16, 282.9, 39000, "Riley"],
+  ["CeeDee Lamb", "DAL", "WR", 15, 263.4, 46000, "Sam"],
+  ["Davante Adams", "NYJ", "WR", 14, 241.3, 32000, "Jordan"],
+  ["George Kittle", "SF", "TE", 15, 236.6, 21000, "Riley"],
+  ["Tyreek Hill", "MIA", "WR", 17, 218.2, 43000, "Sam"],
+  ["A.J. Brown", "PHI", "WR", 13, 216.9, 35000, "Jordan"],
 ];
 
 /**
  * The same league as a bad export. Points arrive as text (note the leading and
  * trailing spaces), one player is missing a value entirely, and the names have
  * not been trimmed — which is exactly why VLOOKUP against this sheet fails
- * until it is cleaned.
+ * until it is cleaned. The underlying numbers are still the real ones.
  */
 const IMPORT: Sheet = [
   ["Raw Name", "Raw Points", "Raw Team"],
-  ["  Josh Allen", " 402.5", "buf"],
-  ["Patrick Mahomes  ", "361.2 ", "KC "],
-  [" Christian McCaffrey ", " 318.7", " sf"],
-  ["Derrick Henry", "279.4", "BAL"],
-  ["Tyreek Hill ", "", "mia"],
-  [" CeeDee Lamb", "288.4 ", "DAL "],
+  ["  Lamar Jackson", " 430.4", "bal"],
+  ["Ja'Marr Chase  ", "403.0 ", "CIN "],
+  [" Josh Allen ", " 379.1", " buf"],
+  ["Jahmyr Gibbs", "362.9", "DET"],
+  ["Saquon Barkley ", "", "phi"],
+  [" Bijan Robinson", "341.7 ", "ATL "],
 ];
 
 export const WORKBOOK: Workbook = {

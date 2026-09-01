@@ -375,7 +375,7 @@ export const COURSE = {
             {
               type: "mc",
               prompt:
-                "week_results has 2,160 rows. You want a quick 10-row peek. Which clause caps the rows returned?",
+                "week_results has 876 rows. You want a quick 10-row peek. Which clause caps the rows returned?",
               options: ["LIMIT", "CAP", "WHERE", "ORDER BY"],
               answer: 0,
               drillSkip: true,
@@ -512,7 +512,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "WHERE player = '…' — mind the quotes and spelling.",
               explain:
-                "45 rows: 15 games a season for three seasons. One filter took you from 2,160 rows to just his.",
+                "49 rows — every game Mahomes played across the three seasons. One filter took you from 876 rows down to his.",
             },
             {
               type: "query",
@@ -523,7 +523,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "position = 'RB' — text value, single quotes.",
               explain:
-                "Three backs on the wire. Same pattern works for any column: team = 'BUF', week = 1, and so on.",
+                "Two backs on the wire. Same pattern works for any column: team = 'BUF', week = 1, and so on.",
             },
           ],
         },
@@ -542,13 +542,13 @@ export const COURSE = {
           intro: {
             title: "Set the over/under",
             text: "Numbers compare with > < >= <= — no quotes. Chain conditions with AND when every condition must hit.",
-            code: "SELECT * FROM week_results\nWHERE season = 2018\n  AND fantasy_pts > 20;",
+            code: "SELECT * FROM week_results\nWHERE season = 2024\n  AND fantasy_pts > 20;",
           },
           film: [
             {
               title: "Compound conditions and parentheses",
-              text: "AND binds tighter than OR — like order of operations in math. Mixing them without parentheses is a classic bust: WHERE season = 2018 AND week = 1 OR week = 2 actually returns ALL week-2 rows from every season. Parentheses make your read explicit.",
-              code: "-- what you meant:\nWHERE season = 2018 AND (week = 1 OR week = 2)",
+              text: "AND binds tighter than OR — like order of operations in math. Mixing them without parentheses is a classic bust: WHERE season = 2024 AND week = 1 OR week = 2 actually returns ALL week-2 rows from every season. Parentheses make your read explicit.",
+              code: "-- what you meant:\nWHERE season = 2024 AND (week = 1 OR week = 2)",
             },
           ],
           exercises: [
@@ -576,14 +576,14 @@ export const COURSE = {
               orderMatters: false,
               hint: "Numbers don't wear quotes: fantasy_pts > 25.",
               explain:
-                "Only the league's best games clear 25. Numeric comparisons are how analysts define “boom” and “bust” in the first place.",
+                "209 of the 876 games on file cleared 25 — roughly one in four. Numeric comparisons are how analysts define boom and bust in the first place.",
             },
             {
               type: "fill",
               prompt:
-                "Two conditions, one play: the 2018 season AND more than 20 points.",
+                "Two conditions, one play: the 2024 season AND more than 20 points.",
               parts: [
-                "SELECT player, week, fantasy_pts\nFROM week_results\nWHERE season = 2018 ",
+                "SELECT player, week, fantasy_pts\nFROM week_results\nWHERE season = 2024 ",
                 null,
                 " fantasy_pts ",
                 null,
@@ -597,11 +597,11 @@ export const COURSE = {
             {
               type: "mc",
               prompt: "What does this return?",
-              code: "WHERE season = 2018 AND week = 1",
+              code: "WHERE season = 2024 AND week = 1",
               options: [
                 "Rows matching BOTH conditions",
                 "Rows matching either condition",
-                "All 2018 rows, then all week-1 rows",
+                "All 2024 rows, then all week-1 rows",
                 "An error — one WHERE, one condition",
               ],
               answer: 0,
@@ -611,11 +611,11 @@ export const COURSE = {
             {
               type: "query",
               prompt:
-                "Who showed up in the week 10 spotlight game of 2017? Pull player and fantasy_pts where season is 2017, week is 10, and fantasy_pts is at least 15.",
+                "Who showed up in the week 10 spotlight game of 2023? Pull player and fantasy_pts where season is 2023, week is 10, and fantasy_pts is at least 15.",
               starter:
                 "SELECT player, fantasy_pts\nFROM week_results\nWHERE ",
               expected:
-                "SELECT player, fantasy_pts FROM week_results WHERE season = 2017 AND week = 10 AND fantasy_pts >= 15;",
+                "SELECT player, fantasy_pts FROM week_results WHERE season = 2023 AND week = 10 AND fantasy_pts >= 15;",
               orderMatters: false,
               hint: "Three conditions chained with AND. “At least 15” means >= 15.",
               explain:
@@ -706,11 +706,11 @@ export const COURSE = {
             {
               type: "query",
               prompt:
-                "Opening-day pass catchers: player, team, and fantasy_pts for positions 'QB' and 'TE' in week 1 of season 2016.",
+                "Opening-day pass catchers: player, team, and fantasy_pts for positions 'QB' and 'TE' in week 1 of season 2022.",
               starter:
                 "SELECT player, team, fantasy_pts\nFROM week_results\nWHERE ",
               expected:
-                "SELECT player, team, fantasy_pts FROM week_results WHERE position IN ('QB', 'TE') AND season = 2016 AND week = 1;",
+                "SELECT player, team, fantasy_pts FROM week_results WHERE position IN ('QB', 'TE') AND season = 2022 AND week = 1;",
               orderMatters: false,
               hint: "position IN ('QB', 'TE'), plus season and week conditions with AND.",
               explain:
@@ -776,9 +776,9 @@ export const COURSE = {
             {
               type: "fill",
               prompt:
-                "Build the week 1 draft board for 2018 — best performance at the top.",
+                "Build the week 1 draft board for 2024 — best performance at the top.",
               parts: [
-                "SELECT player, fantasy_pts\nFROM week_results\nWHERE season = 2018 AND week = 1\n",
+                "SELECT player, fantasy_pts\nFROM week_results\nWHERE season = 2024 AND week = 1\n",
                 null,
                 " fantasy_pts ",
                 null,
@@ -847,7 +847,7 @@ export const COURSE = {
             {
               title: "The clause pipeline never changes",
               text: "SELECT → FROM → WHERE → ORDER BY → LIMIT. That's the fixed snap count for every top-N question: filter to the population you care about, rank it, trim it. Memorize the order once and “top 5 rushers in week 10” becomes pure fill-in-the-blanks.",
-              code: "SELECT player, fantasy_pts\nFROM week_results\nWHERE season = 2018 AND week = 10\nORDER BY fantasy_pts DESC\nLIMIT 5;",
+              code: "SELECT player, fantasy_pts\nFROM week_results\nWHERE season = 2024 AND week = 10\nORDER BY fantasy_pts DESC\nLIMIT 5;",
             },
           ],
           exercises: [
@@ -868,22 +868,22 @@ export const COURSE = {
             {
               type: "query",
               prompt:
-                "Build the 2017 highlight reel: the 5 biggest single-game scores. Show player, week, and fantasy_pts — biggest first, and break ties alphabetically by player, then by earlier week.",
+                "Build the 2023 highlight reel: the 5 biggest single-game scores. Show player, week, and fantasy_pts — biggest first, and break ties alphabetically by player, then by earlier week.",
               starter:
-                "SELECT player, week, fantasy_pts\nFROM week_results\nWHERE season = 2017\n",
+                "SELECT player, week, fantasy_pts\nFROM week_results\nWHERE season = 2023\n",
               expected:
-                "SELECT player, week, fantasy_pts FROM week_results WHERE season = 2017 ORDER BY fantasy_pts DESC, player, week LIMIT 5;",
+                "SELECT player, week, fantasy_pts FROM week_results WHERE season = 2023 ORDER BY fantasy_pts DESC, player, week LIMIT 5;",
               orderMatters: true,
               hint: "ORDER BY fantasy_pts DESC, player, week — then LIMIT 5 at the very end.",
               explain:
-                "WHERE narrows to 2017, ORDER BY ranks, LIMIT trims the reel. That clause order never changes.",
+                "WHERE narrows to 2023, ORDER BY ranks, LIMIT trims the reel. That clause order never changes.",
             },
             {
               type: "fill",
               prompt:
-                "Week 8 of 2016: sort by points first, and break ties alphabetically by player.",
+                "Week 8 of 2022: sort by points first, and break ties alphabetically by player.",
               parts: [
-                "SELECT player, team, fantasy_pts\nFROM week_results\nWHERE season = 2016 AND week = 8\nORDER BY ",
+                "SELECT player, team, fantasy_pts\nFROM week_results\nWHERE season = 2022 AND week = 8\nORDER BY ",
                 null,
                 " DESC, ",
                 null,
@@ -1006,19 +1006,19 @@ export const COURSE = {
               orderMatters: false,
               hint: "COUNT(*) plus a WHERE on player.",
               explain:
-                "45 games — 15 a season for three seasons (every player sits one bye week).",
+                "37 games — not the 50 you might expect from three seasons. McCaffrey played 17, then 16, then just 4 in 2024 before injury ended his year. Real data has those gaps in it, and COUNT(*) is how you find them.",
             },
             {
               type: "query",
               prompt:
-                "What was Tyreek Hill's points-per-game in season 2018? Return ROUND(AVG(fantasy_pts), 1).",
+                "What was Tyreek Hill's points-per-game in season 2024? Return ROUND(AVG(fantasy_pts), 1).",
               starter: "SELECT ",
               expected:
-                "SELECT ROUND(AVG(fantasy_pts), 1) FROM week_results WHERE player = 'Tyreek Hill' AND season = 2018;",
+                "SELECT ROUND(AVG(fantasy_pts), 1) FROM week_results WHERE player = 'Tyreek Hill' AND season = 2024;",
               orderMatters: false,
               hint: "ROUND(AVG(fantasy_pts), 1), with two AND-ed WHERE conditions.",
               explain:
-                "AVG computes the mean of his 15 games; ROUND keeps it to one decimal, box-score style.",
+                "12.8 a game. AVG computes the mean of his 17 games in 2024; ROUND keeps it to one decimal, box-score style.",
             },
           ],
         },
@@ -1074,14 +1074,14 @@ export const COURSE = {
             {
               type: "query",
               prompt:
-                "Position battle: for season 2018, show position and COUNT(*) AS games — one row per position.",
+                "Position battle: for season 2024, show position and COUNT(*) AS games — one row per position.",
               starter: "SELECT position, COUNT(*) AS games\nFROM week_results\n",
               expected:
-                "SELECT position, COUNT(*) AS games FROM week_results WHERE season = 2018 GROUP BY position;",
+                "SELECT position, COUNT(*) AS games FROM week_results WHERE season = 2024 GROUP BY position;",
               orderMatters: false,
-              hint: "WHERE season = 2018, then GROUP BY position.",
+              hint: "WHERE season = 2024, then GROUP BY position.",
               explain:
-                "WHERE trims to 2018 first, then GROUP BY splits by position. Clause order: WHERE before GROUP BY, always.",
+                "WHERE trims to 2024 first, then GROUP BY splits by position. Clause order: WHERE before GROUP BY, always.",
             },
             {
               type: "mc",
@@ -1099,11 +1099,11 @@ export const COURSE = {
             {
               type: "query",
               prompt:
-                "Build the 2017 season leaderboard: player and ROUND(SUM(fantasy_pts), 1) AS total, one row per player, highest total first, top 5 only.",
+                "Build the 2023 season leaderboard: player and ROUND(SUM(fantasy_pts), 1) AS total, one row per player, highest total first, top 5 only.",
               starter:
                 "SELECT player, ROUND(SUM(fantasy_pts), 1) AS total\nFROM week_results\n",
               expected:
-                "SELECT player, ROUND(SUM(fantasy_pts), 1) AS total FROM week_results WHERE season = 2017 GROUP BY player ORDER BY total DESC LIMIT 5;",
+                "SELECT player, ROUND(SUM(fantasy_pts), 1) AS total FROM week_results WHERE season = 2023 GROUP BY player ORDER BY total DESC LIMIT 5;",
               orderMatters: true,
               hint: "WHERE, GROUP BY, ORDER BY total DESC, LIMIT 5 — in exactly that order.",
               explain:
@@ -1177,11 +1177,11 @@ export const COURSE = {
             {
               type: "query",
               prompt:
-                "Find the 300 Club: player and ROUND(SUM(fantasy_pts), 1) AS total for season 2018 — keeping only players whose total tops 300.",
+                "Find the 300 Club: player and ROUND(SUM(fantasy_pts), 1) AS total for season 2024 — keeping only players whose total tops 300.",
               starter:
-                "SELECT player, ROUND(SUM(fantasy_pts), 1) AS total\nFROM week_results\nWHERE season = 2018\nGROUP BY player\n",
+                "SELECT player, ROUND(SUM(fantasy_pts), 1) AS total\nFROM week_results\nWHERE season = 2024\nGROUP BY player\n",
               expected:
-                "SELECT player, ROUND(SUM(fantasy_pts), 1) AS total FROM week_results WHERE season = 2018 GROUP BY player HAVING total > 300;",
+                "SELECT player, ROUND(SUM(fantasy_pts), 1) AS total FROM week_results WHERE season = 2024 GROUP BY player HAVING total > 300;",
               orderMatters: false,
               hint: "Add HAVING total > 300 after the GROUP BY.",
               explain:
@@ -1270,11 +1270,11 @@ export const COURSE = {
             {
               type: "query",
               prompt:
-                "Pull every scoring row that belongs to a rostered player in week 1 of 2018. Show team_name, player and fantasy_pts.",
+                "Pull every scoring row that belongs to a rostered player in week 1 of 2024. Show team_name, player and fantasy_pts.",
               starter:
                 "SELECT rosters.team_name, week_results.player, week_results.fantasy_pts\nFROM rosters\n",
               expected:
-                "SELECT rosters.team_name, week_results.player, week_results.fantasy_pts FROM rosters JOIN week_results ON rosters.player = week_results.player WHERE week_results.season = 2018 AND week_results.week = 1;",
+                "SELECT rosters.team_name, week_results.player, week_results.fantasy_pts FROM rosters JOIN week_results ON rosters.player = week_results.player WHERE week_results.season = 2024 AND week_results.week = 1;",
               orderMatters: false,
               hint: "JOIN week_results ON rosters.player = week_results.player, then filter with WHERE on season and week.",
               explain:
@@ -1286,13 +1286,13 @@ export const COURSE = {
                 "Ten players are on rosters, but that query returned nine rows for week 1. What's the most likely reason?",
               options: [
                 "The join is broken",
-                "One rostered player has no week-1 row — a bye week",
+                "Two rostered players have no row that week — both were injured",
                 "SQL caps results at nine",
                 "One player was traded",
               ],
               answer: 1,
               explain:
-                "A plain JOIN only keeps pairs that match. Travis Kelce is on a bye that week, so he has no row in week_results to pair with, and he silently disappears.",
+                "A plain JOIN only keeps pairs that match. McCaffrey and Nacua were both hurt that week, so neither has a row in week_results to pair with, and both silently disappear.",
             },
           ],
         },
@@ -1305,7 +1305,7 @@ export const COURSE = {
             setup:
               "Spelling out week_results.fantasy_pts every time gets unbearable quickly. Aliases give each table a short name for the length of the query. Same result, a third of the typing — this is how every join you'll read in the wild is written.",
             previewSql:
-              "SELECT r.team_name, w.player, w.fantasy_pts FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2018 AND w.week = 3 ORDER BY w.fantasy_pts DESC;",
+              "SELECT r.team_name, w.player, w.fantasy_pts FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2024 AND w.week = 3 ORDER BY w.fantasy_pts DESC;",
             previewCaption: "the same join, written with aliases",
           },
           intro: {
@@ -1346,12 +1346,12 @@ export const COURSE = {
             {
               type: "query",
               prompt:
-                "Using aliases r and w, show team_name, player and fantasy_pts for rostered players who scored more than 25 points in 2018.",
+                "Using aliases r and w, show team_name, player and fantasy_pts for rostered players who scored more than 25 points in 2024.",
               starter: "SELECT r.team_name, w.player, w.fantasy_pts\nFROM rosters r\n",
               expected:
-                "SELECT r.team_name, w.player, w.fantasy_pts FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2018 AND w.fantasy_pts > 25;",
+                "SELECT r.team_name, w.player, w.fantasy_pts FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2024 AND w.fantasy_pts > 25;",
               orderMatters: false,
-              hint: "JOIN week_results w ON r.player = w.player, then WHERE w.season = 2018 AND w.fantasy_pts > 25.",
+              hint: "JOIN week_results w ON r.player = w.player, then WHERE w.season = 2024 AND w.fantasy_pts > 25.",
               explain:
                 "Aliases make the filter readable at a glance: you can see instantly which table each condition is testing.",
             },
@@ -1371,13 +1371,13 @@ export const COURSE = {
         {
           id: "u5-l3",
           title: "Keep Everyone: LEFT JOIN",
-          blurb: "The bye week that vanished, and how to get it back.",
+          blurb: "The players who vanished, and how to get them back.",
           brief: {
             goal: "Keep rows that have no match on the other side.",
             setup:
               "A plain JOIN silently drops anything unmatched — that's how Travis Kelce disappeared from week 1. LEFT JOIN keeps every row from the left table and fills the missing side with NULL, so absence becomes visible instead of invisible.",
             previewSql:
-              "SELECT r.player, w.fantasy_pts FROM rosters r LEFT JOIN week_results w ON r.player = w.player AND w.season = 2018 AND w.week = 1 ORDER BY r.player;",
+              "SELECT r.player, w.fantasy_pts FROM rosters r LEFT JOIN week_results w ON r.player = w.player AND w.season = 2024 AND w.week = 1 ORDER BY r.player;",
             previewCaption: "10 rows now — look at Travis Kelce",
           },
           intro: {
@@ -1423,7 +1423,7 @@ export const COURSE = {
                 null,
                 " week_results w\n  ON r.player = w.player ",
                 null,
-                " w.season = 2018 AND w.week = 1;",
+                " w.season = 2024 AND w.week = 1;",
               ],
               bank: ["LEFT JOIN", "AND", "JOIN", "WHERE"],
               answer: ["LEFT JOIN", "AND"],
@@ -1433,14 +1433,14 @@ export const COURSE = {
             {
               type: "query",
               prompt:
-                "List every rostered player and their week 2 points in 2018, keeping players who didn't play. Show player and fantasy_pts.",
+                "List every rostered player and their week 2 points in 2024, keeping players who didn't play. Show player and fantasy_pts.",
               starter: "SELECT r.player, w.fantasy_pts\nFROM rosters r\n",
               expected:
-                "SELECT r.player, w.fantasy_pts FROM rosters r LEFT JOIN week_results w ON r.player = w.player AND w.season = 2018 AND w.week = 2;",
+                "SELECT r.player, w.fantasy_pts FROM rosters r LEFT JOIN week_results w ON r.player = w.player AND w.season = 2024 AND w.week = 2;",
               orderMatters: false,
               hint: "LEFT JOIN, and keep the season/week conditions inside ON with AND — not in a WHERE.",
               explain:
-                "Ten rows every time, whoever is on a bye. That's a report you can hand someone without it quietly lying about roster size.",
+                "Ten rows every time, whoever missed the game. That's a report you can hand someone without it quietly lying about roster size.",
             },
           ],
         },
@@ -1525,8 +1525,8 @@ export const COURSE = {
             setup:
               "Everything so far has produced rows. This produces a verdict. Join the roster to the game log, group by fantasy team, sum the points — and you have the season matchup settled in five lines.",
             previewSql:
-              "SELECT r.team_name, ROUND(SUM(w.fantasy_pts), 1) AS total FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2018 GROUP BY r.team_name ORDER BY total DESC;",
-            previewCaption: "the 2018 season, settled",
+              "SELECT r.team_name, ROUND(SUM(w.fantasy_pts), 1) AS total FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2024 GROUP BY r.team_name ORDER BY total DESC;",
+            previewCaption: "the 2024 season, settled",
           },
           intro: {
             title: "Join first, then group",
@@ -1556,23 +1556,23 @@ export const COURSE = {
             {
               type: "query",
               prompt:
-                "Total each fantasy team's points for the 2018 season. Show team_name and a rounded total, highest first.",
+                "Total each fantasy team's points for the 2024 season. Show team_name and a rounded total, highest first.",
               starter:
                 "SELECT r.team_name, ROUND(SUM(w.fantasy_pts), 1) AS total\nFROM rosters r\n",
               expected:
-                "SELECT r.team_name, ROUND(SUM(w.fantasy_pts), 1) AS total FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2018 GROUP BY r.team_name ORDER BY total DESC;",
+                "SELECT r.team_name, ROUND(SUM(w.fantasy_pts), 1) AS total FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2024 GROUP BY r.team_name ORDER BY total DESC;",
               orderMatters: true,
-              hint: "JOIN, WHERE w.season = 2018, GROUP BY r.team_name, ORDER BY total DESC.",
+              hint: "JOIN, WHERE w.season = 2024, GROUP BY r.team_name, ORDER BY total DESC.",
               explain:
-                "Your Team 1243 to Kupp's Krew 1104.6. One query, whole season, no spreadsheet.",
+                "Kupp's Krew 1522.3 to Your Team 1047.1 — not close. One query, whole season, no spreadsheet.",
             },
             {
               type: "query",
               prompt:
-                "Which rostered player scored the most total points in 2018? Show player and rounded total, top 1 only.",
+                "Which rostered player scored the most total points in 2024? Show player and rounded total, top 1 only.",
               starter: "SELECT r.player, ROUND(SUM(w.fantasy_pts), 1) AS total\nFROM rosters r\n",
               expected:
-                "SELECT r.player, ROUND(SUM(w.fantasy_pts), 1) AS total FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2018 GROUP BY r.player ORDER BY total DESC LIMIT 1;",
+                "SELECT r.player, ROUND(SUM(w.fantasy_pts), 1) AS total FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2024 GROUP BY r.player ORDER BY total DESC LIMIT 1;",
               orderMatters: true,
               hint: "Group by r.player instead of team, then ORDER BY total DESC LIMIT 1.",
               explain:
@@ -1581,10 +1581,10 @@ export const COURSE = {
             {
               type: "query",
               prompt:
-                "Per fantasy team, how many rostered players scored a 25-point game in 2018? Show team_name and the count.",
+                "Per fantasy team, how many rostered players scored a 25-point game in 2024? Show team_name and the count.",
               starter: "SELECT r.team_name, COUNT(*) AS big_games\nFROM rosters r\n",
               expected:
-                "SELECT r.team_name, COUNT(*) AS big_games FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2018 AND w.fantasy_pts >= 25 GROUP BY r.team_name;",
+                "SELECT r.team_name, COUNT(*) AS big_games FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2024 AND w.fantasy_pts >= 25 GROUP BY r.team_name;",
               orderMatters: false,
               hint: "Add AND w.fantasy_pts >= 25 to the WHERE, then GROUP BY r.team_name with COUNT(*).",
               explain:
@@ -1613,13 +1613,13 @@ export const COURSE = {
             setup:
               "GROUP BY answers 'what's the total' by throwing the detail away. Window functions answer 'how does this row compare to the total' and keep every row. Same aggregate maths, no collapse — notice the season average repeating beside each game.",
             previewSql:
-              "SELECT player, week, fantasy_pts, ROUND(AVG(fantasy_pts) OVER (), 1) AS league_avg FROM week_results WHERE season = 2018 AND week = 1 ORDER BY fantasy_pts DESC;",
+              "SELECT player, week, fantasy_pts, ROUND(AVG(fantasy_pts) OVER (), 1) AS league_avg FROM week_results WHERE season = 2024 AND week = 1 ORDER BY fantasy_pts DESC;",
             previewCaption: "every row keeps its detail AND gets the average",
           },
           intro: {
             title: "OVER() is the whole idea",
             text: "Put OVER() after an aggregate and it stops collapsing rows. AVG(fantasy_pts) with GROUP BY gives you one row. AVG(fantasy_pts) OVER () gives you the same average printed next to every original row — so you can compare each game to it without a second query.",
-            code: "SELECT player, fantasy_pts,\n       AVG(fantasy_pts) OVER () AS league_avg\nFROM week_results\nWHERE season = 2018 AND week = 1;",
+            code: "SELECT player, fantasy_pts,\n       AVG(fantasy_pts) OVER () AS league_avg\nFROM week_results\nWHERE season = 2024 AND week = 1;",
           },
           film: [
             {
@@ -1651,7 +1651,7 @@ export const COURSE = {
                 null,
                 " (",
                 null,
-                ") AS league_avg\nFROM week_results\nWHERE season = 2018 AND week = 1;",
+                ") AS league_avg\nFROM week_results\nWHERE season = 2024 AND week = 1;",
               ],
               bank: ["OVER", "", "GROUP BY", "PARTITION"],
               answer: ["OVER", ""],
@@ -1661,12 +1661,12 @@ export const COURSE = {
             {
               type: "query",
               prompt:
-                "For week 5 of 2018, show player, fantasy_pts, and the highest score that week as a column called top_score.",
+                "For week 5 of 2024, show player, fantasy_pts, and the highest score that week as a column called top_score.",
               starter: "SELECT player, fantasy_pts,\n",
               expected:
-                "SELECT player, fantasy_pts, MAX(fantasy_pts) OVER () AS top_score FROM week_results WHERE season = 2018 AND week = 5;",
+                "SELECT player, fantasy_pts, MAX(fantasy_pts) OVER () AS top_score FROM week_results WHERE season = 2024 AND week = 5;",
               orderMatters: false,
-              hint: "MAX(fantasy_pts) OVER () AS top_score, with the WHERE filtering to season 2018 and week 5.",
+              hint: "MAX(fantasy_pts) OVER () AS top_score, with the WHERE filtering to season 2024 and week 5.",
               explain:
                 "Every row now carries the week's ceiling, so 'how far off the pace was this player' becomes simple subtraction.",
             },
@@ -1695,7 +1695,7 @@ export const COURSE = {
             setup:
               "Comparing a tight end to a quarterback is meaningless — you want each player ranked against their own position. PARTITION BY splits the window into groups and restarts the calculation in each one, so the ranking begins again at 1 for every position.",
             previewSql:
-              "SELECT player, position, ROUND(AVG(fantasy_pts), 1) AS ppg, RANK() OVER (PARTITION BY position ORDER BY AVG(fantasy_pts) DESC) AS pos_rank FROM week_results WHERE season = 2018 GROUP BY player, position ORDER BY position, pos_rank;",
+              "SELECT player, position, ROUND(AVG(fantasy_pts), 1) AS ppg, RANK() OVER (PARTITION BY position ORDER BY AVG(fantasy_pts) DESC) AS pos_rank FROM week_results WHERE season = 2024 GROUP BY player, position ORDER BY position, pos_rank;",
             previewCaption: "rank restarts at 1 for QB, RB, TE and WR",
           },
           intro: {
@@ -1740,7 +1740,7 @@ export const COURSE = {
                 null,
                 " position ",
                 null,
-                " AVG(fantasy_pts) DESC) AS pos_rank\nFROM week_results\nWHERE season = 2018\nGROUP BY player, position;",
+                " AVG(fantasy_pts) DESC) AS pos_rank\nFROM week_results\nWHERE season = 2024\nGROUP BY player, position;",
               ],
               bank: ["PARTITION BY", "ORDER BY", "GROUP BY", "SORT BY"],
               answer: ["PARTITION BY", "ORDER BY"],
@@ -1750,15 +1750,15 @@ export const COURSE = {
             {
               type: "query",
               prompt:
-                "Rank every 2018 wide receiver by average points, best first. Show player and a rank column called wr_rank.",
+                "Rank every 2024 wide receiver by average points, best first. Show player and a rank column called wr_rank.",
               starter:
                 "SELECT player,\n       RANK() OVER (ORDER BY AVG(fantasy_pts) DESC) AS wr_rank\nFROM week_results\n",
               expected:
-                "SELECT player, RANK() OVER (ORDER BY AVG(fantasy_pts) DESC) AS wr_rank FROM week_results WHERE season = 2018 AND position = 'WR' GROUP BY player;",
+                "SELECT player, RANK() OVER (ORDER BY AVG(fantasy_pts) DESC) AS wr_rank FROM week_results WHERE season = 2024 AND position = 'WR' GROUP BY player;",
               orderMatters: false,
-              hint: "Filter to season 2018 and position = 'WR', then GROUP BY player.",
+              hint: "Filter to season 2024 and position = 'WR', then GROUP BY player.",
               explain:
-                "Tyreek Hill is WR1 at 19.5. Note Amon-Ra and CeeDee are separated by four hundredths — rank sees the real numbers, not the rounded display.",
+                "Ja'Marr Chase is WR1 at 23.7 a game. Note Puka Nacua ranks 2nd on 11 games while Jefferson played 17 — RANK sorts on the average alone and says nothing about how much evidence sits behind it.",
             },
           ],
         },
@@ -1771,13 +1771,13 @@ export const COURSE = {
             setup:
               "Trend questions need two rows at once, and until now every tool you have works one row at a time. LAG reaches backwards to the previous row; LEAD reaches forwards. Here's a quarterback's season with last week's score pulled onto each line.",
             previewSql:
-              "SELECT week, fantasy_pts, LAG(fantasy_pts) OVER (ORDER BY week) AS prev_week FROM week_results WHERE player = 'Patrick Mahomes' AND season = 2018 ORDER BY week LIMIT 8;",
+              "SELECT week, fantasy_pts, LAG(fantasy_pts) OVER (ORDER BY week) AS prev_week FROM week_results WHERE player = 'Patrick Mahomes' AND season = 2024 ORDER BY week LIMIT 8;",
             previewCaption: "week 1 has no previous week — hence NULL",
           },
           intro: {
             title: "LAG looks back, LEAD looks forward",
             text: "LAG(column) OVER (ORDER BY something) gives you that column's value from the previous row in that order. The first row has nothing behind it, so it returns NULL. Subtract the two and you have a week-over-week change — the basis of every trend chart you'll ever build.",
-            code: "SELECT week, fantasy_pts,\n       fantasy_pts - LAG(fantasy_pts) OVER (ORDER BY week) AS swing\nFROM week_results\nWHERE player = 'Josh Allen' AND season = 2018;",
+            code: "SELECT week, fantasy_pts,\n       fantasy_pts - LAG(fantasy_pts) OVER (ORDER BY week) AS swing\nFROM week_results\nWHERE player = 'Josh Allen' AND season = 2024;",
           },
           exercises: [
             {
@@ -1815,7 +1815,7 @@ export const COURSE = {
                 null,
                 "(fantasy_pts) OVER (",
                 null,
-                " week) AS prev_week\nFROM week_results\nWHERE player = 'Josh Allen' AND season = 2018;",
+                " week) AS prev_week\nFROM week_results\nWHERE player = 'Josh Allen' AND season = 2024;",
               ],
               bank: ["LAG", "ORDER BY", "LEAD", "PARTITION BY"],
               answer: ["LAG", "ORDER BY"],
@@ -1825,10 +1825,10 @@ export const COURSE = {
             {
               type: "query",
               prompt:
-                "For Josh Allen in 2018, show week, fantasy_pts, and the previous week's score as prev_week, in week order.",
+                "For Josh Allen in 2024, show week, fantasy_pts, and the previous week's score as prev_week, in week order.",
               starter: "SELECT week, fantasy_pts,\n",
               expected:
-                "SELECT week, fantasy_pts, LAG(fantasy_pts) OVER (ORDER BY week) AS prev_week FROM week_results WHERE player = 'Josh Allen' AND season = 2018 ORDER BY week;",
+                "SELECT week, fantasy_pts, LAG(fantasy_pts) OVER (ORDER BY week) AS prev_week FROM week_results WHERE player = 'Josh Allen' AND season = 2024 ORDER BY week;",
               orderMatters: true,
               hint: "LAG(fantasy_pts) OVER (ORDER BY week) AS prev_week, filtered to the player and season, then ORDER BY week.",
               explain:
@@ -1845,7 +1845,7 @@ export const COURSE = {
             setup:
               "A window can cover just part of its partition. Add ORDER BY and the window becomes everything up to the current row — which turns SUM into a running total for free. Watch it accumulate week by week.",
             previewSql:
-              "SELECT week, fantasy_pts, ROUND(SUM(fantasy_pts) OVER (ORDER BY week), 1) AS season_to_date FROM week_results WHERE player = 'Josh Allen' AND season = 2018 ORDER BY week LIMIT 8;",
+              "SELECT week, fantasy_pts, ROUND(SUM(fantasy_pts) OVER (ORDER BY week), 1) AS season_to_date FROM week_results WHERE player = 'Josh Allen' AND season = 2024 ORDER BY week LIMIT 8;",
             previewCaption: "season_to_date grows every week",
           },
           intro: {
@@ -1890,10 +1890,10 @@ export const COURSE = {
             {
               type: "query",
               prompt:
-                "For Christian McCaffrey in 2018, show week, fantasy_pts, and a running season total called season_to_date (rounded to 1 decimal), in week order.",
+                "For Christian McCaffrey in 2024, show week, fantasy_pts, and a running season total called season_to_date (rounded to 1 decimal), in week order.",
               starter: "SELECT week, fantasy_pts,\n",
               expected:
-                "SELECT week, fantasy_pts, ROUND(SUM(fantasy_pts) OVER (ORDER BY week), 1) AS season_to_date FROM week_results WHERE player = 'Christian McCaffrey' AND season = 2018 ORDER BY week;",
+                "SELECT week, fantasy_pts, ROUND(SUM(fantasy_pts) OVER (ORDER BY week), 1) AS season_to_date FROM week_results WHERE player = 'Christian McCaffrey' AND season = 2024 ORDER BY week;",
               orderMatters: true,
               hint: "ROUND(SUM(fantasy_pts) OVER (ORDER BY week), 1) AS season_to_date.",
               explain:
@@ -1905,7 +1905,7 @@ export const COURSE = {
                 "Same player and season: show week, fantasy_pts, and a rolling 3-game average called form (rounded to 1 decimal), in week order.",
               starter: "SELECT week, fantasy_pts,\n",
               expected:
-                "SELECT week, fantasy_pts, ROUND(AVG(fantasy_pts) OVER (ORDER BY week ROWS BETWEEN 2 PRECEDING AND CURRENT ROW), 1) AS form FROM week_results WHERE player = 'Christian McCaffrey' AND season = 2018 ORDER BY week;",
+                "SELECT week, fantasy_pts, ROUND(AVG(fantasy_pts) OVER (ORDER BY week ROWS BETWEEN 2 PRECEDING AND CURRENT ROW), 1) AS form FROM week_results WHERE player = 'Christian McCaffrey' AND season = 2024 ORDER BY week;",
               orderMatters: true,
               hint: "AVG(...) OVER (ORDER BY week ROWS BETWEEN 2 PRECEDING AND CURRENT ROW).",
               explain:
@@ -3855,7 +3855,7 @@ export const COURSE = {
               expected: "=E2",
               hint: "A formula can be nothing but a cell address: =E2",
               explain:
-                "402.5. A bare reference is the simplest formula there is, and it is what every bigger formula is made of.",
+                "430.4. A bare reference is the simplest formula there is, and it is what every bigger formula is made of.",
             },
             {
               type: "formula",
@@ -3865,7 +3865,7 @@ export const COURSE = {
               expected: "=A5",
               hint: "Names live in column A. Row 5 is the fourth player, because row 1 is headers.",
               explain:
-                "Derrick Henry. Row 1 is the header row, so row 5 is the 4th player — the off-by-one that catches everyone once.",
+                "Jahmyr Gibbs. Row 1 is the header row, so row 5 is the 4th player — the off-by-one that catches everyone once.",
             },
             {
               type: "fill",
@@ -3909,7 +3909,7 @@ export const COURSE = {
               expected: "=SUM(E2:E17)",
               hint: "=SUM( range )",
               explain:
-                "3759.4 points across the league. SUM is the workhorse of every spreadsheet ever built.",
+                "5016.8 points across the league. SUM is the workhorse of every spreadsheet ever built.",
             },
             {
               type: "formula",
@@ -3919,7 +3919,7 @@ export const COURSE = {
               expected: "=ROUND(AVERAGE(E2:E17),1)",
               hint: "Wrap the average in ROUND: =ROUND(AVERAGE(...),1)",
               explain:
-                "235. Functions nest — the inner one runs first, and its answer becomes the outer one's input.",
+                "313.6. Functions nest — the inner one runs first, and its answer becomes the outer one's input.",
             },
             {
               type: "formula",
@@ -3962,7 +3962,7 @@ export const COURSE = {
           brief: {
             goal: "Pull the highest and lowest values out of a column, and measure the distance between them.",
             setup:
-              "MAX and MIN do exactly what they sound like. The catch — and it is the one that sends people to INDEX/MATCH later — is that they return the number, not the player attached to it. MAX tells you the top score was 402.5; it will not tell you who scored it.",
+              "MAX and MIN do exactly what they sound like. The catch — and it is the one that sends people to INDEX/MATCH later — is that they return the number, not the player attached to it. MAX tells you the top score was 430.4; it will not tell you who scored it.",
             previewSheet: "Roster",
           },
           intro: {
@@ -3977,7 +3977,7 @@ export const COURSE = {
               starter: "=",
               expected: "=MAX(E2:E17)",
               hint: "=MAX( range )",
-              explain: "402.5 — the best season on the sheet.",
+              explain: "430.4 — Lamar Jackson's 2024, the best season on the sheet.",
             },
             {
               type: "formula",
@@ -3985,7 +3985,7 @@ export const COURSE = {
               starter: "=",
               expected: "=MIN(E2:E17)",
               hint: "Same shape as MAX.",
-              explain: "119.4. Every roster has one.",
+              explain: "216.9. Every roster has one.",
             },
             {
               type: "formula",
@@ -3995,7 +3995,7 @@ export const COURSE = {
               expected: "=ROUND(MAX(E2:E17)-MIN(E2:E17),1)",
               hint: "You can do arithmetic between two functions: MAX(...) - MIN(...)",
               explain:
-                "283.1 points of spread. Formulas are expressions — you can subtract, add and divide them like any other value.",
+                "213.5 points of spread. Formulas are expressions — you can subtract, add and divide them like any other value.",
             },
             {
               type: "formula",
@@ -4005,12 +4005,12 @@ export const COURSE = {
               expected: "=LARGE(E2:E17,3)",
               hint: "=LARGE(range, n) — n is which place you want.",
               explain:
-                "318.7. LARGE(range,1) is the same as MAX; the second argument is what makes it useful.",
+                "379.1. LARGE(range,1) is the same as MAX; the second argument is what makes it useful.",
             },
             {
               type: "mc",
               prompt:
-                "`=MAX(E2:E17)` returns 402.5. How do you get the player's *name*?",
+                "`=MAX(E2:E17)` returns 430.4. How do you get the player's *name*?",
               options: [
                 "MAX has a second argument for that",
                 "You can't — MAX only ever returns a value, so you need a lookup",
@@ -4041,7 +4041,7 @@ export const COURSE = {
           film: [
             {
               title: "Rate stats change the ranking",
-              text: "A player with 279.4 points in 17 games and one with 208.3 in 14 look far apart on totals. Per game they are 16.4 and 14.9 — much closer. Whenever someone hands you a leaderboard built on totals, the first question worth asking is whether everyone had the same opportunity.",
+              text: "Tyreek Hill scored 218.2 and A.J. Brown 216.9 — all but identical seasons, on the totals. Per game they are 12.8 and 16.7, because Brown played 13 games to Hill's 17. The totals hid the better player. Whenever someone hands you a leaderboard built on totals, the first question worth asking is whether everyone had the same opportunity.",
             },
           ],
           exercises: [
@@ -4053,7 +4053,7 @@ export const COURSE = {
               expected: "=ROUND(E2/D2,2)",
               hint: "Points are in E, games are in D. =ROUND(E2/D2,2)",
               explain:
-                "23.68 points per game. A rate, not a total — and now comparable to anyone else on the sheet.",
+                "25.32 points per game. A rate, not a total — and now comparable to anyone else on the sheet.",
             },
             {
               type: "formula",
@@ -4063,7 +4063,7 @@ export const COURSE = {
               expected: "=ROUND(SUM(E2:E17)/SUM(D2:D17),2)",
               hint: "Divide one SUM by another.",
               explain:
-                "15.1 points per game across the league. Note this is not the same as averaging each player's rate — dividing the totals weights by how much each player actually played.",
+                "19.6 points per game across the league. Note this is not the same as averaging each player's rate — dividing the totals weights by how much each player actually played.",
             },
             {
               type: "formula",
@@ -4073,7 +4073,7 @@ export const COURSE = {
               expected: "=ROUND(F2/E2,0)",
               hint: "Salary is column F, points column E.",
               explain:
-                "$102 per fantasy point. Dollars-per-unit is how you turn two unrelated columns into a fairness question.",
+                "$88 per fantasy point. Dollars-per-unit is how you turn two unrelated columns into a fairness question.",
             },
             {
               type: "mc",
@@ -4158,7 +4158,7 @@ export const COURSE = {
               expected: '=IF(E2>300,"Stud","Flex")',
               hint: 'Text answers need double quotes: =IF(E2>300,"Stud","Flex")',
               explain:
-                "Stud — row 2 scored 402.5. Quotes are what tell Excel you mean the word, not a cell name.",
+                "Stud — row 2 scored 430.4. Quotes are what tell Excel you mean the word, not a cell name.",
             },
             {
               type: "formula",
@@ -4168,7 +4168,7 @@ export const COURSE = {
               expected: '=IF(E15>300,"Stud","Flex")',
               hint: "Only the row number changes.",
               explain:
-                "Flex — row 15 scored 119.4, well under the bar. Same formula, different row, different answer: that is what makes IF worth writing once and copying down.",
+                "Flex — row 15 scored 218.2, well under the bar. Same formula, different row, different answer: that is what makes IF worth writing once and copying down.",
             },
             {
               type: "formula",
@@ -4223,7 +4223,7 @@ export const COURSE = {
               expected: '=COUNTIF(E2:E17,">250")',
               hint: 'The comparison goes inside quotes: ">250"',
               explain:
-                "7 players. The quotes around \">250\" look wrong and are required — Excel reads the whole condition as text.",
+                "12 players. The quotes around \">250\" look wrong and are required — Excel reads the whole condition as text.",
             },
             {
               type: "formula",
@@ -4233,7 +4233,7 @@ export const COURSE = {
               expected: '=COUNTIFS(C2:C17,"WR",E2:E17,">200")',
               hint: "COUNTIFS — pairs of range then rule, as many as you need.",
               explain:
-                "5. COUNTIFS only counts rows where every condition holds, which is how you ask two questions of one sheet.",
+                "7. COUNTIFS only counts rows where every condition holds, which is how you ask two questions of one sheet.",
             },
             {
               type: "mc",
@@ -4289,7 +4289,7 @@ export const COURSE = {
               expected: '=SUMIF(C2:C17,"RB",E2:E17)',
               hint: "Test the position column, add the points column.",
               explain:
-                "1030.8 points from the RBs. Test range first, points range last.",
+                "1396.3 points from the RBs. Test range first, points range last.",
             },
             {
               type: "formula",
@@ -4299,7 +4299,7 @@ export const COURSE = {
               expected: '=SUMIFS(F2:F17,G2:G17,"Jordan")',
               hint: "SUMIFS puts the range you're adding FIRST.",
               explain:
-                "$163,500. Note the flip: with SUMIFS the salary range leads, then come the condition pairs.",
+                "$199,000. Note the flip: with SUMIFS the salary range leads, then come the condition pairs.",
             },
             {
               type: "formula",
@@ -4309,7 +4309,7 @@ export const COURSE = {
               expected: '=ROUND(AVERAGEIF(C2:C17,"QB",E2:E17),1)',
               hint: "AVERAGEIF follows SUMIF's argument order, then wrap it in ROUND.",
               explain:
-                "381.9 points per QB. Only two quarterbacks on this roster, and both were excellent.",
+                "351.9 points per QB across the four on this roster.",
             },
             {
               type: "mc",
@@ -4382,7 +4382,7 @@ export const COURSE = {
               expected: "=ROUND(E2/SUM($E$2:$E$17),3)",
               hint: "The numerator moves, the SUM range does not: SUM($E$2:$E$17)",
               explain:
-                "0.107 — about 10.7% of every point scored in the league. The $ signs are what let you copy this down all 16 rows.",
+                "0.086 — about 8.6% of every point scored in the league. The $ signs are what let you copy this down all 16 rows.",
             },
             {
               type: "formula",
@@ -4392,7 +4392,7 @@ export const COURSE = {
               expected: "=ROUND(E3/SUM($E$2:$E$17),3)",
               hint: "Only the numerator changes — that's the whole point.",
               explain:
-                "0.096. The numerator moved, the denominator didn't. That is exactly the behaviour you designed the $ signs to produce.",
+                "0.080. The numerator moved, the denominator didn't. That is exactly the behaviour you designed the $ signs to produce.",
             },
             {
               type: "mc",
@@ -4444,8 +4444,8 @@ export const COURSE = {
           },
           intro: {
             title: "Four arguments, and the fourth is not optional",
-            text: "=VLOOKUP(\"Puka Nacua\", A2:E17, 5, FALSE) searches the first column of A2:E17 for the name, then returns the 5th column of that block — column E, points. FALSE means exact match. Leave it off and Excel does an approximate match on data it assumes is sorted, which returns confidently wrong answers rather than an error.",
-            code: "=VLOOKUP(\"Puka Nacua\",A2:E17,5,FALSE)\n                 ^          ^     ^   ^\n              what      where   col  exact",
+            text: "=VLOOKUP(\"Justin Jefferson\", A2:E17, 5, FALSE) searches the first column of A2:E17 for the name, then returns the 5th column of that block — column E, points. FALSE means exact match. Leave it off and Excel does an approximate match on data it assumes is sorted, which returns confidently wrong answers rather than an error.",
+            code: "=VLOOKUP(\"Justin Jefferson\",A2:E17,5,FALSE)\n                 ^          ^     ^   ^\n              what      where   col  exact",
           },
           film: [
             {
@@ -4457,27 +4457,27 @@ export const COURSE = {
             {
               type: "formula",
               prompt:
-                "How many fantasy points did \"Puka Nacua\" score? Search the block A2:E17 and return the points column.",
+                "How many fantasy points did \"Justin Jefferson\" score? Search the block A2:E17 and return the points column.",
               starter: "=",
-              expected: '=VLOOKUP("Puka Nacua",A2:E17,5,FALSE)',
+              expected: '=VLOOKUP("Justin Jefferson",A2:E17,5,FALSE)',
               hint: "Points are the 5th column of A2:E17. Don't forget FALSE.",
               explain:
-                "208.3. Column 5 counts from A — Player, Team, Pos, Games, Points.",
+                "317.5. Column 5 counts from A — Player, Team, Pos, Games, Points.",
             },
             {
               type: "formula",
               prompt:
-                "How many games did \"Travis Kelce\" play? Same block, different column.",
+                "How many games did \"George Kittle\" play? Same block, different column.",
               starter: "=",
-              expected: '=VLOOKUP("Travis Kelce",A2:E17,4,FALSE)',
+              expected: '=VLOOKUP("George Kittle",A2:E17,4,FALSE)',
               hint: "Games is the 4th column of the block.",
               explain:
-                "16 games. Only the column number changed — the rest of the formula is identical.",
+                "15 games. Only the column number changed — the rest of the formula is identical.",
             },
             {
               type: "mc",
               prompt:
-                "In `=VLOOKUP(\"Puka Nacua\",A2:E17,5,FALSE)`, what is the 5 counting from?",
+                "In `=VLOOKUP(\"Justin Jefferson\",A2:E17,5,FALSE)`, what is the 5 counting from?",
               options: [
                 "Column A of the sheet",
                 "The first column of the range you passed in — A, in this case",
@@ -4538,10 +4538,10 @@ export const COURSE = {
             {
               type: "formula",
               prompt:
-                "Look up \"Saquon Barkley\" (who is not on this roster) and return \"Not rostered\" instead of an error.",
+                "Look up \"Travis Kelce\" (who is not on this roster) and return \"Not rostered\" instead of an error.",
               starter: "=",
               expected:
-                '=IFERROR(VLOOKUP("Saquon Barkley",A2:E17,5,FALSE),"Not rostered")',
+                '=IFERROR(VLOOKUP("Travis Kelce",A2:E17,5,FALSE),"Not rostered")',
               hint: 'Wrap the whole VLOOKUP: =IFERROR( lookup , "Not rostered")',
               explain:
                 "\"Not rostered\". The lookup still failed — IFERROR just decides what the failure should look like.",
@@ -4552,7 +4552,7 @@ export const COURSE = {
                 "Same lookup, but return 0 so the column can still be summed.",
               starter: "=",
               expected:
-                '=IFERROR(VLOOKUP("Saquon Barkley",A2:E17,5,FALSE),0)',
+                '=IFERROR(VLOOKUP("Travis Kelce",A2:E17,5,FALSE),0)',
               hint: "The fallback doesn't have to be text.",
               explain:
                 "0. Choose your fallback based on what happens next — text reads better for humans, 0 keeps arithmetic working.",
@@ -4615,7 +4615,7 @@ export const COURSE = {
           intro: {
             title: "MATCH finds the position, INDEX fetches the value",
             text: "Read the nested version from the inside out. MATCH runs first and returns a row number; INDEX then pulls that row out of whichever column you point it at. Because you name the return column directly, it can sit anywhere — left of the search column, right of it, another sheet entirely.",
-            code: "=MATCH(\"Travis Kelce\",A2:A17,0)              → 15\n=INDEX(E2:E17,15)                             → 212.8\n=INDEX(E2:E17,MATCH(\"Tyreek Hill\",A2:A17,0))  → both at once",
+            code: "=MATCH(\"George Kittle\",A2:A17,0)              → 14\n=INDEX(E2:E17,14)                             → 236.6\n=INDEX(E2:E17,MATCH(\"Tyreek Hill\",A2:A17,0))  → both at once",
           },
           film: [
             {
@@ -4627,12 +4627,12 @@ export const COURSE = {
             {
               type: "formula",
               prompt:
-                "Which position in the name list does \"Travis Kelce\" occupy? Use MATCH with an exact match (0).",
+                "Which position in the name list does \"George Kittle\" occupy? Use MATCH with an exact match (0).",
               starter: "=",
-              expected: '=MATCH("Travis Kelce",A2:A17,0)',
+              expected: '=MATCH("George Kittle",A2:A17,0)',
               hint: "=MATCH(what, where, 0)",
               explain:
-                "15 — he is the 15th name in the range. Not a value, a position.",
+                "14 — Kittle is the 14th name in the range. Not a value, a position.",
             },
             {
               type: "formula",
@@ -4642,7 +4642,7 @@ export const COURSE = {
               expected: '=INDEX(E2:E17,MATCH("Tyreek Hill",A2:A17,0))',
               hint: "=INDEX(column_to_return, MATCH(name, name_column, 0))",
               explain:
-                "301.9. MATCH found the row, INDEX pulled the value — no column counting anywhere.",
+                "218.2. MATCH found the row, INDEX pulled the value — no column counting anywhere.",
             },
             {
               type: "formula",
@@ -4652,7 +4652,7 @@ export const COURSE = {
               expected: "=INDEX(A2:A17,MATCH(MAX(E2:E17),E2:E17,0))",
               hint: "MATCH can look up a number too: MATCH(MAX(E2:E17),E2:E17,0)",
               explain:
-                "Josh Allen. This is the question MAX couldn't answer back in the first unit — and notice you're returning column A while searching column E, which VLOOKUP flatly cannot do.",
+                "Lamar Jackson. This is the question MAX couldn't answer back in the first unit — and notice you're returning column A while searching column E, which VLOOKUP flatly cannot do.",
             },
             {
               type: "mc",
@@ -4707,15 +4707,15 @@ export const COURSE = {
               expected: '=XLOOKUP("Derrick Henry",A2:A17,F2:F17)',
               hint: "=XLOOKUP(what, where_to_look, what_to_return)",
               explain:
-                "33000. No column counting, no FALSE — the two things that make VLOOKUP fragile are simply gone.",
+                "24000. No column counting, no FALSE — the two things that make VLOOKUP fragile are simply gone.",
             },
             {
               type: "formula",
               prompt:
-                "Look up \"Saquon Barkley\" and return \"Not rostered\" using XLOOKUP's built-in fourth argument — no IFERROR.",
+                "Look up \"Travis Kelce\" and return \"Not rostered\" using XLOOKUP's built-in fourth argument — no IFERROR.",
               starter: "=",
               expected:
-                '=XLOOKUP("Saquon Barkley",A2:A17,F2:F17,"Not rostered")',
+                '=XLOOKUP("Travis Kelce",A2:A17,F2:F17,"Not rostered")',
               hint: "The fallback is just a fourth argument.",
               explain:
                 "\"Not rostered\". What took a wrapper function in VLOOKUP is built in here.",
@@ -4804,7 +4804,7 @@ export const COURSE = {
               expected: "=LEN(Import!A2)",
               hint: "Reference another sheet with its name and an exclamation mark: Import!A2",
               explain:
-                "12 — but \"Josh Allen\" is only 10 characters. Two of them are invisible.",
+                "15 — but \"Lamar Jackson\" is only 13 characters. Two of them are invisible.",
             },
             {
               type: "formula",
@@ -4813,7 +4813,7 @@ export const COURSE = {
               expected: "=TRIM(Import!A2)",
               hint: "=TRIM( the cell )",
               explain:
-                "\"Josh Allen\" — 10 characters, and now it will match the roster.",
+                "Lamar Jackson\" — 13 characters, and now it will match the roster.",
             },
             {
               type: "formula",
@@ -4834,7 +4834,7 @@ export const COURSE = {
               expected: "=VLOOKUP(TRIM(Import!A2),A2:E17,5,FALSE)",
               hint: "Put TRIM around Import!A2 inside the VLOOKUP.",
               explain:
-                "402.5. One function in the right place turned a broken join into a working one.",
+                "430.4. One function in the right place turned a broken join into a working one.",
             },
             {
               type: "mc",
@@ -4865,7 +4865,7 @@ export const COURSE = {
           intro: {
             title: "SUM silently skips text",
             text: "This is the dangerous part: there is no error. A column of 400-point seasons totals to zero and the sheet looks fine. Any time a total is implausibly low — especially exactly zero — suspect text before you suspect the data.",
-            code: "=SUM(Import!B2:B7)              0    — every value is text\n=VALUE(TRIM(Import!B2))         402.5\n=VALUE(TRIM(Import!B2))+VALUE(TRIM(Import!B3))",
+            code: "=SUM(Import!B2:B7)              0    — every value is text\n=VALUE(TRIM(Import!B2))         430.4\n=VALUE(TRIM(Import!B2))+VALUE(TRIM(Import!B3))",
           },
           exercises: [
             {
@@ -4886,7 +4886,7 @@ export const COURSE = {
               expected: "=VALUE(TRIM(Import!B2))",
               hint: "TRIM inside VALUE: =VALUE(TRIM( cell ))",
               explain:
-                "402.5 — now an actual number you can do arithmetic with.",
+                "430.4 — now an actual number you can do arithmetic with.",
             },
             {
               type: "formula",
@@ -4897,7 +4897,7 @@ export const COURSE = {
                 "=ROUND(VALUE(TRIM(Import!B2))+VALUE(TRIM(Import!B3)),1)",
               hint: "Convert each one, then add them, then round the result.",
               explain:
-                "763.7. Convert first, then calculate — never the other way round.",
+                "833.4. Convert first, then calculate — never the other way round.",
             },
             {
               type: "mc",
@@ -5029,7 +5029,7 @@ export const COURSE = {
               expected: "=LEFT(A2,4)",
               hint: "=LEFT(cell, how_many)",
               explain:
-                "\"Josh\". LEFT and RIGHT are blunt instruments — they count characters, not words.",
+                "Lama\" — it cut the name mid-word. LEFT and RIGHT are blunt instruments: they count characters, not words.",
             },
             {
               type: "formula",
@@ -5039,7 +5039,7 @@ export const COURSE = {
               expected: "=UPPER(Import!C2)",
               hint: "=UPPER( cell )",
               explain:
-                "\"BUF\". Standardising case is usually a prerequisite for matching, since a human-entered code column will contain both.",
+                "BAL\". Standardising case is usually a prerequisite for matching, since a human-entered code column will contain both.",
             },
             {
               type: "formula",
@@ -5049,7 +5049,7 @@ export const COURSE = {
               expected: "=PROPER(TRIM(Import!A3))",
               hint: "Nest them: PROPER(TRIM(...))",
               explain:
-                "\"Patrick Mahomes\". Two functions, one pass — the nesting habit from VALUE(TRIM(...)) applies everywhere.",
+                "Ja'Marr Chase\". Two functions, one pass — the nesting habit from VALUE(TRIM(...)) applies everywhere.",
             },
             {
               type: "formula",
@@ -5059,7 +5059,7 @@ export const COURSE = {
               expected: '=TEXTJOIN(", ",TRUE,A2:A4)',
               hint: '=TEXTJOIN(separator, TRUE, range) — TRUE skips blanks.',
               explain:
-                "\"Josh Allen, Patrick Mahomes, Christian McCaffrey\". The TRUE tells it to ignore empty cells rather than leaving double separators.",
+                "Lamar Jackson, Ja'Marr Chase, Josh Allen\". The TRUE tells it to ignore empty cells rather than leaving double separators.",
             },
             {
               type: "mc",
