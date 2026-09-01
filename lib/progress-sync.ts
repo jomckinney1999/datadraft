@@ -28,6 +28,10 @@ type Row = {
   drafted_track: string | null;
   sport: string | null;
   module_id: string | null;
+  badges: string[] | null;
+  best_combo: number | null;
+  perfect_lessons: number | null;
+  total_yards: number | null;
 };
 
 function merge(local: Progress, remote: Row | null): Progress {
@@ -56,6 +60,18 @@ function merge(local: Progress, remote: Row | null): Progress {
     username: newer?.username ?? remote.username ?? local.username ?? null,
     draftedTrack:
       newer?.draftedTrack ?? remote.drafted_track ?? local.draftedTrack ?? null,
+    // Same rule as the counters above: union the badges, max the totals. A
+    // badge earned on a phone must not disappear because the laptop's row is
+    // older, and that is exactly what last-write-wins would do.
+    badges: Array.from(
+      new Set([...local.badges, ...(remote.badges ?? [])]),
+    ),
+    bestCombo: Math.max(local.bestCombo, remote.best_combo ?? 0),
+    perfectLessons: Math.max(
+      local.perfectLessons,
+      remote.perfect_lessons ?? 0,
+    ),
+    totalYards: Math.max(local.totalYards, remote.total_yards ?? 0),
   };
 }
 
@@ -122,6 +138,10 @@ export async function pushProgress(progress?: Progress): Promise<void> {
       drafted_track: p.draftedTrack,
       sport: readStoredSport(),
       module_id: readStoredModule(),
+      badges: p.badges,
+      best_combo: p.bestCombo,
+      perfect_lessons: p.perfectLessons,
+      total_yards: p.totalYards,
     },
     { onConflict: "user_id" },
   );

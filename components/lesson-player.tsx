@@ -42,7 +42,7 @@ import {
 } from "@/lib/runtimes";
 import { useModule } from "@/lib/use-module";
 import { useSport } from "@/lib/use-sport";
-import { completeLesson, loadProgress } from "@/lib/progress";
+import { awardBadges, completeLesson, loadProgress } from "@/lib/progress";
 import { pushProgress } from "@/lib/progress-sync";
 import { getStyle, type PlaybookStyle } from "@/lib/playbook";
 import Coach, { type CoachMood } from "@/components/coach";
@@ -57,6 +57,9 @@ import {
 } from "@/lib/excel-engine";
 import { MAIN_SHEET, type CellValue } from "@/lib/excel-data";
 import { SHORT_CREDIT } from "@/lib/data-source";
+import DriveField from "@/components/drive-field";
+import { drivePct, heatLabel, missCall, runPlay } from "@/lib/gameplay";
+import { newlyEarned, statsFrom, type Badge } from "@/lib/achievements";
 
 type Phase =
   | "loading"
@@ -69,6 +72,8 @@ type Phase =
 type Feedback = {
   correct: boolean;
   headline: string;
+  /** Yards gained on this play — rendered in the reward chip. */
+  yards?: number;
   solution?: string;
   explain: string;
 };
@@ -188,6 +193,18 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const [formulaValue, setFormulaValue] = useState<CellValue | boolean>(null);
   const [formulaError, setFormulaError] = useState<string | null>(null);
   const [formulaReady, setFormulaReady] = useState(false);
+
+  // ── drive state (the football layer over grading) ──
+  const [driveYards, setDriveYards] = useState(0);
+  const [bestCombo, setBestCombo] = useState(0);
+  /** Floating "+12 YDS" chip. `id` forces a re-animation on repeat values. */
+  const [burst, setBurst] = useState<{
+    yards: number;
+    id: number;
+    explosive: boolean;
+  } | null>(null);
+  /** Badges unlocked by this lesson, celebrated on the completion screen. */
+  const [unlocked, setUnlocked] = useState<Badge[]>([]);
 
   /**
    * Gunslingers want to type, not tick boxes. They always skip pure-recall
@@ -362,7 +379,18 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   useEffect(() => {
     if (phase === "complete" && !savedRef.current && entry) {
       savedRef.current = true;
-      completeLesson(entry.lesson.id, finalXp);
+      const saved = completeLesson(entry.lesson.id, finalXp, {
+        perfect,
+        bestCombo,
+        yards: driveYards,
+      });
+      // Badges are recomputed from the saved stats, so an unlock can never
+      // depend on this render having the freshest state.
+      const fresh = newlyEarned(statsFrom(saved), saved.badges);
+      if (fresh.length) {
+        setUnlocked(fresh);
+        awardBadges(fresh.map((b) => b.id));
+      }
       // Fire-and-forget: no-op when signed out, and a failed sync must never
       // block the completion screen the learner just earned.
       void pushProgress();
@@ -583,21 +611,28 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       }
       const newCombo = combo + 1;
       setCombo(newCombo);
+      setBestCombo((b) => Math.max(b, newCombo));
+
+      // The play: yardage scaled to how much the drill actually asked for,
+      // plus a momentum bonus. This is what animates; XP is what persists.
+      const play = runPlay(exercise.type, isFirstAttempt, newCombo, currentIdx);
+      setDriveYards((y) => y + play.yards);
+      setBurst({ yards: play.yards, id: Date.now(), explosive: play.explosive });
+
       setFeedback({
         correct: true,
-        headline:
-          newCombo >= 3
-            ? `Completion! ${newCombo} plays in a row 🔥`
-            : "Completion!",
+        headline: play.heat ? `${play.call} · ${play.heat} 🔥` : play.call,
+        yards: play.yards,
         explain: exercise.explain,
       });
     } else {
       if (isFirstAttempt) setFirstTry((m) => ({ ...m, [currentIdx]: false }));
       setCombo(0);
       setHearts((h) => h - 1);
+      setBurst(null);
       setFeedback({
         correct: false,
-        headline: "Flag on the play",
+        headline: missCall(currentIdx),
         solution: result.solution,
         explain: exercise.explain,
       });
@@ -623,6 +658,10 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     setHearts(MAX_HEARTS);
     setCombo(0);
     setXp(0);
+    setDriveYards(0);
+    setBestCombo(0);
+    setBurst(null);
+    setUnlocked([]);
     setFirstTry({});
     setAttempted({});
     setFeedback(null);
@@ -669,12 +708,11 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             />
           </svg>
         </Link>
-        <div className="h-3 flex-1 overflow-hidden rounded-full bg-panel">
-          <div
-            className="h-full rounded-full bg-turf transition-all duration-500"
-            style={{ width: `${total > 0 ? (done / total) * 100 : 0}%` }}
-          />
-        </div>
+        <DriveField
+          pct={drivePct(done, total)}
+          heat={heatLabel(combo)}
+          burst={burst}
+        />
         <div className="flex items-center gap-1">
           {Array.from({ length: MAX_HEARTS }).map((_, i) => (
             <HeartIcon key={i} filled={i < hearts} />
@@ -1225,10 +1263,11 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                     {feedback.correct && (
                       <span className="ml-3 font-mono text-sm font-semibold">
                         +{firstTry[currentIdx] ? XP_PER_EXERCISE : XP_RETRY} XP
-                        <span className="ml-2 text-ink-muted">
-                          · {firstTry[currentIdx] ? XP_PER_EXERCISE : XP_RETRY}{" "}
-                          {gainNoun}
-                        </span>
+                        {feedback.yards !== undefined && (
+                          <span className="ml-2 text-ink-muted">
+                            · +{feedback.yards} {gainNoun}
+                          </span>
+                        )}
                       </span>
                     )}
                   </p>
@@ -1284,10 +1323,50 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
               </p>
             </div>
           </div>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <span className="border border-panel-border bg-panel/60 px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-ink-muted">
+              {driveYards} yards on the drive
+            </span>
+            {bestCombo >= 3 && (
+              <span className="border border-gold/50 bg-gold/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-gold">
+                🔥 {bestCombo} straight
+              </span>
+            )}
+          </div>
           {perfect && (
             <p className="font-mono text-xs uppercase tracking-widest text-gold">
               Perfect drive · +{PERFECT_BONUS} XP bonus
             </p>
+          )}
+
+          {/* Badge unlocks — the reason to come back tomorrow. */}
+          {unlocked.length > 0 && (
+            <div className="w-full max-w-sm">
+              <p className="label-broadcast text-gold">
+                {unlocked.length === 1 ? "badge unlocked" : "badges unlocked"}
+              </p>
+              <div className="mt-2 space-y-2">
+                {unlocked.map((badge, i) => (
+                  <div
+                    key={badge.id}
+                    className="animate-badge-drop flex items-center gap-3 border border-gold/50 bg-gold/10 p-3 text-left"
+                    style={{ animationDelay: `${i * 120}ms` }}
+                  >
+                    <span className="text-2xl leading-none" aria-hidden>
+                      {badge.glyph}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-display text-sm font-bold text-ink">
+                        {badge.name}
+                      </p>
+                      <p className="text-[12px] leading-snug text-ink-muted">
+                        {badge.requirement}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
           <div className="flex w-full max-w-sm flex-col gap-2">
             {nextId ? (

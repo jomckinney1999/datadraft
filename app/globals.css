@@ -372,3 +372,48 @@ body {
     text-wrap: balance;
   }
 }
+
+/* ── Gameplay animations ─────────────────────────────────────────
+   Reward moments for the lesson player. All of them are decorative, so each
+   one is disabled under prefers-reduced-motion rather than merely slowed —
+   a yardage chip flying up the screen is exactly the kind of thing that
+   setting exists to stop. */
+
+@keyframes yard-pop {
+  0%   { opacity: 0; transform: translate(-50%, 6px) scale(0.85); }
+  25%  { opacity: 1; transform: translate(-50%, -4px) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -26px) scale(1); }
+}
+
+@keyframes heat-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}
+
+@keyframes badge-drop {
+  0%   { opacity: 0; transform: translateY(-14px) scale(0.9); }
+  60%  { opacity: 1; transform: translateY(3px) scale(1.03); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes play-in {
+  0%   { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.animate-yard-pop   { animation: yard-pop 1.15s ease-out forwards; }
+.animate-heat-pulse { animation: heat-pulse 1.6s ease-in-out infinite; }
+.animate-badge-drop { animation: badge-drop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.animate-play-in    { animation: play-in 0.28s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-yard-pop,
+  .animate-heat-pulse,
+  .animate-badge-drop,
+  .animate-play-in {
+    animation: none;
+  }
+  /* The chip is only meaningful while it moves; without motion it would sit
+     on the field permanently, overlapping the yard line text. */
+  .animate-yard-pop { opacity: 0; }
+}

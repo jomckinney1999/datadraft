@@ -9,7 +9,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { COURSES, ALL_IN_ONE, type Course } from "@/lib/courses";
 import { liveLessons, ALL_MODULE } from "@/lib/curriculum";
-import { loadProgress, displayStreak, type Progress } from "@/lib/progress";
+import { loadProgress, displayStreak, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
+import TrophyCase from "@/components/trophy-case";
 import Coach from "@/components/coach";
 import CourseArt from "@/components/course-art";
 import ThemeToggle from "@/components/theme-toggle";
@@ -177,15 +178,7 @@ function CourseCard({
 }
 
 export default function LearnCatalogPage() {
-  const [progress, setProgress] = useState<Progress>({
-    xp: 0,
-    completedLessons: [],
-    streak: 0,
-    lastActiveDay: "",
-    playbookStyle: null,
-    username: null,
-    draftedTrack: null,
-  });
+  const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
 
   useEffect(() => {
     setProgress(loadProgress());
@@ -283,6 +276,8 @@ export default function LearnCatalogPage() {
           <CourseCard key={course.id} course={course} completed={completed} />
         ))}
       </div>
+
+      <TrophyCase />
 
       <p className="mt-12 text-center font-mono text-[10px] uppercase tracking-widest text-ink-muted">
         Lesson counts show the full syllabus · &ldquo;Live&rdquo; is what&apos;s

@@ -16,7 +16,7 @@ import {
   type Unit,
 } from "@/lib/curriculum";
 import { useModule } from "@/lib/use-module";
-import { loadProgress, displayStreak, type Progress } from "@/lib/progress";
+import { loadProgress, displayStreak, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
 import { getStyle } from "@/lib/playbook";
 import { getTrack, normalizeTrackId } from "@/lib/draft";
 import Coach from "@/components/coach";
@@ -67,15 +67,7 @@ function PlayIcon() {
 }
 
 export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
-  const [progress, setProgress] = useState<Progress>({
-    xp: 0,
-    completedLessons: [],
-    streak: 0,
-    lastActiveDay: "",
-    playbookStyle: null,
-    username: null,
-    draftedTrack: null,
-  });
+  const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
 
   const { setModule } = useModule();
 

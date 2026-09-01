@@ -11,11 +11,25 @@ export type Progress = {
   playbookStyle: PlaybookStyle | null;
   username: string | null;
   draftedTrack: string | null;
+  // ── game state (lib/achievements.ts reads these) ──
+  /** Badge ids already celebrated, so an unlock only pops once. */
+  badges: string[];
+  /** Longest run of correct answers, across every lesson. */
+  bestCombo: number;
+  /** Lessons cleared without a single miss. */
+  perfectLessons: number;
+  /** Career yards, the cosmetic counter the drive bar feeds. */
+  totalYards: number;
 };
 
 const KEY = "sqlsports.progress.v1";
 
-const EMPTY: Progress = {
+/**
+ * The zero state. Exported because components need it for their initial
+ * useState before localStorage is readable — three hand-written copies of
+ * this literal is three places to forget a field when Progress grows.
+ */
+export const EMPTY_PROGRESS: Progress = {
   xp: 0,
   completedLessons: [],
   streak: 0,
@@ -23,6 +37,10 @@ const EMPTY: Progress = {
   playbookStyle: null,
   username: null,
   draftedTrack: null,
+  badges: [],
+  bestCombo: 0,
+  perfectLessons: 0,
+  totalYards: 0,
 };
 
 const STYLE_IDS: PlaybookStyle[] = ["film-room", "gunslinger", "dual-threat"];
@@ -38,10 +56,10 @@ function yesterday(): string {
 }
 
 export function loadProgress(): Progress {
-  if (typeof window === "undefined") return EMPTY;
+  if (typeof window === "undefined") return EMPTY_PROGRESS;
   try {
     const raw = window.localStorage.getItem(KEY);
-    if (!raw) return EMPTY;
+    if (!raw) return EMPTY_PROGRESS;
     const parsed = JSON.parse(raw) as Partial<Progress>;
     return {
       xp: typeof parsed.xp === "number" ? parsed.xp : 0,
@@ -60,9 +78,18 @@ export function loadProgress(): Progress {
           : null,
       draftedTrack:
         typeof parsed.draftedTrack === "string" ? parsed.draftedTrack : null,
+      // Defaulted rather than required: progress saved before these existed
+      // must keep loading, not blow up or reset someone's XP.
+      badges: Array.isArray(parsed.badges)
+        ? parsed.badges.filter((x) => typeof x === "string")
+        : [],
+      bestCombo: typeof parsed.bestCombo === "number" ? parsed.bestCombo : 0,
+      perfectLessons:
+        typeof parsed.perfectLessons === "number" ? parsed.perfectLessons : 0,
+      totalYards: typeof parsed.totalYards === "number" ? parsed.totalYards : 0,
     };
   } catch {
-    return EMPTY;
+    return EMPTY_PROGRESS;
   }
 }
 
@@ -103,9 +130,26 @@ export function displayStreak(p: Progress): number {
   return 0;
 }
 
-export function completeLesson(lessonId: string, earnedXp: number): Progress {
+export type DriveResult = {
+  /** Cleared with no misses at all. */
+  perfect: boolean;
+  /** Longest run of correct answers in this lesson. */
+  bestCombo: number;
+  /** Yards gained on this drive. */
+  yards: number;
+};
+
+export function completeLesson(
+  lessonId: string,
+  earnedXp: number,
+  drive?: DriveResult,
+): Progress {
   const p = loadProgress();
   const t = today();
+  // A repeat of a lesson already cleared still counts for combo, yards and
+  // streak — replaying to beat your own drive is the point — but it must not
+  // inflate the perfect-drive count a second time for the same lesson.
+  const firstClear = !p.completedLessons.includes(lessonId);
 
   let streak: number;
   if (p.lastActiveDay === t) streak = Math.max(p.streak, 1);
@@ -122,7 +166,21 @@ export function completeLesson(lessonId: string, earnedXp: number): Progress {
     playbookStyle: p.playbookStyle,
     username: p.username,
     draftedTrack: p.draftedTrack,
+    badges: p.badges,
+    bestCombo: Math.max(p.bestCombo, drive?.bestCombo ?? 0),
+    perfectLessons:
+      p.perfectLessons + (drive?.perfect && firstClear ? 1 : 0),
+    totalYards: p.totalYards + (drive?.yards ?? 0),
   };
+  save(next);
+  return next;
+}
+
+/** Record badges as celebrated so their unlock only fires once. */
+export function awardBadges(ids: string[]): Progress {
+  const p = loadProgress();
+  if (ids.length === 0) return p;
+  const next = { ...p, badges: Array.from(new Set([...p.badges, ...ids])) };
   save(next);
   return next;
 }
