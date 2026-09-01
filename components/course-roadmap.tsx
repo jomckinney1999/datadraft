@@ -253,10 +253,11 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
       </section>
 
       {/* the field — unit by unit, scoped to the selected module */}
-      {visibleUnits.map((unit) => (
+      {visibleUnits.map((unit, i) => (
         <UnitSection
           key={unit.id}
           unit={unit}
+          displayNumber={i + 1}
           nodeState={nodeState}
           completedCount={
             unit.lessons.filter((l) => completed.has(l.id)).length
@@ -273,10 +274,13 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
 
 function UnitSection({
   unit,
+  displayNumber,
   nodeState,
   completedCount,
 }: {
   unit: Unit;
+  /** Position within the selected module, so non-contiguous unit ids still read 1,2,3. */
+  displayNumber: number;
   nodeState: (lesson: Lesson) => "completed" | "current" | "locked";
   completedCount: number;
 }) {
@@ -296,7 +300,7 @@ function UnitSection({
           <div>
             <p className="label-broadcast text-gold">{unit.drive}</p>
             <h2 className="mt-1 font-display text-xl font-bold text-ink">
-              Unit {unit.number} · {unit.title}
+              Unit {displayNumber} · {unit.title}
             </h2>
           </div>
           {comingSoon ? (

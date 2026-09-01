@@ -3147,6 +3147,611 @@ export const COURSE = {
       status: "coming-soon",
       lessons: [],
     },
+    {
+      id: "u13",
+      number: 13,
+      title: "Python — Logic, Functions & Shortcuts",
+      drive: "2nd Drive · Own 40",
+      description:
+        "Decisions, reusable functions, and the comprehensions that turn five lines into one. The half of Python that stops you writing the same block over and over.",
+      skills: ["if/elif", "def", "Comprehensions", "Dictionaries"],
+      status: "live",
+      lessons: [
+        {
+          id: "u13-l1",
+          title: "Making Decisions",
+          blurb: "if / elif / else — tier a performance.",
+          brief: {
+            goal: "Make your code choose between paths.",
+            setup:
+              "So far your code has run straight through. `if` lets it branch: test something, and only run that block when the test is true. `elif` adds another test, `else` catches everything left. Indentation is what says which lines belong to the branch — Python has no braces, and that is not optional styling.",
+          },
+          intro: {
+            title: "Indentation is the syntax",
+            text: "The colon opens a block and the indented lines below it are that block. Get the indentation wrong and Python either errors or, worse, runs the line every time instead of only when the test passes. Four spaces is the convention; be consistent and your editor will handle it.",
+            code: 'points = 24.6\n\nif points >= 20:\n    print("Boom game")\nelif points >= 12:\n    print("Solid")\nelse:\n    print("Bust")',
+          },
+          film: [
+            {
+              title: "Order matters in an if-chain",
+              text: "Python takes the FIRST branch that passes and skips the rest. So a chain has to run from most specific to least: test >= 20 before >= 12, or every 24-point game gets labelled 'Solid' and the boom branch never runs at all. It won't error — it'll just be quietly wrong.",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt:
+                "Your chain tests `if points >= 12` first, then `elif points >= 20`. What happens to a 24-point game?",
+              options: [
+                "It's labelled with the 20+ branch",
+                "It's labelled with the 12+ branch — the first passing test wins",
+                "Both branches run",
+                "Python raises an error",
+              ],
+              answer: 1,
+              explain:
+                "First match wins and the rest are skipped. Order your thresholds most-specific first, or the top tier becomes unreachable.",
+            },
+            {
+              type: "fill",
+              prompt: "Complete the branch keywords.",
+              parts: [
+                "if points >= 20:\n    print(\"Boom\")\n",
+                null,
+                " points >= 12:\n    print(\"Solid\")\n",
+                null,
+                ":\n    print(\"Bust\")",
+              ],
+              bank: ["elif", "else", "else if", "elsif"],
+              answer: ["elif", "else"],
+              explain:
+                "Python spells it `elif`, not `else if`. `else` takes no condition — it's whatever's left.",
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Print the tier for a 17.5-point game: Boom at 20+, Solid at 12+, otherwise Bust.",
+              starter:
+                'points = 17.5\n\n# print "Boom", "Solid" or "Bust"\n',
+              expected: 'print("Solid")',
+              hint: "if points >= 20: ... elif points >= 12: ... else: ... — and print inside each branch.",
+              explain:
+                "Solid. Bucketing a number into named tiers is one of the most common things you'll ever do to a column.",
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Loop the weeks and print how many were boom games (20 or more).",
+              starter:
+                "weeks = [24.6, 8.2, 31.0, 12.5, 19.9, 22.1]\n\n# count the games at 20 or above, then print the count\n",
+              expected: "print(3)",
+              hint: "Start a counter at 0, loop with `for w in weeks:`, add 1 inside an `if w >= 20:`, then print the counter.",
+              explain:
+                "Three. A loop, a condition and a counter — that trio answers a surprising share of real questions.",
+            },
+          ],
+        },
+        {
+          id: "u13-l2",
+          title: "Package It in a Function",
+          blurb: "def: write the logic once, use it everywhere.",
+          brief: {
+            goal: "Turn code you keep repeating into something you can call.",
+            setup:
+              "Copy-pasting the same tiering logic for four players is how bugs get in — you fix one copy and forget the others. A function names that logic once. `def` defines it, the indented body is what it does, and `return` hands a value back to whoever called it.",
+          },
+          intro: {
+            title: "return hands a value back; print just shows it",
+            text: "This is the distinction beginners lose most time to. `print` writes to the screen and gives the caller nothing. `return` gives the caller a value they can store, compare or pass on — and stops the function immediately. A function that prints instead of returning can't be built on.",
+            code: 'def tier(points):\n    if points >= 20:\n        return "Boom"\n    elif points >= 12:\n        return "Solid"\n    return "Bust"\n\nprint(tier(24.6))',
+          },
+          film: [
+            {
+              title: "Default arguments",
+              text: "Give a parameter a default and callers can skip it: `def tier(points, boom=20)` works as both tier(24.6) and tier(24.6, 25). It's how you make a function flexible without forcing every caller to spell out every option.",
+              code: 'def tier(points, boom=20):\n    return "Boom" if points >= boom else "Not boom"',
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt: "What's the difference between `return x` and `print(x)`?",
+              options: [
+                "Nothing",
+                "return hands the value back to the caller; print only displays it and returns None",
+                "print is faster",
+                "return only works with numbers",
+              ],
+              answer: 1,
+              explain:
+                "A function that prints can't be used in a calculation. `total = tier(p)` gets None if tier printed instead of returning.",
+            },
+            {
+              type: "fill",
+              prompt: "Define a function and hand back its answer.",
+              parts: [
+                null,
+                " per_game(total, games):\n    ",
+                null,
+                " total / games",
+              ],
+              bank: ["def", "return", "function", "print"],
+              answer: ["def", "return"],
+              explain:
+                "`def` names it, `return` gives the value back. Without return the function silently produces None.",
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Write a function `per_game(total, games)` that returns points per game, and print it for 128.4 points over 6 games, rounded to 1 decimal.",
+              starter:
+                "# define per_game, then print the rounded result for 128.4 over 6\n",
+              expected: "print(round(128.4 / 6, 1))",
+              hint: "def per_game(total, games): return total / games — then print(round(per_game(128.4, 6), 1)).",
+              explain:
+                "21.4. Now that logic has a name, and every place that needs it calls the same one.",
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Using a function, print the tier for each of these scores on its own line: 24.6, 11.0, 15.2. Boom at 20+, Solid at 12+, else Bust.",
+              starter:
+                "scores = [24.6, 11.0, 15.2]\n\n# define tier(points), then loop and print each one\n",
+              expected: 'print("Boom")\nprint("Bust")\nprint("Solid")',
+              hint: "Define tier(points) with if/elif/return, then `for s in scores: print(tier(s))`.",
+              explain:
+                "Boom, Bust, Solid. One function, three calls — and if the thresholds change you edit one place.",
+            },
+          ],
+        },
+        {
+          id: "u13-l3",
+          title: "Dictionaries",
+          blurb: "Look things up by name instead of by position.",
+          brief: {
+            goal: "Store and retrieve values by a key you choose.",
+            setup:
+              "A list finds things by position — scores[2] means 'the third one', which tells you nothing about who it is. A dictionary finds them by a key you pick, so ppg[\"Josh Allen\"] says exactly what it means. Keys are unique; assigning to an existing key overwrites it.",
+          },
+          intro: {
+            title: "Curly braces, key: value",
+            text: "Write it as {key: value, key: value}. Read a value with square brackets and the key. Asking for a key that isn't there raises a KeyError — use .get(key, default) when a miss is expected rather than exceptional.",
+            code: 'ppg = {"Josh Allen": 22.9, "Travis Kelce": 12.7}\n\nprint(ppg["Josh Allen"])\nprint(ppg.get("Nobody", 0))',
+          },
+          exercises: [
+            {
+              type: "mc",
+              prompt: "What does `ppg[\"Nobody\"]` do when that key doesn't exist?",
+              options: [
+                "Returns None",
+                "Returns 0",
+                "Raises a KeyError",
+                "Adds the key",
+              ],
+              answer: 2,
+              explain:
+                "It raises. `.get(\"Nobody\", 0)` is the version that returns a fallback instead of blowing up.",
+            },
+            {
+              type: "mc",
+              prompt: "Why use a dict instead of two parallel lists?",
+              options: [
+                "Dicts are always faster",
+                "The key travels with the value, so they can't drift out of sync",
+                "Lists can't hold numbers",
+                "Dicts are sorted",
+              ],
+              answer: 1,
+              drillSkip: true,
+              explain:
+                "Two lists rely on the positions lining up forever. Sort one and forget the other and every lookup is silently wrong.",
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Build a dict of player to points and print Kelce's value.",
+              starter:
+                '# keys: "Josh Allen" 22.9, "Travis Kelce" 12.7, "Puka Nacua" 13.7\n# print Travis Kelce\'s points\n',
+              expected: "print(12.7)",
+              hint: 'ppg = {"Josh Allen": 22.9, "Travis Kelce": 12.7, "Puka Nacua": 13.7} then print(ppg["Travis Kelce"]).',
+              explain:
+                "12.7 — and the lookup reads like the question you asked.",
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Loop the dict and print only the players averaging over 13, one name per line, in the order they appear.",
+              starter:
+                'ppg = {"Josh Allen": 22.9, "Travis Kelce": 12.7, "Puka Nacua": 13.7}\n\n# print each name scoring over 13\n',
+              expected: 'print("Josh Allen")\nprint("Puka Nacua")',
+              hint: "for name, pts in ppg.items(): then an if on pts before printing name.",
+              explain:
+                ".items() hands you the key and value together, which is what makes filtering a dict readable.",
+            },
+          ],
+        },
+        {
+          id: "u13-l4",
+          title: "Comprehensions",
+          blurb: "Five lines become one — without becoming unreadable.",
+          brief: {
+            goal: "Build a new list from an old one in a single expression.",
+            setup:
+              "Creating an empty list, looping, and appending is three lines of ceremony around one idea. A comprehension says the same thing in one: what to keep, where from, and optionally which ones. You'll read far more of these than you write, so recognising them matters as much as producing them.",
+          },
+          intro: {
+            title: "[expression for item in list if condition]",
+            text: "Read it left to right as a sentence: give me this, for each of those, where that's true. The `if` on the end is optional. If a comprehension ever gets long enough that you have to squint, that's the signal to write it back out as a loop.",
+            code: "weeks = [24.6, 8.2, 31.0, 12.5]\n\ndoubled = [w * 2 for w in weeks]\nbooms   = [w for w in weeks if w >= 20]",
+          },
+          film: [
+            {
+              title: "The loop it replaces",
+              text: "These two produce exactly the same list. The comprehension isn't faster to think about the first few times — it's faster to read once you're used to it, and it keeps the intent on one line instead of spread over four.",
+              code: "booms = []\nfor w in weeks:\n    if w >= 20:\n        booms.append(w)\n\n# same thing\nbooms = [w for w in weeks if w >= 20]",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt: "What does `[w for w in weeks if w >= 20]` produce?",
+              options: [
+                "True or False",
+                "A new list containing only the weeks at 20 or above",
+                "The count of big weeks",
+                "The original list, sorted",
+              ],
+              answer: 1,
+              explain:
+                "A new list. The original is untouched — comprehensions build, they don't modify in place.",
+            },
+            {
+              type: "fill",
+              prompt: "Keep only the boom weeks.",
+              parts: [
+                "booms = [w ",
+                null,
+                " w in weeks ",
+                null,
+                " w >= 20]",
+              ],
+              bank: ["for", "if", "in", "where"],
+              answer: ["for", "if"],
+              explain:
+                "`for` names the item, `if` filters. SQL's WHERE, wearing different clothes.",
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Using a comprehension, print the list of weeks at 20 or above.",
+              starter:
+                "weeks = [24.6, 8.2, 31.0, 12.5, 19.9, 22.1]\n\n# print the boom weeks as a list\n",
+              expected: "print([24.6, 31.0, 22.1])",
+              hint: "print([w for w in weeks if w >= 20])",
+              explain:
+                "[24.6, 31.0, 22.1]. One line, and the intent is right there on it.",
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Print the players' names in upper case as a list, using a comprehension.",
+              starter:
+                'names = ["Hurts", "Bijan", "Nacua"]\n\n# print the upper-cased names as a list\n',
+              expected: 'print(["HURTS", "BIJAN", "NACUA"])',
+              hint: "print([n.upper() for n in names])",
+              explain:
+                "The expression on the left can be any transformation — that's the half people forget while focusing on the filter.",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "u14",
+      number: 14,
+      title: "pandas for Real Data",
+      drive: "3rd Drive · Red Zone",
+      description:
+        "Filter, group, join and clean a DataFrame. Every SQL verb you already know, plus the mess that real files arrive in.",
+      skills: ["groupby", "merge", "Cleaning", "Missing data"],
+      status: "live",
+      lessons: [
+        {
+          id: "u14-l1",
+          title: "Filter and Sort a DataFrame",
+          blurb: "pandas' WHERE and ORDER BY.",
+          brief: {
+            goal: "Cut a DataFrame down to the rows you want, in the order you want.",
+            setup:
+              "You already know what filtering and sorting mean — you did both in SQL. pandas spells them differently: a boolean mask inside square brackets for WHERE, .sort_values() for ORDER BY. The thinking transfers completely; only the punctuation is new.",
+          },
+          intro: {
+            title: "A mask is a column of True and False",
+            text: 'df["points"] > 20 doesn\'t return rows — it returns a True/False value for every row. Putting that inside df[...] keeps only the Trues. Once you see the mask as its own thing, chained conditions stop looking like magic.',
+            code: 'import pandas as pd\n\ndf = pd.DataFrame({"player": ["Hurts", "Bijan"], "points": [24.6, 18.2]})\n\ndf[df["points"] > 20]\ndf.sort_values("points", ascending=False)',
+          },
+          film: [
+            {
+              title: "Combining conditions needs parentheses",
+              text: "pandas uses & and | rather than `and` / `or`, and they bind tighter than the comparisons — so every condition needs its own parentheses. Leave them out and you get a confusing error about ambiguous truth values, which is pandas' least helpful message.",
+              code: '# right\ndf[(df["points"] > 20) & (df["position"] == "WR")]\n\n# wrong — raises\ndf[df["points"] > 20 & df["position"] == "WR"]',
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt: 'What does `df["points"] > 20` return on its own?',
+              options: [
+                "The matching rows",
+                "A True/False value for every row — a mask",
+                "The count of matching rows",
+                "An error",
+              ],
+              answer: 1,
+              explain:
+                "It's a boolean Series. Wrapping it in df[...] is the step that actually selects rows.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "Why does `df[df.points > 20 & df.pos == \"WR\"]` fail?",
+              options: [
+                "pandas can't combine conditions",
+                "& binds tighter than the comparisons, so each condition needs its own parentheses",
+                "You must use `and`",
+                "The column names are wrong",
+              ],
+              answer: 1,
+              explain:
+                "Operator precedence, not logic. Parenthesise each side and it works.",
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Print the list of players who scored over 20, highest first.",
+              starter:
+                'import pandas as pd\n\ndf = pd.DataFrame({\n    "player": ["Hurts", "Bijan", "Nacua", "Kelce"],\n    "points": [24.6, 18.2, 31.0, 22.4],\n})\n\n# filter to > 20, sort descending, print the player column as a list\n',
+              expected:
+                'import pandas as pd\ndf = pd.DataFrame({"player": ["Hurts","Bijan","Nacua","Kelce"], "points": [24.6,18.2,31.0,22.4]})\nprint(df[df["points"] > 20].sort_values("points", ascending=False)["player"].tolist())',
+              hint: 'df[df["points"] > 20].sort_values("points", ascending=False)["player"].tolist() inside print().',
+              explain:
+                "['Nacua', 'Hurts', 'Kelce'] — filter, sort, select. Same three moves as SQL.",
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Print how many rows have points over 20, using the mask.",
+              starter:
+                'import pandas as pd\n\ndf = pd.DataFrame({\n    "player": ["Hurts", "Bijan", "Nacua", "Kelce"],\n    "points": [24.6, 18.2, 31.0, 22.4],\n})\n\n# print the number of rows over 20\n',
+              expected: "print(3)",
+              hint: 'len(df[df["points"] > 20]) — or sum the mask, since True counts as 1.',
+              explain:
+                "3. Summing a boolean mask is a neat trick: True is 1, so `mask.sum()` counts matches directly.",
+            },
+          ],
+        },
+        {
+          id: "u14-l2",
+          title: "groupby: One Row Per Group",
+          blurb: "pandas' GROUP BY, and .agg for several answers at once.",
+          brief: {
+            goal: "Collapse rows into one summary per group.",
+            setup:
+              "groupby splits rows into buckets by a column, then an aggregate collapses each bucket to one number — exactly GROUP BY. .agg() goes further and computes several aggregates in one pass, which is where pandas starts saving you real time over SQL.",
+          },
+          intro: {
+            title: "Split, apply, combine",
+            text: "groupby splits the frame into groups, applies the aggregate to each, and combines the answers back into one result. Chain a column name before the aggregate to summarise just that column; use .agg() with a dict to summarise several at once.",
+            code: 'df.groupby("position")["points"].mean()\n\ndf.groupby("position").agg(\n    total=("points", "sum"),\n    games=("points", "count"),\n)',
+          },
+          exercises: [
+            {
+              type: "mc",
+              prompt: "What does groupby give you before you aggregate?",
+              options: [
+                "The final answer",
+                "A grouped object — nothing is computed until you apply an aggregate",
+                "A sorted frame",
+                "An error",
+              ],
+              answer: 1,
+              drillSkip: true,
+              explain:
+                "It's lazy: the split is described, then the aggregate triggers the work. That's why printing a bare groupby shows an object rather than data.",
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Print total points per position, as a dict, using groupby.",
+              starter:
+                'import pandas as pd\n\ndf = pd.DataFrame({\n    "position": ["RB", "WR", "RB", "WR", "QB"],\n    "points": [18.2, 31.0, 12.4, 22.4, 28.9],\n})\n\n# print totals per position as a dict\n',
+              expected:
+                'import pandas as pd\ndf = pd.DataFrame({"position":["RB","WR","RB","WR","QB"], "points":[18.2,31.0,12.4,22.4,28.9]})\nprint(df.groupby("position")["points"].sum().round(1).to_dict())',
+              hint: 'df.groupby("position")["points"].sum().round(1).to_dict() — round to keep the floats tidy.',
+              explain:
+                "{'QB': 28.9, 'RB': 30.6, 'WR': 53.4}. .to_dict() is a clean way to print a grouped result without wrestling the Series repr.",
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Print the number of games each position appears in, as a dict.",
+              starter:
+                'import pandas as pd\n\ndf = pd.DataFrame({\n    "position": ["RB", "WR", "RB", "WR", "QB"],\n    "points": [18.2, 31.0, 12.4, 22.4, 28.9],\n})\n\n# print a dict of position -> row count\n',
+              expected:
+                'import pandas as pd\ndf = pd.DataFrame({"position":["RB","WR","RB","WR","QB"], "points":[18.2,31.0,12.4,22.4,28.9]})\nprint(df.groupby("position")["points"].count().to_dict())',
+              hint: 'Swap sum() for count(), then .to_dict().',
+              explain:
+                "{'QB': 1, 'RB': 2, 'WR': 2}. Same shape, different aggregate — count answers 'how many', sum answers 'how much'.",
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Print the highest single score in the frame, rounded to 1 decimal.",
+              starter:
+                'import pandas as pd\n\ndf = pd.DataFrame({\n    "position": ["RB", "WR", "RB", "WR", "QB"],\n    "points": [18.2, 31.0, 12.4, 22.4, 28.9],\n})\n\n# print the max points\n',
+              expected: "print(31.0)",
+              hint: 'round(df["points"].max(), 1) inside print().',
+              explain:
+                "31.0. Aggregates work on a whole column too, not just inside a groupby.",
+            },
+          ],
+        },
+        {
+          id: "u14-l3",
+          title: "merge: Joining DataFrames",
+          blurb: "pandas' JOIN, including the one that drops rows silently.",
+          brief: {
+            goal: "Combine two DataFrames on a shared column.",
+            setup:
+              "You met joins in SQL; merge is the same operation. The argument that matters most is `how`: 'inner' keeps only matches (and quietly drops the rest), 'left' keeps everything on the left and fills gaps with NaN. Choosing wrong is how row counts mysteriously change.",
+          },
+          intro: {
+            title: "how= decides who survives",
+            text: "pd.merge(left, right, on=\"player\", how=\"inner\") keeps only players present in both. how=\"left\" keeps every left-hand row regardless. If a merge changes your row count unexpectedly, `how` is the first thing to check — and the second is whether the right side had duplicate keys.",
+            code: 'pd.merge(roster, scores, on="player", how="left")',
+          },
+          film: [
+            {
+              title: "NaN is pandas' NULL",
+              text: "An unmatched left row gets NaN in the right-hand columns. NaN is a float, so an integer column becomes float the moment a merge introduces one — a small surprise that trips people up when their ids suddenly print as 12.0.",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt:
+                "You merge a 10-row roster with scores and get 8 rows. What most likely happened?",
+              options: [
+                "pandas sampled the data",
+                "It was an inner merge and 2 players had no matching score row",
+                "The frames were sorted differently",
+                "merge always drops rows",
+              ],
+              answer: 1,
+              explain:
+                "Inner keeps only matches. how='left' would have kept all ten with NaN where scores were missing.",
+            },
+            {
+              type: "mc",
+              prompt: "What fills the gaps on an unmatched left-join row?",
+              options: ["0", "NaN", "An empty string", "The previous value"],
+              answer: 1,
+              explain:
+                "NaN — pandas' missing marker. It is not zero, and treating it as zero is a real analytical error.",
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Left-merge the roster onto the scores and print the player column as a list, keeping everyone.",
+              starter:
+                'import pandas as pd\n\nroster = pd.DataFrame({"player": ["Hurts", "Bijan", "Kelce"]})\nscores = pd.DataFrame({"player": ["Hurts", "Kelce"], "points": [24.6, 22.4]})\n\n# left merge, then print the player column as a list\n',
+              expected:
+                'import pandas as pd\nroster = pd.DataFrame({"player": ["Hurts","Bijan","Kelce"]})\nscores = pd.DataFrame({"player": ["Hurts","Kelce"], "points": [24.6,22.4]})\nprint(pd.merge(roster, scores, on="player", how="left")["player"].tolist())',
+              hint: 'pd.merge(roster, scores, on="player", how="left") then ["player"].tolist().',
+              explain:
+                "All three survive — Bijan included, with NaN points. An inner merge would have lost him without a word.",
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Now print how many rows an INNER merge of the same two frames returns.",
+              starter:
+                'import pandas as pd\n\nroster = pd.DataFrame({"player": ["Hurts", "Bijan", "Kelce"]})\nscores = pd.DataFrame({"player": ["Hurts", "Kelce"], "points": [24.6, 22.4]})\n\n# print the row count of an inner merge\n',
+              expected: "print(2)",
+              hint: 'len(pd.merge(roster, scores, on="player", how="inner"))',
+              explain:
+                "2, not 3. Comparing the two counts is the fastest way to find out how much a join is quietly discarding.",
+            },
+          ],
+        },
+        {
+          id: "u14-l4",
+          title: "Cleaning What Arrives",
+          blurb: "Missing values, wrong types, and stray whitespace.",
+          brief: {
+            goal: "Make a messy frame safe to calculate on.",
+            setup:
+              "Real files arrive broken: numbers stored as text, names with trailing spaces, gaps where a value should be. None of it errors immediately — it just produces wrong answers later. Cleaning first is the difference between an analysis and a guess.",
+          },
+          intro: {
+            title: "Find it, then decide",
+            text: "df.isna().sum() counts missing values per column. Then you choose: drop those rows, or fill them. There's no universal right answer — dropping loses data, filling invents it. What matters is choosing deliberately and saying which you did.",
+            code: 'df.isna().sum()\n\ndf["points"].fillna(0)      # treat missing as zero\ndf.dropna(subset=["points"]) # or remove those rows',
+          },
+          film: [
+            {
+              title: "Zero and missing are different facts",
+              text: "A player who was injured has missing points. A player who played and did nothing has zero. Fill missing with 0 and you've merged those into one story — and every average you compute afterwards is dragged down by players who never took the field.",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt: "Why is filling missing points with 0 sometimes wrong?",
+              options: [
+                "0 isn't a valid number",
+                "It turns 'didn't play' into 'played and scored nothing', which drags every average down",
+                "pandas forbids it",
+                "It's always correct",
+              ],
+              answer: 1,
+              explain:
+                "The fill is a claim about reality. Make it only when a missing value genuinely means zero.",
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt: "Print how many missing values are in the points column.",
+              starter:
+                'import pandas as pd\n\ndf = pd.DataFrame({\n    "player": ["Hurts", "Bijan", "Kelce", "Nacua"],\n    "points": [24.6, None, 22.4, None],\n})\n\n# print the count of missing points\n',
+              expected: "print(2)",
+              hint: 'df["points"].isna().sum() — wrap it in int() or print it directly.',
+              explain:
+                "2. Counting the gaps before you do anything else is the habit that prevents silent wrongness.",
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "Drop the rows with missing points and print the remaining players as a list.",
+              starter:
+                'import pandas as pd\n\ndf = pd.DataFrame({\n    "player": ["Hurts", "Bijan", "Kelce", "Nacua"],\n    "points": [24.6, None, 22.4, None],\n})\n\n# drop rows missing points, then print the player list\n',
+              expected: 'print(["Hurts", "Kelce"])',
+              hint: 'df.dropna(subset=["points"])["player"].tolist()',
+              explain:
+                "['Hurts', 'Kelce']. Dropping is honest here — you can't average a score that was never recorded.",
+            },
+            {
+              type: "code",
+              lang: "python",
+              prompt:
+                "The points arrived as text with stray spaces. Convert them to numbers and print the total, rounded to 1 decimal.",
+              starter:
+                'import pandas as pd\n\ndf = pd.DataFrame({"points": [" 24.6", "18.2 ", " 31.0"]})\n\n# strip the whitespace, convert to float, print the rounded total\n',
+              expected: "print(73.8)",
+              hint: 'df["points"].str.strip().astype(float).sum() — then round it.',
+              explain:
+                "73.8. .str.strip() then .astype(float) is the two-step that rescues most badly-typed columns.",
+            },
+          ],
+        },
+      ],
+    },
   ] as Unit[],
 };
 
@@ -3177,7 +3782,11 @@ export const MODULES: Module[] = [
     name: "All-in-one pathway",
     blurb:
       "Every skill in order, the way a career-changer should take it: SQL, Python, statistics, charts, Git, R.",
-    unitIds: ["u1", "u2", "u3", "u4", "u5", "u6", "u7", "u8", "u9", "u10", "u11"],
+    unitIds: [
+      "u1", "u2", "u3", "u4", "u5", "u6",
+      "u7", "u13", "u14",
+      "u8", "u9", "u10", "u11",
+    ],
   },
   {
     id: "sql",
@@ -3189,7 +3798,7 @@ export const MODULES: Module[] = [
     id: "python",
     name: "Python & pandas",
     blurb: "Variables, loops, and DataFrames — with code that really runs.",
-    unitIds: ["u7"],
+    unitIds: ["u7", "u13", "u14"],
   },
   {
     id: "stats",
@@ -3231,7 +3840,13 @@ export function getModule(id: string | null | undefined): Module {
 /** Units belonging to a module, in course order (includes coming-soon ones). */
 export function moduleUnits(moduleId: string): Unit[] {
   const mod = getModule(moduleId);
-  return (COURSE.units as Unit[]).filter((u) => mod.unitIds.includes(u.id));
+  const byId = new Map((COURSE.units as Unit[]).map((u) => [u.id, u]));
+  // Order by the module's unitIds, NOT by position in COURSE.units. A course
+  // whose units were added later (Python's u13/u14) would otherwise appear at
+  // the very end of the all-in-one pathway instead of next to its first unit.
+  return mod.unitIds
+    .map((id) => byId.get(id))
+    .filter((u): u is Unit => Boolean(u));
 }
 
 export function liveLessons(
