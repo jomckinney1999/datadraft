@@ -158,7 +158,7 @@ function CourseCard({
     </>
   );
 
-  const shell = `group flex flex-col border border-panel-border bg-panel transition-colors duration-150 ${
+  const shell = `group lift flex flex-col border border-panel-border bg-panel ${
     isLive ? accentBorder : "opacity-75"
   }`;
 
@@ -272,8 +272,14 @@ export default function LearnCatalogPage() {
       </section>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {COURSES.map((course) => (
-          <CourseCard key={course.id} course={course} completed={completed} />
+        {COURSES.map((course, i) => (
+          <div
+            key={course.id}
+            className="animate-fade-up"
+            style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}
+          >
+            <CourseCard course={course} completed={completed} />
+          </div>
         ))}
       </div>
 

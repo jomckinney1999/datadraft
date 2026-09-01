@@ -61,13 +61,14 @@ export default function TrophyCase() {
       </div>
 
       <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        {BADGES.map((badge) => {
+        {BADGES.map((badge, i) => {
           const { have, need } = badge.progress(stats);
           const done = have >= need;
           return (
             <div
               key={badge.id}
-              className={`flex items-start gap-3 border p-3 transition-colors ${
+              style={{ animationDelay: `${Math.min(i, 9) * 40}ms` }}
+              className={`lift animate-fade-up flex items-start gap-3 border p-3 ${
                 done
                   ? `bg-panel/60 ${TIER_CLASS[badge.tier]}`
                   : "border-panel-border bg-panel/20"

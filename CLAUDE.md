@@ -75,6 +75,7 @@ Read [docs/PLAN.md](docs/PLAN.md) first. It's the source of truth for the produc
 ## Curriculum and launch plan
 
 - [docs/CURRICULUM.md](docs/CURRICULUM.md) is the full 12-week syllabus (source of truth behind the landing page's 4-phase `ROADMAP` summary and the Capstone Project Briefs).
+- [docs/DATA-PIPELINE.md](docs/DATA-PIPELINE.md) is the ingestion plan — read it before touching anything that fetches or refreshes data. Its first rule is the one that matters: **lesson data is pinned and refreshes manually; everything else is live.** An automated refresh pointed at the lesson tables would silently break answer keys and lesson prose every week (it already did once, breaking 12 explanations and 4 keys in a single swap). It also records two known defects in the existing cron: it targets nflverse's dead `player_stats` release tag, and it fails silently.
 - [docs/LAUNCH-PLAN.md](docs/LAUNCH-PLAN.md) is the full build-out plan for everything beyond the marketing site — accounts, payments, a real stats data pipeline, full curriculum production (incl. a server-side autograder and video lessons), fantasy-platform sync (Sleeper/ESPN/Yahoo), a fully automated Weekly Challenge/Leaderboard, Career Track ops, testing/monitoring, growth, and eventual multi-sport/language expansion. It's organized as dependency-ordered phases (no calendar dates by design) — check it before assuming a feature is in or out of scope, and update it if a phase's approach changes rather than letting it go stale.
 
 ## Deployment

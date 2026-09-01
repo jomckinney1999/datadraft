@@ -390,28 +390,119 @@ body {
   50%      { opacity: 0.55; }
 }
 
+/* Entrance animations move, they do not fade.
+ *
+ * An entrance that starts at `opacity: 0` with `fill-mode: both` is a bet that
+ * the animation will definitely run. It does not always: a tab rendered while
+ * hidden freezes its animations at the 0% keyframe, and anything relying on
+ * opacity to arrive is then invisible content rather than un-animated content.
+ * Transform-only entrances degrade to "already in place", which is the failure
+ * mode you want. Only genuinely transient overlays (the yardage chip, the
+ * sheen) animate opacity, because their whole job is to disappear. */
 @keyframes badge-drop {
-  0%   { opacity: 0; transform: translateY(-14px) scale(0.9); }
-  60%  { opacity: 1; transform: translateY(3px) scale(1.03); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+  0%   { transform: translateY(-14px) scale(0.9); }
+  60%  { transform: translateY(3px) scale(1.03); }
+  100% { transform: translateY(0) scale(1); }
 }
 
 @keyframes play-in {
-  0%   { opacity: 0; transform: translateY(8px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0%   { transform: translateY(8px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes fade-up {
+  0%   { transform: translateY(12px); }
+  100% { transform: translateY(0); }
+}
+
+/* A miss should be felt, not just read. Short and lateral so it reads as a
+   hit rather than as the page breaking. */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15%      { transform: translateX(-5px); }
+  30%      { transform: translateX(4px); }
+  45%      { transform: translateX(-3px); }
+  60%      { transform: translateX(2px); }
+  75%      { transform: translateX(-1px); }
+}
+
+@keyframes heart-break {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.35); }
+  100% { transform: scale(1); opacity: 0.35; }
+}
+
+/* The completion screen's headline moment. */
+@keyframes trophy-in {
+  0%   { transform: scale(0.8) rotate(-6deg); }
+  55%  { transform: scale(1.08) rotate(2deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+@keyframes sheen {
+  0%   { background-position: -180% 0; }
+  100% { background-position: 180% 0; }
 }
 
 .animate-yard-pop   { animation: yard-pop 1.15s ease-out forwards; }
 .animate-heat-pulse { animation: heat-pulse 1.6s ease-in-out infinite; }
 .animate-badge-drop { animation: badge-drop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
 .animate-play-in    { animation: play-in 0.28s ease-out both; }
+.animate-fade-up    { animation: fade-up 0.34s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+.animate-shake      { animation: shake 0.42s ease-in-out both; }
+.animate-heart-break{ animation: heart-break 0.5s ease-out both; }
+.animate-trophy-in  { animation: trophy-in 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.3) both; }
+
+/* Tactile press feedback. Applied to the primary action buttons so a click
+   registers physically even before the next screen renders. */
+.press {
+  transition:
+    transform 0.12s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+.press:active { transform: scale(0.97); }
+
+/* Cards lift toward the reader on hover. Transform only — animating box-shadow
+   or height forces layout on every frame. */
+.lift {
+  transition:
+    transform 0.22s cubic-bezier(0.2, 0.7, 0.3, 1),
+    border-color 0.22s ease,
+    background-color 0.22s ease;
+}
+@media (hover: hover) {
+  .lift:hover { transform: translateY(-3px); }
+}
+
+/* Sweep of light across a just-earned badge. Decorative only. */
+.sheen {
+  background-image: linear-gradient(
+    100deg,
+    transparent 35%,
+    rgb(var(--c-gold) / 0.22) 50%,
+    transparent 65%
+  );
+  background-size: 180% 100%;
+  animation: sheen 1.4s ease-out 0.3s both;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .animate-yard-pop,
   .animate-heat-pulse,
   .animate-badge-drop,
-  .animate-play-in {
+  .animate-play-in,
+  .animate-fade-up,
+  .animate-shake,
+  .animate-heart-break,
+  .animate-trophy-in,
+  .sheen {
     animation: none;
+  }
+  .press:active,
+  .lift:hover {
+    transform: none;
   }
   /* The chip is only meaningful while it moves; without motion it would sit
      on the field permanently, overlapping the yard line text. */

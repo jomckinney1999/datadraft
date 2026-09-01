@@ -60,6 +60,7 @@ import { SHORT_CREDIT } from "@/lib/data-source";
 import DriveField from "@/components/drive-field";
 import { drivePct, heatLabel, missCall, runPlay } from "@/lib/gameplay";
 import { newlyEarned, statsFrom, type Badge } from "@/lib/achievements";
+import { useCountUp } from "@/lib/use-count-up";
 
 type Phase =
   | "loading"
@@ -205,6 +206,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   } | null>(null);
   /** Badges unlocked by this lesson, celebrated on the completion screen. */
   const [unlocked, setUnlocked] = useState<Badge[]>([]);
+  /** Bumped on every miss so the hearts row re-runs its shake. */
+  const [hitId, setHitId] = useState(0);
 
   /**
    * Gunslingers want to type, not tick boxes. They always skip pure-recall
@@ -374,6 +377,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     Object.values(firstTry).every(Boolean) &&
     hearts === MAX_HEARTS;
   const finalXp = xp + (perfect ? PERFECT_BONUS : 0);
+  // Ticks up on the completion screen; stays 0 elsewhere so the animation
+  // starts from nothing the moment that screen mounts.
+  const shownXp = useCountUp(phase === "complete" ? finalXp : 0);
 
   // persist once on completion
   useEffect(() => {
@@ -630,6 +636,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       setCombo(0);
       setHearts((h) => h - 1);
       setBurst(null);
+      setHitId((v) => v + 1);
       setFeedback({
         correct: false,
         headline: missCall(currentIdx),
@@ -713,9 +720,17 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
           heat={heatLabel(combo)}
           burst={burst}
         />
-        <div className="flex items-center gap-1">
+        <div
+          key={hitId}
+          className={`flex items-center gap-1 ${hitId > 0 ? "animate-shake" : ""}`}
+        >
           {Array.from({ length: MAX_HEARTS }).map((_, i) => (
-            <HeartIcon key={i} filled={i < hearts} />
+            <span
+              key={i}
+              className={i === hearts && hitId > 0 ? "animate-heart-break" : ""}
+            >
+              <HeartIcon filled={i < hearts} />
+            </span>
           ))}
         </div>
       </div>
@@ -731,7 +746,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       </div>
 
       {phase === "brief" && (
-        <div className="flex flex-1 flex-col justify-center gap-5">
+        <div className="animate-fade-up flex flex-1 flex-col justify-center gap-5">
           <div className="flex items-start gap-4">
             <div className="hidden shrink-0 sm:block">
               <Coach mood="happy" size={104} />
@@ -823,7 +838,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             onClick={() =>
               setPhase(style === "gunslinger" ? "exercise" : "intro")
             }
-            className="w-full border border-turf bg-turf/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25"
+            className="press w-full border border-turf bg-turf/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf hover:bg-turf/25"
           >
             {style === "gunslinger" ? "Snap the ball" : "Walk me through it"}
           </button>
@@ -831,7 +846,10 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       )}
 
       {phase === "intro" && (
-        <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
+        <div
+          key={introStep}
+          className="animate-fade-up flex flex-1 flex-col items-center justify-center gap-6 text-center"
+        >
           <Coach mood="happy" size={140} />
           <TheoryCardView card={introCards[introStep]} />
           {introCards.length > 1 && (
@@ -867,7 +885,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       )}
 
       {phase === "exercise" && exercise && (
-        <div className="flex flex-1 flex-col">
+        <div key={currentIdx} className="animate-play-in flex flex-1 flex-col">
           {/* gunslinger's on-demand chalkboard */}
           {style === "gunslinger" && (
             <div className="mb-3">
@@ -1240,14 +1258,14 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                         running ||
                         checking))
                   }
-                  className="shrink-0 border border-turf bg-turf/15 px-8 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25 disabled:cursor-not-allowed disabled:border-panel-border disabled:bg-panel disabled:text-ink-muted"
+                  className="press shrink-0 border border-turf bg-turf/15 px-8 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf hover:bg-turf/25 disabled:cursor-not-allowed disabled:border-panel-border disabled:bg-panel disabled:text-ink-muted"
                 >
                   {checking ? "Checking…" : "Check"}
                 </button>
               </div>
             ) : (
               <div
-                className={`border p-4 ${
+                className={`animate-fade-up border p-4 ${
                   feedback.correct
                     ? "border-turf/60 bg-turf/10"
                     : "border-gold/60 bg-gold/10"
@@ -1274,7 +1292,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                   <button
                     type="button"
                     onClick={handleContinue}
-                    className={`shrink-0 border px-6 py-2.5 font-mono text-sm font-semibold uppercase tracking-widest transition-colors ${
+                    className={`press shrink-0 border px-6 py-2.5 font-mono text-sm font-semibold uppercase tracking-widest ${
                       feedback.correct
                         ? "border-turf bg-turf/15 text-turf hover:bg-turf/25"
                         : "border-gold bg-gold/15 text-gold hover:bg-gold/25"
@@ -1303,8 +1321,10 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       )}
 
       {phase === "complete" && (
-        <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
-          <Coach mood="cheer" size={150} />
+        <div className="animate-fade-up flex flex-1 flex-col items-center justify-center gap-6 text-center">
+          <div className="animate-trophy-in">
+            <Coach mood="cheer" size={150} />
+          </div>
           <div>
             <p className="label-broadcast text-turf">drive complete</p>
             <h1 className="mt-2 font-display text-3xl font-bold text-ink">
@@ -1314,7 +1334,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
           <div className="grid w-full max-w-sm grid-cols-2 gap-3">
             <div className="border border-gold/40 bg-gold/5 p-4">
               <p className="label-broadcast">xp earned</p>
-              <p className="stat-number mt-1 text-2xl">{finalXp}</p>
+              <p className="stat-number mt-1 text-2xl">{shownXp}</p>
             </div>
             <div className="border border-turf/40 bg-turf/5 p-4">
               <p className="label-broadcast">first-try accuracy</p>
@@ -1349,7 +1369,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 {unlocked.map((badge, i) => (
                   <div
                     key={badge.id}
-                    className="animate-badge-drop flex items-center gap-3 border border-gold/50 bg-gold/10 p-3 text-left"
+                    className="animate-badge-drop sheen flex items-center gap-3 border border-gold/50 bg-gold/10 p-3 text-left"
                     style={{ animationDelay: `${i * 120}ms` }}
                   >
                     <span className="text-2xl leading-none" aria-hidden>

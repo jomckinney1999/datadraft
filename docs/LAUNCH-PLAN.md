@@ -69,6 +69,8 @@ I can write code, lesson copy, docs, marketing copy, and data pipeline logic. I 
 
 ## Phase 3 — Real Data Pipeline
 
+> **See [DATA-PIPELINE.md](DATA-PIPELINE.md) for the detailed plan** — tiering (pinned lesson data vs live surfaces), sources and licensing, cadence, validation gates, and a dependency-ordered phase list. This section is the summary; that document is the plan of record.
+
 **Goal:** replace the sandbox's synthetic, generated dataset with a real, automatically refreshing NFL stats pipeline — this single pipeline becomes the source of truth for the sandbox, the curriculum labs, and the Weekly Challenge.
 **Depends on:** Phase 0 (vendor decision).
 
