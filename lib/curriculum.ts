@@ -68,11 +68,43 @@ export type CodeExercise = {
   explain: string;
 };
 
+/**
+ * Live Excel formula exercise, graded on the value it produces.
+ *
+ * The learner writes a real formula against the real workbook
+ * (lib/excel-data.ts) and it is evaluated by lib/excel-engine.ts — the same
+ * "run it for real" contract the SQL and Python courses use, rather than
+ * string-matching formula text (which would fail `=SUM(E2:E17)` against
+ * `=SUM(E2:E17) ` and reject every equivalent-but-different correct answer).
+ *
+ * `sheet` picks which tab the grid shows and which sheet bare references
+ * resolve against; it defaults to Roster. Cross-sheet references
+ * (`Import!A2`) work regardless and are taught on purpose.
+ */
+export type FormulaExercise = {
+  type: "formula";
+  prompt: string;
+  starter: string;
+  /** Reference formula, evaluated against the same grid to get the target value. */
+  expected: string;
+  sheet?: string;
+  /**
+   * Set when the answer is a literal that legitimately references no cell
+   * (there is only one such drill: typing a value into a cell). Everywhere
+   * else a hardcoded number is rejected even when it equals the right answer,
+   * because reading it off the screen isn't the skill being taught.
+   */
+  allowLiteral?: boolean;
+  hint: string;
+  explain: string;
+};
+
 export type Exercise =
   | MCExercise
   | FillExercise
   | QueryExercise
-  | CodeExercise;
+  | CodeExercise
+  | FormulaExercise;
 
 export type TheoryCard = { title: string; text: string; code?: string };
 
@@ -91,6 +123,8 @@ export type LessonBrief = {
   goal: string;
   setup: string;
   previewSql?: string;
+  /** Excel units: which workbook tab to show in the brief. Same job as previewSql. */
+  previewSheet?: string;
   previewCaption?: string;
 };
 
@@ -3752,6 +3786,1299 @@ export const COURSE = {
         },
       ],
     },
+    {
+      id: "u15",
+      number: 15,
+      title: "Excel: The Grid and Your First Formulas",
+      drive: "1st Drive · Own 25",
+      description:
+        "Cell addresses, ranges, and the handful of formulas that answer most questions anyone will ask you about a spreadsheet.",
+      skills: ["A1 notation", "SUM", "AVERAGE", "MAX / MIN", "ROUND"],
+      status: "live",
+      lessons: [
+        {
+          id: "u15-l1",
+          title: "The Grid: Cells, Rows and Ranges",
+          blurb: "Every cell has an address. Formulas speak in addresses.",
+          brief: {
+            goal: "Point at any cell or block of cells by name, the way a formula does.",
+            setup:
+              "A spreadsheet is a grid. Columns get letters across the top, rows get numbers down the side, and a cell's address is just the two stuck together: column first, then row. E2 means column E, row 2. A block of cells is written with a colon — E2:E17 means \"E2 all the way down to E17\". That is the entire address system, and every formula in this course is built on it.",
+            previewSheet: "Roster",
+            previewCaption:
+              "The league roster. Row 1 holds the headers, so the actual data starts at row 2.",
+          },
+          intro: {
+            title: "Column letter, then row number",
+            text: "E2 is not \"row E, column 2\" — it is column E, row 2. Excel always writes the letter first. The colon in E2:E17 means \"through\", so it covers all 16 player rows without you listing them. Get comfortable reading addresses now and every formula later becomes a sentence you can already parse.",
+            code: "E2        one cell: column E, row 2\nE2:E17    a range: E2 down through E17\nA2:E17    a block: columns A–E, rows 2–17\nImport!A2 a cell on another sheet",
+          },
+          film: [
+            {
+              title: "Why the data starts at row 2",
+              text: "Row 1 holds the headers — Player, Team, Pos, and so on. If you include row 1 in a numeric range you are asking Excel to average the word \"Points\", which it will quietly skip rather than warn you about. Almost every off-by-one bug in a spreadsheet traces back to a range that started one row too high.",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt: "Which cell does `E2` refer to?",
+              options: [
+                "Row E, column 2",
+                "Column E, row 2",
+                "The 2nd cell of the sheet",
+                "Whatever cell is selected",
+              ],
+              answer: 1,
+              explain:
+                "Letter first, number second. Column E, row 2 — Josh Allen's points.",
+              drillSkip: true,
+            },
+            {
+              type: "mc",
+              prompt: "What does the range `E2:E17` cover?",
+              options: [
+                "Just E2 and E17",
+                "E2 through E17 — every cell in between as well",
+                "Columns E through 17",
+                "The whole E column",
+              ],
+              answer: 1,
+              explain:
+                "The colon means \"through\". E2:E17 is all 16 player rows of the Points column.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Return the value in cell E2 — the top row's fantasy points. Just point at the cell.",
+              starter: "=",
+              expected: "=E2",
+              hint: "A formula can be nothing but a cell address: =E2",
+              explain:
+                "402.5. A bare reference is the simplest formula there is, and it is what every bigger formula is made of.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Return the player name in row 5 of the Player column.",
+              starter: "=",
+              expected: "=A5",
+              hint: "Names live in column A. Row 5 is the fourth player, because row 1 is headers.",
+              explain:
+                "Derrick Henry. Row 1 is the header row, so row 5 is the 4th player — the off-by-one that catches everyone once.",
+            },
+            {
+              type: "fill",
+              prompt:
+                "Complete the range covering every player's Games played (column D, rows 2 through 17).",
+              parts: ["=SUM(", null, ")"],
+              bank: ["D2:D17", "D1:D17", "D2-D17", "2D:17D"],
+              answer: ["D2:D17"],
+              explain:
+                "D2:D17 — start below the header, stop at the last player.",
+            },
+          ],
+        },
+        {
+          id: "u15-l2",
+          title: "SUM, AVERAGE and COUNT",
+          blurb: "The three formulas that answer most spreadsheet questions.",
+          brief: {
+            goal: "Total a column, average it, and count how many rows it holds.",
+            setup:
+              "A formula always starts with an equals sign. That is how Excel knows you are asking a question rather than typing text. After the equals sign comes a function name and a range in brackets: =SUM(E2:E17) means \"add up everything from E2 to E17\". SUM, AVERAGE and COUNT are the three you will reach for constantly.",
+            previewSheet: "Roster",
+          },
+          intro: {
+            title: "=FUNCTION(range)",
+            text: "Every function follows the same shape: an equals sign, a name, and brackets holding what it should work on. Change the name and you change the question — the range stays exactly the same. Once you can write one of these you can write all of them.",
+            code: "=SUM(E2:E17)       add every value\n=AVERAGE(E2:E17)   the mean\n=COUNT(E2:E17)     how many numbers\n=COUNTA(A2:A17)    how many non-empty cells",
+          },
+          film: [
+            {
+              title: "COUNT and COUNTA are not the same",
+              text: "COUNT only counts numbers. COUNTA counts anything that is not empty, text included. On a column of names COUNT returns 0 and COUNTA returns the real answer — which is why a roster count that reads zero is usually the wrong function rather than an empty sheet.",
+              code: "=COUNT(A2:A17)    0  — names are not numbers\n=COUNTA(A2:A17)  16  — counts the names",
+            },
+          ],
+          exercises: [
+            {
+              type: "formula",
+              prompt: "Add up every player's fantasy points for the season.",
+              starter: "=",
+              expected: "=SUM(E2:E17)",
+              hint: "=SUM( range )",
+              explain:
+                "3759.4 points across the league. SUM is the workhorse of every spreadsheet ever built.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Average fantasy points across the roster, rounded to 1 decimal place.",
+              starter: "=",
+              expected: "=ROUND(AVERAGE(E2:E17),1)",
+              hint: "Wrap the average in ROUND: =ROUND(AVERAGE(...),1)",
+              explain:
+                "235. Functions nest — the inner one runs first, and its answer becomes the outer one's input.",
+            },
+            {
+              type: "formula",
+              prompt: "Count how many players are on the roster.",
+              starter: "=",
+              expected: "=COUNTA(A2:A17)",
+              hint: "Names are text, so COUNT won't see them. Use COUNTA.",
+              explain:
+                "16 players. COUNTA counts anything non-empty, which is what you need on a text column.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "You run `=COUNT(A2:A17)` on the Player column and get 0. Why?",
+              options: [
+                "The range is wrong",
+                "COUNT only counts numbers, and names are text",
+                "The sheet is empty",
+                "COUNT needs a criteria argument",
+              ],
+              answer: 1,
+              explain:
+                "COUNT is numbers-only. COUNTA is the one that counts text.",
+            },
+            {
+              type: "fill",
+              prompt: "Total the Salary column (column F, rows 2–17).",
+              parts: ["=", null, "(", null, ")"],
+              bank: ["SUM", "COUNT", "F2:F17", "F1:F17"],
+              answer: ["SUM", "F2:F17"],
+              explain:
+                "=SUM(F2:F17). Same shape as every other function you will write.",
+            },
+          ],
+        },
+        {
+          id: "u15-l3",
+          title: "MAX, MIN and the Spread",
+          blurb: "Find the best, the worst, and the gap between them.",
+          brief: {
+            goal: "Pull the highest and lowest values out of a column, and measure the distance between them.",
+            setup:
+              "MAX and MIN do exactly what they sound like. The catch — and it is the one that sends people to INDEX/MATCH later — is that they return the number, not the player attached to it. MAX tells you the top score was 402.5; it will not tell you who scored it.",
+            previewSheet: "Roster",
+          },
+          intro: {
+            title: "The value, not the name",
+            text: "MAX(E2:E17) reads down the Points column and hands back the single biggest number. It has no idea a Player column exists. Getting from \"the top score\" to \"who scored it\" is a lookup problem, and you will solve it properly in the Lookups unit.",
+            code: "=MAX(E2:E17)      the highest score\n=MIN(E2:E17)      the lowest\n=LARGE(E2:E17,3)  the 3rd highest",
+          },
+          exercises: [
+            {
+              type: "formula",
+              prompt: "What was the highest fantasy-point total on the roster?",
+              starter: "=",
+              expected: "=MAX(E2:E17)",
+              hint: "=MAX( range )",
+              explain: "402.5 — the best season on the sheet.",
+            },
+            {
+              type: "formula",
+              prompt: "And the lowest?",
+              starter: "=",
+              expected: "=MIN(E2:E17)",
+              hint: "Same shape as MAX.",
+              explain: "119.4. Every roster has one.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "How far apart are the best and worst seasons? Subtract the minimum from the maximum, rounded to 1 decimal.",
+              starter: "=",
+              expected: "=ROUND(MAX(E2:E17)-MIN(E2:E17),1)",
+              hint: "You can do arithmetic between two functions: MAX(...) - MIN(...)",
+              explain:
+                "283.1 points of spread. Formulas are expressions — you can subtract, add and divide them like any other value.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Use LARGE to get the 3rd-highest points total on the roster.",
+              starter: "=",
+              expected: "=LARGE(E2:E17,3)",
+              hint: "=LARGE(range, n) — n is which place you want.",
+              explain:
+                "318.7. LARGE(range,1) is the same as MAX; the second argument is what makes it useful.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "`=MAX(E2:E17)` returns 402.5. How do you get the player's *name*?",
+              options: [
+                "MAX has a second argument for that",
+                "You can't — MAX only ever returns a value, so you need a lookup",
+                "Sort the sheet first",
+                "Use MAXA instead",
+              ],
+              answer: 1,
+              explain:
+                "MAX returns a number and nothing else. Turning a value back into a row is exactly what INDEX/MATCH is for — coming up in the Lookups unit.",
+            },
+          ],
+        },
+        {
+          id: "u15-l4",
+          title: "Rates: Division and Per-Game Math",
+          blurb: "Totals lie when players play different numbers of games.",
+          brief: {
+            goal: "Turn totals into rates so players who missed time can be compared fairly.",
+            setup:
+              "Games played is not the same for every player on this roster — some played 17, one played 12. That makes total points a misleading way to rank them, because the biggest total might just belong to whoever stayed healthy. Dividing by games gives points per game, which compares like with like. This is the single most common analytical move in sports data.",
+            previewSheet: "Roster",
+          },
+          intro: {
+            title: "Divide, then round",
+            text: "Division uses a plain slash. Raw division gives you a long decimal tail nobody wants to read, so wrap it in ROUND with the number of decimal places you want. ROUND takes two arguments: the value, and how many decimals to keep.",
+            code: "=E2/D2              points ÷ games\n=ROUND(E2/D2,2)     the same, to 2 decimals\n=ROUND(F2/E2,0)     salary per point, whole dollars",
+          },
+          film: [
+            {
+              title: "Rate stats change the ranking",
+              text: "A player with 279.4 points in 17 games and one with 208.3 in 14 look far apart on totals. Per game they are 16.4 and 14.9 — much closer. Whenever someone hands you a leaderboard built on totals, the first question worth asking is whether everyone had the same opportunity.",
+            },
+          ],
+          exercises: [
+            {
+              type: "formula",
+              prompt:
+                "Points per game for the player in row 2: their points divided by their games, rounded to 2 decimals.",
+              starter: "=",
+              expected: "=ROUND(E2/D2,2)",
+              hint: "Points are in E, games are in D. =ROUND(E2/D2,2)",
+              explain:
+                "23.68 points per game. A rate, not a total — and now comparable to anyone else on the sheet.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "League-wide points per game: total points divided by total games, rounded to 2 decimals.",
+              starter: "=",
+              expected: "=ROUND(SUM(E2:E17)/SUM(D2:D17),2)",
+              hint: "Divide one SUM by another.",
+              explain:
+                "15.1 points per game across the league. Note this is not the same as averaging each player's rate — dividing the totals weights by how much each player actually played.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Cost efficiency for row 2: salary divided by points, rounded to 0 decimals.",
+              starter: "=",
+              expected: "=ROUND(F2/E2,0)",
+              hint: "Salary is column F, points column E.",
+              explain:
+                "$102 per fantasy point. Dollars-per-unit is how you turn two unrelated columns into a fairness question.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "Why can total points be a misleading way to rank these players?",
+              options: [
+                "Totals are always wrong",
+                "Players played different numbers of games, so the total partly measures availability",
+                "Excel can't add decimals accurately",
+                "Points should never be summed",
+              ],
+              answer: 1,
+              explain:
+                "A total rewards whoever played most. Per-game rates compare production at the same opportunity.",
+            },
+            {
+              type: "fill",
+              prompt:
+                "Build points-per-game for row 3, rounded to 2 decimal places.",
+              parts: ["=ROUND(", null, "/", null, ",2)"],
+              bank: ["E3", "D3", "E2", "D2"],
+              answer: ["E3", "D3"],
+              explain:
+                "=ROUND(E3/D3,2). Points on top, games underneath — the row number has to match on both sides.",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "u16",
+      number: 16,
+      title: "Excel: Logic and Conditional Math",
+      drive: "2nd Drive · Midfield",
+      description:
+        "IF statements, conditional counting and summing, and the dollar signs that stop your formulas breaking when you copy them.",
+      skills: ["IF", "COUNTIF", "SUMIFS", "Absolute refs"],
+      status: "live",
+      lessons: [
+        {
+          id: "u16-l1",
+          title: "IF: Label Every Row",
+          blurb: "Ask a question of each row and write the answer next to it.",
+          brief: {
+            goal: "Write a formula that makes a decision and returns different text depending on the answer.",
+            setup:
+              "IF takes three things: a test, what to return when the test is true, and what to return when it is false. =IF(E2>300,\"Stud\",\"Flex\") reads as \"if this player scored over 300, call them a Stud, otherwise call them a Flex\". It is the first formula that does something other than arithmetic, and it is the backbone of every spreadsheet that categorises anything.",
+            previewSheet: "Roster",
+          },
+          intro: {
+            title: "Test, then true, then false",
+            text: "The order never changes: =IF(test, value_if_true, value_if_false). Text you want returned goes in double quotes; numbers do not. Leave the third argument off and Excel returns the word FALSE, which is almost never what you meant.",
+            code: "=IF(E2>300,\"Stud\",\"Flex\")\n=IF(D2=17,\"Full season\",\"Missed time\")\n=IF(E2>=350,\"Elite\",IF(E2>=250,\"Starter\",\"Bench\"))",
+          },
+          film: [
+            {
+              title: "Nesting IFs reads like a ladder",
+              text: "Put a second IF where the false answer goes and you get a ladder: check the highest bar first, then the next, and whatever falls through lands on the final default. Order matters — test 350 before 250, or everyone above 350 gets caught by the 250 rung first and labelled Starter.",
+              code: "=IF(E2>=350,\"Elite\",IF(E2>=250,\"Starter\",\"Bench\"))",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt: "What are the three arguments of IF, in order?",
+              options: [
+                "true value, test, false value",
+                "test, value if true, value if false",
+                "range, criteria, result",
+                "test, false value, true value",
+              ],
+              answer: 1,
+              explain:
+                "Test first, then the true answer, then the false one.",
+              drillSkip: true,
+            },
+            {
+              type: "formula",
+              prompt:
+                "Label the player in row 2: \"Stud\" if their points are over 300, otherwise \"Flex\".",
+              starter: "=",
+              expected: '=IF(E2>300,"Stud","Flex")',
+              hint: 'Text answers need double quotes: =IF(E2>300,"Stud","Flex")',
+              explain:
+                "Stud — row 2 scored 402.5. Quotes are what tell Excel you mean the word, not a cell name.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Same test, but for row 15. Over 300 is \"Stud\", otherwise \"Flex\".",
+              starter: "=",
+              expected: '=IF(E15>300,"Stud","Flex")',
+              hint: "Only the row number changes.",
+              explain:
+                "Flex — row 15 scored 119.4, well under the bar. Same formula, different row, different answer: that is what makes IF worth writing once and copying down.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Three tiers for row 2: \"Elite\" at 350 or more, \"Starter\" at 250 or more, otherwise \"Bench\".",
+              starter: "=",
+              expected: '=IF(E2>=350,"Elite",IF(E2>=250,"Starter","Bench"))',
+              hint: "Put the second IF where the false answer goes.",
+              explain:
+                "Elite. Test the highest bar first — reverse the order and everyone above 350 would be caught by the 250 test and mislabelled.",
+            },
+            {
+              type: "fill",
+              prompt:
+                "Flag whether row 4's player made it through a full 17-game season.",
+              parts: ["=IF(D4", null, '17,"Full season","Missed time")'],
+              bank: ["=", ">", "<>", "&"],
+              answer: ["="],
+              explain:
+                "=IF(D4=17,...). A single equals sign inside a formula means \"is equal to\" — the one at the very front is what starts the formula.",
+            },
+          ],
+        },
+        {
+          id: "u16-l2",
+          title: "COUNTIF: Counting Only What Matters",
+          blurb: "Count rows that meet a condition, without filtering anything.",
+          brief: {
+            goal: "Count how many rows match one condition — or several at once.",
+            setup:
+              "COUNT tells you how many rows there are. COUNTIF tells you how many rows match a rule: =COUNTIF(C2:C17,\"WR\") counts the wide receivers. The rule goes in quotes, and comparison rules go in quotes too — \">250\" is a piece of text as far as the formula is concerned, which surprises everyone the first time.",
+            previewSheet: "Roster",
+          },
+          intro: {
+            title: "Range first, then the rule",
+            text: "COUNTIF takes the range to look at and the rule to apply. COUNTIFS takes as many range/rule pairs as you like, and counts only the rows that satisfy every one of them. The ranges must all be the same height or the pairs won't line up row by row.",
+            code: "=COUNTIF(C2:C17,\"WR\")\n=COUNTIF(E2:E17,\">250\")\n=COUNTIFS(C2:C17,\"WR\",E2:E17,\">200\")",
+          },
+          exercises: [
+            {
+              type: "formula",
+              prompt: "How many wide receivers (\"WR\") are on the roster?",
+              starter: "=",
+              expected: '=COUNTIF(C2:C17,"WR")',
+              hint: "Positions live in column C.",
+              explain: "7 wide receivers.",
+            },
+            {
+              type: "formula",
+              prompt: "How many players scored more than 250 points?",
+              starter: "=",
+              expected: '=COUNTIF(E2:E17,">250")',
+              hint: 'The comparison goes inside quotes: ">250"',
+              explain:
+                "7 players. The quotes around \">250\" look wrong and are required — Excel reads the whole condition as text.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "How many wide receivers scored more than 200 points? Two conditions at once.",
+              starter: "=",
+              expected: '=COUNTIFS(C2:C17,"WR",E2:E17,">200")',
+              hint: "COUNTIFS — pairs of range then rule, as many as you need.",
+              explain:
+                "5. COUNTIFS only counts rows where every condition holds, which is how you ask two questions of one sheet.",
+            },
+            {
+              type: "mc",
+              prompt: "Why does `>250` need to be in quotes in COUNTIF?",
+              options: [
+                "It doesn't — quotes are optional",
+                "Excel reads the whole condition as a piece of text, operator included",
+                "Because 250 is a decimal",
+                "To make it case-sensitive",
+              ],
+              answer: 1,
+              explain:
+                "The criteria argument is text. Leave the quotes off and Excel sees a broken comparison rather than a rule.",
+            },
+            {
+              type: "fill",
+              prompt: "Count how many players are on Sam's team (column G).",
+              parts: ["=COUNTIF(", null, ",", null, ")"],
+              bank: ["G2:G17", '"Sam"', "C2:C17", "Sam"],
+              answer: ["G2:G17", '"Sam"'],
+              explain:
+                '=COUNTIF(G2:G17,"Sam"). Range first, then the rule in quotes.',
+            },
+          ],
+        },
+        {
+          id: "u16-l3",
+          title: "SUMIF and SUMIFS: Conditional Totals",
+          blurb: "Add up only the rows that qualify.",
+          brief: {
+            goal: "Total or average a column, but only for the rows matching a condition.",
+            setup:
+              "SUMIF has an argument order that trips up nearly everyone: you give it the range to *test*, then the rule, and then — separately — the range to actually *add*. =SUMIF(C2:C17,\"RB\",E2:E17) means \"look at the positions, find the RBs, and add up their points\". The column you are testing and the column you are summing are different, and they go at opposite ends of the formula.",
+            previewSheet: "Roster",
+          },
+          intro: {
+            title: "Test range, rule, sum range",
+            text: "SUMIF checks one column and adds another. SUMIFS flips the order — the column to add comes first, then the pairs — which is inconsistent and genuinely confusing, so it is worth reading the two side by side until the difference sticks.",
+            code: "=SUMIF(C2:C17,\"RB\",E2:E17)      test, rule, then what to add\n=SUMIFS(F2:F17,G2:G17,\"Jordan\") what to add FIRST, then the pairs\n=AVERAGEIF(C2:C17,\"QB\",E2:E17)",
+          },
+          film: [
+            {
+              title: "SUMIF and SUMIFS disagree on argument order",
+              text: "SUMIF puts the range being added last. SUMIFS puts it first. This is not a rule with a reason — it is a historical accident in Excel that you simply have to remember. When a conditional total comes back wrong, argument order is the first thing to check.",
+            },
+          ],
+          exercises: [
+            {
+              type: "formula",
+              prompt:
+                "Total fantasy points scored by running backs (\"RB\").",
+              starter: "=",
+              expected: '=SUMIF(C2:C17,"RB",E2:E17)',
+              hint: "Test the position column, add the points column.",
+              explain:
+                "1030.8 points from the RBs. Test range first, points range last.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Total salary of every player owned by \"Jordan\" (owners are in column G). Use SUMIFS.",
+              starter: "=",
+              expected: '=SUMIFS(F2:F17,G2:G17,"Jordan")',
+              hint: "SUMIFS puts the range you're adding FIRST.",
+              explain:
+                "$163,500. Note the flip: with SUMIFS the salary range leads, then come the condition pairs.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Average points for quarterbacks (\"QB\"), rounded to 1 decimal.",
+              starter: "=",
+              expected: '=ROUND(AVERAGEIF(C2:C17,"QB",E2:E17),1)',
+              hint: "AVERAGEIF follows SUMIF's argument order, then wrap it in ROUND.",
+              explain:
+                "381.9 points per QB. Only two quarterbacks on this roster, and both were excellent.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "In `=SUMIF(C2:C17,\"RB\",E2:E17)`, what does the last argument do?",
+              options: [
+                "Sets the criteria",
+                "Names the column that actually gets added up",
+                "Limits how many rows are checked",
+                "Nothing — it's optional",
+              ],
+              answer: 1,
+              explain:
+                "It's the sum range. Without it SUMIF would add the position column, which isn't numbers at all.",
+            },
+            {
+              type: "fill",
+              prompt:
+                "Total the points of every tight end (\"TE\") on the roster.",
+              parts: ["=SUMIF(C2:C17,", null, ",", null, ")"],
+              bank: ['"TE"', "E2:E17", "TE", "C2:C17"],
+              answer: ['"TE"', "E2:E17"],
+              explain:
+                '=SUMIF(C2:C17,"TE",E2:E17). Rule in quotes, then the column being added.',
+            },
+          ],
+        },
+        {
+          id: "u16-l4",
+          title: "Absolute References: the $ That Saves You",
+          blurb: "Why your formula breaks the moment you copy it down.",
+          brief: {
+            goal: "Lock part of a reference so it stops moving when the formula is copied.",
+            setup:
+              "Copy =E2/E18 down one row and Excel helpfully turns it into =E3/E19. That is usually what you want for the top half and a disaster for the bottom half — the divisor was supposed to stay put. A dollar sign freezes whatever follows it: $E$2 never moves, E$2 keeps the row fixed, $E2 keeps the column fixed. This one character is the difference between a formula you can copy and one you have to rewrite sixteen times.",
+            previewSheet: "Roster",
+          },
+          intro: {
+            title: "$ freezes what comes after it",
+            text: "References are relative by default — they shift to stay in the same relative position when you copy them. Adding $ makes that part absolute, so it points at the same place no matter where the formula ends up. When a formula works in the first row and returns nonsense further down, a missing $ is almost always why.",
+            code: "E2      moves with the formula\n$E$2    never moves\nE$2     row locked, column free\n$E2     column locked, row free",
+          },
+          film: [
+            {
+              title: "The share-of-total pattern",
+              text: "Any \"what percentage of the whole is this row\" formula needs an absolute denominator. The numerator should move down the column with each row; the total must not. That is exactly one relative reference over one absolute range — and it is the most common real use of $ you will ever write.",
+              code: "=ROUND(E2/SUM($E$2:$E$17),3)   copy down and the total stays put",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt: "What does `$E$2` mean?",
+              options: [
+                "Format the cell as currency",
+                "The reference stays pointed at E2 no matter where the formula is copied",
+                "Multiply E by 2",
+                "It's a reference to another workbook",
+              ],
+              answer: 1,
+              explain:
+                "$ locks the reference. It has nothing to do with currency formatting.",
+              drillSkip: true,
+            },
+            {
+              type: "formula",
+              prompt:
+                "What share of all league points did row 2's player score? Divide their points by the total, rounded to 3 decimals — and lock the total so the formula survives being copied down.",
+              starter: "=",
+              expected: "=ROUND(E2/SUM($E$2:$E$17),3)",
+              hint: "The numerator moves, the SUM range does not: SUM($E$2:$E$17)",
+              explain:
+                "0.107 — about 10.7% of every point scored in the league. The $ signs are what let you copy this down all 16 rows.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "The same share, for row 3. Keep the total locked.",
+              starter: "=",
+              expected: "=ROUND(E3/SUM($E$2:$E$17),3)",
+              hint: "Only the numerator changes — that's the whole point.",
+              explain:
+                "0.096. The numerator moved, the denominator didn't. That is exactly the behaviour you designed the $ signs to produce.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "You write `=E2/SUM(E2:E17)` in row 2 and copy it down. What happens in row 3?",
+              options: [
+                "It works fine",
+                "The SUM range slides to E3:E18, so each row divides by a different, shrinking total",
+                "Excel shows #REF!",
+                "The formula stops calculating",
+              ],
+              answer: 1,
+              explain:
+                "Without $ the range drifts down with the formula. Every row ends up divided by a different total, and the percentages silently stop adding to 100.",
+            },
+            {
+              type: "fill",
+              prompt:
+                "Lock the reference so this always points at cell E2, wherever it's copied.",
+              parts: ["=D5/", null],
+              bank: ["$E$2", "E2", "E$2$", "#E#2"],
+              answer: ["$E$2"],
+              explain:
+                "$E$2 — a dollar sign before both the column letter and the row number.",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "u17",
+      number: 17,
+      title: "Excel: Lookups",
+      drive: "3rd Drive · Red Zone",
+      description:
+        "Pull a value out of one table using a key from another — the skill that turns two spreadsheets into one answer.",
+      skills: ["VLOOKUP", "IFERROR", "INDEX / MATCH", "XLOOKUP"],
+      status: "live",
+      lessons: [
+        {
+          id: "u17-l1",
+          title: "VLOOKUP: Find the Row, Return a Column",
+          blurb: "The formula every job posting means when it says 'Excel'.",
+          brief: {
+            goal: "Look up a player by name and return any value from their row.",
+            setup:
+              "A lookup answers \"I have this name — what's their number?\". VLOOKUP takes four things: what to look for, the block of cells to search, which column of that block to return, and FALSE to demand an exact match. The column number counts from the left edge of the block you gave it, not from column A of the sheet — that off-by-one is the single most common VLOOKUP mistake.",
+            previewSheet: "Roster",
+          },
+          intro: {
+            title: "Four arguments, and the fourth is not optional",
+            text: "=VLOOKUP(\"Puka Nacua\", A2:E17, 5, FALSE) searches the first column of A2:E17 for the name, then returns the 5th column of that block — column E, points. FALSE means exact match. Leave it off and Excel does an approximate match on data it assumes is sorted, which returns confidently wrong answers rather than an error.",
+            code: "=VLOOKUP(\"Puka Nacua\",A2:E17,5,FALSE)\n                 ^          ^     ^   ^\n              what      where   col  exact",
+          },
+          film: [
+            {
+              title: "Always pass FALSE",
+              text: "The fourth argument defaults to TRUE, meaning approximate match. On unsorted data that does not error — it returns whatever it happened to land near, which looks like a real answer and is not. There is no situation in this course where you want anything but FALSE.",
+            },
+          ],
+          exercises: [
+            {
+              type: "formula",
+              prompt:
+                "How many fantasy points did \"Puka Nacua\" score? Search the block A2:E17 and return the points column.",
+              starter: "=",
+              expected: '=VLOOKUP("Puka Nacua",A2:E17,5,FALSE)',
+              hint: "Points are the 5th column of A2:E17. Don't forget FALSE.",
+              explain:
+                "208.3. Column 5 counts from A — Player, Team, Pos, Games, Points.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "How many games did \"Travis Kelce\" play? Same block, different column.",
+              starter: "=",
+              expected: '=VLOOKUP("Travis Kelce",A2:E17,4,FALSE)',
+              hint: "Games is the 4th column of the block.",
+              explain:
+                "16 games. Only the column number changed — the rest of the formula is identical.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "In `=VLOOKUP(\"Puka Nacua\",A2:E17,5,FALSE)`, what is the 5 counting from?",
+              options: [
+                "Column A of the sheet",
+                "The first column of the range you passed in — A, in this case",
+                "The column the formula is written in",
+                "The last column of the sheet",
+              ],
+              answer: 1,
+              explain:
+                "It counts from the left edge of the lookup range. Change the range to start at B and the same column becomes 4.",
+            },
+            {
+              type: "mc",
+              prompt: "What does the final `FALSE` do?",
+              options: [
+                "Hides errors",
+                "Demands an exact match instead of an approximate one",
+                "Makes the search case-sensitive",
+                "Searches bottom to top",
+              ],
+              answer: 1,
+              explain:
+                "Exact match. Without it Excel approximates on data it assumes is sorted and returns confident nonsense.",
+            },
+            {
+              type: "fill",
+              prompt:
+                "Look up \"Derrick Henry\" and return his team (the 2nd column of the block).",
+              parts: ["=VLOOKUP(", null, ",A2:E17,", null, ",FALSE)"],
+              bank: ['"Derrick Henry"', "2", "Derrick Henry", "5"],
+              answer: ['"Derrick Henry"', "2"],
+              explain:
+                'Text to look up goes in quotes; Team is the 2nd column of A2:E17.',
+            },
+          ],
+        },
+        {
+          id: "u17-l2",
+          title: "When VLOOKUP Breaks",
+          blurb: "#N/A, and the two things it usually means.",
+          brief: {
+            goal: "Handle a lookup that finds nothing, instead of leaving #N/A across your sheet.",
+            setup:
+              "#N/A means \"not available\" — the lookup ran fine and simply did not find the value. Sometimes that is real information (the player is not rostered) and sometimes it is a data problem (the name has a trailing space). Either way, a column full of #N/A makes every SUM below it fail too, so you wrap the lookup in IFERROR and decide what should appear instead.",
+            previewSheet: "Roster",
+          },
+          intro: {
+            title: "IFERROR catches the failure",
+            text: "IFERROR takes a formula and a fallback. If the formula works you get its answer; if it errors you get the fallback. It is the difference between a sheet that reports \"Not rostered\" and one that breaks every total underneath it.",
+            code: "=IFERROR(VLOOKUP(\"Nobody\",A2:E17,5,FALSE),\"Not rostered\")\n=IFERROR(VLOOKUP(\"Nobody\",A2:E17,5,FALSE),0)",
+          },
+          film: [
+            {
+              title: "VLOOKUP cannot look left",
+              text: "VLOOKUP always searches the first column of the range and returns something to its right. If the value you have is in column C and the answer you need is in column A, VLOOKUP simply cannot do it — you would have to rearrange the sheet. That limitation is the reason INDEX/MATCH exists, and it is the next lesson.",
+            },
+          ],
+          exercises: [
+            {
+              type: "formula",
+              prompt:
+                "Look up \"Saquon Barkley\" (who is not on this roster) and return \"Not rostered\" instead of an error.",
+              starter: "=",
+              expected:
+                '=IFERROR(VLOOKUP("Saquon Barkley",A2:E17,5,FALSE),"Not rostered")',
+              hint: 'Wrap the whole VLOOKUP: =IFERROR( lookup , "Not rostered")',
+              explain:
+                "\"Not rostered\". The lookup still failed — IFERROR just decides what the failure should look like.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Same lookup, but return 0 so the column can still be summed.",
+              starter: "=",
+              expected:
+                '=IFERROR(VLOOKUP("Saquon Barkley",A2:E17,5,FALSE),0)',
+              hint: "The fallback doesn't have to be text.",
+              explain:
+                "0. Choose your fallback based on what happens next — text reads better for humans, 0 keeps arithmetic working.",
+            },
+            {
+              type: "mc",
+              prompt: "What does `#N/A` actually mean?",
+              options: [
+                "The formula has a syntax error",
+                "The lookup ran correctly but found no match",
+                "The cell is empty",
+                "You divided by zero",
+              ],
+              answer: 1,
+              explain:
+                "Not available — no match found. A broken formula gives you a different error entirely.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "Your lookup value is in column C and the answer you need is in column A. Can VLOOKUP do it?",
+              options: [
+                "Yes, use a negative column number",
+                "No — VLOOKUP only returns columns to the right of the search column",
+                "Yes, if you pass TRUE as the last argument",
+                "Only if the sheet is sorted",
+              ],
+              answer: 1,
+              explain:
+                "VLOOKUP searches the leftmost column of its range and looks rightwards only. Looking left is exactly what INDEX/MATCH solves.",
+            },
+            {
+              type: "fill",
+              prompt:
+                "Wrap this lookup so a missing player shows \"Free agent\".",
+              parts: [
+                "=",
+                null,
+                '(VLOOKUP("Nobody",A2:E17,5,FALSE),',
+                null,
+                ")",
+              ],
+              bank: ["IFERROR", '"Free agent"', "IF", "Free agent"],
+              answer: ["IFERROR", '"Free agent"'],
+              explain:
+                "IFERROR takes the formula first, then what to show when it fails.",
+            },
+          ],
+        },
+        {
+          id: "u17-l3",
+          title: "INDEX + MATCH: the Grown-Up Lookup",
+          blurb: "Two functions that fix everything VLOOKUP can't do.",
+          brief: {
+            goal: "Look up a value in any direction by splitting the job into 'which row?' and 'give me that row'.",
+            setup:
+              "MATCH answers one question: where in this list is my value? It returns a position — 15, not a name. INDEX answers the other: give me item number 15 from this column. Neither is much use alone. Nested together they do everything VLOOKUP does, in any direction, and without a column number that silently breaks when someone inserts a column.",
+            previewSheet: "Roster",
+          },
+          intro: {
+            title: "MATCH finds the position, INDEX fetches the value",
+            text: "Read the nested version from the inside out. MATCH runs first and returns a row number; INDEX then pulls that row out of whichever column you point it at. Because you name the return column directly, it can sit anywhere — left of the search column, right of it, another sheet entirely.",
+            code: "=MATCH(\"Travis Kelce\",A2:A17,0)              → 15\n=INDEX(E2:E17,15)                             → 212.8\n=INDEX(E2:E17,MATCH(\"Tyreek Hill\",A2:A17,0))  → both at once",
+          },
+          film: [
+            {
+              title: "Why analysts prefer it",
+              text: "VLOOKUP's column number is a hardcoded count. Insert a column into the middle of the table and every VLOOKUP pointing past it now returns the wrong field — silently, with no error. INDEX/MATCH references the return column by name, so inserting a column just moves the reference along with it.",
+            },
+          ],
+          exercises: [
+            {
+              type: "formula",
+              prompt:
+                "Which position in the name list does \"Travis Kelce\" occupy? Use MATCH with an exact match (0).",
+              starter: "=",
+              expected: '=MATCH("Travis Kelce",A2:A17,0)',
+              hint: "=MATCH(what, where, 0)",
+              explain:
+                "15 — he is the 15th name in the range. Not a value, a position.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Now combine them: how many points did \"Tyreek Hill\" score? Use INDEX over the points column with MATCH finding the row.",
+              starter: "=",
+              expected: '=INDEX(E2:E17,MATCH("Tyreek Hill",A2:A17,0))',
+              hint: "=INDEX(column_to_return, MATCH(name, name_column, 0))",
+              explain:
+                "301.9. MATCH found the row, INDEX pulled the value — no column counting anywhere.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "The payoff: who scored the most points? Use MAX to find the top score, MATCH to find its row, and INDEX to return the *name*.",
+              starter: "=",
+              expected: "=INDEX(A2:A17,MATCH(MAX(E2:E17),E2:E17,0))",
+              hint: "MATCH can look up a number too: MATCH(MAX(E2:E17),E2:E17,0)",
+              explain:
+                "Josh Allen. This is the question MAX couldn't answer back in the first unit — and notice you're returning column A while searching column E, which VLOOKUP flatly cannot do.",
+            },
+            {
+              type: "mc",
+              prompt: "What does MATCH return?",
+              options: [
+                "The matching value",
+                "A position — how far down the range the value sits",
+                "TRUE or FALSE",
+                "The whole matching row",
+              ],
+              answer: 1,
+              explain:
+                "A number. That number is only useful once INDEX turns it back into a value.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "Someone inserts a new column in the middle of your table. What happens to a VLOOKUP that pointed past it?",
+              options: [
+                "It updates automatically",
+                "It returns the wrong column, with no error to warn you",
+                "It shows #REF!",
+                "Nothing — VLOOKUP is immune",
+              ],
+              answer: 1,
+              explain:
+                "The hardcoded column number now counts to a different field. It fails silently, which is worse than failing loudly — and it's the main reason to reach for INDEX/MATCH.",
+            },
+          ],
+        },
+        {
+          id: "u17-l4",
+          title: "XLOOKUP: the Modern One",
+          blurb: "One function that replaces all of the above.",
+          brief: {
+            goal: "Write a lookup that reads the way you'd say it out loud.",
+            setup:
+              "XLOOKUP is the newer function that fixes VLOOKUP's design in one go: you name the search column and the return column directly, exact match is the default, and the fallback for \"not found\" is built into a fourth argument instead of needing IFERROR. If your Excel has it, use it. If you are on an older version — and plenty of workplaces are — INDEX/MATCH from the last lesson does the same job everywhere.",
+            previewSheet: "Roster",
+          },
+          intro: {
+            title: "Look for, look in, return from",
+            text: "=XLOOKUP(\"Derrick Henry\", A2:A17, F2:F17) reads almost like the sentence you'd say: find this name, in this column, and give me the matching value from that column. An optional fourth argument replaces IFERROR for the not-found case.",
+            code: "=XLOOKUP(\"Derrick Henry\",A2:A17,F2:F17)\n=XLOOKUP(\"Nobody\",A2:A17,F2:F17,\"Not rostered\")",
+          },
+          exercises: [
+            {
+              type: "formula",
+              prompt:
+                "Use XLOOKUP to find \"Derrick Henry\"'s salary — search the name column, return from the salary column.",
+              starter: "=",
+              expected: '=XLOOKUP("Derrick Henry",A2:A17,F2:F17)',
+              hint: "=XLOOKUP(what, where_to_look, what_to_return)",
+              explain:
+                "33000. No column counting, no FALSE — the two things that make VLOOKUP fragile are simply gone.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Look up \"Saquon Barkley\" and return \"Not rostered\" using XLOOKUP's built-in fourth argument — no IFERROR.",
+              starter: "=",
+              expected:
+                '=XLOOKUP("Saquon Barkley",A2:A17,F2:F17,"Not rostered")',
+              hint: "The fallback is just a fourth argument.",
+              explain:
+                "\"Not rostered\". What took a wrapper function in VLOOKUP is built in here.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "What's the main practical advantage of XLOOKUP over VLOOKUP?",
+              options: [
+                "It's faster on large sheets",
+                "You name the return column directly, so there's no column number to break and it can look left",
+                "It doesn't need an equals sign",
+                "It sorts the data first",
+              ],
+              answer: 1,
+              explain:
+                "No hardcoded column index, and no left-to-right restriction. Exact match being the default is a close second.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "Your workplace runs an older Excel with no XLOOKUP. What do you use?",
+              options: [
+                "Nothing — you're stuck",
+                "INDEX/MATCH, which works everywhere and does the same job",
+                "Sort the sheet and use VLOOKUP with TRUE",
+                "Rewrite the data by hand",
+              ],
+              answer: 1,
+              explain:
+                "INDEX/MATCH is the portable answer, which is exactly why it's still worth knowing.",
+            },
+            {
+              type: "fill",
+              prompt:
+                "Use XLOOKUP to return \"CeeDee Lamb\"'s points from column E.",
+              parts: ["=XLOOKUP(", null, ",A2:A17,", null, ")"],
+              bank: ['"CeeDee Lamb"', "E2:E17", "CeeDee Lamb", "5"],
+              answer: ['"CeeDee Lamb"', "E2:E17"],
+              explain:
+                "You pass the return range itself, not a column number. That's the whole improvement.",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "u18",
+      number: 18,
+      title: "Excel: Cleaning the Export",
+      drive: "4th Drive · Goal Line",
+      description:
+        "Real data arrives broken. Trailing spaces, numbers stored as text, and blank cells — and the formulas that fix all three.",
+      skills: ["TRIM", "VALUE", "COUNTBLANK", "Text functions"],
+      status: "live",
+      lessons: [
+        {
+          id: "u18-l1",
+          title: "TRIM: the Space You Cannot See",
+          blurb: "Why a lookup fails on a name that looks identical.",
+          brief: {
+            goal: "Find and remove the invisible whitespace that makes matching fail.",
+            setup:
+              "The Import tab is the same league exported badly. The names look right and the lookups fail anyway, because \"  Josh Allen\" with two leading spaces is not the same text as \"Josh Allen\". You cannot see the difference; Excel can. TRIM strips leading and trailing spaces (and collapses runs of them in the middle), and it fixes more broken lookups than any other function.",
+            previewSheet: "Import",
+            previewCaption:
+              "The bad export. The names carry stray spaces and the points came through as text.",
+          },
+          intro: {
+            title: "LEN proves it",
+            text: "When two values look the same but won't match, measure them. LEN counts characters, spaces included — if the length is longer than the name you can see, you have found your culprit. Then TRIM removes it.",
+            code: "=LEN(Import!A2)         12  — two spaces hiding\n=LEN(TRIM(Import!A2))   10  — the real name\n=TRIM(Import!A2)        \"Josh Allen\"",
+          },
+          film: [
+            {
+              title: "Clean on the way in, not after",
+              text: "The instinct is to fix the source data by hand. On six rows that works; on sixty thousand it does not, and it has to be redone every time the export refreshes. Wrapping the lookup in TRIM fixes it once, permanently, for every future refresh of the same file.",
+            },
+          ],
+          exercises: [
+            {
+              type: "formula",
+              prompt:
+                "How many characters are actually in cell A2 of the Import sheet? Use LEN.",
+              starter: "=",
+              expected: "=LEN(Import!A2)",
+              hint: "Reference another sheet with its name and an exclamation mark: Import!A2",
+              explain:
+                "12 — but \"Josh Allen\" is only 10 characters. Two of them are invisible.",
+            },
+            {
+              type: "formula",
+              prompt: "Now clean it: return Import!A2 with the spaces stripped.",
+              starter: "=",
+              expected: "=TRIM(Import!A2)",
+              hint: "=TRIM( the cell )",
+              explain:
+                "\"Josh Allen\" — 10 characters, and now it will match the roster.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Prove the problem: look up the *untrimmed* Import!A2 against the roster block A2:E17 and return column 5, falling back to \"No match\".",
+              starter: "=",
+              expected:
+                '=IFERROR(VLOOKUP(Import!A2,A2:E17,5,FALSE),"No match")',
+              hint: "Wrap a normal VLOOKUP in IFERROR, using Import!A2 as the lookup value.",
+              explain:
+                "\"No match\" — the name is right there on the roster and the lookup still failed. That is what two invisible spaces cost you.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Now fix it: same lookup, but wrap the lookup value in TRIM.",
+              starter: "=",
+              expected: "=VLOOKUP(TRIM(Import!A2),A2:E17,5,FALSE)",
+              hint: "Put TRIM around Import!A2 inside the VLOOKUP.",
+              explain:
+                "402.5. One function in the right place turned a broken join into a working one.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "Two names look identical but won't match. What's the first thing to check?",
+              options: [
+                "Whether the sheet is sorted",
+                "LEN on both — a length mismatch means hidden whitespace",
+                "The file format",
+                "Whether Excel needs restarting",
+              ],
+              answer: 1,
+              explain:
+                "Measure before you guess. LEN turns an invisible problem into a visible number.",
+            },
+          ],
+        },
+        {
+          id: "u18-l2",
+          title: "Numbers Stored as Text",
+          blurb: "Your SUM says zero and the column is full of numbers.",
+          brief: {
+            goal: "Spot and convert numbers that arrived as text so arithmetic works again.",
+            setup:
+              "Exports frequently deliver numbers as text — quoted, space-padded, or flagged with a little green triangle in the corner of the cell. They look like numbers and they behave like words: SUM ignores them completely and returns 0 rather than an error. VALUE converts a text number into a real one, and TRIM inside VALUE handles the padding at the same time.",
+            previewSheet: "Import",
+          },
+          intro: {
+            title: "SUM silently skips text",
+            text: "This is the dangerous part: there is no error. A column of 400-point seasons totals to zero and the sheet looks fine. Any time a total is implausibly low — especially exactly zero — suspect text before you suspect the data.",
+            code: "=SUM(Import!B2:B7)              0    — every value is text\n=VALUE(TRIM(Import!B2))         402.5\n=VALUE(TRIM(Import!B2))+VALUE(TRIM(Import!B3))",
+          },
+          exercises: [
+            {
+              type: "formula",
+              prompt:
+                "Try to total the Raw Points column on the Import sheet (B2:B7) and see what happens.",
+              starter: "=",
+              expected: "=SUM(Import!B2:B7)",
+              hint: "=SUM(Import!B2:B7)",
+              explain:
+                "0. Six rows of points and the total is zero — because every one of them is text, and SUM skipped them all without complaining.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Convert Import!B2 into a real number. Strip the spaces first.",
+              starter: "=",
+              expected: "=VALUE(TRIM(Import!B2))",
+              hint: "TRIM inside VALUE: =VALUE(TRIM( cell ))",
+              explain:
+                "402.5 — now an actual number you can do arithmetic with.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Add the first two converted values (B2 and B3) together, rounded to 1 decimal.",
+              starter: "=",
+              expected:
+                "=ROUND(VALUE(TRIM(Import!B2))+VALUE(TRIM(Import!B3)),1)",
+              hint: "Convert each one, then add them, then round the result.",
+              explain:
+                "763.7. Convert first, then calculate — never the other way round.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "A column of numbers sums to exactly 0. What's the most likely cause?",
+              options: [
+                "The values are all zero",
+                "They're stored as text, and SUM ignored every one of them",
+                "The range is empty",
+                "Excel needs recalculating",
+              ],
+              answer: 1,
+              explain:
+                "SUM skips text without erroring. A suspiciously round zero is the classic symptom.",
+            },
+            {
+              type: "fill",
+              prompt:
+                "Convert the padded text value in Import!B4 into a usable number.",
+              parts: ["=", null, "(", null, "(Import!B4))"],
+              bank: ["VALUE", "TRIM", "TEXT", "LEN"],
+              answer: ["VALUE", "TRIM"],
+              explain:
+                "=VALUE(TRIM(Import!B4)). TRIM removes the padding, VALUE makes it a number.",
+            },
+          ],
+        },
+        {
+          id: "u18-l3",
+          title: "Blanks, Zeros and Missing Data",
+          blurb: "An empty cell is not the same as a zero.",
+          brief: {
+            goal: "Count what's missing and handle it deliberately rather than by accident.",
+            setup:
+              "One player on the Import sheet has no points value at all — the cell is empty. Empty is not zero. AVERAGE skips blanks entirely, so a blank quietly shrinks your denominator, while a zero drags the average down. Both are defensible choices; picking one by accident is not. Start by counting how many you have.",
+            previewSheet: "Import",
+          },
+          intro: {
+            title: "Count the gaps first",
+            text: "COUNTBLANK counts empty cells; COUNTA counts non-empty ones. Together they tell you the shape of what is missing before you decide what to do about it. Then IF lets you label or substitute, so the gap is visible in the output rather than silently absorbed.",
+            code: "=COUNTBLANK(Import!B2:B7)   1\n=COUNTA(Import!B2:B7)       5\n=IF(Import!B6=\"\",\"Missing\",\"Present\")",
+          },
+          film: [
+            {
+              title: "Blank and zero average differently",
+              text: "Given 10, 20 and a blank, AVERAGE returns 15 — it drops the blank and divides by 2. Replace the blank with 0 and you get 10, dividing by 3. Neither is wrong in the abstract; what is wrong is not knowing which one your sheet did. Say out loud whether a missing game is a zero or an absence, then make the formula agree.",
+            },
+          ],
+          exercises: [
+            {
+              type: "formula",
+              prompt:
+                "How many cells in the Import sheet's Raw Points column (B2:B7) are empty?",
+              starter: "=",
+              expected: "=COUNTBLANK(Import!B2:B7)",
+              hint: "=COUNTBLANK( range )",
+              explain: "1. One player came through with no points at all.",
+            },
+            {
+              type: "formula",
+              prompt: "And how many of those six cells actually have something in them?",
+              starter: "=",
+              expected: "=COUNTA(Import!B2:B7)",
+              hint: "COUNTA counts non-empty cells.",
+              explain:
+                "5. Five present, one missing — and 5 + 1 = 6, which is the check that you've accounted for every row.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Label cell Import!B6: return \"Missing\" if it's empty, otherwise \"Present\".",
+              starter: "=",
+              expected: '=IF(Import!B6="","Missing","Present")',
+              hint: 'Empty is written as two quote marks with nothing between: ""',
+              explain:
+                "\"Missing\". Two quotes with nothing between them is how you write \"empty\" in a formula.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "AVERAGE over 10, 20 and a blank cell returns 15. Why not 10?",
+              options: [
+                "It rounds up",
+                "AVERAGE skips blanks, so it divided by 2 rather than 3",
+                "Blanks count as 15",
+                "It's a bug",
+              ],
+              answer: 1,
+              explain:
+                "Blanks are excluded from both the total and the count. A zero would have been included and given you 10.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "A player missed a game. Should that week be a blank or a zero?",
+              options: [
+                "Always zero",
+                "It depends what you're measuring — and the important thing is deciding on purpose",
+                "Always blank",
+                "It makes no difference",
+              ],
+              answer: 1,
+              explain:
+                "Scoring average per game played wants a blank; total season output wants a zero. The mistake is letting the export decide for you.",
+            },
+          ],
+        },
+        {
+          id: "u18-l4",
+          title: "Text Surgery",
+          blurb: "Reshape text into whatever the next step needs.",
+          brief: {
+            goal: "Cut, join and re-case text so it matches the format you actually need.",
+            setup:
+              "Once the data is clean you often still need it in a different shape — first names split off, team codes upper-cased, a list of names glued into one cell for an email. LEFT and RIGHT take characters off either end, UPPER/LOWER/PROPER fix capitalisation, and TEXTJOIN stitches a range together with a separator of your choosing.",
+            previewSheet: "Roster",
+          },
+          intro: {
+            title: "A small toolkit, endlessly recombined",
+            text: "None of these functions is complicated on its own. The skill is seeing which two or three to nest together to get from what you have to what you need — the same instinct as VALUE(TRIM(...)) in the last lesson.",
+            code: "=LEFT(A2,4)                    \"Josh\"\n=UPPER(Import!C2)              \"BUF\"\n=PROPER(TRIM(Import!A3))       \"Patrick Mahomes\"\n=TEXTJOIN(\", \",TRUE,A2:A4)     one cell, three names",
+          },
+          exercises: [
+            {
+              type: "formula",
+              prompt:
+                "Take the first 4 characters of the name in A2 on the Roster sheet.",
+              starter: "=",
+              expected: "=LEFT(A2,4)",
+              hint: "=LEFT(cell, how_many)",
+              explain:
+                "\"Josh\". LEFT and RIGHT are blunt instruments — they count characters, not words.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "The Import sheet's team codes have inconsistent casing. Return Import!C2 in all capitals.",
+              starter: "=",
+              expected: "=UPPER(Import!C2)",
+              hint: "=UPPER( cell )",
+              explain:
+                "\"BUF\". Standardising case is usually a prerequisite for matching, since a human-entered code column will contain both.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Clean up Import!A3 completely: strip the spaces and fix the capitalisation.",
+              starter: "=",
+              expected: "=PROPER(TRIM(Import!A3))",
+              hint: "Nest them: PROPER(TRIM(...))",
+              explain:
+                "\"Patrick Mahomes\". Two functions, one pass — the nesting habit from VALUE(TRIM(...)) applies everywhere.",
+            },
+            {
+              type: "formula",
+              prompt:
+                "Join the first three player names (A2:A4) into a single cell, separated by a comma and a space.",
+              starter: "=",
+              expected: '=TEXTJOIN(", ",TRUE,A2:A4)',
+              hint: '=TEXTJOIN(separator, TRUE, range) — TRUE skips blanks.',
+              explain:
+                "\"Josh Allen, Patrick Mahomes, Christian McCaffrey\". The TRUE tells it to ignore empty cells rather than leaving double separators.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "You need just the surname from \"Josh Allen\". Why won't `RIGHT(A2,5)` reliably work?",
+              options: [
+                "RIGHT only works on numbers",
+                "Surnames aren't all 5 characters — you'd need to find the space first",
+                "RIGHT counts from the left",
+                "It works fine",
+              ],
+              answer: 1,
+              explain:
+                "A fixed character count breaks on the next row. Real splitting needs the position of the space — which is what FIND and Text to Columns are for.",
+            },
+          ],
+        },
+      ],
+    },
   ] as Unit[],
 };
 
@@ -3784,6 +5111,7 @@ export const MODULES: Module[] = [
       "Every skill in order, the way a career-changer should take it: SQL, Python, statistics, charts, Git, R.",
     unitIds: [
       "u1", "u2", "u3", "u4", "u5", "u6",
+      "u15", "u16", "u17", "u18",
       "u7", "u13", "u14",
       "u8", "u9", "u10", "u11",
     ],
@@ -3799,6 +5127,13 @@ export const MODULES: Module[] = [
     name: "Python & pandas",
     blurb: "Variables, loops, and DataFrames — with code that really runs.",
     unitIds: ["u7", "u13", "u14"],
+  },
+  {
+    id: "excel",
+    name: "Excel",
+    blurb:
+      "Formulas, logic, lookups and cleaning — executed live against a real workbook.",
+    unitIds: ["u15", "u16", "u17", "u18"],
   },
   {
     id: "stats",

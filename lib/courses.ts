@@ -89,7 +89,7 @@ export const COURSES: Course[] = [
   {
     id: "excel",
     photo: "/fantasy-trophy.jpg",
-    moduleId: null,
+    moduleId: "excel",
     title: "Excel for Analysts",
     mark: "XL",
     blurb:
@@ -99,7 +99,7 @@ export const COURSES: Course[] = [
     projects: 1,
     level: "Beginner → Advanced",
     accent: "gold",
-    status: "building",
+    status: "live",
   },
   {
     id: "tableau",

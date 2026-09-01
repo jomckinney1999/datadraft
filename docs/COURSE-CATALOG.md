@@ -30,12 +30,14 @@ Related: `docs/CURRICULUM.md` (the original 12-week SQL syllabus, now a subset o
 | Python | Live execution (Pyodide) | Real code, including pandas |
 | R | Live execution (WebR) | Real code, including dplyr |
 | Statistics | `mc` / `fill` + Python | Compute the stats in Python where it helps |
-| Excel | `mc` / `fill` + formula drills | Formula-as-text, graded like code |
+| Excel | Live execution (fast-formula-parser) | Real formulas against a real workbook |
 | Tableau / Power BI | `mc` / `fill` + guided builds | No runtime — follow along in the real tool |
 | Git & GitHub | `mc` / `fill` | Command-assembly drills |
 | LLMs / AI | `mc` / `fill` + Python | Prompt critique plus API code in Pyodide |
 
-Tableau, Power BI and Excel cannot execute in the browser. Those courses teach through guided builds against a downloadable dataset, framed honestly as "follow along in the real tool" — never a fake simulator.
+Tableau and Power BI cannot execute in the browser. Those courses teach through guided builds against a downloadable dataset, framed honestly as "follow along in the real tool" — never a fake simulator.
+
+Excel **can** now execute: `lib/excel-engine.ts` evaluates real formulas against the two-sheet workbook in `lib/excel-data.ts` and grades on the value produced, so learners write `=SUMIF(...)` and see the answer rather than picking it from a list. The engine is MIT-licensed — the more complete HyperFormula is GPL-3.0-only and would force this whole app to GPL, so it is permanently off the table.
 
 ---
 
@@ -712,18 +714,18 @@ Honest state of what exists in `lib/curriculum.ts` today versus this spec:
 | Visualization (generic) | — | 3 lessons (unit 9) | No |
 | Git & GitHub | 40 | 3 lessons (unit 10) | No |
 | R | 46 | 3 lessons (unit 11) | Yes — WebR |
-| Excel | 52 | 0 | n/a |
+| Excel | 52 | **16 lessons (units 15–18)** | Yes — fast-formula-parser |
 | Tableau | 48 | 0 | n/a |
 | Power BI | 50 | 0 | n/a |
 | LLMs & AI | 44 | 0 (unit 12 is a stub) | Planned — Pyodide |
 
-**40 of 470 lessons exist** (the 3 visualization lessons in unit 9 are folded into Tableau/Power BI above, so they aren't counted here). The catalog page marks unbuilt courses "In build" rather than implying they're ready — keep it that way until the lessons land.
+**56 of 470 lessons exist** (the 3 visualization lessons in unit 9 are folded into Tableau/Power BI above, so they aren't counted here). The catalog page marks unbuilt courses "In build" rather than implying they're ready — keep it that way until the lessons land.
 
 **Suggested build order**, by demand and by what the existing runtimes already support:
 
 1. **Finish SQL** — the flagship, the runtime works, and it's the most-searched skill.
 2. **Finish Python** — runtime works, second-most-demanded.
-3. **Excel** — highest job-posting frequency of anything here, and cheap to build (no runtime).
+3. ~~**Excel**~~ — done: units 15–18 cover the grid and first formulas, logic and conditional math, lookups, and cleaning a bad export. Modules 2.5–2.7 of the spec (PivotTables, charts, job-ready workbooks) are **not** built — PivotTables in particular have no equivalent in the formula engine, so they need either a genuine guided-build treatment or an honest concept-only unit.
 4. **Statistics** — no runtime needed, and it lifts the credibility of every other course.
 5. **Tableau or Power BI** — pick one and do it properly; building both half-way is worse than one done well.
 6. **Git** — short course, high job relevance.

@@ -29,6 +29,7 @@ import {
   type FillExercise,
   type QueryExercise,
   type CodeExercise,
+  type FormulaExercise,
   type TheoryCard,
 } from "@/lib/curriculum";
 import {
@@ -46,6 +47,15 @@ import { pushProgress } from "@/lib/progress-sync";
 import { getStyle, type PlaybookStyle } from "@/lib/playbook";
 import Coach, { type CoachMood } from "@/components/coach";
 import CodeEditor from "@/components/code-editor";
+import ExcelGrid from "@/components/excel-grid";
+import {
+  ensureFormulaEngine,
+  evaluateFormula,
+  formatValue,
+  referencesCells,
+  valuesMatch,
+} from "@/lib/excel-engine";
+import { MAIN_SHEET, type CellValue } from "@/lib/excel-data";
 
 type Phase =
   | "loading"
@@ -167,6 +177,12 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const [checking, setChecking] = useState(false);
   const [runtimeLoading, setRuntimeLoading] = useState<Lang | null>(null);
 
+  // Excel formula exercises (evaluated live against lib/excel-data.ts)
+  const [formulaText, setFormulaText] = useState("");
+  const [formulaValue, setFormulaValue] = useState<CellValue | boolean>(null);
+  const [formulaError, setFormulaError] = useState<string | null>(null);
+  const [formulaReady, setFormulaReady] = useState(false);
+
   /**
    * Gunslingers want to type, not tick boxes. They always skip pure-recall
    * concept checks (drillSkip), and on lessons that have enough hands-on work
@@ -202,6 +218,10 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     entry && currentIdx !== undefined
       ? entry.lesson.exercises[currentIdx]
       : undefined;
+
+  // Which workbook tab the current formula exercise reads from.
+  const formulaSheet =
+    exercise?.type === "formula" ? exercise.sheet ?? MAIN_SHEET : MAIN_SHEET;
 
   // Onboarding gates, in ceremony order: get drafted, then pick a playbook.
   useEffect(() => {
@@ -247,6 +267,19 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     };
   }, []);
 
+  // The formula parser is a lazy import — warm it as soon as an Excel
+  // exercise appears so Check never stalls on a cold module load.
+  useEffect(() => {
+    if (exercise?.type !== "formula") return;
+    let cancelled = false;
+    ensureFormulaEngine()
+      .then(() => !cancelled && setFormulaReady(true))
+      .catch(() => !cancelled && setFormulaReady(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [exercise]);
+
   // reset inputs whenever the current exercise changes
   useEffect(() => {
     if (!exercise) return;
@@ -258,6 +291,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     );
     setQueryText(exercise.type === "query" ? exercise.starter : "");
     setCodeText(exercise.type === "code" ? exercise.starter : "");
+    setFormulaText(exercise.type === "formula" ? exercise.starter : "");
+    setFormulaValue(null);
+    setFormulaError(null);
     setCodeOutput(null);
     setCodeError(null);
     setRunResult(null);
@@ -415,6 +451,62 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     };
   }
 
+  /** Run a formula without grading it — the preview button. */
+  async function handleRunFormula() {
+    if (running) return;
+    setRunning(true);
+    try {
+      const res = await evaluateFormula(formulaText, formulaSheet);
+      setFormulaValue(res.error ? null : res.value);
+      setFormulaError(res.error);
+    } finally {
+      setRunning(false);
+    }
+  }
+
+  /**
+   * Grade an Excel formula on the value it produces, not on its text — there
+   * are several correct ways to write most of these, and string-matching would
+   * reject all but one of them.
+   *
+   * The one extra rule: the formula has to actually reference the sheet.
+   * Otherwise a learner can read 402.5 off the grid, type `=402.5`, and be
+   * graded correct without having written a formula at all.
+   */
+  async function gradeFormula(
+    ex: FormulaExercise,
+  ): Promise<{ correct: boolean; solution?: string } | null> {
+    const mine = await evaluateFormula(formulaText, ex.sheet ?? MAIN_SHEET);
+    if (mine.error) {
+      setFormulaValue(null);
+      setFormulaError(mine.error);
+      setSoftError(mine.error);
+      return null;
+    }
+    setFormulaValue(mine.value);
+    setFormulaError(null);
+
+    if (!ex.allowLiteral && !referencesCells(formulaText)) {
+      setSoftError(
+        "That returns the right kind of value, but it doesn't reference a single cell — read it from the sheet instead of typing the number.",
+      );
+      return null;
+    }
+
+    const reference = await evaluateFormula(ex.expected, ex.sheet ?? MAIN_SHEET);
+    if (reference.error) {
+      // Our key is broken, not their formula. Never take a heart for that.
+      setSoftError(
+        "The answer key failed to run — that's our bug, not yours. Skipping the check.",
+      );
+      return null;
+    }
+    return {
+      correct: valuesMatch(mine.value, reference.value),
+      solution: ex.expected,
+    };
+  }
+
   function grade(): { correct: boolean; solution?: string } | null {
     if (!exercise) return null;
     if (exercise.type === "mc") {
@@ -458,6 +550,13 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       setChecking(true);
       try {
         result = await gradeCode(exercise);
+      } finally {
+        setChecking(false);
+      }
+    } else if (exercise.type === "formula") {
+      setChecking(true);
+      try {
+        result = await gradeFormula(exercise);
       } finally {
         setChecking(false);
       }
@@ -651,6 +750,15 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 </div>
               )}
             </div>
+          )}
+
+          {/* Excel lessons: the real grid, before we ask anything about it. */}
+          {lesson.brief.previewSheet && (
+            <ExcelGrid
+              sheet={lesson.brief.previewSheet}
+              maxRows={9}
+              caption={lesson.brief.previewCaption}
+            />
           )}
 
           <button
@@ -891,6 +999,61 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
               </div>
             )}
 
+            {exercise.type === "formula" && (
+              <div className="space-y-3">
+                <ExcelGrid sheet={formulaSheet} maxRows={9} />
+
+                <div className="border border-panel-border bg-night/95 shadow-scoreboard">
+                  <div className="flex items-center justify-between border-b border-panel-border px-3 py-2">
+                    <span className="label-broadcast text-turf">
+                      formula bar · fx
+                    </span>
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+                      {formulaReady ? "engine ready" : "loading engine…"}
+                    </span>
+                  </div>
+                  <CodeEditor
+                    value={formulaText}
+                    onChange={setFormulaText}
+                    lang="excel"
+                    rows={2}
+                    disabled={!!feedback}
+                    ariaLabel="Excel formula editor"
+                  />
+                  <div className="flex items-center justify-between border-t border-panel-border px-3 py-2">
+                    <p className="font-mono text-[10px] text-ink-muted">
+                      sheet: {formulaSheet}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleRunFormula}
+                      disabled={running || !!feedback}
+                      className="border border-panel-border px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors hover:border-turf/50 hover:text-turf disabled:opacity-40"
+                    >
+                      {running ? "Running…" : "▸ Run preview"}
+                    </button>
+                  </div>
+                  {(formulaError || softError) && (
+                    <p className="border-t border-gold/40 bg-gold/5 px-3 py-2 font-mono text-[12px] text-gold">
+                      ⚠ {softError ?? formulaError}
+                      {softError &&
+                        " — no flag on the play. Fix it and check again."}
+                    </p>
+                  )}
+                  {formulaValue !== null && !formulaError && (
+                    <div className="flex items-baseline gap-3 border-t border-panel-border px-3 py-2">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+                        result
+                      </span>
+                      <span className="font-mono text-[15px] font-semibold text-turf">
+                        {formatValue(formulaValue)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {exercise.type === "query" && (
               <div className="border border-panel-border bg-night/95 shadow-scoreboard">
                 <div className="flex items-center justify-between border-b border-panel-border px-3 py-2">
@@ -978,10 +1141,20 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
           <div className="mt-6">
             {!feedback ? (
               <div className="flex items-center justify-between gap-4">
-                {exercise.type === "query" || exercise.type === "code" ? (
+                {exercise.type === "query" ||
+                exercise.type === "code" ||
+                exercise.type === "formula" ? (
                   hintsVisible ? (
                     <p className="font-mono text-[11px] text-ink-muted">
-                      Hint: {(exercise as QueryExercise | CodeExercise).hint}
+                      Hint:{" "}
+                      {
+                        (
+                          exercise as
+                            | QueryExercise
+                            | CodeExercise
+                            | FormulaExercise
+                        ).hint
+                      }
                     </p>
                   ) : (
                     <button
@@ -1004,7 +1177,11 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                       fillSlots.some((s) => s === null)) ||
                     (exercise.type === "query" && !engineReady) ||
                     (exercise.type === "code" &&
-                      (!!runtimeLoading || running || checking))
+                      (!!runtimeLoading || running || checking)) ||
+                    (exercise.type === "formula" &&
+                      (!formulaText.replace(/^=/, "").trim() ||
+                        running ||
+                        checking))
                   }
                   className="shrink-0 border border-turf bg-turf/15 px-8 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25 disabled:cursor-not-allowed disabled:border-panel-border disabled:bg-panel disabled:text-ink-muted"
                 >
