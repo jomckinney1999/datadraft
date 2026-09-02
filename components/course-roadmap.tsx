@@ -21,6 +21,7 @@ import { getStyle } from "@/lib/playbook";
 import { getTrack, normalizeTrackId } from "@/lib/draft";
 import Coach from "@/components/coach";
 import ThemeToggle from "@/components/theme-toggle";
+import HomeLink from "@/components/home-link";
 
 const NODE_OFFSETS = [0, 48, 0, -48];
 
@@ -102,15 +103,7 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
     <main className="mx-auto min-h-screen w-full max-w-2xl px-4 pb-24">
       {/* header */}
       <header className="flex items-center justify-between py-5">
-        <Link
-          href="/learn"
-          className="font-display text-lg font-bold tracking-tight text-ink"
-        >
-          SQL<span className="text-turf">Sports</span>
-          <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-muted">
-            ← all courses
-          </span>
-        </Link>
+        <HomeLink back="/learn" backLabel="all courses" />
         <div className="flex items-center gap-3">
           {progress.username && (
             <span className="hidden border border-gold/40 bg-gold/5 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-gold md:inline">

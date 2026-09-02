@@ -14,6 +14,7 @@ import { TRACKS, getTrack, type Track } from "@/lib/draft";
 import { readStoredModule } from "@/lib/use-module";
 import { loadProgress, setDraftPick } from "@/lib/progress";
 import Coach from "@/components/coach";
+import HomeLink from "@/components/home-link";
 
 type Act = "jersey" | "clock" | "podium";
 
@@ -59,15 +60,7 @@ function DraftDay() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col px-4 pb-16">
       <header className="flex items-center justify-between py-5">
-        <Link
-          href="/learn"
-          className="font-display text-lg font-bold tracking-tight text-ink"
-        >
-          SQL<span className="text-turf">Sports</span>
-          <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-muted">
-            draft day
-          </span>
-        </Link>
+        <HomeLink label="draft day" back="/learn" backLabel="courses" />
         <div className="flex items-center gap-3">
           <span className="font-mono text-[10px] uppercase tracking-widest text-gold">
             {act === "podium" ? "the pick is in" : "live from the war room"}

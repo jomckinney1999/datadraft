@@ -10,6 +10,7 @@ import { COURSES, ALL_IN_ONE, type Course } from "@/lib/courses";
 import { liveLessons, ALL_MODULE } from "@/lib/curriculum";
 import { loadProgress, displayStreak, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
 import TrophyCase from "@/components/trophy-case";
+import HomeLink from "@/components/home-link";
 import Coach from "@/components/coach";
 import CourseArt from "@/components/course-art";
 import CourseCover from "@/components/course-cover";
@@ -184,15 +185,7 @@ export default function LearnCatalogPage() {
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-24 sm:px-6">
       <header className="flex items-center justify-between py-5">
-        <Link
-          href="/"
-          className="font-display text-lg font-bold tracking-tight text-ink"
-        >
-          SQL<span className="text-turf">Sports</span>
-          <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-muted">
-            learn
-          </span>
-        </Link>
+        <HomeLink label="learn" />
         <div className="flex items-center gap-3">
           {progress.username && (
             <span className="hidden border border-gold/40 bg-gold/5 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-gold md:inline">

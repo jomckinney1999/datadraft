@@ -29,6 +29,7 @@ import { STYLES, type PlaybookStyle } from "@/lib/playbook";
 import { loadProgress, saveProgress, type Progress } from "@/lib/progress";
 import { MODULE_STORAGE_KEY } from "@/lib/use-module";
 import ThemeToggle from "@/components/theme-toggle";
+import HomeLink from "@/components/home-link";
 
 const TYPE_LABEL: Record<Exercise["type"], string> = {
   mc: "MC",
@@ -128,6 +129,10 @@ export default function DemoPage() {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-5xl px-5 py-10">
+      <div className="mb-8">
+        <HomeLink label="beta bench" back="/learn" backLabel="courses" />
+      </div>
+
       <header className="flex items-start justify-between gap-4">
         <div>
           <p className="label-broadcast text-gold">internal · beta bench</p>

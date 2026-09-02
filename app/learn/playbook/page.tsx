@@ -8,6 +8,7 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import ThemeToggle from "@/components/theme-toggle";
+import HomeLink from "@/components/home-link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   QUIZ,
@@ -52,15 +53,7 @@ function PlaybookQuiz() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col px-4 pb-16">
       <header className="flex items-center justify-between py-5">
-        <Link
-          href="/learn"
-          className="font-display text-lg font-bold tracking-tight text-ink"
-        >
-          SQL<span className="text-turf">Sports</span>
-          <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-muted">
-            playbook style
-          </span>
-        </Link>
+        <HomeLink label="playbook style" back="/learn" backLabel="courses" />
         <div className="flex items-center gap-3">
           {!done && (
             <div className="flex items-center gap-1.5">

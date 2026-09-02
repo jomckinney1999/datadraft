@@ -7,6 +7,7 @@ import {
   SOURCES,
 } from "@/lib/data-source";
 import ThemeToggle from "@/components/theme-toggle";
+import HomeLink from "@/components/home-link";
 
 export const metadata: Metadata = {
   title: "Where the data comes from — SQL Sports",
@@ -17,6 +18,10 @@ export const metadata: Metadata = {
 export default function DataPage() {
   return (
     <main className="mx-auto min-h-screen w-full max-w-3xl px-5 py-12">
+      <div className="mb-8">
+        <HomeLink label="data" />
+      </div>
+
       <header className="flex items-start justify-between gap-4">
         <div>
           <p className="label-broadcast text-turf">the numbers</p>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import Coach from "@/components/coach";
 import ThemeToggle from "@/components/theme-toggle";
+import HomeLink from "@/components/home-link";
 import WaitlistForm from "@/components/waitlist-form";
 
 export const metadata: Metadata = {
@@ -32,6 +33,10 @@ const FEATURES = [
 export default function InterviewComingSoonPage() {
   return (
     <main className="mx-auto min-h-screen w-full max-w-3xl px-5 py-12">
+      <div className="mb-8">
+        <HomeLink label="mock interview" />
+      </div>
+
       <header className="flex items-start justify-between gap-4">
         <div>
           <p className="label-broadcast text-gold">declaring next season</p>

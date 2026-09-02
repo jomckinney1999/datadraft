@@ -11,6 +11,7 @@ import { loadProgress, type Progress } from "@/lib/progress";
 import { syncProgress } from "@/lib/progress-sync";
 import ThemeToggle from "@/components/theme-toggle";
 import Coach from "@/components/coach";
+import HomeLink from "@/components/home-link";
 
 type State = "loading" | "signed-out" | "sending" | "sent" | "signed-in";
 
@@ -83,12 +84,7 @@ export default function AccountPage() {
   return (
     <main className="mx-auto min-h-screen w-full max-w-2xl px-4 pb-24 sm:px-6">
       <header className="flex items-center justify-between py-5">
-        <Link href="/" className="font-display text-lg font-bold tracking-tight text-ink">
-          SQL<span className="text-turf">Sports</span>
-          <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-muted">
-            account
-          </span>
-        </Link>
+        <HomeLink label="account" />
         <div className="flex items-center gap-3">
           <ThemeToggle />
           <Link

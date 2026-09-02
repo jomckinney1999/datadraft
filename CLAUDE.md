@@ -18,6 +18,12 @@ Both themes ship. Every token resolves through a CSS variable holding an `"r g b
 - `app/layout.tsx` runs a blocking inline script that sets `data-theme` before first paint. It mirrors the resolution order in `theme-toggle.tsx` — **change both or neither**, or the page flashes the wrong theme on load.
 - **Don't remove the `.theme-switching` transition suppression.** Chrome does not re-resolve a `var()`-derived color on an element with an active `transition-colors`, so without it every button, card, and nav link stays painted in the *previous* theme's colors after a toggle. It is a correctness fix, not polish.
 
+## Navigation
+
+- **Every route puts `components/home-link.tsx` top-left, and the wordmark always goes to `/`.** No exceptions, and don't point it anywhere else. Six routes previously had no way home at all (`/interview`, `/data`, `/demo`, the draft, the playbook quiz, the roadmap), and three more showed the wordmark pointing at `/learn` — which is worse than no link, because the affordance everyone reaches for first silently did something else. The homepage's own logo was `href="#"`, a dead anchor.
+- A page that also wants an in-context back link renders it via `HomeLink`'s `back` / `backLabel` props, beside the wordmark — never by re-targeting the logo. The roadmap is the reference: logo → `/`, "← all courses" → `/learn`.
+- **The lesson player is the one deliberate exception.** Its top bar stays minimal (quit / drive / hearts) and the quit `X` goes to `/learn`, not home: mid-drive the course list is the right destination, and a logo sitting where the X is would make it easy to lose a drive by accident. `/learn` carries the wordmark, so home is one further click.
+
 ## Course imagery
 
 - **Course cards use drawn covers, not photos** (`components/course-cover.tsx`). Each of the ten courses has its own scene pairing its subject with the sport (a stat sheet on a field, a ranked board inside a window frame, a route tree, kick trajectories through uprights). They share a `Sky` + `Field` treatment so the set reads as one system.

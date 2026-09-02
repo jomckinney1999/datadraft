@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import ThemeToggle from "@/components/theme-toggle";
 
 const NAV_LINKS = [
@@ -20,14 +21,14 @@ export default function SiteNav() {
   return (
     <header className="relative z-20 border-b border-panel-border/80">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <a href="#" className="flex items-baseline gap-2">
+        <Link href="/" aria-label="SQL Sports home" className="flex items-baseline gap-2">
           <span className="font-display text-lg font-bold tracking-tight text-pop">
             SQL<span className="text-turf">Sports</span>
           </span>
           <span className="hidden font-mono text-[10px] uppercase tracking-[0.18em] text-ink-muted sm:inline">
             v0.1
           </span>
-        </a>
+        </Link>
 
         <nav className="hidden items-center gap-6 sm:flex">
           {NAV_LINKS.map((link) => (
