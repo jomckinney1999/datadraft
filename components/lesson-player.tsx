@@ -162,6 +162,14 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const [style, setStyle] = useState<PlaybookStyle | undefined>(undefined);
   const [phase, setPhase] = useState<Phase>("loading");
   const [introStep, setIntroStep] = useState(0);
+  /**
+   * Which beat of the brief's paced walk-in is showing.
+   *
+   * The preview table and the "start" button are held back until the last
+   * beat, so a beginner meets one idea at a time instead of a wall of text
+   * with a table under it.
+   */
+  const [briefStep, setBriefStep] = useState(0);
   const [queue, setQueue] = useState<number[]>([]);
   const [hearts, setHearts] = useState(MAX_HEARTS);
   const [combo, setCombo] = useState(0);
@@ -406,6 +414,12 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
 
   if (!entry || !style || phase === "loading") return null;
   const { lesson, unit } = entry;
+  // A lesson either paces its brief across steps or falls back to one
+  // paragraph; the preview and the start button wait for the final beat so
+  // the learner isn't reading ahead while still being introduced.
+  const briefSteps = lesson.brief.steps ?? [];
+  const onLastBriefStep =
+    briefSteps.length === 0 || briefStep >= briefSteps.length - 1;
   // Advance within whichever module the learner picked on the roadmap, so a
   // "just Python" learner isn't dropped into a SQL lesson at the end.
   const nextId = nextLessonId(lesson.id, moduleId);
@@ -673,6 +687,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     setAttempted({});
     setFeedback(null);
     setIntroStep(0);
+    setBriefStep(0);
     // Every style starts at the brief. Gunslingers skip the theory cards that
     // follow it, not the grounding itself — landing cold on drill #1 with no
     // idea what the table looks like was the old behaviour and it was wrong.
@@ -751,19 +766,84 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             <div className="hidden shrink-0 sm:block">
               <Coach mood="happy" size={104} />
             </div>
-            <div className="min-w-0">
-              <p className="label-broadcast text-turf">the brief</p>
-              <h2 className="mt-1 font-display text-2xl font-bold leading-snug text-ink">
-                {lesson.brief.goal}
-              </h2>
-              <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-                {lesson.brief.setup}
+            <div className="min-w-0 flex-1">
+              <p className="label-broadcast text-turf">
+                {briefSteps.length > 0
+                  ? `the brief · ${briefStep + 1} of ${briefSteps.length}`
+                  : "the brief"}
               </p>
+              <h2 className="mt-1 font-display text-2xl font-bold leading-snug text-ink">
+                {briefSteps.length > 0
+                  ? briefSteps[briefStep].title
+                  : lesson.brief.goal}
+              </h2>
+              <p
+                key={briefStep}
+                className="animate-fade-up mt-3 text-sm leading-relaxed text-ink-soft"
+              >
+                {briefSteps.length > 0
+                  ? briefSteps[briefStep].body
+                  : lesson.brief.setup}
+              </p>
+              {briefSteps[briefStep]?.code && (
+                <pre
+                  key={`c-${briefStep}`}
+                  className="animate-fade-up mt-3 overflow-x-auto border border-panel-border bg-night px-3 py-2.5 font-mono text-[12px] leading-relaxed text-turf"
+                >
+                  {briefSteps[briefStep].code}
+                </pre>
+              )}
+              {briefSteps[briefStep]?.note && (
+                <p
+                  key={`n-${briefStep}`}
+                  className="animate-fade-up mt-3 border-l-2 border-gold/50 bg-gold/5 py-2 pl-3 pr-2 text-[13px] leading-relaxed text-ink-muted"
+                >
+                  {briefSteps[briefStep].note}
+                </p>
+              )}
             </div>
           </div>
 
+          {/* Pager. Dots mirror the theory cards, so the two read the same. */}
+          {briefSteps.length > 1 && (
+            <div className="flex items-center justify-between gap-4">
+              <button
+                type="button"
+                onClick={() => setBriefStep((i) => Math.max(0, i - 1))}
+                disabled={briefStep === 0}
+                className="press font-mono text-[11px] uppercase tracking-widest text-ink-muted hover:text-ink disabled:opacity-30"
+              >
+                ← Back
+              </button>
+              <div className="flex items-center gap-1.5">
+                {briefSteps.map((_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    aria-label={`Brief step ${i + 1}`}
+                    onClick={() => setBriefStep(i)}
+                    className={`h-1.5 w-6 transition-colors ${
+                      i === briefStep ? "bg-turf" : "bg-panel-hover hover:bg-turf/40"
+                    }`}
+                  />
+                ))}
+              </div>
+              {!onLastBriefStep ? (
+                <button
+                  type="button"
+                  onClick={() => setBriefStep((i) => i + 1)}
+                  className="press font-mono text-[11px] uppercase tracking-widest text-turf hover:opacity-80"
+                >
+                  Next →
+                </button>
+              ) : (
+                <span className="w-[52px]" />
+              )}
+            </div>
+          )}
+
           {/* Real rows from the real database, before we ask about them. */}
-          {lesson.brief.previewSql && (
+          {lesson.brief.previewSql && onLastBriefStep && (
             <div className="border border-panel-border bg-night/95 shadow-scoreboard">
               <div className="flex items-center justify-between border-b border-panel-border px-3 py-2">
                 <span className="label-broadcast text-[10px] text-turf">
@@ -812,7 +892,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
           )}
 
           {/* Real data deserves a visible source, not a footnote nobody reads. */}
-          {(lesson.brief.previewSql || lesson.brief.previewSheet) && (
+          {(lesson.brief.previewSql || lesson.brief.previewSheet) &&
+            onLastBriefStep && (
             <p className="font-mono text-[10px] leading-relaxed text-ink-muted">
               {SHORT_CREDIT} ·{" "}
               <Link
@@ -825,7 +906,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
           )}
 
           {/* Excel lessons: the real grid, before we ask anything about it. */}
-          {lesson.brief.previewSheet && (
+          {lesson.brief.previewSheet && onLastBriefStep && (
             <ExcelGrid
               sheet={lesson.brief.previewSheet}
               maxRows={9}
@@ -833,15 +914,25 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             />
           )}
 
-          <button
-            type="button"
-            onClick={() =>
-              setPhase(style === "gunslinger" ? "exercise" : "intro")
-            }
-            className="press w-full border border-turf bg-turf/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf hover:bg-turf/25"
-          >
-            {style === "gunslinger" ? "Snap the ball" : "Walk me through it"}
-          </button>
+          {onLastBriefStep ? (
+            <button
+              type="button"
+              onClick={() =>
+                setPhase(style === "gunslinger" ? "exercise" : "intro")
+              }
+              className="press w-full border border-turf bg-turf/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf hover:bg-turf/25"
+            >
+              {style === "gunslinger" ? "Snap the ball" : "Walk me through it"}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setBriefStep((i) => i + 1)}
+              className="press w-full border border-panel-border bg-panel/60 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-ink-soft hover:border-turf/50 hover:text-turf"
+            >
+              Got it → keep going
+            </button>
+          )}
         </div>
       )}
 

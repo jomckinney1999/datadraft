@@ -119,9 +119,34 @@ export type TheoryCard = { title: string; text: string; code?: string };
  * database so the learner literally sees the rows before being asked about
  * them — reading real data is the whole point of the lesson.
  */
+/**
+ * One beat of the brief, shown on its own before the next one appears.
+ *
+ * The brief used to be a single `setup` paragraph. On lesson 1 that meant a
+ * beginner's first contact with the product was a dense block opening "A
+ * database is a set of tables" — a definition, not an on-ramp. Splitting it
+ * into steps lets a lesson introduce one idea at a time and lets the learner
+ * set the pace, which is the whole point of an intro.
+ */
+export type BriefStep = {
+  /** Short headline for the beat. */
+  title: string;
+  body: string;
+  /** Optional illustration — a snippet, a shape, a worked example. */
+  code?: string;
+  /** Optional aside, rendered as a quiet callout under the body. */
+  note?: string;
+};
+
 export type LessonBrief = {
   goal: string;
+  /**
+   * Fallback one-paragraph setup, used when `steps` is absent.
+   * Prefer `steps` for anything a beginner meets early.
+   */
   setup: string;
+  /** Paced walk-in. When present the player shows these before the preview. */
+  steps?: BriefStep[];
   previewSql?: string;
   /** Excel units: which workbook tab to show in the brief. Same job as previewSql. */
   previewSheet?: string;
@@ -172,6 +197,32 @@ export const COURSE = {
           blurb: "Tables, rows, columns — and your first SELECT *.",
           brief: {
             goal: "Read any table in the database with SELECT.",
+      steps: [
+        {
+          title: "You just got the analyst job",
+          body: "Welcome to a fantasy football league that has been running for three seasons. Every week the managers argue about the same things: who deserves to start, who got lucky, who is quietly winning them games. Your job is to settle those arguments with evidence instead of opinions. The good news is that everything you need has already been written down.",
+        },
+        {
+          title: "The records are just stat sheets",
+          body: "All that history lives in something called a database. Do not let the word put you off. A database is a stack of stat sheets, and each sheet is a grid — exactly like the box score page in a newspaper. The categories run across the top, and every line underneath is one thing that happened.",
+          note: "If you have ever opened a spreadsheet, you have already used one of these. Same idea, bigger stack, and something else does the adding up.",
+        },
+        {
+          title: "Our league keeps three sheets",
+          body: "You will use all three of these before the course is over. For now just get a feel for what each one is holding.",
+          code: "week_results   every game a player actually played\nrosters        who owns which player in our league\nwaiver_wire    the free agents nobody has claimed",
+          note: "week_results is real: 876 games of genuine NFL scoring from 2022 to 2024. The other two are an example league we invented, because who owns whom is a fact about one private league and not about the NFL.",
+        },
+        {
+          title: "One row is one player, one game",
+          body: "This is the sentence that unlocks everything else. Read a row from left to right the way you would read a box-score line: who it was, what team they play for, what position, which season, which week, and how many fantasy points they scored that day. That is the whole grammar of this table. Learn to read one row and you can read all 876.",
+        },
+        {
+          title: "SELECT is how you say show me",
+          body: "You get things out of a stat sheet by asking for them in SQL. The word for show me is SELECT. The star means every column. So the line below reads as: show me everything on the week_results sheet, and stop after 5 rows. Here is exactly what that gives you.",
+          code: "SELECT * FROM week_results LIMIT 5;",
+        },
+      ],
             setup:
               "A database is a set of tables. A table is a grid: each column is a stat category, each row is one entry. Our league has three — week_results, rosters, and waiver_wire. Before we ask you anything about it, look at what one row of week_results actually holds.",
             previewSql: "SELECT * FROM week_results LIMIT 5;",
@@ -290,6 +341,18 @@ export const COURSE = {
           blurb: "Select only the columns you need.",
           brief: {
             goal: "Pull only the columns you actually need.",
+      steps: [
+        {
+          title: "Asking for everything gets noisy",
+          body: "SELECT * works, and on a small sheet nobody minds. But real tables are wide — thirty columns, sixty, sometimes hundreds. Dumping all of them to answer one question buries the answer in noise, and you end up scrolling sideways looking for the one number you actually wanted.",
+        },
+        {
+          title: "So call the routes you want",
+          body: "Instead of the star, list the columns you need, separated by commas. You get back exactly those and nothing else. Same rows as before, far less to read.",
+          code: "SELECT player, fantasy_pts FROM week_results;",
+          note: "The order you list them is the order they come back in. Ask for fantasy_pts first and it becomes the first column — the query decides the shape of the answer, not the table.",
+        },
+      ],
             setup:
               "SELECT * gives you everything, which is noisy once a table gets wide. Naming columns instead gives you a clean, readable answer. Here's the difference — same rows, fewer columns.",
             previewSql: "SELECT player, position, fantasy_pts FROM week_results LIMIT 5;",
@@ -387,6 +450,18 @@ export const COURSE = {
           blurb: "LIMIT: take a quick look without the whole game tape.",
           brief: {
             goal: "Cap how many rows come back with LIMIT.",
+      steps: [
+        {
+          title: "Nobody watches every snap of film",
+          body: "week_results has 876 rows, and that is a small table. Real ones run to millions. No analyst opens a table by reading all of it — you glance at the first handful to learn its shape, then ask a real question of it.",
+        },
+        {
+          title: "LIMIT caps how much comes back",
+          body: "Put LIMIT and a number at the very end of the query and the database stops once it has handed you that many rows. It is the first thing most analysts type when they meet a table they have never seen before.",
+          code: "SELECT * FROM week_results LIMIT 3;",
+          note: "It goes last, after everything else. LIMIT is about how much you get back, so it is the final word in the sentence.",
+        },
+      ],
             setup:
               "Real tables have millions of rows. LIMIT takes a quick look without pulling the whole game tape — it's the first thing analysts type when they meet a new table. This returns exactly 3 rows.",
             previewSql: "SELECT player, week, fantasy_pts FROM week_results LIMIT 3;",
@@ -394,7 +469,7 @@ export const COURSE = {
           },
           intro: {
             title: "Take a knee with LIMIT",
-            text: "week_results has over 2,000 rows. When you just want a feel for the data, add LIMIT n at the very end of the query to cap how many rows come back.",
+            text: "week_results has 876 rows. When you just want a feel for the data, add LIMIT n at the very end of the query to cap how many rows come back.",
             code: "SELECT * FROM week_results LIMIT 10;",
           },
           film: [
@@ -486,6 +561,18 @@ export const COURSE = {
           blurb: "WHERE + equality. Text wears quotes.",
           brief: {
             goal: "Filter to the rows you care about with WHERE.",
+      steps: [
+        {
+          title: "You rarely want the whole sheet",
+          body: "So far you have taken whatever the table handed you. Real questions are narrower than that. Not how did everyone do, but how did this one player do, or which games were the big ones. Cutting a table down to the rows that matter is the single most used move in all of SQL, and it is the one that turns a stat sheet into an answer.",
+        },
+        {
+          title: "WHERE is the filter",
+          body: "Add WHERE after the table name and give it a condition to test. The database checks every single row against that condition and hands back only the ones that pass. Text you are matching goes inside single quotes. Numbers go in bare.",
+          code: "SELECT * FROM week_results WHERE player = 'Josh Allen';",
+          note: "One equals sign, not two. Most programming languages use == to ask is this equal, but SQL uses a single = for the question and has no separate assignment to confuse it with.",
+        },
+      ],
             setup:
               "WHERE keeps only rows that pass a test. Text values go in single quotes; numbers don't. Here's every row for one player — the same table you've been reading, narrowed to one name.",
             previewSql: "SELECT player, week, fantasy_pts FROM week_results WHERE player = 'Josh Allen' LIMIT 5;",
