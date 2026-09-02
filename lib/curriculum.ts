@@ -282,12 +282,16 @@ export const COURSE = {
             {
               type: "mc",
               prompt:
-                "Our league database has three tables. Which one holds one row per player, per week, per season — the weekly scoring log?",
-              options: ["week_results", "rosters", "waiver_wire", "playbook"],
-              answer: 0,
-              drillSkip: true,
+                "You are handed a table you have never seen before. Which question should you answer first?",
+              options: [
+                "How many rows does it have?",
+                "What does one row represent?",
+                "Which columns are numbers?",
+                "Who built it?",
+              ],
+              answer: 1,
               explain:
-                "week_results is the weekly scoring log. rosters maps players to fantasy teams, and waiver_wire tracks free agents. There's no playbook table — yet.",
+                "What one row stands for is called the grain, and it decides what every query you write actually means. Get it wrong and your COUNT is counting something other than what you think.",
             },
             {
               type: "mc",
@@ -440,12 +444,17 @@ export const COURSE = {
             },
             {
               type: "mc",
-              prompt: "What separates column names in a SELECT list?",
-              options: ["A comma", "The word AND", "A semicolon", "Just spaces"],
-              answer: 0,
-              drillSkip: true,
+              prompt:
+                "You ask for three columns and they come back in a different order than the table stores them in. What happened?",
+              options: [
+                "The database sorted them alphabetically",
+                "You got the order you asked for — the query decides the shape of the answer",
+                "The table definition changed",
+                "Nothing — column order is random",
+              ],
+              answer: 1,
               explain:
-                "Commas separate columns. AND belongs to filtering (next unit), and the semicolon ends the whole statement.",
+                "The SELECT list is a specification, not a filter. You are describing the result you want, and the order you name columns in is the order you get them back.",
             },
             {
               type: "query",
@@ -508,12 +517,16 @@ export const COURSE = {
             {
               type: "mc",
               prompt:
-                "week_results has 876 rows. You want a quick 10-row peek. Which clause caps the rows returned?",
-              options: ["LIMIT", "CAP", "WHERE", "ORDER BY"],
-              answer: 0,
-              drillSkip: true,
+                "You open a table you have never seen and it holds several million rows. What do you run first?",
+              options: [
+                "SELECT * with no limit, then scroll",
+                "SELECT * with a small LIMIT",
+                "A COUNT of every row",
+                "Nothing until someone sends you the documentation",
+              ],
+              answer: 1,
               explain:
-                "LIMIT n returns at most n rows. WHERE filters by condition and ORDER BY sorts — both coming soon.",
+                "A small LIMIT is a free look at the shape of the data. Pulling millions of rows to glance at five of them is slow for you and inconsiderate on a database other people are sharing.",
             },
             {
               type: "fill",
@@ -610,12 +623,16 @@ export const COURSE = {
             {
               type: "mc",
               prompt:
-                "Which clause filters rows — keeping only the ones that match a condition?",
-              options: ["WHERE", "LIMIT", "SELECT", "FROM"],
-              answer: 0,
-              drillSkip: true,
+                "You need one player's games out of a huge table. You could pull everything and scroll, or filter in the query. Beyond convenience, why does filtering matter?",
+              options: [
+                "It makes the query easier to read",
+                "The database does the work and sends back only what you asked for",
+                "Filtered queries are always more accurate",
+                "It permanently removes the other rows",
+              ],
+              answer: 1,
               explain:
-                "WHERE is the filter. LIMIT caps row count with no opinion about which rows.",
+                "Filtering happens where the data lives. Pulling a million rows across the network to throw away all but forty is slow, and on a shared database it is a cost everyone else pays too.",
             },
             {
               type: "fill",
@@ -956,22 +973,31 @@ export const COURSE = {
           exercises: [
             {
               type: "mc",
-              prompt: "Which clause sorts your results?",
-              options: ["ORDER BY", "SORT BY", "GROUP BY", "RANK"],
-              answer: 0,
-              drillSkip: true,
+              prompt:
+                "You run the same query twice without ORDER BY and the rows come back in a different order the second time. Is that a bug?",
+              options: [
+                "Yes, the database is corrupted",
+                "No — without ORDER BY the database never promised an order at all",
+                "Yes, the query is missing a LIMIT",
+                "No, but only because the table is small",
+              ],
+              answer: 1,
               explain:
-                "ORDER BY is the sorter. GROUP BY (next unit) squashes rows — different job entirely.",
+                "Row order without ORDER BY is an accident of how the data was stored and read, not a guarantee. It often looks stable, which is exactly what makes it a trap when it eventually changes.",
             },
             {
               type: "mc",
               prompt:
-                "You want the biggest scores at the top. Which direction keyword?",
-              options: ["DESC", "ASC", "TOP", "DOWN"],
-              answer: 0,
-              drillSkip: true,
+                "Your leaderboard query is showing the worst players at the top. What has gone wrong?",
+              options: [
+                "The data is sorted incorrectly in the table",
+                "Nothing is broken — ascending is the default, and a leaderboard needs DESC",
+                "LIMIT is cutting the wrong end",
+                "The aggregate is computing the minimum",
+              ],
+              answer: 1,
               explain:
-                "DESC = descending, biggest first. ASC (the default) is smallest first.",
+                "Smallest-first is the default because that is the conventional sort order. A leaderboard is the case where you almost always want the opposite, which is why DESC gets typed so often.",
             },
             {
               type: "fill",
@@ -1198,12 +1224,17 @@ export const COURSE = {
           exercises: [
             {
               type: "mc",
-              prompt: "Which function counts how many rows matched?",
-              options: ["COUNT(*)", "SUM(*)", "TOTAL()", "ROWS()"],
-              answer: 0,
-              drillSkip: true,
+              prompt:
+                "COUNT(*) counts rows. COUNT(fantasy_pts) counts values. On a column that has gaps in it, why do those two disagree?",
+              options: [
+                "They never disagree — the two are identical",
+                "COUNT on a column ignores NULLs, so every missing value is left out",
+                "COUNT on a column only counts distinct values",
+                "COUNT(*) includes the header row",
+              ],
+              answer: 1,
               explain:
-                "COUNT(*) counts rows. SUM adds up values in a column — related, but a different question.",
+                "COUNT on a column ignores NULLs. week_results happens to have none, so here both return 876 — but the moment a column has gaps, counting it silently answers a different question than counting rows, with no warning.",
             },
             {
               type: "mc",
@@ -1304,12 +1335,16 @@ export const COURSE = {
             {
               type: "mc",
               prompt:
-                "You want ONE row per player, each showing that player's total points. Which clause creates the per-player split?",
-              options: ["GROUP BY", "ORDER BY", "SPLIT BY", "WHERE"],
-              answer: 0,
-              drillSkip: true,
+                "You GROUP BY player, then also try to SELECT week alongside the total. Why is that a problem?",
+              options: [
+                "week is the wrong data type to select",
+                "Each player has many weeks, so there is no single week to show on that one row",
+                "You can only ever select the grouping column",
+                "GROUP BY has to come before SELECT",
+              ],
+              answer: 1,
               explain:
-                "GROUP BY player makes a bucket per player; SUM then runs once per bucket.",
+                "Grouping squashes many rows into one, so every column you select has to make sense for the whole group. SQLite will not stop you here — it quietly returns one arbitrary week — which is more dangerous than an error, because the report looks finished.",
             },
             {
               type: "fill",
@@ -1410,12 +1445,16 @@ export const COURSE = {
             {
               type: "mc",
               prompt:
-                "WHERE filters rows before grouping. What filters the groups AFTER aggregation?",
-              options: ["HAVING", "WHERE, again", "LIMIT", "FILTER BY"],
-              answer: 0,
-              drillSkip: true,
+                "A query uses both WHERE and HAVING. What is each one actually narrowing?",
+              options: [
+                "They do the same thing; HAVING is just newer syntax",
+                "WHERE narrows the individual rows before grouping; HAVING narrows the groups after",
+                "WHERE narrows columns; HAVING narrows rows",
+                "HAVING runs first, then WHERE cleans up",
+              ],
+              answer: 1,
               explain:
-                "HAVING is WHERE's post-aggregation counterpart. It sees totals and averages; WHERE never does.",
+                "They filter at two different moments, which is why both can appear in one query and why a condition about an average can only ever go in HAVING.",
             },
             {
               type: "fill",
@@ -4925,17 +4964,17 @@ export const COURSE = {
           exercises: [
             {
               type: "mc",
-              prompt: "What are the three arguments of IF, in order?",
+              prompt:
+                "You write =IF(E2>300,\"Stud\") and leave the last part off. What does the cell show when the test fails?",
               options: [
-                "true value, test, false value",
-                "test, value if true, value if false",
-                "range, criteria, result",
-                "test, false value, true value",
+                "An empty cell",
+                "The word FALSE",
+                "A #VALUE! error",
+                "Zero",
               ],
               answer: 1,
               explain:
-                "Test first, then the true answer, then the false one.",
-              drillSkip: true,
+                "Excel fills in the missing answer with the literal word FALSE, which is almost never what anyone intended and looks alarming in a finished report. Always supply the third argument.",
             },
             {
               type: "formula",
