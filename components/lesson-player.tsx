@@ -48,6 +48,7 @@ import { getStyle, type PlaybookStyle } from "@/lib/playbook";
 import Coach, { type CoachMood } from "@/components/coach";
 import CodeEditor from "@/components/code-editor";
 import ExcelGrid from "@/components/excel-grid";
+import SchemaReference from "@/components/schema-reference";
 import {
   ensureFormulaEngine,
   evaluateFormula,
@@ -253,6 +254,21 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       ? entry.lesson.exercises[currentIdx]
       : undefined;
 
+  /**
+   * The SQL the brief should be showing right now.
+   *
+   * A beat can carry its own preview so it can display the table it is
+   * talking about; otherwise the lesson-level preview appears on the final
+   * beat. Derived up here because the effect that runs it is a hook, and
+   * hooks have to sit above the early return that `lesson` comes after.
+   */
+  const briefStepsAll = entry?.lesson.brief.steps ?? [];
+  const lastBriefBeat =
+    briefStepsAll.length === 0 || briefStep >= briefStepsAll.length - 1;
+  const briefPreviewSql =
+    briefStepsAll[briefStep]?.previewSql ??
+    (lastBriefBeat ? entry?.lesson.brief.previewSql : undefined);
+
   // Which workbook tab the current formula exercise reads from.
   const formulaSheet =
     exercise?.type === "formula" ? exercise.sheet ?? MAIN_SHEET : MAIN_SHEET;
@@ -341,16 +357,14 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   // Run the brief's preview query once the engine is up, so the learner sees
   // real rows before the first question about them.
   useEffect(() => {
-    if (phase !== "brief" || !engineReady || !entry?.lesson.brief.previewSql) {
-      return;
-    }
+    if (phase !== "brief" || !engineReady || !briefPreviewSql) return;
     try {
-      const res = dbRef.current?.exec(entry.lesson.brief.previewSql)[0];
+      const res = dbRef.current?.exec(briefPreviewSql)[0];
       setBriefRows(res ?? { columns: [], values: [] });
     } catch {
       setBriefRows(null); // a broken preview must never block the lesson
     }
-  }, [phase, engineReady, entry]);
+  }, [phase, engineReady, briefPreviewSql]);
 
   // Start downloading Python/R the moment a code exercise appears, rather than
   // making the learner wait for a multi-MB fetch after they hit Run.
@@ -418,8 +432,13 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   // paragraph; the preview and the start button wait for the final beat so
   // the learner isn't reading ahead while still being introduced.
   const briefSteps = lesson.brief.steps ?? [];
-  const onLastBriefStep =
-    briefSteps.length === 0 || briefStep >= briefSteps.length - 1;
+  const onLastBriefStep = lastBriefBeat;
+  const activePreviewSql = briefPreviewSql;
+  const activePreviewSheet =
+    briefSteps[briefStep]?.previewSheet ??
+    (onLastBriefStep ? lesson.brief.previewSheet : undefined);
+  const activePreviewCaption =
+    briefSteps[briefStep]?.previewCaption ?? lesson.brief.previewCaption;
   // Advance within whichever module the learner picked on the roadmap, so a
   // "just Python" learner isn't dropped into a SQL lesson at the end.
   const nextId = nextLessonId(lesson.id, moduleId);
@@ -843,18 +862,18 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
           )}
 
           {/* Real rows from the real database, before we ask about them. */}
-          {lesson.brief.previewSql && onLastBriefStep && (
+          {activePreviewSql && (
             <div className="border border-panel-border bg-night/95 shadow-scoreboard">
               <div className="flex items-center justify-between border-b border-panel-border px-3 py-2">
                 <span className="label-broadcast text-[10px] text-turf">
-                  {lesson.brief.previewCaption ?? "the data"}
+                  {activePreviewCaption ?? "the data"}
                 </span>
                 <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
                   {briefRows ? `${briefRows.values.length} rows` : "loading…"}
                 </span>
               </div>
               <pre className="overflow-x-auto border-b border-panel-border px-3 py-2 font-mono text-[11px] text-ink-muted">
-                {lesson.brief.previewSql}
+                {activePreviewSql}
               </pre>
               {briefRows && briefRows.columns.length > 0 && (
                 <div className="max-h-56 overflow-auto">
@@ -892,8 +911,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
           )}
 
           {/* Real data deserves a visible source, not a footnote nobody reads. */}
-          {(lesson.brief.previewSql || lesson.brief.previewSheet) &&
-            onLastBriefStep && (
+          {(activePreviewSql || activePreviewSheet) && (
             <p className="font-mono text-[10px] leading-relaxed text-ink-muted">
               {SHORT_CREDIT} ·{" "}
               <Link
@@ -906,11 +924,11 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
           )}
 
           {/* Excel lessons: the real grid, before we ask anything about it. */}
-          {lesson.brief.previewSheet && onLastBriefStep && (
+          {activePreviewSheet && (
             <ExcelGrid
-              sheet={lesson.brief.previewSheet}
+              sheet={activePreviewSheet}
               maxRows={9}
-              caption={lesson.brief.previewCaption}
+              caption={activePreviewCaption}
             />
           )}
 
@@ -1238,10 +1256,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                   disabled={!!feedback}
                   ariaLabel="SQL answer editor"
                 />
-                <div className="flex items-center justify-between border-t border-panel-border px-3 py-2">
-                  <p className="font-mono text-[10px] text-ink-muted">
-                    tables: week_results · rosters · waiver_wire
-                  </p>
+                <div className="flex items-center justify-end border-t border-panel-border px-3 py-2">
                   <button
                     type="button"
                     onClick={handleRun}
@@ -1251,6 +1266,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                     ▸ Run preview
                   </button>
                 </div>
+                {/* Prompts name tables constantly; make them checkable here. */}
+                <SchemaReference />
                 {(runError || softError) && (
                   <p className="border-t border-gold/40 bg-gold/5 px-3 py-2 font-mono text-[12px] text-gold">
                     ⚠ {softError ?? runError}

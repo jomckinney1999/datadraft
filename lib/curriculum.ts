@@ -136,6 +136,18 @@ export type BriefStep = {
   code?: string;
   /** Optional aside, rendered as a quiet callout under the body. */
   note?: string;
+  /**
+   * Show the thing this beat is talking about, right underneath it.
+   *
+   * Naming a table and not showing it asks the learner to hold a picture in
+   * their head that they have never actually seen. A beat that mentions
+   * week_results should be able to put week_results on the screen.
+   */
+  previewSql?: string;
+  /** Excel equivalent — which workbook tab this beat is referring to. */
+  previewSheet?: string;
+  /** Caption for whichever preview the beat shows. */
+  previewCaption?: string;
 };
 
 export type LessonBrief = {
@@ -212,10 +224,14 @@ export const COURSE = {
           body: "You will use all three of these before the course is over. For now just get a feel for what each one is holding.",
           code: "week_results   every game a player actually played\nrosters        who owns which player in our league\nwaiver_wire    the free agents nobody has claimed",
           note: "week_results is real: 876 games of genuine NFL scoring from 2022 to 2024. The other two are an example league we invented, because who owns whom is a fact about one private league and not about the NFL.",
+          previewSql: "SELECT * FROM rosters;",
+          previewCaption: "rosters · our example league, all 10 picks",
         },
         {
           title: "One row is one player, one game",
           body: "This is the sentence that unlocks everything else. Read a row from left to right the way you would read a box-score line: who it was, what team they play for, what position, which season, which week, and how many fantasy points they scored that day. That is the whole grammar of this table. Learn to read one row and you can read all 876.",
+          previewSql: "SELECT * FROM week_results LIMIT 1;",
+          previewCaption: "one row of week_results",
         },
         {
           title: "SELECT is how you say show me",
@@ -1480,6 +1496,8 @@ export const COURSE = {
         {
           title: "One sheet cannot answer this",
           body: "week_results knows what every player scored. rosters knows who owns whom in our league. Neither of them, on its own, can tell you how your fantasy team did on a given week, because that fact lives across both sheets at once.",
+          previewSql: "SELECT * FROM rosters;",
+          previewCaption: "rosters · the sheet week_results knows nothing about",
         },
         {
           title: "A join pairs up rows that agree",
@@ -5247,6 +5265,8 @@ export const COURSE = {
         {
           title: "This is the one that gets asked about by name",
           body: "When a job posting says Excel skills, lookups are a large part of what it means, and VLOOKUP is the one most people have heard of. It answers a genuinely common question: I have this name, what is their number.",
+          previewSheet: "Roster",
+          previewCaption: "the sheet every lookup below points at",
         },
         {
           title: "Four arguments, and the fourth is not optional",
@@ -5635,6 +5655,8 @@ export const COURSE = {
         {
           title: "This unit is what the job is actually made of",
           body: "Tutorials use clean data. Real exports do not arrive clean, and a large share of any analyst role is spent making files usable before any analysis begins. The Import tab is the same league exported badly, on purpose.",
+          previewSheet: "Import",
+          previewCaption: "the Import tab · the same league, exported badly",
         },
         {
           title: "The space you cannot see",
