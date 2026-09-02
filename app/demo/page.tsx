@@ -56,7 +56,7 @@ function countTypes(units: Unit[]): Record<string, number> {
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="border border-panel-border bg-panel/50 px-4 py-3">
+    <div className="surface border border-panel-border bg-panel/50 px-4 py-3">
       <p className="font-display text-2xl font-bold text-turf">{value}</p>
       <p className="mt-0.5 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
         {label}
@@ -149,7 +149,7 @@ export default function DemoPage() {
       </header>
 
       {/* ── profile controls ── */}
-      <section className="mt-8 border border-panel-border bg-panel/40 p-5">
+      <section className="surface mt-8 border border-panel-border bg-panel/40 p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="label-broadcast text-turf">demo profile</p>
@@ -269,7 +269,7 @@ export default function DemoPage() {
             return (
               <div
                 key={mod.id}
-                className="border border-panel-border bg-panel/30"
+                className="surface border border-panel-border bg-panel/30"
               >
                 <button
                   type="button"

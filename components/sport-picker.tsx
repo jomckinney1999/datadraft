@@ -124,7 +124,7 @@ export default function SportPicker() {
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <a
             href="/learn"
-            className="inline-flex items-center gap-2 border border-turf bg-turf px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-turf-dim"
+            className="btn-turf inline-flex items-center gap-2 border border-turf bg-turf px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-turf-dim"
           >
             Start learning →
           </a>

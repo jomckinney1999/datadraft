@@ -130,7 +130,7 @@ function HeartIcon({ filled }: { filled: boolean }) {
 
 function TheoryCardView({ card }: { card: TheoryCard }) {
   return (
-    <div className="w-full border border-panel-border bg-panel/80 p-6 text-left shadow-scoreboard">
+  <div className="surface w-full border border-panel-border bg-panel/80 p-6 text-left ">
       <p className="label-broadcast text-turf">coach blitz&apos;s chalkboard</p>
       <h1 className="mt-2 font-display text-2xl font-bold text-ink">
         {card.title}
@@ -946,7 +946,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             <button
               type="button"
               onClick={() => setBriefStep((i) => i + 1)}
-              className="press w-full border border-panel-border bg-panel/60 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-ink-soft hover:border-turf/50 hover:text-turf"
+              className="surface press w-full border border-panel-border bg-panel/60 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-ink-soft hover:border-turf/50 hover:text-turf"
             >
               Got it → keep going
             </button>
@@ -977,7 +977,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             <button
               type="button"
               onClick={() => setIntroStep((s) => s + 1)}
-              className="w-full max-w-xs border border-panel-border bg-panel/70 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-ink transition-colors hover:border-turf/50 hover:text-turf"
+              className="surface w-full max-w-xs border border-panel-border bg-panel/70 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-ink transition-colors hover:border-turf/50 hover:text-turf"
             >
               Next film card
             </button>
@@ -1006,7 +1006,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 {chalkboardOpen ? "▾ hide chalkboard" : "▸ peek at the chalkboard"}
               </button>
               {chalkboardOpen && (
-                <div className="mt-2 border border-panel-border bg-panel/60 p-4">
+                <div className="surface mt-2 border border-panel-border bg-panel/60 p-4">
                   <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-turf">
                     {lesson.intro.title}
                   </p>
@@ -1028,7 +1028,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             <div className="hidden shrink-0 sm:block">
               <Coach mood={coachMood} size={96} />
             </div>
-            <div className="relative flex-1 border border-panel-border bg-panel/80 p-4 shadow-scoreboard">
+      <div className="surface relative flex-1 border border-panel-border bg-panel/80 p-4 ">
               <span className="absolute -left-2 top-6 hidden h-4 w-4 rotate-45 border-b border-l border-panel-border bg-panel sm:block" />
               <p className="text-[15px] leading-relaxed text-ink">
                 {exercise.prompt}

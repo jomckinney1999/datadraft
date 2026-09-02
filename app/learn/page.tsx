@@ -221,7 +221,7 @@ export default function LearnCatalogPage() {
         </div>
       </header>
 
-      <section className="border border-panel-border bg-panel/80 p-6 shadow-scoreboard">
+   <section className="surface border border-panel-border bg-panel/80 p-6 ">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="label-broadcast text-turf">the course board</p>

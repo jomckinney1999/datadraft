@@ -4,14 +4,31 @@ Education platform teaching SQL and data analytics through fantasy football. Nex
 
 ## Design system
 
-Fantasy-football palette, defined once in `tailwind.config.ts` + `app/globals.css`: `night` (draft-night indigo #0C1022 family), `turf` (green #3FD973, primary accent), `gold` (championship gold #F2C94C, secondary), plus `ink`/`panel` neutrals. These replaced an older teal/amber scheme in Aug 2026 — never reintroduce `teal`/`amber` token names, and change colors by editing token values, not component classes.
+Fantasy-football palette, defined once in `tailwind.config.ts` + `app/globals.css`: `night` (primetime near-black #060914 family), `turf` (stadium green #34E885, primary accent), `gold` (trophy gold #FFC857, secondary), `ice` (broadcast blue #60A5FA), plus `ink`/`panel` neutrals. An older teal/amber scheme was replaced in Aug 2026 — never reintroduce `teal`/`amber` token names — and the palette was deepened in Sep 2026. Change colors by editing token values, not component classes.
+
+- **The canvas is near-black on purpose.** It was a mid-navy (#0C1022) and the accents had nothing to be bright *against*; dropping the canvas and lifting the accents raised turf from 10.2:1 to 12.3:1 against the page, so the palette got more contrast and more pop in the same move. Don't lighten it back toward navy to "soften" anything.
+- **`ice` is structural, not a state.** It lights the room (the cool wash in `.bg-stadium`, the middle of the `.chrome` hairline) and colours numbers in the editor. It exists so green and gold stop reading as a two-colour sportsbook. **Never use it for success or reward** — that is turf's only job, and a learner reading blue as "correct" is a bug.
+- **`node scripts/verify-contrast.mjs` measures the shipped tokens, both themes, 48 pairings.** Run it after any palette edit. It reads the real values out of `globals.css` rather than a copy, and it checks the pairings that actually occur — including the tightest one, accent text on a chip of its own accent at 10%, which is what the light-mode accents are calibrated against and which fails long before accent-on-background does.
+
+### Depth, light and material
+
+The old palette was flat by construction: panels sat a few RGB points above the page, borders were 1px solid, and nothing cast or caught light. These give the same sharp broadcast-terminal identity somewhere to sit.
+
+- **`.surface` is the card treatment** — a top-down lightening across the fill, a 1px specular line on the top edge, and a shadow that reads as distance. Add it alongside the existing `border border-panel-border bg-panel` pattern; it is on ~47 cards. Light mode zeroes the first two (a highlight needs somewhere darker than itself to sit) and keeps the shadow.
+- **The new material classes live in `@layer components`, and that placement is load-bearing.** Unlayered, `.surface` would beat `shadow-scoreboard-gold` and strip the gold ring off the draft announcement, and `.chrome` would turn `absolute` frames into `relative` ones. In the components layer a Tailwind utility always wins, which is the right default for a component-level treatment.
+- **`shadow-scoreboard` and `.surface` are mutually exclusive.** The former is a 1px ring in the same colour as the border the card already has — pure duplication — and being a utility it wins, silently costing the card its elevation. It was removed from the eight cards that gained `.surface`; the `-gold`/`-turf` variants are deliberate accent rings and stay.
+- **`.bg-stadium` sits on `<body>`, so its atmosphere is site-wide.** Three coloured washes plus film grain, both on `position: fixed` pseudo-elements at `z-index: -2`/`-1` — the page scrolls *through* the light instead of dragging a gradient with it, and no component has to know they exist. The grain is not decoration: large smooth gradients on a near-black canvas band visibly on 8-bit displays, and a few percent of noise dithers the steps away.
+- **`.btn-turf` / `.btn-gold`** are the primary-CTA treatment (gradient fill, specular top edge, light spilling underneath). The spill multiplies by `--glow-strength`, so it vanishes in light mode rather than becoming a coloured smear.
+- **`.chrome`** is the gradient hairline (turf → ice → gold) on the hero sandbox frame, done as a masked border rather than four elements.
+- **The photo duotone is held at 70% alpha.** `mix-blend-mode: color` takes the overlay's hue *and* saturation wholesale, so at full opacity the higher-chroma accents turn `components/action-gallery.tsx` into a poster. Re-check that treatment if the accents ever gain more chroma again.
+- **Focus rings, selection colour and scrollbars are themed once, globally.** A default scrollbar is a light-grey slab bolted onto a dark page and is one of the loudest tells that a dark theme was applied rather than designed.
 
 ### Light + dark mode
 
 Both themes ship. Every token resolves through a CSS variable holding an `"r g b"` channel triplet — declared in `app/globals.css` under `:root` (dark, the default) and `:root[data-theme="light"]`, wired into Tailwind as `rgb(var(--c-x) / <alpha-value>)`. That indirection is what keeps the ~186 alpha modifiers (`bg-turf/10`, `border-panel-border/60`) working while the palette flips.
 
 - **Use the tokens.** Never hardcode a hex, `rgba()`, or `text-[#...]` in a component — it won't flip. For glows/scrims/gradients that need per-theme tuning, add a class in `globals.css` (see `.rays-turf`, `.yard-lines`, `.edge-glow-gold`) rather than an inline `style`. Coach Blitz (`components/coach.tsx`) is the deliberate exception — it's an illustration, and its hexes stay fixed in both themes.
-- **Light-mode turf and gold are far darker** than their dark-mode values, calibrated against the tightest real pairing (accent text on an accent/10 chip), not against plain white. Every token pair clears WCAG AA 4.5:1 in both themes — re-measure if you change them.
+- **Light-mode turf and gold are far darker** than their dark-mode values, calibrated against the tightest real pairing (accent text on an accent/10 chip), not against plain white. Every token pair clears WCAG AA 4.5:1 in both themes — `scripts/verify-contrast.mjs` proves it. Light-mode gold necessarily lands as brass: there is no hex that is both gold-hued and AA on white, so don't keep hunting for one.
 - `--glow-strength` is `1` in dark and `0` in light, so the scoreboard glow classes multiply to nothing on white instead of smearing.
 - `.theme-dark` re-asserts the dark values on any subtree, if a section ever needs to stay dark in light mode.
 - **The toggle lives in every route's header** (`components/theme-toggle.tsx`), except the lesson player — its top bar is deliberately minimal (quit / progress / hearts). Choice persists in `localStorage` under `sqlsports-theme` and defaults to the OS preference until the visitor picks explicitly.
@@ -26,6 +43,7 @@ Both themes ship. Every token resolves through a CSS variable holding an `"r g b
 
 ## Navigation
 
+- **The marketing header is `sticky top-0` with `.glass`.** The `scroll-mt-20` on every anchored section was written for a sticky header and had nothing to offset against until now.
 - **Every route puts `components/home-link.tsx` top-left, and the wordmark always goes to `/`.** No exceptions, and don't point it anywhere else. Six routes previously had no way home at all (`/interview`, `/data`, `/demo`, the draft, the playbook quiz, the roadmap), and three more showed the wordmark pointing at `/learn` — which is worse than no link, because the affordance everyone reaches for first silently did something else. The homepage's own logo was `href="#"`, a dead anchor.
 - A page that also wants an in-context back link renders it via `HomeLink`'s `back` / `backLabel` props, beside the wordmark — never by re-targeting the logo. The roadmap is the reference: logo → `/`, "← all courses" → `/learn`.
 - **The lesson player is the one deliberate exception.** Its top bar stays minimal (quit / drive / hearts) and the quit `X` goes to `/learn`, not home: mid-drive the course list is the right destination, and a logo sitting where the X is would make it easy to lose a drive by accident. `/learn` carries the wordmark, so home is one further click.

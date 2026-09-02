@@ -72,7 +72,7 @@ function DraftDay() {
       {act === "jersey" && (
         <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
           <Coach mood="happy" size={130} />
-          <div className="w-full border border-panel-border bg-panel/80 p-6 shadow-scoreboard">
+     <div className="surface w-full border border-panel-border bg-panel/80 p-6 ">
             <p className="label-broadcast text-gold">
               welcome to the sqlsports draft
             </p>
@@ -206,7 +206,7 @@ function DraftDay() {
       {act === "podium" && pick && (
         <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
           <Coach mood="cheer" size={140} />
-          <div className="w-full border-2 border-gold/60 bg-panel/80 p-8 shadow-scoreboard-gold">
+          <div className="surface w-full border-2 border-gold/60 bg-panel/80 p-8 shadow-scoreboard-gold">
             <p className="label-broadcast text-gold">
               the sqlsports draft · pick 1.01
             </p>

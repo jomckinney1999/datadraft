@@ -103,7 +103,7 @@ export default function CareerPlaybooks() {
         {/* Active playbook */}
         <div
           role="tabpanel"
-          className="mt-6 border border-panel-border bg-panel/80 p-5 shadow-scoreboard sm:p-8"
+     className="surface mt-6 border border-panel-border bg-panel/80 p-5 sm:p-8"
         >
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>

@@ -122,7 +122,7 @@ export default function FieldSandbox() {
     <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
       {/* left rail: coach, schema, drills */}
       <aside className="space-y-5">
-        <div className="border border-panel-border bg-panel/70 p-4">
+        <div className="surface border border-panel-border bg-panel/70 p-4">
           <div className="flex items-center gap-3">
             <Coach mood="idle" size={64} />
             <p className="text-[12px] leading-relaxed text-ink-soft">
@@ -132,7 +132,7 @@ export default function FieldSandbox() {
           </div>
         </div>
 
-        <div className="border border-panel-border bg-panel/70 p-4">
+        <div className="surface border border-panel-border bg-panel/70 p-4">
           <p className="label-broadcast text-gold">the stat sheets</p>
           <div className="mt-3 space-y-4">
             {FIELD_SCHEMA.map((t) => (
@@ -159,7 +159,7 @@ export default function FieldSandbox() {
           )}
         </div>
 
-        <div className="border border-panel-border bg-panel/70 p-4">
+        <div className="surface border border-panel-border bg-panel/70 p-4">
           <p className="label-broadcast text-gold">drill book</p>
           {TIERS.map((tier) => (
             <div key={tier} className="mt-3">

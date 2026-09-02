@@ -34,7 +34,7 @@ export default function DriveField({
     <div className="min-w-0 flex-1">
       <div className="relative h-7">
         {/* the field */}
-        <div className="absolute inset-x-0 top-2 h-3 overflow-hidden rounded-full border border-panel-border bg-panel">
+        <div className="surface absolute inset-x-0 top-2 h-3 overflow-hidden rounded-full border border-panel-border bg-panel">
           {/* yard hashes every 10% — the texture that makes it read as a field */}
           <div className="absolute inset-0 flex justify-between px-[6%]">
             {Array.from({ length: 9 }).map((_, i) => (

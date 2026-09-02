@@ -43,7 +43,7 @@ export default function DataPage() {
         {SOURCES.map((src) => (
           <div
             key={src.id}
-            className="mt-3 border border-panel-border bg-panel/40 p-5"
+            className="surface mt-3 border border-panel-border bg-panel/40 p-5"
           >
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <a
@@ -97,7 +97,7 @@ export default function DataPage() {
           {PROVENANCE.map((t) => (
             <div
               key={t.table}
-              className="flex flex-col gap-1.5 border border-panel-border bg-panel/30 p-4 sm:flex-row sm:items-start sm:gap-4"
+              className="surface flex flex-col gap-1.5 border border-panel-border bg-panel/30 p-4 sm:flex-row sm:items-start sm:gap-4"
             >
               <div className="flex shrink-0 items-center gap-2">
                 <span
@@ -137,7 +137,7 @@ export default function DataPage() {
               key={d.file}
               href={d.file}
               download
-              className="flex items-center justify-between gap-4 border border-panel-border bg-panel/30 px-4 py-3 transition-colors hover:border-turf/50 hover:bg-panel/60"
+              className="surface flex items-center justify-between gap-4 border border-panel-border bg-panel/30 px-4 py-3 transition-colors hover:border-turf/50 hover:bg-panel/60"
             >
               <span className="min-w-0">
                 <span className="block font-mono text-[13px] text-turf">
@@ -156,7 +156,7 @@ export default function DataPage() {
       </section>
 
       {/* ── coverage ── */}
-      <section className="mt-10 border border-panel-border bg-panel/40 p-5">
+      <section className="surface mt-10 border border-panel-border bg-panel/40 p-5">
         <h2 className="font-display text-lg font-bold text-ink">
           What is covered
         </h2>

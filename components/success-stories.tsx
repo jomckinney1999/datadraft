@@ -48,7 +48,7 @@ const STORIES = [
 
 function StoryCard({ story }: { story: (typeof STORIES)[number] }) {
   return (
-    <div className="flex w-[320px] shrink-0 flex-col justify-between border border-panel-border bg-panel/90 p-5 backdrop-blur-sm sm:w-[360px]">
+    <div className="surface flex w-[320px] shrink-0 flex-col justify-between border border-panel-border bg-panel/90 p-5 backdrop-blur-sm sm:w-[360px]">
       <div>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">

@@ -1,7 +1,8 @@
 /** @type {import('tailwindcss').Config} */
-// Fantasy-football palette: draft-night indigo darks, turf green primary,
-// championship gold secondary. Token names (turf/gold/night/panel/ink) are
-// used across every page — change values here, not in components.
+// Fantasy-football palette: primetime-black darks, turf green primary,
+// trophy gold secondary, broadcast ice blue for cool accents. Token names
+// (turf/gold/ice/night/panel/ink) are used across every page — change values
+// here, not in components.
 const config = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -31,6 +32,16 @@ const config = {
           DEFAULT: "rgb(var(--c-gold) / <alpha-value>)",
           dim: "rgb(var(--c-gold-dim) / <alpha-value>)",
           glow: "rgb(var(--c-gold) / 0.15)",
+        },
+        // Broadcast blue. Sits between turf and gold on the wheel and gives the
+        // palette a cool anchor, so green and gold stop reading as a two-colour
+        // sportsbook. Mostly structural — it lights the page (the room wash in
+        // .bg-stadium, the middle of the .chrome hairline) and colours numbers
+        // in the editor. Never use it for success or reward; that is turf's job.
+        ice: {
+          DEFAULT: "rgb(var(--c-ice) / <alpha-value>)",
+          dim: "rgb(var(--c-ice-dim) / <alpha-value>)",
+          glow: "rgb(var(--c-ice) / 0.15)",
         },
         ink: {
           muted: "rgb(var(--c-ink-muted) / <alpha-value>)",

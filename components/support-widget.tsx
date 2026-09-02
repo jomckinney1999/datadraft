@@ -34,7 +34,7 @@ export default function SupportWidget() {
   return (
     <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
       {open && (
-        <div className="flex w-[320px] max-w-[calc(100vw-2.5rem)] flex-col border border-panel-border bg-panel shadow-float sm:w-[360px]">
+        <div className="surface flex w-[320px] max-w-[calc(100vw-2.5rem)] flex-col border border-panel-border bg-panel shadow-float sm:w-[360px]">
           <div className="flex items-center justify-between border-b border-panel-border px-4 py-3">
             <span className="font-display text-sm font-bold text-pop">
               SQL<span className="text-turf">Sports</span>
@@ -97,7 +97,7 @@ export default function SupportWidget() {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Close support chat" : "Open support chat"}
-        className="flex h-12 w-12 items-center justify-center rounded-full border border-turf/50 bg-turf text-night shadow-fab transition-transform duration-150 hover:scale-105"
+        className="btn-turf flex h-12 w-12 items-center justify-center rounded-full border border-turf/50 bg-turf text-night shadow-fab transition-transform duration-150 hover:scale-105"
       >
         {open ? (
           <span className="text-xl leading-none">✕</span>

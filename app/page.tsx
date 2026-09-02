@@ -227,7 +227,7 @@ export default function Home() {
                 <div className="mt-8 flex flex-wrap items-center gap-3 animate-[fadeUp_0.45s_ease-out_0.2s_forwards] opacity-0">
                   <a
                     href="#sandbox"
-                    className="inline-flex items-center gap-2 border border-turf bg-turf px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-turf-dim"
+                    className="btn-turf inline-flex items-center gap-2 border border-turf bg-turf px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-turf-dim"
                   >
                     Try the sandbox
                   </a>
@@ -263,8 +263,9 @@ export default function Home() {
                 className="lg:col-span-7 animate-[fadeUp_0.5s_ease-out_0.15s_forwards] opacity-0"
               >
                 <div className="shadow-hero-panel relative">
-                  {/* Teal frame — tech/data accent; sharp corners */}
-                  <div className="pointer-events-none absolute -inset-px border border-turf/45" />
+                  {/* Gradient hairline: turf into ice into gold, so the hero panel reads
+                      as lit metal rather than as a green box. Corner ticks stay turf. */}
+                  <div className="chrome pointer-events-none absolute -inset-px" />
                   <div className="absolute -top-px left-4 h-px w-20 bg-turf edge-glow-turf" />
                   <div className="absolute -left-px top-4 h-20 w-px bg-turf edge-glow-turf" />
                   <Sandbox />
@@ -581,7 +582,7 @@ export default function Home() {
                   {plan.available ? (
                     <a
                       href="/learn"
-                      className="mt-6 block border border-turf bg-turf px-4 py-2.5 text-center font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-turf-dim"
+                      className="btn-turf mt-6 block border border-turf bg-turf px-4 py-2.5 text-center font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-turf-dim"
                     >
                       {plan.cta}
                     </a>
@@ -635,7 +636,7 @@ export default function Home() {
             <div className="mt-10 grid gap-6 lg:grid-cols-12">
               {/* Challenge card preview */}
               <div className="lg:col-span-7">
-                <div className="relative h-full border border-panel-border bg-panel p-5">
+                <div className="surface relative h-full border border-panel-border bg-panel p-5">
                   <div className="flex items-center justify-between">
                     <span className="label-broadcast text-turf">
                       this week&apos;s challenge
@@ -662,7 +663,7 @@ export default function Home() {
 
               {/* Leaderboard skeleton preview — no fake usernames/scores */}
               <div className="lg:col-span-5">
-                <div className="h-full border border-panel-border bg-panel p-5">
+                <div className="surface h-full border border-panel-border bg-panel p-5">
                   <div className="flex items-center justify-between">
                     <span className="label-broadcast text-turf">
                       leaderboard
@@ -712,7 +713,7 @@ export default function Home() {
               From the same team
             </p>
 
-            <div className="relative border border-panel-border bg-panel p-6 sm:p-10">
+            <div className="surface relative border border-panel-border bg-panel p-6 sm:p-10">
               <div className="pointer-events-none absolute -inset-px border border-gold/40" />
               <div className="absolute -top-px left-6 h-px w-20 bg-gold edge-glow-gold" />
               <div className="absolute -left-px top-6 h-20 w-px bg-gold edge-glow-gold" />
@@ -751,7 +752,7 @@ export default function Home() {
                       href="https://gridiq-eight.vercel.app/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 border border-gold bg-gold px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-gold-dim"
+                      className="btn-gold inline-flex items-center gap-2 border border-gold bg-gold px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-gold-dim"
                     >
                       Try NFL Stat Guru ↗
                     </a>

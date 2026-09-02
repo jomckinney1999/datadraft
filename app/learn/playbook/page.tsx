@@ -78,7 +78,7 @@ function PlaybookQuiz() {
       {!done ? (
         <div className="flex flex-1 flex-col items-center gap-6 pt-6">
           <Coach mood="think" size={120} />
-          <div className="w-full border border-panel-border bg-panel/80 p-6 shadow-scoreboard">
+     <div className="surface w-full border border-panel-border bg-panel/80 p-6 ">
             <p className="label-broadcast text-gold">
               coach blitz · question {step + 1} of {QUIZ.length}
             </p>

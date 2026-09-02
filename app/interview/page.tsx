@@ -72,7 +72,7 @@ export default function InterviewComingSoonPage() {
         {FEATURES.map((f) => (
           <div
             key={f.title}
-            className="border border-panel-border bg-panel/40 p-5"
+            className="surface border border-panel-border bg-panel/40 p-5"
           >
             <h2 className="font-display text-base font-bold text-ink">
               {f.title}
@@ -84,7 +84,7 @@ export default function InterviewComingSoonPage() {
         ))}
       </section>
 
-      <section className="mt-10 border border-panel-border bg-panel/40 p-5">
+      <section className="surface mt-10 border border-panel-border bg-panel/40 p-5">
         <h2 className="font-display text-lg font-bold text-ink">
           Get notified when it opens
         </h2>

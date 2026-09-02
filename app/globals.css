@@ -17,65 +17,105 @@
 .theme-dark {
   color-scheme: dark;
 
-  --c-night: 12 16 34;
-  --c-night-50: 30 37 66;
-  --c-night-100: 23 28 54;
-  --c-night-200: 18 22 41;
-  --c-night-300: 12 16 34;
+  /* Canvas ladder. Near-black with a blue-violet tint rather than the old mid
+     navy: accents can only read as *light* if the thing behind them is dark
+     enough to be absence of light. The ladder is also spaced wider than before
+     so a panel actually sits above the page instead of blending into it. */
+  --c-night: 6 9 20;
+  --c-night-50: 28 36 66;
+  --c-night-100: 15 20 40;
+  --c-night-200: 10 14 30;
+  --c-night-300: 6 9 20;
 
-  --c-turf: 63 217 115;
-  --c-turf-dim: 47 173 92;
-  --c-gold: 242 201 76;
-  --c-gold-dim: 201 160 50;
+  /* Turf is brighter and pushed toward emerald — stadium grass under lights,
+     not terminal phosphor. Gold is warmer and fully saturated, so it reads as
+     trophy metal rather than mustard. */
+  --c-turf: 52 232 133;
+  --c-turf-dim: 30 176 96;
+  --c-gold: 255 200 87;
+  --c-gold-dim: 214 158 46;
+  --c-ice: 96 165 250;
+  --c-ice-dim: 59 130 246;
 
-  --c-ink: 236 239 250;
-  --c-ink-soft: 190 197 222;
-  --c-ink-muted: 141 149 181;
+  --c-ink: 240 244 255;
+  --c-ink-soft: 183 194 224;
+  --c-ink-muted: 133 145 180;
 
-  --c-panel: 20 25 54;
-  --c-panel-border: 38 46 85;
-  --c-panel-hover: 46 56 102;
+  --c-panel: 14 19 38;
+  --c-panel-border: 37 47 82;
+  --c-panel-hover: 24 31 58;
 
   /* Atmosphere — tuned per theme rather than flipped mechanically */
   --pop-text: 245 247 255;
-  --pop-shadow: 0 1px 2px rgba(0, 0, 0, 0.55), 0 0 40px rgba(12, 16, 34, 0.8);
+  --pop-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 40px rgba(6, 9, 20, 0.85);
   --glow-strength: 1;
   --hero-photo-opacity: 1;
   --hero-scrim-strong: 0.92;
-  --shadow-float: 0 24px 60px rgba(0, 0, 0, 0.55);
-  --shadow-hero-panel: 0 24px 80px rgba(0, 0, 0, 0.55);
+  --shadow-float: 0 24px 60px rgba(0, 0, 0, 0.6);
+  --shadow-hero-panel: 0 30px 90px rgba(0, 0, 0, 0.65);
   --photo-scrim: 0.35;
   --course-photo-opacity: 1;
   --course-scrim-top: 0.62;
   --course-scrim-bottom: 0.88;
 
+  /* Room light. Three coloured washes over the canvas, sized in viewport terms
+     so they read as one continuous space rather than as decoration on a
+     section. Kept low: the job is to stop the background being a flat fill. */
+  --atmo-turf: 0.10;
+  --atmo-gold: 0.055;
+  --atmo-ice: 0.07;
+
+  /* Grain. Large smooth gradients on a near-black canvas band badly on 8-bit
+     displays; a few percent of noise dithers the steps away and is most of why
+     a dark UI reads as a material rather than as a colour. */
+  --grain-opacity: 0.035;
+
+  /* Surface material. A panel gets a top-down lightening and a 1px specular
+     line along its top edge, which is how a real surface catches light from
+     above — the single cheapest cue that something is raised. */
+  --surface-grad: 0.032;
+  --surface-specular: 0.075;
+  --shadow-surface:
+    0 1px 2px rgb(0 0 0 / 0.4),
+    0 14px 34px -14px rgb(0 0 0 / 0.75);
+
+  --selection-bg: rgb(52 232 133 / 0.28);
+  --selection-fg: 240 244 255;
+  --scrollbar-thumb: 44 55 94;
+  --scrollbar-thumb-hover: 62 76 122;
+
   /* Syntax highlighting. Keywords borrow turf and strings borrow gold so the
      editor reads as part of the brand rather than a pasted-in IDE theme. */
-  --c-syn-keyword: 63 217 115;
-  --c-syn-string: 242 201 76;
-  --c-syn-number: 125 211 252;
+  --c-syn-keyword: 52 232 133;
+  --c-syn-string: 255 200 87;
+  --c-syn-number: 147 197 253;
   --c-syn-func: 196 181 253;
-  --c-syn-comment: 141 149 181;
-  --c-syn-punct: 190 197 222;
+  --c-syn-comment: 133 145 180;
+  --c-syn-punct: 183 194 224;
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --c-night: 246 247 252;
-  --c-night-50: 232 236 245;
-  --c-night-100: 238 241 248;
-  --c-night-200: 242 244 250;
-  --c-night-300: 246 247 252;
+  /* Cooler and a shade deeper than before, so a white panel reads as raised
+     paper against it rather than as the same sheet with a line drawn on it. */
+  --c-night: 241 243 249;
+  --c-night-50: 228 232 243;
+  --c-night-100: 235 238 247;
+  --c-night-200: 238 241 249;
+  --c-night-300: 241 243 249;
 
-  /* Turf and gold are darkened hard for light mode — the draft-night green
-     and gold are unreadable as text or borders on white. Each is calibrated
+  /* Turf and gold are darkened hard for light mode — the primetime green and
+     gold are unreadable as text or borders on white. Each is calibrated
      against the tightest real pairing (accent text on an accent/10 chip),
-     not against plain white. */
-  --c-turf: 21 122 62;
-  --c-turf-dim: 15 92 46;
-  --c-gold: 140 90 10;
+     not against plain white. Gold necessarily lands as brass at this
+     luminance; there is no hex that is both gold-hued and AA on white. */
+  --c-turf: 18 121 60;
+  --c-turf-dim: 13 92 45;
+  --c-gold: 143 94 18;
   --c-gold-dim: 112 72 8;
+  --c-ice: 29 78 216;
+  --c-ice-dim: 30 64 175;
 
   --c-ink: 19 24 34;
   --c-ink-soft: 58 66 86;
@@ -97,11 +137,31 @@
   --course-scrim-top: 0.80;
   --course-scrim-bottom: 0.93;
 
+  /* The light-mode accents are dark colours, so the same washes would smudge
+     the corners grey. Held to a tint you register as warmth rather than see. */
+  --atmo-turf: 0.05;
+  --atmo-gold: 0.04;
+  --atmo-ice: 0.045;
+  --grain-opacity: 0.02;
+
+  /* No specular on white — a highlight needs somewhere darker to sit. Light
+     mode gets its elevation from the shadow and the border instead. */
+  --surface-grad: 0;
+  --surface-specular: 0;
+  --shadow-surface:
+    0 1px 2px rgb(19 24 34 / 0.05),
+    0 12px 30px -14px rgb(19 24 34 / 0.18);
+
+  --selection-bg: rgb(18 121 60 / 0.18);
+  --selection-fg: 19 24 34;
+  --scrollbar-thumb: 203 210 226;
+  --scrollbar-thumb-hover: 176 185 206;
+
   /* Syntax colours darkened for white editors — the dark-mode set is
      unreadable on light. Each clears 4.5:1 against the panel background. */
-  --c-syn-keyword: 21 122 62;
-  --c-syn-string: 140 90 10;
-  --c-syn-number: 12 74 110;
+  --c-syn-keyword: 18 121 60;
+  --c-syn-string: 143 94 18;
+  --c-syn-number: 30 64 175;
   --c-syn-func: 91 33 182;
   --c-syn-comment: 92 101 127;
   --c-syn-punct: 58 66 86;
@@ -117,13 +177,180 @@ body {
   min-height: 100vh;
 }
 
-/* Draft-night atmosphere: turf glow under the lights, gold from the stage */
+::selection {
+  background: var(--selection-bg);
+  color: rgb(var(--selection-fg));
+}
+
+/* A default browser scrollbar is a light-grey slab bolted onto a dark page and
+   is one of the loudest tells that a dark theme was applied rather than
+   designed. Firefox gets the two-property version, everything else the
+   -webkit- one. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--scrollbar-thumb)) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--scrollbar-thumb));
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--scrollbar-thumb-hover));
+}
+
+/* Keyboard focus, once, for everything. The browser default is a hairline that
+   vanishes on a dark panel; this is the same ring in both themes and does not
+   fire on mouse clicks. */
+:focus-visible {
+  outline: 2px solid rgb(var(--c-turf) / 0.85);
+  outline-offset: 2px;
+}
+
+/* ── Primetime atmosphere ─────────────────────────────────────
+   The canvas is near-black, which is only flattering if something is lighting
+   it. Three coloured washes plus grain, both on fixed pseudo-elements so they
+   stay put as the page scrolls — the page moves through the light rather than
+   dragging a gradient along with it.
+
+   z-index -2 / -1 puts them above the body background and below every in-flow
+   element, so no component needs to know they exist. */
 .bg-stadium {
   background-color: rgb(var(--c-night));
+  position: relative;
+}
+
+.bg-stadium::before,
+.bg-stadium::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.bg-stadium::before {
+  z-index: -2;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgb(var(--c-turf) / 0.08), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 100% 0%, rgb(var(--c-gold) / 0.05), transparent 45%),
-    linear-gradient(180deg, rgb(var(--c-night)) 0%, rgb(var(--c-night-100)) 50%, rgb(var(--c-night)) 100%);
+    /* floodlights over the tunnel */
+    radial-gradient(ellipse 105% 62% at 50% -14%, rgb(var(--c-turf) / var(--atmo-turf)), transparent 62%),
+    /* stage light, top right */
+    radial-gradient(ellipse 62% 46% at 96% 2%, rgb(var(--c-gold) / var(--atmo-gold)), transparent 55%),
+    /* broadcast cool, low left */
+    radial-gradient(ellipse 72% 58% at 2% 68%, rgb(var(--c-ice) / var(--atmo-ice)), transparent 62%),
+    /* the floor comes back up */
+    radial-gradient(ellipse 120% 45% at 50% 108%, rgb(var(--c-ice) / calc(var(--atmo-ice) * 0.7)), transparent 60%);
+}
+
+.bg-stadium::after {
+  z-index: -1;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@layer components {
+  /* ── Surface material ─────────────────────────────────────────
+     Add alongside the existing `border border-panel-border bg-panel` pattern.
+     Three cues stacked: a top-down lightening across the fill, a 1px specular
+     line where the top edge catches the light, and a shadow that reads as
+     distance rather than as a drop shadow. Light mode zeroes the first two —
+     a highlight needs somewhere darker than itself to sit — and keeps the
+     shadow, which is the only one of the three that works on white. */
+  .surface {
+    background-image: linear-gradient(
+      180deg,
+      rgb(255 255 255 / var(--surface-grad)) 0%,
+      rgb(255 255 255 / 0) 42%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / var(--surface-specular)),
+      var(--shadow-surface);
+  }
+
+  /* Hero-level panels. A hairline that shifts turf → ice → gold along its length,
+     done as a masked gradient border rather than four elements. */
+  .chrome {
+    position: relative;
+  }
+
+  .chrome::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      rgb(var(--c-turf) / 0.55) 0%,
+      rgb(var(--c-ice) / 0.35) 45%,
+      rgb(var(--c-gold) / 0.45) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* ── Accent buttons ───────────────────────────────────────────
+     A flat fill reads as a coloured rectangle; a fill with a highlight along its
+     top edge and light spilling underneath reads as an object. The spill is
+     multiplied by --glow-strength so it disappears in light mode instead of
+     turning into a coloured smear. */
+  .btn-turf {
+    background-image: linear-gradient(
+      180deg,
+      rgb(var(--c-turf)) 0%,
+      rgb(var(--c-turf-dim)) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.28),
+      0 1px 2px rgb(0 0 0 / 0.3),
+      0 10px 26px -10px rgb(var(--c-turf) / calc(0.85 * var(--glow-strength)));
+  }
+
+  .btn-turf:hover {
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.34),
+      0 1px 2px rgb(0 0 0 / 0.3),
+      0 14px 32px -10px rgb(var(--c-turf) / calc(1 * var(--glow-strength)));
+  }
+
+  .btn-gold {
+    background-image: linear-gradient(
+      180deg,
+      rgb(var(--c-gold)) 0%,
+      rgb(var(--c-gold-dim)) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.3),
+      0 1px 2px rgb(0 0 0 / 0.3),
+      0 10px 26px -10px rgb(var(--c-gold) / calc(0.85 * var(--glow-strength)));
+  }
+
+  .btn-gold:hover {
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.36),
+      0 1px 2px rgb(0 0 0 / 0.3),
+      0 14px 32px -10px rgb(var(--c-gold) / calc(1 * var(--glow-strength)));
+  }
+
+  /* Frosted bar for anything that floats over scrolling content. */
+  .glass {
+    background-color: rgb(var(--c-night) / 0.72);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+  }
 }
 
 .border-scoreboard {
@@ -240,12 +467,17 @@ body {
   box-shadow: 0 8px 24px rgb(var(--c-turf) / 0.35);
 }
 
+/* mix-blend-mode: color takes the overlay's hue and saturation wholesale, so a
+   fully opaque accent turns a photograph into a poster. Holding the tint back
+   lets some of the original colour through and reads as a graded frame rather
+   than a fill — and it matters more now that both accents carry more chroma
+   than the ones this treatment was first tuned against. */
 .photo-duotone-turf {
-  background-color: rgb(var(--c-turf));
+  background-color: rgb(var(--c-turf) / 0.7);
 }
 
 .photo-duotone-gold {
-  background-color: rgb(var(--c-gold));
+  background-color: rgb(var(--c-gold) / 0.7);
 }
 
 .photo-scrim {

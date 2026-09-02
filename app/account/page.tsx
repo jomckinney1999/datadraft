@@ -105,7 +105,7 @@ export default function AccountPage() {
         </p>
       )}
 
-      <section className="border border-panel-border bg-panel/80 p-6 shadow-scoreboard">
+   <section className="surface border border-panel-border bg-panel/80 p-6 ">
         {state === "loading" && (
           <p className="font-mono text-xs text-ink-muted">Checking your locker…</p>
         )}
@@ -151,7 +151,7 @@ export default function AccountPage() {
               <button
                 type="submit"
                 disabled={state === "sending"}
-                className="shrink-0 border border-turf bg-turf px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors hover:bg-turf-dim disabled:opacity-50"
+                className="btn-turf shrink-0 border border-turf bg-turf px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors hover:bg-turf-dim disabled:opacity-50"
               >
                 {state === "sending" ? "Sending…" : "Email me a link"}
               </button>
@@ -215,7 +215,7 @@ export default function AccountPage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/learn"
-                className="border border-turf bg-turf px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors hover:bg-turf-dim"
+                className="btn-turf border border-turf bg-turf px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors hover:bg-turf-dim"
               >
                 Back to courses
               </Link>

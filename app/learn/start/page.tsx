@@ -240,7 +240,7 @@ export default function StartPage() {
       </header>
 
       {/* ── how the roadmap works ── */}
-      <section className="mt-10 border border-panel-border bg-panel/40 p-5">
+      <section className="surface mt-10 border border-panel-border bg-panel/40 p-5">
         <h2 className="font-display text-lg font-bold text-ink">
           First, how this is put together
         </h2>
@@ -345,7 +345,7 @@ export default function StartPage() {
             return (
               <details
                 key={course.id}
-                className="lift group border border-panel-border bg-panel/30 p-4 open:bg-panel/60"
+                className="surface lift group border border-panel-border bg-panel/30 p-4 open:bg-panel/60"
               >
                 <summary className="flex cursor-pointer list-none items-baseline justify-between gap-3">
                   <span className="min-w-0">
