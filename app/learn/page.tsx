@@ -237,6 +237,13 @@ export default function LearnCatalogPage() {
               No football knowledge required — the sport is just the dataset,
               and Coach explains any context as you go.
             </p>
+            {/* Ten courses is a lot to choose between cold. */}
+            <Link
+              href="/learn/start"
+              className="press mt-4 inline-flex items-center gap-2 border border-turf bg-turf/10 px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-widest text-turf hover:bg-turf/20"
+            >
+              Not sure which one? Take the 2-question walkthrough →
+            </Link>
           </div>
           <div className="hidden shrink-0 sm:block">
             <Coach mood={allDone > 0 ? "happy" : "idle"} size={110} />

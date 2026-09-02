@@ -662,6 +662,23 @@ export const COURSE = {
           blurb: "Comparisons and AND: numbers, thresholds, combos.",
           brief: {
             goal: "Filter on numbers and combine tests with AND.",
+      steps: [
+        {
+          title: "Equals only gets you so far",
+          body: "You can already pull every game one player played. But most real questions are not about an exact match, they are about a threshold. Big games. Quiet games. Anything over a number. For those you need to compare rather than match.",
+        },
+        {
+          title: "Compare with the maths symbols",
+          body: "Greater than, less than, and their or-equal cousins all work exactly how they look. Numbers go in bare, with no quotes around them, because you are comparing quantities rather than matching text.",
+          code: "WHERE fantasy_pts > 25",
+          note: "Pick thresholds from the data, not from a hunch. Nothing in this table clears 30 in a single game, so 25 is what a genuinely big afternoon looks like here.",
+        },
+        {
+          title: "AND means both have to be true",
+          body: "Chain two conditions with AND and a row only survives if it passes both of them. This is how you say big game, and this season, in one line instead of running two queries and comparing them by eye.",
+          code: "WHERE fantasy_pts > 25 AND season = 2024",
+        },
+      ],
             setup:
               "Beyond equality you get >, <, >=, <=. AND requires both sides to be true, which is how you express \"big game, this season\" in one line. Nothing in this dataset clears 30, so 25 is what a big game actually looks like here.",
             previewSql:
@@ -763,6 +780,22 @@ export const COURSE = {
           blurb: "OR, IN, and BETWEEN: matching more than one option.",
           brief: {
             goal: "Match several options at once with OR, IN, and BETWEEN.",
+      steps: [
+        {
+          title: "Sometimes any of several will do",
+          body: "You often want a handful of options rather than one. Quarterbacks or tight ends. The opening month of the season. You could write that as a long chain of ORs, and it would work, but it gets ugly fast and it is easy to get a bracket wrong.",
+        },
+        {
+          title: "IN is the clean way to say any of these",
+          body: "Give IN a list and a row survives if the column matches anything in it. It does exactly what a stack of ORs does, and it stays readable when the list grows.",
+          code: "WHERE position IN ('QB','TE')",
+        },
+        {
+          title: "BETWEEN covers a range, both ends included",
+          body: "For numbers or weeks that run in sequence, BETWEEN is shorthand for two comparisons at once. The important detail is that both ends count: weeks 1 through 4 means four weeks, not three.",
+          code: "WHERE week BETWEEN 1 AND 4",
+        },
+      ],
             setup:
               "When you want any of a set of values, IN beats stacking ORs. BETWEEN covers an inclusive range. Both are shorthand for tests you could write the long way — they just read better.",
             previewSql: "SELECT player, position, fantasy_pts FROM week_results WHERE position IN ('QB','TE') LIMIT 5;",
@@ -875,6 +908,18 @@ export const COURSE = {
           blurb: "ORDER BY, ascending and descending.",
           brief: {
             goal: "Put rows in a deliberate order with ORDER BY.",
+      steps: [
+        {
+          title: "Row order is not a promise",
+          body: "Everything you have run so far came back in whatever order the database found convenient. It looks stable, so it is easy to assume it is guaranteed. It is not. Change the data, or the query, and the order can change with it.",
+        },
+        {
+          title: "ORDER BY makes the order yours",
+          body: "Name a column to sort by and the order stops being an accident. Smallest first is the default, and DESC flips it to biggest first, which is what you want almost every time you are ranking anything.",
+          code: "SELECT player, fantasy_pts FROM week_results ORDER BY fantasy_pts DESC;",
+          note: "Clause order is fixed: WHERE first, then ORDER BY, then LIMIT. Filter, then sort, then cut.",
+        },
+      ],
             setup:
               "Without ORDER BY, row order is not guaranteed — it just happens to look stable. ORDER BY makes it explicit: ASC is smallest-first (the default), DESC is largest-first. Here's the top of the board.",
             previewSql: "SELECT player, week, fantasy_pts FROM week_results ORDER BY fantasy_pts DESC LIMIT 5;",
@@ -972,6 +1017,18 @@ export const COURSE = {
           blurb: "ORDER BY + LIMIT: every top-N question, answered.",
           brief: {
             goal: "Answer any \"top N\" question with ORDER BY + LIMIT.",
+      steps: [
+        {
+          title: "Every top-N question is the same play",
+          body: "Best five games. Worst three weeks. Highest scoring quarterback. They all sound different and they are all one pattern: sort by the number that matters, then cut the list short.",
+        },
+        {
+          title: "Sort first, then cut",
+          body: "The order of those two steps is the whole lesson. LIMIT does not pick the best rows, it just stops early. So if you cut before sorting you get an arbitrary handful, sorted among themselves, and it will look plausible while being wrong.",
+          code: "SELECT player, fantasy_pts FROM week_results ORDER BY fantasy_pts DESC LIMIT 3;",
+          note: "Sorting on a second column breaks ties in the first, which stops two equal rows swapping places between runs.",
+        },
+      ],
             setup:
               "Sort first, then cut. That order matters: LIMIT before sorting would grab arbitrary rows and sort only those. Every \"best/worst N\" question you'll ever be asked is this pattern.",
             previewSql: "SELECT player, fantasy_pts FROM week_results ORDER BY fantasy_pts DESC LIMIT 3;",
@@ -1084,6 +1141,22 @@ export const COURSE = {
           blurb: "COUNT, SUM, AVG: collapse many rows into one number.",
           brief: {
             goal: "Collapse many rows into one number with COUNT, SUM, and AVG.",
+      steps: [
+        {
+          title: "Every answer so far has been rows",
+          body: "You can now filter and sort, but everything hands back a list. The questions people actually ask a stat sheet are usually not lists at all. How many games. How many points in total. What is typical. Those want a single number.",
+        },
+        {
+          title: "Aggregates fold a column into one value",
+          body: "COUNT counts rows, SUM adds a column up, AVG averages it. They read the whole column and hand back one answer for it.",
+          code: "SELECT COUNT(*) AS games, ROUND(AVG(fantasy_pts), 1) AS avg_pts\nFROM week_results;",
+          note: "AS renames a column so the result is readable, and ROUND trims the decimal tail nobody wants. Both are cosmetic, and both make the difference between a scratch query and something you can hand to someone.",
+        },
+        {
+          title: "Notice you get one row back",
+          body: "That is the shift worth pausing on. Up to now the shape of the answer matched the shape of the table. An aggregate collapses however many rows you fed it into exactly one, which is the first time SQL changes the shape of the thing rather than just trimming it.",
+        },
+      ],
             setup:
               "Aggregates answer \"how many / how much / what's typical\" by folding a whole column into a single value. Notice this returns one row, not many — that's the shift this lesson is about.",
             previewSql: "SELECT COUNT(*) AS rows_total, ROUND(AVG(fantasy_pts), 1) AS avg_pts FROM week_results;",
@@ -1177,6 +1250,18 @@ export const COURSE = {
           blurb: "GROUP BY: one aggregate row per player, position, or team.",
           brief: {
             goal: "Get one aggregate row per player, position, or team with GROUP BY.",
+      steps: [
+        {
+          title: "One number for the whole league is rarely the question",
+          body: "The league average is mildly interesting. What everybody actually wants is the number for each player, side by side, so they can be compared. Running one query per player would work and would be unbearable.",
+        },
+        {
+          title: "GROUP BY sorts the rows into buckets",
+          body: "Name a column to group by and the database sorts every row into a bucket by that column, then runs your aggregate separately inside each one. One bucket per player means one answer per player.",
+          code: "SELECT player, ROUND(SUM(fantasy_pts), 1) AS total\nFROM week_results\nGROUP BY player\nORDER BY total DESC;",
+          note: "Select the grouping column alongside your aggregate and you have built a leaderboard. That combination is most of the reporting work in a real analyst job.",
+        },
+      ],
             setup:
               "GROUP BY splits rows into buckets and runs the aggregate inside each one. Instead of one number for the table, you get one number per group — which is what almost every real report is.",
             previewSql: "SELECT player, ROUND(SUM(fantasy_pts), 1) AS total FROM week_results GROUP BY player ORDER BY total DESC LIMIT 5;",
@@ -1271,6 +1356,18 @@ export const COURSE = {
           blurb: "HAVING: filter the aggregated groups themselves.",
           brief: {
             goal: "Filter the groups themselves with HAVING.",
+      steps: [
+        {
+          title: "Two filters, two different moments",
+          body: "You already know WHERE. HAVING looks almost identical and does something genuinely different, and the difference is when it runs. WHERE happens before the rows are grouped. HAVING happens after, once each bucket already has a number.",
+        },
+        {
+          title: "HAVING filters the groups themselves",
+          body: "So a condition about an individual game belongs in WHERE, and a condition about a player's season total or game count belongs in HAVING. Asking WHERE to test an average is asking it about something that does not exist yet.",
+          code: "SELECT player, COUNT(*) AS games\nFROM week_results\nGROUP BY player\nHAVING COUNT(*) > 30;",
+          note: "This exact distinction is one of the most asked SQL interview questions there is. Being able to say WHERE filters rows and HAVING filters groups, without hesitating, is worth the two minutes.",
+        },
+      ],
             setup:
               "WHERE filters rows before grouping; HAVING filters the groups after. That's the whole distinction, and it's the one interviewers ask about. Here it keeps only the high-volume players.",
             previewSql: "SELECT player, COUNT(*) AS games FROM week_results GROUP BY player HAVING COUNT(*) > 30 LIMIT 5;",
@@ -1379,6 +1476,22 @@ export const COURSE = {
           blurb: "INNER JOIN: connect the roster to the game log.",
           brief: {
             goal: "Answer a question that needs two tables at once.",
+      steps: [
+        {
+          title: "One sheet cannot answer this",
+          body: "week_results knows what every player scored. rosters knows who owns whom in our league. Neither of them, on its own, can tell you how your fantasy team did on a given week, because that fact lives across both sheets at once.",
+        },
+        {
+          title: "A join pairs up rows that agree",
+          body: "JOIN takes two tables and matches their rows against each other. The ON clause is where you say what has to agree for a pair to count. Here it is the player name, because that is the one thing both sheets record the same way.",
+          code: "SELECT rosters.team_name, week_results.fantasy_pts\nFROM rosters\nJOIN week_results ON rosters.player = week_results.player;",
+          note: "The shared column is called a key. Finding the key is usually the hard part of a join, and it is nearly always the thing both tables are about, spelled identically.",
+        },
+        {
+          title: "Every matched pair becomes one row",
+          body: "That is the mental picture to hold. If a player appears once in rosters and 17 times in week_results, you get 17 rows for that player, each carrying their team name alongside one game. The join does not summarise anything yet, it just stitches.",
+        },
+      ],
             setup:
               "week_results knows who scored what. rosters knows who owns whom. Neither can tell you how your fantasy team did — that needs both, stitched together on the column they share. Here's the roster you'll be joining to.",
             previewSql: "SELECT * FROM rosters;",
@@ -1466,6 +1579,18 @@ export const COURSE = {
           blurb: "Stop typing table names twice. Start reading joins fast.",
           brief: {
             goal: "Write joins that stay readable past two tables.",
+      steps: [
+        {
+          title: "Long table names get unbearable fast",
+          body: "The join you just wrote spells out week_results.fantasy_pts in full. With two tables that is merely annoying. With four, and a dozen columns, it becomes genuinely hard to read the query at all.",
+        },
+        {
+          title: "Give each table a short handle",
+          body: "Put a short name straight after the table in FROM or JOIN and it becomes that table's nickname for the rest of the query. Same result, a third of the typing, and this is how essentially every join you meet in the wild is written.",
+          code: "SELECT r.team_name, w.player, w.fantasy_pts\nFROM rosters r\nJOIN week_results w ON r.player = w.player;",
+          note: "Qualifying columns as r.player or w.player is not just tidiness. When both tables have a column of the same name, the database cannot guess which you meant, and it will tell you so.",
+        },
+      ],
             setup:
               "Spelling out week_results.fantasy_pts every time gets unbearable quickly. Aliases give each table a short name for the length of the query. Same result, a third of the typing — this is how every join you'll read in the wild is written.",
             previewSql:
@@ -1550,6 +1675,18 @@ export const COURSE = {
           blurb: "The players who vanished, and how to get them back.",
           brief: {
             goal: "Keep rows that have no match on the other side.",
+      steps: [
+        {
+          title: "A plain JOIN drops what does not match, silently",
+          body: "This is the part that catches people. If a rostered player has no row on the other side, a plain JOIN does not warn you or leave a gap. It simply returns fewer rows, and a report that quietly lost two players looks exactly like a correct one.",
+        },
+        {
+          title: "LEFT JOIN keeps the left side whole",
+          body: "LEFT JOIN returns every row from the first table no matter what, and attaches the second table's columns where a match exists. Where none exists you get NULL, which is the database saying nothing was here.",
+          code: "SELECT r.player, w.fantasy_pts\nFROM rosters r\nLEFT JOIN week_results w\n  ON r.player = w.player AND w.season = 2024 AND w.week = 1;",
+          note: "In our data McCaffrey has no week 1 row in 2024 because he was injured. A plain JOIN makes him vanish. A LEFT JOIN shows him with a NULL, which is a fact worth seeing rather than a row worth losing.",
+        },
+      ],
             setup:
               "A plain JOIN silently drops anything unmatched — that's how Travis Kelce disappeared from week 1. LEFT JOIN keeps every row from the left table and fills the missing side with NULL, so absence becomes visible instead of invisible.",
             previewSql:
@@ -1631,6 +1768,18 @@ export const COURSE = {
           blurb: "Anti-joins: the players nobody rostered.",
           brief: {
             goal: "Find rows in one table that have no counterpart in another.",
+      steps: [
+        {
+          title: "Some of the best questions are about absence",
+          body: "Which players is nobody starting. Which customers never ordered. Which games have no result filed yet. These are all the same shape of question, and none of them can be answered by looking at rows that exist.",
+        },
+        {
+          title: "LEFT JOIN, then keep only the NULLs",
+          body: "The trick has two moves. The LEFT JOIN keeps everything, matched or not. The WHERE then throws away everything that did match, by keeping only rows where the other side came back NULL. What is left is exactly the unmatched.",
+          code: "SELECT DISTINCT w.player\nFROM week_results w\nLEFT JOIN rosters r ON w.player = r.player\nWHERE r.player IS NULL;",
+          note: "This is called an anti-join. It is worth learning as a shape rather than a formula, because you will reach for it constantly once you can see it.",
+        },
+      ],
             setup:
               "Some of the most useful questions are about absence: which players is nobody starting, which customers never ordered, which games have no result yet. The pattern is always the same — LEFT JOIN, then keep only the rows where the match came back NULL.",
             previewSql:
@@ -1715,6 +1864,18 @@ export const COURSE = {
           blurb: "Joins plus GROUP BY: settle it with one query.",
           brief: {
             goal: "Combine a join with aggregation to answer a real question.",
+      steps: [
+        {
+          title: "Time to actually settle it",
+          body: "Everything you have written so far produces rows to look at. This one produces a verdict. Whose fantasy team scored more over the season is a question with a single right answer, and you now have every piece needed to get it.",
+        },
+        {
+          title: "Join first, then group",
+          body: "The database stitches the two tables together first, and only then collapses the result into buckets. Which means you can group by a column from one table while adding up a column from the other, and that is the whole move.",
+          code: "SELECT r.team_name, ROUND(SUM(w.fantasy_pts), 1) AS total\nFROM rosters r\nJOIN week_results w ON r.player = w.player\nWHERE w.season = 2024\nGROUP BY r.team_name\nORDER BY total DESC;",
+          note: "Five lines, three ideas you already knew, and a question that would take a long time by hand. This is roughly the shape of a real analyst's daily work.",
+        },
+      ],
             setup:
               "Everything so far has produced rows. This produces a verdict. Join the roster to the game log, group by fantasy team, sum the points — and you have the season matchup settled in five lines.",
             previewSql:
@@ -1808,6 +1969,18 @@ export const COURSE = {
           blurb: "OVER(): aggregate without collapsing.",
           brief: {
             goal: "Add a summary number to every row without losing the rows.",
+      steps: [
+        {
+          title: "GROUP BY answers by throwing detail away",
+          body: "You can already get a player's season average. The cost is that the individual games are gone from the answer. But plenty of questions need both at once: show me each game, and show me how it compares to the average.",
+        },
+        {
+          title: "OVER turns off the collapsing",
+          body: "Add OVER after an aggregate and it stops folding rows together. The same average gets calculated, then printed alongside every single row instead of replacing them. Same maths, nothing lost.",
+          code: "SELECT player, week, fantasy_pts,\n       ROUND(AVG(fantasy_pts) OVER (), 1) AS league_avg\nFROM week_results;",
+          note: "These are called window functions because the OVER clause defines a window of rows to look at. Empty brackets mean the window is everything.",
+        },
+      ],
             setup:
               "GROUP BY answers 'what's the total' by throwing the detail away. Window functions answer 'how does this row compare to the total' and keep every row. Same aggregate maths, no collapse — notice the season average repeating beside each game.",
             previewSql:
@@ -1895,6 +2068,18 @@ export const COURSE = {
           blurb: "PARTITION BY and RANK: WR1 through WR7.",
           brief: {
             goal: "Rank rows inside groups without running a query per group.",
+      steps: [
+        {
+          title: "Ranking a tight end against a quarterback is meaningless",
+          body: "Quarterbacks score more than everyone by design, so a single leaderboard just lists the quarterbacks first and tells you nothing. What you actually want is each player ranked against the players they are genuinely competing with.",
+        },
+        {
+          title: "PARTITION BY restarts the count in each group",
+          body: "PARTITION BY splits the window into groups, and the calculation begins again from scratch inside each one. Rank with a partition on position and the numbering restarts at 1 for every position.",
+          code: "SELECT player, position,\n       RANK() OVER (PARTITION BY position ORDER BY AVG(fantasy_pts) DESC) AS pos_rank\nFROM week_results\nGROUP BY player, position;",
+          note: "Read it out loud as: rank these, within each position, ordered by average points. Window functions get much easier once you read them as a sentence.",
+        },
+      ],
             setup:
               "Comparing a tight end to a quarterback is meaningless — you want each player ranked against their own position. PARTITION BY splits the window into groups and restarts the calculation in each one, so the ranking begins again at 1 for every position.",
             previewSql:
@@ -1976,6 +2161,18 @@ export const COURSE = {
           blurb: "LAG and LEAD: reach across rows.",
           brief: {
             goal: "Compare a row to the one before or after it.",
+      steps: [
+        {
+          title: "Trend questions need two rows at once",
+          body: "Is he heating up or cooling off. How much better was this week than last. Every tool you have met so far looks at one row at a time, which is why none of them can answer a question about change.",
+        },
+        {
+          title: "LAG reaches back, LEAD reaches forward",
+          body: "LAG pulls a value from the previous row in whatever order you specify, and LEAD pulls from the next one. Once last week's score is sitting on this week's row, comparing them is ordinary subtraction.",
+          code: "SELECT week, fantasy_pts,\n       LAG(fantasy_pts) OVER (ORDER BY week) AS prev_week\nFROM week_results\nWHERE player = 'Patrick Mahomes' AND season = 2024;",
+          note: "The first row has nothing behind it, so LAG returns NULL there. That is correct rather than broken, and forgetting it is a common way to end up with a wrong average.",
+        },
+      ],
             setup:
               "Trend questions need two rows at once, and until now every tool you have works one row at a time. LAG reaches backwards to the previous row; LEAD reaches forwards. Here's a quarterback's season with last week's score pulled onto each line.",
             previewSql:
@@ -2062,6 +2259,18 @@ export const COURSE = {
           blurb: "Window frames: cumulative points and a 3-game average.",
           brief: {
             goal: "Build a running total and a moving average.",
+      steps: [
+        {
+          title: "A window does not have to be the whole season",
+          body: "So far your windows have covered everything. But a window can also cover just the rows up to the one you are on, which is exactly what a running total is: the sum so far, recalculated on every line.",
+        },
+        {
+          title: "ORDER BY inside OVER makes it accumulate",
+          body: "Adding ORDER BY inside the brackets changes the window from everything to everything up to here. That single change turns SUM into a season-to-date total without any extra work.",
+          code: "SELECT week, fantasy_pts,\n       ROUND(SUM(fantasy_pts) OVER (ORDER BY week), 1) AS season_to_date\nFROM week_results\nWHERE player = 'Josh Allen' AND season = 2024;",
+          note: "Spell the window out with ROWS BETWEEN 2 PRECEDING AND CURRENT ROW and you get a three-game rolling average instead, which is how form is measured in almost every sport.",
+        },
+      ],
             setup:
               "A window can cover just part of its partition. Add ORDER BY and the window becomes everything up to the current row — which turns SUM into a running total for free. Watch it accumulate week by week.",
             previewSql:
