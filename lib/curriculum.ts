@@ -2376,6 +2376,18 @@ export const COURSE = {
           blurb: "Variables, numbers, strings — naming things you'll reuse.",
           brief: {
             goal: "Write and run your first real Python.",
+      steps: [
+        {
+          title: "You are about to write actual code",
+          body: "Not pseudo-code, not a diagram. Real Python, running in your browser, the same language used to build most of the data tooling in the world. It is worth saying that plainly, because the first line is the one people talk themselves out of.",
+        },
+        {
+          title: "A variable is a jersey number",
+          body: "It is a name you stick on a value so you can refer to it later. Python does not make you announce what kind of thing it is first. You write the name, an equals sign, and the value, and that is the whole ceremony.",
+          code: "points = 24.6\nplayer = 'Josh Allen'\nprint(player, points)",
+          note: "print is how code talks to you. Nothing appears on screen unless you ask for it, which catches everyone out once.",
+        },
+      ],
             setup:
               "Python runs live in your browser here — nothing is simulated. A variable is a name attached to a value. Numbers do math; text goes in quotes and doesn't. Getting those two confused is the most common beginner error, so we start there.",
           },
@@ -2470,6 +2482,18 @@ export const COURSE = {
           blurb: "Hold a whole roster, then do the same thing to every player.",
           brief: {
             goal: "Store a whole roster in a list and loop over it.",
+      steps: [
+        {
+          title: "One variable holds one thing",
+          body: "That gets old immediately. A roster is not one player, a season is not one week. You need a way to hold many values under a single name and then do the same thing to each of them.",
+        },
+        {
+          title: "A list is a roster, a loop is going down it",
+          body: "Square brackets hold the values in order. A for loop then walks that list one item at a time, running the indented block once per item, with the current item handed to you under whatever name you chose.",
+          code: "scores = [24.6, 18.2, 31.0]\nfor s in scores:\n    print(s)",
+          note: "The indentation is not decoration. Python uses it to decide what is inside the loop and what comes after it, which is unusual and is the single most common early error.",
+        },
+      ],
             setup:
               "A list holds many values in order. A for loop runs the same code once per item. Together they're how you process a season: write the logic once, let it run over every row. Indexing starts at 0, which trips up everyone at first.",
           },
@@ -2560,6 +2584,18 @@ export const COURSE = {
           blurb: "DataFrames, filtering, and groupby — the same moves you know.",
           brief: {
             goal: "Use pandas to do in Python what you already do in SQL.",
+      steps: [
+        {
+          title: "You already know how to think about tables",
+          body: "Six units of SQL taught you filtering, sorting, grouping and joining. None of that knowledge is language-specific. pandas is a way of doing exactly those things in Python, and every verb you know has a twin here.",
+        },
+        {
+          title: "A DataFrame is a table",
+          body: "It has columns with names and rows with values, the same as anything you have queried. WHERE becomes a mask in square brackets, ORDER BY becomes sort_values, GROUP BY becomes groupby. Different punctuation, identical ideas.",
+          code: "import pandas as pd\ndf = pd.DataFrame({'player': ['Allen', 'Hurts'], 'pts': [24.6, 18.2]})\nprint(df)",
+          note: "The reason to bother, given SQL already works, is everything around the query: cleaning, automating, charting, and anything heading toward machine learning.",
+        },
+      ],
             setup:
               "pandas gives Python a table type called a DataFrame. Every SQL verb has a twin: WHERE is a filter, GROUP BY is .groupby(), ORDER BY is .sort_values(). You already know the concepts — this is the spelling.",
           },
@@ -2669,6 +2705,17 @@ export const COURSE = {
           blurb: "Mean, median, and when each one misleads you.",
           brief: {
             goal: "Know when the mean misleads and the median doesn't.",
+      steps: [
+        {
+          title: "Every tool you own will confidently mislead you",
+          body: "SQL will average anything you point it at. Excel will do it faster. Neither will mention that the answer is nonsense because one enormous week dragged it. Statistics is the layer that stops you presenting that number.",
+        },
+        {
+          title: "The mean is easy to bully, the median is not",
+          body: "The mean adds everything and divides, so a single extreme value pulls it. The median is just the middle value once you line them up, so it barely notices. When the two disagree badly, that gap is itself the finding.",
+          note: "Report both when they differ. Reporting only the flattering one is the most common way people mislead without technically lying.",
+        },
+      ],
             setup:
               "The mean adds everything and divides; one huge outlier drags it. The median is the middle value and barely moves. When they disagree, that gap is itself the finding — and reporting only the mean is how people recommend the wrong player.",
           },
@@ -2749,6 +2796,17 @@ export const COURSE = {
           blurb: "Why three great games proves almost nothing.",
           brief: {
             goal: "Judge whether a result has enough data behind it to trust.",
+      steps: [
+        {
+          title: "Three good games is not a trend",
+          body: "Everyone knows this and almost nobody applies it, because a small sample produces the most exciting numbers. The highest scoring average in any league usually belongs to someone who has played twice.",
+        },
+        {
+          title: "Noise shrinks as the sample grows",
+          body: "Flip a fair coin three times and all heads happens one time in eight, which is often enough to see constantly. Flip it fifty times and the same run essentially never happens. Nothing changed about the coin, only how much evidence you gathered.",
+          note: "This is why the leaderboard lessons kept adding a minimum games filter. It is not a technicality, it is the whole point of the exercise.",
+        },
+      ],
             setup:
               "Any small sample can look extreme by luck. Three-for-three isn't elite hands, it's Tuesday. The fix is a habit, not a formula: always ask for the denominator before you believe a rate.",
           },
@@ -2827,6 +2885,17 @@ export const COURSE = {
           blurb: "Why the hot hand cools — and it isn't a jinx.",
           brief: {
             goal: "Recognise regression to the mean instead of inventing a story.",
+      steps: [
+        {
+          title: "The best month is usually followed by a worse one",
+          body: "It happens so reliably that people invent explanations for it: complacency, a new contract, the pressure of expectation. Usually the real reason is much duller and much more useful to understand.",
+        },
+        {
+          title: "Extremes drift back toward normal",
+          body: "If a result is part skill and part luck, an extreme result probably had unusually good luck in it. Skill persists into next month. Luck does not. So the number falls, and no story is required to explain it.",
+          note: "This is the single most useful idea in this course for not looking foolish. Whenever you see a dramatic decline after a peak, check whether ordinary regression explains it before you write the narrative.",
+        },
+      ],
             setup:
               "If a performance is part skill and part luck, an extreme result probably had good luck in it — and luck doesn't repeat. The drift back toward normal isn't a slump or a jinx. It's the most misread pattern in sports analytics.",
           },
@@ -2917,6 +2986,17 @@ export const COURSE = {
           blurb: "Match the chart to the question, not to your mood.",
           brief: {
             goal: "Choose the chart the question actually calls for.",
+      steps: [
+        {
+          title: "The chart is not a decoration",
+          body: "It is the argument. Analysis nobody can read changes nothing, and the wrong chart type actively hides what you found. Choosing well is not an aesthetic decision, it is part of being right.",
+        },
+        {
+          title: "The question decides the chart",
+          body: "Comparing amounts across categories is a bar chart. Tracking something over time is a line. Looking for a relationship between two numbers is a scatter. Say your question out loud and the chart type is usually already decided.",
+          note: "Pie charts are the usual mistake. People are bad at comparing angles, so almost any pie chart is a bar chart that has been made harder to read.",
+        },
+      ],
             setup:
               "The question decides the chart, not your mood. Amounts across categories → bars. Something over time → a line. Relationship between two numbers → scatter. Shape of one distribution → histogram. Most bad charts are right data in the wrong container.",
           },
@@ -2985,6 +3065,17 @@ export const COURSE = {
           blurb: "The truncated y-axis and other honest-mistake territory.",
           brief: {
             goal: "Build charts that don't overstate what the data says.",
+      steps: [
+        {
+          title: "A chart can be accurate and still lie",
+          body: "Every number correct, every label right, and the reader still walks away believing something false. This is not a hypothetical: it is the most common form of misleading chart, and it is usually an accident.",
+        },
+        {
+          title: "Where the axis starts changes the story",
+          body: "Bars encode value by length, so if the axis does not start at zero the lengths stop being proportional. Start it at 20 and a five percent gap can look like a rout. On a line chart tracking change, a truncated axis is often fine, which is why the rule needs judgement rather than memorising.",
+          note: "Ask yourself what someone would conclude in two seconds without reading the axis. If that conclusion is wrong, the chart is wrong.",
+        },
+      ],
             setup:
               "Bars encode value by length, so their baseline must be zero — truncate it and a 5% gap looks like a landslide. Lines encode change, so a non-zero baseline can be the honest choice. Knowing which rule applies is the skill.",
           },
@@ -3061,6 +3152,16 @@ export const COURSE = {
           blurb: "Cut everything that isn't the argument.",
           brief: {
             goal: "Cut a chart down to the one thing it's arguing.",
+      steps: [
+        {
+          title: "Most charts are trying to say too much",
+          body: "Every gridline, legend, colour and label spends some of the reader's attention. Spend it on six things at once and they leave with none of them. A chart making one clear claim beats a dashboard making nine.",
+        },
+        {
+          title: "If it does not serve the point, delete it",
+          body: "That is the whole edit. Say what the chart is arguing in one sentence, then remove everything that is not helping make that argument. Colour is the strongest tool you have, so spend it on the thing you want noticed and let everything else be grey.",
+        },
+      ],
             setup:
               "Every gridline, legend, and colour competes for attention. Say your finding out loud in one sentence, then delete anything on the chart that isn't helping you say it. A title that states the finding does more work than any styling.",
           },
@@ -3144,6 +3245,18 @@ export const COURSE = {
           blurb: "add, commit, and why analysis_final_v3_REAL.py must die.",
           brief: {
             goal: "Save your work in git so you can delete boldly.",
+      steps: [
+        {
+          title: "The point of Git is that you can be reckless",
+          body: "It gets taught as bookkeeping, which makes it sound tedious. The actual benefit is freedom: once your work is saved properly you can delete things, try the risky rewrite, and break whatever you like, because getting back is one command.",
+        },
+        {
+          title: "A commit is a save point",
+          body: "You choose what goes in with add, then save it with commit and a message saying what you did. The message is for a future person, and that person is usually you, six months later, with no memory of any of this.",
+          code: "git add analysis.sql\ngit commit -m 'Add season totals query'",
+          note: "Commit small and often. A commit containing one change is easy to undo. A commit containing a week of work is a decision you will not want to make.",
+        },
+      ],
             setup:
               "Git records snapshots. You stage changes with `git add`, then save them with `git commit -m \"message\"`. Every commit is recoverable forever — which is exactly what frees you to stop hoarding files called analysis_final_v3_REAL.py.",
           },
@@ -3223,6 +3336,18 @@ export const COURSE = {
           blurb: "Try something risky without breaking what works.",
           brief: {
             goal: "Experiment on a branch without risking what works.",
+      steps: [
+        {
+          title: "You will want to try something risky",
+          body: "A rewrite, a different approach, something that might not work. Doing that directly on the code everyone depends on is how you end up with a broken main version and no clean way back.",
+        },
+        {
+          title: "A branch is a parallel drive",
+          body: "It is an independent line of work. main stays exactly as it was and keeps working, you experiment on the branch, and you merge back only when the thing is actually good. If it is not, you delete the branch and nothing was harmed.",
+          code: "git checkout -b rolling-averages",
+          note: "Branches are cheap and disposable. Making one for a half-hour experiment is completely normal, not overkill.",
+        },
+      ],
             setup:
               "A branch is an independent line of work. main keeps running while you try something; if the idea fails you delete the branch and nothing was ever at risk. If it works, you merge it back.",
           },
@@ -3289,6 +3414,17 @@ export const COURSE = {
           blurb: "How work gets reviewed — and how a hiring manager finds it.",
           brief: {
             goal: "Get work reviewed, and make a repo a hiring manager can read.",
+      steps: [
+        {
+          title: "This one is directly about getting hired",
+          body: "Pull requests are how essentially every technical team works, so knowing the flow removes a first-week stumble. And a public repository someone can actually read is portfolio evidence that beats any certificate.",
+        },
+        {
+          title: "A pull request is a proposal",
+          body: "You push a branch to GitHub and open a pull request: here is what I changed, here is why, please look. Someone reviews it, comments, and it gets merged. It is a conversation attached to a diff.",
+          note: "For a portfolio, the README is the part hiring managers actually read. What the project does, what data it used, what you found. Code with no explanation is not evidence of anything.",
+        },
+      ],
             setup:
               "A pull request proposes a change and opens it for review — it's how nearly every data team ships. It's also the artifact an interviewer can actually read: your reasoning, in public, in your own words.",
           },
@@ -3377,6 +3513,17 @@ export const COURSE = {
           blurb: "Where R wins, and why sports analytics leans on it.",
           brief: {
             goal: "Understand where R fits next to Python.",
+      steps: [
+        {
+          title: "An honest answer first",
+          body: "If you want a general analyst job at a typical company, Python is the safer investment and you should do that course instead. R is worth your time for a specific reason, and it is better to know what that reason is before you spend hours here.",
+        },
+        {
+          title: "R was built for data from the start",
+          body: "Python is a general programming language that grew excellent data tools. R was designed for statistics before anything else, so tables, factors and statistical models are native rather than bolted on. That heritage is why academia, biostatistics and a large share of published sports analytics still run on it.",
+          note: "Even if you never write R, being able to read it is useful. A great deal of the public sports analysis worth learning from is published as R code.",
+        },
+      ],
             setup:
               "R was designed for statistics from the start, so tables and models are native rather than bolted on. A large share of public sports analytics — nflverse included — ships as R packages, so reading R is a real advantage even if you write mostly Python.",
           },
@@ -3440,6 +3587,18 @@ export const COURSE = {
           blurb: "filter, group_by, summarise, arrange — same five moves.",
           brief: {
             goal: "Run real dplyr and see it's the SQL you already know.",
+      steps: [
+        {
+          title: "You already know these verbs",
+          body: "filter, arrange, group_by, summarise. Those are WHERE, ORDER BY, GROUP BY and your aggregates, wearing different names. dplyr is close enough to SQL that most of this lesson is translation rather than new concepts.",
+        },
+        {
+          title: "The pipe passes data along",
+          body: "The pipe takes whatever is on its left and feeds it in as the first argument of whatever is on the right. That lets you write a chain in the order the work happens, which reads far better than nesting the calls inside each other.",
+          code: "week_results |>\n  filter(season == 2024) |>\n  group_by(player) |>\n  summarise(total = sum(fantasy_pts))",
+          note: "Older code uses %>% instead of |>. They do the same job here; the second one is newer and built into R itself.",
+        },
+      ],
             setup:
               "R runs live in your browser here, dplyr included. The pipe |> feeds the left side into the right, so a chain reads in the order you'd say it: take the data, filter it, group it, summarise it, sort it. Same five moves as SQL.",
           },
@@ -3540,6 +3699,18 @@ export const COURSE = {
           blurb: "Build a chart by stacking pieces, not by picking a template.",
           brief: {
             goal: "Build a chart in layers with ggplot2.",
+      steps: [
+        {
+          title: "ggplot2 is the reason many people learn R at all",
+          body: "It is widely considered the best charting library anywhere, in any language, and it is built on an actual theory of what a chart is rather than a list of chart types. Learning it changes how you think about charts even if you go back to Python afterwards.",
+        },
+        {
+          title: "Data, mapping, geometry",
+          body: "You name the data, map columns onto visual properties like x, y and colour with aes, and then add a geometry that decides how those get drawn. Layers are joined with a plus. Swap the geometry and the same mapping becomes a different chart.",
+          code: "ggplot(df, aes(x = week, y = fantasy_pts)) +\n  geom_line()",
+          note: "That separation is the idea worth taking away: what the data means is declared once, and how it looks is a separate decision layered on top.",
+        },
+      ],
             setup:
               "ggplot2 joins layers with +. You name the data, map columns to visual properties with aes(), then add a geometry. Swap the geometry and the same mapping becomes a different chart — that's the payoff of the layered grammar.",
           },
@@ -3636,6 +3807,18 @@ export const COURSE = {
           blurb: "if / elif / else — tier a performance.",
           brief: {
             goal: "Make your code choose between paths.",
+      steps: [
+        {
+          title: "Code that always does the same thing is limited",
+          body: "So far every line you have written runs regardless. Real programs make choices: label this one a boom game, skip that row, treat a missing value differently. That requires asking a question and acting on the answer.",
+        },
+        {
+          title: "if, elif, else, and the colon",
+          body: "The colon opens a block, and the indented lines beneath it are what runs when the test passes. Python checks each branch in order and takes the first one that is true, so the order you write them in is part of the logic.",
+          code: "points = 24.6\nif points >= 20:\n    print('Boom')\nelif points >= 12:\n    print('Solid')\nelse:\n    print('Bust')",
+          note: "Put the strictest test first. Reverse these two and everything over 20 gets caught by the 12 check and mislabelled, which the computer will never warn you about.",
+        },
+      ],
             setup:
               "So far your code has run straight through. `if` lets it branch: test something, and only run that block when the test is true. `elif` adds another test, `else` catches everything left. Indentation is what says which lines belong to the branch — Python has no braces, and that is not optional styling.",
           },
@@ -3712,6 +3895,18 @@ export const COURSE = {
           blurb: "def: write the logic once, use it everywhere.",
           brief: {
             goal: "Turn code you keep repeating into something you can call.",
+      steps: [
+        {
+          title: "You will notice yourself repeating things",
+          body: "The same three lines, with one number changed. That repetition is a signal, not a chore: it means there is a named idea hiding in your code that has not been given a name yet.",
+        },
+        {
+          title: "A function is that idea, named",
+          body: "def gives it a name and a list of inputs. Everything indented under it is the body. Call it later with different inputs and it runs again on those.",
+          code: "def per_game(total, games):\n    return total / games\n\nprint(round(per_game(128.4, 6), 1))",
+          note: "return hands a value back to whoever called the function. print only draws on the screen and gives the caller nothing. Confusing the two costs beginners more time than any other single mistake in Python.",
+        },
+      ],
             setup:
               "Copy-pasting the same tiering logic for four players is how bugs get in — you fix one copy and forget the others. A function names that logic once. `def` defines it, the indented body is what it does, and `return` hands a value back to whoever called it.",
           },
@@ -3787,6 +3982,18 @@ export const COURSE = {
           blurb: "Look things up by name instead of by position.",
           brief: {
             goal: "Store and retrieve values by a key you choose.",
+      steps: [
+        {
+          title: "Lists are ordered, which is not always what you want",
+          body: "A list is good when position matters. It is useless when you want to look something up by name, because you would have to know which slot it was in, and nobody remembers that.",
+        },
+        {
+          title: "A dictionary looks things up by a key you choose",
+          body: "Curly braces, and each entry is a key, a colon, and a value. Then you fetch a value by handing over its key, which is how you actually think about data most of the time.",
+          code: "ppg = {'Josh Allen': 22.9, 'Travis Kelce': 12.7}\nprint(ppg['Travis Kelce'])",
+          note: "Asking for a key that is not there raises an error rather than returning nothing. That is deliberate: a silent wrong answer would be worse.",
+        },
+      ],
             setup:
               "A list finds things by position — scores[2] means 'the third one', which tells you nothing about who it is. A dictionary finds them by a key you pick, so ppg[\"Josh Allen\"] says exactly what it means. Keys are unique; assigning to an existing key overwrites it.",
           },
@@ -3855,6 +4062,18 @@ export const COURSE = {
           blurb: "Five lines become one — without becoming unreadable.",
           brief: {
             goal: "Build a new list from an old one in a single expression.",
+      steps: [
+        {
+          title: "Building a list from another list is very common",
+          body: "Take these, keep the ones that qualify, do something to each, hand me the result. You can write that as a loop with an empty list and an append, and it works, and it takes four lines every time.",
+        },
+        {
+          title: "A comprehension says it in one",
+          body: "Read it left to right as a sentence: give me this, for each of those, where that is true. The trailing condition is optional, and dropping it just means keep everything.",
+          code: "weeks = [24.6, 8.2, 31.0, 12.5]\nprint([w for w in weeks if w >= 20])",
+          note: "Comprehensions are idiomatic Python, so you will meet them constantly in other people's code. Being able to read one matters more than always writing one.",
+        },
+      ],
             setup:
               "Creating an empty list, looping, and appending is three lines of ceremony around one idea. A comprehension says the same thing in one: what to keep, where from, and optionally which ones. You'll read far more of these than you write, so recognising them matters as much as producing them.",
           },
@@ -3943,6 +4162,18 @@ export const COURSE = {
           blurb: "pandas' WHERE and ORDER BY.",
           brief: {
             goal: "Cut a DataFrame down to the rows you want, in the order you want.",
+      steps: [
+        {
+          title: "Now the SQL translation gets literal",
+          body: "Filtering and sorting are the two things you reached for most in SQL, and they are the two things you will reach for most here. The thinking transfers completely. Only the punctuation is new.",
+        },
+        {
+          title: "A mask is a column of True and False",
+          body: "This is the bit worth slowing down for. Writing a comparison on a column does not return rows. It returns True or False for every row. Putting that result inside square brackets is the step that actually selects.",
+          code: "df[df['points'] > 20].sort_values('points', ascending=False)",
+          note: "Combining conditions needs & and | rather than and or, and every condition needs its own brackets, because & binds tighter than the comparison does.",
+        },
+      ],
             setup:
               "You already know what filtering and sorting mean — you did both in SQL. pandas spells them differently: a boolean mask inside square brackets for WHERE, .sort_values() for ORDER BY. The thinking transfers completely; only the punctuation is new.",
           },
@@ -4019,6 +4250,17 @@ export const COURSE = {
           blurb: "pandas' GROUP BY, and .agg for several answers at once.",
           brief: {
             goal: "Collapse rows into one summary per group.",
+      steps: [
+        {
+          title: "This is GROUP BY, wearing different clothes",
+          body: "One number for the whole frame is rarely the question. You want one per player, per position, per team. If that sounds exactly like the GROUP BY lesson, that is because it is the same idea.",
+        },
+        {
+          title: "Split, apply, combine",
+          body: "groupby splits the frame into groups, runs your aggregate inside each one, and combines the answers back into a single result. Saying those three words to yourself while reading the code makes it obvious what is happening.",
+          code: "df.groupby('position')['points'].mean()",
+        },
+      ],
             setup:
               "groupby splits rows into buckets by a column, then an aggregate collapses each bucket to one number — exactly GROUP BY. .agg() goes further and computes several aggregates in one pass, which is where pandas starts saving you real time over SQL.",
           },
@@ -4088,6 +4330,18 @@ export const COURSE = {
           blurb: "pandas' JOIN, including the one that drops rows silently.",
           brief: {
             goal: "Combine two DataFrames on a shared column.",
+      steps: [
+        {
+          title: "Joining, again",
+          body: "Two frames, one shared column, one combined answer. You did this with JOIN and you know the traps: matched rows survive, unmatched rows quietly vanish unless you say otherwise.",
+        },
+        {
+          title: "how= decides who survives",
+          body: "inner keeps only rows present in both, which is the JOIN you met first. left keeps every row from the left frame and fills the gaps with NaN, which is the LEFT JOIN. Same decision, same consequences.",
+          code: "pd.merge(roster, scores, on='player', how='left')",
+          note: "Check the row count before and after every merge. A join that silently halved your data looks identical to one that worked, and this is how you catch it.",
+        },
+      ],
             setup:
               "You met joins in SQL; merge is the same operation. The argument that matters most is `how`: 'inner' keeps only matches (and quietly drops the rest), 'left' keeps everything on the left and fills gaps with NaN. Choosing wrong is how row counts mysteriously change.",
           },
@@ -4158,6 +4412,18 @@ export const COURSE = {
           blurb: "Missing values, wrong types, and stray whitespace.",
           brief: {
             goal: "Make a messy frame safe to calculate on.",
+      steps: [
+        {
+          title: "Real files arrive broken",
+          body: "This is the part tutorials skip and the part the job is actually made of. Missing values, numbers stored as text, stray spaces on names that stop every join from matching. None of it is exotic and all of it is constant.",
+        },
+        {
+          title: "Find it, then decide",
+          body: "Count what is missing first, then make a deliberate choice about it. Drop the rows, or fill them with something, and be able to say which you did and why. There is no universal right answer, only a decision you should have made on purpose.",
+          code: "print(df.isna().sum())\ndf = df.dropna(subset=['points'])",
+          note: "Dropping is safe when the missing rows are few and random. Filling with the average is defensible and quietly narrows your data's spread, which matters if anyone measures variance later.",
+        },
+      ],
             setup:
               "Real files arrive broken: numbers stored as text, names with trailing spaces, gaps where a value should be. None of it errors immediately — it just produces wrong answers later. Cleaning first is the difference between an analysis and a guess.",
           },
@@ -4241,6 +4507,22 @@ export const COURSE = {
           blurb: "Every cell has an address. Formulas speak in addresses.",
           brief: {
             goal: "Point at any cell or block of cells by name, the way a formula does.",
+      steps: [
+        {
+          title: "Excel is on more job postings than anything else here",
+          body: "It is unglamorous and it is everywhere. Finance, operations, marketing and most of the small-to-mid-sized world runs on spreadsheets, and a great many analyst jobs are mostly Excel with a little SQL attached. Being genuinely good at it is a hiring signal.",
+        },
+        {
+          title: "A spreadsheet is a grid with addresses",
+          body: "Columns get letters along the top, rows get numbers down the side, and a cell is named by both stuck together. Column first, then row. That is the entire address system and every formula in this course is built on it.",
+          code: "E2        one cell: column E, row 2\nE2:E17    a range: E2 down through E17\nA2:E17    a block: columns A to E, rows 2 to 17",
+          note: "The colon means through. Get comfortable reading these now and every formula later becomes a sentence you can already parse.",
+        },
+        {
+          title: "Real formulas, real workbook",
+          body: "Everything you type here runs against an actual two-sheet workbook and is graded on the value it produces, not on matching some expected text. If your formula is right in a way we did not anticipate, it still passes.",
+        },
+      ],
             setup:
               "A spreadsheet is a grid. Columns get letters across the top, rows get numbers down the side, and a cell's address is just the two stuck together: column first, then row. E2 means column E, row 2. A block of cells is written with a colon — E2:E17 means \"E2 all the way down to E17\". That is the entire address system, and every formula in this course is built on it.",
             previewSheet: "Roster",
@@ -4324,6 +4606,18 @@ export const COURSE = {
           blurb: "The three formulas that answer most spreadsheet questions.",
           brief: {
             goal: "Total a column, average it, and count how many rows it holds.",
+      steps: [
+        {
+          title: "A formula always starts with an equals sign",
+          body: "That is how the sheet knows you are asking a question rather than typing text. Leave it off and Excel stores the literal characters SUM(E2:E17) and wonders why you did that.",
+        },
+        {
+          title: "Every function is the same shape",
+          body: "An equals sign, a name, and brackets holding what it should work on. Change the name and you change the question, while the range stays exactly the same. Learn one and you have structurally learned all of them.",
+          code: "=SUM(E2:E17)       add every value\n=AVERAGE(E2:E17)   the mean\n=COUNT(E2:E17)     how many numbers\n=COUNTA(A2:A17)    how many non-empty cells",
+          note: "COUNT only counts numbers. COUNTA counts anything that is not empty. Run COUNT on a column of names and you get zero, which looks like a broken sheet and is actually the wrong function.",
+        },
+      ],
             setup:
               "A formula always starts with an equals sign. That is how Excel knows you are asking a question rather than typing text. After the equals sign comes a function name and a range in brackets: =SUM(E2:E17) means \"add up everything from E2 to E17\". SUM, AVERAGE and COUNT are the three you will reach for constantly.",
             previewSheet: "Roster",
@@ -4400,6 +4694,18 @@ export const COURSE = {
           blurb: "Find the best, the worst, and the gap between them.",
           brief: {
             goal: "Pull the highest and lowest values out of a column, and measure the distance between them.",
+      steps: [
+        {
+          title: "Finding the best and worst is the easy half",
+          body: "MAX and MIN do exactly what they sound like, and there is nothing subtle about using them. The interesting part is what they cannot tell you.",
+        },
+        {
+          title: "They return the value, not the name",
+          body: "MAX reads down the points column and hands back the biggest number. It has no idea a player column exists, so it cannot tell you who scored it. Getting from the top score to the person is a lookup problem, and you will solve it properly in unit three.",
+          code: "=MAX(E2:E17)      the highest score\n=MIN(E2:E17)      the lowest\n=LARGE(E2:E17,3)  the third highest",
+          note: "Noticing what a function cannot do is worth as much as knowing what it can. That gap is the reason the next two units exist.",
+        },
+      ],
             setup:
               "MAX and MIN do exactly what they sound like. The catch — and it is the one that sends people to INDEX/MATCH later — is that they return the number, not the player attached to it. MAX tells you the top score was 430.4; it will not tell you who scored it.",
             previewSheet: "Roster",
@@ -4468,6 +4774,18 @@ export const COURSE = {
           blurb: "Totals lie when players play different numbers of games.",
           brief: {
             goal: "Turn totals into rates so players who missed time can be compared fairly.",
+      steps: [
+        {
+          title: "Totals quietly reward whoever stayed healthy",
+          body: "Games played is not the same for everyone on this roster. Some played seventeen, one played thirteen. That makes a total-points leaderboard partly a measure of availability rather than of how good anyone was.",
+        },
+        {
+          title: "Dividing turns a total into a rate",
+          body: "Points divided by games gives points per game, which compares like with like. Wrap it in ROUND to cut the decimal tail nobody wants to read. This is the single most common analytical move in all of sports data.",
+          code: "=ROUND(E2/D2,2)     points per game\n=ROUND(F2/E2,0)     salary per point",
+          note: "Whenever someone hands you a leaderboard built on totals, the first question worth asking is whether everyone had the same opportunity.",
+        },
+      ],
             setup:
               "Games played is not the same for every player on this roster — some played 17, one played 12. That makes total points a misleading way to rank them, because the biggest total might just belong to whoever stayed healthy. Dividing by games gives points per game, which compares like with like. This is the single most common analytical move in sports data.",
             previewSheet: "Roster",
@@ -4558,6 +4876,18 @@ export const COURSE = {
           blurb: "Ask a question of each row and write the answer next to it.",
           brief: {
             goal: "Write a formula that makes a decision and returns different text depending on the answer.",
+      steps: [
+        {
+          title: "Formulas that make a decision",
+          body: "Everything so far has done arithmetic. IF is the first function that looks at a value, asks a question about it, and returns different things depending on the answer. It is the backbone of every spreadsheet that categorises anything.",
+        },
+        {
+          title: "Test, then true, then false",
+          body: "The order never changes. First the question, then what to return when the answer is yes, then what to return when it is no. Text you want back goes in double quotes so Excel knows you mean the word rather than a cell name.",
+          code: "=IF(E2>300,\"Stud\",\"Flex\")",
+          note: "Leave off the third argument and Excel returns the word FALSE, which is almost never what you meant and looks alarming in a report.",
+        },
+      ],
             setup:
               "IF takes three things: a test, what to return when the test is true, and what to return when it is false. =IF(E2>300,\"Stud\",\"Flex\") reads as \"if this player scored over 300, call them a Stud, otherwise call them a Flex\". It is the first formula that does something other than arithmetic, and it is the backbone of every spreadsheet that categorises anything.",
             previewSheet: "Roster",
@@ -4637,6 +4967,18 @@ export const COURSE = {
           blurb: "Count rows that meet a condition, without filtering anything.",
           brief: {
             goal: "Count how many rows match one condition — or several at once.",
+      steps: [
+        {
+          title: "Counting everything is rarely the question",
+          body: "You know how many players are on the roster. What people actually ask is how many of them are receivers, or how many cleared a threshold. That means counting only the rows that qualify.",
+        },
+        {
+          title: "Range first, then the rule",
+          body: "COUNTIF takes the range to look at and the condition to apply. COUNTIFS takes as many range and rule pairs as you need and counts only rows that satisfy every one of them.",
+          code: "=COUNTIF(C2:C17,\"WR\")\n=COUNTIF(E2:E17,\">250\")\n=COUNTIFS(C2:C17,\"WR\",E2:E17,\">200\")",
+          note: "The comparison goes inside the quotes, which looks wrong and is required. Excel reads the whole condition as a piece of text, operator included.",
+        },
+      ],
             setup:
               "COUNT tells you how many rows there are. COUNTIF tells you how many rows match a rule: =COUNTIF(C2:C17,\"WR\") counts the wide receivers. The rule goes in quotes, and comparison rules go in quotes too — \">250\" is a piece of text as far as the formula is concerned, which surprises everyone the first time.",
             previewSheet: "Roster",
@@ -4704,6 +5046,18 @@ export const COURSE = {
           blurb: "Add up only the rows that qualify.",
           brief: {
             goal: "Total or average a column, but only for the rows matching a condition.",
+      steps: [
+        {
+          title: "Now add up only the rows that qualify",
+          body: "Same idea as counting, one step further. Not how many receivers, but how many points did the receivers score between them. That means testing one column and adding a different one.",
+        },
+        {
+          title: "Test range, rule, then the range to add",
+          body: "SUMIF checks one column and totals another, and the two are at opposite ends of the formula. The column being tested comes first, the column being added comes last.",
+          code: "=SUMIF(C2:C17,\"RB\",E2:E17)\n=SUMIFS(F2:F17,G2:G17,\"Jordan\")",
+          note: "SUMIF and SUMIFS disagree about argument order: SUMIFS puts the range being added first. There is no reason for this beyond history, and when a conditional total comes back wrong this is the first thing to check.",
+        },
+      ],
             setup:
               "SUMIF has an argument order that trips up nearly everyone: you give it the range to *test*, then the rule, and then — separately — the range to actually *add*. =SUMIF(C2:C17,\"RB\",E2:E17) means \"look at the positions, find the RBs, and add up their points\". The column you are testing and the column you are summing are different, and they go at opposite ends of the formula.",
             previewSheet: "Roster",
@@ -4782,6 +5136,18 @@ export const COURSE = {
           blurb: "Why your formula breaks the moment you copy it down.",
           brief: {
             goal: "Lock part of a reference so it stops moving when the formula is copied.",
+      steps: [
+        {
+          title: "Copy a formula down and it moves",
+          body: "References shift to stay in the same relative position, which is usually exactly what you want. Row two divides row two, row three divides row three. Right up until part of the formula was supposed to stay still.",
+        },
+        {
+          title: "The dollar sign freezes what follows it",
+          body: "Put one before the column letter and the row number and that reference stops moving no matter where the formula is copied. Any share-of-total calculation needs this: the numerator should move down the column, and the total absolutely must not.",
+          code: "E2      moves with the formula\n$E$2    never moves\n=ROUND(E2/SUM($E$2:$E$17),3)",
+          note: "It has nothing to do with currency formatting, which is the guess almost everyone makes first.",
+        },
+      ],
             setup:
               "Copy =E2/E18 down one row and Excel helpfully turns it into =E3/E19. That is usually what you want for the top half and a disaster for the bottom half — the divisor was supposed to stay put. A dollar sign freezes whatever follows it: $E$2 never moves, E$2 keeps the row fixed, $E2 keeps the column fixed. This one character is the difference between a formula you can copy and one you have to rewrite sixteen times.",
             previewSheet: "Roster",
@@ -4877,6 +5243,18 @@ export const COURSE = {
           blurb: "The formula every job posting means when it says 'Excel'.",
           brief: {
             goal: "Look up a player by name and return any value from their row.",
+      steps: [
+        {
+          title: "This is the one that gets asked about by name",
+          body: "When a job posting says Excel skills, lookups are a large part of what it means, and VLOOKUP is the one most people have heard of. It answers a genuinely common question: I have this name, what is their number.",
+        },
+        {
+          title: "Four arguments, and the fourth is not optional",
+          body: "What to look for, the block to search, which column of that block to return, and FALSE to demand an exact match. The column number counts from the left edge of the block you handed it, not from column A of the sheet.",
+          code: "=VLOOKUP(\"Justin Jefferson\",A2:E17,5,FALSE)",
+          note: "The fourth argument defaults to approximate matching, which on unsorted data returns confidently wrong answers instead of an error. There is no situation in this course where you want anything but FALSE.",
+        },
+      ],
             setup:
               "A lookup answers \"I have this name — what's their number?\". VLOOKUP takes four things: what to look for, the block of cells to search, which column of that block to return, and FALSE to demand an exact match. The column number counts from the left edge of the block you gave it, not from column A of the sheet — that off-by-one is the single most common VLOOKUP mistake.",
             previewSheet: "Roster",
@@ -4958,6 +5336,18 @@ export const COURSE = {
           blurb: "#N/A, and the two things it usually means.",
           brief: {
             goal: "Handle a lookup that finds nothing, instead of leaving #N/A across your sheet.",
+      steps: [
+        {
+          title: "Lookups fail, and the failure spreads",
+          body: "A lookup that finds nothing returns an error, and every formula downstream that touches that cell then errors too. One missing player can turn an entire column red and take the totals with it.",
+        },
+        {
+          title: "IFERROR decides what failure looks like",
+          body: "Wrap the lookup and give it a fallback. If the lookup works you get its answer, and if it fails you get whatever you chose instead. Text reads better for a human, zero keeps the arithmetic below it working.",
+          code: "=IFERROR(VLOOKUP(\"Travis Kelce\",A2:E17,5,FALSE),\"Not rostered\")",
+          note: "VLOOKUP also cannot look left: it searches the first column of its range and only returns things to the right of it. That limitation is the entire reason the next lesson exists.",
+        },
+      ],
             setup:
               "#N/A means \"not available\" — the lookup ran fine and simply did not find the value. Sometimes that is real information (the player is not rostered) and sometimes it is a data problem (the name has a trailing space). Either way, a column full of #N/A makes every SUM below it fail too, so you wrap the lookup in IFERROR and decide what should appear instead.",
             previewSheet: "Roster",
@@ -5047,6 +5437,18 @@ export const COURSE = {
           blurb: "Two functions that fix everything VLOOKUP can't do.",
           brief: {
             goal: "Look up a value in any direction by splitting the job into 'which row?' and 'give me that row'.",
+      steps: [
+        {
+          title: "The grown-up version",
+          body: "VLOOKUP has two real weaknesses. It cannot look leftwards, and its column number is a hardcoded count that silently breaks the moment somebody inserts a column. INDEX and MATCH together have neither problem.",
+        },
+        {
+          title: "Split the job in two",
+          body: "MATCH answers one question: where in this list is my value. It returns a position, not a value. INDEX answers the other: give me item number fourteen from this column. Neither is much use alone and nested together they do everything.",
+          code: "=MATCH(\"George Kittle\",A2:A17,0)\n=INDEX(E2:E17,MATCH(\"Tyreek Hill\",A2:A17,0))",
+          note: "Because you name the return column directly rather than counting to it, inserting a column just moves the reference along with it. That is the whole robustness argument.",
+        },
+      ],
             setup:
               "MATCH answers one question: where in this list is my value? It returns a position — 15, not a name. INDEX answers the other: give me item number 15 from this column. Neither is much use alone. Nested together they do everything VLOOKUP does, in any direction, and without a column number that silently breaks when someone inserts a column.",
             previewSheet: "Roster",
@@ -5128,6 +5530,18 @@ export const COURSE = {
           blurb: "One function that replaces all of the above.",
           brief: {
             goal: "Write a lookup that reads the way you'd say it out loud.",
+      steps: [
+        {
+          title: "The modern one, if you have it",
+          body: "XLOOKUP fixes VLOOKUP's design in a single function: you name the search column and the return column directly, exact match is the default, and the not-found fallback is built in rather than needing a wrapper.",
+        },
+        {
+          title: "Look for, look in, return from",
+          body: "It reads almost like the sentence you would say out loud. An optional fourth argument replaces IFERROR entirely.",
+          code: "=XLOOKUP(\"Derrick Henry\",A2:A17,F2:F17)\n=XLOOKUP(\"Travis Kelce\",A2:A17,F2:F17,\"Not rostered\")",
+          note: "Plenty of workplaces run older Excel that does not have it. That is exactly why INDEX and MATCH from the last lesson are still worth knowing: they work everywhere.",
+        },
+      ],
             setup:
               "XLOOKUP is the newer function that fixes VLOOKUP's design in one go: you name the search column and the return column directly, exact match is the default, and the fallback for \"not found\" is built into a fourth argument instead of needing IFERROR. If your Excel has it, use it. If you are on an older version — and plenty of workplaces are — INDEX/MATCH from the last lesson does the same job everywhere.",
             previewSheet: "Roster",
@@ -5217,6 +5631,18 @@ export const COURSE = {
           blurb: "Why a lookup fails on a name that looks identical.",
           brief: {
             goal: "Find and remove the invisible whitespace that makes matching fail.",
+      steps: [
+        {
+          title: "This unit is what the job is actually made of",
+          body: "Tutorials use clean data. Real exports do not arrive clean, and a large share of any analyst role is spent making files usable before any analysis begins. The Import tab is the same league exported badly, on purpose.",
+        },
+        {
+          title: "The space you cannot see",
+          body: "Two names look identical and refuse to match, because one of them has spaces on the front that render as nothing. You cannot see them and Excel can. This breaks more lookups than any other single cause.",
+          code: "=LEN(Import!A2)         15, counting the invisible ones\n=LEN(TRIM(Import!A2))   13, the real name\n=TRIM(Import!A2)        the clean version",
+          note: "When two values look the same and will not match, measure them with LEN before you guess. It turns an invisible problem into a number.",
+        },
+      ],
             setup:
               "The Import tab is the same league exported badly. The names look right and the lookups fail anyway, because \"  Josh Allen\" with two leading spaces is not the same text as \"Josh Allen\". You cannot see the difference; Excel can. TRIM strips leading and trailing spaces (and collapses runs of them in the middle), and it fixes more broken lookups than any other function.",
             previewSheet: "Import",
@@ -5297,6 +5723,18 @@ export const COURSE = {
           blurb: "Your SUM says zero and the column is full of numbers.",
           brief: {
             goal: "Spot and convert numbers that arrived as text so arithmetic works again.",
+      steps: [
+        {
+          title: "The most dangerous kind of broken data",
+          body: "Numbers that arrived as text look completely normal. They sit right-aligned or left-aligned depending on the export, they read as numbers, and they behave as words. There is no error and no warning anywhere.",
+        },
+        {
+          title: "SUM silently skips them",
+          body: "A column of four hundred point seasons totals to zero, and the sheet looks fine. Any time a total is implausibly low, and especially when it is exactly zero, suspect text before you suspect the data.",
+          code: "=SUM(Import!B2:B7)         0, because every value is text\n=VALUE(TRIM(Import!B2))    430.4, an actual number",
+          note: "TRIM inside VALUE handles the padding and the conversion in one move. Convert first, then calculate, never the other way round.",
+        },
+      ],
             setup:
               "Exports frequently deliver numbers as text — quoted, space-padded, or flagged with a little green triangle in the corner of the cell. They look like numbers and they behave like words: SUM ignores them completely and returns 0 rather than an error. VALUE converts a text number into a real one, and TRIM inside VALUE handles the padding at the same time.",
             previewSheet: "Import",
@@ -5370,6 +5808,18 @@ export const COURSE = {
           blurb: "An empty cell is not the same as a zero.",
           brief: {
             goal: "Count what's missing and handle it deliberately rather than by accident.",
+      steps: [
+        {
+          title: "Empty is not the same as zero",
+          body: "This distinction sounds pedantic and changes your answers. AVERAGE skips blank cells entirely, so a blank quietly shrinks the denominator. A zero gets included and drags the average down. Both are defensible; picking one by accident is not.",
+        },
+        {
+          title: "Count the gaps before deciding",
+          body: "COUNTBLANK counts the empties and COUNTA counts the rest. Together they tell you the shape of what is missing, and the two should add up to the number of rows you thought you had.",
+          code: "=COUNTBLANK(Import!B2:B7)\n=COUNTA(Import!B2:B7)\n=IF(Import!B6=\"\",\"Missing\",\"Present\")",
+          note: "A missed game should probably be blank if you are measuring per-game scoring, and zero if you are measuring season output. Say which you meant out loud, then make the sheet agree.",
+        },
+      ],
             setup:
               "One player on the Import sheet has no points value at all — the cell is empty. Empty is not zero. AVERAGE skips blanks entirely, so a blank quietly shrinks your denominator, while a zero drags the average down. Both are defensible choices; picking one by accident is not. Start by counting how many you have.",
             previewSheet: "Import",
@@ -5450,6 +5900,18 @@ export const COURSE = {
           blurb: "Reshape text into whatever the next step needs.",
           brief: {
             goal: "Cut, join and re-case text so it matches the format you actually need.",
+      steps: [
+        {
+          title: "Clean is not always the same as useful",
+          body: "Once the data is trustworthy you often still need it in a different shape: a first name split off, team codes standardised, a list of names glued together for an email. That reshaping is its own small toolkit.",
+        },
+        {
+          title: "A few blunt tools, endlessly recombined",
+          body: "None of these is complicated alone. The skill is seeing which two or three to nest to get from what you have to what you need, exactly like VALUE inside TRIM in the last lesson.",
+          code: "=LEFT(A2,4)                  first four characters\n=UPPER(Import!C2)            standardise the case\n=PROPER(TRIM(Import!A3))     clean and re-case in one\n=TEXTJOIN(\", \",TRUE,A2:A4)   glue a range together",
+          note: "LEFT and RIGHT count characters, not words, so they cut names mid-word the moment the length changes. Real splitting needs the position of the space, which is what FIND and Text to Columns are for.",
+        },
+      ],
             setup:
               "Once the data is clean you often still need it in a different shape — first names split off, team codes upper-cased, a list of names glued into one cell for an email. LEFT and RIGHT take characters off either end, UPPER/LOWER/PROPER fix capitalisation, and TEXTJOIN stitches a range together with a separator of your choosing.",
             previewSheet: "Roster",
@@ -5534,6 +5996,18 @@ export const COURSE = {
           blurb: "WITH turns a buried subquery into a readable first step.",
           brief: {
             goal: "Write a query as a named step instead of a nested subquery.",
+      steps: [
+        {
+          title: "Nested queries stop being readable fast",
+          body: "You can already put a query inside another query. It works, and at one level deep it is fine. At two or three it becomes something you have to unpick from the inside out, and the person reading it next month is you.",
+        },
+        {
+          title: "WITH lets you name a step before you use it",
+          body: "Give a subquery a name up front and the rest of the query can treat that name exactly like a table. The logic is identical. What changes is that the query now reads top to bottom, in the order the work actually happens.",
+          code: "WITH big_games AS (\n  SELECT * FROM week_results WHERE fantasy_pts > 30\n)\nSELECT player, COUNT(*) FROM big_games GROUP BY player;",
+          note: "This is a CTE, short for common table expression. Nobody says the long version out loud.",
+        },
+      ],
             setup:
               "Every subquery you've written so far lived inside another query's FROM or WHERE — readable for one level, painful past two. WITH lets you name a subquery before you use it, so the query reads top to bottom instead of inside out. Here's the exact same games-over-30 filter, written as a CTE.",
             previewSql:
@@ -5618,6 +6092,17 @@ export const COURSE = {
           blurb: "Build a report in stages — each CTE sees the ones before it.",
           brief: {
             goal: "Chain two or more CTEs into a multi-step report.",
+      steps: [
+        {
+          title: "Real reports are built in steps",
+          body: "Almost nothing worth reporting comes out of one pass. You compute season totals, then you rank them. You clean the data, then you group it. Trying to do both at once in a single expression is where queries turn into something nobody wants to touch.",
+        },
+        {
+          title: "One WITH can hold several named steps",
+          body: "Separate them with commas and each one can use anything defined before it. The result reads like a recipe: first this, then that, then the answer.",
+          code: "WITH totals AS (\n  SELECT player, SUM(fantasy_pts) AS pts FROM week_results GROUP BY player\n),\nranked AS (\n  SELECT player, pts, RANK() OVER (ORDER BY pts DESC) AS rk FROM totals\n)\nSELECT * FROM ranked WHERE rk <= 5;",
+        },
+      ],
             setup:
               "One WITH clause can define several CTEs, comma-separated, and each one can reference any CTE defined before it. That's how a real report gets built: one step computes the raw numbers, the next reshapes or ranks them. Here's a season-totals step feeding a ranking step.",
             previewSql:
@@ -5702,6 +6187,18 @@ export const COURSE = {
           blurb: "WITH RECURSIVE: build a sequence, then find what's missing from it.",
           brief: {
             goal: "Generate a sequence with a recursive CTE, and use it to find gaps in real data.",
+      steps: [
+        {
+          title: "Sometimes the rows you need do not exist",
+          body: "Here is a real problem. You want to show every week of the season, including the ones a player missed. Those weeks are not in the table, because nothing happened in them. You cannot select rows that were never written.",
+        },
+        {
+          title: "A recursive CTE builds rows out of nothing",
+          body: "It has two halves joined by UNION ALL. The base case is where you start, and the recursive case is the rule for making the next row from the last one. It keeps going until the rule stops producing rows.",
+          code: "WITH RECURSIVE weeks(n) AS (\n  SELECT 1\n  UNION ALL\n  SELECT n + 1 FROM weeks WHERE n < 18\n)\nSELECT n FROM weeks;",
+          note: "Generating a sequence and LEFT JOINing your real data onto it is the standard way to make gaps visible. Missing weeks become rows with NULLs instead of silently not being there.",
+        },
+      ],
             setup:
               "Every CTE so far ran once. A recursive CTE runs itself repeatedly, each pass building on the last, until a stopping condition is met — the classic use is generating a sequence that doesn't exist anywhere in your tables, like every week number from 1 to 18. Here it is generating exactly that.",
             previewSql:
@@ -5788,6 +6285,18 @@ export const COURSE = {
           blurb: "CREATE TEMP TABLE: a real table that disappears when the session ends.",
           brief: {
             goal: "Know when a temp table beats a CTE.",
+      steps: [
+        {
+          title: "A CTE forgets everything the moment it finishes",
+          body: "Its name lives for exactly one statement. Run a second, separate query that references it and the database has no idea what you are talking about. Usually that is fine. Occasionally it is the exact thing standing in your way.",
+        },
+        {
+          title: "A temp table survives the whole session",
+          body: "CREATE TEMP TABLE runs the SELECT once and stores the result as a genuine table. Every later query in the same connection can read it, and it disappears on its own when you disconnect, so there is nothing to clean up.",
+          code: "CREATE TEMP TABLE big_games AS\nSELECT * FROM week_results WHERE fantasy_pts > 30;",
+          note: "It is also computed once rather than re-run. If an expensive step feeds five later queries, that difference is the whole reason to reach for this.",
+        },
+      ],
             setup:
               "A CTE's name disappears the instant its query finishes — reference it from a second, separate query and SQL has no idea what you mean. A temporary table doesn't have that limit: CREATE TEMP TABLE name AS (a SELECT) makes a real table that any later query in the same session can read, and SQLite drops it automatically when the connection closes.",
             previewSql:
@@ -5868,6 +6377,17 @@ export const COURSE = {
           blurb: "Three ways to hold an intermediate result — one decision framework.",
           brief: {
             goal: "Choose between a subquery, a CTE, and a temp table without guessing.",
+      steps: [
+        {
+          title: "Three tools that all do the same thing",
+          body: "Subqueries, CTEs and temp tables all compute something in the middle and let a later part of your SQL use it. None of them can do anything the others cannot. Choosing between them is not about power, which is why it feels arbitrary until someone gives you the actual question.",
+        },
+        {
+          title: "The question is how long it needs to live",
+          body: "Needed once, buried inside a single query, and small? A subquery is enough. Needed once, but the query has real steps to it? A CTE keeps it readable. Needed by several separate queries in a row? That is a temp table, and nothing else will do.",
+          note: "Scope and lifetime, not capability. Once you hear the decision phrased that way it stops being a judgement call.",
+        },
+      ],
             setup:
               "All three compute an intermediate result and let a later part of your SQL use it — the difference is scope and lifetime, not power. One question settles almost every case: does anything outside this one statement need to see the result?",
             previewSql:
@@ -5962,6 +6482,18 @@ export const COURSE = {
           blurb: "CREATE VIEW packages a query so anyone can SELECT from it later.",
           brief: {
             goal: "Understand what a view actually stores.",
+      steps: [
+        {
+          title: "A view stores a question, not an answer",
+          body: "This is the one thing to get right, and it is the opposite of what most people assume. A view holds no data at all. It holds a SELECT statement, and every time somebody queries the view, that SELECT runs again from scratch.",
+        },
+        {
+          title: "Which means it is never stale",
+          body: "Save a query as a view and everyone who uses it gets today's answer, computed now, not a snapshot from whenever it was created. That is the whole appeal: one definition of what season totals means, shared by everybody, always current.",
+          code: "SELECT * FROM season_totals WHERE total > 200;",
+          note: "Querying a view feels exactly like querying a table. You can filter it, join it, and group it, and most of the time you cannot tell from the query which one you are looking at.",
+        },
+      ],
             setup:
               "A view doesn't store data — it stores a query. Every time someone selects from a view, the database re-runs the underlying SELECT and hands back fresh results. Package a query once under a name, and everyone who queries that name gets the current answer, not a stale snapshot.",
             previewSql:
@@ -6049,6 +6581,18 @@ export const COURSE = {
           blurb: "Write the CREATE VIEW statement, and know how to remove it.",
           brief: {
             goal: "Write a CREATE VIEW statement, and drop one when it's no longer needed.",
+      steps: [
+        {
+          title: "The syntax is one line more than the query",
+          body: "You already know how to write the SELECT. Wrapping it in a view means putting three words in front of it and giving it a name. That is genuinely the whole thing.",
+          code: "CREATE VIEW season_totals AS\nSELECT player, SUM(fantasy_pts) AS total\nFROM week_results\nGROUP BY player;",
+        },
+        {
+          title: "Dropping one costs nothing",
+          body: "DROP VIEW removes the saved definition and nothing else. Because a view never held any data, there is nothing to lose and nothing to back up first, which makes views unusually safe to experiment with.",
+          code: "DROP VIEW season_totals;",
+        },
+      ],
             setup:
               "The syntax is exactly one line more than the query it wraps: CREATE VIEW, a name, AS, then the SELECT you already know how to write. Removing one is just as direct — DROP VIEW name — and unlike a table, there's no data to lose, only the saved definition.",
             previewSql:
@@ -6125,6 +6669,17 @@ export const COURSE = {
           blurb: "Some views accept INSERT/UPDATE; most real ones don't.",
           brief: {
             goal: "Know when a view can be written through, and why most can't.",
+      steps: [
+        {
+          title: "Sometimes you can write through a view",
+          body: "If a view is a plain SELECT from a single table, with no grouping and no join, the database can work out exactly which real row an UPDATE was meant for. So it lets the write through and applies it to the underlying table.",
+        },
+        {
+          title: "And usually you cannot, for a good reason",
+          body: "Add a GROUP BY and one row of the view now stands for forty real rows. Update it to 40 and there is no sensible answer to which of those forty should change. The database rejects the write rather than guess, which is the behaviour you want.",
+          note: "The rule to remember is that ambiguity is what blocks the write. If the database cannot identify one specific row to change, it refuses.",
+        },
+      ],
             setup:
               "A view built on a single table, with no GROUP BY, JOIN, or aggregate, can often accept UPDATE and INSERT statements — SQLite quietly translates the write onto the real underlying table. The moment a view involves a join or an aggregate, that translation becomes ambiguous, and the write is rejected.",
             previewSql:
@@ -6199,6 +6754,17 @@ export const COURSE = {
           blurb: "The full decision, now that a view is on the table.",
           brief: {
             goal: "Add views to the CTE-vs-temp-table decision from last unit.",
+      steps: [
+        {
+          title: "Now there are four",
+          body: "Same decision as the end of the last unit, with one more option on the table. A view outlives everything else here: past the statement, past the session, until somebody explicitly drops it.",
+        },
+        {
+          title: "The full checklist",
+          body: "This one clause, and small? Subquery. This one statement, with steps? CTE. This session, reused several times? Temp table. Every session, by everybody, forever? View. That is the entire decision, and it is the same question each time.",
+          note: "A view is also the only one of the four that other people will find without you telling them about it, which is often the real reason to make one.",
+        },
+      ],
             setup:
               "Same question as before — how long does this need to survive? — with one more answer available. A view survives the longest of all three: past the query, past the session, until someone explicitly drops it.",
             previewSql:
@@ -6287,6 +6853,17 @@ export const COURSE = {
           blurb: "A trigger fires automatically on INSERT, UPDATE, or DELETE.",
           brief: {
             goal: "Understand when and why a trigger fires.",
+      steps: [
+        {
+          title: "Everything so far only ran because you ran it",
+          body: "Every statement in this course has needed a person to type it and press go. A trigger is the first thing here that does not. You define it once, and from then on it runs itself.",
+        },
+        {
+          title: "A trigger watches one table for one kind of change",
+          body: "You attach it to a table and to an event: before or after an insert, an update, or a delete. When that event happens, the trigger fires. Nobody calls it, nothing schedules it, and it will keep happening long after you have forgotten writing it.",
+          note: "That last part is why triggers are powerful and mildly dangerous. Automation you cannot see is automation you will eventually be confused by.",
+        },
+      ],
             setup:
               "Every statement you've written so far only runs because someone typed it and hit run. A trigger is different: you define it once, attached to a table and an event — BEFORE or AFTER an INSERT, UPDATE, or DELETE — and from then on, it fires by itself, every single time that event happens, with no one calling it.",
             previewSql: "SELECT player, team_name FROM rosters LIMIT 5;",
@@ -6367,6 +6944,18 @@ export const COURSE = {
           blurb: "Full CREATE TRIGGER syntax, piece by piece.",
           brief: {
             goal: "Write a complete CREATE TRIGGER statement.",
+      steps: [
+        {
+          title: "Five pieces, always in the same order",
+          body: "The shape never changes: the word CREATE TRIGGER, a name, when it fires, what event it watches, which table, and then a block of ordinary SQL to run. Once you can see the five slots, writing one is filling them in.",
+        },
+        {
+          title: "Everything inside BEGIN and END is normal SQL",
+          body: "There is no special trigger language. The block usually holds an INSERT into some log table, and NEW gives you access to the row that was just written, so you can record what actually changed.",
+          code: "CREATE TRIGGER log_roster_add\nAFTER INSERT ON rosters\nBEGIN\n  INSERT INTO roster_log(player) VALUES (NEW.player);\nEND;",
+          note: "NEW refers to the incoming row, and OLD refers to the row as it was before an update or delete. Which of the two exists depends on the event.",
+        },
+      ],
             setup:
               "The shape is always the same pieces in order: CREATE TRIGGER, a name, WHEN it fires (BEFORE/AFTER) and on what (INSERT/UPDATE/DELETE), which table, then a BEGIN...END block holding whatever SQL should run. Here's a trigger that logs every new roster entry.",
             previewSql: "SELECT player, team_name FROM rosters LIMIT 5;",
@@ -6448,6 +7037,18 @@ export const COURSE = {
           blurb: "Triggers are invisible until you know where to look.",
           brief: {
             goal: "List existing triggers, and remove one safely.",
+      steps: [
+        {
+          title: "Triggers do not show up when you look at a table",
+          body: "This is the practical problem with them. Inspect a table's columns and a trigger is invisible, because it is a separate object entirely. Inherit an unfamiliar database and there may be several firing away that nobody has mentioned to you.",
+        },
+        {
+          title: "sqlite_master is the catalogue of everything",
+          body: "It lists every table, view, index and trigger in the database, along with the SQL that created each one. Querying it is how you find out what a database is actually doing behind your back.",
+          code: "SELECT name, sql FROM sqlite_master WHERE type = 'trigger';",
+          note: "This is a genuinely useful habit on day one of any new job with an unfamiliar database. Look before you write.",
+        },
+      ],
             setup:
               "A trigger doesn't show up when you look at a table's columns — it's a separate object entirely, and an unfamiliar database might have several silently firing that nobody mentioned. SQLite keeps every trigger's definition in sqlite_master, the same catalog that lists tables and views.",
             previewSql: "SELECT name FROM sqlite_master WHERE type = 'table';",
@@ -6531,6 +7132,18 @@ export const COURSE = {
           blurb: "EXPLAIN QUERY PLAN shows you, instead of making you guess.",
           brief: {
             goal: "Read and write EXPLAIN QUERY PLAN output.",
+      steps: [
+        {
+          title: "You have never asked how the database found anything",
+          body: "Every query so far, you wrote what you wanted and results came back. There is a step in between: the database decides how to find the rows, and that decision is what makes a query fast or unusably slow.",
+        },
+        {
+          title: "EXPLAIN QUERY PLAN shows you the decision",
+          body: "Put it in front of any SELECT and you get back a description of the plan instead of your data. Right now every plan in this database says SCAN, which means read every row and check each one, because there are no indexes here yet.",
+          code: "EXPLAIN QUERY PLAN\nSELECT * FROM week_results WHERE player = 'Josh Allen';",
+          note: "SCAN on 876 rows is instant. SCAN on 876 million rows is a meeting about why the dashboard times out. Same query, same plan, very different afternoon.",
+        },
+      ],
             setup:
               "Put EXPLAIN QUERY PLAN in front of any SELECT and SQLite hands back, instead of your data, a short description of how it planned to find it — which table it reads, and whether it scans every row or searches more directly. Right now, with no indexes anywhere in this database, every plan says the same thing: SCAN.",
             previewSql:
@@ -6607,6 +7220,18 @@ export const COURSE = {
           blurb: "CREATE INDEX turns a scan into a search.",
           brief: {
             goal: "Understand what an index changes about a query plan.",
+      steps: [
+        {
+          title: "An index is the index at the back of a book",
+          body: "Without one, finding every mention of a name means reading every page. With one, you look the name up in a sorted list and jump straight to the right pages. A database index is that exact idea, kept up to date automatically.",
+        },
+        {
+          title: "CREATE INDEX turns SCAN into SEARCH",
+          body: "Build an index on the column you filter by, run the same query again, and the plan changes. SEARCH means it went more or less straight to the rows instead of walking the whole table.",
+          code: "CREATE INDEX idx_player ON week_results(player);",
+          note: "Indexes are not free. Each one takes space and has to be updated on every write, so indexing every column makes writes slower and helps nothing. Index what you actually filter and join on.",
+        },
+      ],
             setup:
               "An index is a separate, sorted structure SQLite maintains alongside a table, built on one or more columns — like the index at the back of a book: instead of reading every page, you jump straight to the right one. CREATE INDEX idx_player ON week_results(player) builds exactly that for the player column.",
             previewSql:
@@ -6682,6 +7307,18 @@ export const COURSE = {
           blurb: "Column order in a composite index isn't cosmetic.",
           brief: {
             goal: "Understand why column order matters in a multi-column index.",
+      steps: [
+        {
+          title: "One index can cover two columns",
+          body: "A composite index is sorted by its first column, and then by its second within each value of the first. That ordering is not a detail. It decides which queries the index can help with and which it is useless for.",
+        },
+        {
+          title: "Think of a phone book",
+          body: "Sorted by last name, then first name. Brilliant for finding everyone called Allen, and for finding one specific Josh Allen. Completely useless for finding everyone called Josh, because the Joshes are scattered through the whole book.",
+          code: "CREATE INDEX idx_player_season ON week_results(player, season);",
+          note: "So the rule is that an index helps queries that use its first column. Put the column you always filter on first, and the one you sometimes add second.",
+        },
+      ],
             setup:
               "CREATE INDEX idx_player_season ON week_results(player, season) builds one index across two columns — sorted by player first, then by season within each player. That order isn't a style choice: it decides which queries the index can actually help.",
             previewSql:
