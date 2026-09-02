@@ -2,7 +2,7 @@
 //
 // This board is DERIVED from lib/courses.ts rather than hand-written. It used
 // to be its own hard-coded list, which drifted the moment the /learn catalog
-// shipped nine courses — a learner who picked Statistics from the catalog was
+// shipped its full catalog — a learner who picked Statistics from the catalog was
 // then marched to a draft board offering one option called "Rookie Season"
 // with a SQL scouting report. Deriving it means the board and the catalog can
 // never disagree again.
@@ -23,7 +23,10 @@ export type Track = {
 
 /** Scouting-report voice for the draft board, per course. */
 const SCOUTING: Record<string, string> = {
-  sql: "The consensus #1 overall. Every analyst job posting asks for it, and every query you write here runs against a real database.",
+  "sql-fundamentals":
+    "The consensus #1 overall. Every analyst job posting asks for it — SELECT through JOINs and window functions, every query run against a real database.",
+  "sql-advanced":
+    "Second-round riser. CTEs, views, triggers, indexing — the difference between writing a query and building something a team can run.",
   python:
     "Blue-chip prospect with the highest ceiling. Runs live in your browser — variables to DataFrames without installing anything.",
   stats:
@@ -39,7 +42,8 @@ const SCOUTING: Record<string, string> = {
 };
 
 const SKILLS: Record<string, string[]> = {
-  sql: ["SELECT", "JOIN", "GROUP BY", "Windows"],
+  "sql-fundamentals": ["SELECT", "JOIN", "GROUP BY", "Windows"],
+  "sql-advanced": ["CTEs", "Views", "Triggers", "Indexes"],
   python: ["pandas", "Loops", "Cleaning"],
   stats: ["Sample size", "Significance", "Regression"],
   git: ["commit", "branch", "pull request"],
@@ -78,10 +82,19 @@ export function getTrack(id: string | null | undefined): Track | undefined {
  * rather than showing them a broken pick.
  */
 const LEGACY: Record<string, string> = {
-  "rookie-season": "sql",
-  "contender-season": "sql",
-  "analytics-combine": "sql",
+  "rookie-season": "sql-fundamentals",
+  "contender-season": "sql-fundamentals",
+  "analytics-combine": "sql-fundamentals",
   "dynasty-mode": "ai",
+  // "sql" briefly split into three tiers, then collapsed back to two — carry
+  // both the original id and the short-lived middle tier to the entry point
+  // rather than showing a broken pick. (A learner who drafted the old
+  // "sql-advanced" — JOINs/windows, since repurposed to mean CTEs/views/
+  // triggers — still resolves fine here, just now points at a "building"
+  // card instead of their in-progress content. Not fixed up: this predates
+  // any real users, per the empty progress tables in Supabase.)
+  sql: "sql-fundamentals",
+  "sql-intermediate": "sql-fundamentals",
 };
 
 export function normalizeTrackId(id: string | null | undefined): string | null {

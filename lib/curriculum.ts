@@ -184,13 +184,31 @@ export const COURSE = {
           },
           film: [
             {
-              title: "Anatomy of a query",
-              text: "Every query you'll ever write has the same skeleton: SELECT (what columns), FROM (which table), and a semicolon to end the statement. Everything else — filtering, sorting, grouping — bolts onto that frame. Keywords are conventionally UPPERCASE, but SQL doesn't care; readability does.",
-              code: "SELECT *          -- what to bring back\nFROM week_results -- which stat sheet\n;                 -- end of play",
+              title: "Why bother with a database at all?",
+              text: "Picture trying to answer 'who scored the most points in week 3 of 2023' by scrolling through a giant spreadsheet by hand — painful, right? A database organizes that same information into tables so a question like that takes one line of code instead of ten minutes of scrolling. That's the whole deal. SQL is just how you ask the question.",
             },
             {
-              title: "Scout all three stat sheets",
-              text: "week_results: one row per player per week per season — the game log. rosters: one row per (fantasy team, player) — who owns whom. waiver_wire: one row per free agent with roster percentage and trend. Knowing each table's grain — what one row means — is the first question every pro analyst asks.",
+              title: "A table is a grid you've already seen",
+              text: "If you've ever opened a spreadsheet, you already understand a table. It's rows and columns arranged in a grid. A database is just a collection of these grids, called tables, each one holding a different kind of information — the way one spreadsheet workbook can hold several tabs.",
+            },
+            {
+              title: "Rows and columns have real names: record and field",
+              text: "Zoom in on one row of week_results and you're looking at a record — one player's stat line for one week. Zoom in on one column, like fantasy_pts, and you're looking at a field — one category of information, repeated down every row. Analysts say 'row' and 'record' interchangeably, same with 'column' and 'field' — you'll hear both, so both are worth knowing.",
+              code: "player          week   fantasy_pts   <- the fields (columns)\n--------------------------------------\nJosh Allen      1      31.2          <- one record (row)\nJosh Allen      2      9.8           <- another record",
+            },
+            {
+              title: "SELECT says what, FROM says where",
+              text: "Every query starts with these two words doing two separate jobs. SELECT lists the columns you want to see. FROM names the table to get them from. Put a star after SELECT and you're saying 'just give me every column' — it's a shortcut, not a special new keyword.",
+              code: "SELECT *            -- every column, please\nFROM week_results   -- from this table",
+            },
+            {
+              title: "The semicolon ends the sentence",
+              text: "Just like a period ends a sentence in English, a semicolon tells SQL 'this query is finished.' A few tools let you skip it on a single, standalone query — but the habit is worth building now, because the moment you're writing more than one query together, the semicolon is what tells SQL where one ends and the next begins.",
+              code: "SELECT * FROM week_results;\n--                          ^ the full stop",
+            },
+            {
+              title: "Meet the three tables you'll be working with",
+              text: "week_results: one row per player, per week, per season — the full game log. rosters: one row per player on a fantasy team — who owns whom. waiver_wire: one row per free agent, with how widely they're rostered and which way their popularity is trending. Knowing what one row means in each table — its grain — is the very first question every working analyst asks before writing a single line of SQL.",
             },
           ],
           exercises: [
@@ -284,9 +302,24 @@ export const COURSE = {
           },
           film: [
             {
-              title: "Column order is your call",
-              text: "Columns come back in exactly the order you list them — the table's own order doesn't matter. And with AS you can rename any column on the way out, which is how analysts make results readable for coaches who don't speak database.",
+              title: "List columns separated by commas",
+              text: "After SELECT, write the column names you want with a comma between each one. SQL returns exactly those columns — nothing more, nothing less. Leave a comma out and you'll get a confusing error; add an extra one at the end and you'll get an even more confusing one, so it's worth reading a query list left to right before you run it.",
+              code: "SELECT player, team\nFROM week_results;",
+            },
+            {
+              title: "Column order in your query is column order in your results",
+              text: "The table has a fixed column order behind the scenes, but your SELECT list overrides it completely. List fantasy_pts before player and that's the order they come back in — the table's own layout has no say in it.",
+              code: "SELECT fantasy_pts, player\nFROM week_results; -- points first, name second — your call",
+            },
+            {
+              title: "Give a column a friendlier name with AS",
+              text: "AS lets you rename any column on the way out, without changing anything in the table itself. It's how analysts turn a technical name like fantasy_pts into something a coach or client would actually read comfortably — like points.",
               code: "SELECT player AS name, fantasy_pts AS points\nFROM week_results;",
+            },
+            {
+              title: "SELECT can compute, not just fetch",
+              text: "The SELECT list isn't limited to column names — it can hold any expression that produces one value per row: arithmetic like fantasy_pts * 2, string building, even a literal repeated on every row. SQL evaluates the expression once per row and hands back the result as a new column, aliased however you like.",
+              code: "SELECT player, fantasy_pts, fantasy_pts * 2 AS double_pts\nFROM week_results;",
             },
           ],
           exercises: [
@@ -369,6 +402,15 @@ export const COURSE = {
               title: "Why analysts LIMIT everything",
               text: "First move on any unfamiliar table: SELECT * ... LIMIT 10. It's a free peek at the columns and typical values before you commit to a real question. On production databases with millions of rows it's also what keeps your quick look from becoming an expensive full-table scan.",
               code: "-- the analyst's opening move on any new table\nSELECT * FROM rosters LIMIT 10;",
+            },
+            {
+              title: "LIMIT trims rows, never columns",
+              text: "It's a common mix-up: LIMIT only controls how many rows come back, not how many columns. SELECT * FROM week_results LIMIT 3 still returns every column — team, week, fantasy_pts, all of it — just for 3 rows instead of all 876. Fewer columns is a separate job, handled by your SELECT list, not by LIMIT.",
+              code: "SELECT * FROM week_results LIMIT 3; -- every column, only 3 rows",
+            },
+            {
+              title: "LIMIT doesn't know what 'best' means",
+              text: "LIMIT 5 just grabs the first 5 rows the database happens to hand back — it has no idea what 'top' or 'best' means until you tell it how to sort first. Right now, with no ORDER BY, 'the first 3 rows' is basically arbitrary. You'll fix that with ORDER BY in the very next unit — for now, just remember LIMIT alone never means 'the best.'",
             },
           ],
           exercises: [
@@ -550,6 +592,11 @@ export const COURSE = {
               text: "AND binds tighter than OR — like order of operations in math. Mixing them without parentheses is a classic bust: WHERE season = 2024 AND week = 1 OR week = 2 actually returns ALL week-2 rows from every season. Parentheses make your read explicit.",
               code: "-- what you meant:\nWHERE season = 2024 AND (week = 1 OR week = 2)",
             },
+            {
+              title: "Exact equality gets risky on decimal points",
+              text: "fantasy_pts is a decimal column — values like 20.1 or 4.4. = 20 happily matches a row that's exactly 20.0, but real-world decimal math can land on something like 19.999999 instead of 20 due to floating-point rounding, and then = 20 silently misses it. Range comparisons don't have this problem, which is one more reason 'more than 20' beats 'equal to 20' as a scouting question.",
+              code: "WHERE fantasy_pts = 20    -- risky on computed decimals\nWHERE fantasy_pts >= 20   -- safer, and usually what you meant anyway",
+            },
           ],
           exercises: [
             {
@@ -644,6 +691,11 @@ export const COURSE = {
               title: "Choosing your read: OR vs IN vs BETWEEN",
               text: "All three keep rows matching “any of these,” but each has a natural down-and-distance: OR for two unrelated conditions, IN for a list of values in one column, BETWEEN for a continuous range. They compile to the same result — pick the one that reads like the question you were asked.",
               code: "WHERE team = 'KC' OR fantasy_pts > 25   -- unrelated\nWHERE team IN ('KC', 'BUF', 'MIA')      -- value list\nWHERE week BETWEEN 5 AND 9              -- range",
+            },
+            {
+              title: "Every filter has a NOT",
+              text: "IN and BETWEEN both negate cleanly: NOT IN ('QB','TE') keeps everyone except those positions, NOT BETWEEN 1 AND 4 keeps everything outside that range. Read NOT IN and NOT BETWEEN as one unit — WHERE position NOT IN (...) is the idiom; WHERE NOT position IN (...) means the same thing but reads worse to every SQL developer after you.",
+              code: "WHERE position NOT IN ('QB', 'TE')   -- everyone except passers and tight ends\nWHERE week NOT BETWEEN 1 AND 4       -- week 5 onward",
             },
           ],
           exercises: [
@@ -849,6 +901,11 @@ export const COURSE = {
               text: "SELECT → FROM → WHERE → ORDER BY → LIMIT. That's the fixed snap count for every top-N question: filter to the population you care about, rank it, trim it. Memorize the order once and “top 5 rushers in week 10” becomes pure fill-in-the-blanks.",
               code: "SELECT player, fantasy_pts\nFROM week_results\nWHERE season = 2024 AND week = 10\nORDER BY fantasy_pts DESC\nLIMIT 5;",
             },
+            {
+              title: "A tie at the cutoff is a coin flip",
+              text: "LIMIT 5 keeps exactly 5 rows — but if row 5 and row 6 are tied on every ORDER BY column, which one makes the cut depends on factors you don't control, and can change between runs. The fix is always the same: add another ORDER BY column that breaks the tie, even one you don't care about. A top-N query without a fully-determined sort isn't wrong, but it isn't reproducible — and reproducible is half the job.",
+              code: "ORDER BY fantasy_pts DESC, player  -- player breaks any exact-score tie",
+            },
           ],
           exercises: [
             {
@@ -956,6 +1013,11 @@ export const COURSE = {
               text: "Five workhorses: COUNT(*) counts rows, SUM adds, AVG means, MIN and MAX find the floor and ceiling. They all collapse many rows into one answer, and they all skip NULLs (missing values) except COUNT(*), which counts the row no matter what — a subtle difference that decides real stat lines.",
               code: "SELECT COUNT(*), SUM(fantasy_pts),\n       AVG(fantasy_pts), MIN(fantasy_pts), MAX(fantasy_pts)\nFROM week_results;",
             },
+            {
+              title: "Three flavors of COUNT",
+              text: "COUNT(*) counts rows, full stop. COUNT(column) counts rows where that column isn't NULL — usually the same number, but not always. COUNT(DISTINCT column) counts unique values instead: COUNT(DISTINCT player) on week_results tells you the league has 20 players, not how many games were played. Reach for DISTINCT the moment the question is 'how many different X' rather than 'how many rows'.",
+              code: "SELECT COUNT(*) AS games, COUNT(DISTINCT player) AS players\nFROM week_results;",
+            },
           ],
           exercises: [
             {
@@ -1043,6 +1105,11 @@ export const COURSE = {
               title: "Grain — the question that prevents wrong answers",
               text: "GROUP BY changes the grain of your result: week_results is one row per player-week, but GROUP BY player makes it one row per player. Rule of thumb the pros live by: every column in your SELECT should either be in the GROUP BY or wrapped in an aggregate. Anything else is asking the database to guess.",
               code: "SELECT player, team, SUM(fantasy_pts)  -- team: in neither!\nFROM week_results\nGROUP BY player  -- ⚠ works in SQLite, lies in interviews",
+            },
+            {
+              title: "GROUP BY takes more than one column",
+              text: "GROUP BY player, season buckets by the combination — one row per player per season, not one row per player overall. Every extra column in GROUP BY makes the buckets more specific; drop one and rows that used to be separate start merging together. When a total looks too big, a missing GROUP BY column is the first thing to check.",
+              code: "SELECT player, season, ROUND(SUM(fantasy_pts), 1) AS total\nFROM week_results\nGROUP BY player, season; -- one row per player PER SEASON",
             },
           ],
           exercises: [
@@ -1132,6 +1199,11 @@ export const COURSE = {
               title: "The full order of operations",
               text: "How the database actually runs your query: FROM (get the table) → WHERE (cut rows) → GROUP BY (bucket) → aggregates compute → HAVING (cut groups) → SELECT (shape output) → ORDER BY → LIMIT. Every “why doesn't this work” in SQL traces back to this pipeline — WHERE can't see averages because averages don't exist yet when WHERE runs.",
               code: "FROM → WHERE → GROUP BY → HAVING\n     → SELECT → ORDER BY → LIMIT",
+            },
+            {
+              title: "WHERE and HAVING usually work together, not instead of each other",
+              text: "They're not either/or — a real query typically has both, each doing its own job: WHERE trims rows before the expensive aggregation runs, HAVING then filters the groups that result. Put a condition in the wrong one and it either can't see what it needs (an aggregate in WHERE) or does unnecessary work computing a per-row filter for every group before throwing it away (a raw-row filter in HAVING).",
+              code: "SELECT player, ROUND(AVG(fantasy_pts), 1) AS ppg\nFROM week_results\nWHERE season = 2024              -- cuts rows first (cheap)\nGROUP BY player\nHAVING AVG(fantasy_pts) >= 15;   -- cuts groups after (needs the aggregate)",
             },
           ],
           exercises: [
@@ -1235,6 +1307,11 @@ export const COURSE = {
               title: "The shared column is the hinge",
               text: "A join is only possible when the two tables have a value in common — here, the player's name. In a production database that link is usually an id rather than a name, precisely because names are messy: two players can share one, and spelling drifts between sources. The idea is identical either way.",
             },
+            {
+              title: "JOIN is short for INNER JOIN",
+              text: "The keyword you've been writing is shorthand — INNER JOIN is the full name, and every engine treats a bare JOIN as meaning exactly that. You'll meet OUTER joins like LEFT JOIN soon; knowing the family name up front (INNER vs OUTER) makes the difference obvious the moment you see it: INNER keeps only matched pairs, OUTER keeps unmatched rows from one or both sides too.",
+              code: "-- identical\nFROM rosters JOIN week_results ON rosters.player = week_results.player\nFROM rosters INNER JOIN week_results ON rosters.player = week_results.player",
+            },
           ],
           exercises: [
             {
@@ -1313,6 +1390,18 @@ export const COURSE = {
             text: "Put a short name after the table in FROM or JOIN and it becomes that table's handle everywhere else in the query: rosters r, week_results w. Then qualify every column as r.something or w.something. Qualifying isn't just tidy — when both tables have a column called player, an unqualified `player` is ambiguous and SQL will refuse to run.",
             code: "SELECT r.team_name, w.player, w.fantasy_pts\nFROM rosters r\nJOIN week_results w ON r.player = w.player;",
           },
+          film: [
+            {
+              title: "Aliases aren't optional once you join a table to itself",
+              text: "Every join so far has connected two different tables, so the alias was purely for readability. But compare a player's week 3 to their week 8 and there's only one table involved twice — week_results joined to week_results. Without an alias, SQL has no way to tell the first copy from the second; give each one a name and the ambiguity disappears the same way it did for the shared player column. Notice the join also pins a.season = b.season — drop that and it matches every season combination for the player, not just the two weeks you're after.",
+              code: "SELECT a.week, a.fantasy_pts AS week3_pts, b.fantasy_pts AS week8_pts\nFROM week_results a\nJOIN week_results b ON a.player = b.player AND a.season = b.season\nWHERE a.season = 2024 AND a.week = 3 AND b.week = 8 AND a.player = 'Justin Jefferson';",
+            },
+            {
+              title: "AS renames a column, not a table",
+              text: "Table aliases (rosters r) and column aliases (fantasy_pts AS pts_scored) use the same keyword family but do different jobs. A table alias is a nickname you reference elsewhere in the query; a column alias only relabels what shows up in the result. You can't lean on it in the same query's WHERE clause — WHERE runs before the renaming happens, so the original column name is still what SQL expects there.",
+              code: "SELECT w.fantasy_pts AS pts_scored\nFROM week_results w\nWHERE w.fantasy_pts > 20; -- not WHERE pts_scored > 20",
+            },
+          ],
           exercises: [
             {
               type: "mc",
@@ -1391,6 +1480,11 @@ export const COURSE = {
               text: "This is the subtlest trap in joins. Conditions on the right-hand table belong in ON. Move them to WHERE and you filter out the NULL rows you just worked to keep — quietly turning your LEFT JOIN back into an INNER JOIN. If a LEFT JOIN mysteriously loses rows, this is almost always why.",
               code: "-- keeps Kelce, points NULL\n... LEFT JOIN week_results w ON r.player = w.player AND w.week = 1\n\n-- drops Kelce again\n... LEFT JOIN week_results w ON r.player = w.player WHERE w.week = 1",
             },
+            {
+              title: "LEFT JOIN's siblings — and why LEFT wins by convention",
+              text: "RIGHT JOIN keeps every row from the second table instead of the first; FULL OUTER JOIN keeps unmatched rows from both sides at once. But RIGHT JOIN is just LEFT JOIN with the table order swapped — which is exactly why most style guides ban it outright. One direction, no exceptions, means nobody reading your query ever has to stop and check which side is which.",
+              code: "-- these two return the same rows\nFROM week_results w RIGHT JOIN rosters r ON r.player = w.player\nFROM rosters r LEFT JOIN week_results w ON r.player = w.player",
+            },
           ],
           exercises: [
             {
@@ -1461,6 +1555,18 @@ export const COURSE = {
             text: "An anti-join is a LEFT JOIN with `WHERE right.column IS NULL` bolted on. The LEFT JOIN keeps everything; the WHERE then throws away everything that DID match, leaving only the unmatched. It reads backwards at first and becomes second nature fast.",
             code: "SELECT DISTINCT w.player\nFROM week_results w\nLEFT JOIN rosters r ON w.player = r.player\nWHERE r.player IS NULL;",
           },
+          film: [
+            {
+              title: "NOT IN looks simpler — until a NULL sneaks in",
+              text: "WHERE w.player NOT IN (SELECT player FROM rosters) looks like a one-line shortcut for the same anti-join, and most of the time it is. Until one row in that list is NULL: comparing anything to NULL is neither true nor false, and a single NULL anywhere in the list silently makes the entire NOT IN return zero rows — no error, no warning. LEFT JOIN ... IS NULL never has this problem, which is why experienced analysts default to it over NOT IN the moment the other table's key might ever be NULL.",
+              code: "-- fragile if rosters.player could ever be NULL\nWHERE w.player NOT IN (SELECT player FROM rosters)\n\n-- immune to it\nLEFT JOIN rosters r ON w.player = r.player WHERE r.player IS NULL",
+            },
+            {
+              title: "The anti-join pattern isn't specific to two tables",
+              text: "Nothing about LEFT JOIN ... IS NULL is special to rosters and week_results — it's the general recipe for 'which rows on the left have no counterpart anywhere else,' and it chains: LEFT JOIN a second table, LEFT JOIN a third, and check that every join's key came back NULL. It's the same question real teams ask constantly — which customers never ordered, which shipments never arrived, which invites got no RSVP — just with the noun swapped out.",
+              code: "LEFT JOIN rosters r ON w.player = r.player\nLEFT JOIN waiver_wire ww ON w.player = ww.player\nWHERE r.player IS NULL AND ww.player IS NULL -- on nobody's radar at all",
+            },
+          ],
           exercises: [
             {
               type: "mc",
@@ -1537,6 +1643,11 @@ export const COURSE = {
             {
               title: "Watch for fan-out",
               text: "If the right-hand table has several rows per match, the left row is duplicated once per match — and any SUM over left-hand columns is then inflated. Here that's fine because we're summing the right side. But if you ever join and your totals suddenly double, fan-out is the first thing to check.",
+            },
+            {
+              title: "Fan-out breaks COUNT too, not just SUM",
+              text: "Ask 'how many players are on Kupp's Krew' with COUNT(*) on this same join and you'll get 239 — one row per game played across three seasons, not one per player. The join is doing exactly what it's supposed to; COUNT(*) is just answering a different question than the one you asked. COUNT(DISTINCT r.player) fixes it by counting unique players instead of matched rows — the same DISTINCT trick fan-out always calls for, whether you're counting or summing.",
+              code: "SELECT r.team_name,\n       COUNT(*) AS rows_matched,               -- one per game played\n       COUNT(DISTINCT r.player) AS roster_size  -- the real headcount\nFROM rosters r\nJOIN week_results w ON r.player = w.player\nGROUP BY r.team_name;",
             },
           ],
           exercises: [
@@ -1627,6 +1738,11 @@ export const COURSE = {
               text: "GROUP BY reduces: many rows in, one row out per group. A window function annotates: many rows in, the same many rows out, with an extra column. When a question is 'compare this to that' rather than 'summarise this', it's almost always a window function.",
               code: "-- 1 row\nSELECT AVG(fantasy_pts) FROM week_results;\n\n-- every row, plus the average\nSELECT player, AVG(fantasy_pts) OVER () FROM week_results;",
             },
+            {
+              title: "You can't filter directly on a window function",
+              text: "Window functions run after WHERE, same as regular aggregates — so WHERE league_avg > 15 fails the moment league_avg comes from OVER(), because WHERE doesn't know it exists yet. Filtering on a window result takes one more layer: wrap the query in an outer SELECT and put the condition there instead, since only the outer layer can see a column a window function produced.",
+              code: "-- errors: league_avg doesn't exist yet when WHERE runs\nSELECT player, AVG(fantasy_pts) OVER () AS league_avg\nFROM week_results WHERE league_avg > 15;\n\n-- works: filter in an outer layer instead\nSELECT * FROM (\n  SELECT player, AVG(fantasy_pts) OVER () AS league_avg\n  FROM week_results\n) WHERE league_avg > 15;",
+            },
           ],
           exercises: [
             {
@@ -1709,6 +1825,11 @@ export const COURSE = {
               text: "They differ only in how they treat ties. RANK leaves gaps: 1, 2, 2, 4. DENSE_RANK doesn't: 1, 2, 2, 3. ROW_NUMBER refuses to tie at all and picks arbitrarily: 1, 2, 3, 4. Choose deliberately — 'joint second' is a real answer and ROW_NUMBER will hide it from you.",
               code: "-- scores 20, 18, 18, 15\nRANK()       -> 1, 2, 2, 4\nDENSE_RANK() -> 1, 2, 2, 3\nROW_NUMBER() -> 1, 2, 3, 4",
             },
+            {
+              title: "Top N per group is the classic RANK use case",
+              text: "'Best 3 players per position' is one of the most common real interview questions, and it's just RANK() with the wrapping trick from the last lesson: compute the rank inside a subquery, then filter WHERE pos_rank <= 3 on the outside. PARTITION BY makes the ranking restart per group; the outer WHERE is what actually trims each group down to 3.",
+              code: "SELECT * FROM (\n  SELECT player, position,\n         RANK() OVER (PARTITION BY position ORDER BY AVG(fantasy_pts) DESC) AS pos_rank\n  FROM week_results\n  WHERE season = 2024\n  GROUP BY player, position\n) WHERE pos_rank <= 3;",
+            },
           ],
           exercises: [
             {
@@ -1779,6 +1900,18 @@ export const COURSE = {
             text: "LAG(column) OVER (ORDER BY something) gives you that column's value from the previous row in that order. The first row has nothing behind it, so it returns NULL. Subtract the two and you have a week-over-week change — the basis of every trend chart you'll ever build.",
             code: "SELECT week, fantasy_pts,\n       fantasy_pts - LAG(fantasy_pts) OVER (ORDER BY week) AS swing\nFROM week_results\nWHERE player = 'Josh Allen' AND season = 2024;",
           },
+          film: [
+            {
+              title: "Before window functions, this took a self-join",
+              text: "LAG didn't always exist. The classic way to put 'last week's score' on the same row was a self-join: join week_results to itself, matching player to player, season to season, and one row's week to the other's week minus one. LAG(fantasy_pts) OVER (ORDER BY week) compresses that into a single clause, which is why window functions replaced the pattern almost everywhere. They're not quite identical, though — the self-join matches by week number, so Josh Allen's bye week correctly comes back NULL; LAG matches by row position in the ordered result, so across that same bye week it silently hands back his last game instead. Worth knowing before you lean on either one across a gap in the schedule.",
+              code: "-- the old way, before LAG\nSELECT a.week, a.fantasy_pts,\n       b.fantasy_pts AS prev_week\nFROM week_results a\nLEFT JOIN week_results b\n  ON a.player = b.player AND a.season = b.season AND b.week = a.week - 1\nWHERE a.player = 'Josh Allen' AND a.season = 2024;",
+            },
+            {
+              title: "LAG and LEAD take more than one argument",
+              text: "LAG(column) quietly defaults to one row back and NULL when there's nothing there — but both of those are adjustable. LAG(column, 3) reaches back three rows instead of one; LAG(column, 1, 0) returns 0 instead of NULL when the previous row doesn't exist. That third argument matters most when the result feeds more math, since NULL poisons a SUM the moment it touches one.",
+              code: "LAG(fantasy_pts, 1, 0) OVER (ORDER BY week) -- week 1 returns 0, not NULL",
+            },
+          ],
           exercises: [
             {
               type: "mc",
@@ -1857,6 +1990,16 @@ export const COURSE = {
             {
               title: "Why rolling averages exist",
               text: "A single week is mostly noise; a season average is too slow to react. A rolling three-game window sits between them — recent enough to show a real change in role, smooth enough to ignore one fluke. It's the same reason analysts quote a seven-day average rather than yesterday's number.",
+            },
+            {
+              title: "The default frame isn't always ROWS",
+              text: "Add ORDER BY inside OVER with no explicit frame and SQL assumes RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW, not ROWS. For a running total ordered by a column with no duplicates — like week here — RANGE and ROWS agree exactly. They part ways the moment two rows tie on the ORDER BY key: RANGE lumps every tied row into the total together, ROWS processes them one at a time. Writing ROWS BETWEEN explicitly is the professional habit that avoids ever being surprised by which one you got.",
+              code: "SUM(fantasy_pts) OVER (ORDER BY week)                                                   -- implicit RANGE\nSUM(fantasy_pts) OVER (ORDER BY week ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)  -- explicit, safer",
+            },
+            {
+              title: "A frame has two edges, not just a lookback",
+              text: "Every frame you've built so far has trailed backward — this row and some number before it. That's not the only shape available: ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING centers the window on the current row instead, averaging in the game before AND after it. Reach for a trailing frame whenever the answer can only see the past, like a running total or a season-to-date figure. Reach for a centered one when you're smoothing noise out of a dataset that's already complete and looking backward isn't a constraint.",
+              code: "-- trailing: this row and the 2 before it\nROWS BETWEEN 2 PRECEDING AND CURRENT ROW\n\n-- centered: this row plus one on each side\nROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING",
             },
           ],
           exercises: [
@@ -5079,6 +5222,1244 @@ export const COURSE = {
         },
       ],
     },
+    {
+      id: "u19",
+      number: 7,
+      title: "Overtime — CTEs & Temp Tables",
+      drive: "Overtime, 1st Drive · Own 20",
+      description:
+        "Query writing ends with window functions. This is where SQL starts helping you organize and reuse work: name a subquery instead of nesting it, and stash an intermediate result instead of recomputing it.",
+      skills: ["WITH", "Recursive CTEs", "Temp Tables"],
+      status: "live",
+      lessons: [
+        {
+          id: "u19-l1",
+          title: "Name Your Subquery",
+          blurb: "WITH turns a buried subquery into a readable first step.",
+          brief: {
+            goal: "Write a query as a named step instead of a nested subquery.",
+            setup:
+              "Every subquery you've written so far lived inside another query's FROM or WHERE — readable for one level, painful past two. WITH lets you name a subquery before you use it, so the query reads top to bottom instead of inside out. Here's the exact same games-over-30 filter, written as a CTE.",
+            previewSql:
+              "WITH big_games AS (SELECT player, week, fantasy_pts FROM week_results WHERE season = 2024 AND fantasy_pts > 30) SELECT * FROM big_games ORDER BY fantasy_pts DESC;",
+            previewCaption: "one CTE, then a plain SELECT from its name",
+          },
+          intro: {
+            title: "WITH name AS (...) gives a subquery a name",
+            text: "Write WITH name AS (a SELECT), and for the rest of the query you can treat name exactly like a table — SELECT FROM it, JOIN it, filter it. Nothing about what it computes changes from writing the same thing as a subquery; only how it reads does.",
+            code: "WITH big_games AS (\n  SELECT player, week, fantasy_pts\n  FROM week_results\n  WHERE season = 2024 AND fantasy_pts > 30\n)\nSELECT * FROM big_games\nORDER BY fantasy_pts DESC;",
+          },
+          film: [
+            {
+              title: "A CTE is a subquery with a name, not a new power",
+              text: "Everything a CTE can do, a subquery in FROM can also do — same rows, same performance in SQLite. The entire benefit is readability: once a query needs two or three logical steps, nested subqueries force a reader to work from the inside out, while a CTE reads top to bottom like a recipe. Reach for one the moment nesting a subquery would make you scroll sideways to find the closing parenthesis.",
+              code: "-- same result, opposite reading order\nSELECT * FROM (\n  SELECT player, fantasy_pts FROM week_results WHERE fantasy_pts > 30\n) AS big_games;\n\nWITH big_games AS (\n  SELECT player, fantasy_pts FROM week_results WHERE fantasy_pts > 30\n)\nSELECT * FROM big_games;",
+            },
+            {
+              title: "The name only exists for this one statement",
+              text: "big_games isn't a table — it disappears the moment this query finishes. Run a second query that tries to SELECT FROM big_games and SQL has no idea what you're talking about; you'd have to write the whole WITH clause again. That's the tradeoff CTEs make for their readability: reusable within one query, invisible outside it. (A view, coming up two units from now, is the version that sticks around.)",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt: "What does WITH big_games AS (...) actually create?",
+              options: [
+                "A permanent new table in the database",
+                "A named subquery, usable only inside this one statement",
+                "A saved query you can run again later",
+                "An index on week_results",
+              ],
+              answer: 1,
+              drillSkip: true,
+              explain:
+                "It's scoped to the statement it's written in. Nothing persists after the query finishes running.",
+            },
+            {
+              type: "fill",
+              prompt: "Name a CTE called qb_games holding only quarterback rows.",
+              parts: [
+                "",
+                null,
+                " qb_games AS (SELECT * FROM week_results WHERE position = 'QB')\nSELECT player, fantasy_pts FROM qb_games;",
+              ],
+              bank: ["WITH", "CREATE", "AS"],
+              answer: ["WITH"],
+              explain:
+                "WITH starts the clause; AS connects the name to the subquery that defines it.",
+            },
+            {
+              type: "query",
+              prompt:
+                "Using a CTE named big_games, find every 2024 game where a player scored more than 30 points. Show player, week, and fantasy_pts, highest first.",
+              starter:
+                "WITH big_games AS (\n  SELECT player, week, fantasy_pts\n  FROM week_results\n  WHERE season = 2024 AND fantasy_pts > 30\n)\n",
+              expected:
+                "WITH big_games AS (SELECT player, week, fantasy_pts FROM week_results WHERE season = 2024 AND fantasy_pts > 30) SELECT * FROM big_games ORDER BY fantasy_pts DESC;",
+              orderMatters: true,
+              hint: "Finish it with SELECT * FROM big_games ORDER BY fantasy_pts DESC;",
+              explain:
+                "The CTE does the filtering; the final SELECT just reads from it like any table.",
+            },
+            {
+              type: "query",
+              prompt:
+                "Name a CTE called qb_games holding only quarterback rows from week_results, then select player and fantasy_pts from it for week 1 of the 2024 season.",
+              starter:
+                "WITH qb_games AS (\n  SELECT * FROM week_results WHERE position = 'QB'\n)\n",
+              expected:
+                "WITH qb_games AS (SELECT * FROM week_results WHERE position = 'QB') SELECT player, fantasy_pts FROM qb_games WHERE season = 2024 AND week = 1;",
+              orderMatters: false,
+              hint: "SELECT player, fantasy_pts FROM qb_games WHERE season = 2024 AND week = 1;",
+              explain:
+                "The CTE narrowed to quarterbacks once; the outer query narrowed to one week. Two simple filters instead of one tangled one.",
+            },
+          ],
+        },
+        {
+          id: "u19-l2",
+          title: "Chaining Multiple CTEs",
+          blurb: "Build a report in stages — each CTE sees the ones before it.",
+          brief: {
+            goal: "Chain two or more CTEs into a multi-step report.",
+            setup:
+              "One WITH clause can define several CTEs, comma-separated, and each one can reference any CTE defined before it. That's how a real report gets built: one step computes the raw numbers, the next reshapes or ranks them. Here's a season-totals step feeding a ranking step.",
+            previewSql:
+              "WITH season_totals AS (SELECT player, SUM(fantasy_pts) AS total FROM week_results WHERE season = 2024 GROUP BY player), ranked AS (SELECT player, total, RANK() OVER (ORDER BY total DESC) AS rk FROM season_totals) SELECT player, total FROM ranked WHERE rk <= 3;",
+            previewCaption: "two CTEs: totals, then a rank built from those totals",
+          },
+          intro: {
+            title: "Comma-separate CTEs to chain them",
+            text: "WITH first AS (...), second AS (...) defines two named steps in one clause — and second is free to SELECT FROM first, the same way the final query selects from either of them. Each step only has to solve the part of the problem in front of it; the chain does the rest.",
+            code: "WITH season_totals AS (\n  SELECT player, SUM(fantasy_pts) AS total\n  FROM week_results\n  WHERE season = 2024\n  GROUP BY player\n),\nranked AS (\n  SELECT player, total,\n         RANK() OVER (ORDER BY total DESC) AS rk\n  FROM season_totals\n)\nSELECT player, total FROM ranked WHERE rk <= 3;",
+          },
+          film: [
+            {
+              title: "Each step only has to be simple",
+              text: "The whole point of chaining is that no single CTE has to do everything at once. season_totals only aggregates. ranked only ranks. Neither has to think about the other's job — the same discipline as writing a function that does one thing well, applied to SQL.",
+            },
+            {
+              title: "Order matters; scope doesn't run backward",
+              text: "A later CTE can reference an earlier one, but never the reverse — season_totals can't reach forward and use anything from ranked, because ranked hasn't been defined yet when season_totals is being read. If a chain feels tangled, that's usually a sign one CTE is trying to do two steps' worth of work; split it instead of reordering it.",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt:
+                "In WITH a AS (...), b AS (...) SELECT ..., can b's definition reference a?",
+              options: [
+                "Yes — later CTEs can use earlier ones",
+                "No, CTEs can't reference each other",
+                "Only inside a JOIN",
+                "Only if a is recursive",
+              ],
+              answer: 0,
+              drillSkip: true,
+              explain:
+                "That's the entire point of chaining — each step builds on the ones defined before it.",
+            },
+            {
+              type: "fill",
+              prompt: "Separate two CTE definitions correctly.",
+              parts: [
+                "WITH totals AS (SELECT player, SUM(fantasy_pts) AS total FROM week_results GROUP BY player)",
+                null,
+                "ranked AS (SELECT *, RANK() OVER (ORDER BY total DESC) AS rk FROM totals)\nSELECT * FROM ranked;",
+              ],
+              bank: [",", ";", "AND"],
+              answer: [","],
+              explain:
+                "A comma joins two CTE definitions in the same WITH clause — a semicolon would end the statement early.",
+            },
+            {
+              type: "query",
+              prompt:
+                "Build a two-step report: a CTE called season_totals with each player's SUM(fantasy_pts) for 2024, then a CTE called ranked that ranks those totals highest first. Return player and total for the top 5.",
+              starter:
+                "WITH season_totals AS (\n  SELECT player, SUM(fantasy_pts) AS total\n  FROM week_results\n  WHERE season = 2024\n  GROUP BY player\n),\nranked AS (\n  SELECT player, total, RANK() OVER (ORDER BY total DESC) AS rk\n  FROM season_totals\n)\n",
+              expected:
+                "WITH season_totals AS (SELECT player, SUM(fantasy_pts) AS total FROM week_results WHERE season = 2024 GROUP BY player), ranked AS (SELECT player, total, RANK() OVER (ORDER BY total DESC) AS rk FROM season_totals) SELECT player, total FROM ranked WHERE rk <= 5;",
+              orderMatters: false,
+              hint: "SELECT player, total FROM ranked WHERE rk <= 5;",
+              explain:
+                "Two clean steps beat one query trying to aggregate and rank at the same time.",
+            },
+            {
+              type: "query",
+              prompt:
+                "Chain a CTE called by_position (average fantasy_pts per position for 2024) into a second CTE called with_gap that subtracts each position's average from 30. Return position and the gap, ordered by position.",
+              starter:
+                "WITH by_position AS (\n  SELECT position, AVG(fantasy_pts) AS avg_pts\n  FROM week_results\n  WHERE season = 2024\n  GROUP BY position\n),\nwith_gap AS (\n  SELECT position, 30 - avg_pts AS gap FROM by_position\n)\n",
+              expected:
+                "WITH by_position AS (SELECT position, AVG(fantasy_pts) AS avg_pts FROM week_results WHERE season = 2024 GROUP BY position), with_gap AS (SELECT position, 30 - avg_pts AS gap FROM by_position) SELECT position, gap FROM with_gap ORDER BY position;",
+              orderMatters: true,
+              hint: "SELECT position, gap FROM with_gap ORDER BY position;",
+              explain:
+                "by_position never has to know about the number 30 — that logic lives entirely in the step that needs it.",
+            },
+          ],
+        },
+        {
+          id: "u19-l3",
+          title: "Walk the Whole Season",
+          blurb: "WITH RECURSIVE: build a sequence, then find what's missing from it.",
+          brief: {
+            goal: "Generate a sequence with a recursive CTE, and use it to find gaps in real data.",
+            setup:
+              "Every CTE so far ran once. A recursive CTE runs itself repeatedly, each pass building on the last, until a stopping condition is met — the classic use is generating a sequence that doesn't exist anywhere in your tables, like every week number from 1 to 18. Here it is generating exactly that.",
+            previewSql:
+              "WITH RECURSIVE weeks(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM weeks WHERE n < 18) SELECT n FROM weeks;",
+            previewCaption: "18 rows, built one at a time, from nothing",
+          },
+          intro: {
+            title: "A base case, then a rule for building the next row",
+            text: "WITH RECURSIVE name(col) AS (base_case UNION ALL recursive_case) has two halves: the base case is the starting row (SELECT 1), and the recursive case builds the next row FROM the CTE itself (SELECT n + 1 FROM weeks WHERE n < 18) — referencing its own name is exactly what makes it recursive. SQL keeps re-running the recursive half, feeding each result back in, until the WHERE condition stops matching.",
+            code: "WITH RECURSIVE weeks(n) AS (\n  SELECT 1                             -- base case: start at 1\n  UNION ALL\n  SELECT n + 1 FROM weeks WHERE n < 18 -- keep adding 1 until 18\n)\nSELECT n FROM weeks;",
+          },
+          film: [
+            {
+              title: "Why generate a sequence that isn't in any table?",
+              text: "week_results only has rows for games that were actually played — a bye week or an injury just means the row doesn't exist, the same silent-absence problem the JOIN unit covered. A recursive CTE generating every week number 1 through 18, LEFT JOINed back to a player's real games, turns 'which weeks are missing' into a normal anti-join — except now you're checking against weeks that should exist, not rows in another table.",
+              code: "WITH RECURSIVE weeks(n) AS (\n  SELECT 1 UNION ALL SELECT n + 1 FROM weeks WHERE n < 18\n)\nSELECT weeks.n AS week\nFROM weeks\nLEFT JOIN week_results w\n  ON w.week = weeks.n AND w.player = 'Josh Allen' AND w.season = 2024\nWHERE w.player IS NULL;",
+            },
+            {
+              title: "Recursion needs a stopping condition, or it never stops",
+              text: "WHERE n < 18 in the recursive half isn't optional — it's what eventually makes the recursive case produce zero new rows, which is the only way recursion ends. Get the comparison backwards, and the CTE tries to generate rows forever; SQLite has a default recursion limit that will eventually error rather than hang, but the fix is always the same: check the stopping condition first when a recursive CTE misbehaves.",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt:
+                "In WITH RECURSIVE weeks(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM weeks WHERE n < 18), what stops the recursion?",
+              options: [
+                "Nothing — it runs forever",
+                "WHERE n < 18 eventually matches no rows, so the recursive step produces nothing new",
+                "UNION ALL automatically stops at 18 rows",
+                "SQLite caps every CTE at 18 rows",
+              ],
+              answer: 1,
+              explain:
+                "Once n reaches 18, n < 18 is false for every row, the recursive half returns nothing, and the whole CTE is done.",
+            },
+            {
+              type: "fill",
+              prompt: "Complete the base case and the recursive case.",
+              parts: [
+                "WITH RECURSIVE weeks(n) AS (\n  SELECT ",
+                null,
+                "\n  ",
+                null,
+                " SELECT n + 1 FROM weeks WHERE n < 18\n)\nSELECT n FROM weeks;",
+              ],
+              bank: ["1", "UNION ALL", "0", "JOIN"],
+              answer: ["1", "UNION ALL"],
+              explain:
+                "Start at 1, then UNION ALL the rule that builds each next row from the last.",
+            },
+            {
+              type: "query",
+              prompt:
+                "Generate every week number from 1 to 17 using a recursive CTE called weeks(n). Return just n, in order.",
+              starter:
+                "WITH RECURSIVE weeks(n) AS (\n  SELECT 1\n  UNION ALL\n  SELECT n + 1 FROM weeks WHERE n < 17\n)\n",
+              expected:
+                "WITH RECURSIVE weeks(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM weeks WHERE n < 17) SELECT n FROM weeks;",
+              orderMatters: true,
+              hint: "SELECT n FROM weeks;",
+              explain:
+                "17 rows, built one at a time from a single starting row.",
+            },
+            {
+              type: "query",
+              prompt:
+                "Using a recursive CTE that generates weeks 1 through 18, find which weeks Josh Allen has no row for in the 2024 season. Return the missing week numbers.",
+              starter:
+                "WITH RECURSIVE weeks(n) AS (\n  SELECT 1\n  UNION ALL\n  SELECT n + 1 FROM weeks WHERE n < 18\n)\n",
+              expected:
+                "WITH RECURSIVE weeks(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM weeks WHERE n < 18) SELECT weeks.n AS week FROM weeks LEFT JOIN week_results w ON w.week = weeks.n AND w.player = 'Josh Allen' AND w.season = 2024 WHERE w.player IS NULL;",
+              orderMatters: false,
+              hint: "LEFT JOIN week_results w ON w.week = weeks.n AND w.player = 'Josh Allen' AND w.season = 2024, then WHERE w.player IS NULL.",
+              explain:
+                "Weeks 12 and 18 — the same anti-join pattern from the JOIN unit, just checking against a generated sequence instead of another table.",
+            },
+          ],
+        },
+        {
+          id: "u19-l4",
+          title: "Stash a Result and Come Back to It",
+          blurb: "CREATE TEMP TABLE: a real table that disappears when the session ends.",
+          brief: {
+            goal: "Know when a temp table beats a CTE.",
+            setup:
+              "A CTE's name disappears the instant its query finishes — reference it from a second, separate query and SQL has no idea what you mean. A temporary table doesn't have that limit: CREATE TEMP TABLE name AS (a SELECT) makes a real table that any later query in the same session can read, and SQLite drops it automatically when the connection closes.",
+            previewSql:
+              "SELECT player, week, fantasy_pts FROM week_results WHERE season = 2024 AND fantasy_pts > 25 LIMIT 5;",
+            previewCaption: "the kind of result worth stashing instead of recomputing",
+          },
+          intro: {
+            title: "CREATE TEMP TABLE makes a real, if short-lived, table",
+            text: "CREATE TEMP TABLE big_games AS SELECT ... runs the SELECT once and stores the result as an actual table — not a re-run definition like a CTE. Query it as many times as you want afterward, from as many separate statements as you want, for as long as the session lasts. Close the connection and it's gone — nothing you'd want to keep around long-term belongs in a temp table.",
+            code: "CREATE TEMP TABLE big_games AS\nSELECT player, week, fantasy_pts\nFROM week_results\nWHERE fantasy_pts > 25;\n\n-- now usable from any later query, as many times as you like\nSELECT COUNT(*) FROM big_games;",
+          },
+          film: [
+            {
+              title: "A temp table is computed once; a CTE is computed every time it's used",
+              text: "Reference the same CTE name three times in one query (say, in a self-join) and SQL re-runs its definition three times. A temp table runs its SELECT exactly once, when it's created, and every later read is just reading stored rows — which matters the moment the underlying computation is expensive and gets reused a lot.",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt: "What's the key difference between a temp table and a CTE?",
+              options: [
+                "Temp tables can't be filtered",
+                "A temp table persists across separate queries in the same session; a CTE only exists for one statement",
+                "CTEs are faster",
+                "Temp tables require a JOIN",
+              ],
+              answer: 1,
+              drillSkip: true,
+              explain:
+                "That persistence is the entire reason temp tables exist — everything else about querying them is identical to any other table.",
+            },
+            {
+              type: "mc",
+              prompt: "When does a SQLite temp table disappear?",
+              options: [
+                "Immediately after CREATE runs",
+                "When the database connection/session ends",
+                "After 24 hours",
+                "It never does — you must DROP it manually",
+              ],
+              answer: 1,
+              explain:
+                "It behaves like a real table for as long as the session is open, then SQLite cleans it up automatically.",
+            },
+            {
+              type: "fill",
+              prompt: "Store a query's result as a temp table.",
+              parts: [
+                "",
+                null,
+                " TEMP TABLE big_games AS\nSELECT player, fantasy_pts FROM week_results WHERE fantasy_pts > 25;",
+              ],
+              bank: ["CREATE", "WITH", "SELECT INTO"],
+              answer: ["CREATE"],
+              explain:
+                "CREATE TEMP TABLE name AS (a SELECT) — the AS connects the table to the query that fills it, the same keyword CTEs use for the same reason.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "You'll join the same expensive aggregate to three different tables in one script. What's the better fit — a CTE repeated three times, or a temp table?",
+              options: [
+                "A CTE, always — simpler syntax",
+                "A temp table — the aggregate runs once instead of three times",
+                "Neither works for this",
+                "A VIEW is required",
+              ],
+              answer: 1,
+              explain:
+                "This is the exact situation temp tables exist for: compute once, reuse repeatedly, instead of paying the cost on every reference.",
+            },
+          ],
+        },
+        {
+          id: "u19-l5",
+          title: "Pick the Right Tool",
+          blurb: "Three ways to hold an intermediate result — one decision framework.",
+          brief: {
+            goal: "Choose between a subquery, a CTE, and a temp table without guessing.",
+            setup:
+              "All three compute an intermediate result and let a later part of your SQL use it — the difference is scope and lifetime, not power. One question settles almost every case: does anything outside this one statement need to see the result?",
+            previewSql:
+              "SELECT player, SUM(fantasy_pts) AS total FROM week_results WHERE season = 2024 GROUP BY player LIMIT 5;",
+            previewCaption: "the same aggregate — subquery, CTE, or temp table, depending on who needs it",
+          },
+          intro: {
+            title: "One statement or many? That's the whole decision",
+            text: "Needed once, buried in a single query? A subquery is enough. Needed once, but the query has multiple logical steps? A CTE keeps it readable. Needed by several separate queries, or expensive enough that recomputing it is wasteful? A temp table. Reach for the simplest tool that actually survives as long as you need it to.",
+            code: "-- once, simple:          a subquery\n-- once, multi-step:      a CTE\n-- reused across queries: a temp table",
+          },
+          film: [
+            {
+              title: "Readability breaks the subquery-vs-CTE tie",
+              text: "A subquery and a single CTE compute identically in SQLite — there's no performance reason to prefer one over the other for a one-off. The real tiebreaker is how many logical steps the query has. One step, one filter: a subquery is fine. The moment you'd nest a second subquery inside the first just to keep reading top-down, switch to a CTE before the nesting gets hard to follow.",
+            },
+            {
+              title: "Reuse is the only thing that justifies a temp table",
+              text: "A temp table costs something a CTE doesn't: it's a real table, so it takes up space and someone reading the script later has to track that it exists. That cost only pays for itself when the result is genuinely reused — multiple separate queries, or a result expensive enough that recomputing it (which is exactly what a CTE does on every reference) would be wasteful. Default to a CTE; reach for a temp table only when you can point to the reuse.",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt:
+                "A query needs a season-totals calculation exactly once, as one step before a final SELECT. Best fit?",
+              options: ["A temp table", "A CTE", "Neither works", "A trigger"],
+              answer: 1,
+              explain:
+                "One statement, one use — a CTE gives the readability without paying for a table that outlives the query.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "Three completely separate reports, run as three separate queries, all need the same expensive season-totals number. Best fit?",
+              options: [
+                "Repeat the same CTE in all three queries",
+                "A temp table, computed once and read three times",
+                "A subquery in each one",
+                "It can't be done",
+              ],
+              answer: 1,
+              explain:
+                "This is the one scenario a CTE genuinely can't cover — its name doesn't survive past the statement it's defined in.",
+            },
+            {
+              type: "fill",
+              prompt: "Match the tool to its lifetime.",
+              parts: [
+                "Subquery: one clause only. CTE: ",
+                null,
+                ". Temp table: ",
+                null,
+                ".",
+              ],
+              bank: ["one statement", "the whole session"],
+              answer: ["one statement", "the whole session"],
+              explain:
+                "Each tool trades more persistence for more setup — pick the shortest lifetime that still covers what you need.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "Why default to a CTE over a temp table when either would technically work?",
+              options: [
+                "CTEs are always faster",
+                "A temp table is a real object that outlives the query and has to be tracked and cleaned up — extra cost that should be justified by real reuse",
+                "Temp tables can't be filtered",
+                "There's no reason, they're identical",
+              ],
+              answer: 1,
+              explain:
+                "Simplicity wins by default. Reach for more persistence only when you can point to why you need it.",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "u20",
+      number: 8,
+      title: "Overtime — Views",
+      drive: "Overtime, 2nd Drive · Own 40",
+      description:
+        "A CTE forgets everything the moment its query ends. A view doesn't — it's a saved query that behaves like a table every time anyone reaches for it, including next week.",
+      skills: ["CREATE VIEW", "Updatable views"],
+      status: "live",
+      lessons: [
+        {
+          id: "u20-l1",
+          title: "A Saved Query That Acts Like a Table",
+          blurb: "CREATE VIEW packages a query so anyone can SELECT from it later.",
+          brief: {
+            goal: "Understand what a view actually stores.",
+            setup:
+              "A view doesn't store data — it stores a query. Every time someone selects from a view, the database re-runs the underlying SELECT and hands back fresh results. Package a query once under a name, and everyone who queries that name gets the current answer, not a stale snapshot.",
+            previewSql:
+              "SELECT player, ROUND(SUM(fantasy_pts), 1) AS total FROM week_results WHERE season = 2024 GROUP BY player ORDER BY total DESC LIMIT 5;",
+            previewCaption: "exactly the kind of query worth packaging as a view",
+          },
+          intro: {
+            title: "CREATE VIEW name AS (a SELECT)",
+            text: "Once created, a view is queried exactly like a table: SELECT * FROM season_totals, WHERE, JOIN, all of it. Nothing about querying a view feels different from querying a table — the only special part is what happens behind the name: SQLite re-runs the stored SELECT fresh, every single time.",
+            code: "CREATE VIEW season_totals AS\nSELECT player, SUM(fantasy_pts) AS total\nFROM week_results\nWHERE season = 2024\nGROUP BY player;\n\n-- later, from anyone, any time:\nSELECT * FROM season_totals ORDER BY total DESC LIMIT 5;",
+          },
+          film: [
+            {
+              title: "A view stores no data — it stores the question",
+              text: "This is the one fact that explains everything else about views. Add a new week of games to week_results and season_totals is instantly up to date, with zero extra work — because every query against it re-runs the underlying SELECT from scratch. Compare that to a temp table, which freezes the answer at the moment it was created and goes stale the second the source data changes.",
+            },
+            {
+              title: "A view is our stand-in for what other databases call a stored procedure",
+              text: "Full procedural SQL — parameters, control flow, output variables — needs a feature SQLite doesn't have at all. A view can't take a parameter or run logic, but it does the one thing a stored procedure does for a plain read: package a query once, under a name, so nobody has to retype (or slightly get wrong) a complicated SELECT ever again.",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt: "What does a view actually store?",
+              options: [
+                "A cached copy of the result rows",
+                "The SELECT query itself — re-run fresh every time someone queries the view",
+                "A pointer to a temp table",
+                "Nothing until you query it once",
+              ],
+              answer: 1,
+              drillSkip: true,
+              explain:
+                "No data is cached. Every read re-executes the underlying query, which is exactly why a view is always current.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "New games get added to week_results. What happens to a view built on that table?",
+              options: [
+                "It goes stale until manually refreshed",
+                "It's automatically up to date — its next query includes the new rows",
+                "It breaks and must be recreated",
+                "Nothing changes until the app restarts",
+              ],
+              answer: 1,
+              explain:
+                "Since a view has no stored data of its own, there's nothing to go stale — the next query just sees the current table.",
+            },
+            {
+              type: "fill",
+              prompt: "Package a season-totals query as a view.",
+              parts: [
+                "",
+                null,
+                " VIEW season_totals ",
+                null,
+                "\nSELECT player, SUM(fantasy_pts) AS total FROM week_results GROUP BY player;",
+              ],
+              bank: ["CREATE", "AS", "TEMP"],
+              answer: ["CREATE", "AS"],
+              explain:
+                "CREATE VIEW name AS (a SELECT) — the same AS keyword CTEs and temp tables both use, for the same reason.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "Which one of these can a view NOT do that a real stored procedure could?",
+              options: [
+                "Be queried with a WHERE clause",
+                "Accept a parameter and branch on it",
+                "Be joined to another table",
+                "Return more than one column",
+              ],
+              answer: 1,
+              explain:
+                "A view is always the same fixed query. Parameters and control flow are exactly the procedural piece SQLite doesn't have.",
+            },
+          ],
+        },
+        {
+          id: "u20-l2",
+          title: "Package a Query for Real",
+          blurb: "Write the CREATE VIEW statement, and know how to remove it.",
+          brief: {
+            goal: "Write a CREATE VIEW statement, and drop one when it's no longer needed.",
+            setup:
+              "The syntax is exactly one line more than the query it wraps: CREATE VIEW, a name, AS, then the SELECT you already know how to write. Removing one is just as direct — DROP VIEW name — and unlike a table, there's no data to lose, only the saved definition.",
+            previewSql:
+              "SELECT position, ROUND(AVG(fantasy_pts), 1) AS ppg FROM week_results WHERE season = 2024 GROUP BY position;",
+            previewCaption: "position averages — a natural view to package",
+          },
+          intro: {
+            title: "CREATE VIEW, then DROP VIEW when you're done",
+            text: "CREATE VIEW position_averages AS SELECT ... makes the view; DROP VIEW position_averages removes just the saved definition, instantly, with nothing to clean up — because there was never any data stored under that name to begin with.",
+            code: "CREATE VIEW position_averages AS\nSELECT position, AVG(fantasy_pts) AS ppg\nFROM week_results\nGROUP BY position;\n\nDROP VIEW position_averages;",
+          },
+          film: [
+            {
+              title: "A view can be built on other views",
+              text: "Since a view is queryable exactly like a table, nothing stops CREATE VIEW top_scorers AS SELECT * FROM season_totals WHERE total > 300 — a view stacked on another view. Used well, this is the same layered thinking as chaining CTEs, made permanent. Used carelessly, three views deep, it gets exactly as hard to trace as any other long dependency chain — the same judgment call as deciding when a CTE chain has gotten too long.",
+            },
+          ],
+          exercises: [
+            {
+              type: "fill",
+              prompt: "Remove a view that's no longer needed.",
+              parts: ["", null, " VIEW position_averages;"],
+              bank: ["DROP", "DELETE", "REMOVE"],
+              answer: ["DROP"],
+              explain:
+                "DROP VIEW — the same DROP keyword works across tables, views, indexes, and triggers throughout SQL.",
+            },
+            {
+              type: "mc",
+              prompt: "You DROP a view. What happens to the underlying data in week_results?",
+              options: [
+                "It's deleted too",
+                "Nothing — the view never stored any data, only the query",
+                "It's archived",
+                "The table is locked",
+              ],
+              answer: 1,
+              drillSkip: true,
+              explain:
+                "Dropping a view removes a saved question, not an answer. The source table is completely unaffected.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "CREATE VIEW top_scorers AS SELECT * FROM season_totals WHERE total > 300 — what is this an example of?",
+              options: [
+                "An error — views can't reference other views",
+                "A view built on top of another view",
+                "A recursive view",
+                "A trigger",
+              ],
+              answer: 1,
+              explain:
+                "A view is just something queryable, so nothing stops another view from being built on it — the same layering idea as chaining CTEs.",
+            },
+            {
+              type: "mc",
+              prompt: "What's the risk of stacking views three or four layers deep?",
+              options: [
+                "SQLite doesn't allow it",
+                "It gets hard to trace where a number actually comes from — the same readability cost as an overly long CTE chain",
+                "It's always slower than a single query",
+                "Views can only be stacked twice",
+              ],
+              answer: 1,
+              explain:
+                "Nothing technical stops deep stacking — the cost is entirely in how hard the chain is for the next person to follow.",
+            },
+          ],
+        },
+        {
+          id: "u20-l3",
+          title: "Can You Write Through a View?",
+          blurb: "Some views accept INSERT/UPDATE; most real ones don't.",
+          brief: {
+            goal: "Know when a view can be written through, and why most can't.",
+            setup:
+              "A view built on a single table, with no GROUP BY, JOIN, or aggregate, can often accept UPDATE and INSERT statements — SQLite quietly translates the write onto the real underlying table. The moment a view involves a join or an aggregate, that translation becomes ambiguous, and the write is rejected.",
+            previewSql:
+              "SELECT player, week, fantasy_pts FROM week_results WHERE season = 2024 LIMIT 5;",
+            previewCaption: "a plain, single-table shape — the kind a view CAN be updatable through",
+          },
+          intro: {
+            title: "Simple views can be updatable; aggregated ones can't",
+            text: "UPDATE a_simple_view SET fantasy_pts = 40 WHERE player = 'X' can work when the view is a straightforward SELECT off one table — SQLite knows exactly which real row that maps to. UPDATE season_totals SET total = 999 makes no sense at all: total is a SUM across many rows, and there's no single row to write the change back to.",
+            code: "-- updatable in principle: one table, no aggregation\nCREATE VIEW buffalo_games AS\nSELECT * FROM week_results WHERE team = 'BUF';\n\n-- NOT updatable: an aggregate has no one row to write back to\nCREATE VIEW season_totals AS\nSELECT player, SUM(fantasy_pts) AS total FROM week_results GROUP BY player;",
+          },
+          film: [
+            {
+              title: "Ask 'which real row would this change?'",
+              text: "That question is the whole test. UPDATE buffalo_games SET fantasy_pts = 40 WHERE player = 'Josh Allen' AND week = 1 has an obvious answer — one row in week_results. UPDATE season_totals SET total = 999 WHERE player = 'Josh Allen' has no answer at all, because total was never a single stored number; it's the output of adding several rows together. No SQL engine can reverse a SUM.",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt: "Which of these views could realistically accept an UPDATE?",
+              options: [
+                "A view grouping by player with SUM(fantasy_pts)",
+                "A view that's a plain SELECT * FROM week_results WHERE team = 'BUF'",
+                "A view joining rosters to week_results",
+                "A view using RANK() OVER (...)",
+              ],
+              answer: 1,
+              explain:
+                "One table, no aggregation, no join — SQLite can trace exactly which real row a write maps to.",
+            },
+            {
+              type: "mc",
+              prompt: "Why can't you UPDATE a view built with GROUP BY and SUM()?",
+              options: [
+                "SQLite has a bug",
+                "There's no single real row a change to the summed total could write back to",
+                "GROUP BY views are read-only by license",
+                "You actually can, it's just slow",
+              ],
+              answer: 1,
+              explain:
+                "A SUM erases which individual rows it came from — there's nothing for an UPDATE to reverse-engineer.",
+            },
+            {
+              type: "fill",
+              prompt: "The test for whether a view might be updatable.",
+              parts: ["Ask: which real ", null, " would this write actually change?"],
+              bank: ["row", "table"],
+              answer: ["row"],
+              explain:
+                "Updatability comes down to tracing a write to one specific row in one specific underlying table.",
+            },
+            {
+              type: "mc",
+              prompt: "A view joins rosters to week_results. You try to UPDATE it. What happens?",
+              options: [
+                "It updates both tables",
+                "It's rejected — a join means a write could apply to more than one table, which SQLite refuses to guess at",
+                "It silently does nothing",
+                "It only updates rosters",
+              ],
+              answer: 1,
+              explain:
+                "Same root problem as an aggregate: the moment more than one table (or more than one row) could be the target, the write is ambiguous and SQLite won't guess.",
+            },
+          ],
+        },
+        {
+          id: "u20-l4",
+          title: "Three Tools, Complete",
+          blurb: "The full decision, now that a view is on the table.",
+          brief: {
+            goal: "Add views to the CTE-vs-temp-table decision from last unit.",
+            setup:
+              "Same question as before — how long does this need to survive? — with one more answer available. A view survives the longest of all three: past the query, past the session, until someone explicitly drops it.",
+            previewSql:
+              "SELECT player, ROUND(SUM(fantasy_pts), 1) AS total FROM week_results WHERE season = 2024 GROUP BY player ORDER BY total DESC LIMIT 5;",
+            previewCaption: "one query, four ways to hold onto it: subquery, CTE, temp table, view",
+          },
+          intro: {
+            title: "Add 'does this need to outlive the session' to the checklist",
+            text: "Subquery: this one clause. CTE: this one statement. Temp table: this session. View: forever, until dropped — and always current, since it re-runs its query fresh every time. A view is the only one of the four a completely different session, days later, can still find by name.",
+            code: "-- once, this session:      a temp table\n-- forever, always current: a view",
+          },
+          film: [
+            {
+              title: "A view costs freshness for permanence, in the opposite direction from a temp table",
+              text: "A temp table is a snapshot: fast to reread, but frozen the moment it was created. A view is the opposite: always current, because it never stores anything, but that means every single query against it pays the full cost of the underlying SELECT all over again. Neither is strictly better — a dashboard that needs the current number every time wants a view; a report computing something expensive once per session wants a temp table.",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt:
+                "A dashboard needs 'current season totals, right now' every time someone opens it. Best fit?",
+              options: [
+                "A temp table, refreshed manually",
+                "A view — always current because it re-runs the query fresh",
+                "A CTE, redefined on every page load",
+                "It doesn't matter",
+              ],
+              answer: 1,
+              explain:
+                "The dashboard's whole requirement is freshness — the exact thing a view provides for free by never caching anything.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "A once-a-day batch report runs the same expensive aggregate six times across six separate queries, and staleness for a few minutes is fine. Best fit?",
+              options: [
+                "A view, recomputed six times",
+                "A temp table, computed once and reused six times",
+                "Six separate subqueries",
+                "A trigger",
+              ],
+              answer: 1,
+              explain:
+                "This is a temp table's exact use case: pay the expensive computation once, then read the frozen result as many times as needed.",
+            },
+            {
+              type: "fill",
+              prompt: "Rank all four tools by how long their result survives, shortest first.",
+              parts: ["Subquery < ", null, " < ", null, " < View"],
+              bank: ["CTE", "Temp table"],
+              answer: ["CTE", "Temp table"],
+              explain:
+                "Each step trades a bit more setup for a longer lifetime — subquery for one clause, all the way up to a view that survives the session entirely.",
+            },
+            {
+              type: "mc",
+              prompt: "What's the one thing a view can do that none of the other three can?",
+              options: [
+                "Be filtered with WHERE",
+                "Be found by name from a completely different session, days later",
+                "Contain a JOIN",
+                "Use an aggregate function",
+              ],
+              answer: 1,
+              explain:
+                "Subqueries, CTEs, and temp tables all die with the session (or sooner). A view is the only one of the four that's genuinely permanent.",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "u21",
+      number: 9,
+      title: "Overtime — Triggers",
+      drive: "Overtime, 3rd Drive · Midfield",
+      description:
+        "Everything so far runs when you ask it to. A trigger runs automatically, the instant a specific change happens to a table — no one has to remember to call it.",
+      skills: ["CREATE TRIGGER", "BEFORE / AFTER"],
+      status: "live",
+      lessons: [
+        {
+          id: "u21-l1",
+          title: "Code That Runs Itself",
+          blurb: "A trigger fires automatically on INSERT, UPDATE, or DELETE.",
+          brief: {
+            goal: "Understand when and why a trigger fires.",
+            setup:
+              "Every statement you've written so far only runs because someone typed it and hit run. A trigger is different: you define it once, attached to a table and an event — BEFORE or AFTER an INSERT, UPDATE, or DELETE — and from then on, it fires by itself, every single time that event happens, with no one calling it.",
+            previewSql: "SELECT player, team_name FROM rosters LIMIT 5;",
+            previewCaption: "a change to a table like this is exactly what a trigger watches for",
+          },
+          intro: {
+            title: "A trigger watches one table for one kind of change",
+            text: "CREATE TRIGGER name AFTER INSERT ON rosters ... names the table (rosters) and the event (INSERT) it watches. The moment a row is actually inserted into rosters, the trigger's body runs automatically — logging it, checking it, or reacting to it, without whoever ran the INSERT having to do anything extra.",
+            code: "-- fires automatically, every time, forever\nCREATE TRIGGER log_new_player\nAFTER INSERT ON rosters\nBEGIN\n  INSERT INTO roster_log (player, team, changed_at)\n  VALUES (NEW.player, NEW.team_name, datetime('now'));\nEND;",
+          },
+          film: [
+            {
+              title: "BEFORE and AFTER are genuinely different moments",
+              text: "A BEFORE trigger runs before the change is committed — useful for validating or rejecting it. An AFTER trigger runs once the change has already happened — useful for logging or reacting to it, since by then the new row is real and queryable. Picking the wrong one either lets an invalid row through, or tries to validate something that's already permanent.",
+            },
+            {
+              title: "NEW and OLD are how a trigger sees the change",
+              text: "Inside a trigger's body, NEW.column refers to the row being inserted or the new value on an UPDATE; OLD.column refers to the row being deleted or the value before an UPDATE. An INSERT trigger only has NEW (there's no old row); a DELETE trigger only has OLD (there's no new one); an UPDATE trigger has both, which is how you'd log exactly what changed.",
+              code: "-- UPDATE trigger, seeing both sides of the change\nCREATE TRIGGER log_trade\nAFTER UPDATE ON rosters\nBEGIN\n  INSERT INTO trade_log (player, old_team, new_team)\n  VALUES (NEW.player, OLD.team_name, NEW.team_name);\nEND;",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt: "What actually causes a trigger to run?",
+              options: [
+                "Someone explicitly calls it by name",
+                "A matching INSERT, UPDATE, or DELETE happens on the table it's attached to",
+                "It runs once a day automatically",
+                "The database restarting",
+              ],
+              answer: 1,
+              drillSkip: true,
+              explain:
+                "That's the entire point of a trigger — it fires on the event, not on being called.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "You want to reject an INSERT if a value is invalid, before it's ever saved. BEFORE or AFTER?",
+              options: [
+                "AFTER — check it once it exists",
+                "BEFORE — the change hasn't been committed yet, so it can still be stopped",
+                "Either works identically",
+                "Neither can reject an insert",
+              ],
+              answer: 1,
+              explain:
+                "AFTER is too late to prevent anything — the row is already there. Validation belongs in a BEFORE trigger.",
+            },
+            {
+              type: "mc",
+              prompt: "Inside a DELETE trigger's body, which reference is available?",
+              options: [
+                "Only NEW",
+                "Only OLD — there's no new row, since the row is being removed",
+                "Both NEW and OLD",
+                "Neither",
+              ],
+              answer: 1,
+              explain:
+                "A DELETE has nothing new to point to. OLD refers to the row as it existed right before removal.",
+            },
+            {
+              type: "fill",
+              prompt: "Name the two references a trigger uses to see a row's before/after state.",
+              parts: ["", null, " for the incoming row, ", null, " for the row as it was."],
+              bank: ["NEW", "OLD"],
+              answer: ["NEW", "OLD"],
+              explain:
+                "NEW and OLD are how a trigger's body reaches into the row that caused it to fire.",
+            },
+          ],
+        },
+        {
+          id: "u21-l2",
+          title: "Write the Trigger",
+          blurb: "Full CREATE TRIGGER syntax, piece by piece.",
+          brief: {
+            goal: "Write a complete CREATE TRIGGER statement.",
+            setup:
+              "The shape is always the same pieces in order: CREATE TRIGGER, a name, WHEN it fires (BEFORE/AFTER) and on what (INSERT/UPDATE/DELETE), which table, then a BEGIN...END block holding whatever SQL should run. Here's a trigger that logs every new roster entry.",
+            previewSql: "SELECT player, team_name FROM rosters LIMIT 5;",
+            previewCaption: "the table a trigger would watch",
+          },
+          intro: {
+            title: "Five pieces, always in the same order",
+            text: "CREATE TRIGGER name [BEFORE|AFTER] [INSERT|UPDATE|DELETE] ON table BEGIN ... END. Everything inside BEGIN and END is ordinary SQL — usually an INSERT into a log table, referencing NEW or OLD — and it can be more than one statement, each ending in its own semicolon.",
+            code: "CREATE TRIGGER log_new_player\nAFTER INSERT ON rosters\nBEGIN\n  INSERT INTO roster_log (player, team, changed_at)\n  VALUES (NEW.player, NEW.team_name, datetime('now'));\nEND;",
+          },
+          film: [
+            {
+              title: "A trigger body can hold more than one statement",
+              text: "Nothing limits BEGIN...END to a single INSERT — stack several statements, each ended with its own semicolon, and every one runs as part of the same firing. That's how a single roster change could both log the change AND update a separate summary count in one trigger, with no risk of one happening without the other.",
+            },
+          ],
+          exercises: [
+            {
+              type: "fill",
+              prompt: "Assemble the trigger header in the right order.",
+              parts: [
+                "CREATE ",
+                null,
+                " log_new_player\n",
+                null,
+                " INSERT ON rosters\nBEGIN\n  ...\nEND;",
+              ],
+              bank: ["TRIGGER", "AFTER", "VIEW"],
+              answer: ["TRIGGER", "AFTER"],
+              explain:
+                "CREATE TRIGGER, a name, then the timing and event — the same order every trigger follows.",
+            },
+            {
+              type: "mc",
+              prompt: "What ends the block of SQL a trigger runs?",
+              options: [
+                "A closing parenthesis",
+                "END, matching the BEGIN that opened it",
+                "A final RETURN statement",
+                "Nothing — it runs until the connection closes",
+              ],
+              answer: 1,
+              drillSkip: true,
+              explain:
+                "BEGIN...END wraps the trigger's body, the same pairing used in stored-procedure bodies in engines that have them.",
+            },
+            {
+              type: "mc",
+              prompt: "Can a trigger's BEGIN...END block contain more than one statement?",
+              options: [
+                "No, exactly one",
+                "Yes — each statement inside gets its own semicolon, and all of them run together",
+                "Only in MySQL, not SQLite",
+                "Only if they're all INSERTs",
+              ],
+              answer: 1,
+              explain:
+                "Everything inside the block runs as part of the same firing — useful when one change should cause several side effects at once.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "A trigger references NEW.team_name inside an AFTER INSERT trigger on rosters. What does that resolve to?",
+              options: [
+                "The team_name value of the row that was just inserted",
+                "The previous team_name before this row existed",
+                "Every team_name in the table",
+                "An error — NEW isn't valid on INSERT",
+              ],
+              answer: 0,
+              explain:
+                "On an INSERT, NEW is the row that was just added — exactly the row that caused the trigger to fire.",
+            },
+          ],
+        },
+        {
+          id: "u21-l3",
+          title: "Find and Remove Automation",
+          blurb: "Triggers are invisible until you know where to look.",
+          brief: {
+            goal: "List existing triggers, and remove one safely.",
+            setup:
+              "A trigger doesn't show up when you look at a table's columns — it's a separate object entirely, and an unfamiliar database might have several silently firing that nobody mentioned. SQLite keeps every trigger's definition in sqlite_master, the same catalog that lists tables and views.",
+            previewSql: "SELECT name FROM sqlite_master WHERE type = 'table';",
+            previewCaption: "sqlite_master — the catalog every object gets listed in",
+          },
+          intro: {
+            title: "sqlite_master lists every trigger, table, view, and index",
+            text: "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' shows every trigger's name and its full CREATE TRIGGER definition. Removing one is DROP TRIGGER name — after that, the automation is simply gone; nothing fires on the next INSERT that used to.",
+            code: "-- find every trigger in the database\nSELECT name, sql FROM sqlite_master WHERE type = 'trigger';\n\n-- remove one\nDROP TRIGGER log_new_player;",
+          },
+          film: [
+            {
+              title: "Inherited automation is a real, common surprise",
+              text: "Join a team, inherit a database, and find rows appearing in a log table you never touched — a trigger is one of the first places to check, precisely because it never shows up unless you go looking in sqlite_master. Checking for triggers before assuming a bug is 'somewhere in the application code' is a genuinely useful habit the moment you're debugging someone else's schema.",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt: "Where does SQLite store the definition of every trigger in a database?",
+              options: [
+                "In a separate .trigger file",
+                "In sqlite_master, alongside tables, views, and indexes",
+                "Triggers aren't stored, only re-typed each session",
+                "In the table they're attached to",
+              ],
+              answer: 1,
+              drillSkip: true,
+              explain:
+                "sqlite_master is the one catalog every named object in the database shows up in.",
+            },
+            {
+              type: "fill",
+              prompt: "List every trigger's name and full definition.",
+              parts: ["SELECT name, sql FROM sqlite_master WHERE type = ", null, ";"],
+              bank: ["'trigger'", "'table'", "trigger"],
+              answer: ["'trigger'"],
+              explain:
+                "type is a text column, so 'trigger' needs quotes — the same quoting rule every text comparison follows.",
+            },
+            {
+              type: "fill",
+              prompt: "Remove a trigger by name.",
+              parts: ["", null, " TRIGGER log_new_player;"],
+              bank: ["DROP", "DELETE", "REMOVE"],
+              answer: ["DROP"],
+              explain:
+                "DROP TRIGGER — the same DROP keyword that removes tables, views, and indexes, applied to one more object type.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "Why is it worth checking sqlite_master for triggers before debugging an unexpected row change?",
+              options: [
+                "Triggers always cause bugs",
+                "A trigger fires silently — nothing in the query that changed the data will mention it",
+                "It's required before every query",
+                "Triggers can't be queried directly",
+              ],
+              answer: 1,
+              explain:
+                "Whoever ran the original INSERT or UPDATE sees no sign a trigger fired at all — the side effect is completely invisible unless you go looking for it.",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "u22",
+      number: 10,
+      title: "Overtime — Indexing & Query Plans",
+      drive: "Overtime, 4th Drive · Red Zone",
+      description:
+        "Every query so far has been graded on whether it's right. This unit is about whether it's fast — reading what the database actually did, and giving it a faster way to do it.",
+      skills: ["EXPLAIN QUERY PLAN", "CREATE INDEX", "Composite indexes"],
+      status: "live",
+      lessons: [
+        {
+          id: "u22-l1",
+          title: "What Did the Database Actually Do?",
+          blurb: "EXPLAIN QUERY PLAN shows you, instead of making you guess.",
+          brief: {
+            goal: "Read and write EXPLAIN QUERY PLAN output.",
+            setup:
+              "Put EXPLAIN QUERY PLAN in front of any SELECT and SQLite hands back, instead of your data, a short description of how it planned to find it — which table it reads, and whether it scans every row or searches more directly. Right now, with no indexes anywhere in this database, every plan says the same thing: SCAN.",
+            previewSql:
+              "EXPLAIN QUERY PLAN SELECT * FROM week_results WHERE player = 'Josh Allen';",
+            previewCaption: "SCAN week_results — read every row, checking each one",
+          },
+          intro: {
+            title: "SCAN means 'read every row and check it'",
+            text: "EXPLAIN QUERY PLAN SELECT ... returns a plan, not your data — a row describing what the database intends to do. SCAN week_results means exactly what it sounds like: walk every row in the table, testing each one against your WHERE clause. On 900 rows that's instant; on 900 million, it's the difference between a query that returns in a blink and one that doesn't return at all.",
+            code: "EXPLAIN QUERY PLAN\nSELECT * FROM week_results WHERE player = 'Josh Allen';\n\n-- returns something like:\n-- SCAN week_results",
+          },
+          film: [
+            {
+              title: "A plan is a description, not an answer",
+              text: "EXPLAIN QUERY PLAN never runs your query for real — it asks SQLite's planner what it WOULD do, and hands back that description instead of rows. That makes it completely safe to run on anything: a slow report, a query you're not sure about, even one that would normally return a huge result set. You're reading intent, not paying the cost.",
+            },
+            {
+              title: "This unit's plans will all say SCAN, and that's the point",
+              text: "Nothing in this database has an index yet, so every plan you write here reads the same way: a full scan of the table. That's not a limitation of the exercises — it's the honest starting point every real database has before anyone adds an index, and the next lesson is entirely about what changes once one exists.",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt: "What does EXPLAIN QUERY PLAN actually return?",
+              options: [
+                "Your query's normal result rows, just formatted differently",
+                "A description of how the database intends to find the rows — not the rows themselves",
+                "The time the query took to run",
+                "An error unless the query has already run once",
+              ],
+              answer: 1,
+              drillSkip: true,
+              explain:
+                "It's a plan, not data — completely safe to run on anything, since the underlying query never actually executes for real.",
+            },
+            {
+              type: "mc",
+              prompt: "What does SCAN week_results in a query plan mean?",
+              options: [
+                "The table is broken",
+                "Every row in week_results gets read and checked against the WHERE clause",
+                "The query failed",
+                "An index was used",
+              ],
+              answer: 1,
+              explain:
+                "A scan is the database's fallback when it has no faster way to find matching rows: check every single one.",
+            },
+            {
+              type: "fill",
+              prompt: "Ask SQLite how it plans to run a query, without actually running it.",
+              parts: ["", null, " ", null, "\nSELECT * FROM week_results WHERE season = 2024;"],
+              bank: ["EXPLAIN", "QUERY PLAN", "DESCRIBE"],
+              answer: ["EXPLAIN", "QUERY PLAN"],
+              explain: "EXPLAIN QUERY PLAN goes right before the SELECT it's asking about.",
+            },
+            {
+              type: "query",
+              prompt:
+                "Write EXPLAIN QUERY PLAN for a query that selects everything from week_results where the team is 'KC'.",
+              starter: "",
+              expected: "EXPLAIN QUERY PLAN SELECT * FROM week_results WHERE team = 'KC';",
+              orderMatters: true,
+              hint: "EXPLAIN QUERY PLAN SELECT * FROM week_results WHERE team = 'KC';",
+              explain:
+                "Same SCAN result as every other query in this lesson — there's no index on team yet either.",
+            },
+          ],
+        },
+        {
+          id: "u22-l2",
+          title: "Give the Planner a Shortcut",
+          blurb: "CREATE INDEX turns a scan into a search.",
+          brief: {
+            goal: "Understand what an index changes about a query plan.",
+            setup:
+              "An index is a separate, sorted structure SQLite maintains alongside a table, built on one or more columns — like the index at the back of a book: instead of reading every page, you jump straight to the right one. CREATE INDEX idx_player ON week_results(player) builds exactly that for the player column.",
+            previewSql:
+              "SELECT player, fantasy_pts FROM week_results WHERE player = 'Josh Allen' LIMIT 5;",
+            previewCaption: "the exact kind of lookup an index on player would speed up",
+          },
+          intro: {
+            title: "CREATE INDEX turns SCAN into SEARCH",
+            text: "CREATE INDEX idx_player ON week_results(player) builds a sorted lookup structure for that column. Run the same WHERE player = 'Josh Allen' query afterward and the plan changes from SCAN week_results to SEARCH week_results USING INDEX idx_player (player=?) — the database jumps straight to the matching rows instead of reading the whole table.",
+            code: "CREATE INDEX idx_player ON week_results(player);\n\nEXPLAIN QUERY PLAN\nSELECT * FROM week_results WHERE player = 'Josh Allen';\n-- SEARCH week_results USING INDEX idx_player (player=?)",
+          },
+          film: [
+            {
+              title: "This is a real, verified before-and-after",
+              text: "Before any index exists, SELECT * FROM week_results WHERE player = 'Josh Allen' plans as SCAN week_results — every one of the ~900 rows gets checked. After CREATE INDEX idx_player ON week_results(player), the exact same query plans as SEARCH week_results USING INDEX idx_player (player=?) — SQLite jumps to Josh Allen's rows directly. Same question, same answer, a completely different amount of work behind the scenes.",
+              code: "-- before\nSCAN week_results\n\n-- after CREATE INDEX idx_player ON week_results(player)\nSEARCH week_results USING INDEX idx_player (player=?)",
+            },
+            {
+              title: "Indexes aren't free — they cost writes and space",
+              text: "Every INSERT or UPDATE on an indexed column has to update the index too, not just the table — so an index that speeds up reads slows down writes, and takes up disk space doing it. The real skill isn't 'add an index to everything'; it's indexing the columns that actually get filtered or joined on often, and leaving the rest alone.",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt: "Before any index exists, what does a query plan say for WHERE player = 'Josh Allen'?",
+              options: ["SEARCH", "SCAN — every row gets checked", "INDEX", "ERROR"],
+              answer: 1,
+              drillSkip: true,
+              explain: "With nothing to jump to, a full scan is the only option the planner has.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "After CREATE INDEX idx_player ON week_results(player), what changes in the plan for that same query?",
+              options: [
+                "Nothing — indexes don't affect query plans",
+                "SCAN becomes SEARCH ... USING INDEX — the planner jumps to matching rows instead of checking every one",
+                "The query starts returning different rows",
+                "It becomes slower",
+              ],
+              answer: 1,
+              explain:
+                "This is the entire value of an index: the same correct answer, reached by checking far fewer rows.",
+            },
+            {
+              type: "fill",
+              prompt: "Build an index on the player column of week_results.",
+              parts: ["", null, " idx_player ON week_results(", null, ");"],
+              bank: ["CREATE INDEX", "player", "CREATE TABLE"],
+              answer: ["CREATE INDEX", "player"],
+              explain:
+                "CREATE INDEX name ON table(column) — name it, say which table, say which column to build the shortcut on.",
+            },
+            {
+              type: "mc",
+              prompt: "Why not just index every column, to be safe?",
+              options: [
+                "SQLite has a hard limit of one index per table",
+                "Every index has to be updated on every INSERT/UPDATE, so more indexes means slower writes and more disk space, for columns that may never even be searched on",
+                "Indexes expire after 30 days",
+                "It's not possible to have more than one index total",
+              ],
+              answer: 1,
+              explain:
+                "Indexing is a tradeoff, not a free upgrade — worth it for columns genuinely filtered or joined on often, wasteful otherwise.",
+            },
+          ],
+        },
+        {
+          id: "u22-l3",
+          title: "Indexing More Than One Column",
+          blurb: "Column order in a composite index isn't cosmetic.",
+          brief: {
+            goal: "Understand why column order matters in a multi-column index.",
+            setup:
+              "CREATE INDEX idx_player_season ON week_results(player, season) builds one index across two columns — sorted by player first, then by season within each player. That order isn't a style choice: it decides which queries the index can actually help.",
+            previewSql:
+              "SELECT * FROM week_results WHERE player = 'Josh Allen' AND season = 2024;",
+            previewCaption: "a two-column filter — the natural case for a composite index",
+          },
+          intro: {
+            title: "A composite index is sorted by its first column, then its second",
+            text: "Think of it like a phone book sorted by last name, then first name — perfect for finding everyone named Allen, or one specific Josh Allen, but useless for finding everyone named Josh regardless of last name. CREATE INDEX idx_player_season ON week_results(player, season) helps a query that filters on player, or on player AND season — but does nothing for a query that filters on season alone.",
+            code: "CREATE INDEX idx_player_season ON week_results(player, season);\n\n-- helped: filters on player, or player + season\n-- NOT helped: filters on season alone — season isn't the first column",
+          },
+          film: [
+            {
+              title: "Leftmost-first is the rule to memorize",
+              text: "A composite index on (player, season) can be used for a query that filters on player, or on player and season together — but a query filtering on season alone can't use it at all, the same way you can't use a last-name-first phone book to find everyone with a given first name. The general rule: a composite index helps a query that filters on its leftmost column, or a leftmost prefix of its columns, in order.",
+            },
+          ],
+          exercises: [
+            {
+              type: "mc",
+              prompt:
+                "CREATE INDEX idx ON week_results(player, season) exists. A query filters WHERE season = 2024 only — no player condition. Does the index help?",
+              options: [
+                "Yes, column order doesn't matter",
+                "No — season isn't the leftmost column, so this index can't be used for a season-only filter",
+                "Yes, but only for 2024 specifically",
+                "It depends on how many rows match",
+              ],
+              answer: 1,
+              drillSkip: true,
+              explain:
+                "Leftmost-first: the index is sorted by player first. A search that skips player entirely can't use it.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "Same index, idx ON week_results(player, season). A query filters WHERE player = 'Josh Allen' AND season = 2024. Does the index help?",
+              options: [
+                "No, composite indexes never help multi-column filters",
+                "Yes — it matches both the leftmost column and the one after it, in order",
+                "Only if season were listed first",
+                "Only for one season at a time",
+              ],
+              answer: 1,
+              explain:
+                "This is the composite index's ideal case: both filtered columns, in the same order the index was built in.",
+            },
+            {
+              type: "fill",
+              prompt: "Build a composite index on player, then season, in that order.",
+              parts: ["CREATE INDEX idx_player_season ON week_results(", null, ", ", null, ");"],
+              bank: ["player", "season"],
+              answer: ["player", "season"],
+              explain:
+                "Order in the parentheses is the sort order of the index — player first means player-only and player+season queries both benefit.",
+            },
+            {
+              type: "mc",
+              prompt:
+                "What's the phone-book analogy for a composite index on (last_name, first_name)?",
+              options: [
+                "It's sorted by first name, then last name",
+                "It's sorted by last name first, then first name within each last name — great for finding a last name, useless for a first name alone",
+                "It has no particular order",
+                "It only stores last names",
+              ],
+              answer: 1,
+              explain:
+                "Same leftmost-first idea as any composite index — the analogy is exact, not just illustrative.",
+            },
+          ],
+        },
+      ],
+    },
   ] as Unit[],
 };
 
@@ -5111,16 +6492,27 @@ export const MODULES: Module[] = [
       "Every skill in order, the way a career-changer should take it: SQL, Python, statistics, charts, Git, R.",
     unitIds: [
       "u1", "u2", "u3", "u4", "u5", "u6",
+      "u19", "u20", "u21", "u22",
       "u15", "u16", "u17", "u18",
       "u7", "u13", "u14",
       "u8", "u9", "u10", "u11",
     ],
   },
   {
-    id: "sql",
-    name: "SQL",
-    blurb: "Select, filter, rank, and aggregate real stat sheets.",
+    // Everything currently built. Matches Analyst Builder's "Beginner" scope
+    // (which runs through JOINs and window-function basics) — their Advanced
+    // tier is genuinely new territory (CTEs, views, triggers, indexing), not
+    // yet built, so it has no module here — see lib/courses.ts "sql-advanced".
+    id: "sql-fundamentals",
+    name: "SQL Fundamentals",
+    blurb: "Read, filter, sort, join, and aggregate any stat sheet in the database.",
     unitIds: ["u1", "u2", "u3", "u4", "u5", "u6"],
+  },
+  {
+    id: "sql-advanced",
+    name: "Advanced SQL",
+    blurb: "CTEs, views, triggers, and indexing — package a query for reuse.",
+    unitIds: ["u19", "u20", "u21", "u22"],
   },
   {
     id: "python",

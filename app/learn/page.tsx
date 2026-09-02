@@ -216,6 +216,12 @@ export default function LearnCatalogPage() {
             Practice Field
           </Link>
           <Link
+            href="/interview"
+            className="hidden border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-gold/40 hover:text-gold md:inline"
+          >
+            AI Interview
+          </Link>
+          <Link
             href="/account"
             className="border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-turf/40 hover:text-turf"
           >

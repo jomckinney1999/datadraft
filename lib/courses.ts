@@ -5,8 +5,9 @@
  * lessons already exist, `moduleId` points at the matching module in
  * lib/curriculum.ts and the card links into that roadmap. Where they don't,
  * `moduleId` is null and the card is marked "In build" — never dressed up as
- * ready. Full lesson-by-lesson plans for all nine live in
- * docs/COURSE-CATALOG.md.
+ * ready. SQL ships as three tiered courses (Fundamentals → Intermediate →
+ * Advanced) rather than one; every other language is still one card. Full
+ * lesson-by-lesson plans live in docs/COURSE-CATALOG.md.
  *
  * `lessons` / `projects` describe the SPEC (what the finished course covers),
  * while `builtLessons` is computed from the real curriculum at render time.
@@ -40,17 +41,41 @@ export type Course = {
 
 export const COURSES: Course[] = [
   {
-    id: "sql",
+    id: "sql-fundamentals",
     photo: "/stadium-dusk.jpg",
-    moduleId: "sql",
-    title: "SQL for Data Analytics",
+    moduleId: "sql-fundamentals",
+    title: "SQL Fundamentals",
     mark: "SQL",
     blurb:
-      "From your first SELECT to window functions, every query run against a real database in your browser. The most-asked-for skill on any analyst posting.",
-    hours: 12,
-    lessons: 62,
+      "From your first SELECT to JOINs and window functions, every query run against a real database in your browser. The most-asked-for skill on any analyst posting.",
+    hours: 10,
+    lessons: 60,
+    projects: 2,
+    level: "Beginner",
+    accent: "turf",
+    status: "live",
+    liveCode: true,
+  },
+  {
+    // CTEs/recursion and EXPLAIN QUERY PLAN run real, gradable query
+    // exercises. Views, temp tables, triggers, and CREATE INDEX itself are
+    // mc/fill-only, same treatment as Git — SQLite's DDL statements return no
+    // rows, so the query-diff grader can't safely check them (see the
+    // "Advanced SQL" section of docs/COURSE-CATALOG.md for why). The
+    // capstone (spec §1.14) isn't a curriculum.ts lesson; it uses the
+    // existing public.capstones submission flow, which is why `projects: 1`
+    // below has no matching unit in lib/curriculum.ts.
+    id: "sql-advanced",
+    photo: "/action-tackle.jpg",
+    moduleId: "sql-advanced",
+    title: "Advanced SQL",
+    mark: "SQL II",
+    blurb:
+      "CTEs, recursion, views, triggers, and indexing — package a query for reuse and reason about what actually makes one fast.",
+    hours: 6,
+    lessons: 25,
     projects: 1,
-    level: "Beginner → Advanced",
+    level: "Advanced",
     accent: "turf",
     status: "live",
     liveCode: true,

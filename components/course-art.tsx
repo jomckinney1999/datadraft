@@ -311,7 +311,8 @@ function Ai() {
 }
 
 const ART: Record<string, () => JSX.Element> = {
-  sql: Sql,
+  "sql-fundamentals": Sql,
+  "sql-advanced": Sql,
   python: Python,
   stats: Stats,
   excel: Excel,

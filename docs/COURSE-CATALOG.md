@@ -43,8 +43,12 @@ Excel **can** now execute: `lib/excel-engine.ts` evaluates real formulas against
 
 ## Course 1 — SQL
 
-**Outcome:** query a real relational database confidently, from `SELECT` to window functions, and pass a SQL screen.
-**Depth:** beginner → advanced · 72 lessons
+**Ships as two products**, not one — see `lib/courses.ts` (`sql-fundamentals`, `sql-advanced`) and `lib/curriculum.ts` (`MODULES`). **SQL Fundamentals** (live) is §1.1–1.9 below: everything from a first `SELECT` through JOINs, subqueries, and window functions — the full "ask any question of the data" skill set. **Advanced SQL** (in build) is §1.10–1.14: not harder SELECT statements, but what it takes to package a query for reuse and reason about performance — CTEs and recursion, views, triggers, and indexing. A learner finishes Fundamentals fully job-interview-ready on querying; Advanced is the next rung, not a prerequisite.
+
+Section numbers are stable identifiers, not a promise the two products ship in this order internally — Fundamentals' own §1.9 capstone is a complete, standalone finish line.
+
+**Outcome:** query a real relational database confidently, from `SELECT` to indexing, and pass a SQL screen.
+**Depth:** beginner → advanced · 83 lessons across both products (67 Fundamentals, 16 Advanced)
 
 ### 1.1 Reading Data (8)
 1. What a database actually is — tables, rows, columns · *a stat sheet is a table*
@@ -97,14 +101,13 @@ Excel **can** now execute: `lib/excel-engine.ts` evaluates real formulas against
 9. Self-joins · *compare a player's week to his previous week*
 10. Join fan-out, the silent row multiplier · *why your totals doubled*
 
-### 1.6 Subqueries & CTEs (7)
+### 1.6 Subqueries (4)
 1. Subqueries in `WHERE` · *players above the league average*
 2. Subqueries in `SELECT` · *each player's points beside the team total*
 3. `IN` vs `EXISTS` · *and when each is faster*
 4. Derived tables · *aggregate, then filter the aggregate*
-5. CTEs with `WITH` · *name your steps instead of nesting*
-6. Chaining multiple CTEs · *build a season report in readable stages*
-7. Recursive CTEs, a first look · *walk a playoff bracket*
+
+CTEs (`WITH`) move to §1.10 — they're a query-organization tool, not a harder subquery, and Analyst Builder's own catalog treats them as the opening move of its advanced tier rather than folding them in here. Keeping subqueries and CTEs apart also means Fundamentals never has to explain recursion to finish.
 
 ### 1.7 Window Functions (9)
 1. What a window function is, and why it isn't `GROUP BY` · *keep every row, add a ranking*
@@ -117,24 +120,60 @@ Excel **can** now execute: `lib/excel-engine.ts` evaluates real formulas against
 8. Moving averages and window frames · *rolling 3-game form*
 9. `NTILE` and bucketing · *split players into quartiles*
 
-### 1.8 Real-World SQL (8)
+### 1.8 Data Types & Functions (6)
 1. `CASE` for bucketing · *label players Elite / Starter / Bench*
 2. Date and time functions · *games in the last 30 days*
 3. String functions · *split "Last, First" into two columns*
 4. Type casting · *the points column arrived as text*
 5. `COALESCE` and missing values · *treat a missing score as 0 — carefully*
 6. `UNION` vs `UNION ALL` · *stack two seasons*
-7. Reading a query plan · *why your query takes 40 seconds*
-8. Indexes: what they do, when they help · *the one optimisation you'll be asked about*
+
+Reading a query plan and indexes move to §1.13 — they're about a database already holding real data at scale, which is Advanced's whole angle, not Fundamentals'.
 
 ### 1.9 Job-Ready SQL (7)
 1. The 12 SQL questions asked in most interviews · *rapid-fire drills*
 2. Second-highest value, four ways · *the classic whiteboard problem*
 3. Duplicate detection and removal · *the same game logged twice*
-4. Writing SQL a reviewer will approve · *formatting, CTEs, naming*
+4. Writing SQL a reviewer will approve · *formatting, subqueries, naming*
 5. Debugging someone else's query · *inherit a 200-line report and fix it*
 6. Explaining your query out loud · *the part candidates fluff*
 7. **Capstone:** a season analytics report built from raw tables
+
+**SQL Fundamentals ends here.** Everything below is Advanced SQL — new territory, not harder querying.
+
+**A grading constraint shapes what's hands-on down here.** Every `query` exercise up to this point grades by running the learner's SQL and the answer key separately against the same persistent sql.js database, then diffing the row output — fine for `SELECT` (a CTE is still just a `SELECT`), but `CREATE VIEW`/`TRIGGER`/`INDEX`/`TEMP TABLE` return no rows and have side effects: running the answer key a second time after the learner's version already ran collides (`already exists`) rather than grading anything. So CTEs and recursion (real rows) and `EXPLAIN QUERY PLAN` (also real rows — it describes a plan instead of running the query, so it's side-effect-free and safe to run twice) are graded `query` exercises. Temp tables, views, triggers, and `CREATE INDEX` itself are `mc`/`fill` — the same treatment as Git, which has no live runtime either. Confirmed empirically against the real seeded database, not assumed — `node scripts/verify-answer-keys.mjs` re-runs every `query` answer key in this section on demand.
+
+### 1.10 CTEs & Temp Tables (5)
+1. CTEs with `WITH` · *name your steps instead of nesting*
+2. Chaining multiple CTEs · *build a season report in readable stages*
+3. Recursive CTEs · *walk a coaching tree or a playoff bracket*
+4. Temporary tables · *stash an intermediate result across several queries*
+5. Temp tables vs CTEs vs subqueries · *three tools, one decision: does another query need to see this?*
+
+### 1.11 Views (4)
+1. What a view is · *a saved query that behaves like a table*
+2. Creating a view · *package the season-totals query once, reuse it everywhere*
+3. Updatable views, and where that stops working · *a view over a join usually isn't*
+4. Views vs CTEs vs temp tables · *a view is the one that outlives the session*
+
+Views stand in for stored procedures here. SQLite — the engine every SQL Sports exercise actually runs against — has no procedural extension at all, so `CREATE PROCEDURE` can't be taught hands-on without breaking the "run it for real" rule every other lesson follows. A view is the closest real, gradable analog: it packages a query for reuse, same as a procedure would for a read.
+
+### 1.12 Triggers (3)
+1. What a trigger is, and when it fires · *`BEFORE` / `AFTER`, `INSERT` / `UPDATE` / `DELETE`*
+2. Creating a trigger · *log every roster change automatically*
+3. Viewing and dropping triggers · *finding the automation someone else left behind*
+
+MySQL's `EVENT` scheduler (recurring, time-based jobs) has no SQLite equivalent and isn't planned — it's DBA territory more than analyst territory, and the gap is honest rather than worth faking.
+
+### 1.13 Indexing & Query Plans (3)
+1. Reading a query plan · *why your query takes 40 seconds*
+2. What an index does, and creating one · *the one optimisation you'll be asked about*
+3. Composite indexes · *why column order in the index matters*
+
+Caveat worth stating in the lessons themselves: the seeded dataset is ~900 rows. An index won't produce a *visible* speedup at that size the way it would on a real production table — these lessons teach the mental model and `EXPLAIN QUERY PLAN` output, not a stopwatch demo.
+
+### 1.14 Advanced Capstone (1)
+1. **Capstone:** one project that has to use a view, a trigger, and an index together — submitted through the existing capstone-review flow (`public.capstones`), not a new mechanism.
 
 ---
 
@@ -708,7 +747,8 @@ Honest state of what exists in `lib/curriculum.ts` today versus this spec:
 
 | Course | Spec'd | Built | Live runtime |
 |---|---|---|---|
-| SQL | 72 | **20 lessons (units 1–6, joins and windows now live)** | Yes — sql.js |
+| SQL Fundamentals (§1.1–1.9) | 67 | **20 lessons (units 1–6, joins and windows now live)** | Yes — sql.js |
+| Advanced SQL (§1.10–1.14) | 16 | **15 lessons (units 19–22)** — CTEs/recursion and query-plan reading are real `query` exercises; temp tables, views, triggers, and `CREATE INDEX` itself are mc/fill-only, since `CREATE`/`DROP` statements return no rows for the grader to diff. Capstone (§1.14) isn't a lesson; it's `public.capstones` | Partial — sql.js for CTEs/plans, concept-only for the rest |
 | Python | 64 | **11 lessons (units 7, 13, 14)** | Yes — Pyodide |
 | Statistics | 54 | 3 lessons (unit 8) | No |
 | Visualization (generic) | — | 3 lessons (unit 9) | No |
@@ -719,11 +759,11 @@ Honest state of what exists in `lib/curriculum.ts` today versus this spec:
 | Power BI | 50 | 0 | n/a |
 | LLMs & AI | 44 | 0 (unit 12 is a stub) | Planned — Pyodide |
 
-**56 of 470 lessons exist** (the 3 visualization lessons in unit 9 are folded into Tableau/Power BI above, so they aren't counted here). The catalog page marks unbuilt courses "In build" rather than implying they're ready — keep it that way until the lessons land.
+**71 of 481 lessons exist** (the 3 visualization lessons in unit 9 are folded into Tableau/Power BI above, so they aren't counted here). The catalog page marks unbuilt courses "In build" rather than implying they're ready — keep it that way until the lessons land.
 
 **Suggested build order**, by demand and by what the existing runtimes already support:
 
-1. **Finish SQL** — the flagship, the runtime works, and it's the most-searched skill.
+1. ~~**Finish SQL**~~ — both products are live: Fundamentals (§1.1–1.9, 20 lessons) and Advanced (§1.10–1.13, 15 lessons). Still open within SQL: the §1.6/§1.8 remainder (data types, subqueries, regex, file I/O, data cleaning — Fundamentals gaps relative to the Analyst Builder reference this section was reconciled against) and the §1.14 capstone.
 2. **Finish Python** — runtime works, second-most-demanded.
 3. ~~**Excel**~~ — done: units 15–18 cover the grid and first formulas, logic and conditional math, lookups, and cleaning a bad export. Modules 2.5–2.7 of the spec (PivotTables, charts, job-ready workbooks) are **not** built — PivotTables in particular have no equivalent in the formula engine, so they need either a genuine guided-build treatment or an honest concept-only unit.
 4. **Statistics** — no runtime needed, and it lifts the credibility of every other course.

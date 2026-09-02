@@ -82,7 +82,7 @@ export default function DemoPage() {
   function armProfile() {
     update({
       username: progress?.username || "Demo",
-      draftedTrack: progress?.draftedTrack || "sql",
+      draftedTrack: progress?.draftedTrack || "sql-fundamentals",
       playbookStyle: progress?.playbookStyle || "dual-threat",
     });
   }
