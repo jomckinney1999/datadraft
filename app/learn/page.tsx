@@ -6,13 +6,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { COURSES, ALL_IN_ONE, type Course } from "@/lib/courses";
 import { liveLessons, ALL_MODULE } from "@/lib/curriculum";
 import { loadProgress, displayStreak, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
 import TrophyCase from "@/components/trophy-case";
 import Coach from "@/components/coach";
 import CourseArt from "@/components/course-art";
+import CourseCover from "@/components/course-cover";
 import ThemeToggle from "@/components/theme-toggle";
 
 function ClockIcon() {
@@ -59,24 +59,15 @@ function CourseCard({
 
   const body = (
     <>
-      {/* thumbnail — homepage recipe: grayscale photo, duotone blend into the
-          accent, scrim, broadcast rays, then the course art on top. */}
+      {/* thumbnail — a cover scene unique to this course, then the scrim,
+          broadcast rays and course mark on top. See components/course-cover. */}
       <div className="relative overflow-hidden border-b border-panel-border bg-night">
-        <Image
-          src={course.photo}
-          alt=""
-          aria-hidden
-          fill
-          sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw"
-          className="course-photo object-cover grayscale transition-transform duration-500 group-hover:scale-105"
+        <CourseCover
+          id={course.id}
+          accent={course.accent}
+          className="absolute inset-0 h-full w-full transition-transform duration-500 group-hover:scale-105"
         />
-        <div
-          aria-hidden
-          className={`pointer-events-none absolute inset-0 mix-blend-color ${
-            course.accent === "turf" ? "photo-duotone-turf" : "photo-duotone-gold"
-          }`}
-        />
-        <div aria-hidden className="course-scrim pointer-events-none absolute inset-0" />
+        <div aria-hidden className="cover-scrim pointer-events-none absolute inset-0" />
         <div
           aria-hidden
           className={`pointer-events-none absolute inset-0 ${

@@ -310,9 +310,38 @@ function Ai() {
   );
 }
 
+/**
+ * Advanced SQL — ranked rows with one window framed over them.
+ *
+ * Deliberately distinct from `Sql`: the two SQL courses shared a mark, which
+ * made the catalogue look like it was repeating itself. Fundamentals is the
+ * table; Advanced is what you compute *over* a slice of it.
+ */
+function SqlAdvanced() {
+  return (
+    <g fill="none" stroke="currentColor" strokeWidth="2">
+      {[0, 1, 2, 3, 4].map((i) => (
+        <rect
+          key={i}
+          x={34}
+          y={20 + i * 11}
+          width={96 - i * 9}
+          height="7"
+          fill="currentColor"
+          stroke="none"
+          opacity={i >= 1 && i <= 3 ? 0.5 : 0.2}
+        />
+      ))}
+      {/* the window the ranking runs over */}
+      <rect x="28" y="28" width="108" height="34" opacity="0.9" strokeDasharray="6 4" />
+      <Football x={122} y={16} r={0.7} />
+    </g>
+  );
+}
+
 const ART: Record<string, () => JSX.Element> = {
   "sql-fundamentals": Sql,
-  "sql-advanced": Sql,
+  "sql-advanced": SqlAdvanced,
   python: Python,
   stats: Stats,
   excel: Excel,

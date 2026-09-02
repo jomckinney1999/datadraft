@@ -18,6 +18,15 @@ Both themes ship. Every token resolves through a CSS variable holding an `"r g b
 - `app/layout.tsx` runs a blocking inline script that sets `data-theme` before first paint. It mirrors the resolution order in `theme-toggle.tsx` — **change both or neither**, or the page flashes the wrong theme on load.
 - **Don't remove the `.theme-switching` transition suppression.** Chrome does not re-resolve a `var()`-derived color on an element with an active `transition-colors`, so without it every button, card, and nav link stays painted in the *previous* theme's colors after a toggle. It is a correctness fix, not polish.
 
+## Course imagery
+
+- **Course cards use drawn covers, not photos** (`components/course-cover.tsx`). Each of the ten courses has its own scene pairing its subject with the sport (a stat sheet on a field, a ranked board inside a window frame, a route tree, kick trajectories through uprights). They share a `Sky` + `Field` treatment so the set reads as one system.
+- **The reason is licensing, not preference.** The cards previously shared five stock JPEGs across ten courses (`action-tackle.jpg` alone covered three). Sourcing ten replacements from Wikimedia Commons and Openverse turned up trademarks in nearly every usable frame — a Nike swoosh across the ball, an Adidas board behind a scoreboard, an NFL team mark on a banner. Only two were genuinely clean. **Don't add a stock football photo without checking the frame for brand and team marks.**
+- Covers are a few hundred bytes each, and every colour is a theme token so they flip with light/dark. Keep the centre band quiet — the course title and `CourseArt` mark sit on top.
+- `components/course-art.tsx` is the small foreground mark, separate from the cover. Both SQL courses shared one until Advanced SQL got its own; **every course id needs its own entry in both `ART` and `SCENES`** or it silently falls back to the SQL one and the catalogue looks like it is repeating itself.
+- `.cover-scrim` (not `.course-scrim`) is the gradient for these. The photo scrim is 0.62/0.88 and erases a drawn scene entirely.
+- The homepage hero and `components/action-gallery.tsx` still use the photos in `public/`, which is fine — they don't repeat there. Note `fantasy-trophy.jpg` is 4.7 MB and unoptimised.
+
 ## Sport selection
 
 The learner picks football, basketball, or baseball as their lens (`lib/sports.ts`, `components/sport-picker.tsx`, persisted via `lib/use-sport.ts` under `sqlsports-sport`). Football is `status: "live"` — it's the only one with a real dataset (`public/field-data.json`); basketball and baseball are `status: "building"` and are labeled that way everywhere they appear. Don't mark a sport live until a pipeline actually backs it. The choice is kept in its own localStorage key rather than in `lib/progress.ts` to avoid touching the progress schema — fold it into `Progress` when accounts land (LAUNCH-PLAN Phase 1).

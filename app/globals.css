@@ -311,6 +311,21 @@ body {
   );
 }
 
+/* Lighter scrim for the drawn course covers.
+ *
+ * `.course-scrim` exists to knock back a bright photograph so a title can sit
+ * on it. The covers in components/course-cover.tsx are already dark and
+ * low-contrast by construction, so the same values erase them entirely. This
+ * keeps the gradient only where the text actually sits — the lower half. */
+.cover-scrim {
+  background: linear-gradient(
+    180deg,
+    rgb(var(--c-night) / 0) 0%,
+    rgb(var(--c-night) / 0.15) 38%,
+    rgb(var(--c-night) / var(--course-scrim-bottom)) 100%
+  );
+}
+
 /* ── Code editor ──────────────────────────────────────────── */
 
 /* The highlighted <pre> and the transparent <textarea> stacked on top of it

@@ -35,14 +35,11 @@ export type Course = {
   status: CourseStatus;
   /** True when exercises execute the learner's real code. */
   liveCode?: boolean;
-  /** Backdrop photo, duotoned into the accent like the homepage gallery. */
-  photo: string;
 };
 
 export const COURSES: Course[] = [
   {
     id: "sql-fundamentals",
-    photo: "/stadium-dusk.jpg",
     moduleId: "sql-fundamentals",
     title: "SQL Fundamentals",
     mark: "SQL",
@@ -66,7 +63,6 @@ export const COURSES: Course[] = [
     // existing public.capstones submission flow, which is why `projects: 1`
     // below has no matching unit in lib/curriculum.ts.
     id: "sql-advanced",
-    photo: "/action-tackle.jpg",
     moduleId: "sql-advanced",
     title: "Advanced SQL",
     mark: "SQL II",
@@ -82,7 +78,6 @@ export const COURSES: Course[] = [
   },
   {
     id: "python",
-    photo: "/park-football.jpg",
     moduleId: "python",
     title: "Python & pandas",
     mark: "Py",
@@ -98,7 +93,6 @@ export const COURSES: Course[] = [
   },
   {
     id: "stats",
-    photo: "/action-tackle.jpg",
     moduleId: "stats",
     title: "Statistics That Hold Up",
     mark: "Stat",
@@ -113,7 +107,6 @@ export const COURSES: Course[] = [
   },
   {
     id: "excel",
-    photo: "/fantasy-trophy.jpg",
     moduleId: "excel",
     title: "Excel for Analysts",
     mark: "XL",
@@ -128,7 +121,6 @@ export const COURSES: Course[] = [
   },
   {
     id: "tableau",
-    photo: "/stadium-dusk.jpg",
     moduleId: null,
     title: "Tableau for Data Visualization",
     mark: "Tab",
@@ -143,7 +135,6 @@ export const COURSES: Course[] = [
   },
   {
     id: "powerbi",
-    photo: "/action-tackle.jpg",
     moduleId: null,
     title: "Power BI & DAX",
     mark: "PBI",
@@ -158,7 +149,6 @@ export const COURSES: Course[] = [
   },
   {
     id: "git",
-    photo: "/park-football.jpg",
     moduleId: "git",
     title: "Git & GitHub",
     mark: "Git",
@@ -173,7 +163,6 @@ export const COURSES: Course[] = [
   },
   {
     id: "r",
-    photo: "/fantasy-trophy.jpg",
     moduleId: "r",
     title: "R & the Tidyverse",
     mark: "R",
@@ -189,7 +178,6 @@ export const COURSES: Course[] = [
   },
   {
     id: "ai",
-    photo: "/hero-stadium-night.png",
     moduleId: null,
     title: "LLMs & AI for Analysts",
     mark: "AI",
