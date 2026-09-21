@@ -17,147 +17,141 @@
 .theme-dark {
   color-scheme: dark;
 
-  /* Canvas ladder. Neutral near-black (not blue-violet gaming navy) so accent
-     colour reads as light against absence of light, without the Discord cast.
-     Ladder is spaced wide enough that a panel sits above the page. */
-  --c-night: 7 8 12;
-  --c-night-50: 34 36 46;
-  --c-night-100: 16 17 24;
-  --c-night-200: 11 12 18;
-  --c-night-300: 7 8 12;
+  /* Shadow Grey canvas (#2e1f27) and a warm elevation ladder. */
+  --c-night: 46 31 39;
+  --c-night-50: 90 65 75;
+  --c-night-100: 62 44 54;
+  --c-night-200: 54 38 46;
+  --c-night-300: 46 31 39;
 
-  /* Accents are luminous but desaturated — club emerald and champagne gold
-     rather than sportsbook neon. Ice stays a soft broadcast cool, structural. */
-  --c-turf: 70 205 150;
-  --c-turf-dim: 38 158 112;
-  --c-gold: 224 186 108;
-  --c-gold-dim: 178 142 58;
-  --c-ice: 132 165 218;
-  --c-ice-dim: 82 120 190;
+  /* Brand accents from the site palette:
+     Tuscan Sun primary, Chocolate depth, Light Gold secondary,
+     Chocolate (AA-lifted) as structural ice. Saddle Brown anchors dims. */
+  --c-turf: 244 201 93;
+  --c-turf-dim: 221 114 48;
+  --c-gold: 231 227 147;
+  --c-gold-dim: 244 201 93;
+  --c-ice: 235 131 55;
+  --c-ice-dim: 221 114 48;
 
-  --c-ink: 245 244 241;
-  --c-ink-soft: 186 184 178;
-  --c-ink-muted: 138 136 130;
+  --c-ink: 231 227 147;
+  --c-ink-soft: 210 195 160;
+  --c-ink-muted: 180 165 140;
 
-  --c-panel: 15 16 22;
-  --c-panel-border: 42 44 56;
-  --c-panel-hover: 24 25 34;
+  --c-panel: 54 38 46;
+  --c-panel-border: 90 65 75;
+  --c-panel-hover: 70 50 60;
 
   /* Atmosphere — tuned per theme rather than flipped mechanically */
-  --pop-text: 250 249 246;
-  --pop-shadow: 0 1px 2px rgba(0, 0, 0, 0.55), 0 0 36px rgba(7, 8, 12, 0.8);
+  --pop-text: 247 244 220;
+  --pop-shadow: 0 1px 2px rgba(0, 0, 0, 0.55), 0 0 36px rgba(46, 31, 39, 0.85);
   --glow-strength: 0.72;
   --hero-photo-opacity: 1;
   --hero-scrim-strong: 0.9;
   --shadow-float: 0 22px 56px rgba(0, 0, 0, 0.55);
   --shadow-hero-panel: 0 28px 80px rgba(0, 0, 0, 0.58);
-  --photo-scrim: 0.38;
+  --photo-scrim: 0.4;
   --course-photo-opacity: 1;
   --course-scrim-top: 0.62;
   --course-scrim-bottom: 0.88;
 
-  /* Room light. Held quieter so the page feels lit, not neon-washed. */
-  --atmo-turf: 0.065;
-  --atmo-gold: 0.035;
-  --atmo-ice: 0.045;
+  /* Room light — chocolate / tuscan / light-gold washes. */
+  --atmo-turf: 0.08;
+  --atmo-gold: 0.055;
+  --atmo-ice: 0.04;
 
   /* Grain. Large smooth gradients on a near-black canvas band badly on 8-bit
      displays; a few percent of noise dithers the steps away and is most of why
      a dark UI reads as a material rather than as a colour. */
-  --grain-opacity: 0.04;
+  --grain-opacity: 0.045;
 
   /* Surface material. A panel gets a top-down lightening and a 1px specular
      line along its top edge, which is how a real surface catches light from
      above — the single cheapest cue that something is raised. */
-  --surface-grad: 0.028;
-  --surface-specular: 0.06;
+  --surface-grad: 0.04;
+  --surface-specular: 0.07;
   --shadow-surface:
     0 1px 2px rgb(0 0 0 / 0.35),
     0 16px 40px -16px rgb(0 0 0 / 0.7);
 
-  --selection-bg: rgb(70 205 150 / 0.26);
-  --selection-fg: 245 244 241;
-  --scrollbar-thumb: 52 54 68;
-  --scrollbar-thumb-hover: 72 74 92;
+  --selection-bg: rgb(221 114 48 / 0.32);
+  --selection-fg: 247 244 220;
+  --scrollbar-thumb: 90 65 75;
+  --scrollbar-thumb-hover: 133 77 39;
 
-  /* Syntax highlighting. Keywords borrow turf and strings borrow gold so the
-     editor reads as part of the brand rather than a pasted-in IDE theme. */
-  --c-syn-keyword: 70 205 150;
-  --c-syn-string: 224 186 108;
-  --c-syn-number: 154 186 232;
-  --c-syn-func: 186 168 232;
-  --c-syn-comment: 138 136 130;
-  --c-syn-punct: 186 184 178;
+  /* Syntax highlighting — deliberately NOT the brand palette. Editors keep a
+     classic readable IDE set so SQL/code stays distinct from the UI chrome. */
+  --c-syn-keyword: 110 210 160;
+  --c-syn-string: 230 190 120;
+  --c-syn-number: 150 190 240;
+  --c-syn-func: 190 170 240;
+  --c-syn-comment: 165 155 160;
+  --c-syn-punct: 200 190 185;
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
 
-  /* Soft stone paper — warm enough to feel premium, cool enough to avoid the
-     generic cream-and-terracotta look. White panels read as raised sheets. */
-  --c-night: 246 245 242;
-  --c-night-50: 232 230 224;
-  --c-night-100: 238 236 231;
-  --c-night-200: 242 241 236;
-  --c-night-300: 246 245 242;
+  /* Light Gold paper (#e7e393 family) — warm sheet, pale panels on top. */
+  --c-night: 247 245 228;
+  --c-night-50: 231 227 147;
+  --c-night-100: 238 235 200;
+  --c-night-200: 242 240 214;
+  --c-night-300: 247 245 228;
 
-  /* Accents darkened for AA on white. Forest green and bronze gold — calibrated
-     against accent text on an accent/10 chip. Gold is necessarily brass at this
-     luminance; there is no hex that is both gold-hued and AA on white. */
-  --c-turf: 15 108 58;
-  --c-turf-dim: 11 84 44;
-  --c-gold: 132 86 18;
-  --c-gold-dim: 104 66 10;
-  --c-ice: 30 72 175;
-  --c-ice-dim: 28 60 155;
+  /* Darkened palette accents for AA on paper. Saddle Brown primary,
+     Chocolate secondary, deep structural brown for ice. */
+  --c-turf: 133 77 39;
+  --c-turf-dim: 100 55 25;
+  --c-gold: 160 75 25;
+  --c-gold-dim: 120 55 18;
+  --c-ice: 110 60 28;
+  --c-ice-dim: 85 48 22;
 
-  --c-ink: 18 17 15;
-  --c-ink-soft: 54 52 48;
-  --c-ink-muted: 96 93 88;
+  --c-ink: 46 31 39;
+  --c-ink-soft: 85 55 45;
+  --c-ink-muted: 120 95 80;
 
-  --c-panel: 255 255 255;
-  --c-panel-border: 222 220 214;
-  --c-panel-hover: 238 236 230;
+  --c-panel: 255 253 245;
+  --c-panel-border: 220 205 170;
+  --c-panel-hover: 238 232 200;
 
-  --pop-text: 14 13 11;
+  --pop-text: 46 31 39;
   --pop-shadow: none;
   --glow-strength: 0;
   --hero-photo-opacity: 0.22;
   --hero-scrim-strong: 0.94;
-  --shadow-float: 0 18px 48px rgba(18, 17, 15, 0.1);
-  --shadow-hero-panel: 0 22px 56px rgba(18, 17, 15, 0.12);
+  --shadow-float: 0 18px 48px rgba(46, 31, 39, 0.12);
+  --shadow-hero-panel: 0 22px 56px rgba(46, 31, 39, 0.14);
   --photo-scrim: 0.1;
   --course-photo-opacity: 0.28;
   --course-scrim-top: 0.78;
   --course-scrim-bottom: 0.92;
 
-  /* Light-mode accents are dark, so washes stay at a tint you feel as warmth. */
-  --atmo-turf: 0.035;
-  --atmo-gold: 0.028;
+  --atmo-turf: 0.05;
+  --atmo-gold: 0.045;
   --atmo-ice: 0.03;
-  --grain-opacity: 0.018;
+  --grain-opacity: 0.02;
 
-  /* No specular on white — a highlight needs somewhere darker to sit. Light
-     mode gets its elevation from the shadow and the border instead. */
+  /* No specular on pale paper — elevation from shadow + border. */
   --surface-grad: 0;
   --surface-specular: 0;
   --shadow-surface:
-    0 1px 2px rgb(18 17 15 / 0.04),
-    0 14px 32px -14px rgb(18 17 15 / 0.12);
+    0 1px 2px rgb(46 31 39 / 0.05),
+    0 14px 32px -14px rgb(46 31 39 / 0.14);
 
-  --selection-bg: rgb(15 108 58 / 0.16);
-  --selection-fg: 18 17 15;
-  --scrollbar-thumb: 206 203 196;
-  --scrollbar-thumb-hover: 178 174 166;
+  --selection-bg: rgb(221 114 48 / 0.22);
+  --selection-fg: 46 31 39;
+  --scrollbar-thumb: 200 185 150;
+  --scrollbar-thumb-hover: 160 140 110;
 
-  /* Syntax colours darkened for white editors — the dark-mode set is
-     unreadable on light. Each clears 4.5:1 against the panel background. */
-  --c-syn-keyword: 15 108 58;
-  --c-syn-string: 132 86 18;
-  --c-syn-number: 28 60 155;
-  --c-syn-func: 88 42 160;
-  --c-syn-comment: 96 93 88;
-  --c-syn-punct: 54 52 48;
+  /* Syntax — IDE set, not the brand browns (see dark block). */
+  --c-syn-keyword: 20 110 70;
+  --c-syn-string: 150 90 20;
+  --c-syn-number: 30 70 160;
+  --c-syn-func: 90 40 160;
+  --c-syn-comment: 120 95 80;
+  --c-syn-punct: 85 55 45;
 }
 
 html {

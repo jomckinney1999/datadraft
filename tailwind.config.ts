@@ -1,8 +1,8 @@
 /** @type {import('tailwindcss').Config} */
-// Fantasy-football palette: neutral near-black, club emerald primary,
-// champagne gold secondary, soft broadcast ice for cool accents. Token names
-// (turf/gold/ice/night/panel/ink) are used across every page — change values
-// here, not in components.
+// Warm sports palette: Shadow Grey canvas, Tuscan/Chocolate primary,
+// Light Gold secondary. Token names (turf/gold/ice/night/panel/ink) are
+// used across every page — change values in globals.css, not components.
+// Syntax colours are a separate IDE set and do not follow these swatches.
 const config = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
