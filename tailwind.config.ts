@@ -1,8 +1,7 @@
 /** @type {import('tailwindcss').Config} */
-// Warm sports palette: Shadow Grey canvas, Tuscan/Chocolate primary,
-// Light Gold secondary. Token names (turf/gold/ice/night/panel/ink) are
-// used across every page — change values in globals.css, not components.
-// Syntax colours are a separate IDE set and do not follow these swatches.
+// Engineered Energy: black canvas, lime #C0FF6B primary, silver neutrals.
+// Token names (turf/gold/ice/night/panel/ink) are used across every page —
+// change values in globals.css, not components.
 const config = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",

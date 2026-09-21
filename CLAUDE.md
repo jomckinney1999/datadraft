@@ -4,10 +4,10 @@ Education platform teaching SQL and data analytics through fantasy football. Nex
 
 ## Design system
 
-Fantasy-football palette, defined once in `tailwind.config.ts` + `app/globals.css`: `night` (Shadow Grey #2E1F27), `turf` (Tuscan Sun #F4C95D primary on dark / Saddle Brown #854D27 on light), `gold` (Light Gold #E7E393 / darkened Chocolate on light), `ice` (Chocolate family, structural), plus `ink`/`panel` neutrals from the same warm set. Source swatches: Shadow Grey, Saddle Brown, Chocolate #DD7230, Tuscan Sun, Light Gold. An older teal/amber scheme was replaced in Aug 2026 — never reintroduce `teal`/`amber` token names. **Syntax / editor colours (`--c-syn-*`) stay on a separate IDE set** so SQL and terminal code do not wear the brand browns. Change UI colors by editing token values, not component classes.
+Fantasy-football palette, defined once in `tailwind.config.ts` + `app/globals.css`: Engineered Energy — `night` (black #000000), `turf` (lime #C0FF6B primary), `gold`/`ink` (silver #D5D5D5), structural gray from #656565 (AA-lifted where needed for muted text). An older teal/amber scheme was replaced in Aug 2026 — never reintroduce `teal`/`amber` token names. Change UI colors by editing token values, not component classes.
 
-- **The canvas is Shadow Grey on purpose.** Accents need darkness behind them; don't lighten back toward cool navy or reintroduce emerald sportsbook greens.
-- **`ice` is structural, not a state.** It lights the room (the cool-warm wash in `.bg-stadium`, the middle of the `.chrome` hairline) and is *not* used for syntax numbers. **Never use it for success or reward** — that is turf's only job.
+- **The canvas is pure black on purpose.** Lime only pops against absence of light — don't wash the page back toward navy or cream.
+- **`ice` is structural, not a state.** It shares the silver/gray family for chrome and room light. **Never use it for success or reward** — that is turf's (lime) only job.
 - **`node scripts/verify-contrast.mjs` measures the shipped tokens, both themes, 48 pairings.** Run it after any palette edit. It reads the real values out of `globals.css` rather than a copy, and it checks the pairings that actually occur — including the tightest one, accent text on a chip of its own accent at 10%, which is what the light-mode accents are calibrated against and which fails long before accent-on-background does.
 
 ### Depth, light and material
