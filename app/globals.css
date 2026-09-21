@@ -830,10 +830,16 @@ body {
   perspective-origin: 50% 12%;
 }
 
+/* No whole-stage tilt. It was rotateX(7deg) about the top edge, which on a
+   career board (one stage ~9,000px tall) swings the far end toward the camera
+   by sin 7° × height ≈ 1,100px — the full perspective distance — so nodes
+   were drawn larger the further down they sat: 1.8× at node 20, 6× at node
+   40, 23× at the last, and the page scrolled sideways by thousands of pixels.
+   At the top, where it did render sanely, it scaled things by 1.03×. The
+   pieces carry the board-token look themselves (thick base, rim, cast
+   shadow); a tilt only works on a board of fixed height. */
 .path-board-stage {
-  transform: rotateX(7deg);
   transform-style: preserve-3d;
-  transform-origin: 50% 0%;
 }
 
 .career-path-rail::before {

@@ -18,6 +18,7 @@ import { useModule } from "@/lib/use-module";
 import { loadProgress, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
 import { getTrack, normalizeTrackId } from "@/lib/draft";
 import Coach from "@/components/coach";
+import PathCast from "@/components/path-cast";
 import HomeLink from "@/components/home-link";
 import LearnRail from "@/components/learn-rail";
 import LearnStatusChips from "@/components/learn-status-chips";
@@ -391,6 +392,8 @@ function LessonPath({
 }) {
   const mid = Math.floor(unit.lessons.length / 2);
   const chestOpen = completedCount > mid;
+  // Each unit is its own board; Coach only walks the one holding the current play.
+  const currentId = unit.lessons.find((l) => nodeState(l) === "current")?.id ?? null;
   const items: Array<
     | { kind: "lesson"; lesson: Lesson; index: number }
     | { kind: "chest" }
@@ -413,13 +416,14 @@ function LessonPath({
   items.push({ kind: "trophy" });
 
   return (
-    <div className="path-board">
+    <div className="path-board relative">
       <div className="path-rail path-board-stage yard-lines mt-1">
       {items.map((item, i) => {
         if (item.kind === "chest") {
           return (
             <div
               key={`chest-${i}`}
+              data-path-decor="chest"
               className={`path-chest ${chestOpen ? "path-chest-open" : ""}`}
               title={chestOpen ? "First down secured" : "Pick up a first down"}
               aria-hidden
@@ -432,6 +436,7 @@ function LessonPath({
           return (
             <div
               key="trophy"
+              data-path-decor="endzone"
               className={`path-trophy path-endzone ${unitComplete ? "path-trophy-won" : ""}`}
               title={unitComplete ? "Touchdown — unit complete" : "Drive to the end zone"}
               aria-hidden
@@ -454,17 +459,11 @@ function LessonPath({
 
         const node = (
           <div
+            data-path-node={lesson.id}
             className="relative flex flex-col items-center"
             style={{ transform: `translateX(${offset}px)` }}
           >
-            {state === "current" && (
-              <>
-                <span className="path-start-pill">Snap</span>
-                <div className="pointer-events-none absolute -right-16 top-0 hidden sm:block">
-                  <Coach mood="happy" size={64} />
-                </div>
-              </>
-            )}
+            {state === "current" && <span className="path-start-pill">Snap</span>}
             <span
               className={`path-node ${
                 state === "completed"
@@ -509,6 +508,11 @@ function LessonPath({
         );
       })}
       </div>
+      <PathCast
+        boardKey={`unit:${unit.id}`}
+        currentId={currentId}
+        walker={currentId !== null}
+      />
     </div>
   );
 }

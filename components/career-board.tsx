@@ -6,7 +6,7 @@
  */
 
 import Link from "next/link";
-import Coach from "@/components/coach";
+import PathCast from "@/components/path-cast";
 import { useModule } from "@/lib/use-module";
 import type { BoardLesson, BoardSegment, CareerRole } from "@/lib/career-paths";
 import { buildBoard } from "@/lib/career-paths";
@@ -125,7 +125,7 @@ export default function CareerBoard({
         One board · courses flow into each other down the path
       </p>
 
-      <div className="path-board">
+      <div className="path-board relative">
         <div className="career-path-rail path-board-stage relative flex flex-col items-center gap-8 py-4 pb-16">
         {segments.map((seg, i) => (
           <SegmentView
@@ -137,6 +137,7 @@ export default function CareerBoard({
         ))}
 
         <div
+          data-path-decor="endzone"
           className={`path-trophy path-endzone ${
             lessons.length > 0 &&
             lessons.every((l) => completedLessons.includes(l.lesson.id))
@@ -151,6 +152,10 @@ export default function CareerBoard({
           End zone · {role.title}
         </p>
         </div>
+        <PathCast
+          boardKey={`role:${role.id}`}
+          currentId={current?.lesson.id ?? null}
+        />
       </div>
     </div>
   );
@@ -210,6 +215,7 @@ function SegmentView({
   if (seg.kind === "chest") {
     return (
       <div
+        data-path-decor="chest"
         className={`path-chest ${seg.open ? "path-chest-open" : ""}`}
         style={{ transform: `translateX(${offset * 0.3}px)` }}
         aria-hidden
@@ -222,6 +228,7 @@ function SegmentView({
   if (seg.kind === "course-clear") {
     return (
       <div
+        data-path-decor="clear"
         className={`path-trophy ${seg.open ? "path-trophy-won" : ""}`}
         style={{ transform: `translateX(${offset * 0.2}px)` }}
         title={
@@ -300,22 +307,13 @@ function LessonNode({
 
   const body = (
     <div
+      data-path-node={lesson.id}
       className="relative flex flex-col items-center"
       style={{ transform: `translateX(${offset}px)` }}
     >
-      {state === "current" && (
-        <>
-          <span className="path-start-pill">Snap</span>
-          <div className="pointer-events-none absolute -right-[4.25rem] top-1 hidden sm:block">
-            <div className="flex flex-col items-center">
-              <Coach mood="happy" size={68} />
-              <span className="mt-1 rounded-full border border-panel-border bg-panel px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-ink-muted">
-                you
-              </span>
-            </div>
-          </div>
-        </>
-      )}
+      {/* Coach stands beside this node from PathCast's overlay, so he can
+          walk here from the last play instead of being drawn in place. */}
+      {state === "current" && <span className="path-start-pill">Snap</span>}
       <span className={nodeClass}>{icon}</span>
       <div className="mt-2.5 max-w-[10.5rem] text-center">
         <p
