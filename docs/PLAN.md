@@ -123,6 +123,7 @@ Duo-shaped habit loop, football-named — lives in `lib/economy.ts` + progress f
 | Hearts | **Timeouts** | 5 graded lesson starts per day on Free. Season Pass = unlimited. Practice Field never spends one. |
 | Gems | **Scouting tickets** | Earned clearing drives (bonus for perfect + heater). Spent in the Sideline Shop. |
 | Streak freeze | **Bye week** | Inventory item; auto-covers exactly one missed calendar day so the heater survives. |
+| Instant replay / challenge | **Instant replay** (12 ✦) / **Challenge flag** (25 ✦) | Rewind a hard miss (or 4th-down turnover) and re-take the same snap. Answer key stays hidden until they peek. |
 | Super | **Season Pass** | Maps to Practice tier — waitlist until billing is live. |
 
 Shop prices and ticket payouts are constants in `lib/economy.ts`. Change them there, not in components. When Stripe lands, flip `seasonPass` from the subscription webhook instead of the testing toggle.

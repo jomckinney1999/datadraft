@@ -27,6 +27,10 @@ export const TICKET_STREAK_CAP = 10;
 export const COST_TIMEOUT_REFILL_ONE = 15;
 export const COST_TIMEOUT_REFILL_FULL = 50;
 export const COST_BYE_WEEK = 120;
+/** Undo a hard miss and re-take the same snap (solution stays hidden). */
+export const COST_INSTANT_REPLAY = 12;
+/** After a turnover on downs — buy one more chance at the same play. */
+export const COST_CHALLENGE_FLAG = 25;
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
@@ -107,6 +111,18 @@ export function awardLessonTickets(
   if (opts.perfect) gain += TICKET_PERFECT_BONUS;
   gain += Math.min(TICKET_STREAK_CAP, Math.max(0, p.streak) * TICKET_STREAK_BONUS);
   return { ...p, tickets: p.tickets + gain };
+}
+
+/** Spend tickets for instant replay / challenge flag. Null if broke. */
+export function spendTickets(
+  amount: number,
+): Progress | null {
+  const p = loadEconomy();
+  if (amount <= 0) return p;
+  if (p.tickets < amount) return null;
+  const next = { ...p, tickets: p.tickets - amount };
+  saveProgress(next);
+  return next;
 }
 
 export type ShopItemId = "timeout-1" | "timeout-full" | "bye-week";

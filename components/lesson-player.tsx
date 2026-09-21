@@ -45,7 +45,7 @@ import { useSport } from "@/lib/use-sport";
 import { awardBadges, completeLesson, loadProgress, type Progress } from "@/lib/progress";
 import { pushProgress } from "@/lib/progress-sync";
 import { getStyle, type PlaybookStyle } from "@/lib/playbook";
-import { canStartLesson, loadEconomy, spendTimeout } from "@/lib/economy";
+import { canStartLesson, loadEconomy, spendTimeout, spendTickets, COST_INSTANT_REPLAY, COST_CHALLENGE_FLAG } from "@/lib/economy";
 import Coach from "@/components/coach";
 import TimeoutGate from "@/components/timeout-gate";
 import CodeEditor from "@/components/code-editor";
@@ -160,6 +160,10 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const [timeoutBlocked, setTimeoutBlocked] = useState(false);
   const [economy, setEconomy] = useState<Progress | null>(null);
   const timeoutSpentRef = useRef(false);
+  /** Drive snapshot taken right before a hard miss — Instant Replay restores it. */
+  const driveBeforeMissRef = useRef<DriveState | null>(null);
+  const [showMissSolution, setShowMissSolution] = useState(false);
+  const [replayMsg, setReplayMsg] = useState<string | null>(null);
   const [introStep, setIntroStep] = useState(0);
   /**
    * Which beat of the brief's paced walk-in is showing.
@@ -741,6 +745,11 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       if (isFirstAttempt) setFirstTry((m) => ({ ...m, [currentIdx]: false }));
       setCombo(0);
 
+      // Snapshot LOS/downs so Instant Replay can rewind the play.
+      driveBeforeMissRef.current = drive;
+      setShowMissSolution(false);
+      setReplayMsg(null);
+
       const missed = scoreMissPlay(drive, currentIdx);
       setDrive(missed.state);
       const kind = missed.state.lastPlay?.kind ?? "incomplete";
@@ -761,11 +770,48 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     }
   }
 
+  /** Spend tickets to rewind the miss and re-take this snap. */
+  function handleInstantReplay() {
+    if (!feedback || feedback.correct) return;
+    const snapshot = driveBeforeMissRef.current;
+    if (!snapshot) return;
+
+    const cost =
+      feedback.playKind === "turnover"
+        ? COST_CHALLENGE_FLAG
+        : COST_INSTANT_REPLAY;
+    const next = spendTickets(cost);
+    if (!next) {
+      setReplayMsg(
+        `Need ${cost} ✦ tickets — you have ${loadEconomy().tickets}.`,
+      );
+      setEconomy(loadEconomy());
+      return;
+    }
+
+    setEconomy(next);
+    setDrive(snapshot);
+    driveBeforeMissRef.current = null;
+    setFeedback(null);
+    setShowMissSolution(false);
+    setReplayMsg(null);
+    setBurst(null);
+    // Soft-clear inputs so they aren't staring at the wrong answer.
+    setMcChoice(null);
+    setFillSlots([]);
+    setSoftError(null);
+    setRunError(null);
+    setCodeError(null);
+    setFormulaError(null);
+    if (phase === "turnover") setPhase("exercise");
+  }
+
   function handleContinue() {
     if (!feedback || currentIdx === undefined) return;
 
     if (drive.status === "turnover" || feedback.playKind === "turnover") {
       setFeedback(null);
+      setShowMissSolution(false);
       setPhase("turnover");
       return;
     }
@@ -780,10 +826,15 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     // Football-first: miss does not re-queue — next play is the next exercise.
     setQueue((q) => q.slice(1));
     setFeedback(null);
+    setShowMissSolution(false);
+    driveBeforeMissRef.current = null;
   }
 
   function restart() {
     savedRef.current = false;
+    driveBeforeMissRef.current = null;
+    setShowMissSolution(false);
+    setReplayMsg(null);
     setQueue(activeIdx);
     setDrive(startDrive());
     setCombo(0);
@@ -1188,9 +1239,19 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                       {feedback.explain}
                     </p>
                     {!feedback.correct && feedback.solution && (
-                      <pre className="mt-3 overflow-x-auto whitespace-pre-wrap rounded-xl border border-panel-border bg-night px-3 py-2 font-mono text-[12px] text-ink-soft">
-                        {feedback.solution}
-                      </pre>
+                      showMissSolution ? (
+                        <pre className="mt-3 overflow-x-auto whitespace-pre-wrap rounded-xl border border-panel-border bg-night px-3 py-2 font-mono text-[12px] text-ink-soft">
+                          {feedback.solution}
+                        </pre>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setShowMissSolution(true)}
+                          className="mt-3 font-mono text-[11px] uppercase tracking-wider text-ink-muted underline-offset-2 hover:text-gold hover:underline"
+                        >
+                          Peek at the film (answer)
+                        </button>
+                      )
                     )}
                   </div>
                 )}
@@ -1488,9 +1549,21 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 )}
 
                 {feedback && !feedback.correct && feedback.solution && (
-                  <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-xl border border-panel-border bg-night px-3 py-2.5 font-mono text-[12px] text-ink-soft">
-                    {feedback.solution}
-                  </pre>
+                  <div className="mt-4">
+                    {showMissSolution ? (
+                      <pre className="overflow-x-auto whitespace-pre-wrap rounded-xl border border-panel-border bg-night px-3 py-2.5 font-mono text-[12px] text-ink-soft">
+                        {feedback.solution}
+                      </pre>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setShowMissSolution(true)}
+                        className="font-mono text-[11px] uppercase tracking-wider text-ink-muted underline-offset-2 hover:text-gold hover:underline"
+                      >
+                        Peek at the film (answer)
+                      </button>
+                    )}
+                  </div>
                 )}
                 {feedback && (
                   <p className="mt-3 text-sm leading-relaxed text-ink-soft">
@@ -1528,7 +1601,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                   {checking ? "Checking…" : "Check"}
                 </button>
               ) : (
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3">
                   {!isHandsOn && (
                     <p
                       className={`font-display text-lg font-bold ${
@@ -1548,21 +1621,42 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                       )}
                     </p>
                   )}
-                  <button
-                    type="button"
-                    onClick={handleContinue}
-                    className={
-                      feedback.correct
-                        ? "btn-continue-win"
-                        : "btn-continue-miss"
-                    }
-                  >
-                    {feedback.playKind === "turnover"
-                      ? "See the film"
-                      : feedback.playKind === "td"
-                        ? "Celebrate"
-                        : "Continue"}
-                  </button>
+                  {replayMsg && (
+                    <p className="font-mono text-[11px] text-gold" role="status">
+                      {replayMsg}
+                    </p>
+                  )}
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+                    {!feedback.correct && driveBeforeMissRef.current && (
+                      <button
+                        type="button"
+                        onClick={handleInstantReplay}
+                        className="rounded-2xl border-2 border-gold/50 border-b-4 bg-gold/10 px-5 py-3.5 font-mono text-[12px] font-bold uppercase tracking-wider text-gold transition-colors hover:bg-gold/20"
+                      >
+                        {feedback.playKind === "turnover"
+                          ? `Challenge flag · ${COST_CHALLENGE_FLAG} ✦`
+                          : `Instant replay · ${COST_INSTANT_REPLAY} ✦`}
+                        <span className="ml-2 font-normal text-ink-muted normal-case tracking-normal">
+                          ({(economy ?? loadEconomy()).tickets} left)
+                        </span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleContinue}
+                      className={
+                        feedback.correct
+                          ? "btn-continue-win"
+                          : "btn-continue-miss"
+                      }
+                    >
+                      {feedback.playKind === "turnover"
+                        ? "See the film"
+                        : feedback.playKind === "td"
+                          ? "Celebrate"
+                          : "Continue"}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -1677,11 +1771,30 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
               Drive stalled
             </h1>
             <p className="mx-auto mt-3 max-w-sm text-base leading-relaxed text-ink-soft">
-              Fourth down and no conversion — happens to every offense. Review
-              the film, huddle up, and run it again.
+              Fourth down and no conversion — happens to every offense. Throw a
+              challenge flag to rewind that last snap, or restart the whole
+              drive.
             </p>
           </div>
+          {replayMsg && (
+            <p className="font-mono text-[11px] text-gold" role="status">
+              {replayMsg}
+            </p>
+          )}
           <div className="flex w-full max-w-sm flex-col gap-2.5">
+            {driveBeforeMissRef.current && (
+              <button
+                type="button"
+                onClick={handleInstantReplay}
+                className="rounded-2xl border-2 border-gold/50 border-b-4 bg-gold/10 px-6 py-3.5 font-mono text-[12px] font-bold uppercase tracking-wider text-gold transition-colors hover:bg-gold/20"
+              >
+                Challenge flag · {COST_CHALLENGE_FLAG} ✦
+                <span className="mt-1 block font-normal normal-case tracking-normal text-ink-muted">
+                  Replay the 4th-down snap · {(economy ?? loadEconomy()).tickets}{" "}
+                  tickets
+                </span>
+              </button>
+            )}
             <button type="button" onClick={restart} className="btn-check">
               Rerun the drive
             </button>

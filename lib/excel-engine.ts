@@ -256,6 +256,37 @@ function readCell(book: Workbook, sheet: string, row: number, col: number) {
   return r[col - 1] ?? null;
 }
 
+/**
+ * Cap a parser range to the sheet that actually exists.
+ *
+ * `SUM(A:A)` / `E:E` expand to Excel's full column (~1,048,576 rows). Building
+ * that array freezes the tab. Real Excel short-circuits to used cells; we
+ * clamp to the workbook's last populated row/column instead, which is the
+ * same answer on our fixed sheets and keeps the UI responsive when a learner
+ * types the whole-column habit from Excel desktop.
+ */
+function clampRange(book: Workbook, ref: RangeRef): RangeRef {
+  const rows = book[ref.sheet];
+  if (!rows || rows.length === 0) {
+    return {
+      ...ref,
+      from: { row: 1, col: ref.from.col },
+      to: { row: 1, col: ref.from.col },
+    };
+  }
+  const maxRow = rows.length;
+  const maxCol = rows.reduce((m, r) => Math.max(m, r.length), 0);
+  const fromRow = Math.max(1, Math.min(ref.from.row, maxRow));
+  const toRow = Math.max(fromRow, Math.min(ref.to.row, maxRow));
+  const fromCol = Math.max(1, Math.min(ref.from.col, maxCol));
+  const toCol = Math.max(fromCol, Math.min(ref.to.col, maxCol));
+  return {
+    sheet: ref.sheet,
+    from: { row: fromRow, col: fromCol },
+    to: { row: toRow, col: toCol },
+  };
+}
+
 async function getParser(): Promise<Parser> {
   if (!parserPromise) {
     parserPromise = (async () => {
@@ -267,11 +298,12 @@ async function getParser(): Promise<Parser> {
         onCell: ({ sheet, row, col }: ParserPosition) =>
           readCell(WORKBOOK, sheet, row, col),
         onRange: (ref: RangeRef) => {
+          const clipped = clampRange(WORKBOOK, ref);
           const rows: CellValue[][] = [];
-          for (let r = ref.from.row; r <= ref.to.row; r++) {
+          for (let r = clipped.from.row; r <= clipped.to.row; r++) {
             const row: CellValue[] = [];
-            for (let c = ref.from.col; c <= ref.to.col; c++) {
-              row.push(readCell(WORKBOOK, ref.sheet, r, c));
+            for (let c = clipped.from.col; c <= clipped.to.col; c++) {
+              row.push(readCell(WORKBOOK, clipped.sheet, r, c));
             }
             rows.push(row);
           }
