@@ -1,9 +1,8 @@
 "use client";
 
-// One course's roadmap: DataCamp-style syllabus clarity on top,
-// Duolingo-style winding lesson path per unit below.
-// Which course is shown comes from the route (/learn/track/[moduleId]);
-// the catalog grid at /learn is what links in here.
+// One course's roadmap: Duo-style unit banners + winding lesson path,
+// with a right-hand gamification rail on desktop.
+// Route: /learn/track/[moduleId]
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -16,29 +15,20 @@ import {
   type Unit,
 } from "@/lib/curriculum";
 import { useModule } from "@/lib/use-module";
-import { loadProgress, displayStreak, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
+import { loadProgress, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
 import { getStyle } from "@/lib/playbook";
 import { getTrack, normalizeTrackId } from "@/lib/draft";
 import Coach from "@/components/coach";
 import ThemeToggle from "@/components/theme-toggle";
 import HomeLink from "@/components/home-link";
+import LearnRail from "@/components/learn-rail";
+import LearnStatusChips from "@/components/learn-status-chips";
 
-const NODE_OFFSETS = [0, 48, 0, -48];
+const NODE_OFFSETS = [0, 56, 0, -56, 28, -28];
 
-function FlameIcon() {
+function LockIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 text-gold" aria-hidden>
-      <path
-        d="M12 2c1 4-3 5.5-3 9a3 3 0 0 0 6 0c0-1.5-.8-2.6-.8-2.6S17 10 17 13a5 5 0 0 1-10 0c0-4.5 4-6.5 5-11z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
-
-function LockIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden>
       <rect x="5" y="10" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
       <path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" strokeWidth="1.8" />
     </svg>
@@ -47,11 +37,11 @@ function LockIcon() {
 
 function CheckIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" aria-hidden>
+    <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" aria-hidden>
       <path
         d="M5 13l5 5L19 7"
         stroke="currentColor"
-        strokeWidth="2.5"
+        strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -59,39 +49,43 @@ function CheckIcon() {
   );
 }
 
-function PlayIcon() {
+function BallIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-6 w-6" aria-hidden>
-      <path d="M8 5.5v13l11-6.5z" fill="currentColor" />
+    <svg viewBox="0 0 24 24" className="h-7 w-7" aria-hidden>
+      <ellipse cx="12" cy="12" rx="7" ry="9" fill="#a5672f" />
+      <ellipse cx="10.5" cy="10" rx="4.5" ry="6" fill="#b3743a" opacity="0.5" />
+      <path
+        d="M12 5.5v4M9.5 8h5M9.5 10.5h5M9.5 13h5"
+        stroke="#f4ede2"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
 export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
-
   const { setModule } = useModule();
 
   useEffect(() => {
     setProgress(loadProgress());
   }, []);
 
-  // Opening a course makes it the active module, so the lesson player's
-  // "next lesson" walks this course rather than the whole roadmap.
   useEffect(() => {
     setModule(moduleId);
   }, [moduleId, setModule]);
 
   const activeModule = getModule(moduleId);
   const visibleUnits = moduleUnits(moduleId);
+  const liveUnits = visibleUnits.filter((u) => u.status === "live");
   const all = liveLessons(moduleId);
   const completed = new Set(progress.completedLessons);
   const current =
     all.find((e) => !completed.has(e.lesson.id)) ?? all[all.length - 1];
   const completedCount = all.filter((e) => completed.has(e.lesson.id)).length;
-  const pct = Math.round((completedCount / all.length) * 100);
-  const yardLine = Math.min(100, pct);
-  const streak = displayStreak(progress);
+  const pct =
+    all.length === 0 ? 0 : Math.round((completedCount / all.length) * 100);
 
   function nodeState(lesson: Lesson): "completed" | "current" | "locked" {
     if (completed.has(lesson.id)) return "completed";
@@ -99,280 +93,453 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
     return "locked";
   }
 
+  /** Unit is unlocked when every prior live unit is complete (unit 1 always open). */
+  function unitUnlocked(liveIndex: number): boolean {
+    if (liveIndex <= 0) return true;
+    for (let i = 0; i < liveIndex; i++) {
+      const u = liveUnits[i];
+      if (!u.lessons.every((l) => completed.has(l.id))) return false;
+    }
+    return true;
+  }
+
+  const activeUnitId =
+    current?.unit.id ??
+    liveUnits.find((u) => !u.lessons.every((l) => completed.has(l.id)))?.id ??
+    liveUnits[0]?.id;
+
+  const gateHref =
+    !progress.username || !progress.draftedTrack
+      ? "/learn/draft"
+      : !progress.playbookStyle
+        ? "/learn/playbook"
+        : current
+          ? `/learn/${current.lesson.id}`
+          : null;
+
+  const yardLine = Math.min(100, pct);
+  const fieldCaption =
+    pct === 100
+      ? "END ZONE — course complete"
+      : completedCount === 0
+        ? "Kickoff · ball on own 25"
+        : `Ball on the ${yardLine}-yard line`;
+
+  const gateLabel =
+    !progress.username || !progress.draftedTrack
+      ? "Enter the Draft"
+      : !progress.playbookStyle
+        ? "Choose your playbook"
+        : completedCount === 0
+          ? "Take the first snap"
+          : pct === 100
+            ? "Replay last drive"
+            : "Run the next play";
+
   return (
-    <main className="mx-auto min-h-screen w-full max-w-2xl px-4 pb-24">
-      {/* header */}
-      <header className="flex items-center justify-between py-5">
+    <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-24 sm:px-6">
+      <header className="flex flex-wrap items-center justify-between gap-3 py-5">
         <HomeLink back="/learn" backLabel="all courses" />
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {progress.username && (
-            <span className="hidden border border-gold/40 bg-gold/5 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-gold md:inline">
+            <span className="hidden border border-gold/40 bg-gold/5 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-gold lg:inline">
               GM · {progress.username}
             </span>
           )}
+          <LearnStatusChips progress={progress} />
           <ThemeToggle />
-          <Link
-            href="/field"
-            className="hidden border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-turf/40 hover:text-turf sm:inline"
-          >
-            Practice Field
-          </Link>
-          <span className="flex items-center gap-1.5 border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs text-gold">
-            <FlameIcon />
-            {streak} day{streak === 1 ? "" : "s"}
-          </span>
-          <span className="border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs text-turf">
-            {progress.xp} XP
-          </span>
         </div>
       </header>
 
-      {/* course overview — the DataCamp layer */}
-   <section className="surface border border-panel-border bg-panel/80 p-6 ">
-        <div className="flex items-start justify-between gap-4">
-          <div>
+      <div className="grid gap-8 lg:grid-cols-12 lg:items-start">
+        <div className="lg:col-span-8">
+          {/* Slim course header */}
+          <section className="section-card scorebug-card">
             <p className="label-broadcast text-turf">
-              {moduleId === "all" ? "course 1 · analyst roadmap" : "module"}
+              {moduleId === "all" ? "season roadmap" : "game plan"}
             </p>
             <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
               {moduleId === "all" ? COURSE.title : activeModule.name}
             </h1>
-            <p className="mt-3 max-w-lg text-sm leading-relaxed text-ink-soft">
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">
               {moduleId === "all" ? COURSE.tagline : activeModule.blurb}
             </p>
-            <p className="mt-2 max-w-lg font-mono text-[11px] leading-relaxed text-ink-muted">
-              No football knowledge required — the game is just the dataset,
-              and Coach explains any context as you go.
-            </p>
-          </div>
-          <div className="hidden shrink-0 sm:block">
-            <Coach mood={pct === 100 ? "cheer" : "idle"} size={110} />
-          </div>
-        </div>
 
-        <div className="mt-5">
-          <div className="flex items-baseline justify-between">
-            <p className="font-mono text-[11px] uppercase tracking-widest text-ink-muted">
-              {completedCount}/{all.length} lessons ·{" "}
-              {pct === 100 ? "END ZONE — course complete" : `ball on the ${yardLine}-yard line`}
-            </p>
-            <p className="stat-number text-sm">{pct}%</p>
-          </div>
-          <div className="mt-2 h-3 overflow-hidden rounded-full bg-night">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-turf to-gold transition-all duration-700"
-              style={{ width: `${Math.max(pct, 2)}%` }}
-            />
-          </div>
-        </div>
+            <div className="mt-5">
+              <div className="flex items-baseline justify-between gap-3">
+                <p className="font-mono text-[11px] uppercase tracking-widest text-ink-muted">
+                  {completedCount}/{all.length} drives · {fieldCaption}
+                </p>
+                <p className="stat-number text-sm">{pct}%</p>
+              </div>
+              <div className="field-progress mt-2 flex items-center gap-2">
+                <div className="field-progress-track">
+                  <div
+                    className="field-progress-fill"
+                    style={{ width: `${Math.max(pct, pct > 0 ? 4 : 0)}%` }}
+                  />
+                  <span
+                    className="field-progress-stick"
+                    style={{ left: `${Math.min(Math.max(pct, 8), 96)}%` }}
+                    aria-hidden
+                  />
+                </div>
+                <span className="text-lg" aria-hidden>
+                  {pct === 100 ? "🏈" : "🏁"}
+                </span>
+              </div>
+            </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-2">
-          {visibleUnits
-            .filter((u) => u.status === "live")
-            .flatMap((u) => u.skills)
-            .map((skill) => (
-              <span
-                key={skill}
-                className="border border-panel-border px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-muted"
+            {gateHref && (
+              <Link
+                href={gateHref}
+                className="btn-turf mt-5 flex w-full items-center justify-center rounded-2xl border border-turf/80 px-6 py-3.5 font-display text-base font-bold uppercase tracking-wide text-night"
               >
-                {skill}
-              </span>
-            ))}
+                {gateLabel}
+              </Link>
+            )}
+
+            {progress.username && progress.draftedTrack && (
+              <p className="mt-3 text-center font-mono text-[11px] leading-relaxed text-ink-muted">
+                <span className="text-gold">{progress.username}</span>
+                {" · "}
+                <span className="text-ink-soft">
+                  {getTrack(normalizeTrackId(progress.draftedTrack))?.name ??
+                    progress.draftedTrack}
+                </span>
+                {progress.playbookStyle && (
+                  <>
+                    {" · "}
+                    <span className="text-turf">
+                      {getStyle(progress.playbookStyle).name}
+                    </span>
+                    {" · "}
+                    <Link
+                      href="/learn/playbook"
+                      className="underline decoration-panel-border underline-offset-4 hover:text-gold"
+                    >
+                      retake quiz
+                    </Link>
+                  </>
+                )}
+              </p>
+            )}
+          </section>
+
+          {/* Units */}
+          {visibleUnits.map((unit) => {
+            const liveIndex = liveUnits.findIndex((u) => u.id === unit.id);
+            const displayNumber =
+              liveIndex >= 0
+                ? liveIndex + 1
+                : visibleUnits.findIndex((u) => u.id === unit.id) + 1;
+            const doneCount = unit.lessons.filter((l) =>
+              completed.has(l.id),
+            ).length;
+            const unlocked =
+              unit.status !== "live" ? false : unitUnlocked(liveIndex);
+            const isActive = unit.id === activeUnitId && unlocked;
+
+            return (
+              <UnitBlock
+                key={unit.id}
+                unit={unit}
+                displayNumber={displayNumber}
+                completedCount={doneCount}
+                unlocked={unlocked}
+                isActive={isActive}
+                nodeState={nodeState}
+                continueHref={
+                  isActive && current && progress.playbookStyle
+                    ? `/learn/${current.lesson.id}`
+                    : gateHref && isActive
+                      ? gateHref
+                      : null
+                }
+                continueLabel={gateLabel}
+              />
+            );
+          })}
+
+          <p className="mt-16 text-center font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+            Progress is saved in this browser · full accounts coming with the
+            season launch
+          </p>
         </div>
 
-        {!progress.username || !progress.draftedTrack ? (
-          <Link
-            href="/learn/draft"
-            className="mt-6 block w-full border border-gold bg-gold/15 px-6 py-3 text-center font-mono text-sm font-semibold uppercase tracking-widest text-gold transition-colors hover:bg-gold/25"
-          >
-            🏈 Enter the SQLSports Draft · claim pick 1.01
-          </Link>
-        ) : !progress.playbookStyle ? (
-          <Link
-            href="/learn/playbook"
-            className="mt-6 block w-full border border-gold bg-gold/15 px-6 py-3 text-center font-mono text-sm font-semibold uppercase tracking-widest text-gold transition-colors hover:bg-gold/25"
-          >
-            Take the quiz · Choose your playbook style
-          </Link>
-        ) : (
-          current && (
-            <Link
-              href={`/learn/${current.lesson.id}`}
-              className="mt-6 block w-full border border-turf bg-turf/15 px-6 py-3 text-center font-mono text-sm font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25"
-            >
-              {completedCount === 0
-                ? "Start the season"
-                : pct === 100
-                  ? "Replay the last drive"
-                  : `Continue · ${current.lesson.title}`}
-            </Link>
-          )
-        )}
-
-        {progress.username && progress.draftedTrack && (
-          <p className="mt-3 text-center font-mono text-[11px] leading-relaxed text-ink-muted">
-            Pick 1.01: <span className="text-gold">{progress.username}</span>{" "}
-            drafted{" "}
-            <span className="text-ink-soft">
-              {getTrack(normalizeTrackId(progress.draftedTrack))?.name ??
-                progress.draftedTrack}
-            </span>
-            {progress.playbookStyle && (
-              <>
-                {" "}
-                · running the{" "}
-                <span className="text-turf">
-                  {getStyle(progress.playbookStyle).name}
-                </span>{" "}
-                playbook ·{" "}
-                <Link
-                  href="/learn/playbook"
-                  className="underline decoration-panel-border underline-offset-4 transition-colors hover:text-gold"
-                >
-                  retake the quiz
-                </Link>
-              </>
-            )}
-          </p>
-        )}
-      </section>
-
-      {/* the field — unit by unit, scoped to the selected module */}
-      {visibleUnits.map((unit, i) => (
-        <UnitSection
-          key={unit.id}
-          unit={unit}
-          displayNumber={i + 1}
-          nodeState={nodeState}
-          completedCount={
-            unit.lessons.filter((l) => completed.has(l.id)).length
-          }
-        />
-      ))}
-
-      <p className="mt-16 text-center font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-        Progress is saved in this browser · full accounts coming with the season launch
-      </p>
+        <div className="lg:col-span-4">
+          <div className="lg:sticky lg:top-6">
+            <LearnRail progress={progress} />
+          </div>
+        </div>
+      </div>
     </main>
   );
 }
 
-function UnitSection({
+function UnitBlock({
   unit,
   displayNumber,
-  nodeState,
   completedCount,
+  unlocked,
+  isActive,
+  nodeState,
+  continueHref,
+  continueLabel,
 }: {
   unit: Unit;
-  /** Position within the selected module, so non-contiguous unit ids still read 1,2,3. */
   displayNumber: number;
-  nodeState: (lesson: Lesson) => "completed" | "current" | "locked";
   completedCount: number;
+  unlocked: boolean;
+  isActive: boolean;
+  nodeState: (lesson: Lesson) => "completed" | "current" | "locked";
+  continueHref: string | null;
+  continueLabel: string;
 }) {
   const comingSoon = unit.status === "coming-soon";
+  const total = unit.lessons.length;
+  const unitPct =
+    total === 0 ? 0 : Math.round((completedCount / total) * 100);
+  const unitComplete = !comingSoon && completedCount === total && total > 0;
+  const locked = comingSoon || !unlocked;
 
   return (
-    <section className={`mt-10 ${comingSoon ? "opacity-60" : ""}`}>
-      {/* unit header band */}
-      <div
-        className={`border p-5 shadow-scoreboard ${
-          comingSoon
-            ? "border-panel-border bg-panel/40"
-            : "border-panel-border bg-panel/80"
-        }`}
-      >
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="label-broadcast text-gold">{unit.drive}</p>
-            <h2 className="mt-1 font-display text-xl font-bold text-ink">
-              Unit {displayNumber} · {unit.title}
-            </h2>
+    <section className={`mt-8 ${locked && !comingSoon ? "opacity-90" : ""}`}>
+      {isActive && !locked ? (
+        <div className="unit-banner">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-night/70">
+                {unit.drive} · Unit {displayNumber}
+              </p>
+              <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">
+                {unit.title}
+              </h2>
+            </div>
+            <Link
+              href="/learn/playbook"
+              className="inline-flex items-center gap-1.5 rounded-xl border-2 border-night/20 bg-night/10 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-widest text-night transition-colors hover:bg-night/20"
+            >
+              📋 Playbook
+            </Link>
           </div>
-          {comingSoon ? (
-            <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-              <LockIcon />
-              In the playbook
-            </span>
-          ) : (
-            <span className="font-mono text-xs text-ink-muted">
-              {completedCount}/{unit.lessons.length}
-            </span>
+        </div>
+      ) : (
+        <div
+          className={`section-card ${locked ? "section-card-locked" : ""}`}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="label-broadcast text-gold">
+                {comingSoon ? "coming soon" : unit.drive}
+              </p>
+              <h2 className="mt-1 font-display text-xl font-bold text-ink">
+                Unit {displayNumber} · {unit.title}
+              </h2>
+            </div>
+            {locked && <LockIcon className="h-6 w-6 text-ink-muted" />}
+          </div>
+
+          {!comingSoon && (
+            <div className="mt-4 flex items-center gap-2">
+              <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-night">
+                <div
+                  className="h-full rounded-full bg-turf transition-all duration-500"
+                  style={{ width: `${unitPct}%` }}
+                />
+              </div>
+              <span
+                className={`text-base ${unitComplete ? "" : "opacity-40 grayscale"}`}
+                aria-hidden
+              >
+                {unitComplete ? "🏈" : "🏁"}
+              </span>
+            </div>
+          )}
+
+          {locked && !comingSoon && (
+            <p className="mt-3 font-mono text-[11px] text-ink-muted">
+              Move the chains on Unit {displayNumber - 1} to unlock
+            </p>
+          )}
+          {comingSoon && (
+            <p className="mt-3 font-mono text-[11px] uppercase tracking-wider text-ink-muted">
+              Still in the playbook
+            </p>
           )}
         </div>
-        <p className="mt-2 max-w-xl text-[13px] leading-relaxed text-ink-soft">
-          {unit.description}
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {unit.skills.map((skill) => (
-            <span
-              key={skill}
-              className="border border-panel-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-ink-muted"
-            >
-              {skill}
-            </span>
-          ))}
-        </div>
-      </div>
+      )}
 
-      {/* winding lesson path over faint yard lines */}
-      {!comingSoon && (
-        <div className="yard-lines relative mt-2 flex flex-col items-center gap-7 py-8">
-          {unit.lessons.map((lesson, i) => {
-            const state = nodeState(lesson);
-            const offset = NODE_OFFSETS[i % NODE_OFFSETS.length];
-            const node = (
-              <div
-                className="relative flex flex-col items-center"
-                style={{ transform: `translateX(${offset}px)` }}
-              >
-                {state === "current" && (
-                  <span className="absolute -top-9 animate-bounce border border-gold bg-night px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-gold">
-                    Start
-                  </span>
-                )}
-                <span
-                  className={`flex h-16 w-16 items-center justify-center rounded-full border-2 transition-transform ${
-                    state === "completed"
-                      ? "border-turf bg-turf/20 text-turf"
-                      : state === "current"
-                        ? "border-gold bg-gold/15 text-gold shadow-scoreboard-gold"
-                        : "border-panel-border bg-panel text-ink-muted"
-                  } ${state !== "locked" ? "hover:scale-105" : ""}`}
-                >
-                  {state === "completed" ? (
-                    <CheckIcon />
-                  ) : state === "current" ? (
-                    <PlayIcon />
-                  ) : (
-                    <LockIcon />
+      {/* Unlocked units: Coach speech on active + winding path for replay */}
+      {!locked && (
+        <>
+          {isActive && (
+            <div className="section-card mt-3">
+              <div className="flex items-start gap-3">
+                <Coach mood="idle" size={88} className="hidden shrink-0 sm:block" />
+                <div className="min-w-0 flex-1">
+                  {unit.skills[0] && (
+                    <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+                      Coach&apos;s note · {unit.skills[0]}
+                    </p>
                   )}
-                </span>
-                <span
-                  className={`mt-2 max-w-[140px] text-center font-mono text-[11px] leading-tight ${
-                    state === "locked" ? "text-ink-muted/60" : "text-ink-soft"
-                  }`}
-                >
-                  {lesson.title}
-                </span>
+                  <div className="speech-bubble speech-bubble-coach">
+                    {unit.description}
+                  </div>
+                  {continueHref && (
+                    <Link
+                      href={continueHref}
+                      className="btn-turf mt-4 flex w-full items-center justify-center rounded-2xl border border-turf/80 px-5 py-3 font-display text-sm font-bold uppercase tracking-wide text-night sm:w-auto"
+                    >
+                      {continueLabel}
+                    </Link>
+                  )}
+                </div>
               </div>
-            );
+            </div>
+          )}
 
-            return state === "locked" ? (
-              <div key={lesson.id}>{node}</div>
-            ) : (
-              <Link
-                key={lesson.id}
-                href={`/learn/${lesson.id}`}
-                aria-label={`${lesson.title} — ${
-                  state === "completed" ? "replay" : "start"
-                }`}
-              >
-                {node}
-              </Link>
-            );
-          })}
-        </div>
+          <LessonPath
+            unit={unit}
+            nodeState={nodeState}
+            completedCount={completedCount}
+            unitComplete={unitComplete}
+          />
+        </>
       )}
     </section>
+  );
+}
+
+function LessonPath({
+  unit,
+  nodeState,
+  completedCount,
+  unitComplete,
+}: {
+  unit: Unit;
+  nodeState: (lesson: Lesson) => "completed" | "current" | "locked";
+  completedCount: number;
+  unitComplete: boolean;
+}) {
+  const mid = Math.floor(unit.lessons.length / 2);
+  const chestOpen = completedCount > mid;
+  const items: Array<
+    | { kind: "lesson"; lesson: Lesson; index: number }
+    | { kind: "chest" }
+    | { kind: "trophy" }
+    | { kind: "divider"; label: string }
+  > = [];
+
+  unit.lessons.forEach((lesson, i) => {
+    if (i === mid && unit.lessons.length >= 4) {
+      items.push({ kind: "chest" });
+    }
+    if (i > 0 && i % 3 === 0 && unit.skills[Math.floor(i / 3)]) {
+      items.push({
+        kind: "divider",
+        label: unit.skills[Math.floor(i / 3)] ?? unit.skills[0],
+      });
+    }
+    items.push({ kind: "lesson", lesson, index: i });
+  });
+  items.push({ kind: "trophy" });
+
+  return (
+    <div className="path-rail yard-lines mt-1">
+      {items.map((item, i) => {
+        if (item.kind === "chest") {
+          return (
+            <div
+              key={`chest-${i}`}
+              className={`path-chest ${chestOpen ? "path-chest-open" : ""}`}
+              title={chestOpen ? "First down secured" : "Pick up a first down"}
+              aria-hidden
+            >
+              {chestOpen ? "⛓️" : "⬇️"}
+            </div>
+          );
+        }
+        if (item.kind === "trophy") {
+          return (
+            <div
+              key="trophy"
+              className={`path-trophy path-endzone ${unitComplete ? "path-trophy-won" : ""}`}
+              title={unitComplete ? "Touchdown — unit complete" : "Drive to the end zone"}
+              aria-hidden
+            >
+              {unitComplete ? "🏈" : "🏁"}
+            </div>
+          );
+        }
+        if (item.kind === "divider") {
+          return (
+            <div key={`div-${i}`} className="path-divider">
+              <span>hash · {item.label}</span>
+            </div>
+          );
+        }
+
+        const { lesson, index } = item;
+        const state = nodeState(lesson);
+        const offset = NODE_OFFSETS[index % NODE_OFFSETS.length];
+
+        const node = (
+          <div
+            className="relative flex flex-col items-center"
+            style={{ transform: `translateX(${offset}px)` }}
+          >
+            {state === "current" && (
+              <>
+                <span className="path-start-pill">Snap</span>
+                <div className="pointer-events-none absolute -right-16 top-0 hidden sm:block">
+                  <Coach mood="happy" size={64} />
+                </div>
+              </>
+            )}
+            <span
+              className={`path-node ${
+                state === "completed"
+                  ? "path-node-done"
+                  : state === "current"
+                    ? "path-node-current"
+                    : "path-node-locked"
+              }`}
+            >
+              {state === "completed" ? (
+                <CheckIcon />
+              ) : state === "current" ? (
+                <BallIcon />
+              ) : (
+                <LockIcon />
+              )}
+            </span>
+            <span
+              className={`mt-2 max-w-[150px] text-center font-mono text-[11px] leading-tight ${
+                state === "locked" ? "text-ink-muted/60" : "text-ink-soft"
+              }`}
+            >
+              {lesson.title}
+            </span>
+          </div>
+        );
+
+        if (state === "locked") {
+          return <div key={lesson.id}>{node}</div>;
+        }
+
+        return (
+          <Link
+            key={lesson.id}
+            href={`/learn/${lesson.id}`}
+            aria-label={`${lesson.title} — ${
+              state === "completed" ? "replay drive" : "take the snap"
+            }`}
+          >
+            {node}
+          </Link>
+        );
+      })}
+    </div>
   );
 }

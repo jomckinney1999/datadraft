@@ -8,13 +8,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { COURSES, ALL_IN_ONE, type Course } from "@/lib/courses";
 import { liveLessons, ALL_MODULE } from "@/lib/curriculum";
-import { loadProgress, displayStreak, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
+import { loadProgress, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
 import TrophyCase from "@/components/trophy-case";
 import HomeLink from "@/components/home-link";
 import Coach from "@/components/coach";
 import CourseArt from "@/components/course-art";
 import CourseCover from "@/components/course-cover";
 import ThemeToggle from "@/components/theme-toggle";
+import LearnStatusChips from "@/components/learn-status-chips";
 
 function ClockIcon() {
   return (
@@ -179,49 +180,36 @@ export default function LearnCatalogPage() {
   const completed = new Set(progress.completedLessons);
   const allLessons = liveLessons(ALL_MODULE);
   const allDone = allLessons.filter((e) => completed.has(e.lesson.id)).length;
-  const streak = displayStreak(progress);
   const liveCourses = COURSES.filter((c) => c.status === "live").length;
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-24 sm:px-6">
-      <header className="flex items-center justify-between py-5">
+      <header className="flex flex-wrap items-center justify-between gap-3 py-5">
         <HomeLink label="learn" />
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {progress.username && (
-            <span className="hidden border border-gold/40 bg-gold/5 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-gold md:inline">
+            <span className="hidden border border-gold/40 bg-gold/5 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-gold lg:inline">
               GM · {progress.username}
             </span>
           )}
+          <LearnStatusChips progress={progress} trophiesHref="#trophies" />
           <ThemeToggle />
           <Link
             href="/field"
-            className="hidden border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-turf/40 hover:text-turf sm:inline"
+            className="hidden status-chip hover:border-turf/50 hover:text-turf sm:inline-flex"
           >
-            Practice Field
-          </Link>
-          <Link
-            href="/interview"
-            className="hidden border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-gold/40 hover:text-gold md:inline"
-          >
-            AI Interview
+            Practice
           </Link>
           <Link
             href="/account"
-            className="border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-turf/40 hover:text-turf"
+            className="status-chip hover:border-turf/50 hover:text-turf"
           >
             Account
           </Link>
-          <span className="flex items-center gap-1.5 border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs text-gold">
-            <FlameIcon />
-            {streak} day{streak === 1 ? "" : "s"}
-          </span>
-          <span className="border border-panel-border bg-panel/70 px-3 py-1.5 font-mono text-xs text-turf">
-            {progress.xp} XP
-          </span>
         </div>
       </header>
 
-   <section className="surface border border-panel-border bg-panel/80 p-6 ">
+      <section className="section-card">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="label-broadcast text-turf">the course board</p>
@@ -237,10 +225,9 @@ export default function LearnCatalogPage() {
               No football knowledge required — the sport is just the dataset,
               and Coach explains any context as you go.
             </p>
-            {/* Ten courses is a lot to choose between cold. */}
             <Link
               href="/learn/start"
-              className="press mt-4 inline-flex items-center gap-2 border border-turf bg-turf/10 px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-widest text-turf hover:bg-turf/20"
+              className="press mt-4 inline-flex items-center gap-2 rounded-xl border-2 border-turf/40 border-b-4 bg-turf/10 px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-widest text-turf hover:bg-turf/20"
             >
               Not sure which one? Take the 2-question walkthrough →
             </Link>
@@ -252,7 +239,7 @@ export default function LearnCatalogPage() {
 
         <Link
           href={`/learn/track/${ALL_IN_ONE.moduleId}`}
-          className="mt-5 flex flex-wrap items-center justify-between gap-3 border border-gold/50 bg-gold/10 px-5 py-4 transition-colors hover:bg-gold/20"
+          className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 border-gold/40 border-b-4 bg-gold/10 px-5 py-4 transition-colors hover:bg-gold/20"
         >
           <span>
             <span className="block font-display text-base font-bold text-ink">
@@ -280,7 +267,9 @@ export default function LearnCatalogPage() {
         ))}
       </div>
 
-      <TrophyCase />
+      <div id="trophies">
+        <TrophyCase />
+      </div>
 
       <p className="mt-12 text-center font-mono text-[10px] uppercase tracking-widest text-ink-muted">
         Lesson counts show the full syllabus · &ldquo;Live&rdquo; is what&apos;s
