@@ -8,7 +8,7 @@ import { useCareerRole } from "@/lib/use-career-role";
 import CareerBoard from "@/components/career-board";
 import LearnRail from "@/components/learn-rail";
 import LearnStatusChips from "@/components/learn-status-chips";
-import ThemeToggle from "@/components/theme-toggle";
+import TestingTools from "@/components/testing-tools";
 import HomeLink from "@/components/home-link";
 
 export default function CareerPathClient({ roleId }: { roleId: string }) {
@@ -37,7 +37,6 @@ export default function CareerPathClient({ roleId }: { roleId: string }) {
         <HomeLink back="/learn" backLabel="roles" />
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <LearnStatusChips progress={progress} />
-          <ThemeToggle />
           <Link
             href="/learn"
             className="status-chip hover:border-turf/50 hover:text-turf"
@@ -82,8 +81,9 @@ export default function CareerPathClient({ roleId }: { roleId: string }) {
         </div>
 
         <div className="lg:col-span-4">
-          <div className="lg:sticky lg:top-6">
+          <div className="space-y-4 lg:sticky lg:top-6">
             <LearnRail progress={progress} />
+            <TestingTools role={role} onChange={setProgress} />
           </div>
         </div>
       </div>

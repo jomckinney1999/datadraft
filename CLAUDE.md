@@ -4,11 +4,11 @@ Education platform teaching SQL and data analytics through fantasy football. Nex
 
 ## Design system
 
-Fantasy-football palette, defined once in `tailwind.config.ts` + `app/globals.css`: Engineered Energy — `night` (black #000000), `turf` (lime #C0FF6B primary), `gold`/`ink` (silver #D5D5D5), structural gray from #656565 (AA-lifted where needed for muted text). An older teal/amber scheme was replaced in Aug 2026 — never reintroduce `teal`/`amber` token names. Change UI colors by editing token values, not component classes.
+Fantasy-football palette, defined once in `tailwind.config.ts` + `app/globals.css`: Duolingo-neutral charcoal canvas (`#131F24`) with premium accents — turf green `#58CC02`, ice blue `#1CB0F6`, gold `#FFC800`. Structural gray from the charcoal family. An older teal/amber scheme (and a brief pure-black Engineered Energy pass) were replaced — never reintroduce `teal`/`amber` token names. Change UI colors by editing token values, not component classes.
 
-- **The canvas is pure black on purpose.** Lime only pops against absence of light — don't wash the page back toward navy or cream.
-- **`ice` is structural, not a state.** It shares the silver/gray family for chrome and room light. **Never use it for success or reward** — that is turf's (lime) only job.
-- **`node scripts/verify-contrast.mjs` measures the shipped tokens, both themes, 48 pairings.** Run it after any palette edit. It reads the real values out of `globals.css` rather than a copy, and it checks the pairings that actually occur — including the tightest one, accent text on a chip of its own accent at 10%, which is what the light-mode accents are calibrated against and which fails long before accent-on-background does.
+- **The canvas is charcoal on purpose** — green/blue/gold pop against a neutral dark field without washing toward navy or cream.
+- **`ice` is the blue accent** (broadcast cool / secondary). **Success and reward stay turf green.** Gold is milestones and prestige.
+- **`node scripts/verify-contrast.mjs` measures the shipped tokens, 48 pairings.** Run it after any palette edit. It reads the real values out of `globals.css` rather than a copy.
 
 ### Depth, light and material
 
@@ -23,17 +23,14 @@ The old palette was flat by construction: panels sat a few RGB points above the 
 - **The photo duotone is held at ~58% alpha.** `mix-blend-mode: color` takes the overlay's hue *and* saturation wholesale, so at full opacity the accents turn `components/action-gallery.tsx` into a poster. Re-check that treatment if the accents ever gain more chroma again.
 - **Focus rings, selection colour and scrollbars are themed once, globally.** A default scrollbar is a light-grey slab bolted onto a dark page and is one of the loudest tells that a dark theme was applied rather than designed.
 
-### Light + dark mode
+### Dark only (no light mode)
 
-Both themes ship. Every token resolves through a CSS variable holding an `"r g b"` channel triplet — declared in `app/globals.css` under `:root` (dark, the default) and `:root[data-theme="light"]`, wired into Tailwind as `rgb(var(--c-x) / <alpha-value>)`. That indirection is what keeps the ~186 alpha modifiers (`bg-turf/10`, `border-panel-border/60`) working while the palette flips.
+One theme: Duolingo-neutral charcoal (`#131F24`) with green / blue / gold accents. Tokens are `"r g b"` channel triplets in `app/globals.css` under `:root`, wired into Tailwind as `rgb(var(--c-x) / <alpha-value>)` so alpha modifiers (`bg-turf/10`) keep working.
 
-- **Use the tokens.** Never hardcode a hex, `rgba()`, or `text-[#...]` in a component — it won't flip. For glows/scrims/gradients that need per-theme tuning, add a class in `globals.css` (see `.rays-turf`, `.yard-lines`, `.edge-glow-gold`) rather than an inline `style`. Coach Blitz (`components/coach.tsx`) is the deliberate exception — it's an illustration, and its hexes stay fixed in both themes.
-- **Light-mode turf and gold are far darker** than their dark-mode values, calibrated against the tightest real pairing (accent text on an accent/10 chip), not against plain white. Every token pair clears WCAG AA 4.5:1 in both themes — `scripts/verify-contrast.mjs` proves it. Light-mode gold necessarily lands as brass: there is no hex that is both gold-hued and AA on white, so don't keep hunting for one.
-- `--glow-strength` is `1` in dark and `0` in light, so the scoreboard glow classes multiply to nothing on white instead of smearing.
-- `.theme-dark` re-asserts the dark values on any subtree, if a section ever needs to stay dark in light mode.
-- **The toggle lives in every route's header** (`components/theme-toggle.tsx`), except the lesson player — its top bar is deliberately minimal (quit / drive chrome). Choice persists in `localStorage` under `sqlsports-theme` and defaults to the OS preference until the visitor picks explicitly.
-- `app/layout.tsx` runs a blocking inline script that sets `data-theme` before first paint. It mirrors the resolution order in `theme-toggle.tsx` — **change both or neither**, or the page flashes the wrong theme on load.
-- **Don't remove the `.theme-switching` transition suppression.** Chrome does not re-resolve a `var()`-derived color on an element with an active `transition-colors`, so without it every button, card, and nav link stays painted in the *previous* theme's colors after a toggle. It is a correctness fix, not polish.
+- **Use the tokens.** Never hardcode a hex, `rgba()`, or `text-[#...]` in a component. For glows/scrims/gradients, add a class in `globals.css` (see `.rays-turf`, `.yard-lines`, `.edge-glow-gold`) rather than an inline `style`. Coach Blitz (`components/coach.tsx`) is the deliberate exception — illustration hexes stay fixed.
+- **Accents:** turf green `#58CC02`, ice blue `#1CB0F6`, gold `#FFC800`. All text/accent pairings clear WCAG AA — `node scripts/verify-contrast.mjs` after any palette edit.
+- **No theme toggle.** `ThemeToggle` is a no-op; `app/layout.tsx` forces `data-theme="dark"` and clears any leftover `sqlsports-theme` preference.
+- **Testing resets:** `components/testing-tools.tsx` on career paths (`/learn/path/...`) and course roadmaps (`/learn/track/...`) — restart path/course, complete ahead, or wipe all local progress. Also usable from `/demo`.
 
 ## Choosing a course, and career claims
 

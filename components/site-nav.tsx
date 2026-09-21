@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import ThemeToggle from "@/components/theme-toggle";
 
 /*
  * One word per link where the section allows it, and in the order the
@@ -72,12 +71,9 @@ export default function SiteNav() {
           >
             Learn
           </Link>
-
-          <ThemeToggle />
         </nav>
 
         <div className="flex items-center gap-1 lg:hidden">
-          <ThemeToggle />
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}

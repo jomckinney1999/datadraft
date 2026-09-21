@@ -1,16 +1,6 @@
 #!/usr/bin/env node
 /**
- * Measure the shipped palette against WCAG AA, in both themes.
- *
- * CLAUDE.md has said "every token pair clears 4.5:1 in both themes —
- * re-measure if you change them" since light mode landed, but re-measuring was
- * a manual job nobody was going to redo. This reads the real values out of
- * app/globals.css so the rule is checked rather than remembered.
- *
- * The pairings are the ones that actually occur in the UI, including the
- * tightest one: accent-coloured text sitting on a chip of its own accent at
- * 10% over a panel, which is a good deal harder than accent-on-background and
- * is what the light-mode accents were originally calibrated against.
+ * Measure the shipped palette against WCAG AA (dark-only).
  *
  *   node scripts/verify-contrast.mjs
  */
@@ -67,11 +57,8 @@ function check(label, marker) {
     add(`${k} on night`, t[k], night);
     add(`${k} on panel`, t[k], panel);
   }
-  // Syntax colours are read against the editor's own surface.
   for (const k of SYNTAX) add(`${k} on panel`, t[k], panel);
-  // Accent text on a chip of its own accent — the tightest real pairing.
   for (const k of ACCENTS) add(`${k} on ${k}/10 chip`, t[k], over(t[k], panel, 0.1));
-  // Solid accent buttons carry night-coloured text.
   for (const k of ACCENTS) add(`night on ${k} fill`, night, t[k]);
 
   const failed = rows.filter(([, r]) => r < AA);
@@ -87,12 +74,10 @@ function check(label, marker) {
   return failed.length;
 }
 
-const bad =
-  check("dark", ':root,\n:root[data-theme="dark"]') +
-  check("light", ':root[data-theme="light"] {');
+const bad = check("dark", ':root,\n:root[data-theme="dark"]');
 
 if (bad) {
   console.error(`\n${bad} pairing(s) below WCAG AA 4.5:1.`);
   process.exit(1);
 }
-console.log("\nAll pairings clear WCAG AA 4.5:1 in both themes.");
+console.log("\nAll pairings clear WCAG AA 4.5:1.");

@@ -18,8 +18,8 @@ import HomeLink from "@/components/home-link";
 import Coach from "@/components/coach";
 import CourseArt from "@/components/course-art";
 import CourseCover from "@/components/course-cover";
-import ThemeToggle from "@/components/theme-toggle";
 import LearnStatusChips from "@/components/learn-status-chips";
+import TestingTools from "@/components/testing-tools";
 
 function ClockIcon() {
   return (
@@ -172,7 +172,6 @@ export default function LearnCatalogPage() {
             </span>
           )}
           <LearnStatusChips progress={progress} trophiesHref="#trophies" />
-          <ThemeToggle />
           <Link
             href="/field"
             className="hidden status-chip hover:border-turf/50 hover:text-turf sm:inline-flex"
@@ -256,6 +255,10 @@ export default function LearnCatalogPage() {
             </Link>
           );
         })}
+      </div>
+
+      <div className="mt-8 max-w-md">
+        <TestingTools />
       </div>
 
       <section className="mt-14">

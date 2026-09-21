@@ -53,20 +53,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0c1022" },
-    { media: "(prefers-color-scheme: light)", color: "#f6f7fc" },
-  ],
+  themeColor: "#131F24",
 };
 
-// Runs before first paint so the page never flashes the wrong theme. Mirrors
-// the resolution order in components/theme-toggle.tsx — keep the two in sync.
-// Any failure leaves the document with no data-theme, which renders dark.
+// Force dark — clear any leftover light preference from before dark-only.
 const THEME_SCRIPT = `
 (function(){try{
-var s=localStorage.getItem("sqlsports-theme");
-var t=(s==="light"||s==="dark")?s:(window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");
-document.documentElement.setAttribute("data-theme",t);
+localStorage.removeItem("sqlsports-theme");
+document.documentElement.setAttribute("data-theme","dark");
 }catch(e){}})();
 `;
 

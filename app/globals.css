@@ -6,138 +6,76 @@
    Theme tokens
 
    Values are "r g b" channel triplets so Tailwind can compose them with
-   alpha modifiers (bg-turf/10, border-panel-border/60). Dark is the
-   default — a document with no data-theme attribute renders dark, so a
-   blocked/failed theme script degrades to the original draft-night design
-   rather than a half-styled page.
+   alpha modifiers (bg-turf/10, border-panel-border/60). Dark charcoal only —
+   light mode was removed; any leftover data-theme="light" resolves to the
+   same tokens.
    ──────────────────────────────────────────────────────────── */
 
 :root,
 :root[data-theme="dark"],
+:root[data-theme="light"],
 .theme-dark {
   color-scheme: dark;
 
-  /* Engineered Energy — black canvas, lime energy, silver neutrals.
-     #000000 / #C0FF6B / #D5D5D5 / #656565 (muted lifted for AA). */
-  --c-night: 0 0 0;
-  --c-night-50: 101 101 101;
-  --c-night-100: 18 18 18;
-  --c-night-200: 10 10 10;
-  --c-night-300: 0 0 0;
+  /* Duolingo-neutral charcoal with SQL Sports accents:
+     green (turf) · blue (ice) · gold — dark only, no light mode. */
+  --c-night: 19 31 36;
+  --c-night-50: 55 70 79;
+  --c-night-100: 26 40 47;
+  --c-night-200: 22 35 42;
+  --c-night-300: 19 31 36;
 
-  --c-turf: 192 255 107;
-  --c-turf-dim: 140 200 55;
-  --c-gold: 213 213 213;
-  --c-gold-dim: 170 170 170;
-  --c-ice: 170 170 170;
-  --c-ice-dim: 140 140 140;
+  --c-turf: 88 204 2;
+  --c-turf-dim: 64 160 0;
+  --c-gold: 255 200 0;
+  --c-gold-dim: 212 160 0;
+  --c-ice: 28 176 246;
+  --c-ice-dim: 20 140 200;
 
-  --c-ink: 213 213 213;
-  --c-ink-soft: 170 170 170;
-  --c-ink-muted: 140 140 140;
+  --c-ink: 241 247 251;
+  --c-ink-soft: 200 210 216;
+  --c-ink-muted: 160 172 180;
 
-  --c-panel: 18 18 18;
-  --c-panel-border: 50 50 50;
-  --c-panel-hover: 28 28 28;
+  --c-panel: 32 47 54;
+  --c-panel-border: 55 70 79;
+  --c-panel-hover: 40 58 66;
 
   --pop-text: 255 255 255;
-  --pop-shadow: 0 1px 2px rgba(0, 0, 0, 0.7), 0 0 36px rgba(0, 0, 0, 0.9);
-  --glow-strength: 0.85;
+  --pop-shadow: 0 1px 2px rgba(0, 0, 0, 0.55), 0 0 32px rgba(19, 31, 36, 0.9);
+  --glow-strength: 0.75;
   --hero-photo-opacity: 1;
-  --hero-scrim-strong: 0.92;
-  --shadow-float: 0 22px 56px rgba(0, 0, 0, 0.65);
-  --shadow-hero-panel: 0 28px 80px rgba(0, 0, 0, 0.7);
-  --photo-scrim: 0.42;
+  --hero-scrim-strong: 0.9;
+  --shadow-float: 0 22px 56px rgba(0, 0, 0, 0.45);
+  --shadow-hero-panel: 0 28px 80px rgba(0, 0, 0, 0.5);
+  --photo-scrim: 0.4;
   --course-photo-opacity: 1;
-  --course-scrim-top: 0.65;
-  --course-scrim-bottom: 0.9;
+  --course-scrim-top: 0.62;
+  --course-scrim-bottom: 0.88;
 
-  --atmo-turf: 0.09;
-  --atmo-gold: 0.03;
-  --atmo-ice: 0.025;
+  --atmo-turf: 0.07;
+  --atmo-gold: 0.035;
+  --atmo-ice: 0.05;
 
-  --grain-opacity: 0.04;
+  --grain-opacity: 0.03;
 
-  --surface-grad: 0.05;
-  --surface-specular: 0.08;
+  --surface-grad: 0.04;
+  --surface-specular: 0.07;
   --shadow-surface:
-    0 1px 2px rgb(0 0 0 / 0.5),
-    0 16px 40px -16px rgb(0 0 0 / 0.85);
+    0 1px 2px rgb(0 0 0 / 0.35),
+    0 16px 40px -16px rgb(0 0 0 / 0.65);
 
-  --selection-bg: rgb(192 255 107 / 0.28);
-  --selection-fg: 0 0 0;
-  --scrollbar-thumb: 70 70 70;
-  --scrollbar-thumb-hover: 101 101 101;
+  --selection-bg: rgb(88 204 2 / 0.3);
+  --selection-fg: 19 31 36;
+  --scrollbar-thumb: 55 70 79;
+  --scrollbar-thumb-hover: 80 100 110;
 
-  /* Syntax — separate IDE set; not the brand lime/gray UI chrome. */
-  --c-syn-keyword: 192 255 107;
-  --c-syn-string: 213 213 213;
-  --c-syn-number: 160 200 255;
-  --c-syn-func: 190 170 240;
-  --c-syn-comment: 140 140 140;
-  --c-syn-punct: 170 170 170;
-}
-
-:root[data-theme="light"] {
-  color-scheme: light;
-
-  /* Engineered Energy on paper — soft silver page, black ink, deep lime. */
-  --c-night: 245 245 245;
-  --c-night-50: 213 213 213;
-  --c-night-100: 235 235 235;
-  --c-night-200: 240 240 240;
-  --c-night-300: 245 245 245;
-
-  --c-turf: 48 90 10;
-  --c-turf-dim: 36 70 6;
-  --c-gold: 70 70 70;
-  --c-gold-dim: 50 50 50;
-  --c-ice: 90 90 90;
-  --c-ice-dim: 70 70 70;
-
-  --c-ink: 0 0 0;
-  --c-ink-soft: 70 70 70;
-  --c-ink-muted: 90 90 90;
-
-  --c-panel: 255 255 255;
-  --c-panel-border: 213 213 213;
-  --c-panel-hover: 235 235 235;
-
-  --pop-text: 0 0 0;
-  --pop-shadow: none;
-  --glow-strength: 0;
-  --hero-photo-opacity: 0.2;
-  --hero-scrim-strong: 0.94;
-  --shadow-float: 0 18px 48px rgba(0, 0, 0, 0.1);
-  --shadow-hero-panel: 0 22px 56px rgba(0, 0, 0, 0.12);
-  --photo-scrim: 0.08;
-  --course-photo-opacity: 0.26;
-  --course-scrim-top: 0.78;
-  --course-scrim-bottom: 0.92;
-
-  --atmo-turf: 0.06;
-  --atmo-gold: 0.02;
-  --atmo-ice: 0.02;
-  --grain-opacity: 0.015;
-
-  --surface-grad: 0;
-  --surface-specular: 0;
-  --shadow-surface:
-    0 1px 2px rgb(0 0 0 / 0.04),
-    0 14px 32px -14px rgb(0 0 0 / 0.12);
-
-  --selection-bg: rgb(192 255 107 / 0.35);
-  --selection-fg: 0 0 0;
-  --scrollbar-thumb: 190 190 190;
-  --scrollbar-thumb-hover: 150 150 150;
-
-  /* Syntax — IDE set on white editors. */
-  --c-syn-keyword: 48 90 10;
-  --c-syn-string: 90 90 90;
-  --c-syn-number: 30 80 160;
-  --c-syn-func: 90 40 160;
-  --c-syn-comment: 100 100 100;
-  --c-syn-punct: 70 70 70;
+  /* Syntax — green keywords, gold strings, ice numbers (readable on charcoal). */
+  --c-syn-keyword: 88 204 2;
+  --c-syn-string: 255 200 0;
+  --c-syn-number: 28 176 246;
+  --c-syn-func: 160 190 255;
+  --c-syn-comment: 140 155 165;
+  --c-syn-punct: 200 210 216;
 }
 
 html {

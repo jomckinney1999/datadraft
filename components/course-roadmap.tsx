@@ -19,10 +19,10 @@ import { loadProgress, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
 import { getStyle } from "@/lib/playbook";
 import { getTrack, normalizeTrackId } from "@/lib/draft";
 import Coach from "@/components/coach";
-import ThemeToggle from "@/components/theme-toggle";
 import HomeLink from "@/components/home-link";
 import LearnRail from "@/components/learn-rail";
 import LearnStatusChips from "@/components/learn-status-chips";
+import TestingTools from "@/components/testing-tools";
 
 const NODE_OFFSETS = [0, 56, 0, -56, 28, -28];
 
@@ -147,7 +147,6 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
             </span>
           )}
           <LearnStatusChips progress={progress} />
-          <ThemeToggle />
         </div>
       </header>
 
@@ -268,8 +267,9 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
         </div>
 
         <div className="lg:col-span-4">
-          <div className="lg:sticky lg:top-6">
+          <div className="space-y-4 lg:sticky lg:top-6">
             <LearnRail progress={progress} />
+            <TestingTools moduleId={moduleId} onChange={setProgress} />
           </div>
         </div>
       </div>

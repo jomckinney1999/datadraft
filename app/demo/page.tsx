@@ -30,6 +30,7 @@ import { loadProgress, saveProgress, type Progress } from "@/lib/progress";
 import { MODULE_STORAGE_KEY } from "@/lib/use-module";
 import ThemeToggle from "@/components/theme-toggle";
 import HomeLink from "@/components/home-link";
+import TestingTools from "@/components/testing-tools";
 
 const TYPE_LABEL: Record<Exercise["type"], string> = {
   mc: "MC",
@@ -147,6 +148,10 @@ export default function DemoPage() {
         </div>
         <ThemeToggle />
       </header>
+
+      <div className="mt-6">
+        <TestingTools />
+      </div>
 
       {/* ── profile controls ── */}
       <section className="surface mt-8 border border-panel-border bg-panel/40 p-5">
