@@ -449,7 +449,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     );
   }
 
-  if (!entry || !style || phase === "loading") return null;
+  if (!entry || phase === "loading") return null;
   const { lesson } = entry;
   // A lesson either paces its brief across steps or falls back to one
   // paragraph; the preview and the start button wait for the final beat so

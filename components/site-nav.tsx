@@ -26,6 +26,7 @@ const SECTION_LINKS = [
 /* Links that leave the page, kept apart from the in-page anchors by a rule. */
 const ROUTE_LINKS = [
   { href: "/field", label: "Practice" },
+  { href: "/interview", label: "Interview" },
   { href: "/account", label: "Account" },
 ];
 

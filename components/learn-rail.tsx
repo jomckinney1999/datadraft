@@ -133,6 +133,23 @@ export default function LearnRail({
         </div>
       </div>
 
+      <div className="section-card relative overflow-hidden">
+        <p className="label-broadcast text-ice">mock screens</p>
+        <p className="mt-1 font-display text-lg font-bold text-ink">
+          Interview cases
+        </p>
+        <p className="mt-1 text-sm leading-relaxed text-ink-soft">
+          Scripted analyst scenarios — brief, schema, live SQL. Filter Easy /
+          Medium / Hard. Free like the Practice Field.
+        </p>
+        <Link
+          href="/interview"
+          className="mt-3 inline-flex items-center rounded-xl border border-ice/50 bg-ice/10 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-ice transition-colors hover:border-ice hover:bg-ice/20"
+        >
+          Open interview desk
+        </Link>
+      </div>
+
       <SidelineShop progress={progress} onChange={onProgress} />
 
       <div className="section-card">

@@ -117,6 +117,36 @@ for (const unit of curriculum.COURSE.units) {
   }
 }
 
+// ── Interview cases (dedicated seeds, not the lesson DB) ─────────────
+const interview = await loadProjectTs(
+  path.join(root, "lib/interview-cases.ts"),
+  root,
+);
+let interviewChecked = 0;
+for (const c of interview.INTERVIEW_CASES) {
+  const caseDb = new SQL.Database();
+  try {
+    caseDb.run(c.seedSql);
+  } catch (e) {
+    problems.push(`interview ${c.id} seed FAILED: ${e.message}`);
+    continue;
+  }
+  for (const [qi, q] of c.questions.entries()) {
+    interviewChecked++;
+    const label = `interview ${c.id} q${qi + 1}`;
+    let res;
+    try {
+      res = caseDb.exec(q.expected)[0];
+    } catch (e) {
+      problems.push(`${label} answer key FAILED: ${e.message}`);
+      continue;
+    }
+    if (!res || res.values.length === 0) {
+      problems.push(`${label} answer key returned NO ROWS`);
+    }
+  }
+}
+
 // ── Python answer keys ────────────────────────────────────────────
 // R keys are not checked here: WebR has no supported Node build, so those
 // are verified in-browser instead. Anything skipped is reported below rather
@@ -211,9 +241,11 @@ for (const [label, ex] of formulaExercises) {
 
 console.log(`brief previews checked : ${previews}`);
 console.log(`query answer keys checked: ${checked}`);
+console.log(`interview keys checked   : ${interviewChecked}`);
 console.log(`python answer keys run    : ${pyChecked}`);
 console.log(`excel formula keys checked: ${formulaChecked}`);
 if (skippedR) console.log(`R keys skipped (no Node WebR): ${skippedR}`);
+
 if (problems.length === 0) {
   console.log("\nAll answer keys run, return rows, and have no cutoff ties.");
 } else {
