@@ -19,6 +19,11 @@ import { liveLessons } from "@/lib/curriculum";
 import { CAREER_ROLE_KEY } from "@/lib/use-career-role";
 import { MODULE_STORAGE_KEY } from "@/lib/use-module";
 import { STYLES, type PlaybookStyle } from "@/lib/playbook";
+import {
+  FREE_DAILY_TIMEOUTS,
+  grantSeasonPassDemo,
+  loadEconomy,
+} from "@/lib/economy";
 
 function go(href: string) {
   window.location.href = href;
@@ -369,6 +374,57 @@ export default function TestingTools({
                 </option>
               ))}
             </select>
+          </fieldset>
+
+          {/* ── Economy ── */}
+          <fieldset className="space-y-2 border-t border-panel-border pt-4">
+            <legend className="font-mono text-[10px] font-bold uppercase tracking-widest text-gold">
+              Sideline economy
+            </legend>
+            <div className="flex flex-wrap gap-2">
+              <ToolBtn
+                onClick={() => {
+                  const p = loadEconomy();
+                  write({
+                    ...p,
+                    timeouts: FREE_DAILY_TIMEOUTS,
+                    timeoutsRefilledDay: new Date().toISOString().slice(0, 10),
+                  });
+                }}
+              >
+                Refill timeouts
+              </ToolBtn>
+              <ToolBtn
+                onClick={() => {
+                  const p = loadEconomy();
+                  write({ ...p, tickets: p.tickets + 100 });
+                }}
+              >
+                +100 tickets
+              </ToolBtn>
+              <ToolBtn
+                onClick={() => {
+                  const p = loadEconomy();
+                  write({ ...p, byeWeeks: p.byeWeeks + 1 });
+                }}
+              >
+                +1 bye week
+              </ToolBtn>
+              <ToolBtn
+                onClick={() => {
+                  write(grantSeasonPassDemo(true));
+                }}
+              >
+                Season Pass ON
+              </ToolBtn>
+              <ToolBtn
+                onClick={() => {
+                  write(grantSeasonPassDemo(false));
+                }}
+              >
+                Season Pass OFF
+              </ToolBtn>
+            </div>
           </fieldset>
 
           {/* ── Context actions ── */}

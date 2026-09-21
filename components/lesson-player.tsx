@@ -42,10 +42,12 @@ import {
 } from "@/lib/runtimes";
 import { useModule } from "@/lib/use-module";
 import { useSport } from "@/lib/use-sport";
-import { awardBadges, completeLesson, loadProgress } from "@/lib/progress";
+import { awardBadges, completeLesson, loadProgress, type Progress } from "@/lib/progress";
 import { pushProgress } from "@/lib/progress-sync";
 import { getStyle, type PlaybookStyle } from "@/lib/playbook";
+import { canStartLesson, loadEconomy, spendTimeout } from "@/lib/economy";
 import Coach from "@/components/coach";
+import TimeoutGate from "@/components/timeout-gate";
 import CodeEditor from "@/components/code-editor";
 import ExcelGrid from "@/components/excel-grid";
 import SchemaReference from "@/components/schema-reference";
@@ -155,6 +157,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
 
   const [style, setStyle] = useState<PlaybookStyle | undefined>(undefined);
   const [phase, setPhase] = useState<Phase>("loading");
+  const [timeoutBlocked, setTimeoutBlocked] = useState(false);
+  const [economy, setEconomy] = useState<Progress | null>(null);
+  const timeoutSpentRef = useRef(false);
   const [introStep, setIntroStep] = useState(0);
   /**
    * Which beat of the brief's paced walk-in is showing.
@@ -268,20 +273,57 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
 
   // Skip the old draft + playbook ceremony — roadmaps and courses open
   // straight into lessons. Style defaults to Dual-Threat when unset.
+  // Graded drives spend one daily timeout (Season Pass / Practice Field exempt).
   useEffect(() => {
-    const p = loadProgress();
+    const p = loadEconomy();
     setStyle(getStyle(p.playbookStyle).id);
+    setEconomy(p);
+
+    const day = new Date().toISOString().slice(0, 10);
+    const spendKey = `sqlsports.timeout-spend.${lessonId}.${day}`;
+    let alreadySpent = false;
+    try {
+      alreadySpent = sessionStorage.getItem(spendKey) === "1";
+    } catch {
+      alreadySpent = timeoutSpentRef.current;
+    }
+
+    if (p.seasonPass || alreadySpent) {
+      timeoutSpentRef.current = true;
+      setTimeoutBlocked(false);
+      return;
+    }
+
+    if (!canStartLesson(p)) {
+      setTimeoutBlocked(true);
+      return;
+    }
+
+    const spent = spendTimeout();
+    timeoutSpentRef.current = true;
+    if (!spent) {
+      setTimeoutBlocked(true);
+      setEconomy(loadEconomy());
+      return;
+    }
+    try {
+      sessionStorage.setItem(spendKey, "1");
+    } catch {
+      /* ignore */
+    }
+    setEconomy(spent);
+    setTimeoutBlocked(false);
   }, [lessonId]);
 
   // Once the style is known, deal the queue and pick the opening screen.
   useEffect(() => {
-    if (!style || phase !== "loading") return;
+    if (timeoutBlocked || !style || phase !== "loading") return;
     setQueue(activeIdx);
     // Every style starts at the brief. Gunslingers skip the theory cards that
     // follow it, not the grounding itself — landing cold on drill #1 with no
     // idea what the table looks like was the old behaviour and it was wrong.
     setPhase("brief");
-  }, [style, phase, activeIdx]);
+  }, [style, phase, activeIdx, timeoutBlocked]);
 
   useEffect(() => {
     let cancelled = false;
@@ -408,6 +450,34 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
+
+  if (timeoutBlocked && economy) {
+    return (
+      <TimeoutGate
+        progress={economy}
+        backHref="/learn"
+        onRefill={(p) => {
+          setEconomy(p);
+          if (!canStartLesson(p)) return;
+          const spent = spendTimeout();
+          timeoutSpentRef.current = true;
+          if (!spent) return;
+          try {
+            const day = new Date().toISOString().slice(0, 10);
+            sessionStorage.setItem(
+              `sqlsports.timeout-spend.${lessonId}.${day}`,
+              "1",
+            );
+          } catch {
+            /* ignore */
+          }
+          setEconomy(spent);
+          setTimeoutBlocked(false);
+          setPhase("loading");
+        }}
+      />
+    );
+  }
 
   if (!entry || !style || phase === "loading") return null;
   const { lesson } = entry;

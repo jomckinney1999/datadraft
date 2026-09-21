@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getRole, pathSteps, buildBoard } from "@/lib/career-paths";
-import { loadProgress, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
+import { type Progress, EMPTY_PROGRESS } from "@/lib/progress";
+import { loadEconomy } from "@/lib/economy";
 import { useCareerRole } from "@/lib/use-career-role";
 import CareerBoard from "@/components/career-board";
 import LearnRail from "@/components/learn-rail";
@@ -18,7 +19,7 @@ export default function CareerPathClient({ roleId }: { roleId: string }) {
 
   useEffect(() => {
     setRoleId(role.id);
-    setProgress(loadProgress());
+    setProgress(loadEconomy());
   }, [role.id, setRoleId]);
 
   const steps = pathSteps(role, progress.completedLessons);
@@ -82,7 +83,7 @@ export default function CareerPathClient({ roleId }: { roleId: string }) {
 
         <div className="lg:col-span-4">
           <div className="space-y-4 lg:sticky lg:top-6">
-            <LearnRail progress={progress} />
+            <LearnRail progress={progress} onProgress={setProgress} />
             <TestingTools role={role} onChange={setProgress} />
           </div>
         </div>

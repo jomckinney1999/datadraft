@@ -20,6 +20,22 @@ export type Progress = {
   perfectLessons: number;
   /** Career yards, the cosmetic counter the drive bar feeds. */
   totalYards: number;
+  // ── sideline economy (lib/economy.ts) ──
+  /** Daily lesson starts left (Duo hearts → timeouts). */
+  timeouts: number;
+  /** YYYY-MM-DD of last daily timeout refill. */
+  timeoutsRefilledDay: string;
+  /** Scouting tickets (Duo gems). */
+  tickets: number;
+  /** Bye weeks in inventory (Duo streak freezes). */
+  byeWeeks: number;
+  /** Day a bye week last auto-applied. */
+  byeUsedOn: string;
+  /**
+   * Local Practice-tier flag — unlimited timeouts. Real billing stays on the
+   * waitlist until Stripe/legal are ready; testing tools can flip this.
+   */
+  seasonPass: boolean;
 };
 
 const KEY = "sqlsports.progress.v1";
@@ -41,6 +57,12 @@ export const EMPTY_PROGRESS: Progress = {
   bestCombo: 0,
   perfectLessons: 0,
   totalYards: 0,
+  timeouts: 5,
+  timeoutsRefilledDay: "",
+  tickets: 40,
+  byeWeeks: 0,
+  byeUsedOn: "",
+  seasonPass: false,
 };
 
 const STYLE_IDS: PlaybookStyle[] = ["film-room", "gunslinger", "dual-threat"];
@@ -87,6 +109,15 @@ export function loadProgress(): Progress {
       perfectLessons:
         typeof parsed.perfectLessons === "number" ? parsed.perfectLessons : 0,
       totalYards: typeof parsed.totalYards === "number" ? parsed.totalYards : 0,
+      timeouts: typeof parsed.timeouts === "number" ? parsed.timeouts : 5,
+      timeoutsRefilledDay:
+        typeof parsed.timeoutsRefilledDay === "string"
+          ? parsed.timeoutsRefilledDay
+          : "",
+      tickets: typeof parsed.tickets === "number" ? parsed.tickets : 40,
+      byeWeeks: typeof parsed.byeWeeks === "number" ? parsed.byeWeeks : 0,
+      byeUsedOn: typeof parsed.byeUsedOn === "string" ? parsed.byeUsedOn : "",
+      seasonPass: parsed.seasonPass === true,
     };
   } catch {
     return EMPTY_PROGRESS;
@@ -157,21 +188,25 @@ export function completeLesson(
   else streak = 1;
 
   const next: Progress = {
+    ...p,
     xp: p.xp + earnedXp,
     completedLessons: p.completedLessons.includes(lessonId)
       ? p.completedLessons
       : [...p.completedLessons, lessonId],
     streak,
     lastActiveDay: t,
-    playbookStyle: p.playbookStyle,
-    username: p.username,
-    draftedTrack: p.draftedTrack,
-    badges: p.badges,
     bestCombo: Math.max(p.bestCombo, drive?.bestCombo ?? 0),
     perfectLessons:
       p.perfectLessons + (drive?.perfect && firstClear ? 1 : 0),
     totalYards: p.totalYards + (drive?.yards ?? 0),
   };
+
+  // Sideline tickets — perfect drives and heaters pay more.
+  let ticketGain = 8;
+  if (drive?.perfect) ticketGain += 7;
+  ticketGain += Math.min(10, Math.max(0, streak) * 2);
+  next.tickets = (next.tickets ?? 0) + ticketGain;
+
   save(next);
   return next;
 }

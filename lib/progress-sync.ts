@@ -72,6 +72,12 @@ function merge(local: Progress, remote: Row | null): Progress {
       remote.perfect_lessons ?? 0,
     ),
     totalYards: Math.max(local.totalYards, remote.total_yards ?? 0),
+    timeouts: Math.max(local.timeouts, 0),
+    timeoutsRefilledDay: local.timeoutsRefilledDay,
+    tickets: Math.max(local.tickets, 0),
+    byeWeeks: Math.max(local.byeWeeks, 0),
+    byeUsedOn: local.byeUsedOn,
+    seasonPass: local.seasonPass,
   };
 }
 

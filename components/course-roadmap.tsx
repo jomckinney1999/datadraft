@@ -15,7 +15,8 @@ import {
   type Unit,
 } from "@/lib/curriculum";
 import { useModule } from "@/lib/use-module";
-import { loadProgress, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
+import { type Progress, EMPTY_PROGRESS } from "@/lib/progress";
+import { loadEconomy } from "@/lib/economy";
 import { getTrack, normalizeTrackId } from "@/lib/draft";
 import Coach from "@/components/coach";
 import PathCast from "@/components/path-cast";
@@ -69,7 +70,7 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
   const { setModule } = useModule();
 
   useEffect(() => {
-    setProgress(loadProgress());
+    setProgress(loadEconomy());
   }, []);
 
   useEffect(() => {
@@ -242,7 +243,7 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
 
         <div className="lg:col-span-4">
           <div className="space-y-4 lg:sticky lg:top-6">
-            <LearnRail progress={progress} />
+            <LearnRail progress={progress} onProgress={setProgress} />
             <TestingTools moduleId={moduleId} onChange={setProgress} />
           </div>
         </div>

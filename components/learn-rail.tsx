@@ -5,6 +5,7 @@
 
 import Link from "next/link";
 import Coach from "@/components/coach";
+import SidelineShop from "@/components/sideline-shop";
 import {
   BADGES,
   isEarned,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/achievements";
 import { type Progress } from "@/lib/progress";
 import { leagueLabel } from "@/components/learn-status-chips";
+import { FREE_DAILY_TIMEOUTS } from "@/lib/economy";
 
 type Quest = {
   id: string;
@@ -72,7 +74,13 @@ function HelmetBadge() {
   );
 }
 
-export default function LearnRail({ progress }: { progress: Progress }) {
+export default function LearnRail({
+  progress,
+  onProgress,
+}: {
+  progress: Progress;
+  onProgress?: (p: Progress) => void;
+}) {
   const stats = statsFrom(progress);
   const drills = buildDrills(progress, stats);
   const league = leagueLabel(stats.lessonsDone);
@@ -85,12 +93,33 @@ export default function LearnRail({ progress }: { progress: Progress }) {
           aria-hidden
           className="pointer-events-none absolute inset-0 yard-lines opacity-40"
         />
+        <p className="relative label-broadcast text-ice">timeouts today</p>
+        <p className="relative mt-1 font-display text-3xl font-bold text-ink">
+          {progress.seasonPass ? "∞" : progress.timeouts}
+          {!progress.seasonPass && (
+            <span className="text-lg text-ink-muted">
+              /{FREE_DAILY_TIMEOUTS}
+            </span>
+          )}
+        </p>
+        <p className="relative mt-1 text-[12px] leading-relaxed text-ink-muted">
+          {progress.seasonPass
+            ? "Season Pass — unlimited drives."
+            : "Each graded lesson spends one timeout. Practice Field is free."}
+        </p>
+      </div>
+
+      <div className="section-card relative overflow-hidden">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 yard-lines opacity-40"
+        />
         <p className="relative label-broadcast text-turf">open practice</p>
         <p className="relative mt-1 font-display text-lg font-bold text-ink">
           Hit the Practice Field
         </p>
         <p className="relative mt-1 text-sm leading-relaxed text-ink-soft">
-          Ungraded free play over real NFL data — no downs, no scoreboard
+          Ungraded free play over real NFL data — no timeouts, no scoreboard
           pressure.
         </p>
         <div className="relative mt-3 flex items-end justify-between gap-3">
@@ -103,6 +132,8 @@ export default function LearnRail({ progress }: { progress: Progress }) {
           <Coach mood="happy" size={72} className="shrink-0" />
         </div>
       </div>
+
+      <SidelineShop progress={progress} onChange={onProgress} />
 
       <div className="section-card">
         <p className="label-broadcast text-gold">depth chart</p>

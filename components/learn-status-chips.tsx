@@ -1,11 +1,12 @@
 "use client";
 
-// Top status chips: division · heater streak · XP · career yards.
+// Top status chips: division · heater · timeouts · tickets · XP.
 // Shared by the course roadmap and the /learn catalog.
 
 import Link from "next/link";
 import { displayStreak, type Progress } from "@/lib/progress";
 import { statsFrom, BADGES, isEarned } from "@/lib/achievements";
+import { FREE_DAILY_TIMEOUTS } from "@/lib/economy";
 
 function FlameIcon({ active }: { active: boolean }) {
   return (
@@ -39,6 +40,39 @@ function HelmetIcon() {
   );
 }
 
+function TicketIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-gold" aria-hidden>
+      <path
+        d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a1.5 1.5 0 1 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a1.5 1.5 0 1 0 0-4V8z"
+        fill="currentColor"
+        fillOpacity="0.85"
+      />
+    </svg>
+  );
+}
+
+function ClockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-ice" aria-hidden>
+      <circle
+        cx="12"
+        cy="12"
+        r="8"
+        stroke="currentColor"
+        strokeWidth="2"
+        fill="none"
+      />
+      <path
+        d="M12 8v4l2.5 1.5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 /** Depth-chart rank from lesson count — personal, not multiplayer. */
 export function leagueLabel(lessonsDone: number): string {
   if (lessonsDone >= 40) return "Pro Bowl";
@@ -59,6 +93,9 @@ export default function LearnStatusChips({
   const stats = statsFrom(progress);
   const league = leagueLabel(stats.lessonsDone);
   const earned = BADGES.filter((b) => isEarned(b, stats)).length;
+  const timeoutsLabel = progress.seasonPass
+    ? "∞"
+    : `${progress.timeouts}/${FREE_DAILY_TIMEOUTS}`;
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -73,17 +110,39 @@ export default function LearnStatusChips({
       </Link>
       <span
         className={`status-chip ${streak > 0 ? "border-gold/40 text-gold" : ""}`}
-        title="Day streak"
+        title={
+          progress.byeWeeks > 0
+            ? `Heater · ${progress.byeWeeks} bye week${progress.byeWeeks === 1 ? "" : "s"} ready`
+            : "Day streak (heater)"
+        }
       >
         <FlameIcon active={streak > 0} />
         {streak}
+        {progress.byeWeeks > 0 && (
+          <span className="text-ice" title="Bye weeks">
+            ·{progress.byeWeeks}🛡️
+          </span>
+        )}
         <span className="hidden text-ink-muted md:inline">heater</span>
+      </span>
+      <span
+        className="status-chip text-ice"
+        title="Timeouts left today — each graded drive costs one"
+      >
+        <ClockIcon />
+        {timeoutsLabel}
+        <span className="hidden text-ink-muted lg:inline">TO</span>
+      </span>
+      <span className="status-chip text-gold" title="Scouting tickets">
+        <TicketIcon />
+        {progress.tickets}
+        <span className="hidden text-ink-muted lg:inline">tix</span>
       </span>
       <span className="status-chip text-turf" title="Season XP">
         {progress.xp} XP
       </span>
       <span
-        className="status-chip hidden text-ink-soft sm:inline-flex"
+        className="status-chip hidden text-ink-soft xl:inline-flex"
         title="Career yards"
       >
         {progress.totalYards.toLocaleString()} yd

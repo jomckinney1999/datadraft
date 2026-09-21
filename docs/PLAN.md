@@ -107,12 +107,25 @@ Most drills are honest `placeholder` stubs; Data Analyst foundation drills that 
 
 | Tier | What's included | Price | Who it's for |
 |---|---|---|---|
-| **Free** | Free content (YouTube/LinkedIn/Substack), limited sandbox access | $0 | Top-of-funnel, everyone |
-| **Practice** | Full sandbox subscription, ongoing problem sets, live season datasets | $15–30/mo | Hobbyists, casual skill-builders |
+| **Free** | Free content, limited graded drives (**5 timeouts/day**), scouting tickets + bye weeks (streak freezes), unlimited Practice Field | $0 | Top-of-funnel, everyone |
+| **Practice** (**Season Pass** in-product) | Unlimited timeouts, ongoing problem sets, live season datasets | $15–30/mo | Hobbyists, casual skill-builders |
 | **Roadmap** | Full Beginner → Advanced course pathway, portfolio capstone, completion credential | $200–500 one-time | Serious learners, not yet job-hunting |
 | **Career Track** | Everything in Roadmap + role-specific playbook (DA / DS / AI Eng / SWE / AE / FDE) + resume/portfolio review + mock interview practice + application strategy support | $1,000–5,000/yr | Andy, once he's decided this is a career move, not a hobby |
 
 This ladder is implemented on the landing page pricing section (`app/page.tsx`, `PLANS` array). Nav `Career Track` → `#career-track` anchors the playbooks section (`components/career-playbooks.tsx`). The pricing section also carries a **founding-cohort pricing badge** (see Must-buy mechanisms, #5) — all four tiers are framed as early/founding pricing.
+
+### Free-tier sideline economy (added 2026-09-21)
+
+Duo-shaped habit loop, football-named — lives in `lib/economy.ts` + progress fields, UI on the learn rail / status chips. **No Stripe checkout yet** (legal/business still blocked); Season Pass is a waitlist CTA (`interest: practice`) plus a local demo flag for QA.
+
+| Duo idea | SQL Sports name | Behavior |
+|---|---|---|
+| Hearts | **Timeouts** | 5 graded lesson starts per day on Free. Season Pass = unlimited. Practice Field never spends one. |
+| Gems | **Scouting tickets** | Earned clearing drives (bonus for perfect + heater). Spent in the Sideline Shop. |
+| Streak freeze | **Bye week** | Inventory item; auto-covers exactly one missed calendar day so the heater survives. |
+| Super | **Season Pass** | Maps to Practice tier — waitlist until billing is live. |
+
+Shop prices and ticket payouts are constants in `lib/economy.ts`. Change them there, not in components. When Stripe lands, flip `seasonPass` from the subscription webhook instead of the testing toggle.
 
 ## Weekly Challenge & Leaderboard (planned, not built)
 
