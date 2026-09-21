@@ -521,6 +521,93 @@ body {
     );
   }
 
+  /* DataCamp-style split: content (left) + terminal (right) */
+  .lesson-content-pane {
+    border-radius: 1rem;
+    border: 1px solid rgb(var(--c-panel-border));
+    background-color: rgb(var(--c-panel));
+    box-shadow: var(--shadow-surface);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  .lesson-terminal-pane {
+    border-radius: 1rem;
+    border: 1px solid rgb(var(--c-panel-border));
+    background-color: rgb(var(--c-night-100));
+    box-shadow: var(--shadow-surface);
+    display: flex;
+    flex-direction: column;
+    min-height: 18rem;
+    overflow: hidden;
+  }
+
+  .lesson-terminal-chrome {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border-bottom: 1px solid rgb(var(--c-panel-border));
+    background-color: rgb(var(--c-panel) / 0.85);
+    padding: 0.55rem 0.85rem;
+  }
+
+  .lesson-terminal-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 9999px;
+  }
+
+  .btn-run {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 0.65rem;
+    border: 1px solid rgb(var(--c-turf) / 0.45);
+    background-color: rgb(var(--c-turf) / 0.12);
+    padding: 0.35rem 0.75rem;
+    font-family: var(--font-ibm-plex-mono), monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(var(--c-turf));
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+  .btn-run:hover:not(:disabled) {
+    background-color: rgb(var(--c-turf) / 0.22);
+    border-color: rgb(var(--c-turf));
+  }
+  .btn-run:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .fill-chip {
+    border-radius: 0.75rem;
+    border: 2px solid rgb(var(--c-panel-border));
+    background-color: rgb(var(--c-panel));
+    padding: 0.55rem 0.85rem;
+    font-family: var(--font-ibm-plex-mono), monospace;
+    font-size: 0.85rem;
+    color: rgb(var(--c-ink));
+    transition: transform 0.12s ease, border-color 0.15s ease, background-color 0.15s ease;
+  }
+  .fill-chip:hover:not(:disabled) {
+    border-color: rgb(var(--c-turf) / 0.55);
+    color: rgb(var(--c-turf));
+    transform: translateY(-1px);
+  }
+  .fill-chip:active:not(:disabled) {
+    transform: scale(0.96);
+  }
+  .fill-chip-used {
+    opacity: 0.35;
+    border-color: rgb(var(--c-panel-border));
+  }
+
   /* Frosted bar for anything that floats over scrolling content. */
   .glass {
     background-color: rgb(var(--c-night) / 0.72);
@@ -878,6 +965,37 @@ body {
   100% { transform: translateY(0); }
 }
 
+@keyframes xp-float {
+  0%   { opacity: 0; transform: translate(-50%, 12px) scale(0.9); }
+  18%  { opacity: 1; transform: translate(-50%, 0) scale(1.05); }
+  70%  { opacity: 1; transform: translate(-50%, -28px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -52px) scale(0.96); }
+}
+
+@keyframes confetti-fall {
+  0%   { opacity: 1; transform: translate3d(0, 0, 0) rotate(0deg); }
+  100% { opacity: 0; transform: translate3d(var(--dx, 0px), 55vh, 0) rotate(520deg); }
+}
+
+@keyframes correct-flash {
+  0%   { box-shadow: 0 0 0 0 rgb(var(--c-turf) / 0); }
+  35%  { box-shadow: 0 0 0 6px rgb(var(--c-turf) / 0.35); }
+  100% { box-shadow: 0 0 0 0 rgb(var(--c-turf) / 0); }
+}
+
+@keyframes option-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+.lesson-confetti {
+  animation-name: confetti-fall;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+  animation-fill-mode: forwards;
+  --dx: calc((50% - 50vw) * 0.08);
+}
+
 .animate-yard-pop   { animation: yard-pop 1.15s ease-out forwards; }
 .animate-heat-pulse { animation: heat-pulse 1.6s ease-in-out infinite; }
 .animate-badge-drop { animation: badge-drop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
@@ -888,6 +1006,9 @@ body {
 .animate-trophy-in  { animation: trophy-in 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.3) both; }
 .animate-celebrate  { animation: celebrate-bounce 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.25) both; }
 .animate-feedback-rise { animation: feedback-rise 0.32s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+.animate-xp-float   { animation: xp-float 1.35s ease-out forwards; }
+.animate-correct-flash { animation: correct-flash 0.7s ease-out; }
+.animate-option-pop { animation: option-pop 0.28s ease-out; }
 
 /* Tactile press feedback. Applied to the primary action buttons so a click
    registers physically even before the next screen renders. */
@@ -935,6 +1056,10 @@ body {
   .animate-trophy-in,
   .animate-celebrate,
   .animate-feedback-rise,
+  .animate-xp-float,
+  .animate-correct-flash,
+  .animate-option-pop,
+  .lesson-confetti,
   .sheen {
     animation: none;
   }

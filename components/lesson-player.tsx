@@ -60,6 +60,7 @@ import {
 import { MAIN_SHEET, type CellValue } from "@/lib/excel-data";
 import { SHORT_CREDIT } from "@/lib/data-source";
 import DriveField, { burstFromPlay, type FieldBurst } from "@/components/drive-field";
+import { ConfettiBurst, XpFloat, ComboRibbon } from "@/components/lesson-fx";
 import { heatLabel } from "@/lib/gameplay";
 import {
   startDrive,
@@ -205,6 +206,12 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const [burst, setBurst] = useState<FieldBurst | null>(null);
   /** Badges unlocked by this lesson, celebrated on the completion screen. */
   const [unlocked, setUnlocked] = useState<Badge[]>([]);
+  /** Duolingo FX — bump key to re-fire confetti; float shows last XP award. */
+  const [fxKey, setFxKey] = useState(0);
+  const [xpFloat, setXpFloat] = useState<{
+    amount: number;
+    yards: number;
+  } | null>(null);
 
   /**
    * Gunslingers want to type, not tick boxes. They always skip pure-recall
@@ -651,6 +658,11 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
         burstFromPlay(kind, scored.yards, Date.now(), scored.explosive),
       );
 
+      const xpGain = isFirstAttempt ? XP_PER_EXERCISE : XP_RETRY;
+      setFxKey((k) => k + 1);
+      setXpFloat({ amount: xpGain, yards: scored.yards });
+      window.setTimeout(() => setXpFloat(null), 1400);
+
       setFeedback({
         correct: true,
         headline: scored.heat
@@ -719,6 +731,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     setBestCombo(0);
     setBurst(null);
     setUnlocked([]);
+    setFxKey(0);
+    setXpFloat(null);
     setFirstTry({});
     setAttempted({});
     setFeedback(null);
@@ -733,9 +747,27 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const firstTryCorrect = Object.values(firstTry).filter(Boolean).length;
   const playOrdinal =
     total > 0 ? Math.min(total, total - queue.length + (queue.length > 0 ? 1 : 0)) : 0;
+  const isHandsOn =
+    !!exercise &&
+    (exercise.type === "query" ||
+      exercise.type === "code" ||
+      exercise.type === "formula");
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-4 pb-32 sm:max-w-2xl sm:pb-10">
+    <div
+      className={`relative mx-auto flex min-h-screen w-full flex-col px-4 pb-32 sm:pb-10 ${
+        phase === "exercise" && isHandsOn
+          ? "max-w-6xl"
+          : "max-w-xl sm:max-w-2xl"
+      }`}
+    >
+      <ConfettiBurst fireKey={fxKey} active={!!feedback?.correct} />
+      <XpFloat
+        amount={xpFloat?.amount ?? 0}
+        yards={xpFloat?.yards}
+        yardsLabel={gainNoun}
+        show={!!xpFloat}
+      />
       {/* top bar — frosted scorebug */}
       <div className="glass sticky top-0 z-20 -mx-4 border-b border-panel-border/50 px-4 py-3.5">
         <div className="flex items-center gap-3">
@@ -987,27 +1019,31 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       )}
 
       {phase === "exercise" && exercise && (
-        <div key={currentIdx} className="animate-play-in flex flex-1 flex-col pt-5">
-          {/* gunslinger's on-demand chalkboard */}
+        <div
+          key={currentIdx}
+          className={`animate-play-in flex flex-1 flex-col pt-4 ${
+            feedback?.correct ? "animate-correct-flash" : ""
+          }`}
+        >
           {style === "gunslinger" && (
             <div className="mb-3">
               <button
                 type="button"
                 onClick={() => setChalkboardOpen((v) => !v)}
-                className="font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors hover:text-turf"
+                className="text-sm font-medium text-ink-muted transition-colors hover:text-turf"
               >
-                {chalkboardOpen ? "▾ hide chalkboard" : "▸ peek at the chalkboard"}
+                {chalkboardOpen ? "▾ Hide chalkboard" : "▸ Peek at the chalkboard"}
               </button>
               {chalkboardOpen && (
-                <div className="surface mt-2 border border-panel-border bg-panel/60 p-4">
+                <div className="lesson-prompt mt-2">
                   <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-turf">
                     {lesson.intro.title}
                   </p>
-                  <p className="mt-1.5 text-[13px] leading-relaxed text-ink-soft">
+                  <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">
                     {lesson.intro.text}
                   </p>
                   {lesson.intro.code && (
-                    <pre className="mt-2 overflow-x-auto border border-panel-border bg-night px-3 py-2 font-mono text-[12px] leading-relaxed text-turf">
+                    <pre className="mt-2 overflow-x-auto rounded-xl border border-panel-border bg-night px-3 py-2 font-mono text-[12px] leading-relaxed text-turf">
                       {lesson.intro.code}
                     </pre>
                   )}
@@ -1016,317 +1052,34 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             </div>
           )}
 
-          {/* One beat: short prompt, then the hands-on work */}
-          <div className="lesson-prompt">
-            <p className="mb-2 font-mono text-[11px] font-semibold uppercase tracking-wider text-turf">
-              {feedback?.playKind === "first_down"
-                ? "Chains moving"
-                : feedback?.correct
-                  ? "Nice"
-                  : feedback
-                    ? "Whistle"
-                    : "Your play"}
-            </p>
-            <p className="font-display text-lg font-semibold leading-snug text-ink sm:text-xl">
-              {exercise.prompt}
-            </p>
-            {exercise.type === "mc" && exercise.code && (
-              <pre className="mt-4 overflow-x-auto rounded-xl border border-panel-border bg-night px-3 py-2.5 font-mono text-[13px] leading-relaxed text-gold">
-                {exercise.code}
-              </pre>
-            )}
-          </div>
-
-          {/* answer area */}
-          <div className="mt-5 flex-1 pb-4">
-            {exercise.type === "mc" && (
-              <div className="grid gap-2.5">
-                {exercise.options.map((opt, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    disabled={!!feedback}
-                    onClick={() => setMcChoice(i)}
-                    className={`option-chip ${
-                      mcChoice === i ? "option-chip-on" : ""
-                    } disabled:cursor-default`}
-                  >
-                    <span className="mr-3 inline-flex h-7 w-7 items-center justify-center rounded-full border border-panel-border font-mono text-xs font-bold text-ink-muted">
-                      {i + 1}
-                    </span>
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {exercise.type === "fill" && (
-              <div>
-                <pre className="overflow-x-auto whitespace-pre-wrap border border-panel-border bg-night px-4 py-4 font-mono text-[14px] leading-loose text-ink">
-                  {(() => {
-                    let blank = -1;
-                    return exercise.parts.map((part, i) => {
-                      if (part !== null) return <span key={i}>{part}</span>;
-                      blank += 1;
-                      const b = blank;
-                      const value = fillSlots[b];
-                      return (
-                        <button
-                          key={i}
-                          type="button"
-                          disabled={!!feedback}
-                          onClick={() =>
-                            setFillSlots((s) => {
-                              const next = [...s];
-                              next[b] = null;
-                              return next;
-                            })
-                          }
-                          className={`mx-0.5 inline-block min-w-[72px] border-b-2 px-2 py-0.5 text-center align-baseline transition-colors ${
-                            value
-                              ? "border-turf bg-turf/10 text-turf"
-                              : "border-ink-muted/50 text-ink-muted"
-                          }`}
-                        >
-                          {value ?? " "}
-                        </button>
-                      );
-                    });
-                  })()}
-                </pre>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {exercise.bank.map((chip) => {
-                    const used = fillSlots.includes(chip);
-                    return (
-                      <button
-                        key={chip}
-                        type="button"
-                        disabled={used || !!feedback}
-                        onClick={() =>
-                          setFillSlots((s) => {
-                            const firstEmpty = s.indexOf(null);
-                            if (firstEmpty === -1) return s;
-                            const next = [...s];
-                            next[firstEmpty] = chip;
-                            return next;
-                          })
-                        }
-                        className={`border px-3 py-2 font-mono text-[13px] transition-colors ${
-                          used
-                            ? "border-panel-border bg-panel text-panel-hover"
-                            : "border-panel-border bg-panel/80 text-ink hover:border-turf/50 hover:text-turf"
-                        }`}
-                      >
-                        {chip}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {exercise.type === "code" && (
-              <div className="border border-panel-border bg-night/95 shadow-scoreboard">
-                <div className="flex items-center justify-between border-b border-panel-border px-3 py-2">
-                  <span className="label-broadcast text-turf">
-                    your {LANG_LABEL[exercise.lang].toLowerCase()} · runs for real
+          {isHandsOn ? (
+            <div className="grid flex-1 gap-4 lg:grid-cols-2 lg:items-stretch">
+              <aside className="lesson-content-pane p-5 sm:p-6">
+                <div className="mb-4 flex flex-wrap items-center gap-2">
+                  <span className="rounded-full border border-turf/40 bg-turf/15 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-turf">
+                    Instructions
                   </span>
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-                    {runtimeLoading === exercise.lang
-                      ? `loading ${LANG_LABEL[exercise.lang]} ${LANG_WEIGHT[exercise.lang]}…`
-                      : "runtime ready"}
-                  </span>
+                  <ComboRibbon combo={combo} />
                 </div>
-                <CodeEditor
-                  value={codeText}
-                  onChange={setCodeText}
-                  lang={exercise.lang}
-                  rows={9}
-                  disabled={!!feedback}
-                  ariaLabel={`${LANG_LABEL[exercise.lang]} answer editor`}
-                />
-                <div className="flex items-center justify-between border-t border-panel-border px-3 py-2">
-                  <p className="font-mono text-[10px] text-ink-muted">
-                    print your answer so it can be checked
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => handleRunCode(exercise)}
-                    disabled={
-                      running || !!runtimeLoading || !!feedback || checking
+                <h2 className="font-display text-xl font-bold leading-snug text-ink sm:text-2xl">
+                  {exercise.prompt}
+                </h2>
+                <div className="mt-4 hidden sm:block">
+                  <Coach
+                    mood={
+                      feedback
+                        ? feedback.correct
+                          ? "cheer"
+                          : "sad"
+                        : "think"
                     }
-                    className="border border-panel-border px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors hover:border-turf/50 hover:text-turf disabled:opacity-40"
-                  >
-                    {running ? "running…" : "▸ Run"}
-                  </button>
-                </div>
-                {(codeError || softError) && (
-                  <p className="border-t border-gold/40 bg-gold/5 px-3 py-2 font-mono text-[12px] leading-relaxed text-gold">
-                    ⚠ {softError ?? codeError}
-                    {" — no down on the play. Fix it and check again."}
-                  </p>
-                )}
-                {codeOutput !== null && !codeError && (
-                  <div className="max-h-48 overflow-auto border-t border-panel-border bg-night px-4 py-3">
-                    <p className="label-broadcast mb-1 text-[10px] text-ink-muted">
-                      output
-                    </p>
-                    <pre className="whitespace-pre-wrap font-mono text-[12px] leading-relaxed text-ink">
-                      {codeOutput || "(nothing printed)"}
-                    </pre>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {exercise.type === "formula" && (
-              <div className="space-y-3">
-                <ExcelGrid sheet={formulaSheet} maxRows={9} />
-
-                <div className="border border-panel-border bg-night/95 shadow-scoreboard">
-                  <div className="flex items-center justify-between border-b border-panel-border px-3 py-2">
-                    <span className="label-broadcast text-turf">
-                      formula bar · fx
-                    </span>
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-                      {formulaReady ? "engine ready" : "loading engine…"}
-                    </span>
-                  </div>
-                  <CodeEditor
-                    value={formulaText}
-                    onChange={setFormulaText}
-                    lang="excel"
-                    rows={2}
-                    disabled={!!feedback}
-                    ariaLabel="Excel formula editor"
+                    size={88}
                   />
-                  <div className="flex items-center justify-between border-t border-panel-border px-3 py-2">
-                    <p className="font-mono text-[10px] text-ink-muted">
-                      sheet: {formulaSheet}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={handleRunFormula}
-                      disabled={running || !!feedback}
-                      className="border border-panel-border px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors hover:border-turf/50 hover:text-turf disabled:opacity-40"
-                    >
-                      {running ? "Running…" : "▸ Run preview"}
-                    </button>
-                  </div>
-                  {(formulaError || softError) && (
-                    <p className="border-t border-gold/40 bg-gold/5 px-3 py-2 font-mono text-[12px] text-gold">
-                      ⚠ {softError ?? formulaError}
-                      {softError &&
-                        " — no down on the play. Fix it and check again."}
-                    </p>
-                  )}
-                  {formulaValue !== null && !formulaError && (
-                    <div className="flex items-baseline gap-3 border-t border-panel-border px-3 py-2">
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-                        result
-                      </span>
-                      <span className="font-mono text-[15px] font-semibold text-turf">
-                        {formatValue(formulaValue)}
-                      </span>
-                    </div>
-                  )}
                 </div>
-              </div>
-            )}
-
-            {exercise.type === "query" && (
-              <div className="border border-panel-border bg-night/95 shadow-scoreboard">
-                <div className="flex items-center justify-between border-b border-panel-border px-3 py-2">
-                  <span className="label-broadcast text-turf">
-                    your sql · 3 tables loaded
-                  </span>
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-                    {engineReady ? "engine ready" : "loading engine…"}
-                  </span>
-                </div>
-                <CodeEditor
-                  value={queryText}
-                  onChange={setQueryText}
-                  lang="sql"
-                  rows={5}
-                  disabled={!!feedback}
-                  ariaLabel="SQL answer editor"
-                />
-                <div className="flex items-center justify-end border-t border-panel-border px-3 py-2">
-                  <button
-                    type="button"
-                    onClick={handleRun}
-                    disabled={!engineReady || !!feedback}
-                    className="border border-panel-border px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors hover:border-turf/50 hover:text-turf disabled:opacity-40"
-                  >
-                    ▸ Run preview
-                  </button>
-                </div>
-                {/* Prompts name tables constantly; make them checkable here. */}
-                <SchemaReference />
-                {(runError || softError) && (
-                  <p className="border-t border-gold/40 bg-gold/5 px-3 py-2 font-mono text-[12px] text-gold">
-                    ⚠ {softError ?? runError}
-                    {softError && " — no down on the play. Fix it and check again."}
-                  </p>
-                )}
-                {runResult && runResult.columns.length > 0 && (
-                  <div className="max-h-48 overflow-auto border-t border-panel-border">
-                    <table className="w-full text-left">
-                      <thead>
-                        <tr className="border-b border-panel-border">
-                          {runResult.columns.map((c, i) => (
-                            <th
-                              key={i}
-                              className="px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-ink-muted"
-                            >
-                              {c}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {runResult.values.slice(0, 30).map((row, ri) => (
-                          <tr key={ri} className="border-b border-panel-border/40">
-                            {row.map((cell, ci) => (
-                              <td
-                                key={ci}
-                                className="px-3 py-1.5 font-mono text-[12px] text-ink-soft"
-                              >
-                                {cell === null ? "null" : String(cell)}
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    {runResult.values.length > 30 && (
-                      <p className="px-3 py-1.5 font-mono text-[10px] text-ink-muted">
-                        …{runResult.values.length - 30} more rows
-                      </p>
-                    )}
-                  </div>
-                )}
-                {runResult && runResult.columns.length === 0 && (
-                  <p className="border-t border-panel-border px-3 py-2 font-mono text-[12px] text-ink-muted">
-                    Query ran but returned nothing — try a SELECT.
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* sticky check bar / feedback — Duolingo-weight primary action */}
-          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-panel-border/80 bg-night/95 px-4 py-4 backdrop-blur-md sm:static sm:mt-8 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
-            <div className="mx-auto max-w-xl sm:max-w-none">
-            {!feedback ? (
-              <div className="flex flex-col gap-3">
-                {exercise.type === "query" ||
-                exercise.type === "code" ||
-                exercise.type === "formula" ? (
-                  hintsVisible ? (
-                    <p className="rounded-xl border border-panel-border/80 bg-panel/50 px-3 py-2 text-sm leading-snug text-ink-muted">
-                      <span className="font-semibold text-ink-soft">Hint · </span>
+                <div className="mt-5">
+                  {hintsVisible ? (
+                    <div className="rounded-xl border border-ice/30 bg-ice/5 px-3 py-2.5 text-sm leading-snug text-ink-soft">
+                      <span className="font-semibold text-ice">Hint · </span>
                       {
                         (
                           exercise as
@@ -1335,17 +1088,365 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                             | FormulaExercise
                         ).hint
                       }
-                    </p>
+                    </div>
                   ) : (
                     <button
                       type="button"
                       onClick={() => setHintShown(true)}
-                      className="self-start text-sm font-medium text-ink-muted transition-colors hover:text-gold"
+                      className="text-sm font-medium text-ink-muted transition-colors hover:text-gold"
                     >
                       Need a hint?
                     </button>
-                  )
-                ) : null}
+                  )}
+                </div>
+                {exercise.type === "query" && (
+                  <div className="mt-5">
+                    <SchemaReference />
+                  </div>
+                )}
+                {exercise.type === "formula" && (
+                  <div className="mt-5">
+                    <ExcelGrid sheet={formulaSheet} maxRows={7} />
+                  </div>
+                )}
+                {feedback && (
+                  <div
+                    className={`mt-5 animate-feedback-rise ${
+                      feedback.correct ? "feedback-win" : "feedback-miss"
+                    }`}
+                  >
+                    <p
+                      className={`font-display text-lg font-bold ${
+                        feedback.correct ? "text-turf" : "text-gold"
+                      }`}
+                    >
+                      {feedback.correct ? "🎉 " : "🚩 "}
+                      {feedback.headline}
+                    </p>
+                    <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+                      {feedback.explain}
+                    </p>
+                    {!feedback.correct && feedback.solution && (
+                      <pre className="mt-3 overflow-x-auto whitespace-pre-wrap rounded-xl border border-panel-border bg-night px-3 py-2 font-mono text-[12px] text-ink-soft">
+                        {feedback.solution}
+                      </pre>
+                    )}
+                  </div>
+                )}
+              </aside>
+
+              <section className="lesson-terminal-pane">
+                <div className="lesson-terminal-chrome">
+                  <div className="flex items-center gap-2">
+                    <span className="lesson-terminal-dot bg-gold/80" />
+                    <span className="lesson-terminal-dot bg-turf/80" />
+                    <span className="lesson-terminal-dot bg-ice/80" />
+                    <span className="ml-2 font-mono text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
+                      {exercise.type === "query"
+                        ? "SQL terminal"
+                        : exercise.type === "code"
+                          ? `${LANG_LABEL[exercise.lang]} console`
+                          : "Formula bar"}
+                    </span>
+                  </div>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+                    {exercise.type === "query"
+                      ? engineReady
+                        ? "ready"
+                        : "loading…"
+                      : exercise.type === "code"
+                        ? runtimeLoading === exercise.lang
+                          ? `loading ${LANG_WEIGHT[exercise.lang]}…`
+                          : "ready"
+                        : formulaReady
+                          ? "ready"
+                          : "loading…"}
+                  </span>
+                </div>
+
+                {exercise.type === "code" && (
+                  <>
+                    <CodeEditor
+                      value={codeText}
+                      onChange={setCodeText}
+                      lang={exercise.lang}
+                      rows={12}
+                      disabled={!!feedback}
+                      ariaLabel={`${LANG_LABEL[exercise.lang]} answer editor`}
+                      className="min-h-[220px] flex-1"
+                    />
+                    <div className="flex items-center justify-between border-t border-panel-border px-3 py-2">
+                      <p className="font-mono text-[10px] text-ink-muted">
+                        print() so output can be graded
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => handleRunCode(exercise)}
+                        disabled={
+                          running || !!runtimeLoading || !!feedback || checking
+                        }
+                        className="btn-run"
+                      >
+                        {running ? "Running…" : "▸ Run"}
+                      </button>
+                    </div>
+                    {(codeError || softError) && (
+                      <p className="border-t border-gold/40 bg-gold/5 px-3 py-2 font-mono text-[12px] text-gold">
+                        ⚠ {softError ?? codeError} — no down. Fix &amp; retry.
+                      </p>
+                    )}
+                    {codeOutput !== null && !codeError && (
+                      <div className="max-h-40 overflow-auto border-t border-panel-border bg-night px-4 py-3">
+                        <p className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+                          Output
+                        </p>
+                        <pre className="whitespace-pre-wrap font-mono text-[12px] text-ink">
+                          {codeOutput || "(nothing printed)"}
+                        </pre>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {exercise.type === "formula" && (
+                  <>
+                    <CodeEditor
+                      value={formulaText}
+                      onChange={setFormulaText}
+                      lang="excel"
+                      rows={4}
+                      disabled={!!feedback}
+                      ariaLabel="Excel formula editor"
+                      className="min-h-[100px]"
+                    />
+                    <div className="flex items-center justify-between border-t border-panel-border px-3 py-2">
+                      <p className="font-mono text-[10px] text-ink-muted">
+                        sheet: {formulaSheet}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleRunFormula}
+                        disabled={running || !!feedback}
+                        className="btn-run"
+                      >
+                        {running ? "Running…" : "▸ Run preview"}
+                      </button>
+                    </div>
+                    {(formulaError || softError) && (
+                      <p className="border-t border-gold/40 bg-gold/5 px-3 py-2 font-mono text-[12px] text-gold">
+                        ⚠ {softError ?? formulaError}
+                        {softError && " — no down. Fix & retry."}
+                      </p>
+                    )}
+                    {formulaValue !== null && !formulaError && (
+                      <div className="flex items-baseline gap-3 border-t border-panel-border px-3 py-2">
+                        <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+                          Result
+                        </span>
+                        <span className="font-mono text-[15px] font-semibold text-turf">
+                          {formatValue(formulaValue)}
+                        </span>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {exercise.type === "query" && (
+                  <>
+                    <CodeEditor
+                      value={queryText}
+                      onChange={setQueryText}
+                      lang="sql"
+                      rows={10}
+                      disabled={!!feedback}
+                      ariaLabel="SQL answer editor"
+                      className="min-h-[200px] flex-1"
+                    />
+                    <div className="flex items-center justify-end border-t border-panel-border px-3 py-2">
+                      <button
+                        type="button"
+                        onClick={handleRun}
+                        disabled={!engineReady || !!feedback}
+                        className="btn-run"
+                      >
+                        ▸ Run preview
+                      </button>
+                    </div>
+                    {(runError || softError) && (
+                      <p className="border-t border-gold/40 bg-gold/5 px-3 py-2 font-mono text-[12px] text-gold">
+                        ⚠ {softError ?? runError}
+                        {softError && " — no down. Fix & retry."}
+                      </p>
+                    )}
+                    {runResult && runResult.columns.length > 0 && (
+                      <div className="max-h-48 overflow-auto border-t border-panel-border">
+                        <table className="w-full text-left">
+                          <thead>
+                            <tr className="border-b border-panel-border">
+                              {runResult.columns.map((c, i) => (
+                                <th
+                                  key={i}
+                                  className="px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-ink-muted"
+                                >
+                                  {c}
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {runResult.values.slice(0, 30).map((row, ri) => (
+                              <tr
+                                key={ri}
+                                className="border-b border-panel-border/40"
+                              >
+                                {row.map((cell, ci) => (
+                                  <td
+                                    key={ci}
+                                    className="px-3 py-1.5 font-mono text-[12px] text-ink-soft"
+                                  >
+                                    {cell === null ? "null" : String(cell)}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                    {runResult && runResult.columns.length === 0 && (
+                      <p className="border-t border-panel-border px-3 py-2 font-mono text-[12px] text-ink-muted">
+                        Query ran but returned nothing — try a SELECT.
+                      </p>
+                    )}
+                  </>
+                )}
+              </section>
+            </div>
+          ) : (
+            <>
+              <div className="lesson-prompt">
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-turf">
+                    Your play
+                  </span>
+                  <ComboRibbon combo={combo} />
+                </div>
+                <p className="font-display text-lg font-semibold leading-snug text-ink sm:text-xl">
+                  {exercise.prompt}
+                </p>
+                {exercise.type === "mc" && exercise.code && (
+                  <pre className="mt-4 overflow-x-auto rounded-xl border border-panel-border bg-night px-3 py-2.5 font-mono text-[13px] leading-relaxed text-gold">
+                    {exercise.code}
+                  </pre>
+                )}
+              </div>
+
+              <div className="mt-5 flex-1 pb-4">
+                {exercise.type === "mc" && (
+                  <div className="grid gap-2.5">
+                    {exercise.options.map((opt, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        disabled={!!feedback}
+                        onClick={() => setMcChoice(i)}
+                        className={`option-chip ${
+                          mcChoice === i
+                            ? "option-chip-on animate-option-pop"
+                            : ""
+                        } disabled:cursor-default`}
+                      >
+                        <span className="mr-3 inline-flex h-7 w-7 items-center justify-center rounded-full border border-panel-border font-mono text-xs font-bold text-ink-muted">
+                          {i + 1}
+                        </span>
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {exercise.type === "fill" && (
+                  <div>
+                    <pre className="overflow-x-auto whitespace-pre-wrap rounded-2xl border border-panel-border bg-night px-4 py-4 font-mono text-[14px] leading-loose text-ink">
+                      {(() => {
+                        let blank = -1;
+                        return exercise.parts.map((part, i) => {
+                          if (part !== null) return <span key={i}>{part}</span>;
+                          blank += 1;
+                          const b = blank;
+                          const value = fillSlots[b];
+                          return (
+                            <button
+                              key={i}
+                              type="button"
+                              disabled={!!feedback}
+                              onClick={() =>
+                                setFillSlots((s) => {
+                                  const next = [...s];
+                                  next[b] = null;
+                                  return next;
+                                })
+                              }
+                              className={`mx-0.5 inline-block min-w-[72px] rounded-md border-b-2 px-2 py-0.5 text-center align-baseline transition-colors ${
+                                value
+                                  ? "border-turf bg-turf/10 text-turf"
+                                  : "border-ink-muted/50 text-ink-muted"
+                              }`}
+                            >
+                              {value ?? " "}
+                            </button>
+                          );
+                        });
+                      })()}
+                    </pre>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {exercise.bank.map((chip) => {
+                        const used = fillSlots.includes(chip);
+                        return (
+                          <button
+                            key={chip}
+                            type="button"
+                            disabled={used || !!feedback}
+                            onClick={() =>
+                              setFillSlots((s) => {
+                                const firstEmpty = s.indexOf(null);
+                                if (firstEmpty === -1) return s;
+                                const next = [...s];
+                                next[firstEmpty] = chip;
+                                return next;
+                              })
+                            }
+                            className={`fill-chip ${used ? "fill-chip-used" : ""}`}
+                          >
+                            {chip}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {feedback && !feedback.correct && feedback.solution && (
+                  <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-xl border border-panel-border bg-night px-3 py-2.5 font-mono text-[12px] text-ink-soft">
+                    {feedback.solution}
+                  </pre>
+                )}
+                {feedback && (
+                  <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+                    {feedback.explain}
+                  </p>
+                )}
+              </div>
+            </>
+          )}
+
+          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-panel-border/80 bg-night/95 px-4 py-4 backdrop-blur-md lg:static lg:mt-6 lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+            <div
+              className={`mx-auto ${
+                isHandsOn ? "max-w-6xl" : "max-w-xl sm:max-w-none"
+              }`}
+            >
+              {!feedback ? (
                 <button
                   type="button"
                   onClick={handleCheck}
@@ -1365,53 +1466,34 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 >
                   {checking ? "Checking…" : "Check"}
                 </button>
-              </div>
-            ) : (
-              <div
-                className={`animate-feedback-rise ${
-                  feedback.correct
-                    ? "feedback-win animate-celebrate"
-                    : "feedback-miss"
-                }`}
-              >
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="min-w-0">
-                    <p className="text-2xl" aria-hidden>
-                      {feedback.correct ? "🎉" : "🚩"}
-                    </p>
+              ) : (
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  {!isHandsOn && (
                     <p
-                      className={`mt-1 font-display text-xl font-bold leading-snug ${
+                      className={`font-display text-lg font-bold ${
                         feedback.correct ? "text-turf" : "text-gold"
                       }`}
                     >
+                      {feedback.correct ? "🎉 " : "🚩 "}
                       {feedback.headline}
+                      {feedback.correct && (
+                        <span className="ml-2 text-sm font-semibold text-ink-soft">
+                          +
+                          {firstTry[currentIdx!]
+                            ? XP_PER_EXERCISE
+                            : XP_RETRY}{" "}
+                          XP
+                        </span>
+                      )}
                     </p>
-                    {feedback.correct && (
-                      <p className="mt-1.5 text-sm font-semibold text-ink-soft">
-                        +{firstTry[currentIdx] ? XP_PER_EXERCISE : XP_RETRY} XP
-                        {feedback.yards !== undefined && feedback.yards > 0 && (
-                          <span className="text-turf">
-                            {" "}
-                            · +{feedback.yards} {gainNoun}
-                          </span>
-                        )}
-                      </p>
-                    )}
-                    {!feedback.correct && feedback.playKind && (
-                      <p className="mt-1.5 text-sm font-medium text-ink-muted">
-                        {feedback.playKind === "turnover"
-                          ? "Drive over — turnover on downs"
-                          : feedback.playKind === "sack"
-                            ? "Sack · next down"
-                            : "Incomplete · next down"}
-                      </p>
-                    )}
-                  </div>
+                  )}
                   <button
                     type="button"
                     onClick={handleContinue}
                     className={
-                      feedback.correct ? "btn-continue-win" : "btn-continue-miss"
+                      feedback.correct
+                        ? "btn-continue-win"
+                        : "btn-continue-miss"
                     }
                   >
                     {feedback.playKind === "turnover"
@@ -1421,16 +1503,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                         : "Continue"}
                   </button>
                 </div>
-                {!feedback.correct && feedback.solution && (
-                  <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-xl border border-panel-border bg-night px-3 py-2.5 font-mono text-[12px] leading-relaxed text-ink-soft">
-                    {feedback.solution}
-                  </pre>
-                )}
-                <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-                  {feedback.explain}
-                </p>
-              </div>
-            )}
+              )}
             </div>
           </div>
         </div>
