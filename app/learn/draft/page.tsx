@@ -4,12 +4,12 @@
 //   1. jersey: put a name on the back of the jersey
 //   2. clock:  you're on the clock, pick a track from the draft board
 //   3. podium: "With the first pick of the SQLSports Draft, {name} selects…"
-// The pick is stored in progress; the lesson player gates on it.
+// The pick is stored in progress (optional — lessons no longer require it).
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import ThemeToggle from "@/components/theme-toggle";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { TRACKS, getTrack, type Track } from "@/lib/draft";
 import { readStoredModule } from "@/lib/use-module";
 import { loadProgress, setDraftPick } from "@/lib/progress";
@@ -19,19 +19,16 @@ import HomeLink from "@/components/home-link";
 type Act = "jersey" | "clock" | "podium";
 
 function DraftDay() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const from = searchParams.get("from");
 
   const [act, setAct] = useState<Act>("jersey");
   const [name, setName] = useState("");
   const [pick, setPick] = useState<Track | null>(null);
-  const [hasStyle, setHasStyle] = useState(false);
 
   useEffect(() => {
     const p = loadProgress();
     if (p.username) setName(p.username);
-    setHasStyle(!!p.playbookStyle);
 
     // They already chose a course on the catalog — don't make them choose
     // twice. Pre-select it so the ceremony confirms the pick instead of
@@ -51,11 +48,8 @@ function DraftDay() {
     setAct("podium");
   }
 
-  const nextHref = hasStyle
-    ? from
-      ? `/learn/${from}`
-      : "/learn"
-    : `/learn/playbook${from ? `?from=${from}` : ""}`;
+  // Playbook quiz is no longer required — land on the lesson or catalog.
+  const nextHref = from ? `/learn/${from}` : "/learn";
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col px-4 pb-16">
@@ -233,7 +227,7 @@ function DraftDay() {
             href={nextHref}
             className="w-full max-w-sm border border-turf bg-turf/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25"
           >
-            {hasStyle ? "Take the field" : "Next · choose your playbook style"}
+            Take the field
           </Link>
           <p className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
             Franchise player: you · No trade clause included

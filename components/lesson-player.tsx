@@ -17,7 +17,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import type { Database, QueryExecResult } from "sql.js";
 import { buildSeedSql } from "@/lib/fantasy-data";
 import {
@@ -147,7 +146,6 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   // state with a fresh result object each pass ("Maximum update depth
   // exceeded" on every SQL lesson brief).
   const entry = useMemo(() => getLesson(lessonId), [lessonId]);
-  const router = useRouter();
 
   const dbRef = useRef<Database | null>(null);
   const [engineReady, setEngineReady] = useState(false);
@@ -268,19 +266,12 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const formulaSheet =
     exercise?.type === "formula" ? exercise.sheet ?? MAIN_SHEET : MAIN_SHEET;
 
-  // Onboarding gates, in ceremony order: get drafted, then pick a playbook.
+  // Skip the old draft + playbook ceremony — roadmaps and courses open
+  // straight into lessons. Style defaults to Dual-Threat when unset.
   useEffect(() => {
     const p = loadProgress();
-    if (!p.username || !p.draftedTrack) {
-      router.replace(`/learn/draft?from=${lessonId}`);
-      return;
-    }
-    if (!p.playbookStyle) {
-      router.replace(`/learn/playbook?from=${lessonId}`);
-      return;
-    }
-    setStyle(p.playbookStyle);
-  }, [router, lessonId]);
+    setStyle(getStyle(p.playbookStyle).id);
+  }, [lessonId]);
 
   // Once the style is known, deal the queue and pick the opening screen.
   useEffect(() => {

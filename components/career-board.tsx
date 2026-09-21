@@ -125,7 +125,8 @@ export default function CareerBoard({
         One board · courses flow into each other down the path
       </p>
 
-      <div className="career-path-rail relative flex flex-col items-center gap-8 py-4 pb-16">
+      <div className="path-board">
+        <div className="career-path-rail path-board-stage relative flex flex-col items-center gap-8 py-4 pb-16">
         {segments.map((seg, i) => (
           <SegmentView
             key={segmentKey(seg, i)}
@@ -149,6 +150,7 @@ export default function CareerBoard({
         <p className="max-w-[14rem] text-center font-mono text-[11px] uppercase tracking-widest text-ink-muted">
           End zone · {role.title}
         </p>
+        </div>
       </div>
     </div>
   );

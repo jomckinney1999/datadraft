@@ -16,7 +16,6 @@ import {
 } from "@/lib/curriculum";
 import { useModule } from "@/lib/use-module";
 import { loadProgress, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
-import { getStyle } from "@/lib/playbook";
 import { getTrack, normalizeTrackId } from "@/lib/draft";
 import Coach from "@/components/coach";
 import HomeLink from "@/components/home-link";
@@ -108,14 +107,7 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
     liveUnits.find((u) => !u.lessons.every((l) => completed.has(l.id)))?.id ??
     liveUnits[0]?.id;
 
-  const gateHref =
-    !progress.username || !progress.draftedTrack
-      ? "/learn/draft"
-      : !progress.playbookStyle
-        ? "/learn/playbook"
-        : current
-          ? `/learn/${current.lesson.id}`
-          : null;
+  const gateHref = current ? `/learn/${current.lesson.id}` : null;
 
   const yardLine = Math.min(100, pct);
   const fieldCaption =
@@ -126,15 +118,11 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
         : `Ball on the ${yardLine}-yard line`;
 
   const gateLabel =
-    !progress.username || !progress.draftedTrack
-      ? "Enter the Draft"
-      : !progress.playbookStyle
-        ? "Choose your playbook"
-        : completedCount === 0
-          ? "Take the first snap"
-          : pct === 100
-            ? "Replay last drive"
-            : "Run the next play";
+    completedCount === 0
+      ? "Take the first snap"
+      : pct === 100
+        ? "Replay last drive"
+        : "Run the next play";
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-24 sm:px-6">
@@ -206,21 +194,6 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
                   {getTrack(normalizeTrackId(progress.draftedTrack))?.name ??
                     progress.draftedTrack}
                 </span>
-                {progress.playbookStyle && (
-                  <>
-                    {" · "}
-                    <span className="text-turf">
-                      {getStyle(progress.playbookStyle).name}
-                    </span>
-                    {" · "}
-                    <Link
-                      href="/learn/playbook"
-                      className="underline decoration-panel-border underline-offset-4 hover:text-gold"
-                    >
-                      retake quiz
-                    </Link>
-                  </>
-                )}
               </p>
             )}
           </section>
@@ -249,7 +222,7 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
                 isActive={isActive}
                 nodeState={nodeState}
                 continueHref={
-                  isActive && current && progress.playbookStyle
+                  isActive && current
                     ? `/learn/${current.lesson.id}`
                     : gateHref && isActive
                       ? gateHref
@@ -316,12 +289,6 @@ function UnitBlock({
                 {unit.title}
               </h2>
             </div>
-            <Link
-              href="/learn/playbook"
-              className="inline-flex items-center gap-1.5 rounded-xl border-2 border-night/20 bg-night/10 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-widest text-night transition-colors hover:bg-night/20"
-            >
-              📋 Playbook
-            </Link>
           </div>
         </div>
       ) : (
@@ -446,7 +413,8 @@ function LessonPath({
   items.push({ kind: "trophy" });
 
   return (
-    <div className="path-rail yard-lines mt-1">
+    <div className="path-board">
+      <div className="path-rail path-board-stage yard-lines mt-1">
       {items.map((item, i) => {
         if (item.kind === "chest") {
           return (
@@ -540,6 +508,7 @@ function LessonPath({
           </Link>
         );
       })}
+      </div>
     </div>
   );
 }
