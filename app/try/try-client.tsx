@@ -27,7 +27,6 @@ function armGuest(): Progress {
     ...existing,
     username: existing.username || "Guest",
     draftedTrack: existing.draftedTrack || "sql-fundamentals",
-    playbookStyle: existing.playbookStyle || "dual-threat",
     timeouts:
       existing.timeouts > 0 ? existing.timeouts : FREE_DAILY_TIMEOUTS,
     timeoutsRefilledDay:

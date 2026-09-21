@@ -3,16 +3,9 @@
 /**
  * Beta test bench — an internal QA surface, not a marketing page.
  *
- * Demoing the product normally means walking the full onboarding ceremony
- * (draft → playbook quiz → lessons) before you can open a single lesson, and
- * then clicking through a roadmap to reach the one you actually wanted to
- * check. This page skips all of that: arm a profile in one click, flip
- * playbook style to see how the same lesson changes, and jump straight into
- * any lesson in the catalogue.
- *
- * It is deliberately not linked from the site nav — it is a URL you keep in a
- * bookmark, and it reads and writes the same localStorage progress the real
- * player uses, so what you test is the real thing.
+ * Arm a profile in one click and jump straight into any lesson in the
+ * catalogue. Deliberately not linked from the site nav — it reads and writes
+ * the same localStorage progress the real player uses.
  */
 
 import { useEffect, useState } from "react";
@@ -25,7 +18,6 @@ import {
   type Exercise,
   type Unit,
 } from "@/lib/curriculum";
-import { STYLES, type PlaybookStyle } from "@/lib/playbook";
 import { loadProgress, saveProgress, type Progress } from "@/lib/progress";
 import { MODULE_STORAGE_KEY } from "@/lib/use-module";
 import ThemeToggle from "@/components/theme-toggle";
@@ -85,7 +77,6 @@ export default function DemoPage() {
     update({
       username: progress?.username || "Demo",
       draftedTrack: progress?.draftedTrack || "sql-fundamentals",
-      playbookStyle: progress?.playbookStyle || "dual-threat",
     });
   }
 
@@ -95,7 +86,6 @@ export default function DemoPage() {
       completedLessons: [],
       streak: 0,
       lastActiveDay: "",
-      playbookStyle: null,
       username: null,
       draftedTrack: null,
     });
@@ -124,9 +114,7 @@ export default function DemoPage() {
   const executedCount = EXECUTED.reduce((n, t) => n + (totals[t] ?? 0), 0);
   const liveCourses = COURSES.filter((c) => c.status === "live").length;
 
-  const armed = Boolean(
-    progress?.username && progress?.draftedTrack && progress?.playbookStyle,
-  );
+  const armed = Boolean(progress?.username && progress?.draftedTrack);
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-5xl px-5 py-10">
@@ -162,8 +150,8 @@ export default function DemoPage() {
               {progress === null
                 ? "reading…"
                 : armed
-                  ? `${progress.username} · ${progress.draftedTrack} · ${progress.playbookStyle} · ${progress.xp} XP · ${progress.completedLessons.length} lessons done`
-                  : "not armed — onboarding gates will redirect you"}
+                  ? `${progress.username} · ${progress.draftedTrack} · ${progress.xp} XP · ${progress.completedLessons.length} lessons done`
+                  : "not armed — set a username via Arm demo profile"}
             </p>
           </div>
           <div className="flex gap-2">
@@ -182,38 +170,6 @@ export default function DemoPage() {
               Reset all
             </button>
           </div>
-        </div>
-
-        <div className="mt-4 border-t border-panel-border pt-4">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-            playbook style — changes which exercises a lesson shows
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {STYLES.map((s) => {
-              const active = progress?.playbookStyle === s.id;
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() =>
-                    update({ playbookStyle: s.id as PlaybookStyle })
-                  }
-                  className={`border px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-colors ${
-                    active
-                      ? "border-turf bg-turf/15 text-turf"
-                      : "border-panel-border text-ink-muted hover:border-turf/50 hover:text-turf"
-                  }`}
-                >
-                  {s.name}
-                </button>
-              );
-            })}
-          </div>
-          <p className="mt-2 text-[12px] leading-relaxed text-ink-muted">
-            Gunslinger drops multiple choice on any lesson with 3+ hands-on
-            drills — the fastest way to see the formula and code exercises
-            back to back.
-          </p>
         </div>
       </section>
 
@@ -239,7 +195,6 @@ export default function DemoPage() {
             ["/learn", "Course catalog"],
             ["/field", "Practice Field"],
             ["/learn/draft", "Draft ceremony"],
-            ["/learn/playbook", "Playbook quiz"],
             ["/account", "Sign in"],
           ].map(([href, label]) => (
             <Link

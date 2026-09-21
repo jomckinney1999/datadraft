@@ -5,15 +5,8 @@
 // Soft errors (syntax) cost nothing. 4th-down miss = turnover. Misses are
 // not re-queued — explanation shows, then the next play.
 //
-// The experience adapts to the learner's playbook style (lib/playbook.ts):
-//   film-room  — chalkboard intro + bonus film cards, hints always visible
-//   gunslinger — brief, then straight to hands-on drills (all MCs dropped on
-//                lessons with enough runnable work), hints behind a toggle,
-//                chalkboard available on demand
-//   dual-threat — chalkboard intro, full exercise mix, hints visible
-//
-// Every style starts on the brief: goal, setup, and — for SQL lessons — the
-// actual rows, run live, before any question is asked about them.
+// Every lesson: brief walk-in, chalkboard theory, then one drive of drills.
+// Immediate feedback after each play; soft errors cost no downs.
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
@@ -44,7 +37,6 @@ import { useModule } from "@/lib/use-module";
 import { useSport } from "@/lib/use-sport";
 import { awardBadges, completeLesson, loadProgress, type Progress } from "@/lib/progress";
 import { pushProgress } from "@/lib/progress-sync";
-import { getStyle, type PlaybookStyle } from "@/lib/playbook";
 import { canStartLesson, loadEconomy, spendTimeout, spendTickets, COST_INSTANT_REPLAY, COST_CHALLENGE_FLAG } from "@/lib/economy";
 import Coach from "@/components/coach";
 import TimeoutGate from "@/components/timeout-gate";
@@ -62,6 +54,7 @@ import { MAIN_SHEET, type CellValue } from "@/lib/excel-data";
 import { SHORT_CREDIT } from "@/lib/data-source";
 import DriveField, { burstFromPlay, type FieldBurst } from "@/components/drive-field";
 import { ConfettiBurst, XpFloat, ComboRibbon } from "@/components/lesson-fx";
+import SfxMuteButton from "@/components/sfx-mute-button";
 import { heatLabel } from "@/lib/gameplay";
 import {
   startDrive,
@@ -72,6 +65,7 @@ import {
 } from "@/lib/drive-sim";
 import { newlyEarned, statsFrom, type Badge } from "@/lib/achievements";
 import { useCountUp } from "@/lib/use-count-up";
+import { playForPlayKind, playSfx } from "@/lib/sfx";
 
 type Phase =
   | "loading"
@@ -155,7 +149,6 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const { moduleId } = useModule();
   const { sport } = useSport();
 
-  const [style, setStyle] = useState<PlaybookStyle | undefined>(undefined);
   const [phase, setPhase] = useState<Phase>("loading");
   const [timeoutBlocked, setTimeoutBlocked] = useState(false);
   const [economy, setEconomy] = useState<Progress | null>(null);
@@ -188,8 +181,6 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const [runResult, setRunResult] = useState<QueryExecResult | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
   const [softError, setSoftError] = useState<string | null>(null);
-  const [hintShown, setHintShown] = useState(false);
-  const [chalkboardOpen, setChalkboardOpen] = useState(false);
   const [briefRows, setBriefRows] = useState<QueryExecResult | null>(null);
 
   // live-code exercises (Python / R / SQL executed for real)
@@ -199,6 +190,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const [running, setRunning] = useState(false);
   const [checking, setChecking] = useState(false);
   const [runtimeLoading, setRuntimeLoading] = useState<Lang | null>(null);
+  /** Hints stay hidden until the learner asks — same as Duo. */
+  const [hintShown, setHintShown] = useState(false);
 
   // Excel formula exercises (evaluated live against lib/excel-data.ts)
   const [formulaText, setFormulaText] = useState("");
@@ -220,34 +213,10 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     yards: number;
   } | null>(null);
 
-  /**
-   * Gunslingers want to type, not tick boxes. They always skip pure-recall
-   * concept checks (drillSkip), and on lessons that have enough hands-on work
-   * they skip the remaining multiple-choice too, leaving a DataCamp-style run
-   * of write-it-yourself drills.
-   *
-   * The MIN_HANDS_ON floor matters: concept-only units (statistics, chart
-   * choice, git) have no runnable exercises, and stripping their MCs would
-   * leave a lesson with nothing in it.
-   */
   const activeIdx = useMemo(() => {
     if (!entry) return [];
-    const all = entry.lesson.exercises;
-    const idx = all.map((_, i) => i);
-    if (style !== "gunslinger") return idx;
-
-    const MIN_HANDS_ON = 3;
-    const handsOn = all.filter(
-      (ex) => ex.type === "query" || ex.type === "code" || ex.type === "fill",
-    ).length;
-    const dropAllMc = handsOn >= MIN_HANDS_ON;
-
-    return idx.filter((i) => {
-      const ex = all[i];
-      if (ex.type !== "mc") return true;
-      return dropAllMc ? false : !ex.drillSkip;
-    });
-  }, [entry, style]);
+    return entry.lesson.exercises.map((_, i) => i);
+  }, [entry]);
 
   const total = activeIdx.length;
   const currentIdx = queue[0];
@@ -275,12 +244,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const formulaSheet =
     exercise?.type === "formula" ? exercise.sheet ?? MAIN_SHEET : MAIN_SHEET;
 
-  // Skip the old draft + playbook ceremony — roadmaps and courses open
-  // straight into lessons. Style defaults to Dual-Threat when unset.
   // Graded drives spend one daily timeout (Season Pass / Practice Field exempt).
   useEffect(() => {
     const p = loadEconomy();
-    setStyle(getStyle(p.playbookStyle).id);
     setEconomy(p);
 
     const day = new Date().toISOString().slice(0, 10);
@@ -319,15 +285,12 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     setTimeoutBlocked(false);
   }, [lessonId]);
 
-  // Once the style is known, deal the queue and pick the opening screen.
+  // Once timeouts are settled, deal the queue and open the brief.
   useEffect(() => {
-    if (timeoutBlocked || !style || phase !== "loading") return;
+    if (timeoutBlocked || phase !== "loading") return;
     setQueue(activeIdx);
-    // Every style starts at the brief. Gunslingers skip the theory cards that
-    // follow it, not the grounding itself — landing cold on drill #1 with no
-    // idea what the table looks like was the old behaviour and it was wrong.
     setPhase("brief");
-  }, [style, phase, activeIdx, timeoutBlocked]);
+  }, [phase, activeIdx, timeoutBlocked]);
 
   useEffect(() => {
     let cancelled = false;
@@ -382,7 +345,6 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     setRunError(null);
     setSoftError(null);
     setHintShown(false);
-    setChalkboardOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIdx, phase]);
 
@@ -425,6 +387,10 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       setPhase("complete");
     }
   }, [phase, total, queue.length]);
+
+  useEffect(() => {
+    if (phase === "complete") playSfx("complete");
+  }, [phase]);
 
   const perfect = drive.downsBurned === 0 && Object.values(firstTry).every(Boolean);
   const finalXp = xp + (perfect && total > 0 ? PERFECT_BONUS : 0);
@@ -503,12 +469,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   // equivalent unit of ground gained for the other two.
   const gainNoun =
     sport === "basketball" ? "pts" : sport === "baseball" ? "bases" : "yards";
-  const styleDef = getStyle(style);
-  const introCards: TheoryCard[] =
-    style === "film-room"
-      ? [lesson.intro, ...(lesson.film ?? [])]
-      : [lesson.intro];
-  const hintsVisible = style !== "gunslinger" || hintShown;
+  const introCards: TheoryCard[] = [lesson.intro, ...(lesson.film ?? [])];
 
   function runQuery(sql: string): QueryExecResult | undefined {
     const db = dbRef.current;
@@ -741,6 +702,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
         playKind: kind,
         explain: exercise.explain,
       });
+      playForPlayKind(true, kind);
     } else {
       if (isFirstAttempt) setFirstTry((m) => ({ ...m, [currentIdx]: false }));
       setCombo(0);
@@ -767,6 +729,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
         solution: result.solution,
         explain: exercise.explain,
       });
+      playForPlayKind(false, kind);
     }
   }
 
@@ -850,9 +813,6 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     setFeedback(null);
     setIntroStep(0);
     setBriefStep(0);
-    // Every style starts at the brief. Gunslingers skip the theory cards that
-    // follow it, not the grounding itself — landing cold on drill #1 with no
-    // idea what the table looks like was the old behaviour and it was wrong.
     setPhase("brief");
   }
 
@@ -902,6 +862,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             heat={heatLabel(combo)}
             burst={burst}
           />
+          <SfxMuteButton />
         </div>
         <div className="mt-2.5 flex items-center justify-between gap-3">
           <p className="truncate text-sm font-medium text-ink-soft">
@@ -926,7 +887,6 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 {briefSteps.length > 0
                   ? `the brief · ${briefStep + 1} of ${briefSteps.length}`
                   : "the brief"}
-                <span className="ml-2 text-ink-muted">· {styleDef.name}</span>
               </p>
               <h2 className="mt-2 font-display text-2xl font-bold leading-snug text-ink sm:text-3xl">
                 {briefSteps.length > 0
@@ -1072,12 +1032,10 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
           {onLastBriefStep ? (
             <button
               type="button"
-              onClick={() =>
-                setPhase(style === "gunslinger" ? "exercise" : "intro")
-              }
+              onClick={() => setPhase("intro")}
               className="btn-check"
             >
-              {style === "gunslinger" ? "Snap the ball" : "Walk me through it"}
+              Walk me through it
             </button>
           ) : (
             <button
@@ -1137,33 +1095,6 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             feedback?.correct ? "animate-correct-flash" : ""
           }`}
         >
-          {style === "gunslinger" && (
-            <div className="mb-3">
-              <button
-                type="button"
-                onClick={() => setChalkboardOpen((v) => !v)}
-                className="text-sm font-medium text-ink-muted transition-colors hover:text-turf"
-              >
-                {chalkboardOpen ? "▾ Hide chalkboard" : "▸ Peek at the chalkboard"}
-              </button>
-              {chalkboardOpen && (
-                <div className="lesson-prompt mt-2">
-                  <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-turf">
-                    {lesson.intro.title}
-                  </p>
-                  <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">
-                    {lesson.intro.text}
-                  </p>
-                  {lesson.intro.code && (
-                    <pre className="mt-2 overflow-x-auto rounded-xl border border-panel-border bg-night px-3 py-2 font-mono text-[12px] leading-relaxed text-turf">
-                      {lesson.intro.code}
-                    </pre>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
           {isHandsOn ? (
             <div className="grid flex-1 gap-4 lg:grid-cols-2 lg:items-stretch">
               <aside className="lesson-content-pane p-5 sm:p-6">
@@ -1189,7 +1120,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                   />
                 </div>
                 <div className="mt-5">
-                  {hintsVisible ? (
+                  {hintShown ? (
                     <div className="rounded-xl border border-ice/30 bg-ice/5 px-3 py-2.5 text-sm leading-snug text-ink-soft">
                       <span className="font-semibold text-ice">Hint · </span>
                       {
@@ -1218,6 +1149,10 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 )}
                 {exercise.type === "formula" && (
                   <div className="mt-5">
+                    <p className="mb-2 font-mono text-[10px] leading-snug text-ink-muted">
+                      Cell addresses live in the grid below — read the row and
+                      column off the sheet, then type them into your formula.
+                    </p>
                     <ExcelGrid sheet={formulaSheet} maxRows={7} />
                   </div>
                 )}

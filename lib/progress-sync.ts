@@ -52,11 +52,6 @@ function merge(local: Progress, remote: Row | null): Progress {
         : (remote.last_active_day ?? ""),
     // Prefer whichever side was active most recently for the single-value
     // fields, falling back to whichever one actually has a value.
-    playbookStyle:
-      (newer?.playbookStyle ??
-        (remote.playbook_style as Progress["playbookStyle"])) ||
-      local.playbookStyle ||
-      null,
     username: newer?.username ?? remote.username ?? local.username ?? null,
     draftedTrack:
       newer?.draftedTrack ?? remote.drafted_track ?? local.draftedTrack ?? null,
@@ -139,7 +134,6 @@ export async function pushProgress(progress?: Progress): Promise<void> {
       completed_lessons: p.completedLessons,
       streak: p.streak,
       last_active_day: p.lastActiveDay,
-      playbook_style: p.playbookStyle,
       username: p.username,
       drafted_track: p.draftedTrack,
       sport: readStoredSport(),

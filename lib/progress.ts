@@ -1,14 +1,11 @@
 // localStorage-backed learner progress for the /learn MVP.
 // Deliberately no backend yet — swaps for Supabase `progress` later.
 
-import type { PlaybookStyle } from "@/lib/playbook";
-
 export type Progress = {
   xp: number;
   completedLessons: string[];
   streak: number;
   lastActiveDay: string; // YYYY-MM-DD
-  playbookStyle: PlaybookStyle | null;
   username: string | null;
   draftedTrack: string | null;
   // ── game state (lib/achievements.ts reads these) ──
@@ -50,7 +47,6 @@ export const EMPTY_PROGRESS: Progress = {
   completedLessons: [],
   streak: 0,
   lastActiveDay: "",
-  playbookStyle: null,
   username: null,
   draftedTrack: null,
   badges: [],
@@ -64,8 +60,6 @@ export const EMPTY_PROGRESS: Progress = {
   byeUsedOn: "",
   seasonPass: false,
 };
-
-const STYLE_IDS: PlaybookStyle[] = ["film-room", "gunslinger", "dual-threat"];
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
@@ -91,9 +85,6 @@ export function loadProgress(): Progress {
       streak: typeof parsed.streak === "number" ? parsed.streak : 0,
       lastActiveDay:
         typeof parsed.lastActiveDay === "string" ? parsed.lastActiveDay : "",
-      playbookStyle: STYLE_IDS.includes(parsed.playbookStyle as PlaybookStyle)
-        ? (parsed.playbookStyle as PlaybookStyle)
-        : null,
       username:
         typeof parsed.username === "string" && parsed.username.trim()
           ? parsed.username
@@ -122,12 +113,6 @@ export function loadProgress(): Progress {
   } catch {
     return EMPTY_PROGRESS;
   }
-}
-
-export function setPlaybookStyle(style: PlaybookStyle): Progress {
-  const next = { ...loadProgress(), playbookStyle: style };
-  save(next);
-  return next;
 }
 
 export function setDraftPick(username: string, trackId: string): Progress {

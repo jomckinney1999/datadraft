@@ -12,6 +12,8 @@
 // Modules (MODULES below) let learners take SQL, Python, R, etc. on their own
 // or follow the all-in-one pathway.
 
+import { FINAL_UNITS } from "./finals";
+
 export type MCExercise = {
   type: "mc";
   prompt: string;
@@ -19,9 +21,6 @@ export type MCExercise = {
   options: string[];
   answer: number;
   explain: string;
-  // Pure-recall concept checks Gunslinger mode skips (the concept still
-  // appears in drill feedback). Never tag load-bearing gotcha questions.
-  drillSkip?: boolean;
 };
 
 export type FillExercise = {
@@ -109,10 +108,7 @@ export type Exercise =
 export type TheoryCard = { title: string; text: string; code?: string };
 
 /**
- * The grounding step, shown to EVERY playbook style before the first drill —
- * including Gunslingers, who previously landed cold on questions like "one row
- * in week_results represents…" without ever having been told what a row is or
- * shown the table.
+ * The grounding step shown before the first drill.
  *
  * `goal` is what you'll be able to do; `setup` is the minimum context needed to
  * attempt drill #1. `previewSql` (SQL units only) runs live against the seeded
@@ -169,10 +165,10 @@ export type Lesson = {
   id: string;
   title: string;
   blurb: string;
-  /** Grounding step every style sees before drilling. See LessonBrief. */
+  /** Grounding step before drilling. See LessonBrief. */
   brief: LessonBrief;
   intro: TheoryCard;
-  // Bonus film-study cards shown only in Film Room General mode.
+  /** Extra chalkboard cards after `intro` (deeper examples). */
   film?: TheoryCard[];
   exercises: Exercise[];
 };
@@ -349,7 +345,6 @@ export const COURSE = {
                 "Every table in the database",
               ],
               answer: 0,
-              drillSkip: true,
               explain:
                 "SELECT * with no other clauses returns the full table: all columns, all rows.",
             },
@@ -417,7 +412,6 @@ export const COURSE = {
                 "SELECT FROM week_results player, team;",
               ],
               answer: 0,
-              drillSkip: true,
               explain:
                 "Name the columns right after SELECT, separated by commas. Without the comma, SQL thinks `team` is a nickname (alias) for `player`.",
             },
@@ -747,7 +741,6 @@ export const COURSE = {
                 "fantasy_pts < 20",
               ],
               answer: 0,
-              drillSkip: true,
               explain:
                 "> is strictly more than. >= would also keep games at exactly 20.",
             },
@@ -892,7 +885,6 @@ export const COURSE = {
                 "Every week except 1 and 4",
               ],
               answer: 0,
-              drillSkip: true,
               explain:
                 "BETWEEN is inclusive on both ends. It's shorthand for week >= 1 AND week <= 4.",
             },
@@ -1104,7 +1096,6 @@ export const COURSE = {
                 "ORDER BY fantasy_pts ASC LIMIT 5",
               ],
               answer: 0,
-              drillSkip: true,
               explain:
                 "Sort descending so the best are first, then cut to 5. (ORDER BY always comes before LIMIT.)",
             },
@@ -1246,7 +1237,6 @@ export const COURSE = {
                 "The number of games",
               ],
               answer: 0,
-              drillSkip: true,
               explain:
                 "AVG is the mean — points per game if each row is a game. MAX, SUM, and COUNT answer the others.",
             },
@@ -1582,7 +1572,6 @@ export const COURSE = {
                 "It's too large to query",
               ],
               answer: 1,
-              drillSkip: true,
               explain:
                 "week_results is every player in the league. Which of them are yours is a fact that only exists in rosters, so the question needs both tables.",
             },
@@ -1884,7 +1873,6 @@ export const COURSE = {
                 "To remove NULLs",
               ],
               answer: 1,
-              drillSkip: true,
               explain:
                 "The table's grain is player-week. Without DISTINCT you'd get every one of their games, not a list of names.",
             },
@@ -2492,7 +2480,6 @@ export const COURSE = {
               answer: 1,
               explain:
                 "Reassigning replaces the old value. The variable holds whatever you put in it last — there's no history.",
-              drillSkip: true,
             },
             {
               type: "mc",
@@ -2714,7 +2701,6 @@ export const COURSE = {
               answer: 1,
               explain:
                 ".sort_values() is pandas' ORDER BY. (.arrange() is R's — you'll meet it in the R unit.)",
-              drillSkip: true,
             },
             {
               type: "code",
@@ -3112,7 +3098,6 @@ export const COURSE = {
               answer: 0,
               explain:
                 "A histogram shows the shape of a single distribution — exactly how you reveal skew and outliers visually rather than arguing about the mean.",
-              drillSkip: true,
             },
           ],
         },
@@ -3369,7 +3354,6 @@ export const COURSE = {
               answer: 0,
               explain:
                 "status is the command you run constantly — it shows what's modified, what's staged, and what git is ignoring.",
-              drillSkip: true,
             },
             {
               type: "mc",
@@ -3620,7 +3604,6 @@ export const COURSE = {
               answer: 0,
               explain:
                 "`<-` is R's idiomatic assignment. `=` also works in most spots, but `<-` is what you'll see in nearly all published code.",
-              drillSkip: true,
             },
             {
               type: "mc",
@@ -4083,7 +4066,6 @@ export const COURSE = {
                 "Dicts are sorted",
               ],
               answer: 1,
-              drillSkip: true,
               explain:
                 "Two lists rely on the positions lining up forever. Sort one and forget the other and every lookup is silently wrong.",
             },
@@ -4337,7 +4319,6 @@ export const COURSE = {
                 "An error",
               ],
               answer: 1,
-              drillSkip: true,
               explain:
                 "It's lazy: the split is described, then the aggregate triggers the work. That's why printing a bare groupby shows an object rather than data.",
             },
@@ -4610,7 +4591,6 @@ export const COURSE = {
               answer: 1,
               explain:
                 "Letter first, number second. Column E, row 2 — Josh Allen's points.",
-              drillSkip: true,
             },
             {
               type: "mc",
@@ -5234,7 +5214,6 @@ export const COURSE = {
               answer: 1,
               explain:
                 "$ locks the reference. It has nothing to do with currency formatting.",
-              drillSkip: true,
             },
             {
               type: "formula",
@@ -6102,7 +6081,6 @@ export const COURSE = {
                 "An index on week_results",
               ],
               answer: 1,
-              drillSkip: true,
               explain:
                 "It's scoped to the statement it's written in. Nothing persists after the query finishes running.",
             },
@@ -6197,7 +6175,6 @@ export const COURSE = {
                 "Only if a is recursive",
               ],
               answer: 0,
-              drillSkip: true,
               explain:
                 "That's the entire point of chaining — each step builds on the ones defined before it.",
             },
@@ -6386,7 +6363,6 @@ export const COURSE = {
                 "Temp tables require a JOIN",
               ],
               answer: 1,
-              drillSkip: true,
               explain:
                 "That persistence is the entire reason temp tables exist — everything else about querying them is identical to any other table.",
             },
@@ -6587,7 +6563,6 @@ export const COURSE = {
                 "Nothing until you query it once",
               ],
               answer: 1,
-              drillSkip: true,
               explain:
                 "No data is cached. Every read re-executes the underlying query, which is exactly why a view is always current.",
             },
@@ -6691,7 +6666,6 @@ export const COURSE = {
                 "The table is locked",
               ],
               answer: 1,
-              drillSkip: true,
               explain:
                 "Dropping a view removes a saved question, not an answer. The source table is completely unaffected.",
             },
@@ -6957,7 +6931,6 @@ export const COURSE = {
                 "The database restarting",
               ],
               answer: 1,
-              drillSkip: true,
               explain:
                 "That's the entire point of a trigger — it fires on the event, not on being called.",
             },
@@ -7059,7 +7032,6 @@ export const COURSE = {
                 "Nothing — it runs until the connection closes",
               ],
               answer: 1,
-              drillSkip: true,
               explain:
                 "BEGIN...END wraps the trigger's body, the same pairing used in stored-procedure bodies in engines that have them.",
             },
@@ -7137,7 +7109,6 @@ export const COURSE = {
                 "In the table they're attached to",
               ],
               answer: 1,
-              drillSkip: true,
               explain:
                 "sqlite_master is the one catalog every named object in the database shows up in.",
             },
@@ -7237,7 +7208,6 @@ export const COURSE = {
                 "An error unless the query has already run once",
               ],
               answer: 1,
-              drillSkip: true,
               explain:
                 "It's a plan, not data — completely safe to run on anything, since the underlying query never actually executes for real.",
             },
@@ -7321,7 +7291,6 @@ export const COURSE = {
               prompt: "Before any index exists, what does a query plan say for WHERE player = 'Josh Allen'?",
               options: ["SEARCH", "SCAN — every row gets checked", "INDEX", "ERROR"],
               answer: 1,
-              drillSkip: true,
               explain: "With nothing to jump to, a full scan is the only option the planner has.",
             },
             {
@@ -7409,7 +7378,6 @@ export const COURSE = {
                 "It depends on how many rows match",
               ],
               answer: 1,
-              drillSkip: true,
               explain:
                 "Leftmost-first: the index is sorted by player first. A search that skips player entirely can't use it.",
             },
@@ -7454,6 +7422,7 @@ export const COURSE = {
         },
       ],
     },
+    ...FINAL_UNITS,
   ] as Unit[],
 };
 
@@ -7485,11 +7454,11 @@ export const MODULES: Module[] = [
     blurb:
       "Every skill in order, the way a career-changer should take it: SQL, Python, statistics, charts, Git, R.",
     unitIds: [
-      "u1", "u2", "u3", "u4", "u5", "u6",
-      "u19", "u20", "u21", "u22",
-      "u15", "u16", "u17", "u18",
-      "u7", "u13", "u14",
-      "u8", "u9", "u10", "u11",
+      "u1", "u2", "u3", "u4", "u5", "u6", "u23",
+      "u19", "u20", "u21", "u22", "u24",
+      "u15", "u16", "u17", "u18", "u26",
+      "u7", "u13", "u14", "u25",
+      "u8", "u27", "u9", "u28", "u10", "u29", "u11", "u30",
     ],
   },
   {
@@ -7500,50 +7469,50 @@ export const MODULES: Module[] = [
     id: "sql-fundamentals",
     name: "SQL Fundamentals",
     blurb: "Read, filter, sort, join, and aggregate any stat sheet in the database.",
-    unitIds: ["u1", "u2", "u3", "u4", "u5", "u6"],
+    unitIds: ["u1", "u2", "u3", "u4", "u5", "u6", "u23"],
   },
   {
     id: "sql-advanced",
     name: "Advanced SQL",
     blurb: "CTEs, views, triggers, and indexing — package a query for reuse.",
-    unitIds: ["u19", "u20", "u21", "u22"],
+    unitIds: ["u19", "u20", "u21", "u22", "u24"],
   },
   {
     id: "python",
     name: "Python & pandas",
     blurb: "Variables, loops, and DataFrames — with code that really runs.",
-    unitIds: ["u7", "u13", "u14"],
+    unitIds: ["u7", "u13", "u14", "u25"],
   },
   {
     id: "excel",
     name: "Excel",
     blurb:
       "Formulas, logic, lookups and cleaning — executed live against a real workbook.",
-    unitIds: ["u15", "u16", "u17", "u18"],
+    unitIds: ["u15", "u16", "u17", "u18", "u26"],
   },
   {
     id: "stats",
     name: "Statistics",
     blurb: "Averages, sample size, and regression to the mean.",
-    unitIds: ["u8"],
+    unitIds: ["u8", "u27"],
   },
   {
     id: "viz",
     name: "Visualization",
     blurb: "Chart choice, honest axes, and making a point land.",
-    unitIds: ["u9"],
+    unitIds: ["u9", "u28"],
   },
   {
     id: "git",
     name: "Git & GitHub",
     blurb: "Commits, branches, pull requests, portfolio READMEs.",
-    unitIds: ["u10"],
+    unitIds: ["u10", "u29"],
   },
   {
     id: "r",
     name: "R & the tidyverse",
     blurb: "dplyr and ggplot2, executed live in your browser.",
-    unitIds: ["u11"],
+    unitIds: ["u11", "u30"],
   },
   {
     id: "ai",

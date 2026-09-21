@@ -2,7 +2,7 @@
 
 /**
  * Duolingo-style celebration overlays for the lesson player.
- * Pure CSS/DOM — no audio, no deps. Honours prefers-reduced-motion.
+ * Pure CSS/DOM — audio lives in lib/sfx.ts. Honours prefers-reduced-motion.
  */
 
 import { useEffect, useState, type CSSProperties } from "react";

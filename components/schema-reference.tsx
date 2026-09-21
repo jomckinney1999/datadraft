@@ -25,18 +25,27 @@ export default function SchemaReference() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border-t border-panel-border">
+    <div className="rounded-xl border border-panel-border bg-panel/40">
+      <p className="border-b border-panel-border px-3 py-2 font-mono text-[10px] leading-snug text-ink-muted">
+        Stuck on a column name? Open the tables here on the left — every column
+        you can query is listed under each sheet.
+      </p>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="press flex w-full items-center justify-between gap-3 px-3 py-2 text-left"
+        className="press flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left"
       >
-        <span className="font-mono text-[10px] text-ink-muted">
-          tables: {SCHEMA.map((t) => t.table).join(" · ")}
+        <span className="min-w-0">
+          <span className="block font-mono text-[10px] font-semibold uppercase tracking-widest text-turf">
+            Tables &amp; columns
+          </span>
+          <span className="mt-0.5 block truncate font-mono text-[10px] text-ink-muted">
+            {SCHEMA.map((t) => t.table).join(" · ")}
+          </span>
         </span>
         <span className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-          {open ? "hide" : "columns ↓"}
+          {open ? "hide ↑" : "show ↓"}
         </span>
       </button>
 

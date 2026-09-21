@@ -18,7 +18,6 @@ import {
 import { liveLessons } from "@/lib/curriculum";
 import { CAREER_ROLE_KEY } from "@/lib/use-career-role";
 import { MODULE_STORAGE_KEY } from "@/lib/use-module";
-import { STYLES, type PlaybookStyle } from "@/lib/playbook";
 import {
   FREE_DAILY_TIMEOUTS,
   grantSeasonPassDemo,
@@ -59,7 +58,6 @@ export default function TestingTools({
       ? moduleId
       : LIVE_COURSES[0]?.moduleId ?? "sql-fundamentals",
   );
-  const [pickStyle, setPickStyle] = useState<PlaybookStyle>("dual-threat");
   const [clearProgressOnJump, setClearProgressOnJump] = useState(true);
 
   const courseLessons = useMemo(
@@ -67,7 +65,11 @@ export default function TestingTools({
     [pickCourse],
   );
   const [pickLesson, setPickLesson] = useState(
-    () => courseLessons[0]?.lesson.id ?? "",
+    () => liveLessons(
+      moduleId && moduleId !== "all"
+        ? moduleId
+        : LIVE_COURSES[0]?.moduleId ?? "sql-fundamentals",
+    )[0]?.lesson.id ?? "",
   );
 
   // Keep lesson picker in sync when the course changes.
@@ -110,7 +112,6 @@ export default function TestingTools({
         ...base,
         username: base.username || "Tester",
         draftedTrack: base.draftedTrack || nextRole.courseIds[0] || "sql-fundamentals",
-        playbookStyle: pickStyle,
       },
       `/learn/path/${pickRole}`,
     );
@@ -131,7 +132,6 @@ export default function TestingTools({
         ...base,
         username: base.username || "Tester",
         draftedTrack: base.draftedTrack || pickCourse,
-        playbookStyle: pickStyle,
       },
       `/learn/track/${pickCourse}`,
     );
@@ -151,7 +151,6 @@ export default function TestingTools({
         ...base,
         username: base.username || "Tester",
         draftedTrack: base.draftedTrack || pickCourse,
-        playbookStyle: pickStyle,
       },
       `/learn/${id}`,
     );
@@ -243,7 +242,6 @@ export default function TestingTools({
         ...p,
         completedLessons: merged,
         username: p.username || "Tester",
-        playbookStyle: p.playbookStyle || pickStyle,
       },
       `/learn/path/${role.id}`,
     );
@@ -356,24 +354,6 @@ export default function TestingTools({
               ))}
             </select>
             <ToolBtn onClick={jumpToLesson}>Open lesson</ToolBtn>
-          </fieldset>
-
-          {/* ── Playbook style (optional) ── */}
-          <fieldset className="space-y-2">
-            <legend className="font-mono text-[10px] font-bold uppercase tracking-widest text-gold">
-              Playbook style
-            </legend>
-            <select
-              value={pickStyle}
-              onChange={(e) => setPickStyle(e.target.value as PlaybookStyle)}
-              className="w-full rounded-xl border-2 border-panel-border bg-panel px-3 py-2 font-mono text-[11px] text-ink"
-            >
-              {STYLES.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
           </fieldset>
 
           {/* ── Economy ── */}

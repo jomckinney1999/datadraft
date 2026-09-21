@@ -41,6 +41,7 @@ const SYNTAX = [
   "--c-syn-string",
   "--c-syn-number",
   "--c-syn-func",
+  "--c-syn-table",
   "--c-syn-comment",
   "--c-syn-punct",
 ];
