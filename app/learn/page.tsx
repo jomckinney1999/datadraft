@@ -1,14 +1,18 @@
 "use client";
 
-// The course catalog: every course as a card you can browse, replacing the
-// old module dropdown. Cards for courses with lessons link into their roadmap
-// (/learn/track/[moduleId]); the rest are honestly marked "In build".
+/**
+ * /learn — pick the job title you want, get an auto-built Duolingo-style path.
+ * Course grid stays as a secondary "browse one skill" escape hatch.
+ */
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { COURSES, ALL_IN_ONE, type Course } from "@/lib/courses";
+import { useRouter } from "next/navigation";
+import { COURSES, type Course } from "@/lib/courses";
+import { CAREER_ROLES, pathSteps, roleHours } from "@/lib/career-paths";
 import { liveLessons, ALL_MODULE } from "@/lib/curriculum";
 import { loadProgress, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
+import { useCareerRole } from "@/lib/use-career-role";
 import TrophyCase from "@/components/trophy-case";
 import HomeLink from "@/components/home-link";
 import Coach from "@/components/coach";
@@ -21,7 +25,12 @@ function ClockIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" aria-hidden>
       <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-      <path d="M12 7v5l3 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M12 7v5l3 2"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -37,7 +46,6 @@ function FlameIcon() {
   );
 }
 
-/** Lessons actually built for this course right now. */
 function builtCount(course: Course): number {
   return course.moduleId ? liveLessons(course.moduleId).length : 0;
 }
@@ -61,8 +69,6 @@ function CourseCard({
 
   const body = (
     <>
-      {/* thumbnail — a cover scene unique to this course, then the scrim,
-          broadcast rays and course mark on top. See components/course-cover. */}
       <div className="relative overflow-hidden border-b border-panel-border bg-night">
         <CourseCover
           id={course.id}
@@ -70,12 +76,6 @@ function CourseCard({
           className="absolute inset-0 h-full w-full transition-transform duration-500 group-hover:scale-105"
         />
         <div aria-hidden className="cover-scrim pointer-events-none absolute inset-0" />
-        <div
-          aria-hidden
-          className={`pointer-events-none absolute inset-0 ${
-            course.accent === "turf" ? "rays-turf" : "rays-gold"
-          } opacity-[0.07]`}
-        />
         <div className="relative flex items-center justify-between px-4 pt-4">
           <span className="inline-flex items-center gap-1.5 border border-panel-border bg-panel/80 px-2 py-1 font-mono text-[10px] text-ink-soft">
             <ClockIcon />
@@ -86,83 +86,44 @@ function CourseCard({
             {course.lessons * 10}
           </span>
         </div>
-        <div className="relative flex min-h-[152px] flex-col items-center justify-center px-5 pb-5 pt-2 text-center">
+        <div className="relative flex min-h-[120px] flex-col items-center justify-center px-5 pb-5 pt-2 text-center">
           <CourseArt
             id={course.id}
-            className={`h-[74px] w-full max-w-[190px] ${accentText}`}
+            className={`h-[60px] w-full max-w-[160px] ${accentText}`}
           />
-          <h3 className="mt-2 font-display text-lg font-bold uppercase leading-tight tracking-tight text-pop">
+          <h3 className="mt-2 font-display text-base font-bold uppercase leading-tight tracking-tight text-pop">
             {course.title}
           </h3>
         </div>
       </div>
-
-      {/* stat strip */}
-      <div className="grid grid-cols-3 divide-x divide-panel-border border-b border-panel-border bg-panel/60 text-center">
-        <span className="px-1 py-2 font-mono text-[10px] text-ink-muted">
-          <span className={accentText}>{course.lessons}</span> Lessons
-        </span>
-        <span className="px-1 py-2 font-mono text-[10px] text-ink-muted">
-          <span className={accentText}>{course.projects}</span> Project
-          {course.projects === 1 ? "" : "s"}
-        </span>
-        <span className="px-1 py-2 font-mono text-[10px] text-ink-muted">
-          {isLive ? (
-            <>
-              <span className={accentText}>{built}</span> Live
-            </>
-          ) : (
-            <span className="text-gold">In build</span>
-          )}
-        </span>
-      </div>
-
       <div className="flex flex-1 flex-col p-4">
         <p className="flex-1 text-sm leading-relaxed text-ink-soft">
           {course.blurb}
         </p>
-
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="border border-panel-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-            {course.level}
-          </span>
-          {course.liveCode && (
-            <span className="border border-turf/40 bg-turf/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-turf">
-              Runs your code
-            </span>
-          )}
-          {isLive && done > 0 && (
-            <span className="font-mono text-[10px] uppercase tracking-wider text-gold">
-              {done}/{built} done
-            </span>
-          )}
-        </div>
-
         <span
-          className={`mt-4 block rounded-xl border px-4 py-2.5 text-center font-display text-sm font-bold tracking-wide transition-colors ${
+          className={`mt-4 block rounded-xl border px-4 py-2.5 text-center font-display text-sm font-bold tracking-wide ${
             isLive
-              ? "border-turf-dim border-b-4 bg-turf text-night group-hover:brightness-105"
-              : "cursor-default border-panel-border bg-panel text-ink-muted"
+              ? "border-turf-dim border-b-4 bg-turf text-night"
+              : "border-panel-border bg-panel text-ink-muted"
           }`}
         >
-          {isLive ? "Start learning →" : "Coming soon"}
+          {isLive
+            ? done > 0
+              ? `${done}/${built} · Continue →`
+              : "Open course →"
+            : "Coming soon"}
         </span>
       </div>
     </>
   );
 
-  const shell = `group lift flex flex-col overflow-hidden rounded-2xl border border-panel-border bg-panel shadow-scoreboard ${
+  const shell = `group lift flex flex-col overflow-hidden rounded-2xl border border-panel-border bg-panel ${
     isLive ? accentBorder : "opacity-75"
   }`;
 
   if (!isLive || !course.moduleId) {
-    return (
-      <div className={shell} aria-label={`${course.title} — in build`}>
-        {body}
-      </div>
-    );
+    return <div className={shell}>{body}</div>;
   }
-
   return (
     <Link href={`/learn/track/${course.moduleId}`} className={shell}>
       {body}
@@ -172,15 +133,33 @@ function CourseCard({
 
 export default function LearnCatalogPage() {
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
+  const { roleId, setRoleId, hydrated } = useCareerRole();
+  const router = useRouter();
 
   useEffect(() => {
     setProgress(loadProgress());
   }, []);
 
+  // Resume last path once hydrated.
+  useEffect(() => {
+    if (hydrated && roleId) {
+      router.replace(`/learn/path/${roleId}`);
+    }
+  }, [hydrated, roleId, router]);
+
   const completed = new Set(progress.completedLessons);
   const allLessons = liveLessons(ALL_MODULE);
   const allDone = allLessons.filter((e) => completed.has(e.lesson.id)).length;
-  const liveCourses = COURSES.filter((c) => c.status === "live").length;
+
+  if (hydrated && roleId) {
+    return (
+      <main className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4">
+        <p className="font-mono text-xs uppercase tracking-widest text-ink-muted">
+          Loading your board…
+        </p>
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-24 sm:px-6">
@@ -212,68 +191,101 @@ export default function LearnCatalogPage() {
       <section className="section-card">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="label-broadcast text-turf">the course board</p>
+            <p className="label-broadcast text-turf">draft your path</p>
             <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
-              Pick your course.
+              What job are you playing for?
             </h1>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-soft">
-              {liveCourses} courses open now, more in build. Take one on its
-              own, or run the all-in-one pathway in order. Progress carries
-              across every course either way.
+              Pick a title. We build the course formula and put it on a
+              Duolingo-style board — clear courses in order, see exactly where
+              you are.
             </p>
-            <p className="mt-2 max-w-xl font-mono text-[11px] leading-relaxed text-ink-muted">
-              No football knowledge required — the sport is just the dataset,
-              and Coach explains any context as you go.
-            </p>
-            <Link
-              href="/learn/start"
-              className="press mt-4 inline-flex items-center gap-2 rounded-xl border-2 border-turf/40 border-b-4 bg-turf/10 px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-widest text-turf hover:bg-turf/20"
-            >
-              Not sure which one? Take the 2-question walkthrough →
-            </Link>
           </div>
           <div className="hidden shrink-0 sm:block">
-            <Coach mood={allDone > 0 ? "happy" : "idle"} size={110} />
+            <Coach mood={allDone > 0 ? "happy" : "idle"} size={100} />
           </div>
         </div>
-
-        <Link
-          href={`/learn/track/${ALL_IN_ONE.moduleId}`}
-          className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 border-gold/40 border-b-4 bg-gold/10 px-5 py-4 transition-colors hover:bg-gold/20"
-        >
-          <span>
-            <span className="block font-display text-base font-bold text-ink">
-              🏈 {ALL_IN_ONE.title}
-            </span>
-            <span className="mt-0.5 block text-sm leading-relaxed text-ink-soft">
-              {ALL_IN_ONE.blurb}
-            </span>
-          </span>
-          <span className="shrink-0 font-mono text-xs font-semibold uppercase tracking-widest text-gold">
-            {allDone}/{allLessons.length} · Start →
-          </span>
-        </Link>
       </section>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {COURSES.map((course, i) => (
-          <div
-            key={course.id}
-            className="animate-fade-up"
-            style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}
-          >
-            <CourseCard course={course} completed={completed} />
-          </div>
-        ))}
+      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {CAREER_ROLES.map((role, i) => {
+          const steps = pathSteps(role, progress.completedLessons);
+          const live = steps.filter(
+            (s) => s.course.status === "live" && s.total > 0,
+          );
+          const cleared = live.filter((s) => s.complete).length;
+          return (
+            <Link
+              key={role.id}
+              href={`/learn/path/${role.id}`}
+              onClick={() => setRoleId(role.id)}
+              style={{ animationDelay: `${Math.min(i, 6) * 40}ms` }}
+              className="section-card lift animate-fade-up group block transition-colors hover:border-turf/50"
+            >
+              <p className="label-broadcast text-gold">
+                ~{roleHours(role)}h formula
+              </p>
+              <h2 className="mt-1 font-display text-xl font-bold text-ink group-hover:text-turf">
+                {role.title}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+                {role.blurb}
+              </p>
+              <ol className="mt-3 flex flex-wrap gap-1.5">
+                {steps.map((s, idx) => (
+                  <li
+                    key={s.course.id}
+                    className={`rounded-md border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider ${
+                      s.complete
+                        ? "border-turf/50 bg-turf/15 text-turf"
+                        : s.course.status === "building"
+                          ? "border-panel-border text-ink-muted"
+                          : "border-panel-border text-ink-soft"
+                    }`}
+                  >
+                    {idx + 1}. {s.course.mark}
+                    {s.course.status === "building" ? " · soon" : ""}
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-4 font-mono text-[11px] font-semibold uppercase tracking-widest text-turf">
+                {cleared > 0
+                  ? `${cleared}/${live.length} cleared · Open board →`
+                  : "Open board →"}
+              </p>
+            </Link>
+          );
+        })}
       </div>
+
+      <section className="mt-14">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="label-broadcast text-ink-muted">or browse one skill</p>
+            <h2 className="mt-1 font-display text-xl font-bold text-ink">
+              Individual courses
+            </h2>
+          </div>
+        </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {COURSES.map((course, i) => (
+            <div
+              key={course.id}
+              className="animate-fade-up"
+              style={{ animationDelay: `${Math.min(i, 8) * 35}ms` }}
+            >
+              <CourseCard course={course} completed={completed} />
+            </div>
+          ))}
+        </div>
+      </section>
 
       <div id="trophies">
         <TrophyCase />
       </div>
 
       <p className="mt-12 text-center font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-        Lesson counts show the full syllabus · &ldquo;Live&rdquo; is what&apos;s
-        playable today
+        Building courses still appear on your board — locked until they ship
       </p>
     </main>
   );

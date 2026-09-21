@@ -37,9 +37,10 @@ Both themes ship. Every token resolves through a CSS variable holding an `"r g b
 
 ## Choosing a course, and career claims
 
-- **`/learn/start` is the two-question walkthrough** that recommends a course and explains the roadmap model (course → unit → lesson → drive, progress shared across all of them). It is linked from the `/learn` hero, because ten courses is a lot to choose between for someone who does not yet know what an analytics engineer is.
-- **The recommendation is nearly always SQL and the page admits it.** Do not fake-branch across ten answers to look clever; what genuinely differs by situation is the reasoning and what comes second.
-- **`lib/career.ts` holds the job-impact notes, and there are no invented statistics in it.** No percentages, no salary figures, no "9 out of 10 employers". Claims are qualitative and checkable, and `skipIf` says plainly who should defer a course — talking someone into R when they want an analyst job at a normal company would be a disservice. **Keep it that way**: a learner who checks a number we made up has every reason to distrust the lessons too.
+- **`/learn` is role-first.** Pick a job title (Data Analyst, Analytics Engineer, …); [`lib/career-paths.ts`](lib/career-paths.ts) builds the ordered course formula and [`/learn/path/[roleId]`](app/learn/path/[roleId]/page.tsx) renders it as a Duolingo-style winding board (`components/career-board.tsx`). Individual courses stay as a secondary browse grid.
+- **`/learn/start` is the older two-question walkthrough** — still useful for people who want reasoning before committing to a title. Linked from marketing; the main /learn flow is the role picker.
+- **The recommendation for analysts is nearly always SQL-first**, and the path copy says so honestly. Do not invent branching that pretends every title needs a totally different stack.
+- **`lib/career.ts` holds the job-impact notes, and there are no invented statistics in it.** No percentages, no salary figures, no "9 out of 10 employers". Claims are qualitative and checkable, and `skipIf` says plainly who should defer a course. **Keep it that way**.
 
 ## Navigation
 

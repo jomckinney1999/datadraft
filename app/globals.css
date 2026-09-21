@@ -875,6 +875,40 @@ body {
   padding: 2rem 0 1.5rem;
 }
 
+/* Career board path — wider zigzag, softer connector for course-sized nodes. */
+.career-path-rail {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.25rem;
+  padding: 1.5rem 0 2rem;
+  min-height: 24rem;
+}
+
+.career-path-rail::before {
+  content: "";
+  position: absolute;
+  top: 2rem;
+  bottom: 4rem;
+  left: 50%;
+  width: 10px;
+  margin-left: -5px;
+  border-radius: 9999px;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgb(var(--c-turf) / 0.55) 0,
+      rgb(var(--c-turf) / 0.55) 14px,
+      rgb(var(--c-ink) / 0.12) 14px,
+      rgb(var(--c-ink) / 0.12) 16px,
+      rgb(var(--c-panel-border)) 16px,
+      rgb(var(--c-panel-border)) 32px
+    );
+  z-index: 0;
+  opacity: 0.85;
+}
+
 .path-rail::before {
   content: "";
   position: absolute;
