@@ -201,7 +201,7 @@ export default function Home() {
               Tech education · Sports as the lens
             </p>
 
-            <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-8">
+            <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-8">
               {/* Copy column — brand-first, not a SaaS center stack */}
               <div className="lg:col-span-5 lg:pt-4">
                 <h1 className="font-display text-5xl font-bold leading-[0.98] tracking-tight text-pop sm:text-6xl animate-[fadeUp_0.45s_ease-out_0.05s_forwards] opacity-0">
