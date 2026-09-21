@@ -190,8 +190,8 @@ export default function Home() {
             />
             <div className="hero-media-scrim absolute inset-0" />
             {/* Floodlight wash + scoreboard grid */}
-            <div className="hero-floodlight absolute inset-0 opacity-40" />
-            <div className="hero-grid absolute inset-0 opacity-[0.22]" />
+            <div className="hero-floodlight absolute inset-0 opacity-28" />
+            <div className="hero-grid absolute inset-0 opacity-[0.14]" />
           </div>
 
           <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 sm:pb-24 sm:pt-14">
@@ -227,24 +227,24 @@ export default function Home() {
                 <div className="mt-8 flex flex-wrap items-center gap-3 animate-[fadeUp_0.45s_ease-out_0.2s_forwards] opacity-0">
                   <a
                     href="#sandbox"
-                    className="btn-turf inline-flex items-center gap-2 border border-turf bg-turf px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-turf-dim"
+                    className="btn-turf inline-flex items-center gap-2 border border-turf/80 bg-turf px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-turf-dim"
                   >
                     Try the sandbox
                   </a>
                   <a
                     href="#curriculum"
-                    className="inline-flex items-center gap-2 border border-white/20 bg-night/40 px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-ink transition-colors duration-150 hover:border-gold/70 hover:text-gold backdrop-blur-sm"
+                    className="inline-flex items-center gap-2 border border-panel-border bg-panel/50 px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-ink-soft transition-colors duration-150 hover:border-gold/50 hover:text-gold backdrop-blur-sm"
                   >
                     See curriculum
                   </a>
                 </div>
 
                 {/* Scoreboard strip */}
-                <div className="mt-10 grid grid-cols-3 gap-px border border-gold/25 bg-gold/20 animate-[fadeUp_0.45s_ease-out_0.25s_forwards] opacity-0">
+                <div className="mt-10 grid grid-cols-3 gap-px border border-panel-border bg-panel-border/60 animate-[fadeUp_0.45s_ease-out_0.25s_forwards] opacity-0">
                   {STATS.map((stat) => (
                     <div
                       key={stat.label}
-                      className="bg-panel/90 px-3 py-4 backdrop-blur-sm sm:px-4"
+                      className="surface bg-panel/95 px-3 py-4 sm:px-4"
                     >
                       <p className="label-broadcast mb-1.5 text-[10px]">
                         {stat.label}
@@ -295,8 +295,8 @@ export default function Home() {
               watermarks, no photography, evokes the broadcast-graphics
               look without depicting any real athlete. */}
           <div aria-hidden className="pointer-events-none absolute inset-0">
-            <div className="rays-turf absolute inset-0 opacity-[0.05]" />
-            <div className="rays-gold absolute inset-0 opacity-[0.04]" />
+            <div className="rays-turf absolute inset-0 opacity-[0.03]" />
+            <div className="rays-gold absolute inset-0 opacity-[0.025]" />
             <span className="stat-number-turf absolute -right-6 -top-10 select-none font-display text-[260px] font-bold leading-none opacity-[0.05] sm:text-[320px]">
               07
             </span>
@@ -397,7 +397,7 @@ export default function Home() {
             </p>
 
             {/* Non-fan reassurance */}
-            <div className="mt-10 border border-gold/40 bg-gold/[0.04] p-6 sm:p-8">
+            <div className="mt-10 surface border border-panel-border bg-panel p-6 sm:p-8">
               <p className="label-broadcast text-gold">
                 Don&apos;t watch sports?
               </p>
@@ -714,7 +714,7 @@ export default function Home() {
             </p>
 
             <div className="surface relative border border-panel-border bg-panel p-6 sm:p-10">
-              <div className="pointer-events-none absolute -inset-px border border-gold/40" />
+              <div className="pointer-events-none absolute -inset-px border border-gold/25" />
               <div className="absolute -top-px left-6 h-px w-20 bg-gold edge-glow-gold" />
               <div className="absolute -left-px top-6 h-20 w-px bg-gold edge-glow-gold" />
 
@@ -763,7 +763,7 @@ export default function Home() {
                 </div>
 
                 <div className="lg:col-span-5">
-                  <div className="grid grid-cols-2 gap-px border border-gold/25 bg-gold/20">
+                  <div className="grid grid-cols-2 gap-px border border-panel-border bg-panel-border/60">
                     {[
                       { label: "Tracked plays", value: "2.8M+" },
                       { label: "Seasons covered", value: "1999–2024" },
@@ -772,7 +772,7 @@ export default function Home() {
                     ].map((stat) => (
                       <div
                         key={stat.label}
-                        className="bg-night/60 px-3 py-4 backdrop-blur-sm sm:px-4"
+                        className="surface bg-panel px-3 py-4 sm:px-4"
                       >
                         <p className="label-broadcast mb-1.5 text-[10px]">
                           {stat.label}

@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
-// Fantasy-football palette: primetime-black darks, turf green primary,
-// trophy gold secondary, broadcast ice blue for cool accents. Token names
+// Fantasy-football palette: neutral near-black, club emerald primary,
+// champagne gold secondary, soft broadcast ice for cool accents. Token names
 // (turf/gold/ice/night/panel/ink) are used across every page — change values
 // here, not in components.
 const config = {
