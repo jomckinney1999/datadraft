@@ -1,94 +1,187 @@
 "use client";
 
 /**
- * The lesson's progress bar, drawn as field position.
+ * Downs-and-distance field for the lesson drive.
  *
- * A bar that fills left to right tells you how much is left. A ball moving
- * toward an end zone tells you the same thing and also *where you are*, which
- * is the difference between a status indicator and a game. The yardage chip
- * that pops on a completion is the reward moment — it is the thing that makes
- * a correct answer feel like an event rather than a row turning green.
- *
- * Purely presentational: every number is passed in, so the drive logic stays
- * in lib/gameplay.ts and this file can be reasoned about as a picture.
+ * Reads as a mini football field (thick turf pill, white hashes, gold chains)
+ * rather than a thin progress bar — Duolingo clarity, sports material.
  */
 
-import { DRIVE_START_PCT, yardLine } from "@/lib/gameplay";
+import {
+  ballOnLabel,
+  downAndDistance,
+  type DriveState,
+  type PlayKind,
+} from "@/lib/drive-sim";
+
+export type FieldBurst = {
+  id: number;
+  label: string;
+  explosive?: boolean;
+  negative?: boolean;
+  kind?: PlayKind;
+};
 
 export default function DriveField({
-  pct,
+  drive,
   heat,
   burst,
 }: {
-  /** Field position, 0–100. */
-  pct: number;
-  /** Combo label, shown as a flame chip when hot. */
+  drive: DriveState;
   heat: string | null;
-  /** Yards just gained — renders the floating chip, then clears. */
-  burst: { yards: number; id: number; explosive: boolean } | null;
+  burst: FieldBurst | null;
 }) {
-  const clamped = Math.max(DRIVE_START_PCT, Math.min(100, pct));
-  const inRedZone = clamped >= 80;
+  const ball = Math.max(0, Math.min(100, drive.ballOn));
+  const stick = Math.max(0, Math.min(100, drive.firstDownAt));
+  const inRedZone = ball >= 80;
+  const shake = burst?.negative || burst?.kind === "incomplete";
+
+  const statusLabel =
+    drive.status === "touchdown"
+      ? "Touchdown!"
+      : drive.status === "turnover"
+        ? "Turnover"
+        : downAndDistance(drive);
 
   return (
-    <div className="min-w-0 flex-1">
-      <div className="relative h-7">
-        {/* the field */}
-        <div className="surface absolute inset-x-0 top-2 h-3 overflow-hidden rounded-full border border-panel-border bg-panel">
-          {/* yard hashes every 10% — the texture that makes it read as a field */}
-          <div className="absolute inset-0 flex justify-between px-[6%]">
+    <div className={`min-w-0 flex-1 ${shake ? "animate-shake" : ""}`}>
+      <div className="mb-1.5 flex items-center justify-between gap-2">
+        <span
+          className={`inline-flex items-center rounded-full px-2.5 py-0.5 font-mono text-[11px] font-bold uppercase tracking-wider ${
+            drive.status === "touchdown"
+              ? "border border-turf/50 bg-turf/20 text-turf"
+              : drive.status === "turnover"
+                ? "border border-gold/50 bg-gold/15 text-gold"
+                : "border border-turf/40 bg-turf/15 text-turf"
+          }`}
+        >
+          {statusLabel}
+        </span>
+        <span className="font-mono text-[11px] font-medium text-ink-soft">
+          {ballOnLabel(ball)}
+        </span>
+      </div>
+
+      <div className="relative h-9">
+        <div className="drive-field-track absolute inset-x-0 top-2">
+          {/* hashes */}
+          <div className="pointer-events-none absolute inset-0 flex justify-between px-[6%]">
             {Array.from({ length: 9 }).map((_, i) => (
-              <span key={i} className="h-full w-px bg-panel-border/70" />
+              <span
+                key={i}
+                className="h-full w-px bg-ink/20"
+              />
             ))}
           </div>
           {/* ground gained */}
           <div
-            className={`relative h-full rounded-full transition-all duration-700 ease-out ${
-              inRedZone ? "bg-gold" : "bg-turf"
+            className={`drive-field-gain absolute inset-y-0 left-0 transition-all duration-700 ease-out motion-reduce:transition-none ${
+              inRedZone ? "drive-field-gain-redzone" : ""
             }`}
-            style={{ width: `${clamped}%` }}
+            style={{ width: `${Math.max(ball, 3)}%` }}
           />
-          {/* end zone */}
-          <div className="absolute inset-y-0 right-0 w-[8%] border-l border-turf/50 bg-turf/20" />
+          {/* end zone stripe */}
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-[10%] border-l-2 border-dashed border-turf/50 bg-turf/20" />
         </div>
 
-        {/* the ball */}
+        {/* first-down stick */}
+        {drive.status === "live" && stick > ball + 1 && (
+          <div
+            className="absolute top-1 z-10 -translate-x-1/2 transition-all duration-700 ease-out motion-reduce:transition-none"
+            style={{ left: `${stick}%` }}
+            aria-hidden
+          >
+            <span className="block h-7 w-1 rounded-full bg-gold shadow-scoreboard-gold" />
+          </div>
+        )}
+
+        {/* ball */}
         <div
-          className="absolute top-0 -translate-x-1/2 transition-all duration-700 ease-out"
-          style={{ left: `${clamped}%` }}
+          className="absolute top-0.5 z-20 -translate-x-1/2 transition-all duration-700 ease-out motion-reduce:transition-none"
+          style={{ left: `${ball}%` }}
           aria-hidden
         >
-          <span className="block text-[15px] leading-7">🏈</span>
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-panel text-lg shadow-scoreboard-turf ring-2 ring-turf/40">
+            🏈
+          </span>
         </div>
 
-        {/* yardage chip — keyed on id so an identical gain still re-animates */}
         {burst && (
           <div
             key={burst.id}
-            className="pointer-events-none absolute -top-1 -translate-x-1/2 animate-yard-pop"
-            style={{ left: `${clamped}%` }}
+            className="pointer-events-none absolute -top-1 z-30 -translate-x-1/2 animate-yard-pop"
+            style={{ left: `${ball}%` }}
           >
             <span
-              className={`whitespace-nowrap font-mono text-[11px] font-bold ${
-                burst.explosive ? "text-gold" : "text-turf"
+              className={`rounded-full px-2.5 py-0.5 font-mono text-[11px] font-bold shadow-scoreboard ${
+                burst.negative
+                  ? "border border-gold/50 bg-gold/20 text-gold"
+                  : burst.explosive
+                    ? "border border-gold/50 bg-gold/20 text-gold"
+                    : "border border-turf/50 bg-turf/20 text-turf"
               }`}
             >
-              +{burst.yards} YDS
+              {burst.label}
             </span>
           </div>
         )}
       </div>
 
-      <div className="mt-0.5 flex items-center justify-between gap-2">
-        <span className="font-mono text-[9px] uppercase tracking-widest text-ink-muted">
-          {yardLine(clamped)}
+      <div className="mt-1 flex items-center justify-between gap-2">
+        <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+          {drive.status === "live"
+            ? inRedZone
+              ? "Red zone"
+              : `1st-down marker · ${ballOnLabel(stick)}`
+            : drive.status === "touchdown"
+              ? "In the end zone"
+              : "Drive over"}
         </span>
-        {heat && (
-          <span className="animate-heat-pulse whitespace-nowrap border border-gold/50 bg-gold/10 px-1.5 py-px font-mono text-[9px] uppercase tracking-widest text-gold">
-            🔥 {heat}
+        {heat && drive.status === "live" && (
+          <span className="animate-heat-pulse rounded-full border border-gold/50 bg-gold/15 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-gold">
+            {heat}
           </span>
         )}
       </div>
     </div>
   );
+}
+
+export function burstFromPlay(
+  kind: PlayKind,
+  yards: number,
+  id: number,
+  explosive = false,
+): FieldBurst {
+  if (kind === "incomplete") {
+    return { id, label: "INCOMPLETE", negative: true, kind };
+  }
+  if (kind === "sack") {
+    return { id, label: `SACK ${yards}`, negative: true, kind };
+  }
+  if (kind === "turnover") {
+    return {
+      id,
+      label: yards < 0 ? `TURNOVER ${yards}` : "TURNOVER",
+      negative: true,
+      kind,
+    };
+  }
+  if (kind === "td") {
+    return { id, label: `TD · +${yards}`, explosive: true, kind };
+  }
+  if (kind === "first_down") {
+    return {
+      id,
+      label: `+${yards} · 1ST DOWN`,
+      explosive: explosive || yards >= 10,
+      kind,
+    };
+  }
+  return {
+    id,
+    label: `+${yards} YDS`,
+    explosive,
+    kind,
+  };
 }

@@ -345,6 +345,182 @@ body {
       0 14px 32px -10px rgb(var(--c-gold) / calc(1 * var(--glow-strength)));
   }
 
+  /* Lesson player — Duolingo-weight actions + loud win/miss, sports palette.
+     Scoped class names so the marketing site keeps its broadcast look. */
+  .lesson-prompt {
+    border-radius: 1rem;
+    border: 1px solid rgb(var(--c-panel-border));
+    background-color: rgb(var(--c-panel));
+    box-shadow: var(--shadow-surface);
+    padding: 1.25rem 1.35rem;
+  }
+
+  .btn-check {
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    border: none;
+    border-bottom: 4px solid rgb(var(--c-turf-dim));
+    background-image: linear-gradient(
+      180deg,
+      rgb(var(--c-turf)) 0%,
+      rgb(var(--c-turf-dim)) 100%
+    );
+    padding: 0.9rem 2rem;
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: rgb(var(--c-night));
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.28),
+      0 8px 24px -10px rgb(var(--c-turf) / calc(0.7 * var(--glow-strength)));
+    transition: transform 0.12s ease, filter 0.15s ease, border-bottom-width 0.12s ease;
+  }
+  .btn-check:hover:not(:disabled) {
+    filter: brightness(1.06);
+  }
+  .btn-check:active:not(:disabled) {
+    transform: translateY(2px);
+    border-bottom-width: 2px;
+  }
+  .btn-check:disabled {
+    cursor: not-allowed;
+    border-bottom-color: rgb(var(--c-panel-border));
+    background-image: none;
+    background-color: rgb(var(--c-panel));
+    color: rgb(var(--c-ink-muted));
+    box-shadow: none;
+    filter: none;
+    transform: none;
+  }
+
+  .btn-continue-win {
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    border: none;
+    border-bottom: 4px solid rgb(var(--c-turf-dim));
+    background-image: linear-gradient(
+      180deg,
+      rgb(var(--c-turf)) 0%,
+      rgb(var(--c-turf-dim)) 100%
+    );
+    padding: 0.85rem 2rem;
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: rgb(var(--c-night));
+    transition: transform 0.12s ease, border-bottom-width 0.12s ease;
+  }
+  .btn-continue-win:active {
+    transform: translateY(2px);
+    border-bottom-width: 2px;
+  }
+
+  .btn-continue-miss {
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    border: 2px solid rgb(var(--c-gold) / 0.55);
+    border-bottom: 4px solid rgb(var(--c-gold-dim));
+    background-color: rgb(var(--c-gold) / 0.14);
+    padding: 0.85rem 2rem;
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: rgb(var(--c-gold));
+    transition: transform 0.12s ease, border-bottom-width 0.12s ease;
+  }
+  .btn-continue-miss:active {
+    transform: translateY(2px);
+    border-bottom-width: 2px;
+  }
+
+  @media (min-width: 640px) {
+    .btn-continue-win,
+    .btn-continue-miss {
+      width: auto;
+    }
+  }
+
+  .feedback-win {
+    border-radius: 1rem;
+    border: 2px solid rgb(var(--c-turf) / 0.7);
+    background-color: rgb(var(--c-turf) / 0.14);
+    padding: 1.15rem 1.25rem;
+    box-shadow: var(--shadow-surface);
+  }
+
+  .feedback-miss {
+    border-radius: 1rem;
+    border: 2px solid rgb(var(--c-gold) / 0.55);
+    background-color: rgb(var(--c-gold) / 0.1);
+    padding: 1.15rem 1.25rem;
+    box-shadow: var(--shadow-surface);
+  }
+
+  .option-chip {
+    border-radius: 1rem;
+    border: 2px solid rgb(var(--c-panel-border));
+    background-color: rgb(var(--c-panel) / 0.85);
+    padding: 0.9rem 1.1rem;
+    text-align: left;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: rgb(var(--c-ink-soft));
+    transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  }
+  .option-chip:hover:not(:disabled) {
+    border-color: rgb(var(--c-turf) / 0.45);
+    color: rgb(var(--c-ink));
+  }
+  .option-chip-on {
+    border-color: rgb(var(--c-turf));
+    background-color: rgb(var(--c-turf) / 0.16);
+    color: rgb(var(--c-turf));
+  }
+
+  .drive-field-track {
+    height: 1.35rem;
+    border-radius: 9999px;
+    border: 1px solid rgb(var(--c-turf) / 0.35);
+    background:
+      linear-gradient(
+        180deg,
+        rgb(var(--c-turf) / 0.18) 0%,
+        rgb(var(--c-turf) / 0.08) 100%
+      ),
+      rgb(var(--c-panel));
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  }
+
+  .drive-field-gain {
+    height: 100%;
+    border-radius: 9999px;
+    background: linear-gradient(
+      90deg,
+      rgb(var(--c-turf-dim)) 0%,
+      rgb(var(--c-turf)) 100%
+    );
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25);
+  }
+
+  .drive-field-gain-redzone {
+    background: linear-gradient(
+      90deg,
+      rgb(var(--c-gold-dim)) 0%,
+      rgb(var(--c-gold)) 100%
+    );
+  }
+
   /* Frosted bar for anything that floats over scrolling content. */
   .glass {
     background-color: rgb(var(--c-night) / 0.72);
@@ -691,6 +867,17 @@ body {
   100% { background-position: 180% 0; }
 }
 
+@keyframes celebrate-bounce {
+  0%   { transform: scale(0.92); }
+  45%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+@keyframes feedback-rise {
+  0%   { transform: translateY(10px); }
+  100% { transform: translateY(0); }
+}
+
 .animate-yard-pop   { animation: yard-pop 1.15s ease-out forwards; }
 .animate-heat-pulse { animation: heat-pulse 1.6s ease-in-out infinite; }
 .animate-badge-drop { animation: badge-drop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
@@ -699,6 +886,8 @@ body {
 .animate-shake      { animation: shake 0.42s ease-in-out both; }
 .animate-heart-break{ animation: heart-break 0.5s ease-out both; }
 .animate-trophy-in  { animation: trophy-in 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.3) both; }
+.animate-celebrate  { animation: celebrate-bounce 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.25) both; }
+.animate-feedback-rise { animation: feedback-rise 0.32s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
 
 /* Tactile press feedback. Applied to the primary action buttons so a click
    registers physically even before the next screen renders. */
@@ -744,6 +933,8 @@ body {
   .animate-shake,
   .animate-heart-break,
   .animate-trophy-in,
+  .animate-celebrate,
+  .animate-feedback-rise,
   .sheen {
     animation: none;
   }

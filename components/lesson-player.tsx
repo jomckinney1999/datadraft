@@ -1,8 +1,9 @@
 "use client";
 
-// Duolingo-style lesson player: hearts, XP, combo streaks, re-queued misses.
-// Query exercises grade by running learner SQL and the solution SQL against
-// the same in-browser sql.js database and comparing result values.
+// DataCamp / Duolingo-style lesson player with a real football drive sim:
+// every exercise is a play. Correct answers gain yards; misses burn a down.
+// Soft errors (syntax) cost nothing. 4th-down miss = turnover. Misses are
+// not re-queued — explanation shows, then the next play.
 //
 // The experience adapts to the learner's playbook style (lib/playbook.ts):
 //   film-room  — chalkboard intro + bonus film cards, hints always visible
@@ -45,7 +46,7 @@ import { useSport } from "@/lib/use-sport";
 import { awardBadges, completeLesson, loadProgress } from "@/lib/progress";
 import { pushProgress } from "@/lib/progress-sync";
 import { getStyle, type PlaybookStyle } from "@/lib/playbook";
-import Coach, { type CoachMood } from "@/components/coach";
+import Coach from "@/components/coach";
 import CodeEditor from "@/components/code-editor";
 import ExcelGrid from "@/components/excel-grid";
 import SchemaReference from "@/components/schema-reference";
@@ -58,8 +59,15 @@ import {
 } from "@/lib/excel-engine";
 import { MAIN_SHEET, type CellValue } from "@/lib/excel-data";
 import { SHORT_CREDIT } from "@/lib/data-source";
-import DriveField from "@/components/drive-field";
-import { drivePct, heatLabel, missCall, runPlay } from "@/lib/gameplay";
+import DriveField, { burstFromPlay, type FieldBurst } from "@/components/drive-field";
+import { heatLabel } from "@/lib/gameplay";
+import {
+  startDrive,
+  scoreCorrectPlay,
+  scoreMissPlay,
+  type DriveState,
+  type PlayKind,
+} from "@/lib/drive-sim";
 import { newlyEarned, statsFrom, type Badge } from "@/lib/achievements";
 import { useCountUp } from "@/lib/use-count-up";
 
@@ -69,18 +77,17 @@ type Phase =
   | "intro"
   | "exercise"
   | "complete"
-  | "timeout";
+  | "turnover";
 
 type Feedback = {
   correct: boolean;
   headline: string;
-  /** Yards gained on this play — rendered in the reward chip. */
+  /** Yards gained (or lost) on this play. */
   yards?: number;
+  playKind?: PlayKind;
   solution?: string;
   explain: string;
 };
-
-const MAX_HEARTS = 3;
 
 function normalizeResult(
   res: QueryExecResult | undefined,
@@ -111,33 +118,20 @@ function fillSolution(ex: FillExercise): string {
     .join("");
 }
 
-function HeartIcon({ filled }: { filled: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={`h-4 w-4 ${filled ? "text-gold" : "text-panel-hover"}`}
-      aria-hidden
-    >
-      <path
-        d="M12 21c-5.5-4.1-9-7.3-9-11a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 3.7-3.5 6.9-9 11z"
-        fill={filled ? "currentColor" : "none"}
-        stroke="currentColor"
-        strokeWidth="1.6"
-      />
-    </svg>
-  );
-}
-
 function TheoryCardView({ card }: { card: TheoryCard }) {
   return (
-  <div className="surface w-full border border-panel-border bg-panel/80 p-6 text-left ">
-      <p className="label-broadcast text-turf">coach blitz&apos;s chalkboard</p>
-      <h1 className="mt-2 font-display text-2xl font-bold text-ink">
+    <div className="lesson-prompt w-full text-left">
+      <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-turf">
+        Coach Blitz&apos;s chalkboard
+      </p>
+      <h1 className="mt-3 font-display text-2xl font-bold leading-snug text-ink sm:text-3xl">
         {card.title}
       </h1>
-      <p className="mt-3 text-sm leading-relaxed text-ink-soft">{card.text}</p>
+      <p className="mt-4 max-w-prose text-base leading-relaxed text-ink-soft">
+        {card.text}
+      </p>
       {card.code && (
-        <pre className="mt-4 overflow-x-auto border border-panel-border bg-night px-4 py-3 font-mono text-[13px] leading-relaxed text-turf">
+        <pre className="mt-5 overflow-x-auto rounded-xl border border-panel-border bg-night px-4 py-3 font-mono text-[13px] leading-relaxed text-turf">
           {card.code}
         </pre>
       )}
@@ -172,7 +166,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
    */
   const [briefStep, setBriefStep] = useState(0);
   const [queue, setQueue] = useState<number[]>([]);
-  const [hearts, setHearts] = useState(MAX_HEARTS);
+  const [drive, setDrive] = useState<DriveState>(() => startDrive());
   const [combo, setCombo] = useState(0);
   const [xp, setXp] = useState(0);
   const [firstTry, setFirstTry] = useState<Record<number, boolean>>({});
@@ -204,19 +198,13 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const [formulaError, setFormulaError] = useState<string | null>(null);
   const [formulaReady, setFormulaReady] = useState(false);
 
-  // ── drive state (the football layer over grading) ──
+  // ── drive state (downs-and-distance over grading) ──
   const [driveYards, setDriveYards] = useState(0);
   const [bestCombo, setBestCombo] = useState(0);
-  /** Floating "+12 YDS" chip. `id` forces a re-animation on repeat values. */
-  const [burst, setBurst] = useState<{
-    yards: number;
-    id: number;
-    explosive: boolean;
-  } | null>(null);
+  /** Floating play-result chip. `id` forces a re-animation on repeat values. */
+  const [burst, setBurst] = useState<FieldBurst | null>(null);
   /** Badges unlocked by this lesson, celebrated on the completion screen. */
   const [unlocked, setUnlocked] = useState<Badge[]>([]);
-  /** Bumped on every miss so the hearts row re-runs its shake. */
-  const [hitId, setHitId] = useState(0);
 
   /**
    * Gunslingers want to type, not tick boxes. They always skip pure-recall
@@ -394,11 +382,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     }
   }, [phase, total, queue.length]);
 
-  const perfect =
-    Object.values(firstTry).length === total &&
-    Object.values(firstTry).every(Boolean) &&
-    hearts === MAX_HEARTS;
-  const finalXp = xp + (perfect ? PERFECT_BONUS : 0);
+  const perfect = drive.downsBurned === 0 && Object.values(firstTry).every(Boolean);
+  const finalXp = xp + (perfect && total > 0 ? PERFECT_BONUS : 0);
   // Ticks up on the completion screen; stays 0 elsewhere so the animation
   // starts from nothing the moment that screen mounts.
   const shownXp = useCountUp(phase === "complete" ? finalXp : 0);
@@ -427,7 +412,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   }, [phase]);
 
   if (!entry || !style || phase === "loading") return null;
-  const { lesson, unit } = entry;
+  const { lesson } = entry;
   // A lesson either paces its brief across steps or falls back to one
   // paragraph; the preview and the start button wait for the final beat so
   // the learner isn't reading ahead while still being introduced.
@@ -488,7 +473,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   /**
    * Grade by executing the learner's code and the reference solution in the
    * same runtime and comparing what they printed. A crash or syntax error
-   * returns null so it costs no heart — same forgiveness the SQL path gives.
+   * returns null so it costs no down — same forgiveness the SQL path gives.
    */
   async function gradeCode(
     ex: CodeExercise,
@@ -568,7 +553,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
 
     const reference = await evaluateFormula(ex.expected, ex.sheet ?? MAIN_SHEET);
     if (reference.error) {
-      // Our key is broken, not their formula. Never take a heart for that.
+      // Our key is broken, not their formula. Never burn a down for that.
       setSoftError(
         "The answer key failed to run — that's our bug, not yours. Skipping the check.",
       );
@@ -601,7 +586,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       learner = runQuery(queryText);
     } catch (err) {
       setSoftError(err instanceof Error ? err.message : String(err));
-      return null; // syntax errors don't cost a heart — fix and retry
+      return null; // syntax errors don't burn a down — fix and retry
     }
     setRunResult(learner ?? { columns: [], values: [] });
     const expected = runQuery(ex.expected);
@@ -636,7 +621,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     } else {
       result = grade();
     }
-    if (!result) return; // soft error (code didn't run) — no heart lost
+    if (!result) return; // soft error (code didn't run) — no down burned
 
     const isFirstAttempt = !attempted[currentIdx];
     setAttempted((m) => ({ ...m, [currentIdx]: true }));
@@ -652,27 +637,51 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       setCombo(newCombo);
       setBestCombo((b) => Math.max(b, newCombo));
 
-      // The play: yardage scaled to how much the drill actually asked for,
-      // plus a momentum bonus. This is what animates; XP is what persists.
-      const play = runPlay(exercise.type, isFirstAttempt, newCombo, currentIdx);
-      setDriveYards((y) => y + play.yards);
-      setBurst({ yards: play.yards, id: Date.now(), explosive: play.explosive });
+      const scored = scoreCorrectPlay(
+        drive,
+        exercise.type,
+        isFirstAttempt,
+        newCombo,
+        currentIdx,
+      );
+      setDrive(scored.state);
+      setDriveYards((y) => y + scored.yards);
+      const kind = scored.state.lastPlay?.kind ?? "gain";
+      setBurst(
+        burstFromPlay(kind, scored.yards, Date.now(), scored.explosive),
+      );
 
       setFeedback({
         correct: true,
-        headline: play.heat ? `${play.call} · ${play.heat} 🔥` : play.call,
-        yards: play.yards,
+        headline: scored.heat
+          ? `${scored.call} · ${scored.heat}`
+          : kind === "first_down"
+            ? `${scored.call} · First down!`
+            : kind === "td"
+              ? `${scored.call} · Touchdown!`
+              : scored.call,
+        yards: scored.yards,
+        playKind: kind,
         explain: exercise.explain,
       });
     } else {
       if (isFirstAttempt) setFirstTry((m) => ({ ...m, [currentIdx]: false }));
       setCombo(0);
-      setHearts((h) => h - 1);
-      setBurst(null);
-      setHitId((v) => v + 1);
+
+      const missed = scoreMissPlay(drive, currentIdx);
+      setDrive(missed.state);
+      const kind = missed.state.lastPlay?.kind ?? "incomplete";
+      const yards = missed.state.lastPlay?.yards ?? 0;
+      setBurst(burstFromPlay(kind, yards, Date.now()));
+
       setFeedback({
         correct: false,
-        headline: missCall(currentIdx),
+        headline:
+          kind === "turnover"
+            ? `${missed.call} · Turnover on downs`
+            : missed.call,
+        yards,
+        playKind: kind,
         solution: result.solution,
         explain: exercise.explain,
       });
@@ -681,21 +690,29 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
 
   function handleContinue() {
     if (!feedback || currentIdx === undefined) return;
-    if (!feedback.correct && hearts <= 0) {
+
+    if (drive.status === "turnover" || feedback.playKind === "turnover") {
       setFeedback(null);
-      setPhase("timeout");
+      setPhase("turnover");
       return;
     }
-    setQueue((q) =>
-      feedback.correct ? q.slice(1) : [...q.slice(1), currentIdx],
-    );
+
+    if (drive.status === "touchdown" || feedback.playKind === "td") {
+      setFeedback(null);
+      setQueue([]);
+      setPhase("complete");
+      return;
+    }
+
+    // Football-first: miss does not re-queue — next play is the next exercise.
+    setQueue((q) => q.slice(1));
     setFeedback(null);
   }
 
   function restart() {
     savedRef.current = false;
     setQueue(activeIdx);
-    setHearts(MAX_HEARTS);
+    setDrive(startDrive());
     setCombo(0);
     setXp(0);
     setDriveYards(0);
@@ -713,74 +730,49 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     setPhase("brief");
   }
 
-  const coachMood: CoachMood =
-    phase === "complete"
-      ? "cheer"
-      : phase === "timeout"
-        ? "sad"
-        : feedback
-          ? feedback.correct
-            ? combo >= 3
-              ? "cheer"
-              : "happy"
-            : "sad"
-          : exercise?.type === "query"
-            ? "think"
-            : "idle";
-
-  const done = total - queue.length;
   const firstTryCorrect = Object.values(firstTry).filter(Boolean).length;
+  const playOrdinal =
+    total > 0 ? Math.min(total, total - queue.length + (queue.length > 0 ? 1 : 0)) : 0;
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-2xl flex-col px-4 pb-8">
-      {/* top bar */}
-      <div className="flex items-center gap-4 py-4">
-        <Link
-          href="/learn"
-          aria-label="Quit lesson"
-          className="text-ink-muted transition-colors hover:text-ink"
-        >
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none">
-            <path
-              d="M6 6l12 12M18 6L6 18"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
-        </Link>
-        <DriveField
-          pct={drivePct(done, total)}
-          heat={heatLabel(combo)}
-          burst={burst}
-        />
-        <div
-          key={hitId}
-          className={`flex items-center gap-1 ${hitId > 0 ? "animate-shake" : ""}`}
-        >
-          {Array.from({ length: MAX_HEARTS }).map((_, i) => (
-            <span
-              key={i}
-              className={i === hearts && hitId > 0 ? "animate-heart-break" : ""}
-            >
-              <HeartIcon filled={i < hearts} />
+    <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-4 pb-32 sm:max-w-2xl sm:pb-10">
+      {/* top bar — frosted scorebug */}
+      <div className="glass sticky top-0 z-20 -mx-4 border-b border-panel-border/50 px-4 py-3.5">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/learn"
+            aria-label="Quit lesson"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-panel-border bg-panel/80 text-ink-muted transition-colors hover:border-turf/40 hover:text-ink"
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
+              <path
+                d="M6 6l12 12M18 6L6 18"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </Link>
+          <DriveField
+            drive={drive}
+            heat={heatLabel(combo)}
+            burst={burst}
+          />
+        </div>
+        <div className="mt-2.5 flex items-center justify-between gap-3">
+          <p className="truncate text-sm font-medium text-ink-soft">
+            {lesson.title}
+          </p>
+          {phase === "exercise" && total > 0 && (
+            <span className="shrink-0 rounded-full border border-panel-border bg-panel/70 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-ink-muted">
+              Play {playOrdinal}/{total}
             </span>
-          ))}
+          )}
         </div>
       </div>
 
-      {/* lesson label */}
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <p className="label-broadcast">
-          {unit.drive} · {lesson.title}
-        </p>
-        <span className="shrink-0 border border-panel-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-          {styleDef.name}
-        </span>
-      </div>
-
       {phase === "brief" && (
-        <div className="animate-fade-up flex flex-1 flex-col justify-center gap-5">
+        <div className="animate-fade-up flex flex-1 flex-col justify-center gap-6 pt-6">
           <div className="flex items-start gap-4">
             <div className="hidden shrink-0 sm:block">
               <Coach mood="happy" size={104} />
@@ -790,15 +782,16 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 {briefSteps.length > 0
                   ? `the brief · ${briefStep + 1} of ${briefSteps.length}`
                   : "the brief"}
+                <span className="ml-2 text-ink-muted">· {styleDef.name}</span>
               </p>
-              <h2 className="mt-1 font-display text-2xl font-bold leading-snug text-ink">
+              <h2 className="mt-2 font-display text-2xl font-bold leading-snug text-ink sm:text-3xl">
                 {briefSteps.length > 0
                   ? briefSteps[briefStep].title
                   : lesson.brief.goal}
               </h2>
               <p
                 key={briefStep}
-                className="animate-fade-up mt-3 text-sm leading-relaxed text-ink-soft"
+                className="animate-fade-up mt-4 max-w-prose text-base leading-relaxed text-ink-soft"
               >
                 {briefSteps.length > 0
                   ? briefSteps[briefStep].body
@@ -938,7 +931,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
               onClick={() =>
                 setPhase(style === "gunslinger" ? "exercise" : "intro")
               }
-              className="press w-full border border-turf bg-turf/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf hover:bg-turf/25"
+              className="btn-check"
             >
               {style === "gunslinger" ? "Snap the ball" : "Walk me through it"}
             </button>
@@ -946,9 +939,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             <button
               type="button"
               onClick={() => setBriefStep((i) => i + 1)}
-              className="surface press w-full border border-panel-border bg-panel/60 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-ink-soft hover:border-turf/50 hover:text-turf"
+              className="press w-full rounded-2xl border-2 border-panel-border bg-panel px-6 py-3.5 font-display text-base font-bold text-ink transition-colors hover:border-turf/50 hover:text-turf"
             >
-              Got it → keep going
+              Got it — keep going
             </button>
           )}
         </div>
@@ -977,15 +970,15 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             <button
               type="button"
               onClick={() => setIntroStep((s) => s + 1)}
-              className="surface w-full max-w-xs border border-panel-border bg-panel/70 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-ink transition-colors hover:border-turf/50 hover:text-turf"
+              className="press w-full max-w-sm rounded-2xl border-2 border-panel-border bg-panel px-6 py-3.5 font-display text-base font-bold text-ink transition-colors hover:border-turf/50 hover:text-turf"
             >
-              Next film card
+              Next
             </button>
           ) : (
             <button
               type="button"
               onClick={() => setPhase("exercise")}
-              className="w-full max-w-xs border border-turf bg-turf/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25"
+              className="btn-check max-w-sm"
             >
               Take the field
             </button>
@@ -994,7 +987,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       )}
 
       {phase === "exercise" && exercise && (
-        <div key={currentIdx} className="animate-play-in flex flex-1 flex-col">
+        <div key={currentIdx} className="animate-play-in flex flex-1 flex-col pt-5">
           {/* gunslinger's on-demand chalkboard */}
           {style === "gunslinger" && (
             <div className="mb-3">
@@ -1023,41 +1016,44 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             </div>
           )}
 
-          {/* coach + prompt */}
-          <div className="flex items-start gap-4">
-            <div className="hidden shrink-0 sm:block">
-              <Coach mood={coachMood} size={96} />
-            </div>
-      <div className="surface relative flex-1 border border-panel-border bg-panel/80 p-4 ">
-              <span className="absolute -left-2 top-6 hidden h-4 w-4 rotate-45 border-b border-l border-panel-border bg-panel sm:block" />
-              <p className="text-[15px] leading-relaxed text-ink">
-                {exercise.prompt}
-              </p>
-              {exercise.type === "mc" && exercise.code && (
-                <pre className="mt-3 overflow-x-auto border border-panel-border bg-night px-3 py-2 font-mono text-[13px] leading-relaxed text-gold">
-                  {exercise.code}
-                </pre>
-              )}
-            </div>
+          {/* One beat: short prompt, then the hands-on work */}
+          <div className="lesson-prompt">
+            <p className="mb-2 font-mono text-[11px] font-semibold uppercase tracking-wider text-turf">
+              {feedback?.playKind === "first_down"
+                ? "Chains moving"
+                : feedback?.correct
+                  ? "Nice"
+                  : feedback
+                    ? "Whistle"
+                    : "Your play"}
+            </p>
+            <p className="font-display text-lg font-semibold leading-snug text-ink sm:text-xl">
+              {exercise.prompt}
+            </p>
+            {exercise.type === "mc" && exercise.code && (
+              <pre className="mt-4 overflow-x-auto rounded-xl border border-panel-border bg-night px-3 py-2.5 font-mono text-[13px] leading-relaxed text-gold">
+                {exercise.code}
+              </pre>
+            )}
           </div>
 
           {/* answer area */}
-          <div className="mt-5 flex-1">
+          <div className="mt-5 flex-1 pb-4">
             {exercise.type === "mc" && (
-              <div className="grid gap-2">
+              <div className="grid gap-2.5">
                 {exercise.options.map((opt, i) => (
                   <button
                     key={i}
                     type="button"
                     disabled={!!feedback}
                     onClick={() => setMcChoice(i)}
-                    className={`border px-4 py-3 text-left font-mono text-[13px] transition-colors ${
-                      mcChoice === i
-                        ? "border-turf bg-turf/10 text-turf"
-                        : "border-panel-border bg-panel/60 text-ink-soft hover:border-turf/40 hover:text-ink"
+                    className={`option-chip ${
+                      mcChoice === i ? "option-chip-on" : ""
                     } disabled:cursor-default`}
                   >
-                    <span className="mr-3 text-ink-muted">{i + 1}</span>
+                    <span className="mr-3 inline-flex h-7 w-7 items-center justify-center rounded-full border border-panel-border font-mono text-xs font-bold text-ink-muted">
+                      {i + 1}
+                    </span>
                     {opt}
                   </button>
                 ))}
@@ -1167,7 +1163,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 {(codeError || softError) && (
                   <p className="border-t border-gold/40 bg-gold/5 px-3 py-2 font-mono text-[12px] leading-relaxed text-gold">
                     ⚠ {softError ?? codeError}
-                    {" — no flag on the play. Fix it and check again."}
+                    {" — no down on the play. Fix it and check again."}
                   </p>
                 )}
                 {codeOutput !== null && !codeError && (
@@ -1221,7 +1217,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                     <p className="border-t border-gold/40 bg-gold/5 px-3 py-2 font-mono text-[12px] text-gold">
                       ⚠ {softError ?? formulaError}
                       {softError &&
-                        " — no flag on the play. Fix it and check again."}
+                        " — no down on the play. Fix it and check again."}
                     </p>
                   )}
                   {formulaValue !== null && !formulaError && (
@@ -1271,7 +1267,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 {(runError || softError) && (
                   <p className="border-t border-gold/40 bg-gold/5 px-3 py-2 font-mono text-[12px] text-gold">
                     ⚠ {softError ?? runError}
-                    {softError && " — no flag on the play. Fix it and check again."}
+                    {softError && " — no down on the play. Fix it and check again."}
                   </p>
                 )}
                 {runResult && runResult.columns.length > 0 && (
@@ -1320,16 +1316,17 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             )}
           </div>
 
-          {/* check bar / feedback */}
-          <div className="mt-6">
+          {/* sticky check bar / feedback — Duolingo-weight primary action */}
+          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-panel-border/80 bg-night/95 px-4 py-4 backdrop-blur-md sm:static sm:mt-8 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+            <div className="mx-auto max-w-xl sm:max-w-none">
             {!feedback ? (
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col gap-3">
                 {exercise.type === "query" ||
                 exercise.type === "code" ||
                 exercise.type === "formula" ? (
                   hintsVisible ? (
-                    <p className="font-mono text-[11px] text-ink-muted">
-                      Hint:{" "}
+                    <p className="rounded-xl border border-panel-border/80 bg-panel/50 px-3 py-2 text-sm leading-snug text-ink-muted">
+                      <span className="font-semibold text-ink-soft">Hint · </span>
                       {
                         (
                           exercise as
@@ -1343,14 +1340,12 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                     <button
                       type="button"
                       onClick={() => setHintShown(true)}
-                      className="font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors hover:text-gold"
+                      className="self-start text-sm font-medium text-ink-muted transition-colors hover:text-gold"
                     >
-                      Need a hint, gunslinger?
+                      Need a hint?
                     </button>
                   )
-                ) : (
-                  <span />
-                )}
+                ) : null}
                 <button
                   type="button"
                   onClick={handleCheck}
@@ -1366,86 +1361,106 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                         running ||
                         checking))
                   }
-                  className="press shrink-0 border border-turf bg-turf/15 px-8 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf hover:bg-turf/25 disabled:cursor-not-allowed disabled:border-panel-border disabled:bg-panel disabled:text-ink-muted"
+                  className="btn-check"
                 >
                   {checking ? "Checking…" : "Check"}
                 </button>
               </div>
             ) : (
               <div
-                className={`animate-fade-up border p-4 ${
+                className={`animate-feedback-rise ${
                   feedback.correct
-                    ? "border-turf/60 bg-turf/10"
-                    : "border-gold/60 bg-gold/10"
+                    ? "feedback-win animate-celebrate"
+                    : "feedback-miss"
                 }`}
               >
-                <div className="flex items-center justify-between gap-4">
-                  <p
-                    className={`font-display text-lg font-bold ${
-                      feedback.correct ? "text-turf" : "text-gold"
-                    }`}
-                  >
-                    {feedback.headline}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-2xl" aria-hidden>
+                      {feedback.correct ? "🎉" : "🚩"}
+                    </p>
+                    <p
+                      className={`mt-1 font-display text-xl font-bold leading-snug ${
+                        feedback.correct ? "text-turf" : "text-gold"
+                      }`}
+                    >
+                      {feedback.headline}
+                    </p>
                     {feedback.correct && (
-                      <span className="ml-3 font-mono text-sm font-semibold">
+                      <p className="mt-1.5 text-sm font-semibold text-ink-soft">
                         +{firstTry[currentIdx] ? XP_PER_EXERCISE : XP_RETRY} XP
-                        {feedback.yards !== undefined && (
-                          <span className="ml-2 text-ink-muted">
+                        {feedback.yards !== undefined && feedback.yards > 0 && (
+                          <span className="text-turf">
+                            {" "}
                             · +{feedback.yards} {gainNoun}
                           </span>
                         )}
-                      </span>
+                      </p>
                     )}
-                  </p>
+                    {!feedback.correct && feedback.playKind && (
+                      <p className="mt-1.5 text-sm font-medium text-ink-muted">
+                        {feedback.playKind === "turnover"
+                          ? "Drive over — turnover on downs"
+                          : feedback.playKind === "sack"
+                            ? "Sack · next down"
+                            : "Incomplete · next down"}
+                      </p>
+                    )}
+                  </div>
                   <button
                     type="button"
                     onClick={handleContinue}
-                    className={`press shrink-0 border px-6 py-2.5 font-mono text-sm font-semibold uppercase tracking-widest ${
-                      feedback.correct
-                        ? "border-turf bg-turf/15 text-turf hover:bg-turf/25"
-                        : "border-gold bg-gold/15 text-gold hover:bg-gold/25"
-                    }`}
+                    className={
+                      feedback.correct ? "btn-continue-win" : "btn-continue-miss"
+                    }
                   >
-                    Continue
+                    {feedback.playKind === "turnover"
+                      ? "See the film"
+                      : feedback.playKind === "td"
+                        ? "Celebrate"
+                        : "Continue"}
                   </button>
                 </div>
                 {!feedback.correct && feedback.solution && (
-                  <pre className="mt-3 overflow-x-auto whitespace-pre-wrap border border-panel-border bg-night px-3 py-2 font-mono text-[12px] leading-relaxed text-ink-soft">
+                  <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-xl border border-panel-border bg-night px-3 py-2.5 font-mono text-[12px] leading-relaxed text-ink-soft">
                     {feedback.solution}
                   </pre>
                 )}
-                <p className="mt-3 text-[13px] leading-relaxed text-ink-soft">
+                <p className="mt-3 text-sm leading-relaxed text-ink-soft">
                   {feedback.explain}
                 </p>
-                {!feedback.correct && (
-                  <p className="mt-2 font-mono text-[11px] text-ink-muted">
-                    This play comes back around at the end of the drive.
-                  </p>
-                )}
               </div>
             )}
+            </div>
           </div>
         </div>
       )}
 
       {phase === "complete" && (
-        <div className="animate-fade-up flex flex-1 flex-col items-center justify-center gap-6 text-center">
+        <div className="animate-fade-up flex flex-1 flex-col items-center justify-center gap-6 pt-8 text-center">
           <div className="animate-trophy-in">
             <Coach mood="cheer" size={150} />
           </div>
           <div>
-            <p className="label-broadcast text-turf">drive complete</p>
-            <h1 className="mt-2 font-display text-3xl font-bold text-ink">
-              Touchdown! Lesson complete.
+            <p className="inline-flex rounded-full border border-turf/40 bg-turf/15 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-wider text-turf">
+              Drive complete
+            </p>
+            <h1 className="mt-3 font-display text-3xl font-bold text-ink sm:text-4xl">
+              Touchdown!
             </h1>
+            <p className="mt-2 text-base text-ink-soft">Lesson complete.</p>
           </div>
           <div className="grid w-full max-w-sm grid-cols-2 gap-3">
-            <div className="border border-gold/40 bg-gold/5 p-4">
-              <p className="label-broadcast">xp earned</p>
+            <div className="lesson-prompt !p-4 text-left">
+              <p className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+                XP earned
+              </p>
               <p className="stat-number mt-1 text-2xl">{shownXp}</p>
             </div>
-            <div className="border border-turf/40 bg-turf/5 p-4">
-              <p className="label-broadcast">first-try accuracy</p>
+            <div className="lesson-prompt !p-4 text-left">
+              <p className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+                First-try
+              </p>
               <p className="stat-number-turf mt-1 text-2xl">
                 {total > 0 ? Math.round((firstTryCorrect / total) * 100) : 0}%
               </p>
@@ -1496,56 +1511,51 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
               </div>
             </div>
           )}
-          <div className="flex w-full max-w-sm flex-col gap-2">
+          <div className="flex w-full max-w-sm flex-col gap-2.5">
             {nextId ? (
-              <Link
-                href={`/learn/${nextId}`}
-                className="border border-turf bg-turf/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25"
-              >
+              <Link href={`/learn/${nextId}`} className="btn-check">
                 Next lesson
               </Link>
             ) : (
-              <p className="font-mono text-xs text-ink-muted">
+              <p className="text-sm text-ink-muted">
                 You&apos;ve cleared every live lesson in this module. Switch
                 modules on the roadmap to keep going.
               </p>
             )}
             <Link
               href="/learn"
-              className="border border-panel-border px-6 py-3 font-mono text-sm uppercase tracking-widest text-ink-muted transition-colors hover:border-turf/40 hover:text-ink"
+              className="press rounded-2xl border-2 border-panel-border bg-panel px-6 py-3.5 text-center font-display text-base font-bold text-ink-soft transition-colors hover:border-turf/40 hover:text-ink"
             >
-              Back to the field
+              Back to courses
             </Link>
           </div>
         </div>
       )}
 
-      {phase === "timeout" && (
-        <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
+      {phase === "turnover" && (
+        <div className="animate-fade-up flex flex-1 flex-col items-center justify-center gap-6 pt-8 text-center">
           <Coach mood="sad" size={140} />
           <div>
-            <p className="label-broadcast text-gold">timeout</p>
-            <h1 className="mt-2 font-display text-2xl font-bold text-ink">
-              Coach calls a timeout.
+            <p className="inline-flex rounded-full border border-gold/50 bg-gold/15 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-wider text-gold">
+              Turnover on downs
+            </p>
+            <h1 className="mt-3 font-display text-2xl font-bold text-ink sm:text-3xl">
+              Drive stalled
             </h1>
-            <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-ink-soft">
-              Out of hearts — happens to every rookie. Huddle up, shake it off,
-              and run the drive again. Repetition is how film study works.
+            <p className="mx-auto mt-3 max-w-sm text-base leading-relaxed text-ink-soft">
+              Fourth down and no conversion — happens to every offense. Review
+              the film, huddle up, and run it again.
             </p>
           </div>
-          <div className="flex w-full max-w-sm flex-col gap-2">
-            <button
-              type="button"
-              onClick={restart}
-              className="border border-turf bg-turf/15 px-6 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25"
-            >
+          <div className="flex w-full max-w-sm flex-col gap-2.5">
+            <button type="button" onClick={restart} className="btn-check">
               Rerun the drive
             </button>
             <Link
               href="/learn"
-              className="border border-panel-border px-6 py-3 font-mono text-sm uppercase tracking-widest text-ink-muted transition-colors hover:border-turf/40 hover:text-ink"
+              className="press rounded-2xl border-2 border-panel-border bg-panel px-6 py-3.5 text-center font-display text-base font-bold text-ink-soft transition-colors hover:border-turf/40 hover:text-ink"
             >
-              Back to the field
+              Back to courses
             </Link>
           </div>
         </div>

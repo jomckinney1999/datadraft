@@ -138,19 +138,19 @@ function CourseCard({
         </div>
 
         <span
-          className={`mt-4 block border px-4 py-2.5 text-center font-mono text-xs font-semibold uppercase tracking-wider transition-colors ${
+          className={`mt-4 block rounded-xl border px-4 py-2.5 text-center font-display text-sm font-bold tracking-wide transition-colors ${
             isLive
-              ? "border-turf bg-turf text-night group-hover:bg-turf-dim"
+              ? "border-turf-dim border-b-4 bg-turf text-night group-hover:brightness-105"
               : "cursor-default border-panel-border bg-panel text-ink-muted"
           }`}
         >
-          {isLive ? "Learn More →" : "Coming soon"}
+          {isLive ? "Start learning →" : "Coming soon"}
         </span>
       </div>
     </>
   );
 
-  const shell = `group lift flex flex-col border border-panel-border bg-panel ${
+  const shell = `group lift flex flex-col overflow-hidden rounded-2xl border border-panel-border bg-panel shadow-scoreboard ${
     isLive ? accentBorder : "opacity-75"
   }`;
 

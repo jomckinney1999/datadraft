@@ -1,11 +1,10 @@
 /**
  * The football layer over grading: yardage, play calls, and combo heat.
  *
- * A lesson is a drive. Every correct answer is a completed play that gains
- * ground; a miss is an incompletion that stalls it. This exists so the reward
- * for getting something right is a *specific* event ("Deep ball — 18 yards")
- * rather than a generic "+10 XP", which is the difference between a scoreboard
- * and a game.
+ * Physical downs / LOS / first-down markers live in lib/drive-sim.ts. This
+ * file still owns the booth voice — how many yards a drill is worth, what
+ * the announcer says, and combo heat labels — so the sim and the UI share
+ * one vocabulary.
  *
  * Yardage is deliberately NOT the same as XP. XP measures effort and is what
  * persists; yardage measures the play you just made and is what animates. A
@@ -39,6 +38,10 @@ const BASE_YARDS: Record<Exercise["type"], number> = {
   code: 13,
   formula: 13,
 };
+
+export function baseYardsFor(type: Exercise["type"]): number {
+  return BASE_YARDS[type] ?? 6;
+}
 
 /** Combo thresholds, and what the booth calls them. */
 const HEAT_TIERS: { at: number; label: string }[] = [
@@ -101,7 +104,7 @@ export function runPlay(
   combo: number,
   seed: number,
 ): PlayResult {
-  const base = BASE_YARDS[type] ?? 6;
+  const base = baseYardsFor(type);
   // A re-run of a play you already missed still moves the ball, just less.
   const earned = firstTry ? base : Math.max(3, Math.round(base / 2));
   // Momentum: every completion past the second adds a yard, capped so a long
@@ -121,7 +124,7 @@ export function runPlay(
   };
 }
 
-/** Flavour for a miss. No yardage — a stalled play doesn't move the ball. */
+/** Flavour for a miss. Yard loss (if any) is decided by drive-sim. */
 export function missCall(seed: number): string {
   return pick(MISS_CALLS, seed);
 }
@@ -133,12 +136,7 @@ export function heatLabel(combo: number): string | null {
 }
 
 /**
- * Field position as a percentage of the drive.
- *
- * A drive starts at your own 25 and the goal line is 100%, so the ball is
- * always visibly on the field rather than pinned to the left edge at the
- * start — an empty progress bar reads as "nothing has happened yet", which is
- * exactly the wrong first impression.
+ * @deprecated Prefer drive-sim field position. Kept for any leftover progress UI.
  */
 export const DRIVE_START_PCT = 8;
 
