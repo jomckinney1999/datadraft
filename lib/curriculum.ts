@@ -225,7 +225,7 @@ export const COURSE = {
           code: "week_results   every game a player actually played\nrosters        who owns which player in our league\nwaiver_wire    the free agents nobody has claimed",
           note: "week_results is real: 876 games of genuine NFL scoring from 2022 to 2024. The other two are an example league we invented, because who owns whom is a fact about one private league and not about the NFL.",
           previewSql: "SELECT * FROM rosters;",
-          previewCaption: "rosters · our example league, all 10 picks",
+          previewCaption: "rosters · 5 fantasy teams, 2 starters each",
         },
         {
           title: "One row is one player, one game",
@@ -465,7 +465,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "The table is rosters; the columns are team_name and player.",
               explain:
-                "Ten rows: five players on Your Team, five on Kupp's Krew. You'll join this to the scoring log in a later unit.",
+                "Ten rows across five fantasy teams — two starters each, talent split so no one stacks the whole league. You'll join this to the scoring log in a later unit.",
             },
           ],
         },
@@ -1552,7 +1552,7 @@ export const COURSE = {
             setup:
               "week_results knows who scored what. rosters knows who owns whom. Neither can tell you how your fantasy team did — that needs both, stitched together on the column they share. Here's the roster you'll be joining to.",
             previewSql: "SELECT * FROM rosters;",
-            previewCaption: "rosters · 10 rows, two fantasy teams",
+            previewCaption: "rosters · 5 fantasy teams, 10 starters",
           },
           intro: {
             title: "A join matches rows across tables",
@@ -1620,13 +1620,13 @@ export const COURSE = {
                 "Ten players are on rosters, but that query returned nine rows for week 1. What's the most likely reason?",
               options: [
                 "The join is broken",
-                "Two rostered players have no row that week — both were injured",
+                "One rostered player has no row that week — he was injured",
                 "SQL caps results at nine",
                 "One player was traded",
               ],
               answer: 1,
               explain:
-                "A plain JOIN only keeps pairs that match. McCaffrey and Nacua were both hurt that week, so neither has a row in week_results to pair with, and both silently disappear.",
+                "A plain JOIN only keeps pairs that match. McCaffrey was hurt that week, so he has no row in week_results to pair with and silently disappears.",
             },
           ],
         },
@@ -1722,7 +1722,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "This one needs no join at all — rosters already has both columns.",
               explain:
-                "Kupp's Krew. Worth noticing: not every question about two tables actually needs both. Reach for a join when the answer genuinely spans them.",
+                "Goal Line Gang. Worth noticing: not every question about two tables actually needs both. Reach for a join when the answer genuinely spans them.",
             },
           ],
         },
@@ -1745,10 +1745,10 @@ export const COURSE = {
         },
       ],
             setup:
-              "A plain JOIN silently drops anything unmatched — that's how Travis Kelce disappeared from week 1. LEFT JOIN keeps every row from the left table and fills the missing side with NULL, so absence becomes visible instead of invisible.",
+              "A plain JOIN silently drops anything unmatched — that's how Christian McCaffrey disappeared from week 1. LEFT JOIN keeps every row from the left table and fills the missing side with NULL, so absence becomes visible instead of invisible.",
             previewSql:
               "SELECT r.player, w.fantasy_pts FROM rosters r LEFT JOIN week_results w ON r.player = w.player AND w.season = 2024 AND w.week = 1 ORDER BY r.player;",
-            previewCaption: "10 rows now — look at Travis Kelce",
+            previewCaption: "10 rows now — look at Christian McCaffrey",
           },
           intro: {
             title: "LEFT JOIN keeps the left side whole",
@@ -1759,7 +1759,7 @@ export const COURSE = {
             {
               title: "ON versus WHERE on a LEFT JOIN",
               text: "This is the subtlest trap in joins. Conditions on the right-hand table belong in ON. Move them to WHERE and you filter out the NULL rows you just worked to keep — quietly turning your LEFT JOIN back into an INNER JOIN. If a LEFT JOIN mysteriously loses rows, this is almost always why.",
-              code: "-- keeps Kelce, points NULL\n... LEFT JOIN week_results w ON r.player = w.player AND w.week = 1\n\n-- drops Kelce again\n... LEFT JOIN week_results w ON r.player = w.player WHERE w.week = 1",
+              code: "-- keeps McCaffrey, points NULL\n... LEFT JOIN week_results w ON r.player = w.player AND w.week = 1\n\n-- drops McCaffrey again\n... LEFT JOIN week_results w ON r.player = w.player WHERE w.week = 1",
             },
             {
               title: "LEFT JOIN's siblings — and why LEFT wins by convention",
@@ -1779,7 +1779,7 @@ export const COURSE = {
             {
               type: "mc",
               prompt:
-                "You LEFT JOIN, then add `WHERE w.week = 1`. Kelce disappears again. Why?",
+                "You LEFT JOIN, then add `WHERE w.week = 1`. McCaffrey disappears again. Why?",
               options: [
                 "LEFT JOIN doesn't work with WHERE",
                 "His row has NULL for week, and NULL = 1 is never true, so WHERE removes him",
@@ -1951,7 +1951,7 @@ export const COURSE = {
             },
             {
               title: "Fan-out breaks COUNT too, not just SUM",
-              text: "Ask 'how many players are on Kupp's Krew' with COUNT(*) on this same join and you'll get 239 — one row per game played across three seasons, not one per player. The join is doing exactly what it's supposed to; COUNT(*) is just answering a different question than the one you asked. COUNT(DISTINCT r.player) fixes it by counting unique players instead of matched rows — the same DISTINCT trick fan-out always calls for, whether you're counting or summing.",
+              text: "Ask 'how many players are on Blitz Brothers' with COUNT(*) on this same join and you'll get 97 — one row per game played across three seasons, not one per player. The join is doing exactly what it's supposed to; COUNT(*) is just answering a different question than the one you asked. COUNT(DISTINCT r.player) fixes it by counting unique players instead of matched rows — the same DISTINCT trick fan-out always calls for, whether you're counting or summing.",
               code: "SELECT r.team_name,\n       COUNT(*) AS rows_matched,               -- one per game played\n       COUNT(DISTINCT r.player) AS roster_size  -- the real headcount\nFROM rosters r\nJOIN week_results w ON r.player = w.player\nGROUP BY r.team_name;",
             },
           ],
@@ -1980,7 +1980,7 @@ export const COURSE = {
               orderMatters: true,
               hint: "JOIN, WHERE w.season = 2024, GROUP BY r.team_name, ORDER BY total DESC.",
               explain:
-                "Kupp's Krew 1522.3 to Your Team 1047.1 — not close. One query, whole season, no spreadsheet.",
+                "Fourth & Long 685.9 leads; Touchdown Factory sits at 311.2 with McCaffrey's missed games. One query, whole season, no spreadsheet.",
             },
             {
               type: "query",

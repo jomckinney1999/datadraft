@@ -62,18 +62,24 @@ export function getWeekResults(): WeekResultRow[] {
   }));
 }
 
-/** An example 10-team-style matchup. Real players, invented ownership. */
+/** An example 5-team league slice. Real players, invented ownership.
+ *
+ * Deliberately not two superteams: elite talent is split so a SELECT * looks
+ * like a real draft board. Christian McCaffrey stays rostered so the LEFT JOIN
+ * lesson still has a genuine week-1 absence (he was hurt in 2024). Five players
+ * stay off both rosters and the wire for the anti-join drills.
+ */
 export const ROSTERS: { team_name: string; player: string }[] = [
-  { team_name: "Your Team", player: "Josh Allen" },
-  { team_name: "Your Team", player: "Christian McCaffrey" },
-  { team_name: "Your Team", player: "Tyreek Hill" },
-  { team_name: "Your Team", player: "Travis Kelce" },
-  { team_name: "Your Team", player: "Puka Nacua" },
-  { team_name: "Kupp's Krew", player: "Patrick Mahomes" },
-  { team_name: "Kupp's Krew", player: "Derrick Henry" },
-  { team_name: "Kupp's Krew", player: "CeeDee Lamb" },
-  { team_name: "Kupp's Krew", player: "George Kittle" },
-  { team_name: "Kupp's Krew", player: "Ja'Marr Chase" },
+  { team_name: "Blitz Brothers", player: "Josh Allen" },
+  { team_name: "Blitz Brothers", player: "Travis Kelce" },
+  { team_name: "Fourth & Long", player: "Patrick Mahomes" },
+  { team_name: "Fourth & Long", player: "Ja'Marr Chase" },
+  { team_name: "Touchdown Factory", player: "Christian McCaffrey" },
+  { team_name: "Touchdown Factory", player: "CeeDee Lamb" },
+  { team_name: "Gridiron Gurus", player: "Tyreek Hill" },
+  { team_name: "Gridiron Gurus", player: "George Kittle" },
+  { team_name: "Goal Line Gang", player: "Derrick Henry" },
+  { team_name: "Goal Line Gang", player: "Puka Nacua" },
 ];
 
 /** Example free-agent pool for the same invented league. */
