@@ -34,15 +34,15 @@ export default function CareerPathClient({ roleId }: { roleId: string }) {
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-24 sm:px-6">
       <header className="flex flex-wrap items-center justify-between gap-3 py-5">
-        <HomeLink back="/learn" backLabel="roles" />
+        <HomeLink back="/learn/path" backLabel="all paths" />
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <LearnStatusChips progress={progress} />
           <Link
-            href="/learn"
+            href="/learn/path"
             className="status-chip hover:border-turf/50 hover:text-turf"
             onClick={() => setRoleId(null)}
           >
-            Switch role
+            Switch path
           </Link>
         </div>
       </header>

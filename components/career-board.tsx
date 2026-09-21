@@ -71,7 +71,7 @@ function DumbbellIcon() {
 export default function CareerBoard({
   role,
   completedLessons,
-  backHref = "/learn",
+  backHref = "/learn/path",
 }: {
   role: CareerRole;
   completedLessons: string[];

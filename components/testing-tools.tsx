@@ -85,10 +85,10 @@ export default function TestingTools({
   }
 
   function wipeAndPick() {
-    if (!confirm("Wipe all progress and go back to the role / course picker?"))
+    if (!confirm("Wipe all progress and go back to the path picker?"))
       return;
     clearLocalKeys();
-    write({ ...EMPTY_PROGRESS }, "/learn");
+    write({ ...EMPTY_PROGRESS }, "/learn/path");
   }
 
   function jumpToRole() {
