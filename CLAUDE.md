@@ -133,7 +133,8 @@ Read [docs/PLAN.md](docs/PLAN.md) first. It's the source of truth for the produc
 - Vercel project `sql-sports` under `jomckinney1999s-projects`, linked via `.vercel/` (gitignored).
 - Production branch is `main` (not `master` — `master` is a stale GitHub default branch with no app code, left over from initial repo setup).
 - Framework preset on Vercel is explicitly set to `nextjs` — don't let this get unset, it previously caused production to silently serve only `/public` with everything else 404ing.
-- Deploy with `npx vercel deploy --prod --scope jomckinney1999s-projects` after pushing to `main`. The `--scope` flag is required — without it the CLI fails with a misleading `Not authorized` even when `npx vercel whoami` shows you logged in.
+- **Pushing to `main` deploys production on its own**, through Vercel's Git integration. Observed 2026-09-21: the CLI deploy was rejected at authentication and created nothing, yet the pushed commit was live within about a minute. So the normal flow is just `git push origin main`, then **confirm on the live site** — fetch a page and look for something only the new commit contains, rather than assuming the build went green.
+- The CLI is the fallback, for deploying without a push or re-deploying after an env-var change: `npx vercel deploy --prod --scope jomckinney1999s-projects`. The `--scope` flag is required — without it the CLI fails with a misleading `Not authorized` even when `npx vercel whoami` shows you logged in. **Its saved login expires**, and when it does the CLI answers `reason: "not_authorized"` / "A new login is required" (JSON, not the scope error above). The fix is `npx vercel login` in an interactive terminal, which a Claude session cannot complete — ask the user rather than retrying.
 
 ## Backend (Phase 0/1/2/3 of LAUNCH-PLAN.md — scaffolded, not yet live)
 
