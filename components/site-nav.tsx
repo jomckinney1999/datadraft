@@ -12,6 +12,7 @@ import Link from "next/link";
 const ROUTE_LINKS = [
   { href: "/field", label: "Practice" },
   { href: "/interview", label: "Interview" },
+  { href: "/resources", label: "Resources" },
   { href: "/account", label: "Account" },
 ];
 

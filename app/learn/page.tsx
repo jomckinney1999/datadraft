@@ -179,6 +179,12 @@ export default function LearnCatalogPage() {
             Practice
           </Link>
           <Link
+            href="/resources"
+            className="status-chip hover:border-turf/50 hover:text-turf"
+          >
+            Resources
+          </Link>
+          <Link
             href="/account"
             className="status-chip hover:border-turf/50 hover:text-turf"
           >
@@ -279,6 +285,27 @@ export default function LearnCatalogPage() {
             className="btn-gold shrink-0"
           >
             Start project →
+          </Link>
+        </div>
+      </section>
+
+      <section className="surface mt-4 border border-panel-border bg-panel p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0 max-w-xl">
+            <p className="label-broadcast text-ice">career kit</p>
+            <h2 className="mt-1 font-display text-xl font-bold text-ink">
+              Resumes, outreach &amp; books
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+              Sample resume outlines for your roadmap, job-hunt tactics (yes —
+              including The 2-Hour Job Search), and a short reading list.
+            </p>
+          </div>
+          <Link
+            href="/resources"
+            className="shrink-0 rounded-2xl border-2 border-ice/50 border-b-4 bg-ice/10 px-5 py-3.5 font-mono text-[12px] font-bold uppercase tracking-wider text-ice transition-colors hover:bg-ice/20"
+          >
+            Open resources →
           </Link>
         </div>
       </section>
