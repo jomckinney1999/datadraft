@@ -15,8 +15,8 @@ export function generateMetadata({
   const role = getRole(params.roleId);
   return {
     title: role
-      ? `${role.title} path — SQL Sports`
-      : "Career path — SQL Sports",
+      ? `${role.title} path — DataDraft`
+      : "Career path — DataDraft",
     description: role?.blurb,
   };
 }

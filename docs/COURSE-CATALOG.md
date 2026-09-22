@@ -1,4 +1,4 @@
-# SQL Sports — Full Course Catalog & Lesson Plan
+# DataDraft — Full Course Catalog & Lesson Plan
 
 The production plan for every course on the platform: what gets taught, in what order, and what the sports angle is for each lesson.
 
@@ -156,7 +156,7 @@ Reading a query plan and indexes move to §1.13 — they're about a database alr
 3. Updatable views, and where that stops working · *a view over a join usually isn't*
 4. Views vs CTEs vs temp tables · *a view is the one that outlives the session*
 
-Views stand in for stored procedures here. SQLite — the engine every SQL Sports exercise actually runs against — has no procedural extension at all, so `CREATE PROCEDURE` can't be taught hands-on without breaking the "run it for real" rule every other lesson follows. A view is the closest real, gradable analog: it packages a query for reuse, same as a procedure would for a read.
+Views stand in for stored procedures here. SQLite — the engine every DataDraft exercise actually runs against — has no procedural extension at all, so `CREATE PROCEDURE` can't be taught hands-on without breaking the "run it for real" rule every other lesson follows. A view is the closest real, gradable analog: it packages a query for reuse, same as a procedure would for a read.
 
 ### 1.12 Triggers (3)
 1. What a trigger is, and when it fires · *`BEFORE` / `AFTER`, `INSERT` / `UPDATE` / `DELETE`*

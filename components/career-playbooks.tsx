@@ -63,9 +63,9 @@ export default function CareerPlaybooks() {
             </a>
           </strong>{" "}
           — pick Data Analyst (or another title) and we build your course order.
-          What&apos;s below is the paid Career Track map: resume help, mock
-          interviews, and application support when that tier opens. Stations
-          marked placeholder are still being written. Sport lens right now:{" "}
+          What&apos;s below is a preview of the Career Track map: resume help,
+          mock interviews, and application support later. Stations marked
+          placeholder are still being written. Sport lens right now:{" "}
           <span className="text-ink">
             {sportMeta.icon} {sportMeta.name}
           </span>
@@ -202,10 +202,10 @@ export default function CareerPlaybooks() {
 
           <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-panel-border pt-6">
             <a
-              href="#pricing"
-              className="inline-flex items-center border border-gold bg-gold/10 px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-gold transition-colors duration-150 hover:bg-gold/20"
+              href="/learn"
+              className="btn-gold inline-flex items-center border border-gold/80 px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150"
             >
-              See Career Track pricing
+              Start a free role path →
             </a>
             <p className="font-mono text-[11px] leading-relaxed text-ink-muted">
               Kept intentionally small — 1:1 {lex.coaching.toLowerCase()}{" "}

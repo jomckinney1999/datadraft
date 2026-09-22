@@ -15,8 +15,8 @@ export function generateMetadata({
   const c = getInterviewCase(params.caseId);
   return {
     title: c
-      ? `${c.title} — Interview — SQL Sports`
-      : "Interview Case — SQL Sports",
+      ? `${c.title} — Interview — DataDraft`
+      : "Interview Case — DataDraft",
     description: c?.blurb,
   };
 }

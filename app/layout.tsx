@@ -21,7 +21,7 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-const TITLE = "SQL Sports — Become a data analyst. Sports are the lens.";
+const TITLE = "DataDraft — Become a data analyst. Sports are the lens.";
 const DESCRIPTION =
   "SQL, Python, R, Git, and statistics — everything an aspiring data analyst or data scientist needs, taught through real NFL data. You don't have to watch the games.";
 
@@ -33,14 +33,14 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     url: "https://sql-sports.vercel.app",
-    siteName: "SQL Sports",
+    siteName: "DataDraft",
     type: "website",
     images: [
       {
         url: "/hero-stadium-night.png",
         width: 1536,
         height: 1024,
-        alt: "SQL Sports",
+        alt: "DataDraft",
       },
     ],
   },

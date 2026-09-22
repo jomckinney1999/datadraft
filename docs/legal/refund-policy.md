@@ -4,7 +4,7 @@
 
 Last updated: July 18, 2026
 
-This policy is issued by Jojo Lee McKinney, doing business as SQL Sports (a sole proprietorship, 6617 Rock Lawn Dr, Clifton, VA 20124).
+This policy is issued by Jojo Lee McKinney, doing business as DataDraft (a sole proprietorship, 6617 Rock Lawn Dr, Clifton, VA 20124).
 
 ---
 

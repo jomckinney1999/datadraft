@@ -125,7 +125,17 @@ export function spendTickets(
   return next;
 }
 
-export type ShopItemId = "timeout-1" | "timeout-full" | "bye-week";
+export type ShopItemId =
+  | "timeout-1"
+  | "timeout-full"
+  | "bye-week"
+  | "coach-whisper"
+  | "soft-landing"
+  | "double-tickets";
+
+export const COST_COACH_WHISPER = 25;
+export const COST_SOFT_LANDING = 35;
+export const COST_DOUBLE_TICKETS = 40;
 
 export function shopPrice(id: ShopItemId): number {
   switch (id) {
@@ -135,10 +145,18 @@ export function shopPrice(id: ShopItemId): number {
       return COST_TIMEOUT_REFILL_FULL;
     case "bye-week":
       return COST_BYE_WEEK;
+    case "coach-whisper":
+      return COST_COACH_WHISPER;
+    case "soft-landing":
+      return COST_SOFT_LANDING;
+    case "double-tickets":
+      return COST_DOUBLE_TICKETS;
   }
 }
 
-export function buyShopItem(id: ShopItemId): { ok: true; progress: Progress } | { ok: false; reason: string } {
+export function buyShopItem(
+  id: ShopItemId,
+): { ok: true; progress: Progress } | { ok: false; reason: string } {
   const p = loadEconomy();
   const price = shopPrice(id);
   if (p.tickets < price) {
@@ -149,8 +167,14 @@ export function buyShopItem(id: ShopItemId): { ok: true; progress: Progress } | 
     next.timeouts = Math.min(FREE_DAILY_TIMEOUTS, next.timeouts + 1);
   } else if (id === "timeout-full") {
     next.timeouts = FREE_DAILY_TIMEOUTS;
-  } else {
+  } else if (id === "bye-week") {
     next.byeWeeks += 1;
+  } else if (id === "coach-whisper") {
+    next.coachWhispers = (next.coachWhispers ?? 0) + 1;
+  } else if (id === "soft-landing") {
+    next.softLandings = (next.softLandings ?? 0) + 1;
+  } else if (id === "double-tickets") {
+    next.doubleTickets = (next.doubleTickets ?? 0) + 1;
   }
   saveProgress(next);
   return { ok: true, progress: next };

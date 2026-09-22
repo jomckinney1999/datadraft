@@ -17,7 +17,7 @@
 .theme-dark {
   color-scheme: dark;
 
-  /* Duolingo-neutral charcoal with SQL Sports accents:
+  /* Duolingo-neutral charcoal with DataDraft accents:
      green (turf) · blue (ice) · gold — dark only, no light mode. */
   --c-night: 19 31 36;
   --c-night-50: 55 70 79;

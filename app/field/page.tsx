@@ -5,7 +5,7 @@ import ThemeToggle from "@/components/theme-toggle";
 import HomeLink from "@/components/home-link";
 
 export const metadata: Metadata = {
-  title: "The Practice Field — SQL Sports",
+  title: "The Practice Field — DataDraft",
   description:
     "A free SQL sandbox loaded with real NFL data. Practice on the field like players do — no grades, no limits, just reps.",
 };

@@ -258,7 +258,7 @@ export default function ExcelSandbox() {
         <div className="overflow-hidden border border-panel-border bg-panel">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-panel-border px-3 py-2">
             <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-ink">
-              SQL Sports · Workbook
+              DataDraft · Workbook
             </p>
             <p className="font-mono text-[10px] text-ink-muted">
               {ready ? "Formulas ready" : "Loading engine…"}

@@ -113,67 +113,6 @@ const ROADMAP = [
   },
 ];
 
-const PLANS = [
-  {
-    name: "Free",
-    price: "0",
-    period: "forever",
-    accent: "turf" as const,
-    features: [
-      "All live lessons (SQL, Python, Excel, more)",
-      "Browser sandboxes — no install",
-      "Practice Field + interview cases",
-      "Your League Scorecard project",
-    ],
-    cta: "Start learning free",
-    // Everything currently built is free and open — no account, no card.
-    available: true,
-  },
-  {
-    name: "Practice",
-    price: "15–30",
-    period: "/mo",
-    accent: "turf" as const,
-    features: [
-      "Unlimited timeouts & deeper practice",
-      "Ongoing weekly problem sets",
-      "Live season datasets",
-    ],
-    cta: "Start practicing",
-    available: false,
-  },
-  {
-    name: "Roadmap",
-    price: "200–500",
-    period: "one-time",
-    accent: "gold" as const,
-    features: [
-      "Full Beginner → Advanced pathway",
-      "Portfolio capstone project",
-      "Completion credential",
-    ],
-    cta: "Unlock the Roadmap",
-    available: false,
-  },
-  {
-    name: "Career Track",
-    price: "1k–5k",
-    period: "/yr",
-    accent: "gold" as const,
-    badge: "premium",
-    features: [
-      "Everything in Roadmap",
-      "Role-specific career playbook",
-      "Resume & portfolio review",
-      "Mock interview practice",
-      "Application strategy support",
-    ],
-    cta: "Apply for Career Track",
-    available: false,
-    featured: true,
-  },
-];
-
 export default function Home() {
   return (
     <div className="min-h-screen">
@@ -210,9 +149,9 @@ export default function Home() {
               {/* Copy column — brand-first, not a SaaS center stack */}
               <div className="lg:col-span-5 lg:pt-4">
                 <h1 className="font-display text-5xl font-bold leading-[0.98] tracking-tight text-pop sm:text-6xl animate-[fadeUp_0.45s_ease-out_0.05s_forwards] opacity-0">
-                  SQL
+                  Data
                   <span className="title-glow-turf text-turf">
-                    Sports
+                    Draft
                   </span>
                 </h1>
 
@@ -235,12 +174,6 @@ export default function Home() {
                     className="btn-turf inline-flex items-center gap-2 border border-turf/80 bg-turf px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-turf-dim"
                   >
                     Start learning free
-                  </a>
-                  <a
-                    href="#sandbox"
-                    className="inline-flex items-center gap-2 border border-panel-border bg-panel/50 px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-ink-soft transition-colors duration-150 hover:border-gold/50 hover:text-gold backdrop-blur-sm"
-                  >
-                    Try SQL in the browser
                   </a>
                 </div>
                 <p className="mt-3 font-mono text-[11px] text-ink-muted animate-[fadeUp_0.45s_ease-out_0.22s_forwards] opacity-0">
@@ -298,7 +231,7 @@ export default function Home() {
         {/* ── Pick your sport ───────────────────────────── */}
         <SportPicker />
 
-        {/* ── Why SQL Sports ───────────────────────────── */}
+        {/* ── Why DataDraft ───────────────────────────── */}
         <section
           id="why"
           className="relative overflow-hidden border-t border-panel-border"
@@ -320,7 +253,7 @@ export default function Home() {
           <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
             <p className="label-broadcast mb-3">
               <span className="mr-2 inline-block h-1.5 w-1.5 bg-turf align-middle" />
-              Why SQL Sports
+              Why DataDraft
             </p>
             <h2 className="max-w-2xl font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
               Learn data skills on data you already get
@@ -357,7 +290,7 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Old way vs. SQL Sports comparison */}
+            {/* Old way vs. DataDraft comparison */}
             <div className="mt-12 overflow-hidden border border-panel-border">
               <div className="grid grid-cols-2">
                 <div className="border-b border-r border-panel-border bg-panel/60 px-4 py-3 sm:px-5">
@@ -367,7 +300,7 @@ export default function Home() {
                 </div>
                 <div className="border-b border-panel-border bg-turf/5 px-4 py-3 sm:px-5">
                   <span className="label-broadcast text-[10px] text-turf">
-                    SQL Sports
+                    DataDraft
                   </span>
                 </div>
               </div>
@@ -395,14 +328,11 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Worth-the-money close — framed for when paid tiers open */}
+            {/* Beta close — no dollar figures on the page while checkout is off */}
             <p className="mt-10 max-w-2xl text-base leading-relaxed text-ink-soft">
-              A data analytics bootcamp runs $10,000–20,000. A specialized
-              master&apos;s can run $20,000–50,000. Both bet that immersion
-              works. SQL Sports makes the same bet — with a domain you already
-              understand — and right now every live lesson is free while
-              we&apos;re in beta. When paid tiers open, founding rates stay
-              locked for people on the waitlist.
+              Bootcamps and degrees bet that immersion works. DataDraft makes
+              the same bet — with a domain you already understand — and every
+              live lesson is free while we&apos;re in beta.
             </p>
 
             {/* Non-fan reassurance */}
@@ -512,133 +442,6 @@ export default function Home() {
 
         {/* ── Career Track playbooks ────────────────────── */}
         <CareerPlaybooks />
-
-        {/* ── Pricing ───────────────────────────────────── */}
-        <section id="pricing" className="border-t border-panel-border">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-            <p className="label-broadcast mb-3">
-              <span className="mr-2 dot-glow-gold inline-block h-1.5 w-1.5 bg-gold align-middle" />
-              Pricing
-            </p>
-            <h2 className="font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
-              From first lesson to career change
-            </h2>
-            <p className="mt-3 max-w-xl text-base leading-relaxed text-ink-soft">
-              Start free. When you want more practice depth, a full roadmap
-              credential, or 1:1 career help, the tiers below are the plan —
-              waitlist only until checkout is ready.
-            </p>
-
-            {/* Nothing is for sale yet — the legal docs are still in review and
-                the entity work in docs/BUSINESS-SETUP.md is unfinished. Saying
-                so plainly beats a checkout button that can't charge. */}
-            <div className="mt-6 flex flex-col gap-2">
-              <div className="inline-flex items-center gap-2 border border-turf/40 bg-turf/10 px-3 py-2">
-                <span className="inline-block h-1.5 w-1.5 shrink-0 bg-turf" />
-                <span className="font-mono text-[11px] leading-snug text-ink-soft">
-                  <span className="font-semibold uppercase tracking-wider text-turf">
-                    Everything built is free right now
-                  </span>{" "}
-                  — every live lesson, the sandbox and the Practice Field, no
-                  account and no card. We&apos;re in beta.
-                </span>
-              </div>
-              <div className="inline-flex items-center gap-2 border border-gold/30 bg-gold/5 px-3 py-2">
-                <span className="dot-glow-gold inline-block h-1.5 w-1.5 shrink-0 bg-gold" />
-                <span className="font-mono text-[11px] leading-snug text-ink-soft">
-                  <span className="font-semibold uppercase tracking-wider text-gold">
-                    Prices below are the plan, not a live checkout
-                  </span>{" "}
-                  — founding-cohort rates, locked in for anyone on the list
-                  before the paid tiers open.
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {PLANS.map((plan) => (
-                <div
-                  key={plan.name}
-                  className={`flex flex-col border bg-panel p-5 transition-colors duration-150 ${
-                    plan.featured
-                      ? "border-gold/40 hover:border-gold"
-                      : "border-panel-border hover:border-turf/50"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="label-broadcast text-ink">{plan.name}</span>
-                    {plan.badge && (
-                      <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-gold">
-                        {plan.badge}
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-4 flex items-baseline gap-1">
-                    <span
-                      className={`text-4xl ${
-                        plan.featured ? "stat-number" : "stat-number-turf"
-                      }`}
-                    >
-                      ${plan.price}
-                    </span>
-                    <span className="font-mono text-xs font-medium text-ink-soft">
-                      {plan.period}
-                    </span>
-                  </div>
-                  <ul className="mt-6 flex-1 space-y-2">
-                    {plan.features.map((f) => (
-                      <li
-                        key={f}
-                        className="flex gap-2 text-sm text-ink-soft"
-                      >
-                        <span
-                          className={
-                            plan.accent === "gold" ? "text-gold" : "text-turf"
-                          }
-                        >
-                          ▸
-                        </span>
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  {plan.available ? (
-                    <a
-                      href="/learn"
-                      className="btn-turf mt-6 block border border-turf bg-turf px-4 py-2.5 text-center font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-turf-dim"
-                    >
-                      {plan.cta}
-                    </a>
-                  ) : (
-                    <div className="mt-6">
-                      <p className="mb-2 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-                        Not open yet — get first access
-                      </p>
-                      <WaitlistForm
-                        interest={`tier:${plan.name.toLowerCase().replace(/\s+/g, "-")}`}
-                        source="pricing"
-                        label="Notify me"
-                        compact
-                      />
-                    </div>
-                  )}
-                  {plan.name === "Career Track" && (
-                    <p className="mt-3 text-center font-mono text-[10px] leading-relaxed text-ink-muted">
-                      Role-specific playbooks —{" "}
-                      <a
-                        href="#career-track"
-                        className="text-gold underline decoration-gold/40 underline-offset-2 hover:decoration-gold"
-                      >
-                        see the pathways
-                      </a>
-                      . Kept intentionally small so 1:1 review stays real.
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* ── Weekly Challenge & Leaderboard (preview) ──── */}
         <section id="challenge" className="border-t border-panel-border bg-night/60">
@@ -750,7 +553,7 @@ export default function Home() {
                     Separate app · ask NFL questions in plain English
                   </p>
                   <p className="mt-4 max-w-xl text-base leading-relaxed text-ink-soft">
-                    Built by the same team — not part of the SQL Sports
+                    Built by the same team — not part of the DataDraft
                     curriculum. If you want instant NFL answers from play-by-play
                     data, it&apos;s over there. If you want to{" "}
                     <em className="not-italic text-ink">learn</em> the skills,
@@ -823,7 +626,7 @@ export default function Home() {
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-4 py-8 sm:flex-row sm:items-center sm:px-6">
           <div>
             <p className="font-display text-sm font-semibold text-ink">
-              SQL<span className="text-turf">Sports</span>
+              Data<span className="text-turf">Draft</span>
             </p>
             <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
               Code education · Sports as the hook
@@ -837,7 +640,7 @@ export default function Home() {
               Real NFL data from nflverse · source &amp; download
             </a>
             <p className="font-mono text-[11px] text-ink-muted">
-              © {new Date().getFullYear()} SQL Sports
+              © {new Date().getFullYear()} DataDraft
             </p>
           </div>
         </div>

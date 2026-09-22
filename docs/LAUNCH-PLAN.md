@@ -1,4 +1,4 @@
-# SQL Sports — Full Launch Plan
+# DataDraft — Full Launch Plan
 
 No calendar dates in this version — this is every phase of work needed to build the complete, fully realized product, ordered by dependency (what has to exist before the next thing can be built), not by a deadline. Where the previous 8-week-beta framing of this doc cut something for time, it's called out explicitly below and folded back in as a real phase.
 
@@ -76,7 +76,7 @@ I can write code, lesson copy, docs, marketing copy, and data pipeline logic. I 
 
 - Integrate the chosen data vendor; build a scheduled ETL job (e.g., a cron function) that pulls each week's stats after Monday Night Football concludes.
 - Data-quality checks on ingestion — row counts, no duplicate players, bye weeks handled correctly. This mirrors the "gotcha" pedagogy already built into `docs/CURRICULUM.md`, now applied to production data reliability instead of just teaching content.
-- Historical backfill across multiple past seasons, so SQL Sports has genuine multi-year depth (the kind NFL Stat Guru already advertises) instead of the current 3-season synthetic dataset.
+- Historical backfill across multiple past seasons, so DataDraft has genuine multi-year depth (the kind NFL Stat Guru already advertises) instead of the current 3-season synthetic dataset.
 - This is the one phase everything else quietly depends on: once real, it upgrades the sandbox, every curriculum lab's "correct answer," and the Weekly Challenge simultaneously.
 
 ---
@@ -104,7 +104,7 @@ I can write code, lesson copy, docs, marketing copy, and data pipeline logic. I 
 - **ESPN Fantasy** next (semi-official, cookie-based — more fragile; budget extra hardening time and expect it to need maintenance as ESPN changes things).
 - **Yahoo Fantasy** last (official OAuth API — the most "proper" integration, but the most setup overhead: app registration, OAuth consent flow).
 - Decide refresh cadence for synced leagues (real-time vs. daily vs. weekly) — a cost/complexity tradeoff, not just a technical one.
-- Privacy/security review: this pulls a user's real league data, which may include league-mates' names/info. Handle access tokens properly and think through what you're storing about people who never signed up for SQL Sports themselves.
+- Privacy/security review: this pulls a user's real league data, which may include league-mates' names/info. Handle access tokens properly and think through what you're storing about people who never signed up for DataDraft themselves.
 
 ---
 

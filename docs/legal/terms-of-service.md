@@ -8,9 +8,9 @@ Last updated: July 18, 2026
 
 ## 1. Who this agreement is with
 
-These Terms of Service ("Terms") are a legal agreement between you and **Jojo Lee McKinney, an individual doing business as SQL Sports** ("SQL Sports," "we," "us"), a sole proprietorship operating from 6617 Rock Lawn Dr, Clifton, VA 20124, governing your use of the SQL Sports website, sandbox, curriculum, Weekly Challenge, leaderboard, and related services (the "Service"). By creating an account or using the Service, you agree to these Terms.
+These Terms of Service ("Terms") are a legal agreement between you and **Jojo Lee McKinney, an individual doing business as DataDraft** ("DataDraft," "we," "us"), a sole proprietorship operating from 6617 Rock Lawn Dr, Clifton, VA 20124, governing your use of the DataDraft website, sandbox, curriculum, Weekly Challenge, leaderboard, and related services (the "Service"). By creating an account or using the Service, you agree to these Terms.
 
-**Note on business structure:** SQL Sports currently operates as a sole proprietorship, not a separate legal entity (see `docs/BUSINESS-SETUP.md`). This means Jojo Lee McKinney personally, not a shielded company, is the counterparty to this agreement — the Limitation of Liability section (11) is what does the practical work of limiting exposure here, and it matters more for a sole proprietorship than it would for an LLC. Have a lawyer confirm this section is as strong as it can be before real money changes hands.
+**Note on business structure:** DataDraft currently operates as a sole proprietorship, not a separate legal entity (see `docs/BUSINESS-SETUP.md`). This means Jojo Lee McKinney personally, not a shielded company, is the counterparty to this agreement — the Limitation of Liability section (11) is what does the practical work of limiting exposure here, and it matters more for a sole proprietorship than it would for an LLC. Have a lawyer confirm this section is as strong as it can be before real money changes hands.
 
 ## 2. Eligibility
 
@@ -19,7 +19,7 @@ You must be at least 13 years old to use the Service. If you are under 18, you c
 ## 3. Accounts
 
 - You're responsible for keeping your account secure and for all activity under it.
-- Sign-in is via magic-link email — keep your email account secure, since it's the sole recovery path for your SQL Sports account.
+- Sign-in is via magic-link email — keep your email account secure, since it's the sole recovery path for your DataDraft account.
 - One account per person. Leaderboard/challenge integrity depends on this — see Section 7.
 
 ## 4. Subscriptions, purchases, and billing
@@ -65,7 +65,7 @@ The Service, including the sandbox's sample data and any real stats data pipelin
 
 ## 11. Limitation of liability
 
-To the maximum extent permitted by law, SQL Sports isn't liable for indirect, incidental, or consequential damages arising from your use of the Service. Our total liability for any claim is limited to the amount you paid us in the 12 months before the claim arose. [A real lawyer should tune this section to your state's law — limitation-of-liability enforceability varies.]
+To the maximum extent permitted by law, DataDraft isn't liable for indirect, incidental, or consequential damages arising from your use of the Service. Our total liability for any claim is limited to the amount you paid us in the 12 months before the claim arose. [A real lawyer should tune this section to your state's law — limitation-of-liability enforceability varies.]
 
 ## 12. Changes to these Terms
 

@@ -24,7 +24,7 @@ export default function SupportWidget() {
     if (!body) return;
     const href =
       `mailto:${SUPPORT_EMAIL}` +
-      `?subject=${encodeURIComponent("SQL Sports — support")}` +
+      `?subject=${encodeURIComponent("DataDraft — support")}` +
       `&body=${encodeURIComponent(body)}`;
     window.location.href = href;
     setSent(true);
@@ -37,7 +37,7 @@ export default function SupportWidget() {
         <div className="surface flex w-[320px] max-w-[calc(100vw-2.5rem)] flex-col border border-panel-border bg-panel shadow-float sm:w-[360px]">
           <div className="flex items-center justify-between border-b border-panel-border px-4 py-3">
             <span className="font-display text-sm font-bold text-pop">
-              SQL<span className="text-turf">Sports</span>
+              Data<span className="text-turf">Draft</span>
               <span className="ml-2 label-broadcast align-middle text-[10px] text-ink-muted">
                 support
               </span>

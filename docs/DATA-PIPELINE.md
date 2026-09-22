@@ -1,6 +1,6 @@
 # Data Pipeline Plan
 
-How SQL Sports gets real NFL data, keeps it fresh, and makes it fantasy-relevant
+How DataDraft gets real NFL data, keeps it fresh, and makes it fantasy-relevant
 without breaking the lessons.
 
 This is the plan for everything data-ingestion. `docs/LAUNCH-PLAN.md` Phase 3

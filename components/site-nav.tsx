@@ -25,9 +25,9 @@ export default function SiteNav() {
   return (
     <header className="glass sticky top-0 z-30 border-b border-panel-border/80">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-6 px-4 sm:px-6">
-        <Link href="/" aria-label="SQL Sports home" className="flex shrink-0 items-baseline gap-2">
+        <Link href="/" aria-label="DataDraft home" className="flex shrink-0 items-baseline gap-2">
           <span className="font-display text-lg font-bold tracking-tight text-pop">
-            SQL<span className="text-turf">Sports</span>
+            Data<span className="text-turf">Draft</span>
           </span>
           <span className="hidden font-mono text-[10px] uppercase tracking-[0.18em] text-ink-muted sm:inline">
             v0.1

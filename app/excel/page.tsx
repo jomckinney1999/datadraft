@@ -4,7 +4,7 @@ import ExcelSandbox from "@/components/excel-sandbox";
 import HomeLink from "@/components/home-link";
 
 export const metadata: Metadata = {
-  title: "The Spreadsheet — SQL Sports",
+  title: "The Spreadsheet — DataDraft",
   description:
     "A live Excel-style workbook in your browser. Practice real formulas on fantasy roster data — formula bar, sheet tabs, no install.",
 };

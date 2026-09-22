@@ -1,4 +1,4 @@
-# SQL Sports
+# DataDraft
 
 Education platform teaching SQL and data analytics through fantasy football. Next.js 14 (App Router), TypeScript, Tailwind — a marketing/landing site (`app/page.tsx`) plus a gamified learning MVP (`app/learn/`), deployed to Vercel at https://sql-sports.vercel.app.
 

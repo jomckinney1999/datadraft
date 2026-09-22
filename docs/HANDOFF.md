@@ -1,4 +1,4 @@
-# SQL Sports — Session Handoff
+# DataDraft — Session Handoff
 
 *Written 2026-08-09 after the Aug MVP build-out. Give this file to Claude Code to continue the work with full context. It complements — doesn't replace — `CLAUDE.md` (always in effect) and `docs/PLAN.md` (positioning source of truth).*
 
@@ -12,7 +12,7 @@ Four commits on `main`, all deployed:
 
 1. **Gamified learn MVP** — Duolingo-style lessons (`/learn`, `/learn/[lessonId]`): hearts, XP, combo streaks, re-queued misses, Coach Blitz SVG mascot, write-real-SQL exercises graded in-browser via sql.js.
 2. **Playbook styles + Practice Field** — 3-question quiz (`/learn/playbook`) sorts learners into Film Room General / Gunslinger / Dual-Threat, and lessons adapt (theory depth, trimmed recall MCs, hint visibility). `/field` is an ungraded sandbox over **real NFL data** (nflverse, 2025 season).
-3. **Fantasy palette + SQLSports Draft** — full recolor (turf green / championship gold / draft-night indigo), and course selection as a draft ceremony (`/learn/draft`): jersey name → draft board → *"With the first pick of the SQLSports Draft, {username} selects…"*
+3. **Fantasy palette + DataDraft Draft** — full recolor (turf green / championship gold / draft-night indigo), and course selection as a draft ceremony (`/learn/draft`): jersey name → draft board → *"With the first pick of the DataDraft, {username} selects…"*
 4. **Non-fan positioning** — "you don't have to watch football" callouts on landing, draft, roadmap, and field (decision logged in `docs/PLAN.md`).
 
 ## Route map

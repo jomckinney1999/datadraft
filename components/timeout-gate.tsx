@@ -81,8 +81,8 @@ export default function TimeoutGate({
           Season Pass
         </p>
         <p className="mt-1 text-[12px] text-ink-soft">
-          Unlimited timeouts + Practice-tier weekly data. Billing opens with
-          founding pricing — get on the list.
+          Unlimited timeouts + Practice-tier weekly data. Get on the list for
+          when it opens.
         </p>
         <div className="mt-3">
           <WaitlistForm

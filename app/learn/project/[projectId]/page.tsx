@@ -17,8 +17,8 @@ export function generateMetadata({
   const project = getProject(params.projectId);
   return {
     title: project
-      ? `${project.title} — SQL Sports`
-      : "Project — SQL Sports",
+      ? `${project.title} — DataDraft`
+      : "Project — DataDraft",
     description: project?.blurb,
   };
 }

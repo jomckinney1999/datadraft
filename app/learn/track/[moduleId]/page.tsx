@@ -16,7 +16,7 @@ export function generateMetadata({
 }): Metadata {
   const mod = MODULES.find((m) => m.id === params.moduleId);
   return {
-    title: mod ? `${mod.name} — SQL Sports` : "Course — SQL Sports",
+    title: mod ? `${mod.name} — DataDraft` : "Course — DataDraft",
     description: mod?.blurb,
   };
 }

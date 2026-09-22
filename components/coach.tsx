@@ -1,4 +1,4 @@
-// Coach Blitz — the SQL Sports mascot. A football with a coach's temper.
+// Coach Blitz — the DataDraft mascot. A football with a coach's temper.
 //
 // Built in the flat, outline-free style of a modern mascot: one leather body
 // with a darker rim for shading, huge eyes, heavy brows that carry most of the

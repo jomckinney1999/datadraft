@@ -3,7 +3,7 @@
 // Draft Day: the course-selection ceremony. Three acts —
 //   1. jersey: put a name on the back of the jersey
 //   2. clock:  you're on the clock, pick a track from the draft board
-//   3. podium: "With the first pick of the SQLSports Draft, {name} selects…"
+//   3. podium: "With the first pick of the DataDraft, {name} selects…"
 // The pick is stored in progress (optional — lessons no longer require it).
 
 import { Suspense, useEffect, useState } from "react";
@@ -205,7 +205,7 @@ function DraftDay() {
               the sqlsports draft · pick 1.01
             </p>
             <p className="mt-5 font-display text-2xl font-bold leading-snug text-ink sm:text-3xl">
-              “With the first pick of the SQLSports Draft,{" "}
+              “With the first pick of the DataDraft,{" "}
               <span className="text-turf">{trimmed}</span> selects{" "}
               <span className="text-gold">{pick.name}</span>.”
             </p>

@@ -1,4 +1,4 @@
-// The SQLSports Draft: the course-selection ceremony.
+// The DataDraft Draft: the course-selection ceremony.
 //
 // This board is DERIVED from lib/courses.ts rather than hand-written. It used
 // to be its own hard-coded list, which drifted the moment the /learn catalog

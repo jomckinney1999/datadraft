@@ -1,4 +1,4 @@
-# SQL Sports — 12-Week Curriculum
+# DataDraft — 12-Week Curriculum
 
 **Flagship program:** SQL & data analytics through fantasy football  
 **Audience:** Complete beginner → job-ready analyst (or serious power user)  
@@ -119,7 +119,7 @@ Learners work against a documented schema that grows in complexity:
 | Professional habits | 5% | Notebook hygiene, README, reproducibility |
 
 **Pass:** ≥70% overall + completed capstone  
-**Credential:** SQL Sports Roadmap Certificate (Career Track adds portfolio review + mock interview sign-off)
+**Credential:** DataDraft Roadmap Certificate (Career Track adds portfolio review + mock interview sign-off)
 
 ### Capstone rubric (100 pts)
 
@@ -221,7 +221,7 @@ Learner can produce a correct filtered player list, articulate why `= NULL` is w
 2. Top-N patterns with `ORDER BY` + `LIMIT` (and their limits)
 3. `DISTINCT` vs fixing the join (preview of Phase 2)
 4. Date and week arithmetic: extracting season/week from `game_date`, and why sorting "Week 10" as text breaks after Week 9
-5. Style guide for SQL Sports notebooks
+5. Style guide for DataDraft notebooks
 6. Checkpoint: Phase 1 cumulative review
 
 ### Labs
@@ -548,7 +548,7 @@ Local Postgres setup + `psql` / GUI; export marts for Tableau/Metabase (Career T
 
 ### Graduation
 - Certificate issued on rubric pass  
-- Capstone featured (optional opt-in) in SQL Sports showcase  
+- Capstone featured (optional opt-in) in DataDraft showcase  
 - Practice-tier alumni path: keep sandbox + weekly drops post-program  
 
 ---
@@ -701,7 +701,7 @@ PPR vs half-PPR vs standard appears repeatedly so learners never hard-code “po
 
 ### 4. Ethics & fairness (short modules)
 - Don’t scrape against TOS; use licensed / provided datasets  
-- Be careful with gambling-adjacent framing — SQL Sports teaches analysis, not betting systems  
+- Be careful with gambling-adjacent framing — DataDraft teaches analysis, not betting systems  
 - Represent uncertainty honestly in recommendations  
 
 ---

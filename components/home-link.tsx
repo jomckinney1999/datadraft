@@ -30,10 +30,10 @@ export default function HomeLink({
     <div className="flex min-w-0 items-baseline gap-3">
       <Link
         href="/"
-        aria-label="SQL Sports home"
+        aria-label="DataDraft home"
         className="shrink-0 font-display text-lg font-bold tracking-tight text-ink transition-opacity hover:opacity-80"
       >
-        SQL<span className="text-turf">Sports</span>
+        Data<span className="text-turf">Draft</span>
         {label && (
           <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-muted">
             {label}

@@ -9,7 +9,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { COURSES, type Course } from "@/lib/courses";
-import { CAREER_ROLES, pathSteps, roleHours } from "@/lib/career-paths";
+import { CAREER_ROLES, pathSteps } from "@/lib/career-paths";
+import RolePathCard from "@/components/role-path-card";
 import { liveLessons, ALL_MODULE } from "@/lib/curriculum";
 import { loadProgress, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
 import { useCareerRole } from "@/lib/use-career-role";
@@ -221,55 +222,16 @@ export default function LearnCatalogPage() {
 
       <StreakNudge progress={progress} />
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {CAREER_ROLES.map((role, i) => {
-          const steps = pathSteps(role, progress.completedLessons);
-          const live = steps.filter(
-            (s) => s.course.status === "live" && s.total > 0,
-          );
-          const cleared = live.filter((s) => s.complete).length;
-          return (
-            <Link
-              key={role.id}
-              href={`/learn/path/${role.id}`}
-              onClick={() => setRoleId(role.id)}
-              style={{ animationDelay: `${Math.min(i, 6) * 40}ms` }}
-              className="section-card lift animate-fade-up group block transition-colors hover:border-turf/50"
-            >
-              <p className="label-broadcast text-gold">
-                ~{roleHours(role)}h formula
-              </p>
-              <h2 className="mt-1 font-display text-xl font-bold text-ink group-hover:text-turf">
-                {role.title}
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-                {role.blurb}
-              </p>
-              <ol className="mt-3 flex flex-wrap gap-1.5">
-                {steps.map((s, idx) => (
-                  <li
-                    key={s.course.id}
-                    className={`rounded-md border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider ${
-                      s.complete
-                        ? "border-turf/50 bg-turf/15 text-turf"
-                        : s.course.status === "building"
-                          ? "border-panel-border text-ink-muted"
-                          : "border-panel-border text-ink-soft"
-                    }`}
-                  >
-                    {idx + 1}. {s.course.mark}
-                    {s.course.status === "building" ? " · soon" : ""}
-                  </li>
-                ))}
-              </ol>
-              <p className="mt-4 font-mono text-[11px] font-semibold uppercase tracking-widest text-turf">
-                {cleared > 0
-                  ? `${cleared}/${live.length} cleared · Open board →`
-                  : "Open board →"}
-              </p>
-            </Link>
-          );
-        })}
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {CAREER_ROLES.map((role, i) => (
+          <RolePathCard
+            key={role.id}
+            role={role}
+            steps={pathSteps(role, progress.completedLessons)}
+            index={i}
+            onSelect={() => setRoleId(role.id)}
+          />
+        ))}
       </div>
 
       <div className="mt-8 max-w-md">

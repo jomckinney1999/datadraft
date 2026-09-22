@@ -20,13 +20,13 @@ const stripe = new Stripe(key, { apiVersion: "2026-06-24.dahlia" });
 
 async function main() {
   const existing = await stripe.products.search({
-    query: `name:"SQL Sports — Practice" AND active:"true"`,
+    query: `name:"DataDraft — Practice" AND active:"true"`,
   });
 
   let product = existing.data[0];
   if (!product) {
     product = await stripe.products.create({
-      name: "SQL Sports — Practice",
+      name: "DataDraft — Practice",
       description:
         "Unlimited sandbox access, ongoing weekly problem sets, live season datasets.",
     });

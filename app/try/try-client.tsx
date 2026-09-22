@@ -77,7 +77,7 @@ export default function TryPage() {
         <Coach mood="happy" size={120} />
         <p className="label-broadcast mt-4 text-turf">beta · no account</p>
         <h1 className="mt-2 font-display text-3xl font-bold text-ink sm:text-4xl">
-          Try SQL Sports
+          Try DataDraft
         </h1>
         <p className="mt-3 max-w-md text-base leading-relaxed text-ink-soft">
           Learn SQL (and more) through real NFL data. Everything runs in your
@@ -147,7 +147,7 @@ export default function TryPage() {
       <p className="mt-10 text-center font-mono text-[10px] uppercase tracking-widest text-ink-muted">
         Share this page ·{" "}
         <Link href="/" className="text-turf hover:underline">
-          What is SQL Sports?
+          What is DataDraft?
         </Link>
       </p>
     </main>

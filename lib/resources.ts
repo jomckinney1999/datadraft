@@ -1,7 +1,7 @@
 /**
  * Career resources hub — resume samples, job-hunt tactics, and books.
  *
- * Written for “Andy”: someone using SQL Sports to change careers, not a
+ * Written for “Andy”: someone using DataDraft to change careers, not a
  * hobbyist. Voice stays coach-plain. No invented salary stats. Role ids match
  * lib/career-paths.ts so the page can default to the learner’s roadmap pick.
  */
@@ -70,7 +70,7 @@ export const RESUME_SAMPLES: ResumeSample[] = [
     ],
     projects: [
       {
-        header: "Fantasy League Scorecard · Portfolio · SQL Sports / personal",
+        header: "Fantasy League Scorecard · Portfolio · DataDraft / personal",
         bullets: [
           "Loaded a real fantasy league into SQLite; ranked managers by points-for, wins, and all-play win rate to separate lineup skill from schedule luck.",
           "Documented assumptions in a one-page README a commissioner (or hiring manager) could skim in two minutes.",

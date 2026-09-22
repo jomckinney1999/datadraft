@@ -10,9 +10,9 @@ import ThemeToggle from "@/components/theme-toggle";
 import HomeLink from "@/components/home-link";
 
 export const metadata: Metadata = {
-  title: "Where the data comes from — SQL Sports",
+  title: "Where the data comes from — DataDraft",
   description:
-    "The NFL statistics behind every SQL Sports lesson: the source, the licence, what is real, what is illustrative, and how to download it yourself.",
+    "The NFL statistics behind every DataDraft lesson: the source, the licence, what is real, what is illustrative, and how to download it yourself.",
 };
 
 export default function DataPage() {

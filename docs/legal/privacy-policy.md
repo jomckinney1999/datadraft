@@ -8,7 +8,7 @@ Last updated: July 18, 2026
 
 ## 1. Who we are
 
-**Jojo Lee McKinney, an individual doing business as SQL Sports** ("SQL Sports," "we," "us"), a sole proprietorship operating from 6617 Rock Lawn Dr, Clifton, VA 20124, operates the SQL Sports website and Service. This policy explains what data we collect, why, and what your options are.
+**Jojo Lee McKinney, an individual doing business as DataDraft** ("DataDraft," "we," "us"), a sole proprietorship operating from 6617 Rock Lawn Dr, Clifton, VA 20124, operates the DataDraft website and Service. This policy explains what data we collect, why, and what your options are.
 
 ## 2. What we collect
 
@@ -18,7 +18,7 @@ Last updated: July 18, 2026
 
 **Payment data:** handled by **Stripe**, our payment processor. We do not store your card number ourselves — Stripe is PCI-compliant and handles that directly. We do store which tier you're subscribed to, subscription status, and billing dates, linked to a Stripe customer ID.
 
-**Fantasy platform data (if you connect one):** if you link a Sleeper, ESPN, or Yahoo fantasy account (see Phase 5 of `docs/LAUNCH-PLAN.md`), we access the roster/league data associated with that connection to power personalized features. This may include **league-mates' names or team names who never signed up for SQL Sports themselves** — we only use this data to power the connected user's own experience (e.g., "beat your league's average"), not to build profiles on or contact people who haven't created an account. [This needs real scrutiny once Phase 5 is actually built — flag any additional handling decisions here as they're made.]
+**Fantasy platform data (if you connect one):** if you link a Sleeper, ESPN, or Yahoo fantasy account (see Phase 5 of `docs/LAUNCH-PLAN.md`), we access the roster/league data associated with that connection to power personalized features. This may include **league-mates' names or team names who never signed up for DataDraft themselves** — we only use this data to power the connected user's own experience (e.g., "beat your league's average"), not to build profiles on or contact people who haven't created an account. [This needs real scrutiny once Phase 5 is actually built — flag any additional handling decisions here as they're made.]
 
 **Cookies:** session cookies for authentication (via Supabase Auth), and analytics cookies if/when analytics tooling is added (see `docs/LAUNCH-PLAN.md` Phase 9).
 
@@ -31,7 +31,7 @@ Last updated: July 18, 2026
 
 ## 4. Who we share it with
 
-Only the service providers necessary to run SQL Sports, each bound by their own privacy/security commitments:
+Only the service providers necessary to run DataDraft, each bound by their own privacy/security commitments:
 
 - **Supabase** — database, authentication
 - **Stripe** — payment processing (Stripe Tax for sales tax calculation)

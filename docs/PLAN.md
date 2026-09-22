@@ -1,4 +1,4 @@
-# SQL Sports — Product & Pricing Plan
+# DataDraft — Product & Pricing Plan
 
 This is the source of truth for product structure, pricing, and positioning decisions. Update it whenever the business model changes, *before* or alongside code changes — this is what future Claude/Cursor sessions read to understand why the landing page is shaped the way it is.
 
@@ -6,7 +6,7 @@ Last updated: 2026-08-10 (**positioning pivot** — the narrow single-language/s
 
 ## Big picture vision
 
-**Decided 2026-08-10 (reverses the prior launch strategy):** SQL Sports positions publicly as a **full data-skills platform with sports as the lens** — SQL, Python, R, Git, statistics, and visualization, taught through football (NFL), basketball (NBA), or baseball (MLB), which the learner picks as their base "language."
+**Decided 2026-08-10 (reverses the prior launch strategy):** DataDraft positions publicly as a **full data-skills platform with sports as the lens** — SQL, Python, R, Git, statistics, and visualization, taught through football (NFL), basketball (NBA), or baseball (MLB), which the learner picks as their base "language."
 
 The public value proposition is now: *everything an aspiring data analyst or data scientist needs, through the lens of sports.* The differentiator is the lens, not the subject.
 
@@ -28,17 +28,17 @@ The learner picks one sport; the skills taught are identical across all three an
 
 ### Sister product: NFL Stat Guru
 
-Decided 2026-07-16: the landing page cross-promotes **NFL Stat Guru** (`https://gridiq-eight.vercel.app/`, Vercel project `gridiq`) — a separate, already-live product from the same builder. It's an AI-powered NFL stats Q&A platform ("ask any NFL question in plain English"), not part of the SQL Sports curriculum or codebase. It's linked via a nav tab (`#stat-guru`) and an on-page promo section (`app/page.tsx`) that links out to the external app — not embedded, not merged. Treat it as a distinct brand/business; don't fold its pricing or features into the SQL Sports ladder above.
+Decided 2026-07-16: the landing page cross-promotes **NFL Stat Guru** (`https://gridiq-eight.vercel.app/`, Vercel project `gridiq`) — a separate, already-live product from the same builder. It's an AI-powered NFL stats Q&A platform ("ask any NFL question in plain English"), not part of the DataDraft curriculum or codebase. It's linked via a nav tab (`#stat-guru`) and an on-page promo section (`app/page.tsx`) that links out to the external app — not embedded, not merged. Treat it as a distinct brand/business; don't fold its pricing or features into the DataDraft ladder above.
 
-## Making SQL Sports a "must buy" (not just a nice-to-have)
+## Making DataDraft a "must buy" (not just a nice-to-have)
 
 The mechanisms this plan leans on to make the product feel essential rather than optional, roughly in order of leverage:
 
-1. **Utility before mastery.** The single biggest lever. Most courses only pay off after you finish them. SQL Sports pays off mid-lesson: a learner can query their own league's data to make *this week's* lineup call before they've finished the roadmap. This turns "I should learn this eventually" into "I need this before Sunday." Reflected on-site as the lead pillar in the Why section.
-2. **Appointment-based habit loop.** Fantasy football already has a weekly cadence (waivers, lineups, matchups). SQL Sports rides that same clock — new problems/datasets drop weekly, in-season — instead of competing with it. This is what makes the product something people return to on their own, not something they have to force themselves back to.
+1. **Utility before mastery.** The single biggest lever. Most courses only pay off after you finish them. DataDraft pays off mid-lesson: a learner can query their own league's data to make *this week's* lineup call before they've finished the roadmap. This turns "I should learn this eventually" into "I need this before Sunday." Reflected on-site as the lead pillar in the Why section.
+2. **Appointment-based habit loop.** Fantasy football already has a weekly cadence (waivers, lineups, matchups). DataDraft rides that same clock — new problems/datasets drop weekly, in-season — instead of competing with it. This is what makes the product something people return to on their own, not something they have to force themselves back to.
 3. **Honest trust over fabricated traction.** No fake usage numbers, no fake testimonials, no fake urgency countdowns. Pre-launch, credibility compounds faster than hype does, and a single caught fabrication (a stat, a review, a "3 spots left" that isn't true) undermines every other claim on the page. Where the site doesn't have real numbers yet, it says so plainly (see the success-stories section) or shows structural facts instead of invented usage metrics.
 4. **Real, non-fake exclusivity at the top of the ladder.** Career Track stays intentionally small (see Volume expectations above) — not as a fake-scarcity trick, but because 1:1 review and mock interviews genuinely don't scale, and saying so plainly is more convincing than a countdown timer would be.
-5. **Founding-cohort pricing.** Decided 2026-07-15: current prices across the ladder are framed on-site as founding/early pricing that will rise once SQL Sports is out of early access. This is a real commitment, not just copy — whoever signs up now keeps their price; new sign-ups later pay more. Before raising prices, make sure existing members are actually grandfathered as promised.
+5. **Founding-cohort pricing.** Decided 2026-07-15: current prices across the ladder are framed on-site as founding/early pricing that will rise once DataDraft is out of early access. This is a real commitment, not just copy — whoever signs up now keeps their price; new sign-ups later pay more. Before raising prices, make sure existing members are actually grandfathered as promised.
 6. **Production quality signals competence.** For a product whose whole pitch is "we'll make you good at working with data," the site itself has to look like it was built by people who are good at their craft — polished dark UI, considered motion, working mobile nav, real OG/share metadata. Sloppy production on the marketing site undercuts the pitch before a visitor ever reads a word of copy.
 
 ### Illustrative path to $100k/month (not a forecast)
@@ -53,9 +53,9 @@ Total ≈ $99k/mo. Takeaway: Practice-tier volume is the main lever at this scal
 
 ## Business structure
 
-SQL Sports is **one business with a single pricing ladder** — not a separate education product plus a bolted-on coaching business. Career coaching lives inside SQL Sports as the top rung of the ladder ("Career Track"), positioned explicitly as "for people using this to change careers," not as a distinct offering with its own brand or funnel.
+DataDraft is **one business with a single pricing ladder** — not a separate education product plus a bolted-on coaching business. Career coaching lives inside DataDraft as the top rung of the ladder ("Career Track"), positioned explicitly as "for people using this to change careers," not as a distinct offering with its own brand or funnel.
 
-Overall picture: **freelance work + SQL Sports** — two things, not three. An earlier plan had career coaching as a third, standalone business; that was folded into SQL Sports because it's cleaner to run and matches what the target user actually needs to justify paying for the top tier (see below).
+Overall picture: **freelance work + DataDraft** — two things, not three. An earlier plan had career coaching as a third, standalone business; that was folded into DataDraft because it's cleaner to run and matches what the target user actually needs to justify paying for the top tier (see below).
 
 ## Target user: "Andy"
 
@@ -63,7 +63,7 @@ Andy is the persona the pricing ladder is built against — specifically, the qu
 
 Key insight: the sports-themed hook (fantasy football as the dataset) is what gets Andy in the door, but it is not what gets him to spend real money. Nobody pays $1–5K/year for "make fantasy football more fun." He pays that much when the calculation shifts from **hobby** to **career investment**.
 
-Andy's math: if this genuinely helps him land a data analyst role (even at the entry-level $55–70K range), spending $2–3K is a trivial, obviously-worth-it bet compared to the alternative paths to the same outcome — a bootcamp ($10–20K+) or an online analytics master's ($20–50K). He isn't comparing the price to a $20/month app; he's comparing it to those other paths, and SQL Sports is radically cheaper than all of them. That comparison is what makes $1–5K feel reasonable to him, not the sandbox itself.
+Andy's math: if this genuinely helps him land a data analyst role (even at the entry-level $55–70K range), spending $2–3K is a trivial, obviously-worth-it bet compared to the alternative paths to the same outcome — a bootcamp ($10–20K+) or an online analytics master's ($20–50K). He isn't comparing the price to a $20/month app; he's comparing it to those other paths, and DataDraft is radically cheaper than all of them. That comparison is what makes $1–5K feel reasonable to him, not the sandbox itself.
 
 What Andy actually wants at that price point (an annual "Career Track" membership):
 
@@ -84,12 +84,12 @@ Career Track is a **small, high-value slice** of the user base, not the bulk of 
 
 ## Core "why" argument (positioning)
 
-The landing page has a dedicated "Why SQL Sports" section (`app/page.tsx`, `#why`, between the hero and the curriculum) making the explicit case for why learning **code & data skills** through sports is worth paying for — not SQL alone. The argument, in order (utility-first — this is the must-buy lever, see above):
+The landing page has a dedicated "Why DataDraft" section (`app/page.tsx`, `#why`, between the hero and the curriculum) making the explicit case for why learning **code & data skills** through sports is worth paying for — not SQL alone. The argument, in order (utility-first — this is the must-buy lever, see above):
 
 1. **Useful before you're "done."** You don't need to finish the roadmap to get value — answer a real question about a real season while you're still learning. The skill pays for itself before the course does.
-2. **You already know the domain** — most tech courses make you learn unfamiliar syntax and an unfamiliar business scenario (fictional SaaS churn, etc.) at the same time. SQL Sports removes the second problem because the learner already understands sports, so only the tech is actually new.
+2. **You already know the domain** — most tech courses make you learn unfamiliar syntax and an unfamiliar business scenario (fictional SaaS churn, etc.) at the same time. DataDraft removes the second problem because the learner already understands sports, so only the tech is actually new.
 3. **Real data, real mess** — live NFL/fantasy (and eventually NBA/MLB) data (byes, injuries, trades) instead of toy datasets (Titanic, Iris), which is closer to what real analyst/engineering work looks like.
-4. **Practice rides an existing habit** — checking standings/scores is a habit the learner already has, on the same weekly clock the season already runs on; SQL Sports repurposes it instead of requiring a new study habit built from zero.
+4. **Practice rides an existing habit** — checking standings/scores is a habit the learner already has, on the same weekly clock the season already runs on; DataDraft repurposes it instead of requiring a new study habit built from zero.
 5. **A portfolio story anyone gets instantly** — "I built an analytics tool on fantasy football data" needs no setup in an interview, unlike a generic bootcamp project.
 6. **Cheaper than the alternatives** — direct cost comparison to data analytics bootcamps ($10–20K) and specialized analytics master's programs ($20–50K), framed as the same "immersion" bet those make, minus the cost of also learning a brand-new industry.
 
@@ -118,7 +118,7 @@ This ladder is implemented on the landing page pricing section (`app/page.tsx`, 
 
 Duo-shaped habit loop, football-named — lives in `lib/economy.ts` + progress fields, UI on the learn rail / status chips. **No Stripe checkout yet** (legal/business still blocked); Season Pass is a waitlist CTA (`interest: practice`) plus a local demo flag for QA.
 
-| Duo idea | SQL Sports name | Behavior |
+| Duo idea | DataDraft name | Behavior |
 |---|---|---|
 | Hearts | **Timeouts** | 5 graded lesson starts per day on Free. Season Pass = unlimited. Practice Field never spends one. |
 | Gems | **Scouting tickets** | Earned clearing drives (bonus for perfect + heater). Spent in the Sideline Shop. |
@@ -152,7 +152,7 @@ Before building the real version, these need real decisions (not made yet):
 - **Live code execution (decided 2026-08-10):** Ship it. Python and R run in-browser via Pyodide and WebR (`lib/runtimes.ts`), lazy-loaded only when a `code` exercise opens. SQL keeps `query` result-set grading. Remaining follow-ups: seed shared fantasy DataFrames into Pyodide/WebR (today those drills use inline toy data), and broaden `code` coverage beyond the first drills in units 7 and 11. Git/stats/viz stay on `mc`/`fill` — they aren't languages with a single REPL.
 - **Get a second sport's data in.** Every lesson example across all 11 units is football. The sport picker offers three. NBA/MLB need a real pipeline (`scripts/build-field-dataset.mjs` is the football template) before the picker means anything beyond a label.
 - **What "in build" means in calendar terms for NBA/MLB.** The site tells visitors those sports are coming; that's a promise with no date behind it. Decide the trigger for starting each.
-- **Whether the name still fits.** "SQL Sports" now sells Python, R, Git, and statistics too. Renaming is expensive (domain, Vercel project, Stripe, legal docs) and wasn't part of the pivot decision — but the mismatch is real and deserves an explicit keep-or-change call.
+- **Whether the name still fits.** "DataDraft" now sells Python, R, Git, and statistics too. Renaming is expensive (domain, Vercel project, Stripe, legal docs) and wasn't part of the pivot decision — but the mismatch is real and deserves an explicit keep-or-change call.
 - Weekly Challenge & Leaderboard build-out (see above) — auth, database, content workflow, data source, and perks all still need real decisions.
 
 ## How to use this doc

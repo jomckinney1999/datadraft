@@ -109,7 +109,7 @@ export default function SuccessStories() {
           Fantasy football in, SQL skills out.
         </h2>
         <p className="mt-3 max-w-xl text-base leading-relaxed text-ink-soft">
-          SQL Sports is brand new — these are illustrative example paths
+          DataDraft is brand new — these are illustrative example paths
           showing what the curriculum is designed to do, not verified
           testimonials from real members.
         </p>

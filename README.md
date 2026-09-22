@@ -1,4 +1,4 @@
-# SQL Sports
+# DataDraft
 
 Learn SQL and data analytics through fantasy football.
 

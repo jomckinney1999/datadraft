@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
  * exchange for a session cookie and then bounce the learner to `next`.
  *
  * `next` is validated as a same-site path before use — taking it raw would be
- * an open redirect, letting anyone send a SQL Sports magic link that lands on
+ * an open redirect, letting anyone send a DataDraft magic link that lands on
  * a page they control.
  */
 export async function GET(request: Request) {

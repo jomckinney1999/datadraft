@@ -33,6 +33,21 @@ export type Progress = {
    * waitlist until Stripe/legal are ready; testing tools can flip this.
    */
   seasonPass: boolean;
+  // ── power-ups + daily arcade (lib/power-ups.ts) ──
+  /** Free lesson hints from the shop. */
+  coachWhispers: number;
+  /** Free Instant Replays (soft landings). */
+  softLandings: number;
+  /** Next lesson ticket payout ×2 charges. */
+  doubleTickets: number;
+  /** YYYY-MM-DD for daily quest claim bucket. */
+  dailyQuestDay: string;
+  /** Quest ids claimed today. */
+  dailyQuestsClaimed: string[];
+  /** YYYY-MM-DD for arcade win counter. */
+  arcadeDay: string;
+  /** Arcade wins today (first win pays a daily bonus). */
+  arcadeWinsToday: number;
 };
 
 const KEY = "sqlsports.progress.v1";
@@ -59,6 +74,13 @@ export const EMPTY_PROGRESS: Progress = {
   byeWeeks: 0,
   byeUsedOn: "",
   seasonPass: false,
+  coachWhispers: 0,
+  softLandings: 0,
+  doubleTickets: 0,
+  dailyQuestDay: "",
+  dailyQuestsClaimed: [],
+  arcadeDay: "",
+  arcadeWinsToday: 0,
 };
 
 function today(): string {
@@ -109,6 +131,20 @@ export function loadProgress(): Progress {
       byeWeeks: typeof parsed.byeWeeks === "number" ? parsed.byeWeeks : 0,
       byeUsedOn: typeof parsed.byeUsedOn === "string" ? parsed.byeUsedOn : "",
       seasonPass: parsed.seasonPass === true,
+      coachWhispers:
+        typeof parsed.coachWhispers === "number" ? parsed.coachWhispers : 0,
+      softLandings:
+        typeof parsed.softLandings === "number" ? parsed.softLandings : 0,
+      doubleTickets:
+        typeof parsed.doubleTickets === "number" ? parsed.doubleTickets : 0,
+      dailyQuestDay:
+        typeof parsed.dailyQuestDay === "string" ? parsed.dailyQuestDay : "",
+      dailyQuestsClaimed: Array.isArray(parsed.dailyQuestsClaimed)
+        ? parsed.dailyQuestsClaimed.filter((x) => typeof x === "string")
+        : [],
+      arcadeDay: typeof parsed.arcadeDay === "string" ? parsed.arcadeDay : "",
+      arcadeWinsToday:
+        typeof parsed.arcadeWinsToday === "number" ? parsed.arcadeWinsToday : 0,
     };
   } catch {
     return EMPTY_PROGRESS;
@@ -190,6 +226,12 @@ export function completeLesson(
   let ticketGain = 8;
   if (drive?.perfect) ticketGain += 7;
   ticketGain += Math.min(10, Math.max(0, streak) * 2);
+
+  // Shop power-up: double tickets on the next cleared drive.
+  if ((next.doubleTickets ?? 0) > 0) {
+    ticketGain *= 2;
+    next.doubleTickets = next.doubleTickets - 1;
+  }
   next.tickets = (next.tickets ?? 0) + ticketGain;
 
   save(next);

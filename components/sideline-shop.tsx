@@ -122,7 +122,7 @@ export default function SidelineShop({
         </p>
         <p className="mt-1 text-[12px] leading-relaxed text-ink-soft">
           Unlimited timeouts, live weekly datasets, and the appointment habit
-          that rides the NFL calendar — founding pricing when billing opens.
+          that rides the NFL calendar — join the waitlist for when it opens.
         </p>
         {progress.seasonPass ? (
           <p className="mt-2 font-mono text-[11px] text-turf">
@@ -139,10 +139,10 @@ export default function SidelineShop({
           </div>
         )}
         <Link
-          href="/#pricing"
+          href="/learn"
           className="mt-2 inline-block font-mono text-[10px] uppercase tracking-wider text-ink-muted hover:text-turf"
         >
-          See the full ladder →
+          Back to learning →
         </Link>
       </div>
     </div>
