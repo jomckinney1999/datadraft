@@ -6,8 +6,12 @@
  * Roster / Import stay read-only source data (habits transfer: read addresses,
  * write real formulas). Practice sheet cells can show overlays (computed
  * values) and receive clicks for editing in the formula bar.
+ *
+ * When `maxRows` truncates the sheet, “Show all rows” expands to the full
+ * grid; “Show fewer” collapses back. Call sites keep a compact default.
  */
 
+import { useState } from "react";
 import {
   IMPORT_SHEET,
   MAIN_SHEET,
@@ -48,6 +52,8 @@ export default function ExcelGrid({
   overlays,
   /** Soft highlight for formula-range previews, etc. */
   highlighted,
+  /** Offer expand/collapse when maxRows hides rows. Default true. */
+  expandable = true,
 }: {
   sheet?: string;
   maxRows?: number;
@@ -57,34 +63,60 @@ export default function ExcelGrid({
   onSelect?: (cell: CellCoord, a1: string) => void;
   overlays?: Record<string, CellValue>;
   highlighted?: Set<string>;
+  expandable?: boolean;
 }) {
+  const [expanded, setExpanded] = useState(false);
+
   const base = rowsOverride ?? WORKBOOK[sheet] ?? WORKBOOK[MAIN_SHEET];
   const width = Math.max(sheetWidth(base), 1);
-  const shown = maxRows ? base.slice(0, maxRows) : base;
+  const canExpand =
+    expandable && Boolean(maxRows) && base.length > (maxRows ?? 0);
+  const showingAll = !maxRows || expanded || !canExpand;
+  const shown = showingAll ? base : base.slice(0, maxRows);
   const hidden = base.length - shown.length;
   const selectable = Boolean(onSelect);
 
   return (
     <div className="overflow-hidden border border-panel-border bg-night/95">
-      <div className="flex items-center justify-between border-b border-panel-border px-3 py-2">
+      <div className="flex items-center justify-between gap-2 border-b border-panel-border px-3 py-2">
         <span className="label-broadcast text-turf">{sheetLabel(sheet)}</span>
-        <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-          {sheet === PRACTICE_SHEET
-            ? `${shown.length} rows · type here`
-            : `${Math.max(0, base.length - 1)} data rows`}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+            {sheet === PRACTICE_SHEET
+              ? `${shown.length} of ${base.length} rows · type here`
+              : showingAll
+                ? `${Math.max(0, base.length - 1)} data rows`
+                : `${shown.length} of ${base.length} rows`}
+          </span>
+          {canExpand && (
+            <button
+              type="button"
+              onClick={() => setExpanded((v) => !v)}
+              className="font-mono text-[10px] font-semibold uppercase tracking-wider text-ice hover:underline"
+              aria-expanded={expanded}
+            >
+              {expanded ? "Show fewer" : "Show all"}
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div
+        className={
+          expanded && base.length > 12
+            ? "max-h-[min(70vh,32rem)] overflow-auto"
+            : "overflow-x-auto"
+        }
+      >
         <table className="w-full border-collapse text-left">
-          <thead>
-            <tr className="border-b border-panel-border bg-panel/40">
-              <th className="sticky left-0 z-10 w-9 border-r border-panel-border bg-panel/60 px-1 py-1 font-mono text-[10px] text-ink-muted" />
+          <thead className="sticky top-0 z-[2]">
+            <tr className="border-b border-panel-border bg-panel/95">
+              <th className="sticky left-0 z-10 w-9 border-r border-panel-border bg-panel px-1 py-1 font-mono text-[10px] text-ink-muted" />
               {Array.from({ length: width }, (_, c) => (
                 <th
                   key={c}
                   className={[
-                    "border-r border-panel-border/50 px-2 py-1 font-mono text-[10px] font-normal uppercase tracking-widest text-ink-muted",
+                    "border-r border-panel-border/50 bg-panel/95 px-2 py-1 font-mono text-[10px] font-normal uppercase tracking-widest text-ink-muted",
                     selected?.col === c ? "bg-turf/15 text-turf" : "",
                   ].join(" ")}
                 >
@@ -160,9 +192,20 @@ export default function ExcelGrid({
       </div>
 
       {hidden > 0 && (
-        <p className="border-t border-panel-border px-3 py-1.5 font-mono text-[10px] text-ink-muted">
-          …{hidden} more rows
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-panel-border px-3 py-1.5">
+          <p className="font-mono text-[10px] text-ink-muted">
+            …{hidden} more rows
+          </p>
+          {canExpand && (
+            <button
+              type="button"
+              onClick={() => setExpanded(true)}
+              className="font-mono text-[10px] font-semibold uppercase tracking-wider text-ice hover:underline"
+            >
+              Show all {base.length} rows
+            </button>
+          )}
+        </div>
       )}
       {caption && (
         <p className="border-t border-panel-border px-3 py-2 text-[12px] text-ink-muted">
