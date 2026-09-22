@@ -217,7 +217,7 @@ export default function Home() {
                 </h1>
 
                 <p className="mt-6 max-w-lg font-display text-2xl font-medium leading-snug text-pop sm:text-[1.75rem] animate-[fadeUp_0.45s_ease-out_0.1s_forwards] opacity-0">
-                  Become a <RotatingRoles />
+                  Become <RotatingRoles />
                   <br />
                   <span className="text-gold">Sports are the lens.</span>
                 </p>

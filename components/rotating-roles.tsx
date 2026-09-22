@@ -7,7 +7,8 @@ import { useEffect, useState } from "react";
  *
  * The trailing period lives *inside* the absolutely positioned role (and the
  * width reserve) so it never floats out at the end of the longest title while
- * a shorter one is showing.
+ * a shorter one is showing. The article (“a” / “an”) rotates with the title
+ * so “analytics engineer” gets “an” and the rest get “a”.
  *
  * Accessibility: the animation is decorative, so the rotating word is hidden
  * from assistive tech and the full list is exposed once as static text. It
@@ -25,8 +26,13 @@ export const ROLES = [
   "data engineer",
 ];
 
+/** “a” vs “an” from the spoken start of the title (vowel letter → an). */
+export function articleFor(role: string): "a" | "an" {
+  return /^[aeiou]/i.test(role.trim()) ? "an" : "a";
+}
+
 const INTERVAL_MS = 2200;
-const LONGEST = "analytics engineer";
+const LONGEST = "an analytics engineer";
 
 export default function RotatingRoles() {
   const [index, setIndex] = useState(0);
@@ -51,9 +57,12 @@ export default function RotatingRoles() {
     };
   }, []);
 
+  const role = ROLES[index];
+  const phrase = `${articleFor(role)} ${role}`;
+
   return (
     <span className="relative inline-block align-baseline">
-      {/* Reserves the width of the longest role + period so the line never reflows. */}
+      {/* Reserves the width of the longest article+role + period so the line never reflows. */}
       <span aria-hidden className="invisible whitespace-nowrap">
         {LONGEST}.
       </span>
@@ -66,11 +75,14 @@ export default function RotatingRoles() {
             : "translate-y-0 opacity-100 blur-0"
         }`}
       >
-        {ROLES[index]}.
+        {phrase}.
       </span>
 
       <span className="sr-only">
-        {ROLES.slice(0, -1).join(", ")}, or {ROLES[ROLES.length - 1]}.
+        {ROLES.slice(0, -1)
+          .map((r) => `${articleFor(r)} ${r}`)
+          .join(", ")}
+        , or {articleFor(ROLES[ROLES.length - 1])} {ROLES[ROLES.length - 1]}.
       </span>
     </span>
   );
