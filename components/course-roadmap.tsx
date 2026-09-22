@@ -153,6 +153,16 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
             <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">
               {moduleId === "all" ? COURSE.tagline : activeModule.blurb}
             </p>
+            {moduleId === "excel" && (
+              <p className="mt-3">
+                <Link
+                  href="/excel"
+                  className="font-mono text-[11px] font-semibold uppercase tracking-wider text-ice hover:underline"
+                >
+                  Open the live Spreadsheet →
+                </Link>
+              </p>
+            )}
 
             <div className="mt-5">
               <div className="flex items-baseline justify-between gap-3">

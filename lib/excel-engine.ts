@@ -289,34 +289,34 @@ function clampRange(book: Workbook, ref: RangeRef): RangeRef {
 
 async function getParser(): Promise<Parser> {
   if (!parserPromise) {
-    parserPromise = (async () => {
-      const mod = await import("fast-formula-parser");
-      const FormulaParser = (mod.default ?? mod) as new (
-        cfg: unknown,
-      ) => Parser;
-      return new FormulaParser({
-        onCell: ({ sheet, row, col }: ParserPosition) =>
-          readCell(WORKBOOK, sheet, row, col),
-        onRange: (ref: RangeRef) => {
-          const clipped = clampRange(WORKBOOK, ref);
-          const rows: CellValue[][] = [];
-          for (let r = clipped.from.row; r <= clipped.to.row; r++) {
-            const row: CellValue[] = [];
-            for (let c = clipped.from.col; c <= clipped.to.col; c++) {
-              row.push(readCell(WORKBOOK, clipped.sheet, r, c));
-            }
-            rows.push(row);
-          }
-          return rows;
-        },
-        functions: customFunctions(),
-      });
-    })().catch((err) => {
+    parserPromise = buildParser(WORKBOOK).catch((err) => {
       parserPromise = null;
       throw err;
     });
   }
   return parserPromise;
+}
+
+async function buildParser(book: Workbook): Promise<Parser> {
+  const mod = await import("fast-formula-parser");
+  const FormulaParser = (mod.default ?? mod) as new (cfg: unknown) => Parser;
+  return new FormulaParser({
+    onCell: ({ sheet, row, col }: ParserPosition) =>
+      readCell(book, sheet, row, col),
+    onRange: (ref: RangeRef) => {
+      const clipped = clampRange(book, ref);
+      const rows: CellValue[][] = [];
+      for (let r = clipped.from.row; r <= clipped.to.row; r++) {
+        const row: CellValue[] = [];
+        for (let c = clipped.from.col; c <= clipped.to.col; c++) {
+          row.push(readCell(book, clipped.sheet, r, c));
+        }
+        rows.push(row);
+      }
+      return rows;
+    },
+    functions: customFunctions(),
+  });
 }
 
 let ready = false;
@@ -332,6 +332,14 @@ export function formulaEngineReady(): boolean {
   return ready;
 }
 
+export type EvaluateOptions = {
+  /** Override workbook (e.g. Practice sheet overlays). Defaults to pinned WORKBOOK. */
+  book?: Workbook;
+  /** 1-based cell the formula “lives” in — matters for relative refs. */
+  row?: number;
+  col?: number;
+};
+
 /**
  * Evaluate a formula against the workbook. The leading `=` is optional so a
  * learner who types it (as they would in Excel) and one who doesn't both work.
@@ -339,14 +347,21 @@ export function formulaEngineReady(): boolean {
 export async function evaluateFormula(
   formula: string,
   sheet: string = MAIN_SHEET,
+  opts: EvaluateOptions = {},
 ): Promise<FormulaResult> {
   const body = formula.trim().replace(/^=/, "").trim();
   if (!body) return { value: null, error: "Type a formula to run it." };
 
   try {
-    const parser = await getParser();
+    const book = opts.book ?? WORKBOOK;
+    const parser =
+      book === WORKBOOK ? await getParser() : await buildParser(book);
     ready = true;
-    const raw = parser.parse(body, { row: 1, col: 1, sheet });
+    const raw = parser.parse(body, {
+      row: opts.row ?? 1,
+      col: opts.col ?? 1,
+      sheet,
+    });
 
     if (raw && typeof raw === "object" && "error" in raw) {
       const err = (raw as { error: unknown }).error;

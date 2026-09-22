@@ -32,6 +32,8 @@ export type Workbook = Record<string, Sheet>;
 
 export const MAIN_SHEET = "Roster";
 export const IMPORT_SHEET = "Import";
+/** Empty sheet learners type into — like a blank workbook tab. */
+export const PRACTICE_SHEET = "Practice";
 
 /**
  * A1 = "Player" … G1 = "Owner"; data runs rows 2–17, ordered by points.
@@ -79,7 +81,15 @@ const IMPORT: Sheet = [
 export const WORKBOOK: Workbook = {
   [MAIN_SHEET]: ROSTER,
   [IMPORT_SHEET]: IMPORT,
+  [PRACTICE_SHEET]: emptySheet(24, 8),
 };
+
+/** Build an empty grid (null cells) for the Practice tab. */
+export function emptySheet(rows: number, cols: number): Sheet {
+  return Array.from({ length: rows }, () =>
+    Array.from({ length: cols }, () => null),
+  );
+}
 
 /** 0-based column index → spreadsheet letter. 0 → A, 26 → AA. */
 export function columnLetter(index: number): string {
@@ -91,6 +101,25 @@ export function columnLetter(index: number): string {
     n = Math.floor((n - 1) / 26);
   }
   return out;
+}
+
+/** "A1" → { col: 0, row: 0 } (0-based). */
+export function parseA1(ref: string): { col: number; row: number } | null {
+  const m = /^\$?([A-Za-z]{1,3})\$?(\d+)$/.exec(ref.trim());
+  if (!m) return null;
+  const letters = m[1].toUpperCase();
+  let col = 0;
+  for (let i = 0; i < letters.length; i++) {
+    col = col * 26 + (letters.charCodeAt(i) - 64);
+  }
+  const row = Number(m[2]);
+  if (row < 1 || col < 1) return null;
+  return { col: col - 1, row: row - 1 };
+}
+
+/** 0-based → "A1". */
+export function toA1(col: number, row: number): string {
+  return `${columnLetter(col)}${row + 1}`;
 }
 
 /** Widest row in a sheet — sheets are ragged, the grid header is not. */

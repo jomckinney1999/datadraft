@@ -18,6 +18,12 @@ export default function FieldPage() {
         <div className="flex items-center gap-3">
           <ThemeToggle />
           <Link
+            href="/excel"
+            className="status-chip hover:border-ice/50 hover:text-ice"
+          >
+            Spreadsheet
+          </Link>
+          <Link
             href="/learn"
             className="border border-turf/50 bg-turf/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-turf transition-colors hover:border-turf hover:bg-turf/20"
           >

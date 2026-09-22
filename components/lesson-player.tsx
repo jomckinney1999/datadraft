@@ -54,7 +54,7 @@ import Coach from "@/components/coach";
 import CoachAssist from "@/components/coach-assist";
 import TimeoutGate from "@/components/timeout-gate";
 import CodeEditor from "@/components/code-editor";
-import ExcelGrid from "@/components/excel-grid";
+import ExcelGrid, { type CellCoord } from "@/components/excel-grid";
 import SchemaReference from "@/components/schema-reference";
 import {
   ensureFormulaEngine,
@@ -63,7 +63,7 @@ import {
   referencesCells,
   valuesMatch,
 } from "@/lib/excel-engine";
-import { MAIN_SHEET, type CellValue } from "@/lib/excel-data";
+import { MAIN_SHEET, toA1, type CellValue } from "@/lib/excel-data";
 import { SHORT_CREDIT } from "@/lib/data-source";
 import DriveField, { burstFromPlay, type FieldBurst } from "@/components/drive-field";
 import {
@@ -233,6 +233,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const [formulaValue, setFormulaValue] = useState<CellValue | boolean>(null);
   const [formulaError, setFormulaError] = useState<string | null>(null);
   const [formulaReady, setFormulaReady] = useState(false);
+  const [formulaSelected, setFormulaSelected] = useState<CellCoord | null>(
+    null,
+  );
 
   // ── drive state (downs-and-distance over grading) ──
   const [driveYards, setDriveYards] = useState(0);
@@ -374,6 +377,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     setFormulaText(exercise.type === "formula" ? exercise.starter : "");
     setFormulaValue(null);
     setFormulaError(null);
+    setFormulaSelected(null);
     setCodeOutput(null);
     setCodeError(null);
     setRunResult(null);
@@ -607,6 +611,23 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     } finally {
       setRunning(false);
     }
+  }
+
+  /** Click a grid cell to insert its address — Excel-style point-and-click. */
+  function insertFormulaCell(cell: CellCoord, a1: string) {
+    if (feedback) return;
+    setFormulaSelected(cell);
+    const ref =
+      formulaSheet === MAIN_SHEET ? a1 : `${formulaSheet}!${a1}`;
+    setFormulaText((prev) => {
+      const trimmed = prev.trim();
+      if (!trimmed || trimmed === "=") return `=${ref}`;
+      const withEq = trimmed.startsWith("=") ? trimmed : `=${trimmed}`;
+      if (withEq.endsWith(ref) || withEq.endsWith(a1)) return withEq;
+      return withEq + ref;
+    });
+    setFormulaError(null);
+    setSoftError(null);
   }
 
   /**
@@ -1268,10 +1289,20 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 {exercise.type === "formula" && (
                   <div className="mt-5">
                     <p className="mb-2 font-mono text-[10px] leading-snug text-ink-muted">
-                      Cell addresses live in the grid below — read the row and
-                      column off the sheet, then type them into your formula.
+                      Click a cell to drop its address into the formula bar —
+                      same move as Excel.
                     </p>
-                    <ExcelGrid sheet={formulaSheet} maxRows={7} />
+                    <ExcelGrid
+                      sheet={formulaSheet}
+                      maxRows={7}
+                      selected={formulaSelected}
+                      onSelect={feedback ? undefined : insertFormulaCell}
+                      caption={
+                        formulaSelected
+                          ? `Selected ${toA1(formulaSelected.col, formulaSelected.row)}`
+                          : undefined
+                      }
+                    />
                   </div>
                 )}
                 {feedback && (
@@ -1401,18 +1432,34 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
 
                 {exercise.type === "formula" && (
                   <>
-                    <CodeEditor
-                      value={formulaText}
-                      onChange={setFormulaText}
-                      lang="excel"
-                      rows={4}
-                      disabled={!!feedback}
-                      ariaLabel="Excel formula editor"
-                      className="min-h-[100px]"
-                    />
+                    <div className="flex items-stretch border-b border-panel-border bg-night/80">
+                      <div className="flex w-14 shrink-0 items-center justify-center border-r border-panel-border font-mono text-xs font-bold text-turf">
+                        {formulaSelected
+                          ? toA1(formulaSelected.col, formulaSelected.row)
+                          : "ƒx"}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <CodeEditor
+                          value={formulaText}
+                          onChange={setFormulaText}
+                          lang="excel"
+                          rows={3}
+                          disabled={!!feedback}
+                          ariaLabel="Excel formula editor"
+                          className="min-h-[72px] border-0"
+                        />
+                      </div>
+                    </div>
                     <div className="flex items-center justify-between border-t border-panel-border px-3 py-2">
                       <p className="font-mono text-[10px] text-ink-muted">
                         sheet: {formulaSheet}
+                        {" · "}
+                        <Link
+                          href="/excel"
+                          className="text-ice hover:underline"
+                        >
+                          open full workbook
+                        </Link>
                       </p>
                       <button
                         type="button"

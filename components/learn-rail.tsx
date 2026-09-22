@@ -122,13 +122,21 @@ export default function LearnRail({
           Ungraded free play over real NFL data — no timeouts, no scoreboard
           pressure.
         </p>
-        <div className="relative mt-3 flex items-end justify-between gap-3">
-          <Link
-            href="/field"
-            className="btn-turf inline-flex items-center rounded-xl border border-turf/80 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-night"
-          >
-            Walk onto the field
-          </Link>
+        <div className="relative mt-3 flex flex-wrap items-end justify-between gap-3">
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/field"
+              className="btn-turf inline-flex items-center rounded-xl border border-turf/80 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-night"
+            >
+              SQL Field
+            </Link>
+            <Link
+              href="/excel"
+              className="inline-flex items-center rounded-xl border border-ice/50 bg-ice/10 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-ice transition-colors hover:border-ice hover:bg-ice/20"
+            >
+              Spreadsheet
+            </Link>
+          </div>
           <Coach mood="happy" size={72} className="shrink-0" />
         </div>
       </div>

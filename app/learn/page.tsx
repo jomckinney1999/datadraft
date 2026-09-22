@@ -177,7 +177,13 @@ export default function LearnCatalogPage() {
             href="/field"
             className="hidden status-chip hover:border-turf/50 hover:text-turf sm:inline-flex"
           >
-            Practice
+            SQL Field
+          </Link>
+          <Link
+            href="/excel"
+            className="hidden status-chip hover:border-ice/50 hover:text-ice sm:inline-flex"
+          >
+            Spreadsheet
           </Link>
           <Link
             href="/resources"
