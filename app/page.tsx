@@ -10,9 +10,12 @@ import CareerPlaybooks from "@/components/career-playbooks";
 import WaitlistForm from "@/components/waitlist-form";
 
 const STATS = [
-  { label: "Skills taught", value: "7+" },
-  { label: "Live lessons", value: "70+" },
-  { label: "Account needed", value: "None" },
+  // Live course hours from lib/courses.ts (status: "live") — 10+6+14+11+10+6+9.
+  { label: "Hours of content", value: "65+" },
+  // BLS OEWS May 2025 median, Data Scientists (SOC 15-2051). Not a guarantee.
+  { label: "Median DS salary", value: "$120k" },
+  // Graded exercises across live lessons in lib/curriculum.ts.
+  { label: "Hands-on drills", value: "270+" },
 ];
 
 const WHY_PILLARS = [
@@ -185,20 +188,26 @@ export default function Home() {
                 </p>
 
                 {/* Scoreboard strip */}
-                <div className="mt-10 grid grid-cols-3 gap-px border border-panel-border bg-panel-border/60 animate-[fadeUp_0.45s_ease-out_0.25s_forwards] opacity-0">
-                  {STATS.map((stat) => (
-                    <div
-                      key={stat.label}
-                      className="surface bg-panel/95 px-3 py-4 sm:px-4"
-                    >
-                      <p className="label-broadcast mb-1.5 text-[10px]">
-                        {stat.label}
-                      </p>
-                      <p className="stat-number text-2xl sm:text-3xl">
-                        {stat.value}
-                      </p>
-                    </div>
-                  ))}
+                <div className="mt-10 animate-[fadeUp_0.45s_ease-out_0.25s_forwards] opacity-0">
+                  <div className="grid grid-cols-3 gap-px border border-panel-border bg-panel-border/60">
+                    {STATS.map((stat) => (
+                      <div
+                        key={stat.label}
+                        className="surface bg-panel/95 px-3 py-4 sm:px-4"
+                      >
+                        <p className="label-broadcast mb-1.5 text-[10px]">
+                          {stat.label}
+                        </p>
+                        <p className="stat-number text-2xl sm:text-3xl">
+                          {stat.value}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-2 font-mono text-[10px] leading-relaxed text-ink-muted">
+                    Salary: U.S. median for Data Scientists, BLS OEWS May
+                    2025 — not a placement promise.
+                  </p>
                 </div>
               </div>
 
