@@ -4,26 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 
 /*
- * One word per link where the section allows it, and in the order the
- * sections actually appear on the page — the nav doubles as a table of
- * contents, so it should read top-to-bottom the way the page scrolls.
- *
- * The labels were two and three words each ("Why SQL Sports", "NFL Stat
- * Guru"), which in uppercase mono added up to wider than the container and
- * wrapped every link onto two lines. `whitespace-nowrap` stops any single
- * label splitting; short labels are what make the row fit at all.
+ * Deliberately short. Section anchors used to double as a table of contents
+ * and crowded the bar with seven marketing jumps. Core product routes only —
+ * Learn is the primary CTA; Practice / Interview / Account sit beside it.
+ * Marketing sections stay on the homepage; they are just not in the header.
  */
-const SECTION_LINKS = [
-  { href: "#pick-your-sport", label: "Sports" },
-  { href: "#why", label: "Why" },
-  { href: "#curriculum", label: "Roadmap" },
-  { href: "#career-track", label: "Careers" },
-  { href: "#pricing", label: "Pricing" },
-  { href: "#challenge", label: "Challenge" },
-  { href: "#stat-guru", label: "Stat Guru" },
-];
-
-/* Links that leave the page, kept apart from the in-page anchors by a rule. */
 const ROUTE_LINKS = [
   { href: "/field", label: "Practice" },
   { href: "/interview", label: "Interview" },
@@ -48,18 +33,7 @@ export default function SiteNav() {
           </span>
         </Link>
 
-        {/* The full row only appears once it can fit on one line. Below lg it
-            would have to wrap no matter how short the labels are, so those
-            widths get the menu instead. */}
-        <nav className="hidden items-center gap-5 lg:flex">
-          {SECTION_LINKS.map((link) => (
-            <a key={link.href} href={link.href} className={LINK}>
-              {link.label}
-            </a>
-          ))}
-
-          <span aria-hidden className="h-4 w-px bg-panel-border" />
-
+        <nav className="hidden items-center gap-5 sm:flex">
           {ROUTE_LINKS.map((link) => (
             <Link key={link.href} href={link.href} className={LINK}>
               {link.label}
@@ -74,7 +48,7 @@ export default function SiteNav() {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-1 lg:hidden">
+        <div className="flex items-center gap-1 sm:hidden">
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
@@ -104,21 +78,8 @@ export default function SiteNav() {
       </div>
 
       {open && (
-        <nav className="border-t border-panel-border/80 bg-night/95 px-4 py-4 backdrop-blur-sm lg:hidden">
+        <nav className="border-t border-panel-border/80 bg-night/95 px-4 py-4 backdrop-blur-sm sm:hidden">
           <div className="mx-auto flex max-w-6xl flex-col gap-1">
-            {SECTION_LINKS.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="px-2 py-2.5 font-mono text-xs uppercase tracking-wider text-ink-muted transition-colors duration-150 hover:text-turf"
-              >
-                {link.label}
-              </a>
-            ))}
-
-            <span aria-hidden className="mx-2 my-2 h-px bg-panel-border" />
-
             {ROUTE_LINKS.map((link) => (
               <Link
                 key={link.href}

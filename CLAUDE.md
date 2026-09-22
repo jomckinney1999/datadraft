@@ -39,10 +39,22 @@ One theme: Duolingo-neutral charcoal (`#131F24`) with green / blue / gold accent
 - **The recommendation for analysts is nearly always SQL-first**, and the path copy says so honestly. Do not invent branching that pretends every title needs a totally different stack.
 - **`lib/career.ts` holds the job-impact notes, and there are no invented statistics in it.** No percentages, no salary figures, no "9 out of 10 employers". Claims are qualitative and checkable, and `skipIf` says plainly who should defer a course. **Keep it that way**.
 
+## Teaching voice (Duolingo-shaped)
+
+Lesson copy lives mostly in `lib/curriculum.ts` (briefs, film cards, intros, prompts, explains). Write like a friendly coach — short, human, easy — not a textbook.
+
+- **Short sentences.** One idea per beat. Prefer two short lines over one long clause stack.
+- **Picture first, term second.** Show the spreadsheet / box score, *then* name “table” or “grain.” Never open a beat with a definition.
+- **Talk to “you.”** Contractions are fine (`you're`, `don't`, `that's`). Skip passive lecture voice.
+- **Football is seasoning, not a quiz.** Use sport flavor for energy; don’t require knowing play calls to understand SQL.
+- **Cut filler and hype.** No “the sentence that unlocks everything,” “Do not let the word put you off,” or “That’s the whole deal.”
+- **Film cards:** plain-English title + ≤2 short sentences + optional code. Brief notes = one gentle aside.
+- **Explains:** one clear sentence after a miss. Prompts stay situation-based (not vocabulary lookups) — already the rule; keep them light.
+
 ## Navigation
 
 - **The marketing header is `sticky top-0` with `.glass`.** The `scroll-mt-20` on every anchored section was written for a sticky header and had nothing to offset against until now.
-- **The header row must fit on one line, and it only appears at `lg`.** Section links are one word where possible and listed in page order (the nav doubles as a table of contents); a rule separates them from the links that leave the page (Practice, Interview, Account). Below 1024px the menu takes over, because at that width the row would wrap whatever the labels say — it used to switch on at 640px and wrapped every label onto two lines even on a 1400px screen. At 1024px slack is tight, so **adding a link means removing or shortening one**, not squeezing the gap.
+- **Header is product routes only:** Practice · Interview · Account, plus a Learn CTA. No homepage section anchors (Sports / Why / Roadmap / …) — those stay on the page, not in the bar. Keep the row short; adding a link means removing one.
 - **Every route puts `components/home-link.tsx` top-left, and the wordmark always goes to `/`.** No exceptions, and don't point it anywhere else. Six routes previously had no way home at all (`/interview`, `/data`, `/demo`, the draft, the playbook quiz, the roadmap), and three more showed the wordmark pointing at `/learn` — which is worse than no link, because the affordance everyone reaches for first silently did something else. The homepage's own logo was `href="#"`, a dead anchor.
 - A page that also wants an in-context back link renders it via `HomeLink`'s `back` / `backLabel` props, beside the wordmark — never by re-targeting the logo. The roadmap is the reference: logo → `/`, "← all courses" → `/learn`.
 - **The lesson player is the one deliberate exception.** Its top bar stays minimal (quit / downs-and-distance field) and the quit `X` goes to `/learn`, not home: mid-drive the course list is the right destination, and a logo sitting where the X is would make it easy to lose a drive by accident. `/learn` carries the wordmark, so home is one further click.

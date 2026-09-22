@@ -136,9 +136,8 @@ export default function InterviewCatalog() {
             Interview cases
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-soft">
-            Scripted analyst scenarios — business brief, real schema, live SQL
-            terminal. Filter by difficulty, take your time, peek at a hint when
-            you need it. No timeouts spent.
+            Practice cases — brief, schema, live SQL. Filter by difficulty,
+            take your time, peek at a hint if you need one. No timeouts spent.
           </p>
         </div>
         <Coach mood="whistle" size={88} className="hidden shrink-0 sm:block" />

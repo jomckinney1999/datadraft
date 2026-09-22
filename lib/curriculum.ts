@@ -185,17 +185,17 @@ export type Unit = {
 };
 
 export const COURSE = {
-  title: "Analyst Fundamentals: Rookie Season",
+  title: "Analyst Fundamentals",
   tagline:
-    "The full rookie roadmap: SQL first, then Python, statistics, visualization, Git, and R — every skill on a data analyst job posting, taught one short drive at a time.",
+    "SQL first, then Python, stats, charts, Git, and R — the skills on a data analyst job post, one short lesson at a time.",
   units: [
     {
       id: "u1",
       number: 1,
-      title: "Kickoff — Reading the Stat Sheet",
+      title: "Read the Stat Sheet",
       drive: "1st Drive · Own 20",
       description:
-        "What a database actually is, and how to pull data out of it with SELECT. By the end you can open any stat sheet and grab exactly the columns you want.",
+        "What a database is, and how to pull data with SELECT. By the end you can open any sheet and grab the columns you want.",
       skills: ["SELECT", "FROM", "LIMIT"],
       status: "live",
       lessons: [
@@ -204,81 +204,81 @@ export const COURSE = {
           title: "Meet the Stat Sheet",
           blurb: "Tables, rows, columns — and your first SELECT *.",
           brief: {
-            goal: "Read any table in the database with SELECT.",
+            goal: "Read any table with SELECT.",
       steps: [
         {
-          title: "You just got the analyst job",
-          body: "Welcome to a fantasy football league that has been running for three seasons. Every week the managers argue about the same things: who deserves to start, who got lucky, who is quietly winning them games. Your job is to settle those arguments with evidence instead of opinions. The good news is that everything you need has already been written down.",
+          title: "You just got the job",
+          body: "Welcome to a fantasy football league. Managers argue every week — who starts, who got lucky, who's quietly winning. Your job: settle it with evidence. Lucky for you, the numbers are already written down.",
         },
         {
-          title: "The records are just stat sheets",
-          body: "All that history lives in something called a database. Do not let the word put you off. A database is a stack of stat sheets, and each sheet is a grid — exactly like the box score page in a newspaper. The categories run across the top, and every line underneath is one thing that happened.",
-          note: "If you have ever opened a spreadsheet, you have already used one of these. Same idea, bigger stack, and something else does the adding up.",
+          title: "It's just a stack of sheets",
+          body: "That history lives in a database. Think of a box-score page: categories across the top, one line per thing that happened. A database is a stack of those sheets.",
+          note: "If you've opened a spreadsheet, you already get this. Same idea — bigger stack.",
         },
         {
           title: "Our league keeps three sheets",
-          body: "You will use all three of these before the course is over. For now just get a feel for what each one is holding.",
+          body: "You'll use all three before this course is done. For now, just peek at what each one holds.",
           code: "week_results   every game a player actually played\nrosters        who owns which player in our league\nwaiver_wire    the free agents nobody has claimed",
-          note: "week_results is real: 876 games of genuine NFL scoring from 2022 to 2024. The other two are an example league we invented, because who owns whom is a fact about one private league and not about the NFL.",
+          note: "week_results is real: 876 NFL games from 2022–2024. The other two are an example league we made up — who owns whom isn't an NFL fact.",
           previewSql: "SELECT * FROM rosters;",
           previewCaption: "rosters · 5 fantasy teams, 2 starters each",
         },
         {
-          title: "One row is one player, one game",
-          body: "This is the sentence that unlocks everything else. Read a row from left to right the way you would read a box-score line: who it was, what team they play for, what position, which season, which week, and how many fantasy points they scored that day. That is the whole grammar of this table. Learn to read one row and you can read all 876.",
+          title: "One row = one player, one game",
+          body: "Read a row left to right like a box-score line: who, team, position, season, week, points. That's it. Learn one row and you can read all 876.",
           previewSql: "SELECT * FROM week_results LIMIT 1;",
           previewCaption: "one row of week_results",
         },
         {
-          title: "SELECT is how you say show me",
-          body: "You get things out of a stat sheet by asking for them in SQL. The word for show me is SELECT. The star means every column. So the line below reads as: show me everything on the week_results sheet, and stop after 5 rows. Here is exactly what that gives you.",
+          title: "SELECT means show me",
+          body: "SQL is how you ask for stuff. SELECT means show me. The star means every column. So the line below says: show me week_results, and stop after 5 rows.",
           code: "SELECT * FROM week_results LIMIT 5;",
         },
       ],
             setup:
-              "A database is a set of tables. A table is a grid: each column is a stat category, each row is one entry. Our league has three — week_results, rosters, and waiver_wire. Before we ask you anything about it, look at what one row of week_results actually holds.",
+              "A database is a stack of tables — grids with columns (stat categories) and rows (entries). Ours has three: week_results, rosters, and waiver_wire. Peek at week_results before we ask you anything.",
             previewSql: "SELECT * FROM week_results LIMIT 5;",
             previewCaption: "week_results · first 5 rows",
           },
           intro: {
-            title: "Databases are stat sheets",
-            text: "A database is a set of tables. Each table is a grid: columns are the stat categories, rows are the entries. Our league has three tables — week_results (one row per player per week), rosters, and waiver_wire. SELECT * FROM a table reads the whole sheet.",
+            title: "Databases are just sheets",
+            text: "Tables are grids: columns across the top, rows underneath. We have three — week_results (one row per player per week), rosters, and waiver_wire. SELECT * FROM a table reads the whole sheet.",
             code: "SELECT * FROM week_results;",
           },
           film: [
             {
-              title: "Why bother with a database at all?",
-              text: "Picture trying to answer 'who scored the most points in week 3 of 2023' by scrolling through a giant spreadsheet by hand — painful, right? A database organizes that same information into tables so a question like that takes one line of code instead of ten minutes of scrolling. That's the whole deal. SQL is just how you ask the question.",
+              title: "Why not just scroll a spreadsheet?",
+              text: "Finding “who scored most in week 3 of 2023” by hand is miserable. A database lets you ask that in one line. SQL is how you ask.",
             },
             {
-              title: "A table is a grid you've already seen",
-              text: "If you've ever opened a spreadsheet, you already understand a table. It's rows and columns arranged in a grid. A database is just a collection of these grids, called tables, each one holding a different kind of information — the way one spreadsheet workbook can hold several tabs.",
+              title: "A table is a grid you already know",
+              text: "Rows and columns — same as a spreadsheet tab. A database is a few of those tabs living together.",
             },
             {
-              title: "Rows and columns have real names: record and field",
-              text: "Zoom in on one row of week_results and you're looking at a record — one player's stat line for one week. Zoom in on one column, like fantasy_pts, and you're looking at a field — one category of information, repeated down every row. Analysts say 'row' and 'record' interchangeably, same with 'column' and 'field' — you'll hear both, so both are worth knowing.",
-              code: "player          week   fantasy_pts   <- the fields (columns)\n--------------------------------------\nJosh Allen      1      31.2          <- one record (row)\nJosh Allen      2      9.8           <- another record",
+              title: "Row = record. Column = field.",
+              text: "One row of week_results is one player's week. One column like fantasy_pts is that category on every row. Pros say row/record and column/field — both are fine.",
+              code: "player          week   fantasy_pts   <- fields (columns)\n--------------------------------------\nJosh Allen      1      31.2          <- one record (row)\nJosh Allen      2      9.8           <- another record",
             },
             {
-              title: "SELECT says what, FROM says where",
-              text: "Every query starts with these two words doing two separate jobs. SELECT lists the columns you want to see. FROM names the table to get them from. Put a star after SELECT and you're saying 'just give me every column' — it's a shortcut, not a special new keyword.",
+              title: "SELECT = what. FROM = where.",
+              text: "SELECT lists the columns you want. FROM names the table. A star after SELECT means “every column.”",
               code: "SELECT *            -- every column, please\nFROM week_results   -- from this table",
             },
             {
-              title: "The semicolon ends the sentence",
-              text: "Just like a period ends a sentence in English, a semicolon tells SQL 'this query is finished.' A few tools let you skip it on a single, standalone query — but the habit is worth building now, because the moment you're writing more than one query together, the semicolon is what tells SQL where one ends and the next begins.",
+              title: "End with a semicolon",
+              text: "A semicolon tells SQL “this query is done.” Build the habit now — you'll need it when you run more than one query.",
               code: "SELECT * FROM week_results;\n--                          ^ the full stop",
             },
             {
-              title: "Meet the three tables you'll be working with",
-              text: "week_results: one row per player, per week, per season — the full game log. rosters: one row per player on a fantasy team — who owns whom. waiver_wire: one row per free agent, with how widely they're rostered and which way their popularity is trending. Knowing what one row means in each table — its grain — is the very first question every working analyst asks before writing a single line of SQL.",
+              title: "Three tables, three jobs",
+              text: "week_results = game log. rosters = who owns whom. waiver_wire = free agents. Before you write SQL, always ask: what does one row mean? Pros call that the grain.",
             },
           ],
           exercises: [
             {
               type: "mc",
               prompt:
-                "You are handed a table you have never seen before. Which question should you answer first?",
+                "You're handed a table you've never seen. What should you figure out first?",
               options: [
                 "How many rows does it have?",
                 "What does one row represent?",
@@ -287,7 +287,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "What one row stands for is called the grain, and it decides what every query you write actually means. Get it wrong and your COUNT is counting something other than what you think.",
+                "What one row means is the grain. Get it wrong and every COUNT is counting the wrong thing.",
             },
             {
               type: "mc",
@@ -300,39 +300,39 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "Analysts call this the grain of the table: week_results is one row per player-week. Knowing the grain is the first thing a pro checks.",
+                "That's the grain: one row per player-week. Pros check this before anything else.",
             },
             {
               type: "fill",
               prompt:
-                "Call the play: grab every column and every row from the weekly stat sheet.",
+                "Grab every column and every row from the weekly stat sheet.",
               parts: ["SELECT ", null, " FROM ", null, ";"],
               bank: ["*", "week_results", "everything", "rosters"],
               answer: ["*", "week_results"],
               explain:
-                "The * means “every column.” SELECT * FROM week_results returns the entire table.",
+                "* means every column. SELECT * FROM week_results returns the whole table.",
             },
             {
               type: "query",
               prompt:
-                "Your first snap: pull the entire waiver wire — every column, every row.",
+                "Pull the entire waiver wire — every column, every row.",
               starter: "SELECT ",
               expected: "SELECT * FROM waiver_wire;",
               orderMatters: false,
               hint: "SELECT * FROM table_name; — the table is called waiver_wire.",
               explain:
-                "SELECT * FROM waiver_wire; reads the whole free-agent board. Five rows — a quick scouting read.",
+                "SELECT * FROM waiver_wire; reads the whole free-agent board. Five rows — a quick look.",
             },
             {
               type: "query",
               prompt:
-                "Now the roster sheet: pull every column and every row from rosters.",
+                "Same idea for rosters: every column, every row.",
               starter: "SELECT ",
               expected: "SELECT * FROM rosters;",
               orderMatters: false,
               hint: "Same shape as the last one — SELECT * FROM rosters;",
               explain:
-                "Three tables, one pattern. Once SELECT * FROM <table> is muscle memory, every other clause bolts onto it.",
+                "Three tables, one pattern. Once SELECT * FROM <table> sticks, everything else builds on it.",
             },
             {
               type: "mc",
@@ -346,57 +346,57 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "SELECT * with no other clauses returns the full table: all columns, all rows.",
+                "SELECT * with nothing else returns the full table — all columns, all rows.",
             },
           ],
         },
         {
           id: "u1-l2",
-          title: "Calling Specific Routes",
+          title: "Pick Your Columns",
           blurb: "Select only the columns you need.",
           brief: {
             goal: "Pull only the columns you actually need.",
       steps: [
         {
-          title: "Asking for everything gets noisy",
-          body: "SELECT * works, and on a small sheet nobody minds. But real tables are wide — thirty columns, sixty, sometimes hundreds. Dumping all of them to answer one question buries the answer in noise, and you end up scrolling sideways looking for the one number you actually wanted.",
+          title: "Everything at once gets noisy",
+          body: "SELECT * is fine on a small sheet. Real tables are wide — thirty columns, sometimes hundreds. Ask for everything and the answer gets buried. You end up scrolling sideways for one number.",
         },
         {
-          title: "So call the routes you want",
-          body: "Instead of the star, list the columns you need, separated by commas. You get back exactly those and nothing else. Same rows as before, far less to read.",
+          title: "Name the columns you want",
+          body: "Skip the star. List the columns, separated by commas. Same rows — way less to read.",
           code: "SELECT player, fantasy_pts FROM week_results;",
-          note: "The order you list them is the order they come back in. Ask for fantasy_pts first and it becomes the first column — the query decides the shape of the answer, not the table.",
+          note: "Order matters. List fantasy_pts first and it shows up first. You shape the answer — not the table.",
         },
       ],
             setup:
-              "SELECT * gives you everything, which is noisy once a table gets wide. Naming columns instead gives you a clean, readable answer. Here's the difference — same rows, fewer columns.",
+              "SELECT * dumps everything. Naming columns keeps the answer clean. Same rows, fewer columns.",
             previewSql: "SELECT player, position, fantasy_pts FROM week_results LIMIT 5;",
             previewCaption: "three columns instead of six",
           },
           intro: {
-            title: "Don't audible to SELECT * every play",
-            text: "A good coordinator calls specific routes. List column names after SELECT, separated by commas, and you get only those columns — in the order you asked for them.",
+            title: "Ask for what you need",
+            text: "List column names after SELECT, separated by commas. You get only those — in the order you wrote them.",
             code: "SELECT player, team FROM week_results;",
           },
           film: [
             {
-              title: "List columns separated by commas",
-              text: "After SELECT, write the column names you want with a comma between each one. SQL returns exactly those columns — nothing more, nothing less. Leave a comma out and you'll get a confusing error; add an extra one at the end and you'll get an even more confusing one, so it's worth reading a query list left to right before you run it.",
+              title: "Commas between column names",
+              text: "After SELECT, list the columns you want with commas between them. Miss a comma and SQL gets confused — so skim the list before you run it.",
               code: "SELECT player, team\nFROM week_results;",
             },
             {
-              title: "Column order in your query is column order in your results",
-              text: "The table has a fixed column order behind the scenes, but your SELECT list overrides it completely. List fantasy_pts before player and that's the order they come back in — the table's own layout has no say in it.",
-              code: "SELECT fantasy_pts, player\nFROM week_results; -- points first, name second — your call",
+              title: "Your order wins",
+              text: "The table has its own column order. Your SELECT list overrides it. Put fantasy_pts before player and that's how they come back.",
+              code: "SELECT fantasy_pts, player\nFROM week_results; -- points first, name second",
             },
             {
-              title: "Give a column a friendlier name with AS",
-              text: "AS lets you rename any column on the way out, without changing anything in the table itself. It's how analysts turn a technical name like fantasy_pts into something a coach or client would actually read comfortably — like points.",
+              title: "Rename with AS",
+              text: "AS gives a column a friendlier name in the results — without changing the table. fantasy_pts can show up as points.",
               code: "SELECT player AS name, fantasy_pts AS points\nFROM week_results;",
             },
             {
-              title: "SELECT can compute, not just fetch",
-              text: "The SELECT list isn't limited to column names — it can hold any expression that produces one value per row: arithmetic like fantasy_pts * 2, string building, even a literal repeated on every row. SQL evaluates the expression once per row and hands back the result as a new column, aliased however you like.",
+              title: "SELECT can do math too",
+              text: "You're not stuck with column names. Try fantasy_pts * 2 — SQL runs it once per row and returns a new column.",
               code: "SELECT player, fantasy_pts, fantasy_pts * 2 AS double_pts\nFROM week_results;",
             },
           ],
@@ -404,7 +404,7 @@ export const COURSE = {
             {
               type: "mc",
               prompt:
-                "You only want each player's name and team from week_results. Which play call?",
+                "You only want each player's name and team from week_results. Which query?",
               options: [
                 "SELECT player, team FROM week_results;",
                 "SELECT * FROM week_results;",
@@ -413,122 +413,122 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "Name the columns right after SELECT, separated by commas. Without the comma, SQL thinks `team` is a nickname (alias) for `player`.",
+                "Name the columns after SELECT, commas between them. Skip the comma and SQL treats `team` as a nickname for `player`.",
             },
             {
               type: "fill",
               prompt:
-                "Run two routes: the player's name and how widely they're rostered.",
+                "Pull the player's name and how widely they're rostered.",
               parts: ["SELECT ", null, ", ", null, " FROM waiver_wire;"],
               bank: ["player", "pct_rostered", "rosters", "*"],
               answer: ["player", "pct_rostered"],
               explain:
-                "Columns are listed by name, comma-separated. pct_rostered is the percent of leagues where the player is taken.",
+                "Columns by name, comma-separated. pct_rostered is the percent of leagues where that player is taken.",
             },
             {
               type: "query",
               prompt:
-                "Scout the free agents: pull just player and position from waiver_wire.",
+                "From waiver_wire, pull just player and position.",
               starter: "SELECT ",
               expected: "SELECT player, position FROM waiver_wire;",
               orderMatters: false,
               hint: "Two column names after SELECT, separated by a comma.",
               explain:
-                "Selecting only the columns you need keeps results readable — and on real databases, fast.",
+                "Fewer columns = easier to read — and faster on real databases.",
             },
             {
               type: "mc",
               prompt:
-                "You ask for three columns and they come back in a different order than the table stores them in. What happened?",
+                "You ask for three columns and they come back in a different order than the table stores them. What happened?",
               options: [
                 "The database sorted them alphabetically",
-                "You got the order you asked for — the query decides the shape of the answer",
+                "You got the order you asked for — the query decides",
                 "The table definition changed",
                 "Nothing — column order is random",
               ],
               answer: 1,
               explain:
-                "The SELECT list is a specification, not a filter. You are describing the result you want, and the order you name columns in is the order you get them back.",
+                "The SELECT list describes the result you want. The order you name columns is the order you get them.",
             },
             {
               type: "query",
               prompt:
-                "Print the league's depth chart: team_name and player from the rosters table.",
+                "From rosters, show team_name and player.",
               starter: "SELECT ",
               expected: "SELECT team_name, player FROM rosters;",
               orderMatters: false,
               hint: "The table is rosters; the columns are team_name and player.",
               explain:
-                "Ten rows across five fantasy teams — two starters each, talent split so no one stacks the whole league. You'll join this to the scoring log in a later unit.",
+                "Ten rows, five fantasy teams, two starters each. You'll join this to the scoring log later.",
             },
           ],
         },
         {
           id: "u1-l3",
-          title: "Clock Management",
-          blurb: "LIMIT: take a quick look without the whole game tape.",
+          title: "Just a Quick Look",
+          blurb: "LIMIT: peek without loading the whole table.",
           brief: {
             goal: "Cap how many rows come back with LIMIT.",
       steps: [
         {
-          title: "Nobody watches every snap of film",
-          body: "week_results has 876 rows, and that is a small table. Real ones run to millions. No analyst opens a table by reading all of it — you glance at the first handful to learn its shape, then ask a real question of it.",
+          title: "You don't need every row",
+          body: "week_results has 876 rows — and that's small. Real tables hit millions. Nobody opens a table by reading all of it. You peek at a handful, then ask a real question.",
         },
         {
-          title: "LIMIT caps how much comes back",
-          body: "Put LIMIT and a number at the very end of the query and the database stops once it has handed you that many rows. It is the first thing most analysts type when they meet a table they have never seen before.",
+          title: "LIMIT stops early",
+          body: "Put LIMIT and a number at the end. The database stops once it has that many rows. It's the first thing most people type on a new table.",
           code: "SELECT * FROM week_results LIMIT 3;",
-          note: "It goes last, after everything else. LIMIT is about how much you get back, so it is the final word in the sentence.",
+          note: "LIMIT goes last. It's about how much you get back — so it's the final word.",
         },
       ],
             setup:
-              "Real tables have millions of rows. LIMIT takes a quick look without pulling the whole game tape — it's the first thing analysts type when they meet a new table. This returns exactly 3 rows.",
+              "Real tables can be huge. LIMIT gives you a quick peek — usually the first thing you type on a new table. This one returns 3 rows.",
             previewSql: "SELECT player, week, fantasy_pts FROM week_results LIMIT 3;",
             previewCaption: "LIMIT 3 · a quick peek",
           },
           intro: {
-            title: "Take a knee with LIMIT",
-            text: "week_results has 876 rows. When you just want a feel for the data, add LIMIT n at the very end of the query to cap how many rows come back.",
+            title: "Peek with LIMIT",
+            text: "week_results has 876 rows. Want a feel for the data? Add LIMIT n at the very end to cap how many rows come back.",
             code: "SELECT * FROM week_results LIMIT 10;",
           },
           film: [
             {
-              title: "Why analysts LIMIT everything",
-              text: "First move on any unfamiliar table: SELECT * ... LIMIT 10. It's a free peek at the columns and typical values before you commit to a real question. On production databases with millions of rows it's also what keeps your quick look from becoming an expensive full-table scan.",
-              code: "-- the analyst's opening move on any new table\nSELECT * FROM rosters LIMIT 10;",
+              title: "First move on a new table",
+              text: "Try SELECT * … LIMIT 10. You see the columns and typical values without hauling millions of rows.",
+              code: "-- opening move on any new table\nSELECT * FROM rosters LIMIT 10;",
             },
             {
-              title: "LIMIT trims rows, never columns",
-              text: "It's a common mix-up: LIMIT only controls how many rows come back, not how many columns. SELECT * FROM week_results LIMIT 3 still returns every column — team, week, fantasy_pts, all of it — just for 3 rows instead of all 876. Fewer columns is a separate job, handled by your SELECT list, not by LIMIT.",
+              title: "LIMIT cuts rows, not columns",
+              text: "SELECT * … LIMIT 3 still returns every column — just three rows. Want fewer columns? That's your SELECT list, not LIMIT.",
               code: "SELECT * FROM week_results LIMIT 3; -- every column, only 3 rows",
             },
             {
-              title: "LIMIT doesn't know what 'best' means",
-              text: "LIMIT 5 just grabs the first 5 rows the database happens to hand back — it has no idea what 'top' or 'best' means until you tell it how to sort first. Right now, with no ORDER BY, 'the first 3 rows' is basically arbitrary. You'll fix that with ORDER BY in the very next unit — for now, just remember LIMIT alone never means 'the best.'",
+              title: "LIMIT isn't “the best”",
+              text: "LIMIT 5 grabs the first 5 rows the database hands back — not the top scorers. Sorting comes next with ORDER BY. For now: LIMIT alone never means “best.”",
             },
           ],
           exercises: [
             {
               type: "mc",
               prompt:
-                "You open a table you have never seen and it holds several million rows. What do you run first?",
+                "You open a table with millions of rows. What do you run first?",
               options: [
                 "SELECT * with no limit, then scroll",
                 "SELECT * with a small LIMIT",
                 "A COUNT of every row",
-                "Nothing until someone sends you the documentation",
+                "Nothing until someone sends you the docs",
               ],
               answer: 1,
               explain:
-                "A small LIMIT is a free look at the shape of the data. Pulling millions of rows to glance at five of them is slow for you and inconsiderate on a database other people are sharing.",
+                "A small LIMIT is a free look at the shape. Pulling millions of rows to glance at five is slow — and rude on a shared database.",
             },
             {
               type: "fill",
-              prompt: "Take a knee after 10 rows.",
+              prompt: "Stop after 10 rows.",
               parts: ["SELECT * FROM week_results ", null, " ", null, ";"],
               bank: ["LIMIT", "10", "CAP", "TEN"],
               answer: ["LIMIT", "10"],
-              explain: "LIMIT 10 — the keyword, then the row count as a number.",
+              explain: "LIMIT 10 — the keyword, then the number.",
             },
             {
               type: "query",
@@ -539,7 +539,7 @@ export const COURSE = {
               orderMatters: true,
               hint: "Two columns, then LIMIT 5 at the end.",
               explain:
-                "LIMIT goes after the FROM (and any other clauses). It's always the last call in the huddle.",
+                "LIMIT goes after FROM (and any other clauses). Always last.",
             },
             {
               type: "mc",
@@ -552,7 +552,7 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "LIMIT is always last. SQL clauses have a fixed order — like a snap count.",
+                "LIMIT is always last. SQL clauses have a fixed order.",
             },
             {
               type: "query",
@@ -562,7 +562,7 @@ export const COURSE = {
               orderMatters: true,
               hint: "SELECT * plus LIMIT 3.",
               explain:
-                "Heads up for later: without ORDER BY, “first 3” just means whatever the database reaches first — not the best 3.",
+                "Heads up: without ORDER BY, “first 3” just means whatever the database reaches first — not the best 3.",
             },
           ],
         },
@@ -571,45 +571,45 @@ export const COURSE = {
     {
       id: "u2",
       number: 2,
-      title: "Field Position — Filtering with WHERE",
+      title: "Filter with WHERE",
       drive: "2nd Drive · Own 40",
       description:
-        "Most questions are about some of the data: one player, one season, big games only. WHERE keeps the rows that match your conditions and cuts the rest.",
+        "Most questions are about some of the data — one player, one season, big games only. WHERE keeps the rows that match and drops the rest.",
       skills: ["WHERE", "= > <", "AND / OR", "IN", "BETWEEN"],
       status: "live",
       lessons: [
         {
           id: "u2-l1",
-          title: "Scouting One Player",
-          blurb: "WHERE + equality. Text wears quotes.",
+          title: "One Player",
+          blurb: "WHERE + equals. Text needs quotes.",
           brief: {
-            goal: "Filter to the rows you care about with WHERE.",
+            goal: "Keep only the rows you care about with WHERE.",
       steps: [
         {
           title: "You rarely want the whole sheet",
-          body: "So far you have taken whatever the table handed you. Real questions are narrower than that. Not how did everyone do, but how did this one player do, or which games were the big ones. Cutting a table down to the rows that matter is the single most used move in all of SQL, and it is the one that turns a stat sheet into an answer.",
+          body: "So far you've taken whatever the table handed you. Real questions are narrower — how did this player do, which games were huge. Filtering to the rows that matter is the move you'll use most.",
         },
         {
           title: "WHERE is the filter",
-          body: "Add WHERE after the table name and give it a condition to test. The database checks every single row against that condition and hands back only the ones that pass. Text you are matching goes inside single quotes. Numbers go in bare.",
+          body: "Add WHERE after the table name and give it a test. SQL checks every row and keeps only the ones that pass. Text goes in single quotes. Numbers stay bare.",
           code: "SELECT * FROM week_results WHERE player = 'Josh Allen';",
-          note: "One equals sign, not two. Most programming languages use == to ask is this equal, but SQL uses a single = for the question and has no separate assignment to confuse it with.",
+          note: "One equals sign, not two. SQL uses = to ask “is this equal?” — no ==.",
         },
       ],
             setup:
-              "WHERE keeps only rows that pass a test. Text values go in single quotes; numbers don't. Here's every row for one player — the same table you've been reading, narrowed to one name.",
+              "WHERE keeps only rows that pass a test. Text values go in single quotes; numbers don't. Here's every row for one player — same table, narrowed to one name.",
             previewSql: "SELECT player, week, fantasy_pts FROM week_results WHERE player = 'Josh Allen' LIMIT 5;",
             previewCaption: "WHERE player = 'Josh Allen'",
           },
           intro: {
-            title: "WHERE cuts the roster",
-            text: "WHERE goes after FROM and keeps only rows matching a condition. Text values must be wrapped in single quotes — 'Josh Allen', 'KC' — while numbers go bare.",
+            title: "WHERE keeps what matches",
+            text: "WHERE goes after FROM and keeps only rows that pass a test. Text needs single quotes — 'Josh Allen', 'KC'. Numbers go bare.",
             code: "SELECT * FROM week_results\nWHERE player = 'Josh Allen';",
           },
           film: [
             {
-              title: "Text wears quotes, numbers don't",
-              text: "WHERE player = 'Josh Allen' works; WHERE player = Josh Allen makes SQL hunt for a column named Josh. Numbers go bare: WHERE week = 5. One more scouting note: text matching is exact — capitalization and spelling must match the data, so 'josh allen' finds nothing.",
+              title: "Text needs quotes, numbers don't",
+              text: "Quote text like 'Josh Allen'; skip the quotes and SQL looks for a column named Josh. Numbers stay bare (week = 5), and spelling plus caps must match the data exactly.",
               code: "WHERE player = 'Josh Allen'  -- text: quoted, exact\nWHERE week = 5               -- number: bare",
             },
           ],
@@ -626,12 +626,12 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Filtering happens where the data lives. Pulling a million rows across the network to throw away all but forty is slow, and on a shared database it is a cost everyone else pays too.",
+                "The database filters where the data lives, so you only get the rows you asked for — not a million you throw away.",
             },
             {
               type: "fill",
               prompt:
-                "Scout Josh Allen's full game log. Careful — text values wear quotes like a jersey.",
+                "Pull Josh Allen's full game log. Text values need single quotes.",
               parts: [
                 "SELECT * FROM week_results\nWHERE ",
                 null,
@@ -642,7 +642,7 @@ export const COURSE = {
               bank: ["player", "'Josh Allen'", "Josh Allen", "week"],
               answer: ["player", "'Josh Allen'"],
               explain:
-                "Without quotes, SQL reads Josh Allen as column names and throws an error. Text always gets single quotes.",
+                "Without quotes, SQL reads Josh Allen as column names and errors. Text always gets single quotes.",
             },
             {
               type: "mc",
@@ -656,7 +656,7 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "Unquoted MIA is treated as a column name, which doesn't exist. Quoted 'MIA' is a text value.",
+                "Bare MIA looks like a column name. Quoted 'MIA' is a text value.",
             },
             {
               type: "query",
@@ -668,64 +668,64 @@ export const COURSE = {
               orderMatters: false,
               hint: "WHERE player = '…' — mind the quotes and spelling.",
               explain:
-                "49 rows — every game Mahomes played across the three seasons. One filter took you from 876 rows down to his.",
+                "One filter took you from 876 rows down to every game Mahomes played.",
             },
             {
               type: "query",
               prompt:
-                "Scout the waiver wire for running backs only — rows where position is 'RB'. All columns.",
+                "From the waiver wire, keep only running backs — rows where position is 'RB'. All columns.",
               starter: "SELECT * FROM waiver_wire\nWHERE ",
               expected: "SELECT * FROM waiver_wire WHERE position = 'RB';",
               orderMatters: false,
               hint: "position = 'RB' — text value, single quotes.",
               explain:
-                "Two backs on the wire. Same pattern works for any column: team = 'BUF', week = 1, and so on.",
+                "Same pattern works for any column: team = 'BUF', week = 1, and so on.",
             },
           ],
         },
         {
           id: "u2-l2",
-          title: "Setting the Line",
-          blurb: "Comparisons and AND: numbers, thresholds, combos.",
+          title: "Compare and Combine",
+          blurb: ">, <, and AND: thresholds and combos.",
           brief: {
             goal: "Filter on numbers and combine tests with AND.",
       steps: [
         {
           title: "Equals only gets you so far",
-          body: "You can already pull every game one player played. But most real questions are not about an exact match, they are about a threshold. Big games. Quiet games. Anything over a number. For those you need to compare rather than match.",
+          body: "You can already pull every game one player played. Most real questions aren't exact matches — they're thresholds. Big games. Quiet games. Anything over a number. For those you compare, not match.",
         },
         {
-          title: "Compare with the maths symbols",
-          body: "Greater than, less than, and their or-equal cousins all work exactly how they look. Numbers go in bare, with no quotes around them, because you are comparing quantities rather than matching text.",
+          title: "Compare with the usual symbols",
+          body: "Greater than, less than, and their or-equal cousins work how they look. Numbers go in bare — no quotes — because you're comparing quantities, not matching text.",
           code: "WHERE fantasy_pts > 25",
-          note: "Pick thresholds from the data, not from a hunch. Nothing in this table clears 30 in a single game, so 25 is what a genuinely big afternoon looks like here.",
+          note: "Pick thresholds from the data, not a hunch. Nothing here clears 30 in a game, so 25 is what a big afternoon looks like.",
         },
         {
-          title: "AND means both have to be true",
-          body: "Chain two conditions with AND and a row only survives if it passes both of them. This is how you say big game, and this season, in one line instead of running two queries and comparing them by eye.",
+          title: "AND means both must be true",
+          body: "Chain two tests with AND and a row only survives if it passes both. Big game, this season — one line instead of two queries you compare by eye.",
           code: "WHERE fantasy_pts > 25 AND season = 2024",
         },
       ],
             setup:
-              "Beyond equality you get >, <, >=, <=. AND requires both sides to be true, which is how you express \"big game, this season\" in one line. Nothing in this dataset clears 30, so 25 is what a big game actually looks like here.",
+              "Beyond equals you get >, <, >=, <=. AND needs both sides true — how you say “big game, this season” in one line. Nothing here clears 30, so 25 is a real big game.",
             previewSql:
               "SELECT player, season, week, fantasy_pts FROM week_results WHERE fantasy_pts > 25 ORDER BY fantasy_pts DESC LIMIT 5;",
             previewCaption: "only rows scoring over 25",
           },
           intro: {
-            title: "Set the over/under",
-            text: "Numbers compare with > < >= <= — no quotes. Chain conditions with AND when every condition must hit.",
+            title: "Numbers and AND",
+            text: "Numbers compare with > < >= <= — no quotes. Chain tests with AND when every one must pass.",
             code: "SELECT * FROM week_results\nWHERE season = 2024\n  AND fantasy_pts > 20;",
           },
           film: [
             {
-              title: "Compound conditions and parentheses",
-              text: "AND binds tighter than OR — like order of operations in math. Mixing them without parentheses is a classic bust: WHERE season = 2024 AND week = 1 OR week = 2 actually returns ALL week-2 rows from every season. Parentheses make your read explicit.",
+              title: "AND, OR, and parentheses",
+              text: "AND binds tighter than OR — like math order of operations. Without parentheses, season = 2024 AND week = 1 OR week = 2 returns every week-2 row from every season.",
               code: "-- what you meant:\nWHERE season = 2024 AND (week = 1 OR week = 2)",
             },
             {
-              title: "Exact equality gets risky on decimal points",
-              text: "fantasy_pts is a decimal column — values like 20.1 or 4.4. = 20 happily matches a row that's exactly 20.0, but real-world decimal math can land on something like 19.999999 instead of 20 due to floating-point rounding, and then = 20 silently misses it. Range comparisons don't have this problem, which is one more reason 'more than 20' beats 'equal to 20' as a scouting question.",
+              title: "Exact equals is shaky on decimals",
+              text: "fantasy_pts is a decimal, so = 20 can miss a value that landed on 19.999999. Ranges like >= 20 don't have that problem — and they're usually what you meant anyway.",
               code: "WHERE fantasy_pts = 20    -- risky on computed decimals\nWHERE fantasy_pts >= 20   -- safer, and usually what you meant anyway",
             },
           ],
@@ -742,7 +742,7 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "> is strictly more than. >= would also keep games at exactly 20.",
+                "> means strictly more than. >= would also keep games at exactly 20.",
             },
             {
               type: "query",
@@ -751,14 +751,14 @@ export const COURSE = {
               starter: "SELECT * FROM week_results\nWHERE ",
               expected: "SELECT * FROM week_results WHERE fantasy_pts > 25;",
               orderMatters: false,
-              hint: "Numbers don't wear quotes: fantasy_pts > 25.",
+              hint: "Numbers don't need quotes: fantasy_pts > 25.",
               explain:
-                "209 of the 876 games on file cleared 25 — roughly one in four. Numeric comparisons are how analysts define boom and bust in the first place.",
+                "Numeric comparisons are how you define boom and bust — just set the bar and keep what clears it.",
             },
             {
               type: "fill",
               prompt:
-                "Two conditions, one play: the 2024 season AND more than 20 points.",
+                "Two tests, one query: the 2024 season AND more than 20 points.",
               parts: [
                 "SELECT player, week, fantasy_pts\nFROM week_results\nWHERE season = 2024 ",
                 null,
@@ -769,7 +769,7 @@ export const COURSE = {
               bank: ["AND", ">", "OR", "="],
               answer: ["AND", ">"],
               explain:
-                "AND means both conditions must be true for a row to survive the cut.",
+                "AND means both tests must pass for a row to stay.",
             },
             {
               type: "mc",
@@ -783,12 +783,12 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "AND requires every condition to hit. One WHERE can chain as many conditions as you need.",
+                "AND requires every test to pass. One WHERE can chain as many as you need.",
             },
             {
               type: "query",
               prompt:
-                "Who showed up in the week 10 spotlight game of 2023? Pull player and fantasy_pts where season is 2023, week is 10, and fantasy_pts is at least 15.",
+                "Who showed up in week 10 of 2023? Pull player and fantasy_pts where season is 2023, week is 10, and fantasy_pts is at least 15.",
               starter:
                 "SELECT player, fantasy_pts\nFROM week_results\nWHERE ",
               expected:
@@ -796,29 +796,29 @@ export const COURSE = {
               orderMatters: false,
               hint: "Three conditions chained with AND. “At least 15” means >= 15.",
               explain:
-                "Chained ANDs read like a scouting brief: this season, this week, this threshold.",
+                "Chained ANDs read like a short brief: this season, this week, this bar.",
             },
           ],
         },
         {
           id: "u2-l3",
-          title: "Multiple Reads",
-          blurb: "OR, IN, and BETWEEN: matching more than one option.",
+          title: "Any of These",
+          blurb: "OR, IN, and BETWEEN: more than one option.",
           brief: {
             goal: "Match several options at once with OR, IN, and BETWEEN.",
       steps: [
         {
           title: "Sometimes any of several will do",
-          body: "You often want a handful of options rather than one. Quarterbacks or tight ends. The opening month of the season. You could write that as a long chain of ORs, and it would work, but it gets ugly fast and it is easy to get a bracket wrong.",
+          body: "You often want a handful of options, not one. Quarterbacks or tight ends. The opening month. You could write a long chain of ORs — it works, but it gets ugly fast and brackets are easy to mess up.",
         },
         {
-          title: "IN is the clean way to say any of these",
-          body: "Give IN a list and a row survives if the column matches anything in it. It does exactly what a stack of ORs does, and it stays readable when the list grows.",
+          title: "IN says any of these",
+          body: "Give IN a list. A row survives if the column matches anything in it. Same job as a stack of ORs, and it stays readable when the list grows.",
           code: "WHERE position IN ('QB','TE')",
         },
         {
-          title: "BETWEEN covers a range, both ends included",
-          body: "For numbers or weeks that run in sequence, BETWEEN is shorthand for two comparisons at once. The important detail is that both ends count: weeks 1 through 4 means four weeks, not three.",
+          title: "BETWEEN covers a range, both ends in",
+          body: "For numbers or weeks in a sequence, BETWEEN is shorthand for two comparisons. Both ends count: weeks 1 through 4 means four weeks, not three.",
           code: "WHERE week BETWEEN 1 AND 4",
         },
       ],
@@ -828,19 +828,19 @@ export const COURSE = {
             previewCaption: "position IN ('QB','TE')",
           },
           intro: {
-            title: "Progress through your reads",
-            text: "OR keeps a row if either condition hits. IN ('A','B','C') is a cleaner way to say “any of these.” BETWEEN a AND b keeps a range — both ends included.",
+            title: "OR, IN, and BETWEEN",
+            text: "OR keeps a row if either side passes. IN ('A','B','C') is a cleaner “any of these.” BETWEEN a AND b keeps a range — both ends included.",
             code: "WHERE position IN ('QB', 'TE')\n  AND week BETWEEN 1 AND 4",
           },
           film: [
             {
-              title: "Choosing your read: OR vs IN vs BETWEEN",
-              text: "All three keep rows matching “any of these,” but each has a natural down-and-distance: OR for two unrelated conditions, IN for a list of values in one column, BETWEEN for a continuous range. They compile to the same result — pick the one that reads like the question you were asked.",
+              title: "OR vs IN vs BETWEEN",
+              text: "OR for two unrelated tests, IN for a list in one column, BETWEEN for a continuous range. Same result either way — pick the one that reads like the question.",
               code: "WHERE team = 'KC' OR fantasy_pts > 25   -- unrelated\nWHERE team IN ('KC', 'BUF', 'MIA')      -- value list\nWHERE week BETWEEN 5 AND 9              -- range",
             },
             {
               title: "Every filter has a NOT",
-              text: "IN and BETWEEN both negate cleanly: NOT IN ('QB','TE') keeps everyone except those positions, NOT BETWEEN 1 AND 4 keeps everything outside that range. Read NOT IN and NOT BETWEEN as one unit — WHERE position NOT IN (...) is the idiom; WHERE NOT position IN (...) means the same thing but reads worse to every SQL developer after you.",
+              text: "NOT IN and NOT BETWEEN flip a filter cleanly — everyone except those positions, or everything outside the range. Prefer WHERE position NOT IN (...) as the usual form.",
               code: "WHERE position NOT IN ('QB', 'TE')   -- everyone except passers and tight ends\nWHERE week NOT BETWEEN 1 AND 4       -- week 5 onward",
             },
           ],
@@ -857,7 +857,7 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "OR means either side counts. AND would demand a player be on both teams at once — zero rows, guaranteed.",
+                "OR means either side counts. AND would need a player on both teams at once — zero rows.",
             },
             {
               type: "fill",
@@ -873,7 +873,7 @@ export const COURSE = {
               bank: ["IN", "'RB'", "OR", "RB"],
               answer: ["IN", "'RB'"],
               explain:
-                "IN ('RB', 'WR') matches either value — and each text value still wears its quotes.",
+                "IN ('RB', 'WR') matches either value — and each text value still needs its quotes.",
             },
             {
               type: "mc",
@@ -886,24 +886,24 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "BETWEEN is inclusive on both ends. It's shorthand for week >= 1 AND week <= 4.",
+                "BETWEEN includes both ends. It's shorthand for week >= 1 AND week <= 4.",
             },
             {
               type: "query",
               prompt:
-                "Scout Derrick Henry's September stretch: every column of his week_results rows for weeks 1 through 4, any season.",
+                "Pull Derrick Henry's early-season stretch: every column of his week_results rows for weeks 1 through 4, any season.",
               starter: "SELECT * FROM week_results\nWHERE ",
               expected:
                 "SELECT * FROM week_results WHERE player = 'Derrick Henry' AND week BETWEEN 1 AND 4;",
               orderMatters: false,
               hint: "Two conditions: player = '…' AND week BETWEEN 1 AND 4.",
               explain:
-                "BETWEEN handles the range; AND ties it to the player. You can mix all these tools freely in one WHERE.",
+                "BETWEEN handles the range; AND ties it to the player. Mix these tools freely in one WHERE.",
             },
             {
               type: "query",
               prompt:
-                "Opening-day pass catchers: player, team, and fantasy_pts for positions 'QB' and 'TE' in week 1 of season 2022.",
+                "Opening week pass catchers: player, team, and fantasy_pts for positions 'QB' and 'TE' in week 1 of season 2022.",
               starter:
                 "SELECT player, team, fantasy_pts\nFROM week_results\nWHERE ",
               expected:
@@ -911,7 +911,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "position IN ('QB', 'TE'), plus season and week conditions with AND.",
               explain:
-                "IN plus AND is the everyday workhorse of real scouting queries.",
+                "IN plus AND is the everyday pattern for “these kinds of players, this week.”",
             },
           ],
         },
@@ -920,45 +920,45 @@ export const COURSE = {
     {
       id: "u3",
       number: 3,
-      title: "Game Plan — Sorting the Board",
+      title: "Sort the Board",
       drive: "3rd Drive · Midfield",
       description:
-        "Ranking is the analyst's bread and butter. ORDER BY sorts your results; combined with LIMIT it answers every “top N” question on the board.",
+        "Ranking is everyday analyst work. ORDER BY sorts your results; with LIMIT it answers every “top N” question.",
       skills: ["ORDER BY", "DESC / ASC", "Top-N"],
       status: "live",
       lessons: [
         {
           id: "u3-l1",
-          title: "Ranking the Board",
+          title: "Rank the Board",
           blurb: "ORDER BY, ascending and descending.",
           brief: {
             goal: "Put rows in a deliberate order with ORDER BY.",
       steps: [
         {
           title: "Row order is not a promise",
-          body: "Everything you have run so far came back in whatever order the database found convenient. It looks stable, so it is easy to assume it is guaranteed. It is not. Change the data, or the query, and the order can change with it.",
+          body: "Everything you've run so far came back in whatever order the database found convenient. It looks stable, so it's easy to assume it's locked in. It isn't. Change the data or the query and the order can change too.",
         },
         {
           title: "ORDER BY makes the order yours",
-          body: "Name a column to sort by and the order stops being an accident. Smallest first is the default, and DESC flips it to biggest first, which is what you want almost every time you are ranking anything.",
+          body: "Name a column to sort by and the order stops being an accident. Smallest first is the default. DESC flips it to biggest first — what you want almost every time you're ranking anything.",
           code: "SELECT player, fantasy_pts FROM week_results ORDER BY fantasy_pts DESC;",
           note: "Clause order is fixed: WHERE first, then ORDER BY, then LIMIT. Filter, then sort, then cut.",
         },
       ],
             setup:
-              "Without ORDER BY, row order is not guaranteed — it just happens to look stable. ORDER BY makes it explicit: ASC is smallest-first (the default), DESC is largest-first. Here's the top of the board.",
+              "Without ORDER BY, row order isn't guaranteed — it just happens to look stable. ORDER BY makes it explicit: ASC is smallest-first (the default), DESC is largest-first. Here's the top of the board.",
             previewSql: "SELECT player, week, fantasy_pts FROM week_results ORDER BY fantasy_pts DESC LIMIT 5;",
             previewCaption: "highest scoring weeks first",
           },
           intro: {
-            title: "Sort the draft board",
+            title: "Sort your results",
             text: "ORDER BY column sorts your results — smallest first by default (ASC). Add DESC for biggest first. It goes after WHERE, before LIMIT.",
             code: "SELECT player, fantasy_pts\nFROM week_results\nORDER BY fantasy_pts DESC;",
           },
           film: [
             {
               title: "Sorting text, numbers, and ties",
-              text: "Numbers sort numerically, text sorts alphabetically — and you can stack sort keys: the second key only kicks in when the first one ties. ORDER BY team, fantasy_pts DESC gives you an alphabetical team list with each team's best games first. Deterministic order is what separates a real report from a lucky screenshot.",
+              text: "Numbers sort numerically, text alphabetically. Stack sort keys and the second one only kicks in when the first ties — like teams A–Z with each team's best games first.",
               code: "ORDER BY team, fantasy_pts DESC\n--       ↑ first    ↑ tiebreak within team",
             },
           ],
@@ -975,7 +975,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Row order without ORDER BY is an accident of how the data was stored and read, not a guarantee. It often looks stable, which is exactly what makes it a trap when it eventually changes.",
+                "Without ORDER BY, row order is whatever the database found convenient — not a guarantee.",
             },
             {
               type: "mc",
@@ -989,12 +989,12 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Smallest-first is the default because that is the conventional sort order. A leaderboard is the case where you almost always want the opposite, which is why DESC gets typed so often.",
+                "Smallest-first is the default. A leaderboard almost always wants DESC.",
             },
             {
               type: "fill",
               prompt:
-                "Build the week 1 draft board for 2024 — best performance at the top.",
+                "Build the week 1 board for 2024 — best performance at the top.",
               parts: [
                 "SELECT player, fantasy_pts\nFROM week_results\nWHERE season = 2024 AND week = 1\n",
                 null,
@@ -1005,7 +1005,7 @@ export const COURSE = {
               bank: ["ORDER BY", "DESC", "SORT", "ASC"],
               answer: ["ORDER BY", "DESC"],
               explain:
-                "ORDER BY fantasy_pts DESC puts the monster games on top of the board.",
+                "ORDER BY fantasy_pts DESC puts the biggest games on top.",
             },
             {
               type: "query",
@@ -1016,7 +1016,7 @@ export const COURSE = {
               orderMatters: true,
               hint: "ORDER BY trend DESC.",
               explain:
-                "Now the board reads like a waiver priority list. Sorting turns raw rows into a decision.",
+                "Sorting turns raw rows into a priority list you can act on.",
             },
             {
               type: "query",
@@ -1028,7 +1028,7 @@ export const COURSE = {
               orderMatters: true,
               hint: "ASC is smallest-first. It's also the default, so ORDER BY pct_rostered alone works too.",
               explain:
-                "Lowest rostered percentage first — that's where the genuinely unclaimed players are.",
+                "Lowest rostered percentage first — that's where the unclaimed players are.",
             },
             {
               type: "mc",
@@ -1041,47 +1041,47 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "ASC is the silent default. If you want biggest-first you must say DESC.",
+                "ASC is the silent default. Biggest-first needs an explicit DESC.",
             },
           ],
         },
         {
           id: "u3-l2",
-          title: "Top Plays",
-          blurb: "ORDER BY + LIMIT: every top-N question, answered.",
+          title: "Top N",
+          blurb: "ORDER BY + LIMIT: every top-N question.",
           brief: {
             goal: "Answer any \"top N\" question with ORDER BY + LIMIT.",
       steps: [
         {
-          title: "Every top-N question is the same play",
-          body: "Best five games. Worst three weeks. Highest scoring quarterback. They all sound different and they are all one pattern: sort by the number that matters, then cut the list short.",
+          title: "Every top-N question is the same pattern",
+          body: "Best five games. Worst three weeks. Highest-scoring quarterback. They sound different. They're one pattern: sort by the number that matters, then cut the list short.",
         },
         {
           title: "Sort first, then cut",
-          body: "The order of those two steps is the whole lesson. LIMIT does not pick the best rows, it just stops early. So if you cut before sorting you get an arbitrary handful, sorted among themselves, and it will look plausible while being wrong.",
+          body: "That order is the whole lesson. LIMIT doesn't pick the best rows — it just stops early. Cut before you sort and you get an arbitrary handful, sorted among themselves. It looks fine. It's wrong.",
           code: "SELECT player, fantasy_pts FROM week_results ORDER BY fantasy_pts DESC LIMIT 3;",
-          note: "Sorting on a second column breaks ties in the first, which stops two equal rows swapping places between runs.",
+          note: "Sorting on a second column breaks ties in the first, so two equal rows don't swap places between runs.",
         },
       ],
             setup:
-              "Sort first, then cut. That order matters: LIMIT before sorting would grab arbitrary rows and sort only those. Every \"best/worst N\" question you'll ever be asked is this pattern.",
+              "Sort first, then cut. That order matters: LIMIT before sorting would grab arbitrary rows and sort only those. Every “best/worst N” question is this pattern.",
             previewSql: "SELECT player, fantasy_pts FROM week_results ORDER BY fantasy_pts DESC LIMIT 3;",
             previewCaption: "the 3 biggest weeks in the data",
           },
           intro: {
-            title: "The highlight reel formula",
-            text: "“Top 5 anything” is always the same play: ORDER BY the stat DESC, then LIMIT 5. You can also sort by several columns — the second breaks ties in the first.",
+            title: "The top-N formula",
+            text: "“Top 5 anything” is always the same: ORDER BY the stat DESC, then LIMIT 5. You can sort by several columns — the second breaks ties in the first.",
             code: "ORDER BY fantasy_pts DESC, player\nLIMIT 5;",
           },
           film: [
             {
-              title: "The clause pipeline never changes",
-              text: "SELECT → FROM → WHERE → ORDER BY → LIMIT. That's the fixed snap count for every top-N question: filter to the population you care about, rank it, trim it. Memorize the order once and “top 5 rushers in week 10” becomes pure fill-in-the-blanks.",
+              title: "The clause order never changes",
+              text: "SELECT → FROM → WHERE → ORDER BY → LIMIT. Learn that once and “top 5 in week 10” is fill-in-the-blanks: filter, rank, trim.",
               code: "SELECT player, fantasy_pts\nFROM week_results\nWHERE season = 2024 AND week = 10\nORDER BY fantasy_pts DESC\nLIMIT 5;",
             },
             {
-              title: "A tie at the cutoff is a coin flip",
-              text: "LIMIT 5 keeps exactly 5 rows — but if row 5 and row 6 are tied on every ORDER BY column, which one makes the cut depends on factors you don't control, and can change between runs. The fix is always the same: add another ORDER BY column that breaks the tie, even one you don't care about. A top-N query without a fully-determined sort isn't wrong, but it isn't reproducible — and reproducible is half the job.",
+              title: "A tie at the cutoff can flip",
+              text: "LIMIT 5 keeps exactly 5 rows — but if rows 5 and 6 tie on every ORDER BY column, which one makes the cut can change between runs. Add another sort column so the order is fully decided.",
               code: "ORDER BY fantasy_pts DESC, player  -- player breaks any exact-score tie",
             },
           ],
@@ -1097,7 +1097,7 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "Sort descending so the best are first, then cut to 5. (ORDER BY always comes before LIMIT.)",
+                "Sort descending so the best are first, then cut to 5. ORDER BY always comes before LIMIT.",
             },
             {
               type: "query",
@@ -1110,7 +1110,7 @@ export const COURSE = {
               orderMatters: true,
               hint: "ORDER BY fantasy_pts DESC, player, week — then LIMIT 5 at the very end.",
               explain:
-                "WHERE narrows to 2023, ORDER BY ranks, LIMIT trims the reel. That clause order never changes.",
+                "WHERE narrows to 2023, ORDER BY ranks, LIMIT trims. That clause order never changes.",
             },
             {
               type: "fill",
@@ -1126,7 +1126,7 @@ export const COURSE = {
               bank: ["fantasy_pts", "player", "LIMIT", "week"],
               answer: ["fantasy_pts", "player"],
               explain:
-                "The second sort key only matters when the first one ties — a clean, deterministic board.",
+                "The second sort key only matters when the first one ties.",
             },
             {
               type: "mc",
@@ -1139,12 +1139,12 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "A classic rookie mistake: LIMIT has no idea what “best” means until ORDER BY defines it.",
+                "LIMIT has no idea what “best” means until ORDER BY defines it.",
             },
             {
               type: "query",
               prompt:
-                "Film study on the bad games: Travis Kelce's 3 LOWEST-scoring games across all seasons. Show season, week, fantasy_pts — lowest first; break ties by season, then week.",
+                "Quiet games for Travis Kelce: his 3 LOWEST-scoring games across all seasons. Show season, week, fantasy_pts — lowest first; break ties by season, then week.",
               starter:
                 "SELECT season, week, fantasy_pts\nFROM week_results\nWHERE ",
               expected:
@@ -1152,7 +1152,7 @@ export const COURSE = {
               orderMatters: true,
               hint: "No DESC needed — ascending is the default. ORDER BY fantasy_pts, season, week LIMIT 3.",
               explain:
-                "Ascending order finds the floor games. Analysts study the floor as hard as the ceiling.",
+                "Ascending finds the floor games — same pattern as top-N, flipped.",
             },
           ],
         },
@@ -1161,54 +1161,54 @@ export const COURSE = {
     {
       id: "u4",
       number: 4,
-      title: "Film Room Math — Aggregations",
+      title: "Season Math — Aggregations",
       drive: "4th Drive · Red Zone",
       description:
-        "Stop reading individual plays and start computing season stats: totals, averages, counts — per player, per position, per team — with GROUP BY and HAVING.",
+        "Turn many game rows into season stats: totals, averages, and counts — per player, per position, per team — with GROUP BY and HAVING.",
       skills: ["COUNT / SUM / AVG", "GROUP BY", "AS", "HAVING"],
       status: "live",
       lessons: [
         {
           id: "u4-l1",
           title: "Season Totals",
-          blurb: "COUNT, SUM, AVG: collapse many rows into one number.",
+          blurb: "COUNT, SUM, AVG: many rows → one number.",
           brief: {
-            goal: "Collapse many rows into one number with COUNT, SUM, and AVG.",
+            goal: "Turn many rows into one number with COUNT, SUM, and AVG.",
       steps: [
         {
-          title: "Every answer so far has been rows",
-          body: "You can now filter and sort, but everything hands back a list. The questions people actually ask a stat sheet are usually not lists at all. How many games. How many points in total. What is typical. Those want a single number.",
+          title: "Lists aren't always the answer",
+          body: "You can filter and sort. That still hands back a list. Real questions often want one number: how many games, how many points, what's typical.",
         },
         {
-          title: "Aggregates fold a column into one value",
-          body: "COUNT counts rows, SUM adds a column up, AVG averages it. They read the whole column and hand back one answer for it.",
+          title: "Fold a column into one value",
+          body: "COUNT counts rows. SUM adds a column up. AVG averages it. Each one reads the whole column and hands back a single answer.",
           code: "SELECT COUNT(*) AS games, ROUND(AVG(fantasy_pts), 1) AS avg_pts\nFROM week_results;",
-          note: "AS renames a column so the result is readable, and ROUND trims the decimal tail nobody wants. Both are cosmetic, and both make the difference between a scratch query and something you can hand to someone.",
+          note: "AS renames a column so it's easy to read. ROUND trims messy decimals. Both are cosmetic — and both make the result friendlier.",
         },
         {
-          title: "Notice you get one row back",
-          body: "That is the shift worth pausing on. Up to now the shape of the answer matched the shape of the table. An aggregate collapses however many rows you fed it into exactly one, which is the first time SQL changes the shape of the thing rather than just trimming it.",
+          title: "You get one row back",
+          body: "Up to now, answers looked like the table. An aggregate collapses every row you feed it into exactly one. That's the shift.",
         },
       ],
             setup:
-              "Aggregates answer \"how many / how much / what's typical\" by folding a whole column into a single value. Notice this returns one row, not many — that's the shift this lesson is about.",
+              "Aggregates answer \"how many / how much / what's typical\" by folding a whole column into one value. Notice: one row comes back, not many.",
             previewSql: "SELECT COUNT(*) AS rows_total, ROUND(AVG(fantasy_pts), 1) AS avg_pts FROM week_results;",
             previewCaption: "the whole table, as one row",
           },
           intro: {
-            title: "From game tape to box score",
-            text: "Aggregate functions squash many rows into one: COUNT(*) counts rows, SUM adds a column up, AVG averages it. AS gives the result a readable name, and ROUND(x, 1) trims decimals.",
+            title: "Many games, one box score",
+            text: "Aggregates squash many rows into one. COUNT(*) counts rows, SUM adds, AVG averages. AS names the result, and ROUND(x, 1) trims decimals.",
             code: "SELECT ROUND(AVG(fantasy_pts), 1) AS ppg\nFROM week_results\nWHERE player = 'Josh Allen';",
           },
           film: [
             {
-              title: "The aggregate family",
-              text: "Five workhorses: COUNT(*) counts rows, SUM adds, AVG means, MIN and MAX find the floor and ceiling. They all collapse many rows into one answer, and they all skip NULLs (missing values) except COUNT(*), which counts the row no matter what — a subtle difference that decides real stat lines.",
+              title: "The aggregate crew",
+              text: "COUNT(*) counts rows. SUM adds. AVG averages. MIN and MAX find the low and high. They all skip NULLs — except COUNT(*), which counts the row no matter what.",
               code: "SELECT COUNT(*), SUM(fantasy_pts),\n       AVG(fantasy_pts), MIN(fantasy_pts), MAX(fantasy_pts)\nFROM week_results;",
             },
             {
-              title: "Three flavors of COUNT",
-              text: "COUNT(*) counts rows, full stop. COUNT(column) counts rows where that column isn't NULL — usually the same number, but not always. COUNT(DISTINCT column) counts unique values instead: COUNT(DISTINCT player) on week_results tells you the league has 20 players, not how many games were played. Reach for DISTINCT the moment the question is 'how many different X' rather than 'how many rows'.",
+              title: "Three kinds of COUNT",
+              text: "COUNT(*) counts rows. COUNT(column) skips NULLs in that column. COUNT(DISTINCT column) counts unique values — so COUNT(DISTINCT player) is \"how many different players,\" not \"how many games.\"",
               code: "SELECT COUNT(*) AS games, COUNT(DISTINCT player) AS players\nFROM week_results;",
             },
           ],
@@ -1225,7 +1225,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "COUNT on a column ignores NULLs. week_results happens to have none, so here both return 876 — but the moment a column has gaps, counting it silently answers a different question than counting rows, with no warning.",
+                "COUNT on a column ignores NULLs, so gaps make it answer a different question than COUNT(*).",
             },
             {
               type: "mc",
@@ -1238,7 +1238,7 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "AVG is the mean — points per game if each row is a game. MAX, SUM, and COUNT answer the others.",
+                "AVG is the mean — points per game when each row is a game.",
             },
             {
               type: "fill",
@@ -1253,7 +1253,7 @@ export const COURSE = {
               bank: ["SUM", "'Josh Allen'", "COUNT", "TOTAL"],
               answer: ["SUM", "'Josh Allen'"],
               explain:
-                "SUM adds every one of his weekly scores into a single career total. AS total_pts names the output column.",
+                "SUM adds his weekly scores into one career total.",
             },
             {
               type: "query",
@@ -1265,7 +1265,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "COUNT(*) plus a WHERE on player.",
               explain:
-                "37 games — not the 50 you might expect from three seasons. McCaffrey played 17, then 16, then just 4 in 2024 before injury ended his year. Real data has those gaps in it, and COUNT(*) is how you find them.",
+                "37 games — not 50. Missed weeks are missing rows, and COUNT(*) finds that.",
             },
             {
               type: "query",
@@ -1277,47 +1277,47 @@ export const COURSE = {
               orderMatters: false,
               hint: "ROUND(AVG(fantasy_pts), 1), with two AND-ed WHERE conditions.",
               explain:
-                "12.8 a game. AVG computes the mean of his 17 games in 2024; ROUND keeps it to one decimal, box-score style.",
+                "12.8 a game — AVG of his 2024 scores, ROUND to one decimal.",
             },
           ],
         },
         {
           id: "u4-l2",
-          title: "Splitting the Film by Player",
+          title: "One Number Per Player",
           blurb: "GROUP BY: one aggregate row per player, position, or team.",
           brief: {
             goal: "Get one aggregate row per player, position, or team with GROUP BY.",
       steps: [
         {
-          title: "One number for the whole league is rarely the question",
-          body: "The league average is mildly interesting. What everybody actually wants is the number for each player, side by side, so they can be compared. Running one query per player would work and would be unbearable.",
+          title: "One league number isn't enough",
+          body: "A league average is fine. What you usually want is each player's number, side by side. One query per player would work — and it would be miserable.",
         },
         {
-          title: "GROUP BY sorts the rows into buckets",
-          body: "Name a column to group by and the database sorts every row into a bucket by that column, then runs your aggregate separately inside each one. One bucket per player means one answer per player.",
+          title: "GROUP BY makes buckets",
+          body: "Name a column. SQL sorts every row into a bucket by that value, then runs your aggregate inside each bucket. One bucket per player means one answer per player.",
           code: "SELECT player, ROUND(SUM(fantasy_pts), 1) AS total\nFROM week_results\nGROUP BY player\nORDER BY total DESC;",
-          note: "Select the grouping column alongside your aggregate and you have built a leaderboard. That combination is most of the reporting work in a real analyst job.",
+          note: "Select the grouping column next to your aggregate and you've built a leaderboard.",
         },
       ],
             setup:
-              "GROUP BY splits rows into buckets and runs the aggregate inside each one. Instead of one number for the table, you get one number per group — which is what almost every real report is.",
+              "GROUP BY splits rows into buckets and runs the aggregate inside each one. Instead of one number for the table, you get one number per group.",
             previewSql: "SELECT player, ROUND(SUM(fantasy_pts), 1) AS total FROM week_results GROUP BY player ORDER BY total DESC LIMIT 5;",
             previewCaption: "one row per player",
           },
           intro: {
             title: "One row per player",
-            text: "GROUP BY splits the table into buckets — one per distinct value — then aggregates run inside each bucket. SELECT the grouping column plus your aggregates and you've built a leaderboard.",
+            text: "GROUP BY splits the table into buckets — one per distinct value — then aggregates run inside each bucket. Select the grouping column plus your aggregates and you've got a leaderboard.",
             code: "SELECT player, SUM(fantasy_pts) AS total\nFROM week_results\nGROUP BY player;",
           },
           film: [
             {
-              title: "Grain — the question that prevents wrong answers",
-              text: "GROUP BY changes the grain of your result: week_results is one row per player-week, but GROUP BY player makes it one row per player. Rule of thumb the pros live by: every column in your SELECT should either be in the GROUP BY or wrapped in an aggregate. Anything else is asking the database to guess.",
+              title: "What one row means now",
+              text: "week_results is one row per player-week. GROUP BY player makes it one row per player. Every column in SELECT should be in the GROUP BY or wrapped in an aggregate — otherwise SQL is guessing.",
               code: "SELECT player, team, SUM(fantasy_pts)  -- team: in neither!\nFROM week_results\nGROUP BY player  -- ⚠ works in SQLite, lies in interviews",
             },
             {
-              title: "GROUP BY takes more than one column",
-              text: "GROUP BY player, season buckets by the combination — one row per player per season, not one row per player overall. Every extra column in GROUP BY makes the buckets more specific; drop one and rows that used to be separate start merging together. When a total looks too big, a missing GROUP BY column is the first thing to check.",
+              title: "Group by more than one column",
+              text: "GROUP BY player, season means one row per player per season. Add a column and buckets get finer. Drop one and separate totals merge — often the reason a total looks too big.",
               code: "SELECT player, season, ROUND(SUM(fantasy_pts), 1) AS total\nFROM week_results\nGROUP BY player, season; -- one row per player PER SEASON",
             },
           ],
@@ -1334,7 +1334,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Grouping squashes many rows into one, so every column you select has to make sense for the whole group. SQLite will not stop you here — it quietly returns one arbitrary week — which is more dangerous than an error, because the report looks finished.",
+                "Grouping squashes many weeks into one row, so there's no single week to show.",
             },
             {
               type: "fill",
@@ -1349,7 +1349,7 @@ export const COURSE = {
               bank: ["SUM", "GROUP BY", "AVG", "ORDER BY"],
               answer: ["SUM", "GROUP BY"],
               explain:
-                "SUM inside, GROUP BY outside — the pattern behind every leaderboard you've ever seen.",
+                "SUM inside, GROUP BY outside — that's a leaderboard.",
             },
             {
               type: "query",
@@ -1361,7 +1361,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "WHERE season = 2024, then GROUP BY position.",
               explain:
-                "WHERE trims to 2024 first, then GROUP BY splits by position. Clause order: WHERE before GROUP BY, always.",
+                "WHERE trims to 2024 first, then GROUP BY splits by position.",
             },
             {
               type: "mc",
@@ -1374,7 +1374,7 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "GROUP BY changes the grain of your result: from one row per player-week to one row per player.",
+                "GROUP BY changes the grain: one row per player instead of one row per player-week.",
             },
             {
               type: "query",
@@ -1387,47 +1387,47 @@ export const COURSE = {
               orderMatters: true,
               hint: "WHERE, GROUP BY, ORDER BY total DESC, LIMIT 5 — in exactly that order.",
               explain:
-                "That's a real analyst query: filter, group, rank, trim. You just built the season MVP board.",
+                "Filter, group, rank, trim — that's the season board.",
             },
           ],
         },
         {
           id: "u4-l3",
           title: "The Cut Line",
-          blurb: "HAVING: filter the aggregated groups themselves.",
+          blurb: "HAVING: filter groups after you aggregate.",
           brief: {
             goal: "Filter the groups themselves with HAVING.",
       steps: [
         {
-          title: "Two filters, two different moments",
-          body: "You already know WHERE. HAVING looks almost identical and does something genuinely different, and the difference is when it runs. WHERE happens before the rows are grouped. HAVING happens after, once each bucket already has a number.",
+          title: "Two filters, two moments",
+          body: "You already know WHERE. HAVING looks similar but runs later. WHERE cuts rows before grouping. HAVING cuts after each bucket already has a number.",
         },
         {
-          title: "HAVING filters the groups themselves",
-          body: "So a condition about an individual game belongs in WHERE, and a condition about a player's season total or game count belongs in HAVING. Asking WHERE to test an average is asking it about something that does not exist yet.",
+          title: "HAVING filters the groups",
+          body: "A condition about one game goes in WHERE. A condition about a season total or game count goes in HAVING. WHERE can't test an average — that number doesn't exist yet.",
           code: "SELECT player, COUNT(*) AS games\nFROM week_results\nGROUP BY player\nHAVING COUNT(*) > 30;",
-          note: "This exact distinction is one of the most asked SQL interview questions there is. Being able to say WHERE filters rows and HAVING filters groups, without hesitating, is worth the two minutes.",
+          note: "WHERE filters rows. HAVING filters groups. Say it that way and you're set.",
         },
       ],
             setup:
-              "WHERE filters rows before grouping; HAVING filters the groups after. That's the whole distinction, and it's the one interviewers ask about. Here it keeps only the high-volume players.",
+              "WHERE filters rows before grouping. HAVING filters the groups after. Here it keeps only high-volume players.",
             previewSql: "SELECT player, COUNT(*) AS games FROM week_results GROUP BY player HAVING COUNT(*) > 30 LIMIT 5;",
             previewCaption: "only groups with more than 30 games",
           },
           intro: {
-            title: "Cuts happen after the film session",
-            text: "WHERE filters raw rows before grouping. HAVING filters groups after aggregation — it's how you say “only players averaging 15+.” In SQLite you can reuse your AS alias inside HAVING.",
+            title: "Cut after the totals exist",
+            text: "WHERE filters raw rows before grouping. HAVING filters groups after aggregation — like “only players averaging 15+.” In SQLite you can reuse your AS alias inside HAVING.",
             code: "SELECT player, AVG(fantasy_pts) AS ppg\nFROM week_results\nGROUP BY player\nHAVING ppg >= 15;",
           },
           film: [
             {
-              title: "The full order of operations",
-              text: "How the database actually runs your query: FROM (get the table) → WHERE (cut rows) → GROUP BY (bucket) → aggregates compute → HAVING (cut groups) → SELECT (shape output) → ORDER BY → LIMIT. Every “why doesn't this work” in SQL traces back to this pipeline — WHERE can't see averages because averages don't exist yet when WHERE runs.",
+              title: "Order of operations",
+              text: "SQL runs: FROM → WHERE → GROUP BY → aggregates → HAVING → SELECT → ORDER BY → LIMIT. WHERE can't see averages because they don't exist yet when WHERE runs.",
               code: "FROM → WHERE → GROUP BY → HAVING\n     → SELECT → ORDER BY → LIMIT",
             },
             {
-              title: "WHERE and HAVING usually work together, not instead of each other",
-              text: "They're not either/or — a real query typically has both, each doing its own job: WHERE trims rows before the expensive aggregation runs, HAVING then filters the groups that result. Put a condition in the wrong one and it either can't see what it needs (an aggregate in WHERE) or does unnecessary work computing a per-row filter for every group before throwing it away (a raw-row filter in HAVING).",
+              title: "Use both, not either/or",
+              text: "WHERE trims rows first. HAVING then filters the groups. Put a condition in the wrong place and either it can't see the aggregate, or you do extra work before throwing rows away.",
               code: "SELECT player, ROUND(AVG(fantasy_pts), 1) AS ppg\nFROM week_results\nWHERE season = 2024              -- cuts rows first (cheap)\nGROUP BY player\nHAVING AVG(fantasy_pts) >= 15;   -- cuts groups after (needs the aggregate)",
             },
           ],
@@ -1444,7 +1444,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "They filter at two different moments, which is why both can appear in one query and why a condition about an average can only ever go in HAVING.",
+                "They filter at two different moments — averages can only go in HAVING.",
             },
             {
               type: "fill",
@@ -1459,7 +1459,7 @@ export const COURSE = {
               bank: ["HAVING", ">=", "WHERE", "GROUP"],
               answer: ["HAVING", ">="],
               explain:
-                "HAVING ppg >= 15 makes the cut using the aggregate itself — something WHERE can't see.",
+                "HAVING can see the aggregate; WHERE can't.",
             },
             {
               type: "mc",
@@ -1473,7 +1473,7 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "Order of operations: WHERE cuts rows first, then GROUP BY buckets, then aggregates compute, then HAVING cuts groups.",
+                "WHERE runs before grouping, so the average isn't there yet.",
             },
             {
               type: "query",
@@ -1486,7 +1486,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "Add HAVING total > 300 after the GROUP BY.",
               explain:
-                "WHERE picked the season, GROUP BY built the totals, HAVING made the cut. Elite club.",
+                "WHERE picked the season, GROUP BY built totals, HAVING made the cut.",
             },
             {
               type: "query",
@@ -1499,7 +1499,7 @@ export const COURSE = {
               orderMatters: true,
               hint: "GROUP BY player, HAVING big_games > 15, ORDER BY big_games DESC, player.",
               explain:
-                "Every clause you've learned, one play: WHERE, GROUP BY, HAVING, ORDER BY. That's the full fundamental stack — drive complete.",
+                "WHERE, GROUP BY, HAVING, ORDER BY — that's the full stack in one query.",
             },
           ],
         },
@@ -1508,10 +1508,10 @@ export const COURSE = {
     {
       id: "u5",
       number: 5,
-      title: "Trade Desk — JOINs",
+      title: "Two Tables — JOINs",
       drive: "5th Drive · Midfield",
       description:
-        "Combine tables: match rosters to week_results and score entire fantasy matchups. The relational thinking phase of the curriculum.",
+        "Combine tables: match rosters to week_results and score whole fantasy matchups. This is how SQL stitches sheets together.",
       skills: ["JOIN", "ON", "LEFT JOIN", "Anti-joins"],
       status: "live",
       lessons: [
@@ -1523,40 +1523,40 @@ export const COURSE = {
             goal: "Answer a question that needs two tables at once.",
       steps: [
         {
-          title: "One sheet cannot answer this",
-          body: "week_results knows what every player scored. rosters knows who owns whom in our league. Neither of them, on its own, can tell you how your fantasy team did on a given week, because that fact lives across both sheets at once.",
+          title: "One sheet can't answer this",
+          body: "week_results knows what every player scored. rosters knows who owns whom. Neither alone can tell you how your fantasy team did that week — that answer lives across both.",
           previewSql: "SELECT * FROM rosters;",
           previewCaption: "rosters · the sheet week_results knows nothing about",
         },
         {
-          title: "A join pairs up rows that agree",
-          body: "JOIN takes two tables and matches their rows against each other. The ON clause is where you say what has to agree for a pair to count. Here it is the player name, because that is the one thing both sheets record the same way.",
+          title: "A join pairs matching rows",
+          body: "JOIN takes two tables and matches their rows. ON says what has to agree. Here that's the player name — the one thing both sheets share.",
           code: "SELECT rosters.team_name, week_results.fantasy_pts\nFROM rosters\nJOIN week_results ON rosters.player = week_results.player;",
-          note: "The shared column is called a key. Finding the key is usually the hard part of a join, and it is nearly always the thing both tables are about, spelled identically.",
+          note: "That shared column is the key. Finding it is usually the hard part — and it's almost always the thing both tables are about.",
         },
         {
           title: "Every matched pair becomes one row",
-          body: "That is the mental picture to hold. If a player appears once in rosters and 17 times in week_results, you get 17 rows for that player, each carrying their team name alongside one game. The join does not summarise anything yet, it just stitches.",
+          body: "One roster row and 17 game rows → 17 joined rows, each with a team name beside one game. The join doesn't summarize yet. It just stitches.",
         },
       ],
             setup:
-              "week_results knows who scored what. rosters knows who owns whom. Neither can tell you how your fantasy team did — that needs both, stitched together on the column they share. Here's the roster you'll be joining to.",
+              "week_results knows who scored what. rosters knows who owns whom. Your team's week needs both, joined on the column they share.",
             previewSql: "SELECT * FROM rosters;",
             previewCaption: "rosters · 5 fantasy teams, 10 starters",
           },
           intro: {
             title: "A join matches rows across tables",
-            text: "JOIN takes two tables and pairs up rows that agree on something. The ON clause says what has to match — here it's the player name, which appears in both tables. Every matched pair becomes one wide row containing columns from both sides.",
+            text: "JOIN pairs rows that agree on something. ON says what must match — here, the player name in both tables. Each matched pair becomes one wide row with columns from both sides.",
             code: "SELECT rosters.team_name, week_results.player, week_results.fantasy_pts\nFROM rosters\nJOIN week_results ON rosters.player = week_results.player;",
           },
           film: [
             {
               title: "The shared column is the hinge",
-              text: "A join is only possible when the two tables have a value in common — here, the player's name. In a production database that link is usually an id rather than a name, precisely because names are messy: two players can share one, and spelling drifts between sources. The idea is identical either way.",
+              text: "You can only join when both tables share a value — here, the player's name. Real databases often use an id instead, because names get messy. The idea is the same either way.",
             },
             {
-              title: "JOIN is short for INNER JOIN",
-              text: "The keyword you've been writing is shorthand — INNER JOIN is the full name, and every engine treats a bare JOIN as meaning exactly that. You'll meet OUTER joins like LEFT JOIN soon; knowing the family name up front (INNER vs OUTER) makes the difference obvious the moment you see it: INNER keeps only matched pairs, OUTER keeps unmatched rows from one or both sides too.",
+              title: "JOIN means INNER JOIN",
+              text: "Bare JOIN is short for INNER JOIN. INNER keeps only matched pairs. OUTER joins (like LEFT JOIN) can keep unmatched rows too — you'll meet those next.",
               code: "-- identical\nFROM rosters JOIN week_results ON rosters.player = week_results.player\nFROM rosters INNER JOIN week_results ON rosters.player = week_results.player",
             },
           ],
@@ -1573,7 +1573,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "week_results is every player in the league. Which of them are yours is a fact that only exists in rosters, so the question needs both tables.",
+                "week_results has every player. Who's yours only lives in rosters — so you need both.",
             },
             {
               type: "fill",
@@ -1588,7 +1588,7 @@ export const COURSE = {
               bank: ["JOIN", "ON", "WHERE", "AND"],
               answer: ["JOIN", "ON"],
               explain:
-                "JOIN names the second table, ON states the matching rule. Swap ON for WHERE here and SQL won't know how to pair the rows.",
+                "JOIN names the second table. ON states the matching rule.",
             },
             {
               type: "query",
@@ -1601,7 +1601,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "JOIN week_results ON rosters.player = week_results.player, then filter with WHERE on season and week.",
               explain:
-                "Nine rows — not ten. Ten players are rostered, so one is missing. That's the whole point of the next lesson.",
+                "Nine rows, not ten — one rostered player is missing. Next lesson explains why.",
             },
             {
               type: "mc",
@@ -1615,48 +1615,48 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "A plain JOIN only keeps pairs that match. McCaffrey was hurt that week, so he has no row in week_results to pair with and silently disappears.",
+                "A plain JOIN only keeps matches. No game row that week means that player vanishes.",
             },
           ],
         },
         {
           id: "u5-l2",
-          title: "Aliases and Qualified Names",
-          blurb: "Stop typing table names twice. Start reading joins fast.",
+          title: "Short Names for Tables",
+          blurb: "Aliases: less typing, clearer joins.",
           brief: {
             goal: "Write joins that stay readable past two tables.",
       steps: [
         {
-          title: "Long table names get unbearable fast",
-          body: "The join you just wrote spells out week_results.fantasy_pts in full. With two tables that is merely annoying. With four, and a dozen columns, it becomes genuinely hard to read the query at all.",
+          title: "Long table names get old fast",
+          body: "week_results.fantasy_pts is fine once. With four tables and a dozen columns, the query gets hard to read.",
         },
         {
           title: "Give each table a short handle",
-          body: "Put a short name straight after the table in FROM or JOIN and it becomes that table's nickname for the rest of the query. Same result, a third of the typing, and this is how essentially every join you meet in the wild is written.",
+          body: "Put a short name right after the table in FROM or JOIN. That nickname works for the rest of the query. Same result, way less typing.",
           code: "SELECT r.team_name, w.player, w.fantasy_pts\nFROM rosters r\nJOIN week_results w ON r.player = w.player;",
-          note: "Qualifying columns as r.player or w.player is not just tidiness. When both tables have a column of the same name, the database cannot guess which you meant, and it will tell you so.",
+          note: "Qualify columns as r.player or w.player. When both tables share a name, SQL won't guess which you meant.",
         },
       ],
             setup:
-              "Spelling out week_results.fantasy_pts every time gets unbearable quickly. Aliases give each table a short name for the length of the query. Same result, a third of the typing — this is how every join you'll read in the wild is written.",
+              "Spelling out week_results.fantasy_pts every time gets old. Aliases give each table a short name for the query — same result, less typing.",
             previewSql:
               "SELECT r.team_name, w.player, w.fantasy_pts FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2024 AND w.week = 3 ORDER BY w.fantasy_pts DESC;",
             previewCaption: "the same join, written with aliases",
           },
           intro: {
             title: "One letter per table",
-            text: "Put a short name after the table in FROM or JOIN and it becomes that table's handle everywhere else in the query: rosters r, week_results w. Then qualify every column as r.something or w.something. Qualifying isn't just tidy — when both tables have a column called player, an unqualified `player` is ambiguous and SQL will refuse to run.",
+            text: "Put a short name after the table — rosters r, week_results w — then write r.something or w.something. When both tables have player, an unqualified name is ambiguous and SQL refuses.",
             code: "SELECT r.team_name, w.player, w.fantasy_pts\nFROM rosters r\nJOIN week_results w ON r.player = w.player;",
           },
           film: [
             {
-              title: "Aliases aren't optional once you join a table to itself",
-              text: "Every join so far has connected two different tables, so the alias was purely for readability. But compare a player's week 3 to their week 8 and there's only one table involved twice — week_results joined to week_results. Without an alias, SQL has no way to tell the first copy from the second; give each one a name and the ambiguity disappears the same way it did for the shared player column. Notice the join also pins a.season = b.season — drop that and it matches every season combination for the player, not just the two weeks you're after.",
+              title: "Aliases matter when a table joins itself",
+              text: "Compare week 3 to week 8 and you're joining week_results to itself. Without aliases, SQL can't tell the two copies apart. Name each one and pin a.season = b.season so you don't mix seasons.",
               code: "SELECT a.week, a.fantasy_pts AS week3_pts, b.fantasy_pts AS week8_pts\nFROM week_results a\nJOIN week_results b ON a.player = b.player AND a.season = b.season\nWHERE a.season = 2024 AND a.week = 3 AND b.week = 8 AND a.player = 'Justin Jefferson';",
             },
             {
               title: "AS renames a column, not a table",
-              text: "Table aliases (rosters r) and column aliases (fantasy_pts AS pts_scored) use the same keyword family but do different jobs. A table alias is a nickname you reference elsewhere in the query; a column alias only relabels what shows up in the result. You can't lean on it in the same query's WHERE clause — WHERE runs before the renaming happens, so the original column name is still what SQL expects there.",
+              text: "rosters r is a table nickname you use elsewhere. fantasy_pts AS pts_scored only relabels the result. WHERE still needs the original column name — renaming happens later.",
               code: "SELECT w.fantasy_pts AS pts_scored\nFROM week_results w\nWHERE w.fantasy_pts > 20; -- not WHERE pts_scored > 20",
             },
           ],
@@ -1673,7 +1673,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "SQL won't guess. Qualify it — r.player or w.player — and the ambiguity disappears.",
+                "SQL won't guess — qualify it as r.player or w.player.",
             },
             {
               type: "fill",
@@ -1688,7 +1688,7 @@ export const COURSE = {
               bank: ["r", "w", "AS r", "rosters"],
               answer: ["r", "w"],
               explain:
-                "The alias goes straight after the table name. AS is allowed but almost nobody writes it for tables.",
+                "The alias goes right after the table name.",
             },
             {
               type: "query",
@@ -1700,7 +1700,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "JOIN week_results w ON r.player = w.player, then WHERE w.season = 2024 AND w.fantasy_pts > 25.",
               explain:
-                "Aliases make the filter readable at a glance: you can see instantly which table each condition is testing.",
+                "Aliases make it obvious which table each filter hits.",
             },
             {
               type: "query",
@@ -1711,48 +1711,48 @@ export const COURSE = {
               orderMatters: false,
               hint: "This one needs no join at all — rosters already has both columns.",
               explain:
-                "Goal Line Gang. Worth noticing: not every question about two tables actually needs both. Reach for a join when the answer genuinely spans them.",
+                "Goal Line Gang — and no join needed. Reach for a join only when the answer spans two tables.",
             },
           ],
         },
         {
           id: "u5-l3",
           title: "Keep Everyone: LEFT JOIN",
-          blurb: "The players who vanished, and how to get them back.",
+          blurb: "Players who vanished — and how to keep them.",
           brief: {
             goal: "Keep rows that have no match on the other side.",
       steps: [
         {
-          title: "A plain JOIN drops what does not match, silently",
-          body: "This is the part that catches people. If a rostered player has no row on the other side, a plain JOIN does not warn you or leave a gap. It simply returns fewer rows, and a report that quietly lost two players looks exactly like a correct one.",
+          title: "A plain JOIN drops non-matches",
+          body: "If a rostered player has no row on the other side, JOIN doesn't warn you. You just get fewer rows — and a quiet missing player looks like a finished report.",
         },
         {
-          title: "LEFT JOIN keeps the left side whole",
-          body: "LEFT JOIN returns every row from the first table no matter what, and attaches the second table's columns where a match exists. Where none exists you get NULL, which is the database saying nothing was here.",
+          title: "LEFT JOIN keeps the left side",
+          body: "LEFT JOIN returns every row from the first table. Matching columns from the second attach when they exist. No match? You get NULL — which means “nothing here.”",
           code: "SELECT r.player, w.fantasy_pts\nFROM rosters r\nLEFT JOIN week_results w\n  ON r.player = w.player AND w.season = 2024 AND w.week = 1;",
-          note: "In our data McCaffrey has no week 1 row in 2024 because he was injured. A plain JOIN makes him vanish. A LEFT JOIN shows him with a NULL, which is a fact worth seeing rather than a row worth losing.",
+          note: "McCaffrey has no week 1 row in 2024 — he was hurt. JOIN drops him. LEFT JOIN shows him with NULL, which is worth seeing.",
         },
       ],
             setup:
-              "A plain JOIN silently drops anything unmatched — that's how Christian McCaffrey disappeared from week 1. LEFT JOIN keeps every row from the left table and fills the missing side with NULL, so absence becomes visible instead of invisible.",
+              "A plain JOIN silently drops unmatched rows — that's how a hurt player vanished from week 1. LEFT JOIN keeps every left-side row and fills gaps with NULL.",
             previewSql:
               "SELECT r.player, w.fantasy_pts FROM rosters r LEFT JOIN week_results w ON r.player = w.player AND w.season = 2024 AND w.week = 1 ORDER BY r.player;",
             previewCaption: "10 rows now — look at Christian McCaffrey",
           },
           intro: {
             title: "LEFT JOIN keeps the left side whole",
-            text: "LEFT JOIN returns every row from the first table no matter what, and attaches matching columns from the second where they exist. Where they don't, you get NULL. Nothing is lost — and a NULL is information, not an error.",
+            text: "LEFT JOIN returns every row from the first table, and attaches matches from the second when they exist. No match means NULL. Nothing is lost — and NULL is information.",
             code: "SELECT r.player, w.fantasy_pts\nFROM rosters r\nLEFT JOIN week_results w\n  ON r.player = w.player AND w.week = 1;",
           },
           film: [
             {
-              title: "ON versus WHERE on a LEFT JOIN",
-              text: "This is the subtlest trap in joins. Conditions on the right-hand table belong in ON. Move them to WHERE and you filter out the NULL rows you just worked to keep — quietly turning your LEFT JOIN back into an INNER JOIN. If a LEFT JOIN mysteriously loses rows, this is almost always why.",
+              title: "ON vs WHERE on a LEFT JOIN",
+              text: "Filters on the right-hand table belong in ON. Put them in WHERE and you drop the NULL rows you meant to keep — turning LEFT JOIN back into INNER JOIN.",
               code: "-- keeps McCaffrey, points NULL\n... LEFT JOIN week_results w ON r.player = w.player AND w.week = 1\n\n-- drops McCaffrey again\n... LEFT JOIN week_results w ON r.player = w.player WHERE w.week = 1",
             },
             {
-              title: "LEFT JOIN's siblings — and why LEFT wins by convention",
-              text: "RIGHT JOIN keeps every row from the second table instead of the first; FULL OUTER JOIN keeps unmatched rows from both sides at once. But RIGHT JOIN is just LEFT JOIN with the table order swapped — which is exactly why most style guides ban it outright. One direction, no exceptions, means nobody reading your query ever has to stop and check which side is which.",
+              title: "Why people stick to LEFT",
+              text: "RIGHT JOIN keeps the second table instead. FULL OUTER keeps unmatched rows from both. Most teams just swap table order and use LEFT — one direction, less confusion.",
               code: "-- these two return the same rows\nFROM week_results w RIGHT JOIN rosters r ON r.player = w.player\nFROM rosters r LEFT JOIN week_results w ON r.player = w.player",
             },
           ],
@@ -1763,7 +1763,7 @@ export const COURSE = {
               options: ["0", "An empty string", "NULL", "It skips the row"],
               answer: 2,
               explain:
-                "NULL — meaning 'no value here'. That's different from zero: Kelce didn't score 0 points, he had no game at all.",
+                "NULL means “no value here” — different from scoring zero.",
             },
             {
               type: "mc",
@@ -1777,7 +1777,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "The NULL row can't satisfy a WHERE test on the right-hand table. Put that condition in ON instead and he stays.",
+                "A NULL week can't pass WHERE w.week = 1 — put that filter in ON instead.",
             },
             {
               type: "fill",
@@ -1792,7 +1792,7 @@ export const COURSE = {
               bank: ["LEFT JOIN", "AND", "JOIN", "WHERE"],
               answer: ["LEFT JOIN", "AND"],
               explain:
-                "LEFT JOIN keeps all ten, and the extra conditions ride along in ON with AND so the unmatched row survives.",
+                "LEFT JOIN keeps all ten; season and week ride in ON with AND.",
             },
             {
               type: "query",
@@ -1804,48 +1804,48 @@ export const COURSE = {
               orderMatters: false,
               hint: "LEFT JOIN, and keep the season/week conditions inside ON with AND — not in a WHERE.",
               explain:
-                "Ten rows every time, whoever missed the game. That's a report you can hand someone without it quietly lying about roster size.",
+                "Ten rows every time — even when someone missed the game.",
             },
           ],
         },
         {
           id: "u5-l4",
           title: "Finding What's Missing",
-          blurb: "Anti-joins: the players nobody rostered.",
+          blurb: "Anti-joins: players nobody rostered.",
           brief: {
             goal: "Find rows in one table that have no counterpart in another.",
       steps: [
         {
-          title: "Some of the best questions are about absence",
-          body: "Which players is nobody starting. Which customers never ordered. Which games have no result filed yet. These are all the same shape of question, and none of them can be answered by looking at rows that exist.",
+          title: "Absence is a real question",
+          body: "Who isn't starting. Who never ordered. Which games have no result yet. Same shape every time — and looking only at rows that exist won't answer it.",
         },
         {
-          title: "LEFT JOIN, then keep only the NULLs",
-          body: "The trick has two moves. The LEFT JOIN keeps everything, matched or not. The WHERE then throws away everything that did match, by keeping only rows where the other side came back NULL. What is left is exactly the unmatched.",
+          title: "LEFT JOIN, then keep the NULLs",
+          body: "LEFT JOIN keeps everything. WHERE then throws away the matches by keeping only rows where the other side is NULL. What's left is the unmatched set.",
           code: "SELECT DISTINCT w.player\nFROM week_results w\nLEFT JOIN rosters r ON w.player = r.player\nWHERE r.player IS NULL;",
-          note: "This is called an anti-join. It is worth learning as a shape rather than a formula, because you will reach for it constantly once you can see it.",
+          note: "That's an anti-join. Learn the shape — you'll reach for it a lot.",
         },
       ],
             setup:
-              "Some of the most useful questions are about absence: which players is nobody starting, which customers never ordered, which games have no result yet. The pattern is always the same — LEFT JOIN, then keep only the rows where the match came back NULL.",
+              "Useful questions are often about absence: who isn't rostered, who never ordered. Pattern: LEFT JOIN, then keep rows where the match came back NULL.",
             previewSql:
               "SELECT DISTINCT w.player FROM week_results w LEFT JOIN rosters r ON w.player = r.player WHERE r.player IS NULL ORDER BY w.player;",
             previewCaption: "six players in the league, on nobody's roster",
           },
           intro: {
             title: "LEFT JOIN, then keep the NULLs",
-            text: "An anti-join is a LEFT JOIN with `WHERE right.column IS NULL` bolted on. The LEFT JOIN keeps everything; the WHERE then throws away everything that DID match, leaving only the unmatched. It reads backwards at first and becomes second nature fast.",
+            text: "An anti-join is LEFT JOIN plus WHERE right.column IS NULL. The join keeps everything; the WHERE throws away matches and leaves only the unmatched.",
             code: "SELECT DISTINCT w.player\nFROM week_results w\nLEFT JOIN rosters r ON w.player = r.player\nWHERE r.player IS NULL;",
           },
           film: [
             {
-              title: "NOT IN looks simpler — until a NULL sneaks in",
-              text: "WHERE w.player NOT IN (SELECT player FROM rosters) looks like a one-line shortcut for the same anti-join, and most of the time it is. Until one row in that list is NULL: comparing anything to NULL is neither true nor false, and a single NULL anywhere in the list silently makes the entire NOT IN return zero rows — no error, no warning. LEFT JOIN ... IS NULL never has this problem, which is why experienced analysts default to it over NOT IN the moment the other table's key might ever be NULL.",
+              title: "NOT IN looks simpler — until NULL",
+              text: "NOT IN (SELECT …) often works. One NULL in that list and the whole filter can return zero rows with no error. LEFT JOIN … IS NULL doesn't have that problem.",
               code: "-- fragile if rosters.player could ever be NULL\nWHERE w.player NOT IN (SELECT player FROM rosters)\n\n-- immune to it\nLEFT JOIN rosters r ON w.player = r.player WHERE r.player IS NULL",
             },
             {
-              title: "The anti-join pattern isn't specific to two tables",
-              text: "Nothing about LEFT JOIN ... IS NULL is special to rosters and week_results — it's the general recipe for 'which rows on the left have no counterpart anywhere else,' and it chains: LEFT JOIN a second table, LEFT JOIN a third, and check that every join's key came back NULL. It's the same question real teams ask constantly — which customers never ordered, which shipments never arrived, which invites got no RSVP — just with the noun swapped out.",
+              title: "Same pattern, any tables",
+              text: "LEFT JOIN … IS NULL isn't special to fantasy. It's “which left rows have no match elsewhere.” Swap the nouns — customers, shipments, invites — and the shape stays.",
               code: "LEFT JOIN rosters r ON w.player = r.player\nLEFT JOIN waiver_wire ww ON w.player = ww.player\nWHERE r.player IS NULL AND ww.player IS NULL -- on nobody's radar at all",
             },
           ],
@@ -1861,7 +1861,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "The NULL is the fingerprint of a failed match. Filtering to it is what turns 'everything' into 'only the unmatched'.",
+                "NULL marks a failed match — filtering to it leaves only the unmatched.",
             },
             {
               type: "mc",
@@ -1874,7 +1874,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "The table's grain is player-week. Without DISTINCT you'd get every one of their games, not a list of names.",
+                "Grain is player-week — without DISTINCT you'd get every game, not a name list.",
             },
             {
               type: "query",
@@ -1887,7 +1887,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "Finish it with WHERE r.player IS NULL.",
               explain:
-                "Six names — the waiver pool. This exact shape answers 'who hasn't done X' in every job you'll ever have.",
+                "Six names — the waiver pool. Same shape answers “who hasn't done X” anywhere.",
             },
             {
               type: "query",
@@ -1899,47 +1899,47 @@ export const COURSE = {
               orderMatters: false,
               hint: "Same shape, different tables: LEFT JOIN waiver_wire ww ON r.player = ww.player, then WHERE ww.player IS NULL.",
               explain:
-                "Eight of the ten rostered players aren't on the wire. Same pattern, new question — that's what makes it worth memorising.",
+                "Eight of ten rostered players aren't on the wire — same pattern, new question.",
             },
           ],
         },
         {
           id: "u5-l5",
           title: "Score the Matchup",
-          blurb: "Joins plus GROUP BY: settle it with one query.",
+          blurb: "Joins plus GROUP BY: settle it in one query.",
           brief: {
             goal: "Combine a join with aggregation to answer a real question.",
       steps: [
         {
-          title: "Time to actually settle it",
-          body: "Everything you have written so far produces rows to look at. This one produces a verdict. Whose fantasy team scored more over the season is a question with a single right answer, and you now have every piece needed to get it.",
+          title: "Time for a verdict",
+          body: "So far you've built lists to look at. This one answers a matchup: whose fantasy team scored more over the season. You already have every piece.",
         },
         {
           title: "Join first, then group",
-          body: "The database stitches the two tables together first, and only then collapses the result into buckets. Which means you can group by a column from one table while adding up a column from the other, and that is the whole move.",
+          body: "SQL stitches the tables together, then collapses into buckets. You can group by a column from one table while summing a column from the other.",
           code: "SELECT r.team_name, ROUND(SUM(w.fantasy_pts), 1) AS total\nFROM rosters r\nJOIN week_results w ON r.player = w.player\nWHERE w.season = 2024\nGROUP BY r.team_name\nORDER BY total DESC;",
-          note: "Five lines, three ideas you already knew, and a question that would take a long time by hand. This is roughly the shape of a real analyst's daily work.",
+          note: "Five lines, ideas you already know — and a question that would take forever by hand.",
         },
       ],
             setup:
-              "Everything so far has produced rows. This produces a verdict. Join the roster to the game log, group by fantasy team, sum the points — and you have the season matchup settled in five lines.",
+              "Join the roster to the game log, group by fantasy team, sum the points. Season matchup, settled.",
             previewSql:
               "SELECT r.team_name, ROUND(SUM(w.fantasy_pts), 1) AS total FROM rosters r JOIN week_results w ON r.player = w.player WHERE w.season = 2024 GROUP BY r.team_name ORDER BY total DESC;",
             previewCaption: "the 2024 season, settled",
           },
           intro: {
             title: "Join first, then group",
-            text: "SQL builds the joined rows first, then GROUP BY collapses them. So you can group by a column from either table and aggregate a column from the other — which is exactly what 'total points per fantasy team' needs.",
+            text: "SQL builds joined rows first, then GROUP BY collapses them. Group by a column from either table and aggregate a column from the other — that's “total points per fantasy team.”",
             code: "SELECT r.team_name, ROUND(SUM(w.fantasy_pts), 1) AS total\nFROM rosters r\nJOIN week_results w ON r.player = w.player\nGROUP BY r.team_name;",
           },
           film: [
             {
               title: "Watch for fan-out",
-              text: "If the right-hand table has several rows per match, the left row is duplicated once per match — and any SUM over left-hand columns is then inflated. Here that's fine because we're summing the right side. But if you ever join and your totals suddenly double, fan-out is the first thing to check.",
+              text: "If the right side has several rows per match, the left row repeats. Summing a left-side column then inflates. Here we sum the right side, so we're fine — but doubled totals often mean fan-out.",
             },
             {
-              title: "Fan-out breaks COUNT too, not just SUM",
-              text: "Ask 'how many players are on Blitz Brothers' with COUNT(*) on this same join and you'll get 97 — one row per game played across three seasons, not one per player. The join is doing exactly what it's supposed to; COUNT(*) is just answering a different question than the one you asked. COUNT(DISTINCT r.player) fixes it by counting unique players instead of matched rows — the same DISTINCT trick fan-out always calls for, whether you're counting or summing.",
+              title: "Fan-out breaks COUNT too",
+              text: "COUNT(*) on this join counts matched game rows, not roster size. COUNT(DISTINCT r.player) counts unique players instead.",
               code: "SELECT r.team_name,\n       COUNT(*) AS rows_matched,               -- one per game played\n       COUNT(DISTINCT r.player) AS roster_size  -- the real headcount\nFROM rosters r\nJOIN week_results w ON r.player = w.player\nGROUP BY r.team_name;",
             },
           ],
@@ -1955,7 +1955,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Join, then group. That's why you can group by a column from one table and aggregate one from the other.",
+                "Join first, then group — so you can mix columns from both sides.",
             },
             {
               type: "query",
@@ -1968,7 +1968,7 @@ export const COURSE = {
               orderMatters: true,
               hint: "JOIN, WHERE w.season = 2024, GROUP BY r.team_name, ORDER BY total DESC.",
               explain:
-                "Fourth & Long 685.9 leads; Touchdown Factory sits at 311.2 with McCaffrey's missed games. One query, whole season, no spreadsheet.",
+                "Fourth & Long leads; one query covers the whole season.",
             },
             {
               type: "query",
@@ -1980,7 +1980,7 @@ export const COURSE = {
               orderMatters: true,
               hint: "Group by r.player instead of team, then ORDER BY total DESC LIMIT 1.",
               explain:
-                "Josh Allen. Change one line — the GROUP BY — and the same query answers a different question entirely.",
+                "Josh Allen — change the GROUP BY and the same join answers a new question.",
             },
             {
               type: "query",
@@ -1992,7 +1992,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "Add AND w.fantasy_pts >= 25 to the WHERE, then GROUP BY r.team_name with COUNT(*).",
               explain:
-                "Counting rows that survive a filter, grouped by team — join, filter, group, count. That's the shape of most real reports.",
+                "Join, filter, group, count — the shape of most real reports.",
             },
           ],
         },
@@ -2001,10 +2001,10 @@ export const COURSE = {
     {
       id: "u6",
       number: 6,
-      title: "Two-Minute Drill — Window Functions",
+      title: "Side-by-Side Stats — Window Functions",
       drive: "6th Drive · Red Zone",
       description:
-        "Rolling averages, ranks within groups, week-over-week trends — the toolkit that separates job-ready from beginner on a SQL screen.",
+        "Rolling averages, ranks within groups, week-over-week trends — keep every row and still add the comparison numbers.",
       skills: ["OVER", "PARTITION BY", "RANK", "LAG", "Running totals"],
       status: "live",
       lessons: [
@@ -2016,36 +2016,36 @@ export const COURSE = {
             goal: "Add a summary number to every row without losing the rows.",
       steps: [
         {
-          title: "GROUP BY answers by throwing detail away",
-          body: "You can already get a player's season average. The cost is that the individual games are gone from the answer. But plenty of questions need both at once: show me each game, and show me how it compares to the average.",
+          title: "GROUP BY throws detail away",
+          body: "You can already get a player's season average. The individual games disappear from that answer. Plenty of questions need both: each game, and how it compares to the average.",
         },
         {
-          title: "OVER turns off the collapsing",
-          body: "Add OVER after an aggregate and it stops folding rows together. The same average gets calculated, then printed alongside every single row instead of replacing them. Same maths, nothing lost.",
+          title: "OVER keeps the rows",
+          body: "Put OVER after an aggregate and it stops folding rows together. The same average still calculates — then it prints beside every row instead of replacing them.",
           code: "SELECT player, week, fantasy_pts,\n       ROUND(AVG(fantasy_pts) OVER (), 1) AS league_avg\nFROM week_results;",
-          note: "These are called window functions because the OVER clause defines a window of rows to look at. Empty brackets mean the window is everything.",
+          note: "These are window functions. OVER defines which rows to look at. Empty brackets mean “everything.”",
         },
       ],
             setup:
-              "GROUP BY answers 'what's the total' by throwing the detail away. Window functions answer 'how does this row compare to the total' and keep every row. Same aggregate maths, no collapse — notice the season average repeating beside each game.",
+              "GROUP BY answers with a total and loses the detail. Window functions keep every row and still add the comparison number. Watch the season average repeat beside each game.",
             previewSql:
               "SELECT player, week, fantasy_pts, ROUND(AVG(fantasy_pts) OVER (), 1) AS league_avg FROM week_results WHERE season = 2024 AND week = 1 ORDER BY fantasy_pts DESC;",
             previewCaption: "every row keeps its detail AND gets the average",
           },
           intro: {
             title: "OVER() is the whole idea",
-            text: "Put OVER() after an aggregate and it stops collapsing rows. AVG(fantasy_pts) with GROUP BY gives you one row. AVG(fantasy_pts) OVER () gives you the same average printed next to every original row — so you can compare each game to it without a second query.",
+            text: "Put OVER() after an aggregate and rows stop collapsing. AVG with GROUP BY → one row. AVG(...) OVER () → the same average next to every original row, so you can compare each game without a second query.",
             code: "SELECT player, fantasy_pts,\n       AVG(fantasy_pts) OVER () AS league_avg\nFROM week_results\nWHERE season = 2024 AND week = 1;",
           },
           film: [
             {
-              title: "Window vs GROUP BY, side by side",
-              text: "GROUP BY reduces: many rows in, one row out per group. A window function annotates: many rows in, the same many rows out, with an extra column. When a question is 'compare this to that' rather than 'summarise this', it's almost always a window function.",
+              title: "Window vs GROUP BY",
+              text: "GROUP BY reduces: many rows in, one out per group. A window annotates: same many rows out, plus an extra column. “Compare this to that” is almost always a window.",
               code: "-- 1 row\nSELECT AVG(fantasy_pts) FROM week_results;\n\n-- every row, plus the average\nSELECT player, AVG(fantasy_pts) OVER () FROM week_results;",
             },
             {
-              title: "You can't filter directly on a window function",
-              text: "Window functions run after WHERE, same as regular aggregates — so WHERE league_avg > 15 fails the moment league_avg comes from OVER(), because WHERE doesn't know it exists yet. Filtering on a window result takes one more layer: wrap the query in an outer SELECT and put the condition there instead, since only the outer layer can see a column a window function produced.",
+              title: "You can't filter on a window in WHERE",
+              text: "Window functions run after WHERE, so WHERE league_avg > 15 fails when league_avg comes from OVER(). Wrap the query and filter in an outer SELECT instead.",
               code: "-- errors: league_avg doesn't exist yet when WHERE runs\nSELECT player, AVG(fantasy_pts) OVER () AS league_avg\nFROM week_results WHERE league_avg > 15;\n\n-- works: filter in an outer layer instead\nSELECT * FROM (\n  SELECT player, AVG(fantasy_pts) OVER () AS league_avg\n  FROM week_results\n) WHERE league_avg > 15;",
             },
           ],
@@ -2062,7 +2062,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "That's the entire concept. Everything else in this unit is a variation on it.",
+                "That's the whole idea — everything else in this unit varies it.",
             },
             {
               type: "fill",
@@ -2077,7 +2077,7 @@ export const COURSE = {
               bank: ["OVER", "", "GROUP BY", "PARTITION"],
               answer: ["OVER", ""],
               explain:
-                "Empty parentheses mean 'the window is every row in the result'. You'll narrow that window in the next lesson.",
+                "Empty parentheses mean the window is every row in the result.",
             },
             {
               type: "query",
@@ -2089,7 +2089,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "MAX(fantasy_pts) OVER () AS top_score, with the WHERE filtering to season 2024 and week 5.",
               explain:
-                "Every row now carries the week's ceiling, so 'how far off the pace was this player' becomes simple subtraction.",
+                "Every row carries the week's high — subtracting tells you how far off the pace someone was.",
             },
             {
               type: "mc",
@@ -2103,48 +2103,48 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "You'd have to run a second query and join it back. The window function does both jobs in one pass.",
+                "GROUP BY would collapse to one row — you'd need a second query and a join.",
             },
           ],
         },
         {
           id: "u6-l2",
           title: "Rank Within the Position",
-          blurb: "PARTITION BY and RANK: WR1 through WR7.",
+          blurb: "PARTITION BY and RANK: rankings that restart per group.",
           brief: {
             goal: "Rank rows inside groups without running a query per group.",
       steps: [
         {
-          title: "Ranking a tight end against a quarterback is meaningless",
-          body: "Quarterbacks score more than everyone by design, so a single leaderboard just lists the quarterbacks first and tells you nothing. What you actually want is each player ranked against the players they are genuinely competing with.",
+          title: "One leaderboard mixes positions badly",
+          body: "Quarterbacks score more by design. One big board just lists them first. You want each player ranked against the people they actually compete with.",
         },
         {
-          title: "PARTITION BY restarts the count in each group",
-          body: "PARTITION BY splits the window into groups, and the calculation begins again from scratch inside each one. Rank with a partition on position and the numbering restarts at 1 for every position.",
+          title: "PARTITION BY restarts in each group",
+          body: "PARTITION BY splits the window into groups. The calculation starts over inside each one. Rank with a partition on position and numbering restarts at 1 for every position.",
           code: "SELECT player, position,\n       RANK() OVER (PARTITION BY position ORDER BY AVG(fantasy_pts) DESC) AS pos_rank\nFROM week_results\nGROUP BY player, position;",
-          note: "Read it out loud as: rank these, within each position, ordered by average points. Window functions get much easier once you read them as a sentence.",
+          note: "Read it out loud: rank these, within each position, ordered by average points.",
         },
       ],
             setup:
-              "Comparing a tight end to a quarterback is meaningless — you want each player ranked against their own position. PARTITION BY splits the window into groups and restarts the calculation in each one, so the ranking begins again at 1 for every position.",
+              "Comparing a tight end to a quarterback isn't useful. PARTITION BY splits the window by group and restarts the math — so rank begins at 1 for every position.",
             previewSql:
               "SELECT player, position, ROUND(AVG(fantasy_pts), 1) AS ppg, RANK() OVER (PARTITION BY position ORDER BY AVG(fantasy_pts) DESC) AS pos_rank FROM week_results WHERE season = 2024 GROUP BY player, position ORDER BY position, pos_rank;",
             previewCaption: "rank restarts at 1 for QB, RB, TE and WR",
           },
           intro: {
             title: "PARTITION BY is GROUP BY for windows",
-            text: "PARTITION BY splits rows into groups; ORDER BY inside OVER decides the order within each group. RANK() then numbers them, restarting at 1 in every partition. Read it as: rank these, within each position, by points, highest first.",
+            text: "PARTITION BY splits rows into groups. ORDER BY inside OVER sets the order within each group. RANK() numbers them, restarting at 1 in every partition.",
             code: "RANK() OVER (\n  PARTITION BY position\n  ORDER BY AVG(fantasy_pts) DESC\n) AS pos_rank",
           },
           film: [
             {
               title: "RANK, DENSE_RANK, ROW_NUMBER",
-              text: "They differ only in how they treat ties. RANK leaves gaps: 1, 2, 2, 4. DENSE_RANK doesn't: 1, 2, 2, 3. ROW_NUMBER refuses to tie at all and picks arbitrarily: 1, 2, 3, 4. Choose deliberately — 'joint second' is a real answer and ROW_NUMBER will hide it from you.",
+              text: "They differ on ties. RANK leaves gaps: 1, 2, 2, 4. DENSE_RANK doesn't: 1, 2, 2, 3. ROW_NUMBER never ties: 1, 2, 3, 4. Pick on purpose — “joint second” is a real answer.",
               code: "-- scores 20, 18, 18, 15\nRANK()       -> 1, 2, 2, 4\nDENSE_RANK() -> 1, 2, 2, 3\nROW_NUMBER() -> 1, 2, 3, 4",
             },
             {
-              title: "Top N per group is the classic RANK use case",
-              text: "'Best 3 players per position' is one of the most common real interview questions, and it's just RANK() with the wrapping trick from the last lesson: compute the rank inside a subquery, then filter WHERE pos_rank <= 3 on the outside. PARTITION BY makes the ranking restart per group; the outer WHERE is what actually trims each group down to 3.",
+              title: "Top N per group",
+              text: "“Best 3 per position” is RANK in a subquery, then WHERE pos_rank <= 3 outside. PARTITION BY restarts per group; the outer filter trims each group.",
               code: "SELECT * FROM (\n  SELECT player, position,\n         RANK() OVER (PARTITION BY position ORDER BY AVG(fantasy_pts) DESC) AS pos_rank\n  FROM week_results\n  WHERE season = 2024\n  GROUP BY player, position\n) WHERE pos_rank <= 3;",
             },
           ],
@@ -2155,7 +2155,7 @@ export const COURSE = {
               options: ["3", "4", "2", "It errors"],
               answer: 1,
               explain:
-                "RANK skips the gap the tie consumed: 1, 2, 2, 4. DENSE_RANK would say 3.",
+                "RANK skips the gap the tie used: 1, 2, 2, 4.",
             },
             {
               type: "mc",
@@ -2168,7 +2168,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "It carves the rows into groups and runs the window function inside each independently — no filtering, no row loss.",
+                "It runs the window inside each position group — no filtering, no row loss.",
             },
             {
               type: "fill",
@@ -2183,7 +2183,7 @@ export const COURSE = {
               bank: ["PARTITION BY", "ORDER BY", "GROUP BY", "SORT BY"],
               answer: ["PARTITION BY", "ORDER BY"],
               explain:
-                "PARTITION BY makes the groups, ORDER BY decides who's first inside each one.",
+                "PARTITION BY makes the groups; ORDER BY decides who's first inside each.",
             },
             {
               type: "query",
@@ -2196,7 +2196,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "Filter to season 2024 and position = 'WR', then GROUP BY player.",
               explain:
-                "Ja'Marr Chase is WR1 at 23.7 a game. Note Puka Nacua ranks 2nd on 11 games while Jefferson played 17 — RANK sorts on the average alone and says nothing about how much evidence sits behind it.",
+                "Ja'Marr Chase is WR1 — RANK sorts on the average alone.",
             },
           ],
         },
@@ -2208,36 +2208,36 @@ export const COURSE = {
             goal: "Compare a row to the one before or after it.",
       steps: [
         {
-          title: "Trend questions need two rows at once",
-          body: "Is he heating up or cooling off. How much better was this week than last. Every tool you have met so far looks at one row at a time, which is why none of them can answer a question about change.",
+          title: "Trend questions need two rows",
+          body: "Is he heating up or cooling off? How much better was this week than last? Tools that look at one row at a time can't answer change.",
         },
         {
           title: "LAG reaches back, LEAD reaches forward",
-          body: "LAG pulls a value from the previous row in whatever order you specify, and LEAD pulls from the next one. Once last week's score is sitting on this week's row, comparing them is ordinary subtraction.",
+          body: "LAG pulls a value from the previous row in the order you set. LEAD pulls from the next. Once last week's score sits on this week's row, comparing is plain subtraction.",
           code: "SELECT week, fantasy_pts,\n       LAG(fantasy_pts) OVER (ORDER BY week) AS prev_week\nFROM week_results\nWHERE player = 'Patrick Mahomes' AND season = 2024;",
-          note: "The first row has nothing behind it, so LAG returns NULL there. That is correct rather than broken, and forgetting it is a common way to end up with a wrong average.",
+          note: "The first row has nothing behind it, so LAG returns NULL there — that's correct.",
         },
       ],
             setup:
-              "Trend questions need two rows at once, and until now every tool you have works one row at a time. LAG reaches backwards to the previous row; LEAD reaches forwards. Here's a quarterback's season with last week's score pulled onto each line.",
+              "Trend questions need two rows at once. LAG reaches back; LEAD reaches forward. Here's a season with last week's score pulled onto each line.",
             previewSql:
               "SELECT week, fantasy_pts, LAG(fantasy_pts) OVER (ORDER BY week) AS prev_week FROM week_results WHERE player = 'Patrick Mahomes' AND season = 2024 ORDER BY week LIMIT 8;",
             previewCaption: "week 1 has no previous week — hence NULL",
           },
           intro: {
             title: "LAG looks back, LEAD looks forward",
-            text: "LAG(column) OVER (ORDER BY something) gives you that column's value from the previous row in that order. The first row has nothing behind it, so it returns NULL. Subtract the two and you have a week-over-week change — the basis of every trend chart you'll ever build.",
+            text: "LAG(column) OVER (ORDER BY something) returns that column from the previous row. The first row gets NULL. Subtract the two and you have week-over-week change.",
             code: "SELECT week, fantasy_pts,\n       fantasy_pts - LAG(fantasy_pts) OVER (ORDER BY week) AS swing\nFROM week_results\nWHERE player = 'Josh Allen' AND season = 2024;",
           },
           film: [
             {
-              title: "Before window functions, this took a self-join",
-              text: "LAG didn't always exist. The classic way to put 'last week's score' on the same row was a self-join: join week_results to itself, matching player to player, season to season, and one row's week to the other's week minus one. LAG(fantasy_pts) OVER (ORDER BY week) compresses that into a single clause, which is why window functions replaced the pattern almost everywhere. They're not quite identical, though — the self-join matches by week number, so Josh Allen's bye week correctly comes back NULL; LAG matches by row position in the ordered result, so across that same bye week it silently hands back his last game instead. Worth knowing before you lean on either one across a gap in the schedule.",
+              title: "Before LAG, people used a self-join",
+              text: "The old way joined a table to itself on player, season, and week − 1. LAG compresses that into one clause. One catch: LAG follows row order, so a bye week can quietly hand back the last game instead of NULL.",
               code: "-- the old way, before LAG\nSELECT a.week, a.fantasy_pts,\n       b.fantasy_pts AS prev_week\nFROM week_results a\nLEFT JOIN week_results b\n  ON a.player = b.player AND a.season = b.season AND b.week = a.week - 1\nWHERE a.player = 'Josh Allen' AND a.season = 2024;",
             },
             {
-              title: "LAG and LEAD take more than one argument",
-              text: "LAG(column) quietly defaults to one row back and NULL when there's nothing there — but both of those are adjustable. LAG(column, 3) reaches back three rows instead of one; LAG(column, 1, 0) returns 0 instead of NULL when the previous row doesn't exist. That third argument matters most when the result feeds more math, since NULL poisons a SUM the moment it touches one.",
+              title: "LAG takes more than one argument",
+              text: "LAG(column) defaults to one row back and NULL when there's nothing. LAG(column, 3) goes three back. LAG(column, 1, 0) returns 0 instead of NULL — handy when more math follows.",
               code: "LAG(fantasy_pts, 1, 0) OVER (ORDER BY week) -- week 1 returns 0, not NULL",
             },
           ],
@@ -2253,7 +2253,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Nothing precedes the first row, so LAG has nothing to return. That NULL is correct, not a defect.",
+                "Nothing precedes the first row, so LAG has nothing to return.",
             },
             {
               type: "mc",
@@ -2267,7 +2267,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "The window spills across players and quietly produces nonsense. Partition by player and each one gets their own sequence.",
+                "The window spills across players — partition by player so each gets their own sequence.",
             },
             {
               type: "fill",
@@ -2282,7 +2282,7 @@ export const COURSE = {
               bank: ["LAG", "ORDER BY", "LEAD", "PARTITION BY"],
               answer: ["LAG", "ORDER BY"],
               explain:
-                "LAG plus an ORDER BY that defines what 'previous' means. Without the ORDER BY there's no sequence to look back along.",
+                "LAG needs an ORDER BY so “previous” has a direction.",
             },
             {
               type: "query",
@@ -2294,7 +2294,7 @@ export const COURSE = {
               orderMatters: true,
               hint: "LAG(fantasy_pts) OVER (ORDER BY week) AS prev_week, filtered to the player and season, then ORDER BY week.",
               explain:
-                "Now every row carries its own comparison. Subtract the two columns and you've built a momentum metric.",
+                "Every row now carries its comparison — subtract the two columns for momentum.",
             },
           ],
         },
@@ -2306,40 +2306,40 @@ export const COURSE = {
             goal: "Build a running total and a moving average.",
       steps: [
         {
-          title: "A window does not have to be the whole season",
-          body: "So far your windows have covered everything. But a window can also cover just the rows up to the one you are on, which is exactly what a running total is: the sum so far, recalculated on every line.",
+          title: "A window doesn't have to be the whole season",
+          body: "So far your windows covered everything. A window can also cover just the rows up to the one you're on — that's a running total: the sum so far, recalculated on every line.",
         },
         {
           title: "ORDER BY inside OVER makes it accumulate",
-          body: "Adding ORDER BY inside the brackets changes the window from everything to everything up to here. That single change turns SUM into a season-to-date total without any extra work.",
+          body: "Add ORDER BY inside the brackets and the window becomes “everything up to here.” That turns SUM into a season-to-date total.",
           code: "SELECT week, fantasy_pts,\n       ROUND(SUM(fantasy_pts) OVER (ORDER BY week), 1) AS season_to_date\nFROM week_results\nWHERE player = 'Josh Allen' AND season = 2024;",
-          note: "Spell the window out with ROWS BETWEEN 2 PRECEDING AND CURRENT ROW and you get a three-game rolling average instead, which is how form is measured in almost every sport.",
+          note: "Spell the frame with ROWS BETWEEN 2 PRECEDING AND CURRENT ROW and you get a three-game rolling average instead.",
         },
       ],
             setup:
-              "A window can cover just part of its partition. Add ORDER BY and the window becomes everything up to the current row — which turns SUM into a running total for free. Watch it accumulate week by week.",
+              "A window can cover just part of its partition. Add ORDER BY and it becomes everything up to the current row — SUM turns into a running total.",
             previewSql:
               "SELECT week, fantasy_pts, ROUND(SUM(fantasy_pts) OVER (ORDER BY week), 1) AS season_to_date FROM week_results WHERE player = 'Josh Allen' AND season = 2024 ORDER BY week LIMIT 8;",
             previewCaption: "season_to_date grows every week",
           },
           intro: {
             title: "ORDER BY inside OVER creates a running window",
-            text: "SUM(x) OVER () totals everything. Add ORDER BY and it totals everything from the start up to the current row instead — a running total. Add an explicit frame like ROWS BETWEEN 2 PRECEDING AND CURRENT ROW and you get a moving average over the last three rows.",
+            text: "SUM(x) OVER () totals everything. Add ORDER BY and it totals from the start up to the current row — a running total. Add ROWS BETWEEN 2 PRECEDING AND CURRENT ROW for a three-game moving average.",
             code: "-- running total\nSUM(fantasy_pts) OVER (ORDER BY week)\n\n-- rolling 3-game average\nAVG(fantasy_pts) OVER (\n  ORDER BY week\n  ROWS BETWEEN 2 PRECEDING AND CURRENT ROW\n)",
           },
           film: [
             {
               title: "Why rolling averages exist",
-              text: "A single week is mostly noise; a season average is too slow to react. A rolling three-game window sits between them — recent enough to show a real change in role, smooth enough to ignore one fluke. It's the same reason analysts quote a seven-day average rather than yesterday's number.",
+              text: "One week is noisy. A season average is slow to react. A three-game window sits in between — recent enough to show a real shift, smooth enough to ignore one fluke.",
             },
             {
               title: "The default frame isn't always ROWS",
-              text: "Add ORDER BY inside OVER with no explicit frame and SQL assumes RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW, not ROWS. For a running total ordered by a column with no duplicates — like week here — RANGE and ROWS agree exactly. They part ways the moment two rows tie on the ORDER BY key: RANGE lumps every tied row into the total together, ROWS processes them one at a time. Writing ROWS BETWEEN explicitly is the professional habit that avoids ever being surprised by which one you got.",
+              text: "ORDER BY with no frame uses RANGE, not ROWS. With unique weeks they match. On ties, RANGE lumps tied rows together. Writing ROWS BETWEEN explicitly avoids surprises.",
               code: "SUM(fantasy_pts) OVER (ORDER BY week)                                                   -- implicit RANGE\nSUM(fantasy_pts) OVER (ORDER BY week ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)  -- explicit, safer",
             },
             {
-              title: "A frame has two edges, not just a lookback",
-              text: "Every frame you've built so far has trailed backward — this row and some number before it. That's not the only shape available: ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING centers the window on the current row instead, averaging in the game before AND after it. Reach for a trailing frame whenever the answer can only see the past, like a running total or a season-to-date figure. Reach for a centered one when you're smoothing noise out of a dataset that's already complete and looking backward isn't a constraint.",
+              title: "A frame has two edges",
+              text: "Trailing frames look backward — this row and some before it. Centered ones use both sides, like 1 PRECEDING AND 1 FOLLOWING. Use trailing when you can only see the past; use centered when the full series is already done and you're smoothing noise.",
               code: "-- trailing: this row and the 2 before it\nROWS BETWEEN 2 PRECEDING AND CURRENT ROW\n\n-- centered: this row plus one on each side\nROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING",
             },
           ],
@@ -2356,7 +2356,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "ORDER BY inside OVER introduces the idea of 'so far', which is exactly what a running total is.",
+                "ORDER BY inside OVER introduces “so far” — that's a running total.",
             },
             {
               type: "mc",
@@ -2369,7 +2369,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Three rows total. That's the frame a rolling 3-game average needs.",
+                "Three rows total — the frame a rolling 3-game average needs.",
             },
             {
               type: "query",
@@ -2381,7 +2381,7 @@ export const COURSE = {
               orderMatters: true,
               hint: "ROUND(SUM(fantasy_pts) OVER (ORDER BY week), 1) AS season_to_date.",
               explain:
-                "The cumulative line every fantasy app draws — and you just built it in one clause.",
+                "That's the cumulative line fantasy apps draw — one clause.",
             },
             {
               type: "query",
@@ -2393,7 +2393,7 @@ export const COURSE = {
               orderMatters: true,
               hint: "AVG(...) OVER (ORDER BY week ROWS BETWEEN 2 PRECEDING AND CURRENT ROW).",
               explain:
-                "Early weeks average fewer rows because there aren't three yet — which is correct, and worth knowing before someone asks why week 1 looks odd.",
+                "Early weeks average fewer than three rows — that's correct when the season is just starting.",
             },
           ],
         },
@@ -2418,40 +2418,40 @@ export const COURSE = {
         {
           id: "u7-l1",
           title: "Your First Python Line",
-          blurb: "Variables, numbers, strings — naming things you'll reuse.",
+          blurb: "Name a value. Reuse it. Print it.",
           brief: {
             goal: "Write and run your first real Python.",
       steps: [
         {
-          title: "You are about to write actual code",
-          body: "Not pseudo-code, not a diagram. Real Python, running in your browser, the same language used to build most of the data tooling in the world. It is worth saying that plainly, because the first line is the one people talk themselves out of.",
+          title: "You're writing real code",
+          body: "Not a sketch. Real Python, running in your browser. Same language analysts use every day.",
         },
         {
-          title: "A variable is a jersey number",
-          body: "It is a name you stick on a value so you can refer to it later. Python does not make you announce what kind of thing it is first. You write the name, an equals sign, and the value, and that is the whole ceremony.",
+          title: "Stick a name on a value",
+          body: "That's a variable — like a jersey number. Write the name, an equals sign, and the value. Done.",
           code: "points = 24.6\nplayer = 'Josh Allen'\nprint(player, points)",
-          note: "print is how code talks to you. Nothing appears on screen unless you ask for it, which catches everyone out once.",
+          note: "print is how code talks to you. Nothing shows up unless you ask.",
         },
       ],
             setup:
-              "Python runs live in your browser here — nothing is simulated. A variable is a name attached to a value. Numbers do math; text goes in quotes and doesn't. Getting those two confused is the most common beginner error, so we start there.",
+              "Python runs live here. A variable is a name stuck on a value. Numbers do math; text needs quotes. Mixing those up is the classic first stumble.",
           },
           intro: {
             title: "A variable is a jersey number",
-            text: "A variable is a name you attach to a value so you can call it later. Python doesn't need you to declare a type — assign it and move on. Numbers do math, strings are text in quotes, and mixing them up is the single most common beginner error.",
+            text: "Name a value so you can call it later. No type announcement — just assign and go. Numbers do math. Strings are text in quotes.",
             code: 'player = "Jalen Hurts"\npoints = 24.6\ngames = 3\navg = points / games',
           },
           film: [
             {
               title: "Why quotes matter",
-              text: '24.6 is a number you can divide. "24.6" is a piece of text that happens to look like a number — Python will refuse to divide it. When data arrives from a CSV, everything starts as text, which is why cleaning is step one of every real analysis.',
+              text: '24.6 divides. "24.6" is text that looks like a number — Python won\'t divide it. CSVs arrive as text, so float() is your first cleanup move.',
               code: '"24.6" / 3   # TypeError\nfloat("24.6") / 3   # 8.2',
             },
           ],
           exercises: [
             {
               type: "mc",
-              prompt: "Which line stores a number Python can do math with?",
+              prompt: "Which line stores a number you can do math with?",
               options: [
                 'points = "24.6"',
                 "points = 24.6",
@@ -2460,17 +2460,17 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "No quotes means it's a number (a float). Both quoted versions are strings — text that looks like a number but can't be divided.",
+                "No quotes = a number. Quotes = text that looks like a number but won't divide.",
             },
             {
               type: "fill",
               prompt:
-                "Store this receiver's yards, then compute yards per catch.",
+                "Store this receiver's yards, then get yards per catch.",
               parts: ["yards = 128\ncatches = 8\nper_catch = yards ", null, " catches"],
               bank: ["/", "*", "+", "%"],
               answer: ["/"],
               explain:
-                "Division. per_catch comes out to 16.0 — Python returns a float from / even when both inputs are whole numbers.",
+                "Divide with /. You get 16.0 — / returns a float even with whole numbers.",
             },
             {
               type: "mc",
@@ -2479,12 +2479,12 @@ export const COURSE = {
               options: ["Bijan", "Saquon", "Bijan Saquon", "An error"],
               answer: 1,
               explain:
-                "Reassigning replaces the old value. The variable holds whatever you put in it last — there's no history.",
+                "A reassignment replaces the old value. The variable only remembers the last thing you put in.",
             },
             {
               type: "mc",
               prompt:
-                "You read a stat sheet from a CSV and every value arrives as text. Which conversion gets you a number you can average?",
+                "A CSV handed you every value as text. Which turn makes 18.4 a number you can average?",
               options: [
                 'str("18.4")',
                 'float("18.4")',
@@ -2493,63 +2493,63 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "float() turns text into a decimal number. This is the first thing you do to almost every column in a real dataset.",
+                "float() turns text into a decimal. You'll do this to almost every numeric column.",
             },
             {
               type: "code",
               lang: "python",
               prompt:
-                "This is real Python, running in your browser. Print this player's yards per catch — 128 yards on 8 catches.",
+                "Real Python in your browser. Print yards per catch: 128 yards on 8 catches.",
               starter: "yards = 128\ncatches = 8\n\n# print yards per catch\n",
               expected: "print(128 / 8)",
               hint: "Divide with /, then wrap it in print(...) so the answer shows up.",
               explain:
-                "16.0 — Python's / always returns a float. Your code ran for real; nothing here is simulated.",
+                "16.0. / always returns a float — and your code ran for real.",
             },
             {
               type: "code",
               lang: "python",
               prompt:
-                "Build a one-line scouting note. Print exactly: Nacua went for 31.0",
+                "Build a one-line note. Print exactly: Nacua went for 31.0",
               starter:
                 'player = "Nacua"\npoints = 31.0\n\n# print: Nacua went for 31.0\n',
               expected: 'print("Nacua went for 31.0")',
               hint: 'An f-string is the tidy way: print(f"{player} went for {points}").',
               explain:
-                "f-strings drop variables straight into text. This is how nearly every readable Python report line gets built.",
+                "f-strings drop variables into text. That's how most readable report lines get built.",
             },
           ],
         },
         {
           id: "u7-l2",
           title: "Lists & Loops",
-          blurb: "Hold a whole roster, then do the same thing to every player.",
+          blurb: "Hold a roster. Do the same thing to every player.",
           brief: {
-            goal: "Store a whole roster in a list and loop over it.",
+            goal: "Store a roster in a list and loop over it.",
       steps: [
         {
-          title: "One variable holds one thing",
-          body: "That gets old immediately. A roster is not one player, a season is not one week. You need a way to hold many values under a single name and then do the same thing to each of them.",
+          title: "One name, one value gets old fast",
+          body: "A roster isn't one player. A season isn't one week. You need many values under one name.",
         },
         {
-          title: "A list is a roster, a loop is going down it",
-          body: "Square brackets hold the values in order. A for loop then walks that list one item at a time, running the indented block once per item, with the current item handed to you under whatever name you chose.",
+          title: "A list is a roster. A loop walks it.",
+          body: "Square brackets hold values in order. A for loop runs the indented block once per item.",
           code: "scores = [24.6, 18.2, 31.0]\nfor s in scores:\n    print(s)",
-          note: "The indentation is not decoration. Python uses it to decide what is inside the loop and what comes after it, which is unusual and is the single most common early error.",
+          note: "Indentation isn't decoration. Python uses it to decide what's inside the loop.",
         },
       ],
             setup:
-              "A list holds many values in order. A for loop runs the same code once per item. Together they're how you process a season: write the logic once, let it run over every row. Indexing starts at 0, which trips up everyone at first.",
+              "A list holds many values in order. A for loop runs the same code once per item. Write the logic once; let it walk every week. First item is index 0.",
           },
           intro: {
             title: "A list is a roster",
-            text: "A list holds many values in order, written in square brackets. A for loop walks the list one item at a time and runs the same code for each. That's the whole idea behind processing a season: write the logic once, let it run over every row.",
+            text: "Square brackets, values in order. A for loop walks one item at a time and runs the same block for each. That's how you process a season.",
             code: 'scores = [24.6, 18.2, 31.0]\nfor s in scores:\n    print(s)',
           },
           film: [
             {
-              title: "Indexing starts at zero",
-              text: "scores[0] is the first item, not the second. This trips up everyone at first and it's the source of countless off-by-one bugs. scores[-1] is a handy shortcut for the last item.",
+              title: "Counting starts at zero",
+              text: "scores[0] is first. scores[-1] is last. That zero-start trips everyone once.",
               code: "scores[0]    # 24.6  (first)\nscores[-1]   # 31.0  (last)",
             },
           ],
@@ -2576,12 +2576,12 @@ export const COURSE = {
               bank: ["for", "in", "while", "of"],
               answer: ["for", "in"],
               explain:
-                "`for X in Y:` is the standard Python loop. It reads almost like English: for each player in the roster.",
+                "`for X in Y:` reads almost like English: for each player in the roster.",
             },
             {
               type: "fill",
               prompt:
-                "Add up a player's weekly scores to get their season total.",
+                "Add up weekly scores into a season total.",
               parts: [
                 "weeks = [24.6, 18.2, 31.0]\ntotal = ",
                 null,
@@ -2592,12 +2592,12 @@ export const COURSE = {
               bank: ["0", "1", "+=", "=="],
               answer: ["0", "+="],
               explain:
-                "Start the accumulator at 0, then `total += w` adds each week onto it. Starting at 1 would silently inflate every total by one point — exactly the kind of bug that survives to production.",
+                "Start at 0, then total += w each week. Start at 1 and every total is silently one point high.",
             },
             {
               type: "mc",
               prompt:
-                "Why does starting the accumulator at 1 instead of 0 matter so much here?",
+                "You start the running total at 1 instead of 0. What's the damage?",
               options: [
                 "It causes a crash",
                 "It makes the loop run one extra time",
@@ -2606,59 +2606,59 @@ export const COURSE = {
               ],
               answer: 2,
               explain:
-                "It's a silent wrong answer, not a crash. Bugs that produce plausible-but-wrong numbers are the dangerous ones — the code runs, the report ships, and nobody notices.",
+                "No crash — just a quietly wrong number. Those are the bugs that ship.",
             },
             {
               type: "code",
               lang: "python",
               prompt:
-                "Loop over the weeks and print this player's season total.",
+                "Loop the weeks and print this player's season total.",
               starter:
                 "weeks = [24.6, 18.2, 31.0, 12.5]\n\n# add them up, then print the total\n",
               expected: "print(24.6 + 18.2 + 31.0 + 12.5)",
               hint: "Start a variable at 0, loop with `for w in weeks:`, and use total += w. Then print(total).",
               explain:
-                "86.3. A loop plus an accumulator is the shape of almost every season-long calculation you'll write.",
+                "86.3. A loop plus a running total is the shape of most season math.",
             },
           ],
         },
         {
           id: "u7-l3",
           title: "pandas: SQL for Python",
-          blurb: "DataFrames, filtering, and groupby — the same moves you know.",
+          blurb: "Same table moves you know — new spelling.",
           brief: {
-            goal: "Use pandas to do in Python what you already do in SQL.",
+            goal: "Do your SQL moves in Python with pandas.",
       steps: [
         {
-          title: "You already know how to think about tables",
-          body: "Six units of SQL taught you filtering, sorting, grouping and joining. None of that knowledge is language-specific. pandas is a way of doing exactly those things in Python, and every verb you know has a twin here.",
+          title: "You already think in tables",
+          body: "Filter, sort, group, join — you know those. pandas is those same moves in Python.",
         },
         {
           title: "A DataFrame is a table",
-          body: "It has columns with names and rows with values, the same as anything you have queried. WHERE becomes a mask in square brackets, ORDER BY becomes sort_values, GROUP BY becomes groupby. Different punctuation, identical ideas.",
+          body: "Named columns, rows of values. WHERE becomes a filter in brackets. ORDER BY becomes sort_values. GROUP BY becomes groupby.",
           code: "import pandas as pd\ndf = pd.DataFrame({'player': ['Allen', 'Hurts'], 'pts': [24.6, 18.2]})\nprint(df)",
-          note: "The reason to bother, given SQL already works, is everything around the query: cleaning, automating, charting, and anything heading toward machine learning.",
+          note: "SQL still pulls data. Python shines for cleaning, scripting, and charts around the query.",
         },
       ],
             setup:
-              "pandas gives Python a table type called a DataFrame. Every SQL verb has a twin: WHERE is a filter, GROUP BY is .groupby(), ORDER BY is .sort_values(). You already know the concepts — this is the spelling.",
+              "pandas gives Python a table type: the DataFrame. WHERE → filter. GROUP BY → .groupby(). ORDER BY → .sort_values(). Same ideas, new spelling.",
           },
           intro: {
             title: "A DataFrame is a table",
-            text: "pandas gives Python a table type called a DataFrame. If you know SQL, you already know pandas — every verb has a twin. WHERE becomes a boolean filter, GROUP BY becomes .groupby(), ORDER BY becomes .sort_values(). Same thinking, different syntax.",
+            text: "If you know SQL, you already know pandas. WHERE becomes a filter. GROUP BY becomes .groupby(). ORDER BY becomes .sort_values().",
             code: 'import pandas as pd\ndf = pd.read_csv("week_results.csv")\ndf[df["position"] == "RB"]',
           },
           film: [
             {
-              title: "The translation table",
-              text: "Keep this mapping in your head and pandas stops feeling foreign. The concepts transfer intact; only the punctuation changes.",
+              title: "The cheat sheet",
+              text: "Keep this map handy. The ideas transfer; only the punctuation changes.",
               code: "SELECT cols   →  df[[\"a\", \"b\"]]\nWHERE ...     →  df[df[\"pts\"] > 20]\nGROUP BY x    →  df.groupby(\"x\")\nORDER BY x    →  df.sort_values(\"x\")\nLIMIT 5       →  df.head(5)",
             },
           ],
           exercises: [
             {
               type: "mc",
-              prompt: "Which pandas expression is the twin of WHERE points > 20?",
+              prompt: "Which pandas line is the twin of WHERE points > 20?",
               options: [
                 'df.groupby("points")',
                 'df[df["points"] > 20]',
@@ -2667,22 +2667,22 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Filtering rows in pandas means indexing the DataFrame with a condition. The inner part builds True/False per row; the outer part keeps the Trues.",
+                "Put a condition inside df[...]. Inner builds True/False per row; outer keeps the Trues.",
             },
             {
               type: "fill",
               prompt:
-                "Get each position's average points — the pandas version of GROUP BY.",
+                "Average points by position — pandas GROUP BY.",
               parts: ["df.", null, '("position")["points"].', null, "()"],
               bank: ["groupby", "sort_values", "mean", "count"],
               answer: ["groupby", "mean"],
               explain:
-                "groupby splits rows into buckets, then .mean() aggregates each bucket — exactly GROUP BY position with AVG(points).",
+                "groupby buckets the rows; .mean() collapses each bucket — GROUP BY + AVG.",
             },
             {
               type: "mc",
               prompt:
-                "You want the 5 highest-scoring weeks. Which chain does it?",
+                "You want the 5 highest-scoring weeks. Which chain works?",
               options: [
                 'df.head(5).sort_values("points", ascending=False)',
                 'df.sort_values("points", ascending=False).head(5)',
@@ -2691,42 +2691,42 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Sort first, then take the top 5. The other order grabs an arbitrary 5 rows and sorts only those — a classic mistake that produces a confident wrong answer.",
+                "Sort first, then take five. Head-then-sort only sorts a random five.",
             },
             {
               type: "mc",
               prompt:
-                "In SQL you'd write ORDER BY. What's the pandas equivalent?",
+                "In SQL you'd write ORDER BY. What's the pandas twin?",
               options: [".order()", ".sort_values()", ".arrange()", ".rank()"],
               answer: 1,
               explain:
-                ".sort_values() is pandas' ORDER BY. (.arrange() is R's — you'll meet it in the R unit.)",
+                ".sort_values() is ORDER BY. (.arrange() is R — you'll meet it later.)",
             },
             {
               type: "code",
               lang: "python",
               prompt:
-                "Real pandas, running live. Print the names of every player who scored more than 20 — highest scorer first.",
+                "Live pandas. Print players over 20 points — highest first.",
               starter:
                 'import pandas as pd\n\ndf = pd.DataFrame({\n    "player": ["Hurts", "Bijan", "Nacua", "Kelce"],\n    "points": [24.6, 18.2, 31.0, 22.4],\n})\n\n# filter to > 20, sort high to low, print the player column as a list\n',
               expected:
                 'import pandas as pd\ndf = pd.DataFrame({"player":["Hurts","Bijan","Nacua","Kelce"],"points":[24.6,18.2,31.0,22.4]})\nprint(df[df["points"] > 20].sort_values("points", ascending=False)["player"].tolist())',
               hint: 'Filter with df[df["points"] > 20], then .sort_values("points", ascending=False), then ["player"].tolist() inside print().',
               explain:
-                "['Nacua', 'Hurts', 'Kelce'] — filter, then sort, then select. That's WHERE + ORDER BY + SELECT, in pandas.",
+                "['Nacua', 'Hurts', 'Kelce'] — filter, sort, select. WHERE + ORDER BY + SELECT.",
             },
             {
               type: "code",
               lang: "python",
               prompt:
-                "GROUP BY, in pandas. Print each position's mean points.",
+                "GROUP BY in pandas. Print mean points per position.",
               starter:
                 'import pandas as pd\n\ndf = pd.DataFrame({\n    "position": ["RB", "WR", "RB", "WR"],\n    "points": [18.2, 31.0, 12.4, 22.4],\n})\n\n# print the mean points per position\n',
               expected:
                 'import pandas as pd\ndf = pd.DataFrame({"position":["RB","WR","RB","WR"],"points":[18.2,31.0,12.4,22.4]})\nprint(df.groupby("position")["points"].mean())',
               hint: 'df.groupby("position")["points"].mean() — then wrap it in print().',
               explain:
-                "RB 15.3, WR 26.7. groupby + an aggregate is GROUP BY + AVG, and it's the single most-used move in analyst Python.",
+                "RB 15.3, WR 26.7. groupby + an aggregate is the move you'll use most.",
             },
           ],
         },
@@ -2745,32 +2745,32 @@ export const COURSE = {
         {
           id: "u8-l1",
           title: "Averages Lie",
-          blurb: "Mean, median, and when each one misleads you.",
+          blurb: "Mean vs median — and when each one fools you.",
           brief: {
-            goal: "Know when the mean misleads and the median doesn't.",
+            goal: "Spot when the mean misleads and reach for the median.",
       steps: [
         {
-          title: "Every tool you own will confidently mislead you",
-          body: "SQL will average anything you point it at. Excel will do it faster. Neither will mention that the answer is nonsense because one enormous week dragged it. Statistics is the layer that stops you presenting that number.",
+          title: "Your tools will happily lie",
+          body: "SQL will average anything. Excel will too. Neither warns you when one huge week dragged the number. Stats is the layer that catches that.",
         },
         {
-          title: "The mean is easy to bully, the median is not",
-          body: "The mean adds everything and divides, so a single extreme value pulls it. The median is just the middle value once you line them up, so it barely notices. When the two disagree badly, that gap is itself the finding.",
-          note: "Report both when they differ. Reporting only the flattering one is the most common way people mislead without technically lying.",
+          title: "Mean gets bullied. Median doesn't.",
+          body: "The mean adds and divides — one extreme pulls it. The median is the middle value after you line them up. When they disagree, that gap is the finding.",
+          note: "Report both when they differ. Showing only the flattering one misleads without technically lying.",
         },
       ],
             setup:
-              "The mean adds everything and divides; one huge outlier drags it. The median is the middle value and barely moves. When they disagree, that gap is itself the finding — and reporting only the mean is how people recommend the wrong player.",
+              "Mean = add and divide; one outlier drags it. Median = middle value; barely moves. When they disagree, report both — or you'll recommend the wrong player.",
           },
           intro: {
             title: "One huge week breaks the mean",
-            text: "The mean adds everything and divides by the count, so a single outlier drags it. The median is the middle value once sorted, so outliers barely move it. When a distribution is skewed, reporting only the mean is how you end up recommending the wrong player.",
+            text: "Mean adds and divides — outliers pull it. Median is the middle after sorting — outliers barely move it. Skewed data + only the mean = wrong player recommended.",
             code: "weeks = [4, 5, 6, 7, 48]\nmean   = 14.0   ← nobody scored near this\nmedian = 6.0    ← the typical week",
           },
           film: [
             {
-              title: "Which one should I report?",
-              text: "Rule of thumb: if the mean and median are far apart, the distribution is skewed and the median describes the typical case better. Report both when they disagree — the gap between them is itself the finding.",
+              title: "Which one do you report?",
+              text: "Mean and median far apart? The data is skewed — median describes a typical week better. Report both; the gap is the story.",
             },
           ],
           exercises: [
@@ -2786,12 +2786,12 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Four of five weeks were between 4 and 7. The median (6) describes them; the mean (14) describes nobody — it's one blowup pulling the number up.",
+                "Four of five weeks sat between 4 and 7. Median (6) fits them; mean (14) fits nobody.",
             },
             {
               type: "mc",
               prompt:
-                "The mean and median of a stat are nearly identical. What does that suggest?",
+                "Mean and median are nearly the same. What does that suggest?",
               options: [
                 "The data is skewed",
                 "There's a huge outlier",
@@ -2800,7 +2800,7 @@ export const COURSE = {
               ],
               answer: 2,
               explain:
-                "When mean ≈ median, no extreme values are pulling the average around — the distribution is roughly balanced.",
+                "When mean ≈ median, nothing extreme is yanking the average — the shape is roughly balanced.",
             },
             {
               type: "fill",
@@ -2815,12 +2815,12 @@ export const COURSE = {
               bank: ["median", "mean", "mode", "sum"],
               answer: ["median", "mean"],
               explain:
-                "Always compute both on a new dataset. The distance between them tells you instantly whether outliers are in play.",
+                "Always grab both. The gap tells you fast whether outliers are in play.",
             },
             {
               type: "mc",
               prompt:
-                "A manager asks for 'the average fantasy score' of a boom-or-bust player. What's the most useful answer?",
+                "A manager wants 'the average' for a boom-or-bust player. What's most useful?",
               options: [
                 "Just the mean — it's what they asked for",
                 "Just the median — it's more accurate",
@@ -2829,38 +2829,38 @@ export const COURSE = {
               ],
               answer: 2,
               explain:
-                "The inconsistency IS the answer they need. Giving both numbers and naming the spread is what separates an analyst from a calculator.",
+                "The inconsistency is the answer. Both numbers plus a note on the spread — that's analysis.",
             },
           ],
         },
         {
           id: "u8-l2",
           title: "Small Samples Lie Louder",
-          blurb: "Why three great games proves almost nothing.",
+          blurb: "Three great games prove almost nothing.",
           brief: {
-            goal: "Judge whether a result has enough data behind it to trust.",
+            goal: "Ask whether there's enough data before you trust a rate.",
       steps: [
         {
-          title: "Three good games is not a trend",
-          body: "Everyone knows this and almost nobody applies it, because a small sample produces the most exciting numbers. The highest scoring average in any league usually belongs to someone who has played twice.",
+          title: "Three good games isn't a trend",
+          body: "Small samples make the flashiest numbers. The highest average in a league often belongs to someone who played twice.",
         },
         {
-          title: "Noise shrinks as the sample grows",
-          body: "Flip a fair coin three times and all heads happens one time in eight, which is often enough to see constantly. Flip it fifty times and the same run essentially never happens. Nothing changed about the coin, only how much evidence you gathered.",
-          note: "This is why the leaderboard lessons kept adding a minimum games filter. It is not a technicality, it is the whole point of the exercise.",
+          title: "More data, less noise",
+          body: "Three coin flips can all land heads. Fifty flips almost never do. The coin didn't change — your evidence did.",
+          note: "That's why leaderboards want a minimum-games filter. Not a nicety — the whole point.",
         },
       ],
             setup:
-              "Any small sample can look extreme by luck. Three-for-three isn't elite hands, it's Tuesday. The fix is a habit, not a formula: always ask for the denominator before you believe a rate.",
+              "Tiny samples look extreme by luck. 3-for-3 isn't elite hands — it's Tuesday. Habit: ask for the denominator before you trust any rate.",
           },
           intro: {
             title: "Noise shrinks as n grows",
-            text: "Any small sample can look extreme by chance. Flip a fair coin three times and all-heads happens one time in eight — that's not a magic coin, that's Tuesday. The same is true of a receiver's first three games. The more observations you have, the harder it is for luck alone to fake a pattern.",
+            text: "Small samples can look extreme by chance. Three heads in a row isn't a magic coin. Same for a receiver's first three games. More observations make luck harder to fake.",
           },
           film: [
             {
-              title: "Stabilization",
-              text: "Different stats need different sample sizes before they mean much. Volume stats (targets, carries) stabilize fast — a player's role is a real, repeated decision. Efficiency stats (yards per catch, touchdown rate) stabilize slowly, because they depend on a handful of high-variance plays.",
+              title: "Some stats settle faster",
+              text: "Targets and carries stabilize quick — role is a real, repeated choice. Yards per catch and TD rate need more games; they hang on a few wild plays.",
             },
           ],
           exercises: [
@@ -2876,12 +2876,12 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "100% of 3 is not evidence of elite hands — it's a sample so small that luck dominates. Ask for the number of attempts before you trust any rate.",
+                "100% of 3 isn't elite hands — the sample is tiny. Ask for attempts before you trust a rate.",
             },
             {
               type: "mc",
               prompt:
-                "Which stat becomes trustworthy with FEWER games of data?",
+                "Which stat gets trustworthy with FEWER games?",
               options: [
                 "Touchdown rate",
                 "Yards per catch",
@@ -2890,12 +2890,12 @@ export const COURSE = {
               ],
               answer: 2,
               explain:
-                "Targets reflect a coaching decision repeated every week, so they stabilize quickly. Rates and maximums hinge on rare, high-variance events.",
+                "Targets are a coaching choice repeated every week. Rates and maxes hang on rare, wild events.",
             },
             {
               type: "mc",
               prompt:
-                "Your query returns a 90% win rate — from 10 games. What do you add to the report?",
+                "Your query shows a 90% win rate — from 10 games. What do you add?",
               options: [
                 "Nothing, the number speaks for itself",
                 "The sample size, so the reader can judge it",
@@ -2904,12 +2904,12 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "A rate without its denominator is close to meaningless. Reporting n alongside the percentage is a habit that earns trust fast.",
+                "A rate without its denominator is nearly useless. Pair n with the percentage.",
             },
             {
               type: "fill",
               prompt:
-                "Report the rate alongside the count that produced it.",
+                "Report the rate next to the count that made it.",
               parts: [
                 'summary = df.groupby("player").agg(\n    rate=("caught", "mean"),\n    targets=("caught", "',
                 null,
@@ -2918,38 +2918,38 @@ export const COURSE = {
               bank: ["count", "max", "first", "std"],
               answer: ["count"],
               explain:
-                "Pairing every rate with its count is the single cheapest habit for not embarrassing yourself in a stakeholder meeting.",
+                "Every rate needs its count. Cheapest habit for not embarrassing yourself in a meeting.",
             },
           ],
         },
         {
           id: "u8-l3",
           title: "Regression to the Mean",
-          blurb: "Why the hot hand cools — and it isn't a jinx.",
+          blurb: "The hot hand cools — and it isn't a jinx.",
           brief: {
-            goal: "Recognise regression to the mean instead of inventing a story.",
+            goal: "Spot regression to the mean before you invent a story.",
       steps: [
         {
-          title: "The best month is usually followed by a worse one",
-          body: "It happens so reliably that people invent explanations for it: complacency, a new contract, the pressure of expectation. Usually the real reason is much duller and much more useful to understand.",
+          title: "Best month, then a worse one",
+          body: "People invent stories: complacency, pressure, a new contract. Usually the real reason is duller — and more useful.",
         },
         {
           title: "Extremes drift back toward normal",
-          body: "If a result is part skill and part luck, an extreme result probably had unusually good luck in it. Skill persists into next month. Luck does not. So the number falls, and no story is required to explain it.",
-          note: "This is the single most useful idea in this course for not looking foolish. Whenever you see a dramatic decline after a peak, check whether ordinary regression explains it before you write the narrative.",
+          body: "Skill plus luck made the peak. Skill sticks. Luck doesn't. The number falls — no jinx required.",
+          note: "See a big drop after a peak? Check ordinary regression before you write the narrative.",
         },
       ],
             setup:
-              "If a performance is part skill and part luck, an extreme result probably had good luck in it — and luck doesn't repeat. The drift back toward normal isn't a slump or a jinx. It's the most misread pattern in sports analytics.",
+              "Part skill, part luck: an extreme result probably had good luck in it. Luck doesn't repeat. The drift back isn't a slump — it's the most misread pattern in sports analytics.",
           },
           intro: {
             title: "Extremes drift back toward normal",
-            text: "If a performance is partly skill and partly luck, then an extreme result probably had unusually good luck in it. Luck doesn't repeat, so the next stretch lands closer to the player's true level. That drift is regression to the mean, and it's the most misread pattern in all of sports analytics.",
+            text: "Extreme results usually packed in good luck. Luck doesn't repeat, so the next stretch lands closer to true level. That drift is regression to the mean.",
           },
           film: [
             {
               title: "The cover jinx isn't real",
-              text: "Players featured after a monster month tend to decline afterward — not because of the magazine cover, but because they were selected FOR an extreme result. Selecting on an extreme guarantees the average performance afterward looks worse. Same math behind 'the rookie hit a wall' and 'the new coach fixed him.'",
+              text: "Players featured after a monster month often decline — they were picked *for* the extreme. Same math behind \"rookie wall\" and \"new coach fixed him.\"",
             },
           ],
           exercises: [
@@ -2965,12 +2965,12 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "His true ability probably didn't change. An extreme run reflects skill plus luck; only the skill part carries forward.",
+                "True ability probably didn't change. Extreme runs mix skill and luck; only skill carries forward.",
             },
             {
               type: "mc",
               prompt:
-                "You rank players by Week 1 points and track the top 10 afterward. What should you EXPECT?",
+                "You rank by Week 1 points, then track the top 10. What should you EXPECT?",
               options: [
                 "They stay the top 10 all season",
                 "As a group they score less than in Week 1",
@@ -2979,12 +2979,12 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "You selected them for an extreme week, so the group's average falls afterward. Predicting this correctly is a genuine analytical edge — and a great interview answer.",
+                "You picked them for an extreme week — the group's average falls afterward. Predicting that is a real edge.",
             },
             {
               type: "mc",
               prompt:
-                "Which finding is most likely to be real rather than regression?",
+                "Which finding is most likely real, not just regression?",
               options: [
                 "A 3-game scoring spike",
                 "A career-best single game",
@@ -2993,7 +2993,7 @@ export const COURSE = {
               ],
               answer: 2,
               explain:
-                "A sustained change in role — snaps, targets, usage — is a decision, not a coin flip. Role changes are the signal; single-game peaks are usually noise.",
+                "A lasting role change — snaps, targets, usage — is a decision, not a coin flip.",
             },
             {
               type: "mc",
@@ -3007,7 +3007,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Both ends are being over-read. The job is to say what the data can and can't support — in both directions, not just the convenient one.",
+                "Both ends are over-read. Say what the data can and can't support — in both directions.",
             },
           ],
         },
@@ -3026,31 +3026,31 @@ export const COURSE = {
         {
           id: "u9-l1",
           title: "Pick the Right Chart",
-          blurb: "Match the chart to the question, not to your mood.",
+          blurb: "Match the chart to the question — not your mood.",
           brief: {
-            goal: "Choose the chart the question actually calls for.",
+            goal: "Pick the chart the question actually needs.",
       steps: [
         {
-          title: "The chart is not a decoration",
-          body: "It is the argument. Analysis nobody can read changes nothing, and the wrong chart type actively hides what you found. Choosing well is not an aesthetic decision, it is part of being right.",
+          title: "The chart is the argument",
+          body: "Wrong chart type hides what you found. Choosing well isn't aesthetics — it's part of being right.",
         },
         {
-          title: "The question decides the chart",
-          body: "Comparing amounts across categories is a bar chart. Tracking something over time is a line. Looking for a relationship between two numbers is a scatter. Say your question out loud and the chart type is usually already decided.",
-          note: "Pie charts are the usual mistake. People are bad at comparing angles, so almost any pie chart is a bar chart that has been made harder to read.",
+          title: "The question picks the chart",
+          body: "Compare amounts → bars. Track over time → line. Link two numbers → scatter. Say the question out loud; the chart usually follows.",
+          note: "Pie charts are the usual trap. People compare angles badly — most pies should be bars.",
         },
       ],
             setup:
-              "The question decides the chart, not your mood. Amounts across categories → bars. Something over time → a line. Relationship between two numbers → scatter. Shape of one distribution → histogram. Most bad charts are right data in the wrong container.",
+              "Question decides the chart. Amounts → bars. Over time → line. Two numbers → scatter. One distribution's shape → histogram. Most bad charts are right data in the wrong box.",
           },
           intro: {
-            title: "The chart type is decided by the question",
-            text: "Comparing amounts across categories? Bar chart. Tracking something over time? Line chart. Looking for a relationship between two numbers? Scatter plot. Showing how one distribution is shaped? Histogram. Most bad charts are the right data in the wrong container.",
+            title: "The chart type follows the question",
+            text: "Amounts across categories? Bars. Over time? Line. Two numbers related? Scatter. Shape of one distribution? Histogram.",
           },
           film: [
             {
-              title: "Why pie charts keep losing",
-              text: "Humans compare lengths accurately and angles poorly. A pie chart with six similar slices is unreadable; the same data as a sorted bar chart is instantly clear. Reserve pie charts for two or three parts of an obvious whole — or skip them.",
+              title: "Why pies keep losing",
+              text: "We compare lengths well and angles poorly. Six similar pie slices? Unreadable. Same data as sorted bars? Clear. Save pies for two or three parts — or skip them.",
             },
           ],
           exercises: [
@@ -3061,7 +3061,7 @@ export const COURSE = {
               options: ["Pie chart", "Line chart", "Histogram", "Scatter plot"],
               answer: 1,
               explain:
-                "Time on the x-axis, value on the y-axis — a line chart. The connecting line is what signals 'these points are a sequence.'",
+                "Time on x, value on y — a line. The connecting line says these points are a sequence.",
             },
             {
               type: "mc",
@@ -3075,7 +3075,7 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "Two numeric variables, one point per player — a scatter plot is how you see a relationship (and whether it's actually there).",
+                "Two numbers, one point per player — scatter is how you see (or miss) a relationship.",
             },
             {
               type: "mc",
@@ -3088,47 +3088,47 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Comparing amounts across categories is bar-chart work, and sorting it does half the analysis for the reader. Horizontal bars also give long player names room to breathe.",
+                "Comparing amounts is bar work. Sorting does half the analysis; horizontal bars leave room for names.",
             },
             {
               type: "mc",
               prompt:
-                "You want to show whether most weekly scores cluster low with a few big outliers. Which chart?",
+                "Most weekly scores cluster low, with a few big outliers. Which chart?",
               options: ["Histogram", "Pie chart", "Line chart", "Bar chart"],
               answer: 0,
               explain:
-                "A histogram shows the shape of a single distribution — exactly how you reveal skew and outliers visually rather than arguing about the mean.",
+                "A histogram shows one distribution's shape — skew and outliers, visible.",
             },
           ],
         },
         {
           id: "u9-l2",
           title: "Axes That Don't Lie",
-          blurb: "The truncated y-axis and other honest-mistake territory.",
+          blurb: "Truncated axes and other honest-looking traps.",
           brief: {
-            goal: "Build charts that don't overstate what the data says.",
+            goal: "Build charts that don't overstate the data.",
       steps: [
         {
-          title: "A chart can be accurate and still lie",
-          body: "Every number correct, every label right, and the reader still walks away believing something false. This is not a hypothetical: it is the most common form of misleading chart, and it is usually an accident.",
+          title: "Accurate numbers can still mislead",
+          body: "Every label right, every value correct — and the reader still walks away with the wrong story. Usually by accident.",
         },
         {
           title: "Where the axis starts changes the story",
-          body: "Bars encode value by length, so if the axis does not start at zero the lengths stop being proportional. Start it at 20 and a five percent gap can look like a rout. On a line chart tracking change, a truncated axis is often fine, which is why the rule needs judgement rather than memorising.",
-          note: "Ask yourself what someone would conclude in two seconds without reading the axis. If that conclusion is wrong, the chart is wrong.",
+          body: "Bars encode value by length, so start at zero. Start at 20 and a tiny gap looks like a rout. Lines encode change — a truncated axis can be fine there.",
+          note: "Ask: what would someone conclude in two seconds without reading the axis? If that's wrong, the chart is wrong.",
         },
       ],
             setup:
-              "Bars encode value by length, so their baseline must be zero — truncate it and a 5% gap looks like a landslide. Lines encode change, so a non-zero baseline can be the honest choice. Knowing which rule applies is the skill.",
+              "Bars = length, so baseline must be zero. Truncate and a 5% gap looks like a landslide. Lines encode change — non-zero baselines can be honest. Knowing which rule applies is the skill.",
           },
           intro: {
             title: "Where the axis starts changes the story",
-            text: "Start a bar chart's y-axis at 20 instead of 0 and a 5% difference looks like a landslide. Bars encode value by length, so their baseline must be zero. Line charts are different — they encode change, so a non-zero baseline is often fine and sometimes necessary.",
+            text: "Start a bar chart at 20 instead of 0 and a 5% gap looks huge. Bars need zero. Lines track change — a non-zero baseline is often fine.",
           },
           film: [
             {
               title: "The rule, and its exception",
-              text: "Bars: always start at zero, no exceptions. Lines: zero is optional, but label clearly and don't zoom so far that ordinary noise looks like a crisis. When you do truncate, say so on the chart rather than hoping nobody checks.",
+              text: "Bars: always start at zero. Lines: zero optional — but label clearly, and don't zoom ordinary noise into a crisis.",
             },
           ],
           exercises: [
@@ -3144,11 +3144,11 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Bar length is the value. Cutting the baseline breaks that link and visually exaggerates every gap — the most common way an honest chart misleads.",
+                "Bar length is the value. Cut the baseline and every gap looks bigger than it is.",
             },
             {
               type: "mc",
-              prompt: "Which chart type can legitimately skip a zero baseline?",
+              prompt: "Which chart type can skip a zero baseline?",
               options: [
                 "Bar chart",
                 "Stacked bar chart",
@@ -3157,11 +3157,11 @@ export const COURSE = {
               ],
               answer: 2,
               explain:
-                "Lines encode change rather than magnitude, so a zoomed y-axis can be the honest choice — a body-temperature chart starting at 0°C would hide everything that matters.",
+                "Lines encode change, not magnitude — a zoomed axis can be the honest choice.",
             },
             {
               type: "mc",
-              prompt: "What belongs on essentially every chart you ship?",
+              prompt: "What belongs on nearly every chart you ship?",
               options: [
                 "A 3D effect",
                 "Axis labels with units, and a title stating the takeaway",
@@ -3170,12 +3170,12 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Unlabeled axes make a chart unusable out of context — and charts always travel out of context. Titling with the finding ('RB targets fell after Week 8') beats a generic label.",
+                "Unlabeled axes die out of context — and charts always travel. Title with the finding.",
             },
             {
               type: "mc",
               prompt:
-                "Your chart uses red and green to separate two groups. What's the accessibility problem?",
+                "Your chart uses red and green for two groups. What's the accessibility problem?",
               options: [
                 "Red and green are unprofessional",
                 "Roughly 1 in 12 men can't reliably distinguish them",
@@ -3184,7 +3184,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Red/green is the most common color-vision deficiency. Use blue/orange, or vary shape and position too, so color isn't the only thing carrying meaning.",
+                "Red/green is the most common color-vision issue. Use blue/orange, or vary shape too.",
             },
           ],
         },
@@ -3193,23 +3193,23 @@ export const COURSE = {
           title: "One Chart, One Point",
           blurb: "Cut everything that isn't the argument.",
           brief: {
-            goal: "Cut a chart down to the one thing it's arguing.",
+            goal: "Trim a chart down to the one thing it's arguing.",
       steps: [
         {
-          title: "Most charts are trying to say too much",
-          body: "Every gridline, legend, colour and label spends some of the reader's attention. Spend it on six things at once and they leave with none of them. A chart making one clear claim beats a dashboard making nine.",
+          title: "Most charts try to say too much",
+          body: "Every gridline, legend, and color spends attention. Spend it six ways and the reader leaves with none.",
         },
         {
-          title: "If it does not serve the point, delete it",
-          body: "That is the whole edit. Say what the chart is arguing in one sentence, then remove everything that is not helping make that argument. Colour is the strongest tool you have, so spend it on the thing you want noticed and let everything else be grey.",
+          title: "If it doesn't serve the point, delete it",
+          body: "Say the finding in one sentence. Remove anything that isn't helping. Color is your strongest tool — spend it on what you want noticed; gray the rest.",
         },
       ],
             setup:
-              "Every gridline, legend, and colour competes for attention. Say your finding out loud in one sentence, then delete anything on the chart that isn't helping you say it. A title that states the finding does more work than any styling.",
+              "Every extra mark competes for attention. Say the finding out loud, then delete anything that isn't helping. A title that states the finding beats any styling.",
           },
           intro: {
             title: "If it doesn't serve the point, delete it",
-            text: "Every gridline, legend, color, and label competes for attention. A chart making one clear claim beats a dashboard making eight vague ones. Before you ship, say your finding out loud in a sentence — then delete anything on the chart that isn't helping you say it.",
+            text: "One clear claim beats a dashboard of eight vague ones. Say your finding in a sentence — then cut anything on the chart that isn't helping you say it.",
           },
           exercises: [
             {
@@ -3224,11 +3224,11 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Show the argument, keep the rest available. Forty labeled bars is a data dump — the reader has to do the analysis you were hired to do.",
+                "Show the argument; keep the rest available. Forty labeled bars dump the analysis on the reader.",
             },
             {
               type: "mc",
-              prompt: "Which title is doing the most work?",
+              prompt: "Which title does the most work?",
               options: [
                 '"Points by Week"',
                 '"Chart 3"',
@@ -3237,12 +3237,12 @@ export const COURSE = {
               ],
               answer: 2,
               explain:
-                "A title that states the finding means the reader gets it even if they only look for two seconds. That's usually all you get.",
+                "A title that states the finding lands even on a two-second glance.",
             },
             {
               type: "mc",
               prompt:
-                "A stakeholder says your chart is 'too simple.' What's the strongest response?",
+                "A stakeholder says your chart is 'too simple.' Strongest response?",
               options: [
                 "Add more series and colors",
                 "Switch to 3D",
@@ -3251,12 +3251,12 @@ export const COURSE = {
               ],
               answer: 2,
               explain:
-                "Simplicity isn't the flaw — mismatch with the decision is. Anchor on what they need to decide, then confirm the chart supports it.",
+                "Simplicity isn't the flaw — mismatch with the decision is. Anchor on what they need to decide.",
             },
             {
               type: "fill",
               prompt:
-                "Label the chart so it survives being screenshotted into a Slack thread.",
+                "Label the chart so it survives a Slack screenshot.",
               parts: [
                 'ax.set_title("RB target share fell after Week 8")\nax.set_xlabel("Week")\nax.',
                 null,
@@ -3265,7 +3265,7 @@ export const COURSE = {
               bank: ["set_ylabel", "set_xlim", "legend", "grid"],
               answer: ["set_ylabel"],
               explain:
-                "set_ylabel names the y-axis and its units. Units are the part people forget, and the part that makes a chart ambiguous forever.",
+                "set_ylabel names the y-axis and its units. Units are the part people forget.",
             },
           ],
         },
@@ -3284,33 +3284,33 @@ export const COURSE = {
         {
           id: "u10-l1",
           title: "Save States for Code",
-          blurb: "add, commit, and why analysis_final_v3_REAL.py must die.",
+          blurb: "add, commit — and kill analysis_final_v3_REAL.py.",
           brief: {
             goal: "Save your work in git so you can delete boldly.",
       steps: [
         {
-          title: "The point of Git is that you can be reckless",
-          body: "It gets taught as bookkeeping, which makes it sound tedious. The actual benefit is freedom: once your work is saved properly you can delete things, try the risky rewrite, and break whatever you like, because getting back is one command.",
+          title: "Git lets you be reckless",
+          body: "Once work is saved properly, you can try the risky rewrite. Getting back is one command.",
         },
         {
           title: "A commit is a save point",
-          body: "You choose what goes in with add, then save it with commit and a message saying what you did. The message is for a future person, and that person is usually you, six months later, with no memory of any of this.",
+          body: "Stage with add. Save with commit and a message. That message is for future-you — usually with no memory of this.",
           code: "git add analysis.sql\ngit commit -m 'Add season totals query'",
-          note: "Commit small and often. A commit containing one change is easy to undo. A commit containing a week of work is a decision you will not want to make.",
+          note: "Commit small and often. One change is easy to undo. A week's work in one commit isn't.",
         },
       ],
             setup:
-              "Git records snapshots. You stage changes with `git add`, then save them with `git commit -m \"message\"`. Every commit is recoverable forever — which is exactly what frees you to stop hoarding files called analysis_final_v3_REAL.py.",
+              "Git records snapshots. Stage with `git add`, save with `git commit -m \"message\"`. Every commit is recoverable — so you can stop hoarding final_v3_REAL.py.",
           },
           intro: {
             title: "A commit is a save point",
-            text: "Git records snapshots of your project. You stage the changes you want to keep with `git add`, then save them with `git commit -m \"message\"`. Every commit is recoverable forever, which is what frees you to delete boldly instead of hoarding files named final_v2_actually_final.",
+            text: "Stage what you want with `git add`, then save with `git commit -m \"message\"`. Recoverable forever — that's what frees you to delete boldly.",
             code: 'git add analysis.py\ngit commit -m "Add target share calculation"',
           },
           film: [
             {
-              title: "Writing a message worth reading",
-              text: "Write what changed and why, not what you did mechanically. 'Fix bye-week double count in weekly totals' is useful to future-you at 11pm. 'update', 'stuff', and 'fix' are not — and reviewers read these before they read your code.",
+              title: "Write a message worth reading",
+              text: "'Fix bye-week double count in weekly totals' helps future-you at 11pm. 'update' and 'fix' don't.",
             },
           ],
           exercises: [
@@ -3327,7 +3327,7 @@ export const COURSE = {
               bank: ["add", "commit", "push", "save"],
               answer: ["add", "commit"],
               explain:
-                "add stages, commit saves. The two-step trip surprises beginners but it's what lets you commit part of your changes and leave the rest.",
+                "add stages, commit saves. Two steps so you can commit part of your changes and leave the rest.",
             },
             {
               type: "mc",
@@ -3340,7 +3340,7 @@ export const COURSE = {
               ],
               answer: 2,
               explain:
-                "It names the bug and where it lived. Six months later this is the difference between understanding your own work and rewriting it.",
+                "It names the bug and where it lived. Six months later, that's the difference between understanding and rewriting.",
             },
             {
               type: "mc",
@@ -3353,7 +3353,7 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "status is the command you run constantly — it shows what's modified, what's staged, and what git is ignoring.",
+                "status is the command you'll run constantly — modified, staged, ignored.",
             },
             {
               type: "mc",
@@ -3367,7 +3367,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "History keeps everything. Removing the file going forward doesn't erase past commits — treat the key as leaked and rotate it. This is why .gitignore and .env files exist.",
+                "History keeps everything. Treat the key as leaked and rotate it. That's why .gitignore exists.",
             },
           ],
         },
@@ -3376,25 +3376,25 @@ export const COURSE = {
           title: "Branches",
           blurb: "Try something risky without breaking what works.",
           brief: {
-            goal: "Experiment on a branch without risking what works.",
+            goal: "Experiment on a branch without risking main.",
       steps: [
         {
-          title: "You will want to try something risky",
-          body: "A rewrite, a different approach, something that might not work. Doing that directly on the code everyone depends on is how you end up with a broken main version and no clean way back.",
+          title: "You'll want to try something risky",
+          body: "A rewrite that might not work. Doing that on the code everyone depends on leaves you with a broken main and no clean way back.",
         },
         {
           title: "A branch is a parallel drive",
-          body: "It is an independent line of work. main stays exactly as it was and keeps working, you experiment on the branch, and you merge back only when the thing is actually good. If it is not, you delete the branch and nothing was harmed.",
+          body: "main stays safe. You experiment on the branch. Merge only when it's good — or delete the branch and nothing was harmed.",
           code: "git checkout -b rolling-averages",
-          note: "Branches are cheap and disposable. Making one for a half-hour experiment is completely normal, not overkill.",
+          note: "Branches are cheap. One for a half-hour experiment is normal, not overkill.",
         },
       ],
             setup:
-              "A branch is an independent line of work. main keeps running while you try something; if the idea fails you delete the branch and nothing was ever at risk. If it works, you merge it back.",
+              "A branch is an independent line of work. main keeps running while you try something. Fail? Delete the branch. Win? Merge it back.",
           },
           intro: {
             title: "A branch is a parallel drive",
-            text: "A branch is an independent line of work. You leave main untouched and safe, experiment on a branch, and merge back only if it pans out. If it doesn't, you delete the branch and nothing was ever at risk.",
+            text: "Leave main untouched. Experiment on a branch. Merge only if it pans out — otherwise delete it and nothing was at risk.",
             code: "git checkout -b rolling-averages\n# ...work, commit...\ngit checkout main\ngit merge rolling-averages",
           },
           exercises: [
@@ -3405,11 +3405,11 @@ export const COURSE = {
               bank: ["-b", "-m", "--new", "-a"],
               answer: ["-b"],
               explain:
-                "-b creates the branch and switches to it. Without -b, git expects the branch to already exist. (Newer git also offers `git switch -c`.)",
+                "-b creates the branch and switches to it. Without -b, git expects it already exists.",
             },
             {
               type: "mc",
-              prompt: "Why branch instead of just editing main directly?",
+              prompt: "Why branch instead of editing main directly?",
               options: [
                 "It's faster",
                 "main keeps working while you experiment, and bad ideas cost nothing",
@@ -3418,7 +3418,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Isolation. Broken half-finished work never touches the version that runs, and abandoning an experiment is a one-line delete.",
+                "Isolation. Broken half-finished work never touches the version that runs.",
             },
             {
               type: "mc",
@@ -3431,7 +3431,7 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "Git merges automatically when changes don't overlap. When they do, it stops and asks a human — conflicts are normal, not a failure state.",
+                "Git merges automatically when changes don't overlap. When they do, it asks a human — normal, not failure.",
             },
             {
               type: "mc",
@@ -3445,7 +3445,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Merged branches are noise. Delete them so the branch list shows only live work — and never force push over shared history.",
+                "Merged branches are noise. Delete them so the list shows only live work.",
             },
           ],
         },
@@ -3457,26 +3457,26 @@ export const COURSE = {
             goal: "Get work reviewed, and make a repo a hiring manager can read.",
       steps: [
         {
-          title: "This one is directly about getting hired",
-          body: "Pull requests are how essentially every technical team works, so knowing the flow removes a first-week stumble. And a public repository someone can actually read is portfolio evidence that beats any certificate.",
+          title: "This one's about getting hired",
+          body: "Pull requests are how most teams ship. A public repo someone can actually read beats any certificate.",
         },
         {
           title: "A pull request is a proposal",
-          body: "You push a branch to GitHub and open a pull request: here is what I changed, here is why, please look. Someone reviews it, comments, and it gets merged. It is a conversation attached to a diff.",
-          note: "For a portfolio, the README is the part hiring managers actually read. What the project does, what data it used, what you found. Code with no explanation is not evidence of anything.",
+          body: "Push a branch, open a PR: here's what changed, here's why, please look. Review, comments, then merge.",
+          note: "Hiring managers read the README first. What it does, what data, what you found. Code with no explanation isn't evidence.",
         },
       ],
             setup:
-              "A pull request proposes a change and opens it for review — it's how nearly every data team ships. It's also the artifact an interviewer can actually read: your reasoning, in public, in your own words.",
+              "A pull request proposes a change for review — how most data teams ship. It's also an artifact an interviewer can read: your reasoning, in public.",
           },
           intro: {
             title: "A pull request is a proposal",
-            text: "You push a branch to GitHub and open a pull request: here's what I changed, here's why, please review. It's how essentially every data team ships work. It's also the artifact a hiring manager can read — your reasoning, in public, in your own words.",
+            text: "Push a branch, open a PR: here's what I changed, here's why, please review. That's how teams ship — and how a hiring manager sees your thinking.",
           },
           film: [
             {
               title: "The README does the hiring",
-              text: "Most people click your repo, read the README, and leave. Lead with what the project answers, one screenshot of the finding, and how to run it. A brilliant notebook behind a blank README reads as an unfinished project.",
+              text: "Most people read the README and leave. Lead with the question, one screenshot of the finding, and how to run it.",
             },
           ],
           exercises: [
@@ -3491,7 +3491,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "It's a request, not an action — a place to discuss the change before it lands. Reviewers comment, you push fixes, then it merges.",
+                "It's a request, not an action — discuss first, then merge.",
             },
             {
               type: "mc",
@@ -3505,7 +3505,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Review is a conversation. Being able to defend a choice and change your mind in public is exactly the behavior teams are screening for.",
+                "Review is a conversation. Defend a choice — and change your mind in public when you should.",
             },
             {
               type: "mc",
@@ -3518,12 +3518,12 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Lead with the question and the finding. Setup details matter but belong further down — most readers never scroll.",
+                "Lead with the question and the finding. Setup details matter further down.",
             },
             {
               type: "mc",
               prompt:
-                "Why does a public repo with real commit history beat a single uploaded notebook?",
+                "Why does a public repo with real commit history beat one uploaded notebook?",
               options: [
                 "It looks longer",
                 "It shows how you work and think over time, not just the final artifact",
@@ -3532,7 +3532,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "History is evidence of process — iteration, fixes, judgment. That's the part an interviewer can't get from a polished final file.",
+                "History is evidence of process — iteration, fixes, judgment.",
             },
           ],
         },
@@ -3551,31 +3551,31 @@ export const COURSE = {
         {
           id: "u11-l1",
           title: "Why R Is Still Here",
-          blurb: "Where R wins, and why sports analytics leans on it.",
+          blurb: "Where R wins — and why sports analytics leans on it.",
           brief: {
-            goal: "Understand where R fits next to Python.",
+            goal: "See where R fits next to Python.",
       steps: [
         {
           title: "An honest answer first",
-          body: "If you want a general analyst job at a typical company, Python is the safer investment and you should do that course instead. R is worth your time for a specific reason, and it is better to know what that reason is before you spend hours here.",
+          body: "For a typical company analyst job, Python is the safer bet. R is worth your time for a specific reason — know that before you sink hours here.",
         },
         {
-          title: "R was built for data from the start",
-          body: "Python is a general programming language that grew excellent data tools. R was designed for statistics before anything else, so tables, factors and statistical models are native rather than bolted on. That heritage is why academia, biostatistics and a large share of published sports analytics still run on it.",
-          note: "Even if you never write R, being able to read it is useful. A great deal of the public sports analysis worth learning from is published as R code.",
+          title: "R was built for data from day one",
+          body: "Python grew great data tools. R was designed for stats first — tables, factors, models feel native. That's why academia and a lot of published sports analytics still run on it.",
+          note: "Even if you never write R, reading it helps. A lot of public sports work worth learning from ships as R.",
         },
       ],
             setup:
-              "R was designed for statistics from the start, so tables and models are native rather than bolted on. A large share of public sports analytics — nflverse included — ships as R packages, so reading R is a real advantage even if you write mostly Python.",
+              "R was built for statistics, so tables and models are native. A lot of public sports analytics — nflverse included — ships as R packages. Reading R is an advantage even if you write mostly Python.",
           },
           intro: {
-            title: "R was built for data, not general programming",
-            text: "Python is a general language that grew great data tools. R was designed for statistics from the start, so tables, factors, and models are native rather than bolted on. In sports specifically, an enormous amount of public work — nflverse included — ships as R packages.",
+            title: "R was built for data",
+            text: "Python is a general language that grew data tools. R was designed for stats from the start. In sports, a huge share of public work — nflverse included — ships as R packages.",
           },
           film: [
             {
               title: "You don't have to choose",
-              text: "Most working analysts read both and write mostly one. The concepts you already have — filter, group, aggregate, sort — are identical in either. Switching languages is a vocabulary problem, not a thinking problem.",
+              text: "Most analysts read both and write mostly one. Filter, group, aggregate, sort — same ideas. Switching languages is vocabulary, not a new brain.",
             },
           ],
           exercises: [
@@ -3590,7 +3590,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "The ecosystem is the reason. If the package that already solves your problem is in R, reading R is the shortest path to using it.",
+                "The ecosystem is the reason. If the package that solves your problem is in R, reading R is the shortest path.",
             },
             {
               type: "mc",
@@ -3603,7 +3603,7 @@ export const COURSE = {
               ],
               answer: 0,
               explain:
-                "`<-` is R's idiomatic assignment. `=` also works in most spots, but `<-` is what you'll see in nearly all published code.",
+                "`<-` is R's usual assignment. `=` often works too, but `<-` is what you'll see published.",
             },
             {
               type: "mc",
@@ -3617,7 +3617,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "filter/group_by/summarise/arrange line up with the SQL and pandas moves you already have. The punctuation is new; the ideas aren't.",
+                "filter / group_by / summarise / arrange line up with SQL and pandas. New punctuation; same ideas.",
             },
           ],
         },
@@ -3630,27 +3630,27 @@ export const COURSE = {
       steps: [
         {
           title: "You already know these verbs",
-          body: "filter, arrange, group_by, summarise. Those are WHERE, ORDER BY, GROUP BY and your aggregates, wearing different names. dplyr is close enough to SQL that most of this lesson is translation rather than new concepts.",
+          body: "filter, arrange, group_by, summarise — that's WHERE, ORDER BY, GROUP BY, and your aggregates. Mostly translation, not new concepts.",
         },
         {
           title: "The pipe passes data along",
-          body: "The pipe takes whatever is on its left and feeds it in as the first argument of whatever is on the right. That lets you write a chain in the order the work happens, which reads far better than nesting the calls inside each other.",
+          body: "Whatever's on the left feeds into the right as the first argument. Chains read in the order the work happens.",
           code: "week_results |>\n  filter(season == 2024) |>\n  group_by(player) |>\n  summarise(total = sum(fantasy_pts))",
-          note: "Older code uses %>% instead of |>. They do the same job here; the second one is newer and built into R itself.",
+          note: "Older code uses %>% instead of |>. Same job here; |> is newer and built into R.",
         },
       ],
             setup:
-              "R runs live in your browser here, dplyr included. The pipe |> feeds the left side into the right, so a chain reads in the order you'd say it: take the data, filter it, group it, summarise it, sort it. Same five moves as SQL.",
+              "R runs live here, dplyr included. The pipe |> feeds left into right: take the data, filter, group, summarise, sort. Same five moves as SQL.",
           },
           intro: {
             title: "The pipe passes data along",
-            text: "The pipe (|>, or %>% in older code) takes the thing on the left and feeds it to the function on the right. It lets you write a chain in the order you'd say it out loud: take the data, filter it, group it, summarise it, sort it.",
+            text: "|> (or %>% in older code) takes the left side and feeds it to the function on the right. Write the chain in the order you'd say it out loud.",
             code: 'week_results |>\n  filter(position == "RB") |>\n  group_by(player) |>\n  summarise(total = sum(points)) |>\n  arrange(desc(total))',
           },
           film: [
             {
-              title: "The translation table",
-              text: "One mapping covers all three languages you've now seen. Learn the concept once; the rest is spelling.",
+              title: "The cheat sheet",
+              text: "One map covers SQL, pandas, and dplyr. Learn the idea once; the rest is spelling.",
               code: "WHERE     →  df[df.x > 1]        →  filter(x > 1)\nGROUP BY  →  df.groupby(\"x\")     →  group_by(x)\nAVG/SUM   →  .mean() / .sum()    →  summarise(...)\nORDER BY  →  .sort_values(\"x\")   →  arrange(x)",
             },
           ],
@@ -3661,7 +3661,7 @@ export const COURSE = {
               options: ["select()", "filter()", "arrange()", "mutate()"],
               answer: 1,
               explain:
-                "filter() picks rows. Careful: R's select() picks COLUMNS, so it's SQL's SELECT list rather than a row filter — the one name that reliably confuses people.",
+                "filter() picks rows. Careful: R's select() picks COLUMNS — SQL's SELECT list, not a row filter.",
             },
             {
               type: "fill",
@@ -3677,7 +3677,7 @@ export const COURSE = {
               bank: ["group_by", "arrange", "select", "mutate"],
               answer: ["group_by", "arrange"],
               explain:
-                "group_by then summarise is GROUP BY plus an aggregate; arrange(desc()) is ORDER BY ... DESC. Structurally identical to the SQL you wrote in Unit 3.",
+                "group_by + summarise is GROUP BY + aggregate; arrange(desc()) is ORDER BY DESC. Same shape as SQL.",
             },
             {
               type: "mc",
@@ -3690,7 +3690,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "mutate() creates a computed column — SQL's `points / games AS avg` in the SELECT list.",
+                "mutate() adds or changes a column — like points / games AS avg in SQL.",
             },
             {
               type: "mc",
@@ -3703,7 +3703,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "It threads data through steps in reading order, which is why dplyr chains scan like sentences instead of nested function calls.",
+                "It threads data through steps in reading order — chains read like sentences, not nested calls.",
             },
             {
               type: "code",
@@ -3729,7 +3729,7 @@ export const COURSE = {
                 'suppressMessages(library(dplyr))\ndf <- data.frame(position=c("RB","WR","RB","WR"), points=c(18.2,31.0,12.4,22.4))\nout <- df |> group_by(position) |> summarise(avg = mean(points))\nprint(as.data.frame(out))',
               hint: "df |> group_by(position) |> summarise(avg = mean(points)), then print(as.data.frame(out)).",
               explain:
-                "group_by + summarise is GROUP BY + AVG. You've now written the same aggregation in three languages.",
+                "group_by + summarise is GROUP BY + AVG. Same aggregation — three languages.",
             },
           ],
         },
@@ -3741,22 +3741,22 @@ export const COURSE = {
             goal: "Build a chart in layers with ggplot2.",
       steps: [
         {
-          title: "ggplot2 is the reason many people learn R at all",
-          body: "It is widely considered the best charting library anywhere, in any language, and it is built on an actual theory of what a chart is rather than a list of chart types. Learning it changes how you think about charts even if you go back to Python afterwards.",
+          title: "Why many people learn R",
+          body: "ggplot2 is built on a theory of charts, not a menu of types. Learn it and you'll think differently about charts — even back in Python.",
         },
         {
           title: "Data, mapping, geometry",
-          body: "You name the data, map columns onto visual properties like x, y and colour with aes, and then add a geometry that decides how those get drawn. Layers are joined with a plus. Swap the geometry and the same mapping becomes a different chart.",
+          body: "Name the data. Map columns to x, y, color with aes. Add a geometry that draws them. Layers join with +. Swap the geom — same mapping, new chart.",
           code: "ggplot(df, aes(x = week, y = fantasy_pts)) +\n  geom_line()",
-          note: "That separation is the idea worth taking away: what the data means is declared once, and how it looks is a separate decision layered on top.",
+          note: "Declare what the data means once. How it looks is a separate layer on top.",
         },
       ],
             setup:
-              "ggplot2 joins layers with +. You name the data, map columns to visual properties with aes(), then add a geometry. Swap the geometry and the same mapping becomes a different chart — that's the payoff of the layered grammar.",
+              "ggplot2 joins layers with +. Name the data, map columns with aes(), add a geometry. Swap the geom and the same mapping becomes a different chart.",
           },
           intro: {
             title: "Data, mapping, geometry",
-            text: "ggplot2 builds a chart in layers joined by +. You name the data, map columns to visual properties (x, y, color) with aes(), then add a geometry — geom_point() for a scatter, geom_col() for bars, geom_line() for lines. Change the geom and the same mapping becomes a different chart.",
+            text: "Layers join with +. Name the data, map columns (x, y, color) with aes(), then add a geom — point, bar, or line. Change the geom; keep the mapping.",
             code: 'ggplot(rbs, aes(x = targets, y = points)) +\n  geom_point() +\n  labs(title = "Targets drive points")',
           },
           exercises: [
@@ -3771,7 +3771,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "aes() is the mapping layer — it connects columns to what you see. Setting a fixed color goes OUTSIDE aes(); mapping a column to color goes inside.",
+                "aes() maps columns to what you see. Fixed color goes outside aes(); a column mapped to color goes inside.",
             },
             {
               type: "fill",
@@ -3786,7 +3786,7 @@ export const COURSE = {
               bank: ["+", "|>", "geom_point", "geom_col"],
               answer: ["+", "geom_point"],
               explain:
-                "ggplot2 layers join with + (not the pipe — a classic stumble), and geom_point() draws one dot per row.",
+                "Layers join with + (not the pipe — classic stumble). geom_point() draws one dot per row.",
             },
             {
               type: "mc",
@@ -3800,7 +3800,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "That's the payoff of the layered grammar — the data and mapping stay, only the geometry swaps.",
+                "Data and mapping stay; only the geometry swaps. That's the payoff.",
             },
             {
               type: "mc",
@@ -3814,7 +3814,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "ggplot2 predates the pipe and joins layers with +. Piping between layers is the error nearly everyone hits once — usually right after learning dplyr.",
+                "ggplot2 joins layers with +. Piping between layers is the stumble almost everyone hits once.",
             },
           ],
         },
@@ -3849,28 +3849,28 @@ export const COURSE = {
             goal: "Make your code choose between paths.",
       steps: [
         {
-          title: "Code that always does the same thing is limited",
-          body: "So far every line you have written runs regardless. Real programs make choices: label this one a boom game, skip that row, treat a missing value differently. That requires asking a question and acting on the answer.",
+          title: "Straight-through code only goes so far",
+          body: "So far every line always runs. Real programs choose: boom game, skip that row, handle a miss differently.",
         },
         {
-          title: "if, elif, else, and the colon",
-          body: "The colon opens a block, and the indented lines beneath it are what runs when the test passes. Python checks each branch in order and takes the first one that is true, so the order you write them in is part of the logic.",
+          title: "if, elif, else — and the colon",
+          body: "The colon opens a block. Indented lines run when the test passes. Python takes the first true branch, so order is part of the logic.",
           code: "points = 24.6\nif points >= 20:\n    print('Boom')\nelif points >= 12:\n    print('Solid')\nelse:\n    print('Bust')",
-          note: "Put the strictest test first. Reverse these two and everything over 20 gets caught by the 12 check and mislabelled, which the computer will never warn you about.",
+          note: "Strictest test first. Flip the order and everything over 20 gets labelled Solid — no warning.",
         },
       ],
             setup:
-              "So far your code has run straight through. `if` lets it branch: test something, and only run that block when the test is true. `elif` adds another test, `else` catches everything left. Indentation is what says which lines belong to the branch — Python has no braces, and that is not optional styling.",
+              "So far your code ran straight through. `if` branches: test, then run that block only when true. `elif` adds another test; `else` catches the rest. Indentation marks the block — Python has no braces.",
           },
           intro: {
             title: "Indentation is the syntax",
-            text: "The colon opens a block and the indented lines below it are that block. Get the indentation wrong and Python either errors or, worse, runs the line every time instead of only when the test passes. Four spaces is the convention; be consistent and your editor will handle it.",
+            text: "Colon opens a block; indented lines are that block. Wrong indent → an error, or worse, the line always runs. Four spaces is the convention.",
             code: 'points = 24.6\n\nif points >= 20:\n    print("Boom game")\nelif points >= 12:\n    print("Solid")\nelse:\n    print("Bust")',
           },
           film: [
             {
               title: "Order matters in an if-chain",
-              text: "Python takes the FIRST branch that passes and skips the rest. So a chain has to run from most specific to least: test >= 20 before >= 12, or every 24-point game gets labelled 'Solid' and the boom branch never runs at all. It won't error — it'll just be quietly wrong.",
+              text: "First true branch wins; the rest are skipped. Test >= 20 before >= 12, or every boom gets labelled Solid — quietly wrong, no error.",
             },
           ],
           exercises: [
@@ -3886,7 +3886,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "First match wins and the rest are skipped. Order your thresholds most-specific first, or the top tier becomes unreachable.",
+                "First match wins. Put the strictest threshold first, or the top tier never runs.",
             },
             {
               type: "fill",
@@ -3901,7 +3901,7 @@ export const COURSE = {
               bank: ["elif", "else", "else if", "elsif"],
               answer: ["elif", "else"],
               explain:
-                "Python spells it `elif`, not `else if`. `else` takes no condition — it's whatever's left.",
+                "Python spells it `elif`, not `else if`. `else` takes no condition — whatever's left.",
             },
             {
               type: "code",
@@ -3913,7 +3913,7 @@ export const COURSE = {
               expected: 'print("Solid")',
               hint: "if points >= 20: ... elif points >= 12: ... else: ... — and print inside each branch.",
               explain:
-                "Solid. Bucketing a number into named tiers is one of the most common things you'll ever do to a column.",
+                "Solid. Bucketing a number into named tiers is a move you'll do constantly.",
             },
             {
               type: "code",
@@ -3925,7 +3925,7 @@ export const COURSE = {
               expected: "print(3)",
               hint: "Start a counter at 0, loop with `for w in weeks:`, add 1 inside an `if w >= 20:`, then print the counter.",
               explain:
-                "Three. A loop, a condition and a counter — that trio answers a surprising share of real questions.",
+                "Three. A loop, a condition, and a counter — that trio answers a lot of real questions.",
             },
           ],
         },
@@ -3937,28 +3937,28 @@ export const COURSE = {
             goal: "Turn code you keep repeating into something you can call.",
       steps: [
         {
-          title: "You will notice yourself repeating things",
-          body: "The same three lines, with one number changed. That repetition is a signal, not a chore: it means there is a named idea hiding in your code that has not been given a name yet.",
+          title: "You'll catch yourself repeating things",
+          body: "Same three lines, one number changed. That repetition is a signal: there's a named idea hiding that hasn't been named yet.",
         },
         {
           title: "A function is that idea, named",
-          body: "def gives it a name and a list of inputs. Everything indented under it is the body. Call it later with different inputs and it runs again on those.",
+          body: "def gives it a name and inputs. Everything indented under it is the body. Call it later with new inputs and it runs again.",
           code: "def per_game(total, games):\n    return total / games\n\nprint(round(per_game(128.4, 6), 1))",
-          note: "return hands a value back to whoever called the function. print only draws on the screen and gives the caller nothing. Confusing the two costs beginners more time than any other single mistake in Python.",
+          note: "return hands a value back. print only shows on screen. Mixing those up costs beginners more time than almost anything else.",
         },
       ],
             setup:
-              "Copy-pasting the same tiering logic for four players is how bugs get in — you fix one copy and forget the others. A function names that logic once. `def` defines it, the indented body is what it does, and `return` hands a value back to whoever called it.",
+              "Copy-pasting the same logic for four players is how bugs get in — you fix one copy and miss the others. A function names that logic once. `def` defines it; `return` hands a value back.",
           },
           intro: {
             title: "return hands a value back; print just shows it",
-            text: "This is the distinction beginners lose most time to. `print` writes to the screen and gives the caller nothing. `return` gives the caller a value they can store, compare or pass on — and stops the function immediately. A function that prints instead of returning can't be built on.",
+            text: "`print` writes to the screen and gives the caller nothing. `return` gives a value you can store or pass on — and stops the function. A function that only prints can't be built on.",
             code: 'def tier(points):\n    if points >= 20:\n        return "Boom"\n    elif points >= 12:\n        return "Solid"\n    return "Bust"\n\nprint(tier(24.6))',
           },
           film: [
             {
               title: "Default arguments",
-              text: "Give a parameter a default and callers can skip it: `def tier(points, boom=20)` works as both tier(24.6) and tier(24.6, 25). It's how you make a function flexible without forcing every caller to spell out every option.",
+              text: "Give a parameter a default and callers can skip it: `def tier(points, boom=20)` works as tier(24.6) or tier(24.6, 25).",
               code: 'def tier(points, boom=20):\n    return "Boom" if points >= boom else "Not boom"',
             },
           ],
@@ -3974,7 +3974,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "A function that prints can't be used in a calculation. `total = tier(p)` gets None if tier printed instead of returning.",
+                "A function that only prints returns None. `total = tier(p)` gets nothing useful.",
             },
             {
               type: "fill",
@@ -3988,7 +3988,7 @@ export const COURSE = {
               bank: ["def", "return", "function", "print"],
               answer: ["def", "return"],
               explain:
-                "`def` names it, `return` gives the value back. Without return the function silently produces None.",
+                "`def` names it; `return` gives the value back. Skip return and you silently get None.",
             },
             {
               type: "code",
@@ -4000,7 +4000,7 @@ export const COURSE = {
               expected: "print(round(128.4 / 6, 1))",
               hint: "def per_game(total, games): return total / games — then print(round(per_game(128.4, 6), 1)).",
               explain:
-                "21.4. Now that logic has a name, and every place that needs it calls the same one.",
+                "21.4. Now the logic has a name — every caller uses the same one.",
             },
             {
               type: "code",
@@ -4012,7 +4012,7 @@ export const COURSE = {
               expected: 'print("Boom")\nprint("Bust")\nprint("Solid")',
               hint: "Define tier(points) with if/elif/return, then `for s in scores: print(tier(s))`.",
               explain:
-                "Boom, Bust, Solid. One function, three calls — and if the thresholds change you edit one place.",
+                "Boom, Bust, Solid. One function, three calls. Thresholds change? Edit one place.",
             },
           ],
         },
@@ -4024,22 +4024,22 @@ export const COURSE = {
             goal: "Store and retrieve values by a key you choose.",
       steps: [
         {
-          title: "Lists are ordered, which is not always what you want",
-          body: "A list is good when position matters. It is useless when you want to look something up by name, because you would have to know which slot it was in, and nobody remembers that.",
+          title: "Lists are ordered — not always what you want",
+          body: "Lists are great when position matters. Useless when you want to look something up by name — you'd have to remember which slot.",
         },
         {
-          title: "A dictionary looks things up by a key you choose",
-          body: "Curly braces, and each entry is a key, a colon, and a value. Then you fetch a value by handing over its key, which is how you actually think about data most of the time.",
+          title: "A dictionary looks up by a key you choose",
+          body: "Curly braces. Each entry is key, colon, value. Fetch by handing over the key — how you usually think about data.",
           code: "ppg = {'Josh Allen': 22.9, 'Travis Kelce': 12.7}\nprint(ppg['Travis Kelce'])",
           note: "Asking for a key that is not there raises an error rather than returning nothing. That is deliberate: a silent wrong answer would be worse.",
         },
       ],
             setup:
-              "A list finds things by position — scores[2] means 'the third one', which tells you nothing about who it is. A dictionary finds them by a key you pick, so ppg[\"Josh Allen\"] says exactly what it means. Keys are unique; assigning to an existing key overwrites it.",
+              "A list finds by position — scores[2] says 'the third one,' not who. A dict finds by a key you pick: ppg[\"Josh Allen\"]. Keys are unique; reassigning overwrites.",
           },
           intro: {
             title: "Curly braces, key: value",
-            text: "Write it as {key: value, key: value}. Read a value with square brackets and the key. Asking for a key that isn't there raises a KeyError — use .get(key, default) when a miss is expected rather than exceptional.",
+            text: "Write {key: value}. Read with brackets and the key. Missing key → KeyError. Use .get(key, default) when a miss is normal.",
             code: 'ppg = {"Josh Allen": 22.9, "Travis Kelce": 12.7}\n\nprint(ppg["Josh Allen"])\nprint(ppg.get("Nobody", 0))',
           },
           exercises: [
@@ -4067,7 +4067,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Two lists rely on the positions lining up forever. Sort one and forget the other and every lookup is silently wrong.",
+                "Two lists need positions to stay lined up. Sort one, forget the other — every lookup is silently wrong.",
             },
             {
               type: "code",
@@ -4091,7 +4091,7 @@ export const COURSE = {
               expected: 'print("Josh Allen")\nprint("Puka Nacua")',
               hint: "for name, pts in ppg.items(): then an if on pts before printing name.",
               explain:
-                ".items() hands you the key and value together, which is what makes filtering a dict readable.",
+                ".items() hands you key and value together — that's what makes filtering a dict readable.",
             },
           ],
         },
@@ -4103,28 +4103,28 @@ export const COURSE = {
             goal: "Build a new list from an old one in a single expression.",
       steps: [
         {
-          title: "Building a list from another list is very common",
-          body: "Take these, keep the ones that qualify, do something to each, hand me the result. You can write that as a loop with an empty list and an append, and it works, and it takes four lines every time.",
+          title: "Building a list from another is common",
+          body: "Keep the ones that qualify, transform each, hand me the result. A loop with append works — and takes four lines every time.",
         },
         {
           title: "A comprehension says it in one",
-          body: "Read it left to right as a sentence: give me this, for each of those, where that is true. The trailing condition is optional, and dropping it just means keep everything.",
+          body: "Read left to right: give me this, for each of those, where that's true. The trailing if is optional.",
           code: "weeks = [24.6, 8.2, 31.0, 12.5]\nprint([w for w in weeks if w >= 20])",
           note: "Comprehensions are idiomatic Python, so you will meet them constantly in other people's code. Being able to read one matters more than always writing one.",
         },
       ],
             setup:
-              "Creating an empty list, looping, and appending is three lines of ceremony around one idea. A comprehension says the same thing in one: what to keep, where from, and optionally which ones. You'll read far more of these than you write, so recognising them matters as much as producing them.",
+              "Empty list + loop + append is three lines of ceremony. A comprehension says it in one. You'll read more than you write — recognise them.",
           },
           intro: {
             title: "[expression for item in list if condition]",
-            text: "Read it left to right as a sentence: give me this, for each of those, where that's true. The `if` on the end is optional. If a comprehension ever gets long enough that you have to squint, that's the signal to write it back out as a loop.",
+            text: "Read it as a sentence: give me this, for each of those, where that's true. Optional if. Squinting to read one? Write it back out as a loop.",
             code: "weeks = [24.6, 8.2, 31.0, 12.5]\n\ndoubled = [w * 2 for w in weeks]\nbooms   = [w for w in weeks if w >= 20]",
           },
           film: [
             {
               title: "The loop it replaces",
-              text: "These two produce exactly the same list. The comprehension isn't faster to think about the first few times — it's faster to read once you're used to it, and it keeps the intent on one line instead of spread over four.",
+              text: "Same list either way. Comprehensions aren't faster to invent at first — they're faster to read once you're used to them.",
               code: "booms = []\nfor w in weeks:\n    if w >= 20:\n        booms.append(w)\n\n# same thing\nbooms = [w for w in weeks if w >= 20]",
             },
           ],
@@ -4140,7 +4140,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "A new list. The original is untouched — comprehensions build, they don't modify in place.",
+                "A new list. The original stays untouched — comprehensions build; they don't edit in place.",
             },
             {
               type: "fill",
@@ -4155,7 +4155,7 @@ export const COURSE = {
               bank: ["for", "if", "in", "where"],
               answer: ["for", "if"],
               explain:
-                "`for` names the item, `if` filters. SQL's WHERE, wearing different clothes.",
+                "`for` names the item; `if` filters. SQL's WHERE in different clothes.",
             },
             {
               type: "code",
@@ -4167,7 +4167,7 @@ export const COURSE = {
               expected: "print([24.6, 31.0, 22.1])",
               hint: "print([w for w in weeks if w >= 20])",
               explain:
-                "[24.6, 31.0, 22.1]. One line, and the intent is right there on it.",
+                "[24.6, 31.0, 22.1]. One line — intent right on it.",
             },
             {
               type: "code",
@@ -4179,7 +4179,7 @@ export const COURSE = {
               expected: 'print(["HURTS", "BIJAN", "NACUA"])',
               hint: "print([n.upper() for n in names])",
               explain:
-                "The expression on the left can be any transformation — that's the half people forget while focusing on the filter.",
+                "The left side can be any transformation — easy to forget while focusing on the filter.",
             },
           ],
         },
@@ -4214,7 +4214,7 @@ export const COURSE = {
         },
       ],
             setup:
-              "You already know what filtering and sorting mean — you did both in SQL. pandas spells them differently: a boolean mask inside square brackets for WHERE, .sort_values() for ORDER BY. The thinking transfers completely; only the punctuation is new.",
+              "You already know filter and sort from SQL. pandas: boolean mask in brackets for WHERE, .sort_values() for ORDER BY. Same thinking; new spelling.",
           },
           intro: {
             title: "A mask is a column of True and False",
@@ -4291,21 +4291,21 @@ export const COURSE = {
             goal: "Collapse rows into one summary per group.",
       steps: [
         {
-          title: "This is GROUP BY, wearing different clothes",
-          body: "One number for the whole frame is rarely the question. You want one per player, per position, per team. If that sounds exactly like the GROUP BY lesson, that is because it is the same idea.",
+          title: "GROUP BY in different clothes",
+          body: "One number for the whole frame is rarely the question. You want one per player, per position, per team. Same idea as GROUP BY.",
         },
         {
           title: "Split, apply, combine",
-          body: "groupby splits the frame into groups, runs your aggregate inside each one, and combines the answers back into a single result. Saying those three words to yourself while reading the code makes it obvious what is happening.",
+          body: "groupby splits into groups, runs your aggregate in each, then combines the answers. Say those three words while you read the code.",
           code: "df.groupby('position')['points'].mean()",
         },
       ],
             setup:
-              "groupby splits rows into buckets by a column, then an aggregate collapses each bucket to one number — exactly GROUP BY. .agg() goes further and computes several aggregates in one pass, which is where pandas starts saving you real time over SQL.",
+              "groupby buckets rows by a column; an aggregate collapses each bucket — exactly GROUP BY. .agg() does several aggregates in one pass.",
           },
           intro: {
             title: "Split, apply, combine",
-            text: "groupby splits the frame into groups, applies the aggregate to each, and combines the answers back into one result. Chain a column name before the aggregate to summarise just that column; use .agg() with a dict to summarise several at once.",
+            text: "groupby splits, applies the aggregate, combines. Chain a column before the aggregate for one column; use .agg() with a dict for several.",
             code: 'df.groupby("position")["points"].mean()\n\ndf.groupby("position").agg(\n    total=("points", "sum"),\n    games=("points", "count"),\n)',
           },
           exercises: [
@@ -4371,27 +4371,27 @@ export const COURSE = {
       steps: [
         {
           title: "Joining, again",
-          body: "Two frames, one shared column, one combined answer. You did this with JOIN and you know the traps: matched rows survive, unmatched rows quietly vanish unless you say otherwise.",
+          body: "Two frames, one shared column, one combined answer. Matched rows survive. Unmatched ones quietly vanish unless you say otherwise.",
         },
         {
           title: "how= decides who survives",
-          body: "inner keeps only rows present in both, which is the JOIN you met first. left keeps every row from the left frame and fills the gaps with NaN, which is the LEFT JOIN. Same decision, same consequences.",
+          body: "inner = only rows in both. left = every left row, gaps filled with NaN. Same decision as INNER vs LEFT JOIN.",
           code: "pd.merge(roster, scores, on='player', how='left')",
           note: "Check the row count before and after every merge. A join that silently halved your data looks identical to one that worked, and this is how you catch it.",
         },
       ],
             setup:
-              "You met joins in SQL; merge is the same operation. The argument that matters most is `how`: 'inner' keeps only matches (and quietly drops the rest), 'left' keeps everything on the left and fills gaps with NaN. Choosing wrong is how row counts mysteriously change.",
+              "merge is SQL's JOIN. `how` matters most: 'inner' keeps matches only; 'left' keeps everything on the left and fills gaps with NaN.",
           },
           intro: {
             title: "how= decides who survives",
-            text: "pd.merge(left, right, on=\"player\", how=\"inner\") keeps only players present in both. how=\"left\" keeps every left-hand row regardless. If a merge changes your row count unexpectedly, `how` is the first thing to check — and the second is whether the right side had duplicate keys.",
+            text: "how=\"inner\" keeps players in both. how=\"left\" keeps every left-hand row. Unexpected row count? Check `how` first — then duplicate keys on the right.",
             code: 'pd.merge(roster, scores, on="player", how="left")',
           },
           film: [
             {
               title: "NaN is pandas' NULL",
-              text: "An unmatched left row gets NaN in the right-hand columns. NaN is a float, so an integer column becomes float the moment a merge introduces one — a small surprise that trips people up when their ids suddenly print as 12.0.",
+              text: "Unmatched left rows get NaN on the right. NaN is a float — so an int column can suddenly print as 12.0 after a merge.",
             },
           ],
           exercises: [
@@ -4453,27 +4453,27 @@ export const COURSE = {
       steps: [
         {
           title: "Real files arrive broken",
-          body: "This is the part tutorials skip and the part the job is actually made of. Missing values, numbers stored as text, stray spaces on names that stop every join from matching. None of it is exotic and all of it is constant.",
+          body: "Tutorials skip this. The job is made of it. Missing values, numbers as text, stray spaces that break every join.",
         },
         {
           title: "Find it, then decide",
-          body: "Count what is missing first, then make a deliberate choice about it. Drop the rows, or fill them with something, and be able to say which you did and why. There is no universal right answer, only a decision you should have made on purpose.",
+          body: "Count what's missing first. Then choose: drop or fill — and say which you did and why.",
           code: "print(df.isna().sum())\ndf = df.dropna(subset=['points'])",
           note: "Dropping is safe when the missing rows are few and random. Filling with the average is defensible and quietly narrows your data's spread, which matters if anyone measures variance later.",
         },
       ],
             setup:
-              "Real files arrive broken: numbers stored as text, names with trailing spaces, gaps where a value should be. None of it errors immediately — it just produces wrong answers later. Cleaning first is the difference between an analysis and a guess.",
+              "Real files arrive broken: text numbers, trailing spaces, gaps. No immediate error — just wrong answers later. Clean first.",
           },
           intro: {
             title: "Find it, then decide",
-            text: "df.isna().sum() counts missing values per column. Then you choose: drop those rows, or fill them. There's no universal right answer — dropping loses data, filling invents it. What matters is choosing deliberately and saying which you did.",
+            text: "df.isna().sum() counts gaps per column. Then choose: drop or fill. Dropping loses data; filling invents it. Choose on purpose.",
             code: 'df.isna().sum()\n\ndf["points"].fillna(0)      # treat missing as zero\ndf.dropna(subset=["points"]) # or remove those rows',
           },
           film: [
             {
               title: "Zero and missing are different facts",
-              text: "A player who was injured has missing points. A player who played and did nothing has zero. Fill missing with 0 and you've merged those into one story — and every average you compute afterwards is dragged down by players who never took the field.",
+              text: "Injured → missing. Played and blanked → zero. Fill missing with 0 and you merge those stories — averages get dragged by players who never took the field.",
             },
           ],
           exercises: [
@@ -4547,35 +4547,35 @@ export const COURSE = {
             goal: "Point at any cell or block of cells by name, the way a formula does.",
       steps: [
         {
-          title: "Excel is on more job postings than anything else here",
-          body: "It is unglamorous and it is everywhere. Finance, operations, marketing and most of the small-to-mid-sized world runs on spreadsheets, and a great many analyst jobs are mostly Excel with a little SQL attached. Being genuinely good at it is a hiring signal.",
+          title: "Excel shows up on more job posts than anything else here",
+          body: "Unglamorous and everywhere. A lot of analyst jobs are mostly Excel with a little SQL. Being good at it is a hiring signal.",
         },
         {
           title: "A spreadsheet is a grid with addresses",
-          body: "Columns get letters along the top, rows get numbers down the side, and a cell is named by both stuck together. Column first, then row. That is the entire address system and every formula in this course is built on it.",
+          body: "Columns get letters. Rows get numbers. A cell is both stuck together — column first, then row. That's the whole address system.",
           code: "E2        one cell: column E, row 2\nE2:E17    a range: E2 down through E17\nA2:E17    a block: columns A to E, rows 2 to 17",
-          note: "The colon means through. Get comfortable reading these now and every formula later becomes a sentence you can already parse.",
+          note: "The colon means through. Get comfortable reading these and every formula later is a sentence you can already parse.",
         },
         {
           title: "Real formulas, real workbook",
-          body: "Everything you type here runs against an actual two-sheet workbook and is graded on the value it produces, not on matching some expected text. If your formula is right in a way we did not anticipate, it still passes.",
+          body: "Everything here runs against a real two-sheet workbook. Graded on the value produced — not matching expected text. Right answer in a different spelling still passes.",
         },
       ],
             setup:
-              "A spreadsheet is a grid. Columns get letters across the top, rows get numbers down the side, and a cell's address is just the two stuck together: column first, then row. E2 means column E, row 2. A block of cells is written with a colon — E2:E17 means \"E2 all the way down to E17\". That is the entire address system, and every formula in this course is built on it.",
+              "A spreadsheet is a grid. Letters across, numbers down. Cell address = column then row: E2. A colon means through: E2:E17. That's the whole address system.",
             previewSheet: "Roster",
             previewCaption:
               "The league roster. Row 1 holds the headers, so the actual data starts at row 2.",
           },
           intro: {
             title: "Column letter, then row number",
-            text: "E2 is not \"row E, column 2\" — it is column E, row 2. Excel always writes the letter first. The colon in E2:E17 means \"through\", so it covers all 16 player rows without you listing them. Get comfortable reading addresses now and every formula later becomes a sentence you can already parse.",
+            text: "E2 is column E, row 2 — letter first. The colon in E2:E17 means \"through\" — all 16 player rows without listing them.",
             code: "E2        one cell: column E, row 2\nE2:E17    a range: E2 down through E17\nA2:E17    a block: columns A–E, rows 2–17\nImport!A2 a cell on another sheet",
           },
           film: [
             {
               title: "Why the data starts at row 2",
-              text: "Row 1 holds the headers — Player, Team, Pos, and so on. If you include row 1 in a numeric range you are asking Excel to average the word \"Points\", which it will quietly skip rather than warn you about. Almost every off-by-one bug in a spreadsheet traces back to a range that started one row too high.",
+              text: "Row 1 is headers. Include it in a numeric range and you're averaging the word \"Points\" — Excel quietly skips it. Most off-by-ones start one row too high.",
             },
           ],
           exercises: [
@@ -4645,29 +4645,29 @@ export const COURSE = {
             goal: "Total a column, average it, and count how many rows it holds.",
       steps: [
         {
-          title: "A formula always starts with an equals sign",
-          body: "That is how the sheet knows you are asking a question rather than typing text. Leave it off and Excel stores the literal characters SUM(E2:E17) and wonders why you did that.",
+          title: "A formula always starts with =",
+          body: "That's how the sheet knows you're asking, not typing text. Leave it off and Excel stores the literal characters SUM(E2:E17).",
         },
         {
           title: "Every function is the same shape",
-          body: "An equals sign, a name, and brackets holding what it should work on. Change the name and you change the question, while the range stays exactly the same. Learn one and you have structurally learned all of them.",
+          body: "Equals, name, brackets with what it works on. Change the name, change the question — range stays the same.",
           code: "=SUM(E2:E17)       add every value\n=AVERAGE(E2:E17)   the mean\n=COUNT(E2:E17)     how many numbers\n=COUNTA(A2:A17)    how many non-empty cells",
-          note: "COUNT only counts numbers. COUNTA counts anything that is not empty. Run COUNT on a column of names and you get zero, which looks like a broken sheet and is actually the wrong function.",
+          note: "COUNT = numbers only. COUNTA = anything non-empty. COUNT on names returns 0 — wrong function, not empty sheet.",
         },
       ],
             setup:
-              "A formula always starts with an equals sign. That is how Excel knows you are asking a question rather than typing text. After the equals sign comes a function name and a range in brackets: =SUM(E2:E17) means \"add up everything from E2 to E17\". SUM, AVERAGE and COUNT are the three you will reach for constantly.",
+              "Formulas start with =. Then a function name and a range: =SUM(E2:E17) means add everything from E2 to E17. SUM, AVERAGE, COUNT — you'll reach for these constantly.",
             previewSheet: "Roster",
           },
           intro: {
             title: "=FUNCTION(range)",
-            text: "Every function follows the same shape: an equals sign, a name, and brackets holding what it should work on. Change the name and you change the question — the range stays exactly the same. Once you can write one of these you can write all of them.",
+            text: "Same shape every time: equals, name, brackets. Change the name, change the question. Write one and you can write them all.",
             code: "=SUM(E2:E17)       add every value\n=AVERAGE(E2:E17)   the mean\n=COUNT(E2:E17)     how many numbers\n=COUNTA(A2:A17)    how many non-empty cells",
           },
           film: [
             {
               title: "COUNT and COUNTA are not the same",
-              text: "COUNT only counts numbers. COUNTA counts anything that is not empty, text included. On a column of names COUNT returns 0 and COUNTA returns the real answer — which is why a roster count that reads zero is usually the wrong function rather than an empty sheet.",
+              text: "COUNT = numbers only. COUNTA = anything non-empty. Names + COUNT = 0. That's usually the wrong function, not an empty sheet.",
               code: "=COUNT(A2:A17)    0  — names are not numbers\n=COUNTA(A2:A17)  16  — counts the names",
             },
           ],
@@ -4733,23 +4733,23 @@ export const COURSE = {
             goal: "Pull the highest and lowest values out of a column, and measure the distance between them.",
       steps: [
         {
-          title: "Finding the best and worst is the easy half",
-          body: "MAX and MIN do exactly what they sound like, and there is nothing subtle about using them. The interesting part is what they cannot tell you.",
+          title: "Best and worst are the easy half",
+          body: "MAX and MIN do exactly what they sound like. The interesting part is what they can't tell you.",
         },
         {
           title: "They return the value, not the name",
-          body: "MAX reads down the points column and hands back the biggest number. It has no idea a player column exists, so it cannot tell you who scored it. Getting from the top score to the person is a lookup problem, and you will solve it properly in unit three.",
+          body: "MAX hands back the biggest number. It doesn't know a player column exists. Getting from the score to the person is a lookup — coming soon.",
           code: "=MAX(E2:E17)      the highest score\n=MIN(E2:E17)      the lowest\n=LARGE(E2:E17,3)  the third highest",
-          note: "Noticing what a function cannot do is worth as much as knowing what it can. That gap is the reason the next two units exist.",
+          note: "Noticing what a function can't do matters as much as knowing what it can.",
         },
       ],
             setup:
-              "MAX and MIN do exactly what they sound like. The catch — and it is the one that sends people to INDEX/MATCH later — is that they return the number, not the player attached to it. MAX tells you the top score was 430.4; it will not tell you who scored it.",
+              "MAX and MIN do what they sound like. Catch: they return the number, not the player. MAX says 430.4 — not who scored it.",
             previewSheet: "Roster",
           },
           intro: {
             title: "The value, not the name",
-            text: "MAX(E2:E17) reads down the Points column and hands back the single biggest number. It has no idea a Player column exists. Getting from \"the top score\" to \"who scored it\" is a lookup problem, and you will solve it properly in the Lookups unit.",
+            text: "MAX hands back the biggest number. It has no idea a Player column exists. Score → who scored it is a lookup problem — Lookups unit next.",
             code: "=MAX(E2:E17)      the highest score\n=MIN(E2:E17)      the lowest\n=LARGE(E2:E17,3)  the 3rd highest",
           },
           exercises: [
@@ -4814,28 +4814,28 @@ export const COURSE = {
       steps: [
         {
           title: "Totals quietly reward whoever stayed healthy",
-          body: "Games played is not the same for everyone on this roster. Some played seventeen, one played thirteen. That makes a total-points leaderboard partly a measure of availability rather than of how good anyone was.",
+          body: "Games played aren't equal on this roster. Some played 17; one played 13. A total-points board partly measures availability.",
         },
         {
           title: "Dividing turns a total into a rate",
-          body: "Points divided by games gives points per game, which compares like with like. Wrap it in ROUND to cut the decimal tail nobody wants to read. This is the single most common analytical move in all of sports data.",
+          body: "Points ÷ games = points per game — compares like with like. Wrap in ROUND to cut the decimal tail.",
           code: "=ROUND(E2/D2,2)     points per game\n=ROUND(F2/E2,0)     salary per point",
-          note: "Whenever someone hands you a leaderboard built on totals, the first question worth asking is whether everyone had the same opportunity.",
+          note: "Leaderboard on totals? First ask: did everyone get the same opportunity?",
         },
       ],
             setup:
-              "Games played is not the same for every player on this roster — some played 17, one played 12. That makes total points a misleading way to rank them, because the biggest total might just belong to whoever stayed healthy. Dividing by games gives points per game, which compares like with like. This is the single most common analytical move in sports data.",
+              "Games played aren't equal — some 17, one 12. Totals partly measure who stayed healthy. Divide by games for a fair rate.",
             previewSheet: "Roster",
           },
           intro: {
             title: "Divide, then round",
-            text: "Division uses a plain slash. Raw division gives you a long decimal tail nobody wants to read, so wrap it in ROUND with the number of decimal places you want. ROUND takes two arguments: the value, and how many decimals to keep.",
+            text: "Slash divides. Raw division leaves a long decimal tail — wrap in ROUND(value, decimals).",
             code: "=E2/D2              points ÷ games\n=ROUND(E2/D2,2)     the same, to 2 decimals\n=ROUND(F2/E2,0)     salary per point, whole dollars",
           },
           film: [
             {
               title: "Rate stats change the ranking",
-              text: "Tyreek Hill scored 218.2 and A.J. Brown 216.9 — all but identical seasons, on the totals. Per game they are 12.8 and 16.7, because Brown played 13 games to Hill's 17. The totals hid the better player. Whenever someone hands you a leaderboard built on totals, the first question worth asking is whether everyone had the same opportunity.",
+              text: "Hill 218.2, Brown 216.9 — almost identical totals. Per game: 12.8 vs 16.7 (13 games vs 17). Totals hid the better player.",
             },
           ],
           exercises: [
@@ -4916,28 +4916,28 @@ export const COURSE = {
       steps: [
         {
           title: "Formulas that make a decision",
-          body: "Everything so far has done arithmetic. IF is the first function that looks at a value, asks a question about it, and returns different things depending on the answer. It is the backbone of every spreadsheet that categorises anything.",
+          body: "So far, arithmetic. IF looks at a value, asks a question, and returns different things depending on the answer.",
         },
         {
           title: "Test, then true, then false",
-          body: "The order never changes. First the question, then what to return when the answer is yes, then what to return when it is no. Text you want back goes in double quotes so Excel knows you mean the word rather than a cell name.",
+          body: "Order never changes: question, yes-answer, no-answer. Text goes in double quotes so Excel knows you mean the word, not a cell name.",
           code: "=IF(E2>300,\"Stud\",\"Flex\")",
-          note: "Leave off the third argument and Excel returns the word FALSE, which is almost never what you meant and looks alarming in a report.",
+          note: "Skip the third argument and Excel returns FALSE — almost never what you meant.",
         },
       ],
             setup:
-              "IF takes three things: a test, what to return when the test is true, and what to return when it is false. =IF(E2>300,\"Stud\",\"Flex\") reads as \"if this player scored over 300, call them a Stud, otherwise call them a Flex\". It is the first formula that does something other than arithmetic, and it is the backbone of every spreadsheet that categorises anything.",
+              "IF takes three things: test, value if true, value if false. =IF(E2>300,\"Stud\",\"Flex\") means: over 300 → Stud, else Flex.",
             previewSheet: "Roster",
           },
           intro: {
             title: "Test, then true, then false",
-            text: "The order never changes: =IF(test, value_if_true, value_if_false). Text you want returned goes in double quotes; numbers do not. Leave the third argument off and Excel returns the word FALSE, which is almost never what you meant.",
+            text: "Order never changes: =IF(test, if_true, if_false). Text in quotes; numbers not. Skip the third argument → the word FALSE.",
             code: "=IF(E2>300,\"Stud\",\"Flex\")\n=IF(D2=17,\"Full season\",\"Missed time\")\n=IF(E2>=350,\"Elite\",IF(E2>=250,\"Starter\",\"Bench\"))",
           },
           film: [
             {
               title: "Nesting IFs reads like a ladder",
-              text: "Put a second IF where the false answer goes and you get a ladder: check the highest bar first, then the next, and whatever falls through lands on the final default. Order matters — test 350 before 250, or everyone above 350 gets caught by the 250 rung first and labelled Starter.",
+              text: "Put a second IF where the false answer goes. Check the highest bar first. Test 350 before 250, or everyone above 350 gets labelled Starter.",
               code: "=IF(E2>=350,\"Elite\",IF(E2>=250,\"Starter\",\"Bench\"))",
             },
           ],
@@ -5007,22 +5007,22 @@ export const COURSE = {
       steps: [
         {
           title: "Counting everything is rarely the question",
-          body: "You know how many players are on the roster. What people actually ask is how many of them are receivers, or how many cleared a threshold. That means counting only the rows that qualify.",
+          body: "You know the roster size. People ask: how many receivers? How many cleared 250? Count only the rows that qualify.",
         },
         {
           title: "Range first, then the rule",
-          body: "COUNTIF takes the range to look at and the condition to apply. COUNTIFS takes as many range and rule pairs as you need and counts only rows that satisfy every one of them.",
+          body: "COUNTIF: range, then condition. COUNTIFS: as many range/rule pairs as you need — only rows that satisfy every one.",
           code: "=COUNTIF(C2:C17,\"WR\")\n=COUNTIF(E2:E17,\">250\")\n=COUNTIFS(C2:C17,\"WR\",E2:E17,\">200\")",
-          note: "The comparison goes inside the quotes, which looks wrong and is required. Excel reads the whole condition as a piece of text, operator included.",
+          note: "Comparisons go inside quotes — looks wrong, required. Excel reads the whole condition as text.",
         },
       ],
             setup:
-              "COUNT tells you how many rows there are. COUNTIF tells you how many rows match a rule: =COUNTIF(C2:C17,\"WR\") counts the wide receivers. The rule goes in quotes, and comparison rules go in quotes too — \">250\" is a piece of text as far as the formula is concerned, which surprises everyone the first time.",
+              "COUNT = how many rows. COUNTIF = how many match a rule. Rules go in quotes — even \">250\".",
             previewSheet: "Roster",
           },
           intro: {
             title: "Range first, then the rule",
-            text: "COUNTIF takes the range to look at and the rule to apply. COUNTIFS takes as many range/rule pairs as you like, and counts only the rows that satisfy every one of them. The ranges must all be the same height or the pairs won't line up row by row.",
+            text: "COUNTIF: range + rule. COUNTIFS: many pairs; only rows that hit every rule. Ranges must be the same height.",
             code: "=COUNTIF(C2:C17,\"WR\")\n=COUNTIF(E2:E17,\">250\")\n=COUNTIFS(C2:C17,\"WR\",E2:E17,\">200\")",
           },
           exercises: [
@@ -5086,28 +5086,28 @@ export const COURSE = {
       steps: [
         {
           title: "Now add up only the rows that qualify",
-          body: "Same idea as counting, one step further. Not how many receivers, but how many points did the receivers score between them. That means testing one column and adding a different one.",
+          body: "Same idea as counting, one step further. Not how many receivers — how many points did they score? Test one column; add another.",
         },
         {
           title: "Test range, rule, then the range to add",
-          body: "SUMIF checks one column and totals another, and the two are at opposite ends of the formula. The column being tested comes first, the column being added comes last.",
+          body: "SUMIF checks one column and totals another. Test range first; sum range last.",
           code: "=SUMIF(C2:C17,\"RB\",E2:E17)\n=SUMIFS(F2:F17,G2:G17,\"Jordan\")",
-          note: "SUMIF and SUMIFS disagree about argument order: SUMIFS puts the range being added first. There is no reason for this beyond history, and when a conditional total comes back wrong this is the first thing to check.",
+          note: "SUMIFS flips it: sum range first. Historical accident. Wrong total? Check argument order first.",
         },
       ],
             setup:
-              "SUMIF has an argument order that trips up nearly everyone: you give it the range to *test*, then the rule, and then — separately — the range to actually *add*. =SUMIF(C2:C17,\"RB\",E2:E17) means \"look at the positions, find the RBs, and add up their points\". The column you are testing and the column you are summing are different, and they go at opposite ends of the formula.",
+              "SUMIF order trips everyone: test range, rule, then the range to *add*. =SUMIF(C2:C17,\"RB\",E2:E17) means find RBs, add their points.",
             previewSheet: "Roster",
           },
           intro: {
             title: "Test range, rule, sum range",
-            text: "SUMIF checks one column and adds another. SUMIFS flips the order — the column to add comes first, then the pairs — which is inconsistent and genuinely confusing, so it is worth reading the two side by side until the difference sticks.",
+            text: "SUMIF: check one column, add another. SUMIFS flips — sum range first, then pairs. Confusing; read them side by side until it sticks.",
             code: "=SUMIF(C2:C17,\"RB\",E2:E17)      test, rule, then what to add\n=SUMIFS(F2:F17,G2:G17,\"Jordan\") what to add FIRST, then the pairs\n=AVERAGEIF(C2:C17,\"QB\",E2:E17)",
           },
           film: [
             {
               title: "SUMIF and SUMIFS disagree on argument order",
-              text: "SUMIF puts the range being added last. SUMIFS puts it first. This is not a rule with a reason — it is a historical accident in Excel that you simply have to remember. When a conditional total comes back wrong, argument order is the first thing to check.",
+              text: "SUMIF: sum range last. SUMIFS: sum range first. Historical accident — just remember it. Wrong total? Check order first.",
             },
           ],
           exercises: [
@@ -5176,28 +5176,28 @@ export const COURSE = {
       steps: [
         {
           title: "Copy a formula down and it moves",
-          body: "References shift to stay in the same relative position, which is usually exactly what you want. Row two divides row two, row three divides row three. Right up until part of the formula was supposed to stay still.",
+          body: "References shift to stay relative — usually what you want. Until part of the formula was supposed to stay still.",
         },
         {
           title: "The dollar sign freezes what follows it",
-          body: "Put one before the column letter and the row number and that reference stops moving no matter where the formula is copied. Any share-of-total calculation needs this: the numerator should move down the column, and the total absolutely must not.",
+          body: "$ before letter and number → that reference never moves when you copy. Share-of-total needs this: numerator moves; total must not.",
           code: "E2      moves with the formula\n$E$2    never moves\n=ROUND(E2/SUM($E$2:$E$17),3)",
-          note: "It has nothing to do with currency formatting, which is the guess almost everyone makes first.",
+          note: "Nothing to do with currency — the guess almost everyone makes first.",
         },
       ],
             setup:
-              "Copy =E2/E18 down one row and Excel helpfully turns it into =E3/E19. That is usually what you want for the top half and a disaster for the bottom half — the divisor was supposed to stay put. A dollar sign freezes whatever follows it: $E$2 never moves, E$2 keeps the row fixed, $E2 keeps the column fixed. This one character is the difference between a formula you can copy and one you have to rewrite sixteen times.",
+              "Copy =E2/E18 down → =E3/E19. Fine for the top; disaster if the bottom should stay put. $ freezes what follows: $E$2 never moves. One character = copyable vs rewrite sixteen times.",
             previewSheet: "Roster",
           },
           intro: {
             title: "$ freezes what comes after it",
-            text: "References are relative by default — they shift to stay in the same relative position when you copy them. Adding $ makes that part absolute, so it points at the same place no matter where the formula ends up. When a formula works in the first row and returns nonsense further down, a missing $ is almost always why.",
+            text: "References are relative by default. $ makes that part absolute. Works in row 1, nonsense below? Missing $ is almost always why.",
             code: "E2      moves with the formula\n$E$2    never moves\nE$2     row locked, column free\n$E2     column locked, row free",
           },
           film: [
             {
               title: "The share-of-total pattern",
-              text: "Any \"what percentage of the whole is this row\" formula needs an absolute denominator. The numerator should move down the column with each row; the total must not. That is exactly one relative reference over one absolute range — and it is the most common real use of $ you will ever write.",
+              text: "Percent of whole? Absolute denominator. Numerator moves; total stays. Most common real use of $ you'll write.",
               code: "=ROUND(E2/SUM($E$2:$E$17),3)   copy down and the total stays put",
             },
           ],
@@ -5282,19 +5282,19 @@ export const COURSE = {
       steps: [
         {
           title: "This is the one that gets asked about by name",
-          body: "When a job posting says Excel skills, lookups are a large part of what it means, and VLOOKUP is the one most people have heard of. It answers a genuinely common question: I have this name, what is their number.",
+          body: "When a posting says Excel skills, lookups are a big part of it. VLOOKUP is the one most people know. Question: I have this name — what's their number?",
           previewSheet: "Roster",
           previewCaption: "the sheet every lookup below points at",
         },
         {
           title: "Four arguments, and the fourth is not optional",
-          body: "What to look for, the block to search, which column of that block to return, and FALSE to demand an exact match. The column number counts from the left edge of the block you handed it, not from column A of the sheet.",
+          body: "What to look for, the block to search, which column to return, and FALSE for exact match. Column number counts from the left edge of *your* block — not column A of the sheet.",
           code: "=VLOOKUP(\"Justin Jefferson\",A2:E17,5,FALSE)",
-          note: "The fourth argument defaults to approximate matching, which on unsorted data returns confidently wrong answers instead of an error. There is no situation in this course where you want anything but FALSE.",
+          note: "Skip FALSE and Excel approximates — confidently wrong on unsorted data, no error. Always FALSE here.",
         },
       ],
             setup:
-              "A lookup answers \"I have this name — what's their number?\". VLOOKUP takes four things: what to look for, the block of cells to search, which column of that block to return, and FALSE to demand an exact match. The column number counts from the left edge of the block you gave it, not from column A of the sheet — that off-by-one is the single most common VLOOKUP mistake.",
+              "Lookup = \"I have this name — what's their number?\" VLOOKUP: what, where, which column, FALSE for exact. Column count starts at the left of your block — classic off-by-one.",
             previewSheet: "Roster",
           },
           intro: {
@@ -5305,7 +5305,7 @@ export const COURSE = {
           film: [
             {
               title: "Always pass FALSE",
-              text: "The fourth argument defaults to TRUE, meaning approximate match. On unsorted data that does not error — it returns whatever it happened to land near, which looks like a real answer and is not. There is no situation in this course where you want anything but FALSE.",
+              text: "Default is TRUE — approximate. On unsorted data it won't error; it'll land near something and look real. Always FALSE here.",
             },
           ],
           exercises: [
@@ -5377,28 +5377,28 @@ export const COURSE = {
       steps: [
         {
           title: "Lookups fail, and the failure spreads",
-          body: "A lookup that finds nothing returns an error, and every formula downstream that touches that cell then errors too. One missing player can turn an entire column red and take the totals with it.",
+          body: "No match → error. Every formula touching that cell errors too. One missing player can turn a column red and kill the totals.",
         },
         {
           title: "IFERROR decides what failure looks like",
-          body: "Wrap the lookup and give it a fallback. If the lookup works you get its answer, and if it fails you get whatever you chose instead. Text reads better for a human, zero keeps the arithmetic below it working.",
+          body: "Wrap the lookup; give a fallback. Works → answer. Fails → your choice. Text for humans; zero to keep math working.",
           code: "=IFERROR(VLOOKUP(\"Travis Kelce\",A2:E17,5,FALSE),\"Not rostered\")",
-          note: "VLOOKUP also cannot look left: it searches the first column of its range and only returns things to the right of it. That limitation is the entire reason the next lesson exists.",
+          note: "VLOOKUP can't look left — searches the first column, returns only to the right. That's why the next lesson exists.",
         },
       ],
             setup:
-              "#N/A means \"not available\" — the lookup ran fine and simply did not find the value. Sometimes that is real information (the player is not rostered) and sometimes it is a data problem (the name has a trailing space). Either way, a column full of #N/A makes every SUM below it fail too, so you wrap the lookup in IFERROR and decide what should appear instead.",
+              "#N/A = not found. Sometimes real (not rostered); sometimes dirty data (trailing space). Either way, #N/A breaks SUMs below — wrap with IFERROR and choose what to show.",
             previewSheet: "Roster",
           },
           intro: {
             title: "IFERROR catches the failure",
-            text: "IFERROR takes a formula and a fallback. If the formula works you get its answer; if it errors you get the fallback. It is the difference between a sheet that reports \"Not rostered\" and one that breaks every total underneath it.",
+            text: "IFERROR(formula, fallback). Works → answer. Errors → fallback. \"Not rostered\" beats a column that breaks every total.",
             code: "=IFERROR(VLOOKUP(\"Nobody\",A2:E17,5,FALSE),\"Not rostered\")\n=IFERROR(VLOOKUP(\"Nobody\",A2:E17,5,FALSE),0)",
           },
           film: [
             {
               title: "VLOOKUP cannot look left",
-              text: "VLOOKUP always searches the first column of the range and returns something to its right. If the value you have is in column C and the answer you need is in column A, VLOOKUP simply cannot do it — you would have to rearrange the sheet. That limitation is the reason INDEX/MATCH exists, and it is the next lesson.",
+              text: "It searches the first column and only returns to the right. Need column A while searching C? VLOOKUP can't. That's why INDEX/MATCH exists.",
             },
           ],
           exercises: [
@@ -5478,28 +5478,28 @@ export const COURSE = {
       steps: [
         {
           title: "The grown-up version",
-          body: "VLOOKUP has two real weaknesses. It cannot look leftwards, and its column number is a hardcoded count that silently breaks the moment somebody inserts a column. INDEX and MATCH together have neither problem.",
+          body: "VLOOKUP's weaknesses: can't look left, and a hardcoded column number breaks silently when someone inserts a column. INDEX + MATCH have neither problem.",
         },
         {
           title: "Split the job in two",
-          body: "MATCH answers one question: where in this list is my value. It returns a position, not a value. INDEX answers the other: give me item number fourteen from this column. Neither is much use alone and nested together they do everything.",
+          body: "MATCH: where in this list is my value? Returns a position. INDEX: give me item 14 from this column. Nested together, they do everything.",
           code: "=MATCH(\"George Kittle\",A2:A17,0)\n=INDEX(E2:E17,MATCH(\"Tyreek Hill\",A2:A17,0))",
-          note: "Because you name the return column directly rather than counting to it, inserting a column just moves the reference along with it. That is the whole robustness argument.",
+          note: "You name the return column directly — insert a column and the reference moves with it.",
         },
       ],
             setup:
-              "MATCH answers one question: where in this list is my value? It returns a position — 15, not a name. INDEX answers the other: give me item number 15 from this column. Neither is much use alone. Nested together they do everything VLOOKUP does, in any direction, and without a column number that silently breaks when someone inserts a column.",
+              "MATCH = where is my value? Returns a position. INDEX = give me item N from this column. Nested: everything VLOOKUP does, any direction, no fragile column number.",
             previewSheet: "Roster",
           },
           intro: {
             title: "MATCH finds the position, INDEX fetches the value",
-            text: "Read the nested version from the inside out. MATCH runs first and returns a row number; INDEX then pulls that row out of whichever column you point it at. Because you name the return column directly, it can sit anywhere — left of the search column, right of it, another sheet entirely.",
+            text: "Read inside out: MATCH returns a row number; INDEX pulls that row from the column you name. Return column can sit anywhere — left, right, another sheet.",
             code: "=MATCH(\"George Kittle\",A2:A17,0)              → 14\n=INDEX(E2:E17,14)                             → 236.6\n=INDEX(E2:E17,MATCH(\"Tyreek Hill\",A2:A17,0))  → both at once",
           },
           film: [
             {
               title: "Why analysts prefer it",
-              text: "VLOOKUP's column number is a hardcoded count. Insert a column into the middle of the table and every VLOOKUP pointing past it now returns the wrong field — silently, with no error. INDEX/MATCH references the return column by name, so inserting a column just moves the reference along with it.",
+              text: "VLOOKUP's column number is hardcoded. Insert a column and it returns the wrong field — silently. INDEX/MATCH names the return column, so inserts just move the reference.",
             },
           ],
           exercises: [
@@ -5571,22 +5571,22 @@ export const COURSE = {
       steps: [
         {
           title: "The modern one, if you have it",
-          body: "XLOOKUP fixes VLOOKUP's design in a single function: you name the search column and the return column directly, exact match is the default, and the not-found fallback is built in rather than needing a wrapper.",
+          body: "XLOOKUP fixes VLOOKUP in one function: name search and return columns, exact match by default, built-in not-found fallback.",
         },
         {
           title: "Look for, look in, return from",
-          body: "It reads almost like the sentence you would say out loud. An optional fourth argument replaces IFERROR entirely.",
+          body: "Reads almost like the sentence you'd say. Optional fourth argument replaces IFERROR.",
           code: "=XLOOKUP(\"Derrick Henry\",A2:A17,F2:F17)\n=XLOOKUP(\"Travis Kelce\",A2:A17,F2:F17,\"Not rostered\")",
-          note: "Plenty of workplaces run older Excel that does not have it. That is exactly why INDEX and MATCH from the last lesson are still worth knowing: they work everywhere.",
+          note: "Older Excel may not have it. That's why INDEX/MATCH still matter — they work everywhere.",
         },
       ],
             setup:
-              "XLOOKUP is the newer function that fixes VLOOKUP's design in one go: you name the search column and the return column directly, exact match is the default, and the fallback for \"not found\" is built into a fourth argument instead of needing IFERROR. If your Excel has it, use it. If you are on an older version — and plenty of workplaces are — INDEX/MATCH from the last lesson does the same job everywhere.",
+              "XLOOKUP: name search column and return column, exact match by default, not-found fallback built in. Have it? Use it. Older Excel? INDEX/MATCH still works everywhere.",
             previewSheet: "Roster",
           },
           intro: {
             title: "Look for, look in, return from",
-            text: "=XLOOKUP(\"Derrick Henry\", A2:A17, F2:F17) reads almost like the sentence you'd say: find this name, in this column, and give me the matching value from that column. An optional fourth argument replaces IFERROR for the not-found case.",
+            text: "=XLOOKUP(\"Derrick Henry\", A2:A17, F2:F17) reads like: find this name, in this column, return from that column. Fourth argument = not-found fallback.",
             code: "=XLOOKUP(\"Derrick Henry\",A2:A17,F2:F17)\n=XLOOKUP(\"Nobody\",A2:A17,F2:F17,\"Not rostered\")",
           },
           exercises: [
@@ -5671,33 +5671,33 @@ export const COURSE = {
             goal: "Find and remove the invisible whitespace that makes matching fail.",
       steps: [
         {
-          title: "This unit is what the job is actually made of",
-          body: "Tutorials use clean data. Real exports do not arrive clean, and a large share of any analyst role is spent making files usable before any analysis begins. The Import tab is the same league exported badly, on purpose.",
+          title: "This unit is what the job is made of",
+          body: "Tutorials use clean data. Real exports don't. A big chunk of analyst work is making files usable first. Import is the same league — exported badly on purpose.",
           previewSheet: "Import",
           previewCaption: "the Import tab · the same league, exported badly",
         },
         {
           title: "The space you cannot see",
-          body: "Two names look identical and refuse to match, because one of them has spaces on the front that render as nothing. You cannot see them and Excel can. This breaks more lookups than any other single cause.",
+          body: "Two names look identical and won't match — one has leading spaces that render as nothing. You can't see them; Excel can. Breaks more lookups than anything else.",
           code: "=LEN(Import!A2)         15, counting the invisible ones\n=LEN(TRIM(Import!A2))   13, the real name\n=TRIM(Import!A2)        the clean version",
-          note: "When two values look the same and will not match, measure them with LEN before you guess. It turns an invisible problem into a number.",
+          note: "Look the same, won't match? Measure with LEN first. Invisible problem → a number.",
         },
       ],
             setup:
-              "The Import tab is the same league exported badly. The names look right and the lookups fail anyway, because \"  Josh Allen\" with two leading spaces is not the same text as \"Josh Allen\". You cannot see the difference; Excel can. TRIM strips leading and trailing spaces (and collapses runs of them in the middle), and it fixes more broken lookups than any other function.",
+              "Import is the same league exported badly. \"  Josh Allen\" ≠ \"Josh Allen\". You can't see it; Excel can. TRIM strips those spaces — fixes more broken lookups than any other function.",
             previewSheet: "Import",
             previewCaption:
               "The bad export. The names carry stray spaces and the points came through as text.",
           },
           intro: {
             title: "LEN proves it",
-            text: "When two values look the same but won't match, measure them. LEN counts characters, spaces included — if the length is longer than the name you can see, you have found your culprit. Then TRIM removes it.",
+            text: "Look the same, won't match? Measure. LEN counts characters including spaces. Too long? Culprit found. Then TRIM.",
             code: "=LEN(Import!A2)         12  — two spaces hiding\n=LEN(TRIM(Import!A2))   10  — the real name\n=TRIM(Import!A2)        \"Josh Allen\"",
           },
           film: [
             {
               title: "Clean on the way in, not after",
-              text: "The instinct is to fix the source data by hand. On six rows that works; on sixty thousand it does not, and it has to be redone every time the export refreshes. Wrapping the lookup in TRIM fixes it once, permanently, for every future refresh of the same file.",
+              text: "Fix six rows by hand? Fine. Sixty thousand? No — and it breaks again on every refresh. Wrap the lookup in TRIM once; every future refresh stays fixed.",
             },
           ],
           exercises: [
@@ -5766,22 +5766,22 @@ export const COURSE = {
       steps: [
         {
           title: "The most dangerous kind of broken data",
-          body: "Numbers that arrived as text look completely normal. They sit right-aligned or left-aligned depending on the export, they read as numbers, and they behave as words. There is no error and no warning anywhere.",
+          body: "Numbers stored as text look normal. They read as numbers and behave as words. No error, no warning.",
         },
         {
           title: "SUM silently skips them",
-          body: "A column of four hundred point seasons totals to zero, and the sheet looks fine. Any time a total is implausibly low, and especially when it is exactly zero, suspect text before you suspect the data.",
+          body: "A column of 400-point seasons totals to zero — sheet looks fine. Implausibly low total, especially exact zero? Suspect text first.",
           code: "=SUM(Import!B2:B7)         0, because every value is text\n=VALUE(TRIM(Import!B2))    430.4, an actual number",
-          note: "TRIM inside VALUE handles the padding and the conversion in one move. Convert first, then calculate, never the other way round.",
+          note: "VALUE(TRIM(...)) pads and converts in one move. Convert first, then calculate.",
         },
       ],
             setup:
-              "Exports frequently deliver numbers as text — quoted, space-padded, or flagged with a little green triangle in the corner of the cell. They look like numbers and they behave like words: SUM ignores them completely and returns 0 rather than an error. VALUE converts a text number into a real one, and TRIM inside VALUE handles the padding at the same time.",
+              "Exports often deliver numbers as text. They look fine; SUM ignores them and returns 0. VALUE turns text into a real number; TRIM inside handles padding.",
             previewSheet: "Import",
           },
           intro: {
             title: "SUM silently skips text",
-            text: "This is the dangerous part: there is no error. A column of 400-point seasons totals to zero and the sheet looks fine. Any time a total is implausibly low — especially exactly zero — suspect text before you suspect the data.",
+            text: "No error. A column of big seasons totals to zero and looks fine. Suspiciously low — especially exact zero — suspect text first.",
             code: "=SUM(Import!B2:B7)              0    — every value is text\n=VALUE(TRIM(Import!B2))         430.4\n=VALUE(TRIM(Import!B2))+VALUE(TRIM(Import!B3))",
           },
           exercises: [
@@ -5851,28 +5851,28 @@ export const COURSE = {
       steps: [
         {
           title: "Empty is not the same as zero",
-          body: "This distinction sounds pedantic and changes your answers. AVERAGE skips blank cells entirely, so a blank quietly shrinks the denominator. A zero gets included and drags the average down. Both are defensible; picking one by accident is not.",
+          body: "Sounds pedantic — changes your answers. AVERAGE skips blanks (shrinks the denominator). Zero gets included (drags the average). Both ok; accident not.",
         },
         {
           title: "Count the gaps before deciding",
-          body: "COUNTBLANK counts the empties and COUNTA counts the rest. Together they tell you the shape of what is missing, and the two should add up to the number of rows you thought you had.",
+          body: "COUNTBLANK = empties. COUNTA = the rest. Together they should add up to the rows you thought you had.",
           code: "=COUNTBLANK(Import!B2:B7)\n=COUNTA(Import!B2:B7)\n=IF(Import!B6=\"\",\"Missing\",\"Present\")",
-          note: "A missed game should probably be blank if you are measuring per-game scoring, and zero if you are measuring season output. Say which you meant out loud, then make the sheet agree.",
+          note: "Missed game: blank for per-game scoring, zero for season output. Say which out loud, then make the sheet agree.",
         },
       ],
             setup:
-              "One player on the Import sheet has no points value at all — the cell is empty. Empty is not zero. AVERAGE skips blanks entirely, so a blank quietly shrinks your denominator, while a zero drags the average down. Both are defensible choices; picking one by accident is not. Start by counting how many you have.",
+              "One Import player has an empty points cell. Empty ≠ zero. AVERAGE skips blanks; zero drags the average. Both defensible — pick on purpose. Count gaps first.",
             previewSheet: "Import",
           },
           intro: {
             title: "Count the gaps first",
-            text: "COUNTBLANK counts empty cells; COUNTA counts non-empty ones. Together they tell you the shape of what is missing before you decide what to do about it. Then IF lets you label or substitute, so the gap is visible in the output rather than silently absorbed.",
+            text: "COUNTBLANK = empty. COUNTA = non-empty. See the shape of what's missing, then IF to label or substitute so gaps aren't silently absorbed.",
             code: "=COUNTBLANK(Import!B2:B7)   1\n=COUNTA(Import!B2:B7)       5\n=IF(Import!B6=\"\",\"Missing\",\"Present\")",
           },
           film: [
             {
               title: "Blank and zero average differently",
-              text: "Given 10, 20 and a blank, AVERAGE returns 15 — it drops the blank and divides by 2. Replace the blank with 0 and you get 10, dividing by 3. Neither is wrong in the abstract; what is wrong is not knowing which one your sheet did. Say out loud whether a missing game is a zero or an absence, then make the formula agree.",
+              text: "10, 20, blank → AVERAGE = 15 (÷2). Blank → 0 → AVERAGE = 10 (÷3). Neither wrong — not knowing which your sheet did is. Decide out loud, then match the formula.",
             },
           ],
           exercises: [
@@ -5943,22 +5943,22 @@ export const COURSE = {
       steps: [
         {
           title: "Clean is not always the same as useful",
-          body: "Once the data is trustworthy you often still need it in a different shape: a first name split off, team codes standardised, a list of names glued together for an email. That reshaping is its own small toolkit.",
+          body: "Trusted data still needs reshaping: first name split off, team codes standardised, names glued for an email. Small toolkit of its own.",
         },
         {
           title: "A few blunt tools, endlessly recombined",
-          body: "None of these is complicated alone. The skill is seeing which two or three to nest to get from what you have to what you need, exactly like VALUE inside TRIM in the last lesson.",
+          body: "None is hard alone. Skill is nesting two or three to get from what you have to what you need — like VALUE(TRIM(...)).",
           code: "=LEFT(A2,4)                  first four characters\n=UPPER(Import!C2)            standardise the case\n=PROPER(TRIM(Import!A3))     clean and re-case in one\n=TEXTJOIN(\", \",TRUE,A2:A4)   glue a range together",
-          note: "LEFT and RIGHT count characters, not words, so they cut names mid-word the moment the length changes. Real splitting needs the position of the space, which is what FIND and Text to Columns are for.",
+          note: "LEFT/RIGHT count characters, not words — they cut mid-name when lengths change. Real splits need FIND or Text to Columns.",
         },
       ],
             setup:
-              "Once the data is clean you often still need it in a different shape — first names split off, team codes upper-cased, a list of names glued into one cell for an email. LEFT and RIGHT take characters off either end, UPPER/LOWER/PROPER fix capitalisation, and TEXTJOIN stitches a range together with a separator of your choosing.",
+              "Clean data still needs reshaping — split names, upper-case codes, glue a list for email. LEFT/RIGHT, UPPER/LOWER/PROPER, TEXTJOIN.",
             previewSheet: "Roster",
           },
           intro: {
             title: "A small toolkit, endlessly recombined",
-            text: "None of these functions is complicated on its own. The skill is seeing which two or three to nest together to get from what you have to what you need — the same instinct as VALUE(TRIM(...)) in the last lesson.",
+            text: "None of these is hard alone. Skill is nesting two or three — same instinct as VALUE(TRIM(...)).",
             code: "=LEFT(A2,4)                    \"Josh\"\n=UPPER(Import!C2)              \"BUF\"\n=PROPER(TRIM(Import!A3))       \"Patrick Mahomes\"\n=TEXTJOIN(\", \",TRUE,A2:A4)     one cell, three names",
           },
           exercises: [
@@ -6026,48 +6026,48 @@ export const COURSE = {
       title: "Overtime — CTEs & Temp Tables",
       drive: "Overtime, 1st Drive · Own 20",
       description:
-        "Query writing ends with window functions. This is where SQL starts helping you organize and reuse work: name a subquery instead of nesting it, and stash an intermediate result instead of recomputing it.",
+        "Name a subquery so it reads top to bottom. Stash a result so you don't recompute it. Same SQL power — cleaner play-calling.",
       skills: ["WITH", "Recursive CTEs", "Temp Tables"],
       status: "live",
       lessons: [
         {
           id: "u19-l1",
           title: "Name Your Subquery",
-          blurb: "WITH turns a buried subquery into a readable first step.",
+          blurb: "WITH turns a buried subquery into a named first step.",
           brief: {
-            goal: "Write a query as a named step instead of a nested subquery.",
+            goal: "Write a query as a named step instead of nesting a subquery.",
       steps: [
         {
-          title: "Nested queries stop being readable fast",
-          body: "You can already put a query inside another query. It works, and at one level deep it is fine. At two or three it becomes something you have to unpick from the inside out, and the person reading it next month is you.",
+          title: "Nesting gets messy fast",
+          body: "You can already put a query inside another query. One level deep? Fine. Two or three? You're peeling it from the inside out. And next month's reader is you.",
         },
         {
-          title: "WITH lets you name a step before you use it",
-          body: "Give a subquery a name up front and the rest of the query can treat that name exactly like a table. The logic is identical. What changes is that the query now reads top to bottom, in the order the work actually happens.",
+          title: "Name the step first",
+          body: "WITH lets you give a subquery a name up front. After that, treat the name like a table. Same logic — just top to bottom, like a play sheet.",
           code: "WITH big_games AS (\n  SELECT * FROM week_results WHERE fantasy_pts > 30\n)\nSELECT player, COUNT(*) FROM big_games GROUP BY player;",
-          note: "This is a CTE, short for common table expression. Nobody says the long version out loud.",
+          note: "Pros call this a CTE (common table expression). You'll say WITH.",
         },
       ],
             setup:
-              "Every subquery you've written so far lived inside another query's FROM or WHERE — readable for one level, painful past two. WITH lets you name a subquery before you use it, so the query reads top to bottom instead of inside out. Here's the exact same games-over-30 filter, written as a CTE.",
+              "You've buried subqueries in FROM and WHERE. WITH names the step first, so the query reads top to bottom. Here's the same games-over-30 filter as a CTE.",
             previewSql:
               "WITH big_games AS (SELECT player, week, fantasy_pts FROM week_results WHERE season = 2024 AND fantasy_pts > 30) SELECT * FROM big_games ORDER BY fantasy_pts DESC;",
             previewCaption: "one CTE, then a plain SELECT from its name",
           },
           intro: {
-            title: "WITH name AS (...) gives a subquery a name",
-            text: "Write WITH name AS (a SELECT), and for the rest of the query you can treat name exactly like a table — SELECT FROM it, JOIN it, filter it. Nothing about what it computes changes from writing the same thing as a subquery; only how it reads does.",
+            title: "WITH name AS (...) names a subquery",
+            text: "Write WITH name AS (a SELECT). Then SELECT FROM it, JOIN it, filter it — like any table. What it computes stays the same. How it reads gets way clearer.",
             code: "WITH big_games AS (\n  SELECT player, week, fantasy_pts\n  FROM week_results\n  WHERE season = 2024 AND fantasy_pts > 30\n)\nSELECT * FROM big_games\nORDER BY fantasy_pts DESC;",
           },
           film: [
             {
-              title: "A CTE is a subquery with a name, not a new power",
-              text: "Everything a CTE can do, a subquery in FROM can also do — same rows, same performance in SQLite. The entire benefit is readability: once a query needs two or three logical steps, nested subqueries force a reader to work from the inside out, while a CTE reads top to bottom like a recipe. Reach for one the moment nesting a subquery would make you scroll sideways to find the closing parenthesis.",
+              title: "Same rows — clearer order",
+              text: "A CTE and a subquery in FROM can return the same rows. The win is reading top to bottom instead of inside out.",
               code: "-- same result, opposite reading order\nSELECT * FROM (\n  SELECT player, fantasy_pts FROM week_results WHERE fantasy_pts > 30\n) AS big_games;\n\nWITH big_games AS (\n  SELECT player, fantasy_pts FROM week_results WHERE fantasy_pts > 30\n)\nSELECT * FROM big_games;",
             },
             {
-              title: "The name only exists for this one statement",
-              text: "big_games isn't a table — it disappears the moment this query finishes. Run a second query that tries to SELECT FROM big_games and SQL has no idea what you're talking about; you'd have to write the whole WITH clause again. That's the tradeoff CTEs make for their readability: reusable within one query, invisible outside it. (A view, coming up two units from now, is the version that sticks around.)",
+              title: "The name dies with the query",
+              text: "big_games isn't a real table — it's gone when this statement ends. A later query that SELECTs from big_games won't know what you mean.",
             },
           ],
           exercises: [
@@ -6082,7 +6082,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "It's scoped to the statement it's written in. Nothing persists after the query finishes running.",
+                "It only lives inside this statement — nothing sticks around after the query finishes.",
             },
             {
               type: "fill",
@@ -6094,8 +6094,7 @@ export const COURSE = {
               ],
               bank: ["WITH", "CREATE", "AS"],
               answer: ["WITH"],
-              explain:
-                "WITH starts the clause; AS connects the name to the subquery that defines it.",
+              explain: "WITH starts the clause; AS ties the name to the subquery.",
             },
             {
               type: "query",
@@ -6106,9 +6105,9 @@ export const COURSE = {
               expected:
                 "WITH big_games AS (SELECT player, week, fantasy_pts FROM week_results WHERE season = 2024 AND fantasy_pts > 30) SELECT * FROM big_games ORDER BY fantasy_pts DESC;",
               orderMatters: true,
-              hint: "Finish it with SELECT * FROM big_games ORDER BY fantasy_pts DESC;",
+              hint: "Finish with SELECT * FROM big_games ORDER BY fantasy_pts DESC;",
               explain:
-                "The CTE does the filtering; the final SELECT just reads from it like any table.",
+                "The CTE filters; the final SELECT just reads from that name like a table.",
             },
             {
               type: "query",
@@ -6121,46 +6120,46 @@ export const COURSE = {
               orderMatters: false,
               hint: "SELECT player, fantasy_pts FROM qb_games WHERE season = 2024 AND week = 1;",
               explain:
-                "The CTE narrowed to quarterbacks once; the outer query narrowed to one week. Two simple filters instead of one tangled one.",
+                "CTE narrows to QBs; outer query narrows to one week — two simple filters.",
             },
           ],
         },
         {
           id: "u19-l2",
           title: "Chaining Multiple CTEs",
-          blurb: "Build a report in stages — each CTE sees the ones before it.",
+          blurb: "Build a report in stages — each CTE can use the ones before it.",
           brief: {
             goal: "Chain two or more CTEs into a multi-step report.",
       steps: [
         {
-          title: "Real reports are built in steps",
-          body: "Almost nothing worth reporting comes out of one pass. You compute season totals, then you rank them. You clean the data, then you group it. Trying to do both at once in a single expression is where queries turn into something nobody wants to touch.",
+          title: "Real reports take steps",
+          body: "You rarely get the answer in one pass. First season totals, then ranks. First clean, then group. Cram both into one expression and nobody wants to touch it.",
         },
         {
-          title: "One WITH can hold several named steps",
-          body: "Separate them with commas and each one can use anything defined before it. The result reads like a recipe: first this, then that, then the answer.",
+          title: "One WITH, several names",
+          body: "Comma-separate the steps. Each one can use anything defined above it. Reads like a recipe: first this, then that, then the answer.",
           code: "WITH totals AS (\n  SELECT player, SUM(fantasy_pts) AS pts FROM week_results GROUP BY player\n),\nranked AS (\n  SELECT player, pts, RANK() OVER (ORDER BY pts DESC) AS rk FROM totals\n)\nSELECT * FROM ranked WHERE rk <= 5;",
         },
       ],
             setup:
-              "One WITH clause can define several CTEs, comma-separated, and each one can reference any CTE defined before it. That's how a real report gets built: one step computes the raw numbers, the next reshapes or ranks them. Here's a season-totals step feeding a ranking step.",
+              "One WITH can define several CTEs, comma-separated. Later ones can read earlier ones. Here's season totals feeding a ranking step.",
             previewSql:
               "WITH season_totals AS (SELECT player, SUM(fantasy_pts) AS total FROM week_results WHERE season = 2024 GROUP BY player), ranked AS (SELECT player, total, RANK() OVER (ORDER BY total DESC) AS rk FROM season_totals) SELECT player, total FROM ranked WHERE rk <= 3;",
             previewCaption: "two CTEs: totals, then a rank built from those totals",
           },
           intro: {
             title: "Comma-separate CTEs to chain them",
-            text: "WITH first AS (...), second AS (...) defines two named steps in one clause — and second is free to SELECT FROM first, the same way the final query selects from either of them. Each step only has to solve the part of the problem in front of it; the chain does the rest.",
+            text: "WITH first AS (...), second AS (...) — and second can SELECT FROM first. Each step solves one piece. The chain does the rest.",
             code: "WITH season_totals AS (\n  SELECT player, SUM(fantasy_pts) AS total\n  FROM week_results\n  WHERE season = 2024\n  GROUP BY player\n),\nranked AS (\n  SELECT player, total,\n         RANK() OVER (ORDER BY total DESC) AS rk\n  FROM season_totals\n)\nSELECT player, total FROM ranked WHERE rk <= 3;",
           },
           film: [
             {
-              title: "Each step only has to be simple",
-              text: "The whole point of chaining is that no single CTE has to do everything at once. season_totals only aggregates. ranked only ranks. Neither has to think about the other's job — the same discipline as writing a function that does one thing well, applied to SQL.",
+              title: "Keep each step simple",
+              text: "season_totals only aggregates. ranked only ranks. Neither does the other's job — that's the point of chaining.",
             },
             {
-              title: "Order matters; scope doesn't run backward",
-              text: "A later CTE can reference an earlier one, but never the reverse — season_totals can't reach forward and use anything from ranked, because ranked hasn't been defined yet when season_totals is being read. If a chain feels tangled, that's usually a sign one CTE is trying to do two steps' worth of work; split it instead of reordering it.",
+              title: "Later can see earlier — not the reverse",
+              text: "ranked can read season_totals. season_totals can't reach forward to ranked. If a chain feels tangled, split a step rather than reorder it.",
             },
           ],
           exercises: [
@@ -6175,8 +6174,7 @@ export const COURSE = {
                 "Only if a is recursive",
               ],
               answer: 0,
-              explain:
-                "That's the entire point of chaining — each step builds on the ones defined before it.",
+              explain: "Later steps build on earlier ones — that's why you chain.",
             },
             {
               type: "fill",
@@ -6188,8 +6186,7 @@ export const COURSE = {
               ],
               bank: [",", ";", "AND"],
               answer: [","],
-              explain:
-                "A comma joins two CTE definitions in the same WITH clause — a semicolon would end the statement early.",
+              explain: "A comma joins two CTE definitions; a semicolon would end the statement early.",
             },
             {
               type: "query",
@@ -6201,8 +6198,7 @@ export const COURSE = {
                 "WITH season_totals AS (SELECT player, SUM(fantasy_pts) AS total FROM week_results WHERE season = 2024 GROUP BY player), ranked AS (SELECT player, total, RANK() OVER (ORDER BY total DESC) AS rk FROM season_totals) SELECT player, total FROM ranked WHERE rk <= 5;",
               orderMatters: false,
               hint: "SELECT player, total FROM ranked WHERE rk <= 5;",
-              explain:
-                "Two clean steps beat one query trying to aggregate and rank at the same time.",
+              explain: "Two clean steps beat one query that aggregates and ranks at once.",
             },
             {
               type: "query",
@@ -6214,49 +6210,48 @@ export const COURSE = {
                 "WITH by_position AS (SELECT position, AVG(fantasy_pts) AS avg_pts FROM week_results WHERE season = 2024 GROUP BY position), with_gap AS (SELECT position, 30 - avg_pts AS gap FROM by_position) SELECT position, gap FROM with_gap ORDER BY position;",
               orderMatters: true,
               hint: "SELECT position, gap FROM with_gap ORDER BY position;",
-              explain:
-                "by_position never has to know about the number 30 — that logic lives entirely in the step that needs it.",
+              explain: "by_position never needs to know about 30 — that math lives in the next step.",
             },
           ],
         },
         {
           id: "u19-l3",
           title: "Walk the Whole Season",
-          blurb: "WITH RECURSIVE: build a sequence, then find what's missing from it.",
+          blurb: "WITH RECURSIVE builds a sequence — then you find what's missing.",
           brief: {
-            goal: "Generate a sequence with a recursive CTE, and use it to find gaps in real data.",
+            goal: "Generate a sequence with a recursive CTE, then find gaps in real data.",
       steps: [
         {
-          title: "Sometimes the rows you need do not exist",
-          body: "Here is a real problem. You want to show every week of the season, including the ones a player missed. Those weeks are not in the table, because nothing happened in them. You cannot select rows that were never written.",
+          title: "Some rows never got written",
+          body: "You want every week of the season — including byes and missed games. Those weeks aren't in the table. You can't SELECT rows that were never there.",
         },
         {
-          title: "A recursive CTE builds rows out of nothing",
-          body: "It has two halves joined by UNION ALL. The base case is where you start, and the recursive case is the rule for making the next row from the last one. It keeps going until the rule stops producing rows.",
+          title: "Build the weeks yourself",
+          body: "A recursive CTE has two halves joined by UNION ALL: a start row, then a rule that makes the next row from the last. It keeps going until the rule stops matching.",
           code: "WITH RECURSIVE weeks(n) AS (\n  SELECT 1\n  UNION ALL\n  SELECT n + 1 FROM weeks WHERE n < 18\n)\nSELECT n FROM weeks;",
-          note: "Generating a sequence and LEFT JOINing your real data onto it is the standard way to make gaps visible. Missing weeks become rows with NULLs instead of silently not being there.",
+          note: "Generate 1–18, LEFT JOIN real games onto it. Missing weeks show up as NULLs instead of vanishing.",
         },
       ],
             setup:
-              "Every CTE so far ran once. A recursive CTE runs itself repeatedly, each pass building on the last, until a stopping condition is met — the classic use is generating a sequence that doesn't exist anywhere in your tables, like every week number from 1 to 18. Here it is generating exactly that.",
+              "So far every CTE ran once. A recursive CTE re-runs itself until a stop condition. Classic use: invent week numbers 1–18 that don't live in any table.",
             previewSql:
               "WITH RECURSIVE weeks(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM weeks WHERE n < 18) SELECT n FROM weeks;",
             previewCaption: "18 rows, built one at a time, from nothing",
           },
           intro: {
-            title: "A base case, then a rule for building the next row",
-            text: "WITH RECURSIVE name(col) AS (base_case UNION ALL recursive_case) has two halves: the base case is the starting row (SELECT 1), and the recursive case builds the next row FROM the CTE itself (SELECT n + 1 FROM weeks WHERE n < 18) — referencing its own name is exactly what makes it recursive. SQL keeps re-running the recursive half, feeding each result back in, until the WHERE condition stops matching.",
+            title: "Start row, then a rule for the next",
+            text: "WITH RECURSIVE name(col) AS (base UNION ALL recursive). The base is SELECT 1. The recursive half SELECTs from the CTE itself — that's what makes it recursive. SQL feeds each result back in until the WHERE stops matching.",
             code: "WITH RECURSIVE weeks(n) AS (\n  SELECT 1                             -- base case: start at 1\n  UNION ALL\n  SELECT n + 1 FROM weeks WHERE n < 18 -- keep adding 1 until 18\n)\nSELECT n FROM weeks;",
           },
           film: [
             {
-              title: "Why generate a sequence that isn't in any table?",
-              text: "week_results only has rows for games that were actually played — a bye week or an injury just means the row doesn't exist, the same silent-absence problem the JOIN unit covered. A recursive CTE generating every week number 1 through 18, LEFT JOINed back to a player's real games, turns 'which weeks are missing' into a normal anti-join — except now you're checking against weeks that should exist, not rows in another table.",
+              title: "Why invent weeks that aren't in the table?",
+              text: "week_results only has games that were played. A bye just means no row. Generate weeks 1–18, LEFT JOIN a player's games, and missing weeks become a normal anti-join.",
               code: "WITH RECURSIVE weeks(n) AS (\n  SELECT 1 UNION ALL SELECT n + 1 FROM weeks WHERE n < 18\n)\nSELECT weeks.n AS week\nFROM weeks\nLEFT JOIN week_results w\n  ON w.week = weeks.n AND w.player = 'Josh Allen' AND w.season = 2024\nWHERE w.player IS NULL;",
             },
             {
-              title: "Recursion needs a stopping condition, or it never stops",
-              text: "WHERE n < 18 in the recursive half isn't optional — it's what eventually makes the recursive case produce zero new rows, which is the only way recursion ends. Get the comparison backwards, and the CTE tries to generate rows forever; SQLite has a default recursion limit that will eventually error rather than hang, but the fix is always the same: check the stopping condition first when a recursive CTE misbehaves.",
+              title: "You need a stop condition",
+              text: "WHERE n < 18 is what ends recursion — when it matches nothing, you're done. Flip the comparison and SQLite hits a recursion limit instead of hanging forever.",
             },
           ],
           exercises: [
@@ -6272,7 +6267,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "Once n reaches 18, n < 18 is false for every row, the recursive half returns nothing, and the whole CTE is done.",
+                "Once n hits 18, n < 18 is false — the recursive half returns nothing and you're done.",
             },
             {
               type: "fill",
@@ -6286,8 +6281,7 @@ export const COURSE = {
               ],
               bank: ["1", "UNION ALL", "0", "JOIN"],
               answer: ["1", "UNION ALL"],
-              explain:
-                "Start at 1, then UNION ALL the rule that builds each next row from the last.",
+              explain: "Start at 1, then UNION ALL the rule that builds each next row.",
             },
             {
               type: "query",
@@ -6299,8 +6293,7 @@ export const COURSE = {
                 "WITH RECURSIVE weeks(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM weeks WHERE n < 17) SELECT n FROM weeks;",
               orderMatters: true,
               hint: "SELECT n FROM weeks;",
-              explain:
-                "17 rows, built one at a time from a single starting row.",
+              explain: "Seventeen rows, built one at a time from a single starting row.",
             },
             {
               type: "query",
@@ -6313,43 +6306,43 @@ export const COURSE = {
               orderMatters: false,
               hint: "LEFT JOIN week_results w ON w.week = weeks.n AND w.player = 'Josh Allen' AND w.season = 2024, then WHERE w.player IS NULL.",
               explain:
-                "Weeks 12 and 18 — the same anti-join pattern from the JOIN unit, just checking against a generated sequence instead of another table.",
+                "Weeks 12 and 18 — same anti-join pattern, now against a generated sequence.",
             },
           ],
         },
         {
           id: "u19-l4",
           title: "Stash a Result and Come Back to It",
-          blurb: "CREATE TEMP TABLE: a real table that disappears when the session ends.",
+          blurb: "CREATE TEMP TABLE: a real table that vanishes when the session ends.",
           brief: {
             goal: "Know when a temp table beats a CTE.",
       steps: [
         {
-          title: "A CTE forgets everything the moment it finishes",
-          body: "Its name lives for exactly one statement. Run a second, separate query that references it and the database has no idea what you are talking about. Usually that is fine. Occasionally it is the exact thing standing in your way.",
+          title: "A CTE forgets the next query",
+          body: "Its name lives for one statement. Run a second query that references it and the database shrugs. Usually fine. Sometimes that's exactly the wall you're hitting.",
         },
         {
-          title: "A temp table survives the whole session",
-          body: "CREATE TEMP TABLE runs the SELECT once and stores the result as a genuine table. Every later query in the same connection can read it, and it disappears on its own when you disconnect, so there is nothing to clean up.",
+          title: "A temp table lasts the session",
+          body: "CREATE TEMP TABLE runs the SELECT once and stores the result as a real table. Later queries in the same connection can read it. Disconnect and it's gone — nothing to clean up.",
           code: "CREATE TEMP TABLE big_games AS\nSELECT * FROM week_results WHERE fantasy_pts > 30;",
-          note: "It is also computed once rather than re-run. If an expensive step feeds five later queries, that difference is the whole reason to reach for this.",
+          note: "It's also computed once, not re-run. Expensive step feeding five later queries? That's why you reach for this.",
         },
       ],
             setup:
-              "A CTE's name disappears the instant its query finishes — reference it from a second, separate query and SQL has no idea what you mean. A temporary table doesn't have that limit: CREATE TEMP TABLE name AS (a SELECT) makes a real table that any later query in the same session can read, and SQLite drops it automatically when the connection closes.",
+              "A CTE's name dies when its query ends. CREATE TEMP TABLE name AS (a SELECT) makes a real table any later query in the session can read. SQLite drops it when the connection closes.",
             previewSql:
               "SELECT player, week, fantasy_pts FROM week_results WHERE season = 2024 AND fantasy_pts > 25 LIMIT 5;",
             previewCaption: "the kind of result worth stashing instead of recomputing",
           },
           intro: {
-            title: "CREATE TEMP TABLE makes a real, if short-lived, table",
-            text: "CREATE TEMP TABLE big_games AS SELECT ... runs the SELECT once and stores the result as an actual table — not a re-run definition like a CTE. Query it as many times as you want afterward, from as many separate statements as you want, for as long as the session lasts. Close the connection and it's gone — nothing you'd want to keep around long-term belongs in a temp table.",
+            title: "CREATE TEMP TABLE makes a short-lived real table",
+            text: "CREATE TEMP TABLE big_games AS SELECT ... runs once and stores rows. Query it from as many later statements as you want, until the session ends. Close the connection and it's gone.",
             code: "CREATE TEMP TABLE big_games AS\nSELECT player, week, fantasy_pts\nFROM week_results\nWHERE fantasy_pts > 25;\n\n-- now usable from any later query, as many times as you like\nSELECT COUNT(*) FROM big_games;",
           },
           film: [
             {
-              title: "A temp table is computed once; a CTE is computed every time it's used",
-              text: "Reference the same CTE name three times in one query (say, in a self-join) and SQL re-runs its definition three times. A temp table runs its SELECT exactly once, when it's created, and every later read is just reading stored rows — which matters the moment the underlying computation is expensive and gets reused a lot.",
+              title: "Computed once vs re-run every time",
+              text: "Reference the same CTE three times and SQL may re-run its definition three times. A temp table runs its SELECT once at CREATE — later reads just pull stored rows.",
             },
           ],
           exercises: [
@@ -6364,7 +6357,7 @@ export const COURSE = {
               ],
               answer: 1,
               explain:
-                "That persistence is the entire reason temp tables exist — everything else about querying them is identical to any other table.",
+                "That session-long life is why temp tables exist — querying them is otherwise just like any table.",
             },
             {
               type: "mc",
@@ -6376,8 +6369,7 @@ export const COURSE = {
                 "It never does — you must DROP it manually",
               ],
               answer: 1,
-              explain:
-                "It behaves like a real table for as long as the session is open, then SQLite cleans it up automatically.",
+              explain: "It acts like a real table until the session closes, then SQLite cleans it up.",
             },
             {
               type: "fill",
@@ -6389,8 +6381,7 @@ export const COURSE = {
               ],
               bank: ["CREATE", "WITH", "SELECT INTO"],
               answer: ["CREATE"],
-              explain:
-                "CREATE TEMP TABLE name AS (a SELECT) — the AS connects the table to the query that fills it, the same keyword CTEs use for the same reason.",
+              explain: "CREATE TEMP TABLE name AS (a SELECT) — AS fills the table from the query.",
             },
             {
               type: "mc",
@@ -6403,47 +6394,46 @@ export const COURSE = {
                 "A VIEW is required",
               ],
               answer: 1,
-              explain:
-                "This is the exact situation temp tables exist for: compute once, reuse repeatedly, instead of paying the cost on every reference.",
+              explain: "Compute once, reuse — that's the temp-table sweet spot.",
             },
           ],
         },
         {
           id: "u19-l5",
           title: "Pick the Right Tool",
-          blurb: "Three ways to hold an intermediate result — one decision framework.",
+          blurb: "Subquery, CTE, or temp table — one decision: how long must it live?",
           brief: {
             goal: "Choose between a subquery, a CTE, and a temp table without guessing.",
       steps: [
         {
-          title: "Three tools that all do the same thing",
-          body: "Subqueries, CTEs and temp tables all compute something in the middle and let a later part of your SQL use it. None of them can do anything the others cannot. Choosing between them is not about power, which is why it feels arbitrary until someone gives you the actual question.",
+          title: "Three tools, same job",
+          body: "Subqueries, CTEs, and temp tables all hold a middle result for later SQL. None can do something the others can't. The choice isn't about power.",
         },
         {
-          title: "The question is how long it needs to live",
-          body: "Needed once, buried inside a single query, and small? A subquery is enough. Needed once, but the query has real steps to it? A CTE keeps it readable. Needed by several separate queries in a row? That is a temp table, and nothing else will do.",
-          note: "Scope and lifetime, not capability. Once you hear the decision phrased that way it stops being a judgement call.",
+          title: "Ask how long it needs to live",
+          body: "Once, buried in one query, small? Subquery. Once, but with real steps? CTE. Several separate queries in a row? Temp table.",
+          note: "Scope and lifetime — not capability. Phrase it that way and the guesswork drops.",
         },
       ],
             setup:
-              "All three compute an intermediate result and let a later part of your SQL use it — the difference is scope and lifetime, not power. One question settles almost every case: does anything outside this one statement need to see the result?",
+              "All three compute a middle result. The difference is lifetime, not power. One question settles most cases: does anything outside this statement need to see it?",
             previewSql:
               "SELECT player, SUM(fantasy_pts) AS total FROM week_results WHERE season = 2024 GROUP BY player LIMIT 5;",
             previewCaption: "the same aggregate — subquery, CTE, or temp table, depending on who needs it",
           },
           intro: {
-            title: "One statement or many? That's the whole decision",
-            text: "Needed once, buried in a single query? A subquery is enough. Needed once, but the query has multiple logical steps? A CTE keeps it readable. Needed by several separate queries, or expensive enough that recomputing it is wasteful? A temp table. Reach for the simplest tool that actually survives as long as you need it to.",
+            title: "One statement or many?",
+            text: "Once, buried in a single query? Subquery. Once, with multiple steps? CTE. Several separate queries, or expensive to recompute? Temp table. Pick the simplest tool that lasts as long as you need.",
             code: "-- once, simple:          a subquery\n-- once, multi-step:      a CTE\n-- reused across queries: a temp table",
           },
           film: [
             {
-              title: "Readability breaks the subquery-vs-CTE tie",
-              text: "A subquery and a single CTE compute identically in SQLite — there's no performance reason to prefer one over the other for a one-off. The real tiebreaker is how many logical steps the query has. One step, one filter: a subquery is fine. The moment you'd nest a second subquery inside the first just to keep reading top-down, switch to a CTE before the nesting gets hard to follow.",
+              title: "Readability breaks the subquery–CTE tie",
+              text: "In SQLite, one subquery and one CTE compute the same. One filter? Subquery is fine. About to nest a second subquery just to keep reading top-down? Switch to a CTE.",
             },
             {
-              title: "Reuse is the only thing that justifies a temp table",
-              text: "A temp table costs something a CTE doesn't: it's a real table, so it takes up space and someone reading the script later has to track that it exists. That cost only pays for itself when the result is genuinely reused — multiple separate queries, or a result expensive enough that recomputing it (which is exactly what a CTE does on every reference) would be wasteful. Default to a CTE; reach for a temp table only when you can point to the reuse.",
+              title: "Reuse is what justifies a temp table",
+              text: "A temp table is a real object — space, and something else to track. Pay that only when you genuinely reuse the result across queries, or when recomputing would hurt.",
             },
           ],
           exercises: [
@@ -6453,8 +6443,7 @@ export const COURSE = {
                 "A query needs a season-totals calculation exactly once, as one step before a final SELECT. Best fit?",
               options: ["A temp table", "A CTE", "Neither works", "A trigger"],
               answer: 1,
-              explain:
-                "One statement, one use — a CTE gives the readability without paying for a table that outlives the query.",
+              explain: "One statement, one use — a CTE gives the name without outliving the query.",
             },
             {
               type: "mc",
@@ -6467,8 +6456,7 @@ export const COURSE = {
                 "It can't be done",
               ],
               answer: 1,
-              explain:
-                "This is the one scenario a CTE genuinely can't cover — its name doesn't survive past the statement it's defined in.",
+              explain: "A CTE's name dies with its statement — this is where a temp table wins.",
             },
             {
               type: "fill",
@@ -6482,8 +6470,7 @@ export const COURSE = {
               ],
               bank: ["one statement", "the whole session"],
               answer: ["one statement", "the whole session"],
-              explain:
-                "Each tool trades more persistence for more setup — pick the shortest lifetime that still covers what you need.",
+              explain: "Pick the shortest lifetime that still covers what you need.",
             },
             {
               type: "mc",
@@ -6496,8 +6483,7 @@ export const COURSE = {
                 "There's no reason, they're identical",
               ],
               answer: 1,
-              explain:
-                "Simplicity wins by default. Reach for more persistence only when you can point to why you need it.",
+              explain: "Default to simpler. Reach for more persistence only when you need it.",
             },
           ],
         },
@@ -6509,7 +6495,7 @@ export const COURSE = {
       title: "Overtime — Views",
       drive: "Overtime, 2nd Drive · Own 40",
       description:
-        "A CTE forgets everything the moment its query ends. A view doesn't — it's a saved query that behaves like a table every time anyone reaches for it, including next week.",
+        "A CTE forgets when the query ends. A view doesn't — it's a saved SELECT anyone can query like a table, including next week.",
       skills: ["CREATE VIEW", "Updatable views"],
       status: "live",
       lessons: [
@@ -6518,38 +6504,38 @@ export const COURSE = {
           title: "A Saved Query That Acts Like a Table",
           blurb: "CREATE VIEW packages a query so anyone can SELECT from it later.",
           brief: {
-            goal: "Understand what a view actually stores.",
+            goal: "Know what a view actually stores.",
       steps: [
         {
-          title: "A view stores a question, not an answer",
-          body: "This is the one thing to get right, and it is the opposite of what most people assume. A view holds no data at all. It holds a SELECT statement, and every time somebody queries the view, that SELECT runs again from scratch.",
+          title: "It stores the question, not the answer",
+          body: "Most people assume a view holds rows. It doesn't. It holds a SELECT. Every time someone queries the view, that SELECT runs again from scratch.",
         },
         {
-          title: "Which means it is never stale",
-          body: "Save a query as a view and everyone who uses it gets today's answer, computed now, not a snapshot from whenever it was created. That is the whole appeal: one definition of what season totals means, shared by everybody, always current.",
+          title: "So it never goes stale",
+          body: "Save the query once. Everyone who uses the name gets today's answer — computed now, not a snapshot from create day. One shared definition of \"season totals.\"",
           code: "SELECT * FROM season_totals WHERE total > 200;",
-          note: "Querying a view feels exactly like querying a table. You can filter it, join it, and group it, and most of the time you cannot tell from the query which one you are looking at.",
+          note: "Querying a view feels like querying a table — filter it, join it, group it. Often you can't tell which you hit.",
         },
       ],
             setup:
-              "A view doesn't store data — it stores a query. Every time someone selects from a view, the database re-runs the underlying SELECT and hands back fresh results. Package a query once under a name, and everyone who queries that name gets the current answer, not a stale snapshot.",
+              "A view stores a query, not data. Every SELECT from it re-runs the underlying SQL and returns fresh rows. Package once; everyone gets the current answer.",
             previewSql:
               "SELECT player, ROUND(SUM(fantasy_pts), 1) AS total FROM week_results WHERE season = 2024 GROUP BY player ORDER BY total DESC LIMIT 5;",
             previewCaption: "exactly the kind of query worth packaging as a view",
           },
           intro: {
             title: "CREATE VIEW name AS (a SELECT)",
-            text: "Once created, a view is queried exactly like a table: SELECT * FROM season_totals, WHERE, JOIN, all of it. Nothing about querying a view feels different from querying a table — the only special part is what happens behind the name: SQLite re-runs the stored SELECT fresh, every single time.",
+            text: "After that, SELECT * FROM season_totals — WHERE, JOIN, all of it. Behind the name, SQLite re-runs the stored SELECT fresh every time.",
             code: "CREATE VIEW season_totals AS\nSELECT player, SUM(fantasy_pts) AS total\nFROM week_results\nWHERE season = 2024\nGROUP BY player;\n\n-- later, from anyone, any time:\nSELECT * FROM season_totals ORDER BY total DESC LIMIT 5;",
           },
           film: [
             {
-              title: "A view stores no data — it stores the question",
-              text: "This is the one fact that explains everything else about views. Add a new week of games to week_results and season_totals is instantly up to date, with zero extra work — because every query against it re-runs the underlying SELECT from scratch. Compare that to a temp table, which freezes the answer at the moment it was created and goes stale the second the source data changes.",
+              title: "No cached rows — just the question",
+              text: "Add a new week to week_results and season_totals is current on the next read. A temp table would still hold yesterday's freeze.",
             },
             {
-              title: "A view is our stand-in for what other databases call a stored procedure",
-              text: "Full procedural SQL — parameters, control flow, output variables — needs a feature SQLite doesn't have at all. A view can't take a parameter or run logic, but it does the one thing a stored procedure does for a plain read: package a query once, under a name, so nobody has to retype (or slightly get wrong) a complicated SELECT ever again.",
+              title: "Close enough to a stored procedure for reads",
+              text: "SQLite has no full stored procedures. A view can't take parameters, but it does package a complicated SELECT under one name so nobody retypes it wrong.",
             },
           ],
           exercises: [
@@ -6563,8 +6549,7 @@ export const COURSE = {
                 "Nothing until you query it once",
               ],
               answer: 1,
-              explain:
-                "No data is cached. Every read re-executes the underlying query, which is exactly why a view is always current.",
+              explain: "No data is cached — every read re-runs the underlying query, so it stays current.",
             },
             {
               type: "mc",
@@ -6577,8 +6562,7 @@ export const COURSE = {
                 "Nothing changes until the app restarts",
               ],
               answer: 1,
-              explain:
-                "Since a view has no stored data of its own, there's nothing to go stale — the next query just sees the current table.",
+              explain: "The view has no stored data of its own — the next query just sees the live table.",
             },
             {
               type: "fill",
@@ -6592,8 +6576,7 @@ export const COURSE = {
               ],
               bank: ["CREATE", "AS", "TEMP"],
               answer: ["CREATE", "AS"],
-              explain:
-                "CREATE VIEW name AS (a SELECT) — the same AS keyword CTEs and temp tables both use, for the same reason.",
+              explain: "CREATE VIEW name AS (a SELECT) — same AS pattern as CTEs and temp tables.",
             },
             {
               type: "mc",
@@ -6606,44 +6589,43 @@ export const COURSE = {
                 "Return more than one column",
               ],
               answer: 1,
-              explain:
-                "A view is always the same fixed query. Parameters and control flow are exactly the procedural piece SQLite doesn't have.",
+              explain: "A view is one fixed query — no parameters or branching in SQLite.",
             },
           ],
         },
         {
           id: "u20-l2",
           title: "Package a Query for Real",
-          blurb: "Write the CREATE VIEW statement, and know how to remove it.",
+          blurb: "Write CREATE VIEW — and DROP VIEW when you're done.",
           brief: {
             goal: "Write a CREATE VIEW statement, and drop one when it's no longer needed.",
       steps: [
         {
-          title: "The syntax is one line more than the query",
-          body: "You already know how to write the SELECT. Wrapping it in a view means putting three words in front of it and giving it a name. That is genuinely the whole thing.",
+          title: "Three words in front of the SELECT",
+          body: "You already know the query. Wrap it: CREATE VIEW, a name, AS. That's the whole syntax.",
           code: "CREATE VIEW season_totals AS\nSELECT player, SUM(fantasy_pts) AS total\nFROM week_results\nGROUP BY player;",
         },
         {
-          title: "Dropping one costs nothing",
-          body: "DROP VIEW removes the saved definition and nothing else. Because a view never held any data, there is nothing to lose and nothing to back up first, which makes views unusually safe to experiment with.",
+          title: "Dropping one is safe",
+          body: "DROP VIEW removes the saved definition only. No data lived there, so there's nothing to lose — easy to experiment.",
           code: "DROP VIEW season_totals;",
         },
       ],
             setup:
-              "The syntax is exactly one line more than the query it wraps: CREATE VIEW, a name, AS, then the SELECT you already know how to write. Removing one is just as direct — DROP VIEW name — and unlike a table, there's no data to lose, only the saved definition.",
+              "CREATE VIEW, a name, AS, then the SELECT you already write. DROP VIEW name removes the definition — no rows to lose.",
             previewSql:
               "SELECT position, ROUND(AVG(fantasy_pts), 1) AS ppg FROM week_results WHERE season = 2024 GROUP BY position;",
             previewCaption: "position averages — a natural view to package",
           },
           intro: {
             title: "CREATE VIEW, then DROP VIEW when you're done",
-            text: "CREATE VIEW position_averages AS SELECT ... makes the view; DROP VIEW position_averages removes just the saved definition, instantly, with nothing to clean up — because there was never any data stored under that name to begin with.",
+            text: "CREATE VIEW position_averages AS SELECT ... makes it. DROP VIEW position_averages removes just the saved definition — there was never data under that name.",
             code: "CREATE VIEW position_averages AS\nSELECT position, AVG(fantasy_pts) AS ppg\nFROM week_results\nGROUP BY position;\n\nDROP VIEW position_averages;",
           },
           film: [
             {
-              title: "A view can be built on other views",
-              text: "Since a view is queryable exactly like a table, nothing stops CREATE VIEW top_scorers AS SELECT * FROM season_totals WHERE total > 300 — a view stacked on another view. Used well, this is the same layered thinking as chaining CTEs, made permanent. Used carelessly, three views deep, it gets exactly as hard to trace as any other long dependency chain — the same judgment call as deciding when a CTE chain has gotten too long.",
+              title: "Views can stack on views",
+              text: "CREATE VIEW top_scorers AS SELECT * FROM season_totals WHERE total > 300 works — CTE-style layering, made permanent. Stack three deep and tracing a number gets hard.",
             },
           ],
           exercises: [
@@ -6653,8 +6635,7 @@ export const COURSE = {
               parts: ["", null, " VIEW position_averages;"],
               bank: ["DROP", "DELETE", "REMOVE"],
               answer: ["DROP"],
-              explain:
-                "DROP VIEW — the same DROP keyword works across tables, views, indexes, and triggers throughout SQL.",
+              explain: "DROP VIEW — same DROP family as tables, indexes, and triggers.",
             },
             {
               type: "mc",
@@ -6666,8 +6647,7 @@ export const COURSE = {
                 "The table is locked",
               ],
               answer: 1,
-              explain:
-                "Dropping a view removes a saved question, not an answer. The source table is completely unaffected.",
+              explain: "You dropped a saved question, not an answer — the source table is untouched.",
             },
             {
               type: "mc",
@@ -6680,8 +6660,7 @@ export const COURSE = {
                 "A trigger",
               ],
               answer: 1,
-              explain:
-                "A view is just something queryable, so nothing stops another view from being built on it — the same layering idea as chaining CTEs.",
+              explain: "A view is queryable, so another view can sit on top — same idea as chaining CTEs.",
             },
             {
               type: "mc",
@@ -6693,8 +6672,7 @@ export const COURSE = {
                 "Views can only be stacked twice",
               ],
               answer: 1,
-              explain:
-                "Nothing technical stops deep stacking — the cost is entirely in how hard the chain is for the next person to follow.",
+              explain: "Nothing technical blocks deep stacks — the cost is how hard the chain is to follow.",
             },
           ],
         },
@@ -6706,30 +6684,30 @@ export const COURSE = {
             goal: "Know when a view can be written through, and why most can't.",
       steps: [
         {
-          title: "Sometimes you can write through a view",
-          body: "If a view is a plain SELECT from a single table, with no grouping and no join, the database can work out exactly which real row an UPDATE was meant for. So it lets the write through and applies it to the underlying table.",
+          title: "Sometimes writes go through",
+          body: "Plain SELECT from one table, no grouping, no join? The database can map an UPDATE to one real row — so it lets the write through.",
         },
         {
-          title: "And usually you cannot, for a good reason",
-          body: "Add a GROUP BY and one row of the view now stands for forty real rows. Update it to 40 and there is no sensible answer to which of those forty should change. The database rejects the write rather than guess, which is the behaviour you want.",
-          note: "The rule to remember is that ambiguity is what blocks the write. If the database cannot identify one specific row to change, it refuses.",
+          title: "Usually it refuses — on purpose",
+          body: "Add a GROUP BY and one view row stands for forty real rows. Update it to 40 and there's no sensible answer which of those forty change. Rejecting the write beats guessing.",
+          note: "Ambiguity blocks the write. If SQL can't name one row to change, it says no.",
         },
       ],
             setup:
-              "A view built on a single table, with no GROUP BY, JOIN, or aggregate, can often accept UPDATE and INSERT statements — SQLite quietly translates the write onto the real underlying table. The moment a view involves a join or an aggregate, that translation becomes ambiguous, and the write is rejected.",
+              "A single-table view with no GROUP BY, JOIN, or aggregate can often take UPDATE/INSERT — SQLite maps the write to the real table. Join or aggregate? Ambiguous — write rejected.",
             previewSql:
               "SELECT player, week, fantasy_pts FROM week_results WHERE season = 2024 LIMIT 5;",
             previewCaption: "a plain, single-table shape — the kind a view CAN be updatable through",
           },
           intro: {
-            title: "Simple views can be updatable; aggregated ones can't",
-            text: "UPDATE a_simple_view SET fantasy_pts = 40 WHERE player = 'X' can work when the view is a straightforward SELECT off one table — SQLite knows exactly which real row that maps to. UPDATE season_totals SET total = 999 makes no sense at all: total is a SUM across many rows, and there's no single row to write the change back to.",
+            title: "Simple views can be updatable; aggregates can't",
+            text: "UPDATE buffalo_games SET fantasy_pts = 40 can work when the view is a plain SELECT off one table. UPDATE season_totals SET total = 999 doesn't — total is a SUM across many rows.",
             code: "-- updatable in principle: one table, no aggregation\nCREATE VIEW buffalo_games AS\nSELECT * FROM week_results WHERE team = 'BUF';\n\n-- NOT updatable: an aggregate has no one row to write back to\nCREATE VIEW season_totals AS\nSELECT player, SUM(fantasy_pts) AS total FROM week_results GROUP BY player;",
           },
           film: [
             {
-              title: "Ask 'which real row would this change?'",
-              text: "That question is the whole test. UPDATE buffalo_games SET fantasy_pts = 40 WHERE player = 'Josh Allen' AND week = 1 has an obvious answer — one row in week_results. UPDATE season_totals SET total = 999 WHERE player = 'Josh Allen' has no answer at all, because total was never a single stored number; it's the output of adding several rows together. No SQL engine can reverse a SUM.",
+              title: "Ask: which real row would this change?",
+              text: "UPDATE buffalo_games for Josh Allen week 1 maps to one week_results row. UPDATE season_totals SET total = 999 has nowhere to write — you can't reverse a SUM.",
             },
           ],
           exercises: [
@@ -6743,8 +6721,7 @@ export const COURSE = {
                 "A view using RANK() OVER (...)",
               ],
               answer: 1,
-              explain:
-                "One table, no aggregation, no join — SQLite can trace exactly which real row a write maps to.",
+              explain: "One table, no aggregation, no join — SQLite can trace the write to one real row.",
             },
             {
               type: "mc",
@@ -6756,8 +6733,7 @@ export const COURSE = {
                 "You actually can, it's just slow",
               ],
               answer: 1,
-              explain:
-                "A SUM erases which individual rows it came from — there's nothing for an UPDATE to reverse-engineer.",
+              explain: "A SUM erases which rows it came from — nothing for UPDATE to reverse.",
             },
             {
               type: "fill",
@@ -6765,8 +6741,7 @@ export const COURSE = {
               parts: ["Ask: which real ", null, " would this write actually change?"],
               bank: ["row", "table"],
               answer: ["row"],
-              explain:
-                "Updatability comes down to tracing a write to one specific row in one specific underlying table.",
+              explain: "Updatability means tracing a write to one specific row in one underlying table.",
             },
             {
               type: "mc",
@@ -6778,43 +6753,42 @@ export const COURSE = {
                 "It only updates rosters",
               ],
               answer: 1,
-              explain:
-                "Same root problem as an aggregate: the moment more than one table (or more than one row) could be the target, the write is ambiguous and SQLite won't guess.",
+              explain: "Same as aggregates: more than one possible target → SQLite won't guess.",
             },
           ],
         },
         {
           id: "u20-l4",
           title: "Three Tools, Complete",
-          blurb: "The full decision, now that a view is on the table.",
+          blurb: "Subquery, CTE, temp table, view — pick by how long it must live.",
           brief: {
             goal: "Add views to the CTE-vs-temp-table decision from last unit.",
       steps: [
         {
           title: "Now there are four",
-          body: "Same decision as the end of the last unit, with one more option on the table. A view outlives everything else here: past the statement, past the session, until somebody explicitly drops it.",
+          body: "Same decision as last unit, plus one more. A view outlives the statement and the session — until someone DROP VIEWs it.",
         },
         {
           title: "The full checklist",
-          body: "This one clause, and small? Subquery. This one statement, with steps? CTE. This session, reused several times? Temp table. Every session, by everybody, forever? View. That is the entire decision, and it is the same question each time.",
-          note: "A view is also the only one of the four that other people will find without you telling them about it, which is often the real reason to make one.",
+          body: "One clause, small? Subquery. One statement, with steps? CTE. This session, reused? Temp table. Every session, shared forever? View.",
+          note: "A view is also the only one other people find without you telling them — often the real reason to make one.",
         },
       ],
             setup:
-              "Same question as before — how long does this need to survive? — with one more answer available. A view survives the longest of all three: past the query, past the session, until someone explicitly drops it.",
+              "Same question — how long must this survive? — with one more answer. A view lasts past the query and the session, until someone drops it.",
             previewSql:
               "SELECT player, ROUND(SUM(fantasy_pts), 1) AS total FROM week_results WHERE season = 2024 GROUP BY player ORDER BY total DESC LIMIT 5;",
             previewCaption: "one query, four ways to hold onto it: subquery, CTE, temp table, view",
           },
           intro: {
-            title: "Add 'does this need to outlive the session' to the checklist",
-            text: "Subquery: this one clause. CTE: this one statement. Temp table: this session. View: forever, until dropped — and always current, since it re-runs its query fresh every time. A view is the only one of the four a completely different session, days later, can still find by name.",
+            title: "Does it need to outlive the session?",
+            text: "Subquery: this clause. CTE: this statement. Temp table: this session. View: until dropped — and always current, because it re-runs. Only a view is findable by name days later from another session.",
             code: "-- once, this session:      a temp table\n-- forever, always current: a view",
           },
           film: [
             {
-              title: "A view costs freshness for permanence, in the opposite direction from a temp table",
-              text: "A temp table is a snapshot: fast to reread, but frozen the moment it was created. A view is the opposite: always current, because it never stores anything, but that means every single query against it pays the full cost of the underlying SELECT all over again. Neither is strictly better — a dashboard that needs the current number every time wants a view; a report computing something expensive once per session wants a temp table.",
+              title: "Fresh vs frozen",
+              text: "A temp table is a snapshot — fast to reread, frozen at CREATE. A view stays current but pays the full SELECT every time — dashboards want views; once-per-session reports want temp tables.",
             },
           ],
           exercises: [
@@ -6829,8 +6803,7 @@ export const COURSE = {
                 "It doesn't matter",
               ],
               answer: 1,
-              explain:
-                "The dashboard's whole requirement is freshness — the exact thing a view provides for free by never caching anything.",
+              explain: "The dashboard needs freshness — a view never caches, so it's always current.",
             },
             {
               type: "mc",
@@ -6843,8 +6816,7 @@ export const COURSE = {
                 "A trigger",
               ],
               answer: 1,
-              explain:
-                "This is a temp table's exact use case: pay the expensive computation once, then read the frozen result as many times as needed.",
+              explain: "Pay once, read six times — classic temp-table job.",
             },
             {
               type: "fill",
@@ -6852,8 +6824,7 @@ export const COURSE = {
               parts: ["Subquery < ", null, " < ", null, " < View"],
               bank: ["CTE", "Temp table"],
               answer: ["CTE", "Temp table"],
-              explain:
-                "Each step trades a bit more setup for a longer lifetime — subquery for one clause, all the way up to a view that survives the session entirely.",
+              explain: "Each step buys a longer lifetime — from one clause up to a permanent view.",
             },
             {
               type: "mc",
@@ -6865,8 +6836,7 @@ export const COURSE = {
                 "Use an aggregate function",
               ],
               answer: 1,
-              explain:
-                "Subqueries, CTEs, and temp tables all die with the session (or sooner). A view is the only one of the four that's genuinely permanent.",
+              explain: "Subqueries, CTEs, and temp tables die with the session (or sooner). Views stick.",
             },
           ],
         },
@@ -6878,7 +6848,7 @@ export const COURSE = {
       title: "Overtime — Triggers",
       drive: "Overtime, 3rd Drive · Midfield",
       description:
-        "Everything so far runs when you ask it to. A trigger runs automatically, the instant a specific change happens to a table — no one has to remember to call it.",
+        "Everything so far ran when you asked. A trigger runs itself the instant a table changes — nobody has to remember to call it.",
       skills: ["CREATE TRIGGER", "BEFORE / AFTER"],
       status: "live",
       lessons: [
@@ -6887,36 +6857,36 @@ export const COURSE = {
           title: "Code That Runs Itself",
           blurb: "A trigger fires automatically on INSERT, UPDATE, or DELETE.",
           brief: {
-            goal: "Understand when and why a trigger fires.",
+            goal: "Know when and why a trigger fires.",
       steps: [
         {
-          title: "Everything so far only ran because you ran it",
-          body: "Every statement in this course has needed a person to type it and press go. A trigger is the first thing here that does not. You define it once, and from then on it runs itself.",
+          title: "So far, you pressed go",
+          body: "Every statement in this course needed someone to type it and run it. A trigger is different. You define it once — then it runs itself.",
         },
         {
-          title: "A trigger watches one table for one kind of change",
-          body: "You attach it to a table and to an event: before or after an insert, an update, or a delete. When that event happens, the trigger fires. Nobody calls it, nothing schedules it, and it will keep happening long after you have forgotten writing it.",
-          note: "That last part is why triggers are powerful and mildly dangerous. Automation you cannot see is automation you will eventually be confused by.",
+          title: "It watches one table for one event",
+          body: "Attach it to a table and to an event: before or after insert, update, or delete. When that event happens, it fires. Nobody calls it. It keeps firing long after you've forgotten writing it.",
+          note: "That's why triggers are powerful and a little dangerous — invisible automation will surprise you later.",
         },
       ],
             setup:
-              "Every statement you've written so far only runs because someone typed it and hit run. A trigger is different: you define it once, attached to a table and an event — BEFORE or AFTER an INSERT, UPDATE, or DELETE — and from then on, it fires by itself, every single time that event happens, with no one calling it.",
+              "You've typed every statement so far. A trigger is different: define it once on a table and an event (BEFORE or AFTER INSERT/UPDATE/DELETE), and it fires by itself every time that event happens.",
             previewSql: "SELECT player, team_name FROM rosters LIMIT 5;",
             previewCaption: "a change to a table like this is exactly what a trigger watches for",
           },
           intro: {
-            title: "A trigger watches one table for one kind of change",
-            text: "CREATE TRIGGER name AFTER INSERT ON rosters ... names the table (rosters) and the event (INSERT) it watches. The moment a row is actually inserted into rosters, the trigger's body runs automatically — logging it, checking it, or reacting to it, without whoever ran the INSERT having to do anything extra.",
+            title: "Watch one table for one kind of change",
+            text: "CREATE TRIGGER name AFTER INSERT ON rosters ... names the table and the event. When a row lands in rosters, the trigger body runs — log it, check it, react — without the INSERT author doing anything extra.",
             code: "-- fires automatically, every time, forever\nCREATE TRIGGER log_new_player\nAFTER INSERT ON rosters\nBEGIN\n  INSERT INTO roster_log (player, team, changed_at)\n  VALUES (NEW.player, NEW.team_name, datetime('now'));\nEND;",
           },
           film: [
             {
-              title: "BEFORE and AFTER are genuinely different moments",
-              text: "A BEFORE trigger runs before the change is committed — useful for validating or rejecting it. An AFTER trigger runs once the change has already happened — useful for logging or reacting to it, since by then the new row is real and queryable. Picking the wrong one either lets an invalid row through, or tries to validate something that's already permanent.",
+              title: "BEFORE vs AFTER are different moments",
+              text: "BEFORE runs before the change sticks — good for validating or rejecting. AFTER runs once it's real — good for logging, too late to stop a bad row.",
             },
             {
-              title: "NEW and OLD are how a trigger sees the change",
-              text: "Inside a trigger's body, NEW.column refers to the row being inserted or the new value on an UPDATE; OLD.column refers to the row being deleted or the value before an UPDATE. An INSERT trigger only has NEW (there's no old row); a DELETE trigger only has OLD (there's no new one); an UPDATE trigger has both, which is how you'd log exactly what changed.",
+              title: "NEW and OLD see the change",
+              text: "NEW is the incoming row (or new UPDATE values); OLD is the row before delete/update. INSERT has only NEW, DELETE only OLD, UPDATE has both.",
               code: "-- UPDATE trigger, seeing both sides of the change\nCREATE TRIGGER log_trade\nAFTER UPDATE ON rosters\nBEGIN\n  INSERT INTO trade_log (player, old_team, new_team)\n  VALUES (NEW.player, OLD.team_name, NEW.team_name);\nEND;",
             },
           ],
@@ -6931,8 +6901,7 @@ export const COURSE = {
                 "The database restarting",
               ],
               answer: 1,
-              explain:
-                "That's the entire point of a trigger — it fires on the event, not on being called.",
+              explain: "It fires on the event — you don't call it by name.",
             },
             {
               type: "mc",
@@ -6945,8 +6914,7 @@ export const COURSE = {
                 "Neither can reject an insert",
               ],
               answer: 1,
-              explain:
-                "AFTER is too late to prevent anything — the row is already there. Validation belongs in a BEFORE trigger.",
+              explain: "AFTER is too late — the row is already there. Validate in BEFORE.",
             },
             {
               type: "mc",
@@ -6958,8 +6926,7 @@ export const COURSE = {
                 "Neither",
               ],
               answer: 1,
-              explain:
-                "A DELETE has nothing new to point to. OLD refers to the row as it existed right before removal.",
+              explain: "A DELETE has nothing new — OLD is the row right before removal.",
             },
             {
               type: "fill",
@@ -6967,8 +6934,7 @@ export const COURSE = {
               parts: ["", null, " for the incoming row, ", null, " for the row as it was."],
               bank: ["NEW", "OLD"],
               answer: ["NEW", "OLD"],
-              explain:
-                "NEW and OLD are how a trigger's body reaches into the row that caused it to fire.",
+              explain: "NEW and OLD are how the trigger body reaches the row that fired it.",
             },
           ],
         },
@@ -6980,30 +6946,30 @@ export const COURSE = {
             goal: "Write a complete CREATE TRIGGER statement.",
       steps: [
         {
-          title: "Five pieces, always in the same order",
-          body: "The shape never changes: the word CREATE TRIGGER, a name, when it fires, what event it watches, which table, and then a block of ordinary SQL to run. Once you can see the five slots, writing one is filling them in.",
+          title: "Five pieces, same order every time",
+          body: "CREATE TRIGGER, a name, when it fires, what event, which table, then a block of SQL. See the five slots and you're just filling them in.",
         },
         {
-          title: "Everything inside BEGIN and END is normal SQL",
-          body: "There is no special trigger language. The block usually holds an INSERT into some log table, and NEW gives you access to the row that was just written, so you can record what actually changed.",
+          title: "Inside BEGIN…END is normal SQL",
+          body: "No special trigger language. Usually an INSERT into a log table. NEW gives you the row that just landed so you can record what changed.",
           code: "CREATE TRIGGER log_roster_add\nAFTER INSERT ON rosters\nBEGIN\n  INSERT INTO roster_log(player) VALUES (NEW.player);\nEND;",
-          note: "NEW refers to the incoming row, and OLD refers to the row as it was before an update or delete. Which of the two exists depends on the event.",
+          note: "NEW is the incoming row; OLD is the row before an update or delete. Which exists depends on the event.",
         },
       ],
             setup:
-              "The shape is always the same pieces in order: CREATE TRIGGER, a name, WHEN it fires (BEFORE/AFTER) and on what (INSERT/UPDATE/DELETE), which table, then a BEGIN...END block holding whatever SQL should run. Here's a trigger that logs every new roster entry.",
+              "Same shape every time: CREATE TRIGGER, name, BEFORE/AFTER + INSERT/UPDATE/DELETE, ON table, then BEGIN…END with the SQL to run. Here's one that logs every new roster entry.",
             previewSql: "SELECT player, team_name FROM rosters LIMIT 5;",
             previewCaption: "the table a trigger would watch",
           },
           intro: {
             title: "Five pieces, always in the same order",
-            text: "CREATE TRIGGER name [BEFORE|AFTER] [INSERT|UPDATE|DELETE] ON table BEGIN ... END. Everything inside BEGIN and END is ordinary SQL — usually an INSERT into a log table, referencing NEW or OLD — and it can be more than one statement, each ending in its own semicolon.",
+            text: "CREATE TRIGGER name [BEFORE|AFTER] [INSERT|UPDATE|DELETE] ON table BEGIN ... END. Inside is ordinary SQL — often an INSERT into a log, using NEW or OLD. Multiple statements each get their own semicolon.",
             code: "CREATE TRIGGER log_new_player\nAFTER INSERT ON rosters\nBEGIN\n  INSERT INTO roster_log (player, team, changed_at)\n  VALUES (NEW.player, NEW.team_name, datetime('now'));\nEND;",
           },
           film: [
             {
-              title: "A trigger body can hold more than one statement",
-              text: "Nothing limits BEGIN...END to a single INSERT — stack several statements, each ended with its own semicolon, and every one runs as part of the same firing. That's how a single roster change could both log the change AND update a separate summary count in one trigger, with no risk of one happening without the other.",
+              title: "More than one statement is fine",
+              text: "BEGIN…END can hold several statements, each with its own semicolon. One roster change can log and update a summary count in the same firing.",
             },
           ],
           exercises: [
@@ -7019,8 +6985,7 @@ export const COURSE = {
               ],
               bank: ["TRIGGER", "AFTER", "VIEW"],
               answer: ["TRIGGER", "AFTER"],
-              explain:
-                "CREATE TRIGGER, a name, then the timing and event — the same order every trigger follows.",
+              explain: "CREATE TRIGGER, a name, then timing and event — same order every time.",
             },
             {
               type: "mc",
@@ -7032,8 +6997,7 @@ export const COURSE = {
                 "Nothing — it runs until the connection closes",
               ],
               answer: 1,
-              explain:
-                "BEGIN...END wraps the trigger's body, the same pairing used in stored-procedure bodies in engines that have them.",
+              explain: "BEGIN…END wraps the body — END closes what BEGIN opened.",
             },
             {
               type: "mc",
@@ -7045,8 +7009,7 @@ export const COURSE = {
                 "Only if they're all INSERTs",
               ],
               answer: 1,
-              explain:
-                "Everything inside the block runs as part of the same firing — useful when one change should cause several side effects at once.",
+              explain: "Everything in the block runs as one firing — handy for several side effects.",
             },
             {
               type: "mc",
@@ -7059,43 +7022,42 @@ export const COURSE = {
                 "An error — NEW isn't valid on INSERT",
               ],
               answer: 0,
-              explain:
-                "On an INSERT, NEW is the row that was just added — exactly the row that caused the trigger to fire.",
+              explain: "On INSERT, NEW is the row that just landed — the one that fired the trigger.",
             },
           ],
         },
         {
           id: "u21-l3",
           title: "Find and Remove Automation",
-          blurb: "Triggers are invisible until you know where to look.",
+          blurb: "Triggers stay invisible until you know where to look.",
           brief: {
             goal: "List existing triggers, and remove one safely.",
       steps: [
         {
-          title: "Triggers do not show up when you look at a table",
-          body: "This is the practical problem with them. Inspect a table's columns and a trigger is invisible, because it is a separate object entirely. Inherit an unfamiliar database and there may be several firing away that nobody has mentioned to you.",
+          title: "You won't see them on the table",
+          body: "Inspect columns and a trigger won't show up — it's a separate object. Inherit a database and a few may be firing that nobody mentioned.",
         },
         {
-          title: "sqlite_master is the catalogue of everything",
-          body: "It lists every table, view, index and trigger in the database, along with the SQL that created each one. Querying it is how you find out what a database is actually doing behind your back.",
+          title: "sqlite_master lists everything",
+          body: "Tables, views, indexes, triggers — plus the SQL that created each. Query it when you want to know what a database is doing behind your back.",
           code: "SELECT name, sql FROM sqlite_master WHERE type = 'trigger';",
-          note: "This is a genuinely useful habit on day one of any new job with an unfamiliar database. Look before you write.",
+          note: "Good day-one habit on an unfamiliar database: look before you write.",
         },
       ],
             setup:
-              "A trigger doesn't show up when you look at a table's columns — it's a separate object entirely, and an unfamiliar database might have several silently firing that nobody mentioned. SQLite keeps every trigger's definition in sqlite_master, the same catalog that lists tables and views.",
+              "Triggers don't appear in a table's columns. SQLite keeps every definition in sqlite_master — same catalog as tables and views.",
             previewSql: "SELECT name FROM sqlite_master WHERE type = 'table';",
             previewCaption: "sqlite_master — the catalog every object gets listed in",
           },
           intro: {
-            title: "sqlite_master lists every trigger, table, view, and index",
-            text: "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' shows every trigger's name and its full CREATE TRIGGER definition. Removing one is DROP TRIGGER name — after that, the automation is simply gone; nothing fires on the next INSERT that used to.",
+            title: "sqlite_master lists every trigger (and more)",
+            text: "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' shows each name and its full CREATE TRIGGER. DROP TRIGGER name removes it — after that, nothing fires on the next INSERT that used to.",
             code: "-- find every trigger in the database\nSELECT name, sql FROM sqlite_master WHERE type = 'trigger';\n\n-- remove one\nDROP TRIGGER log_new_player;",
           },
           film: [
             {
-              title: "Inherited automation is a real, common surprise",
-              text: "Join a team, inherit a database, and find rows appearing in a log table you never touched — a trigger is one of the first places to check, precisely because it never shows up unless you go looking in sqlite_master. Checking for triggers before assuming a bug is 'somewhere in the application code' is a genuinely useful habit the moment you're debugging someone else's schema.",
+              title: "Inherited automation is a common surprise",
+              text: "Rows appear in a log you never touched? Check sqlite_master for triggers before you blame the app. Silent side effects don't show up in the INSERT that caused them.",
             },
           ],
           exercises: [
@@ -7109,8 +7071,7 @@ export const COURSE = {
                 "In the table they're attached to",
               ],
               answer: 1,
-              explain:
-                "sqlite_master is the one catalog every named object in the database shows up in.",
+              explain: "sqlite_master is the catalog where every named object shows up.",
             },
             {
               type: "fill",
@@ -7118,8 +7079,7 @@ export const COURSE = {
               parts: ["SELECT name, sql FROM sqlite_master WHERE type = ", null, ";"],
               bank: ["'trigger'", "'table'", "trigger"],
               answer: ["'trigger'"],
-              explain:
-                "type is a text column, so 'trigger' needs quotes — the same quoting rule every text comparison follows.",
+              explain: "type is text, so 'trigger' needs quotes — same as any text comparison.",
             },
             {
               type: "fill",
@@ -7127,8 +7087,7 @@ export const COURSE = {
               parts: ["", null, " TRIGGER log_new_player;"],
               bank: ["DROP", "DELETE", "REMOVE"],
               answer: ["DROP"],
-              explain:
-                "DROP TRIGGER — the same DROP keyword that removes tables, views, and indexes, applied to one more object type.",
+              explain: "DROP TRIGGER — same DROP family as tables, views, and indexes.",
             },
             {
               type: "mc",
@@ -7141,8 +7100,7 @@ export const COURSE = {
                 "Triggers can't be queried directly",
               ],
               answer: 1,
-              explain:
-                "Whoever ran the original INSERT or UPDATE sees no sign a trigger fired at all — the side effect is completely invisible unless you go looking for it.",
+              explain: "The INSERT or UPDATE shows no sign a trigger fired — you have to go looking.",
             },
           ],
         },
@@ -7154,47 +7112,47 @@ export const COURSE = {
       title: "Overtime — Indexing & Query Plans",
       drive: "Overtime, 4th Drive · Red Zone",
       description:
-        "Every query so far has been graded on whether it's right. This unit is about whether it's fast — reading what the database actually did, and giving it a faster way to do it.",
+        "Right answers aren't enough — this unit is about speed. Read what the database actually did, then give it a faster path.",
       skills: ["EXPLAIN QUERY PLAN", "CREATE INDEX", "Composite indexes"],
       status: "live",
       lessons: [
         {
           id: "u22-l1",
           title: "What Did the Database Actually Do?",
-          blurb: "EXPLAIN QUERY PLAN shows you, instead of making you guess.",
+          blurb: "EXPLAIN QUERY PLAN shows the plan — so you don't have to guess.",
           brief: {
             goal: "Read and write EXPLAIN QUERY PLAN output.",
       steps: [
         {
-          title: "You have never asked how the database found anything",
-          body: "Every query so far, you wrote what you wanted and results came back. There is a step in between: the database decides how to find the rows, and that decision is what makes a query fast or unusably slow.",
+          title: "You've never asked how it found the rows",
+          body: "You wrote what you wanted; results came back. In between, the database picks a plan. That choice is what makes a query fast or painfully slow.",
         },
         {
-          title: "EXPLAIN QUERY PLAN shows you the decision",
-          body: "Put it in front of any SELECT and you get back a description of the plan instead of your data. Right now every plan in this database says SCAN, which means read every row and check each one, because there are no indexes here yet.",
+          title: "Ask for the plan",
+          body: "Put EXPLAIN QUERY PLAN in front of any SELECT. You get a description instead of data. Right now every plan here says SCAN — read every row — because there are no indexes yet.",
           code: "EXPLAIN QUERY PLAN\nSELECT * FROM week_results WHERE player = 'Josh Allen';",
-          note: "SCAN on 876 rows is instant. SCAN on 876 million rows is a meeting about why the dashboard times out. Same query, same plan, very different afternoon.",
+          note: "SCAN on 876 rows is instant. SCAN on 876 million is a meeting about why the dashboard times out.",
         },
       ],
             setup:
-              "Put EXPLAIN QUERY PLAN in front of any SELECT and SQLite hands back, instead of your data, a short description of how it planned to find it — which table it reads, and whether it scans every row or searches more directly. Right now, with no indexes anywhere in this database, every plan says the same thing: SCAN.",
+              "EXPLAIN QUERY PLAN in front of a SELECT returns how SQLite plans to find the rows — not the rows. With no indexes here, every plan says SCAN.",
             previewSql:
               "EXPLAIN QUERY PLAN SELECT * FROM week_results WHERE player = 'Josh Allen';",
             previewCaption: "SCAN week_results — read every row, checking each one",
           },
           intro: {
-            title: "SCAN means 'read every row and check it'",
-            text: "EXPLAIN QUERY PLAN SELECT ... returns a plan, not your data — a row describing what the database intends to do. SCAN week_results means exactly what it sounds like: walk every row in the table, testing each one against your WHERE clause. On 900 rows that's instant; on 900 million, it's the difference between a query that returns in a blink and one that doesn't return at all.",
+            title: "SCAN means read every row and check it",
+            text: "EXPLAIN QUERY PLAN SELECT ... returns a plan, not your data. SCAN week_results means walk the whole table testing your WHERE. Fine on ~900 rows. Brutal on 900 million.",
             code: "EXPLAIN QUERY PLAN\nSELECT * FROM week_results WHERE player = 'Josh Allen';\n\n-- returns something like:\n-- SCAN week_results",
           },
           film: [
             {
               title: "A plan is a description, not an answer",
-              text: "EXPLAIN QUERY PLAN never runs your query for real — it asks SQLite's planner what it WOULD do, and hands back that description instead of rows. That makes it completely safe to run on anything: a slow report, a query you're not sure about, even one that would normally return a huge result set. You're reading intent, not paying the cost.",
+              text: "EXPLAIN QUERY PLAN never runs your query for real — it asks what SQLite would do. Safe on slow reports and huge result sets; you're reading intent, not paying the cost.",
             },
             {
-              title: "This unit's plans will all say SCAN, and that's the point",
-              text: "Nothing in this database has an index yet, so every plan you write here reads the same way: a full scan of the table. That's not a limitation of the exercises — it's the honest starting point every real database has before anyone adds an index, and the next lesson is entirely about what changes once one exists.",
+              title: "Everything here says SCAN — on purpose",
+              text: "No indexes yet, so every plan is a full scan. That's the honest starting point. Next lesson is what changes once you add one.",
             },
           ],
           exercises: [
@@ -7208,8 +7166,7 @@ export const COURSE = {
                 "An error unless the query has already run once",
               ],
               answer: 1,
-              explain:
-                "It's a plan, not data — completely safe to run on anything, since the underlying query never actually executes for real.",
+              explain: "It's a plan, not data — safe to run, since the query doesn't execute for real.",
             },
             {
               type: "mc",
@@ -7221,8 +7178,7 @@ export const COURSE = {
                 "An index was used",
               ],
               answer: 1,
-              explain:
-                "A scan is the database's fallback when it has no faster way to find matching rows: check every single one.",
+              explain: "A scan is the fallback: check every row when there's no faster path.",
             },
             {
               type: "fill",
@@ -7230,7 +7186,7 @@ export const COURSE = {
               parts: ["", null, " ", null, "\nSELECT * FROM week_results WHERE season = 2024;"],
               bank: ["EXPLAIN", "QUERY PLAN", "DESCRIBE"],
               answer: ["EXPLAIN", "QUERY PLAN"],
-              explain: "EXPLAIN QUERY PLAN goes right before the SELECT it's asking about.",
+              explain: "EXPLAIN QUERY PLAN goes right before the SELECT you're asking about.",
             },
             {
               type: "query",
@@ -7240,8 +7196,7 @@ export const COURSE = {
               expected: "EXPLAIN QUERY PLAN SELECT * FROM week_results WHERE team = 'KC';",
               orderMatters: true,
               hint: "EXPLAIN QUERY PLAN SELECT * FROM week_results WHERE team = 'KC';",
-              explain:
-                "Same SCAN result as every other query in this lesson — there's no index on team yet either.",
+              explain: "Same SCAN as the rest of this lesson — no index on team yet either.",
             },
           ],
         },
@@ -7250,39 +7205,39 @@ export const COURSE = {
           title: "Give the Planner a Shortcut",
           blurb: "CREATE INDEX turns a scan into a search.",
           brief: {
-            goal: "Understand what an index changes about a query plan.",
+            goal: "Know what an index changes about a query plan.",
       steps: [
         {
-          title: "An index is the index at the back of a book",
-          body: "Without one, finding every mention of a name means reading every page. With one, you look the name up in a sorted list and jump straight to the right pages. A database index is that exact idea, kept up to date automatically.",
+          title: "Like the index at the back of a book",
+          body: "Without one, finding a name means reading every page. With one, you look it up and jump to the right pages. A database index is that idea, kept up to date automatically.",
         },
         {
           title: "CREATE INDEX turns SCAN into SEARCH",
-          body: "Build an index on the column you filter by, run the same query again, and the plan changes. SEARCH means it went more or less straight to the rows instead of walking the whole table.",
+          body: "Index the column you filter on, rerun the same query, and the plan changes. SEARCH means it went more or less straight to the rows.",
           code: "CREATE INDEX idx_player ON week_results(player);",
-          note: "Indexes are not free. Each one takes space and has to be updated on every write, so indexing every column makes writes slower and helps nothing. Index what you actually filter and join on.",
+          note: "Indexes aren't free — space plus work on every write. Index what you filter and join on, not every column.",
         },
       ],
             setup:
-              "An index is a separate, sorted structure SQLite maintains alongside a table, built on one or more columns — like the index at the back of a book: instead of reading every page, you jump straight to the right one. CREATE INDEX idx_player ON week_results(player) builds exactly that for the player column.",
+              "An index is a sorted shortcut beside the table — like a book index. CREATE INDEX idx_player ON week_results(player) builds one on player.",
             previewSql:
               "SELECT player, fantasy_pts FROM week_results WHERE player = 'Josh Allen' LIMIT 5;",
             previewCaption: "the exact kind of lookup an index on player would speed up",
           },
           intro: {
             title: "CREATE INDEX turns SCAN into SEARCH",
-            text: "CREATE INDEX idx_player ON week_results(player) builds a sorted lookup structure for that column. Run the same WHERE player = 'Josh Allen' query afterward and the plan changes from SCAN week_results to SEARCH week_results USING INDEX idx_player (player=?) — the database jumps straight to the matching rows instead of reading the whole table.",
+            text: "CREATE INDEX idx_player ON week_results(player) builds a sorted lookup. Same WHERE player = 'Josh Allen' afterward plans as SEARCH ... USING INDEX instead of SCAN — jump to the matches instead of walking the table.",
             code: "CREATE INDEX idx_player ON week_results(player);\n\nEXPLAIN QUERY PLAN\nSELECT * FROM week_results WHERE player = 'Josh Allen';\n-- SEARCH week_results USING INDEX idx_player (player=?)",
           },
           film: [
             {
-              title: "This is a real, verified before-and-after",
-              text: "Before any index exists, SELECT * FROM week_results WHERE player = 'Josh Allen' plans as SCAN week_results — every one of the ~900 rows gets checked. After CREATE INDEX idx_player ON week_results(player), the exact same query plans as SEARCH week_results USING INDEX idx_player (player=?) — SQLite jumps to Josh Allen's rows directly. Same question, same answer, a completely different amount of work behind the scenes.",
+              title: "Before and after, same question",
+              text: "Before: SCAN — check ~900 rows. After CREATE INDEX idx_player: SEARCH USING INDEX — jump to Josh Allen's rows for the same answer with far less work.",
               code: "-- before\nSCAN week_results\n\n-- after CREATE INDEX idx_player ON week_results(player)\nSEARCH week_results USING INDEX idx_player (player=?)",
             },
             {
-              title: "Indexes aren't free — they cost writes and space",
-              text: "Every INSERT or UPDATE on an indexed column has to update the index too, not just the table — so an index that speeds up reads slows down writes, and takes up disk space doing it. The real skill isn't 'add an index to everything'; it's indexing the columns that actually get filtered or joined on often, and leaving the rest alone.",
+              title: "Indexes cost writes and space",
+              text: "Every INSERT/UPDATE on an indexed column updates the index too. Speed up the filters you actually use; leave the rest alone.",
             },
           ],
           exercises: [
@@ -7291,7 +7246,7 @@ export const COURSE = {
               prompt: "Before any index exists, what does a query plan say for WHERE player = 'Josh Allen'?",
               options: ["SEARCH", "SCAN — every row gets checked", "INDEX", "ERROR"],
               answer: 1,
-              explain: "With nothing to jump to, a full scan is the only option the planner has.",
+              explain: "With nothing to jump to, a full scan is the only option.",
             },
             {
               type: "mc",
@@ -7304,8 +7259,7 @@ export const COURSE = {
                 "It becomes slower",
               ],
               answer: 1,
-              explain:
-                "This is the entire value of an index: the same correct answer, reached by checking far fewer rows.",
+              explain: "Same correct answer, reached by checking far fewer rows.",
             },
             {
               type: "fill",
@@ -7313,8 +7267,7 @@ export const COURSE = {
               parts: ["", null, " idx_player ON week_results(", null, ");"],
               bank: ["CREATE INDEX", "player", "CREATE TABLE"],
               answer: ["CREATE INDEX", "player"],
-              explain:
-                "CREATE INDEX name ON table(column) — name it, say which table, say which column to build the shortcut on.",
+              explain: "CREATE INDEX name ON table(column) — name it, pick the table, pick the column.",
             },
             {
               type: "mc",
@@ -7326,44 +7279,43 @@ export const COURSE = {
                 "It's not possible to have more than one index total",
               ],
               answer: 1,
-              explain:
-                "Indexing is a tradeoff, not a free upgrade — worth it for columns genuinely filtered or joined on often, wasteful otherwise.",
+              explain: "It's a tradeoff — worth it for columns you filter or join on often, wasteful otherwise.",
             },
           ],
         },
         {
           id: "u22-l3",
           title: "Indexing More Than One Column",
-          blurb: "Column order in a composite index isn't cosmetic.",
+          blurb: "In a composite index, column order isn't cosmetic.",
           brief: {
-            goal: "Understand why column order matters in a multi-column index.",
+            goal: "Know why column order matters in a multi-column index.",
       steps: [
         {
-          title: "One index can cover two columns",
-          body: "A composite index is sorted by its first column, and then by its second within each value of the first. That ordering is not a detail. It decides which queries the index can help with and which it is useless for.",
+          title: "One index, two columns",
+          body: "A composite index sorts by its first column, then by its second within each value of the first. That order decides which queries it helps — and which it can't.",
         },
         {
-          title: "Think of a phone book",
-          body: "Sorted by last name, then first name. Brilliant for finding everyone called Allen, and for finding one specific Josh Allen. Completely useless for finding everyone called Josh, because the Joshes are scattered through the whole book.",
+          title: "Think phone book",
+          body: "Sorted by last name, then first. Great for every Allen, or one Josh Allen. Useless for every Josh — those names are scattered through the book.",
           code: "CREATE INDEX idx_player_season ON week_results(player, season);",
-          note: "So the rule is that an index helps queries that use its first column. Put the column you always filter on first, and the one you sometimes add second.",
+          note: "The index helps queries that use its first column. Put what you always filter on first; the sometimes-extra second.",
         },
       ],
             setup:
-              "CREATE INDEX idx_player_season ON week_results(player, season) builds one index across two columns — sorted by player first, then by season within each player. That order isn't a style choice: it decides which queries the index can actually help.",
+              "CREATE INDEX idx_player_season ON week_results(player, season) sorts by player first, then season. That order isn't style — it decides which filters the index can help.",
             previewSql:
               "SELECT * FROM week_results WHERE player = 'Josh Allen' AND season = 2024;",
             previewCaption: "a two-column filter — the natural case for a composite index",
           },
           intro: {
-            title: "A composite index is sorted by its first column, then its second",
-            text: "Think of it like a phone book sorted by last name, then first name — perfect for finding everyone named Allen, or one specific Josh Allen, but useless for finding everyone named Josh regardless of last name. CREATE INDEX idx_player_season ON week_results(player, season) helps a query that filters on player, or on player AND season — but does nothing for a query that filters on season alone.",
+            title: "Sorted by first column, then second",
+            text: "Like a phone book: last name, then first. Index on (player, season) helps filters on player, or player AND season. Season alone? No help — season isn't leftmost.",
             code: "CREATE INDEX idx_player_season ON week_results(player, season);\n\n-- helped: filters on player, or player + season\n-- NOT helped: filters on season alone — season isn't the first column",
           },
           film: [
             {
-              title: "Leftmost-first is the rule to memorize",
-              text: "A composite index on (player, season) can be used for a query that filters on player, or on player and season together — but a query filtering on season alone can't use it at all, the same way you can't use a last-name-first phone book to find everyone with a given first name. The general rule: a composite index helps a query that filters on its leftmost column, or a leftmost prefix of its columns, in order.",
+              title: "Leftmost-first is the rule",
+              text: "Index on (player, season) helps player alone, or player + season. Season alone can't use it — same as hunting first names in a last-name phone book.",
             },
           ],
           exercises: [
@@ -7378,8 +7330,7 @@ export const COURSE = {
                 "It depends on how many rows match",
               ],
               answer: 1,
-              explain:
-                "Leftmost-first: the index is sorted by player first. A search that skips player entirely can't use it.",
+              explain: "Leftmost-first: sorted by player first — skip player and you can't use it.",
             },
             {
               type: "mc",
@@ -7392,8 +7343,7 @@ export const COURSE = {
                 "Only for one season at a time",
               ],
               answer: 1,
-              explain:
-                "This is the composite index's ideal case: both filtered columns, in the same order the index was built in.",
+              explain: "Ideal case: both filtered columns, in the same order the index was built.",
             },
             {
               type: "fill",
@@ -7401,8 +7351,7 @@ export const COURSE = {
               parts: ["CREATE INDEX idx_player_season ON week_results(", null, ", ", null, ");"],
               bank: ["player", "season"],
               answer: ["player", "season"],
-              explain:
-                "Order in the parentheses is the sort order of the index — player first means player-only and player+season queries both benefit.",
+              explain: "Order in the parentheses is the sort order — player first helps player-only and player+season.",
             },
             {
               type: "mc",
@@ -7415,8 +7364,7 @@ export const COURSE = {
                 "It only stores last names",
               ],
               answer: 1,
-              explain:
-                "Same leftmost-first idea as any composite index — the analogy is exact, not just illustrative.",
+              explain: "Same leftmost-first idea — the analogy matches how the index is sorted.",
             },
           ],
         },

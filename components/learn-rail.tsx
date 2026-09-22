@@ -34,21 +34,21 @@ function buildDrills(progress: Progress, stats: BadgeStats): Quest[] {
   return [
     {
       id: "snap-today",
-      label: "Take a snap today",
+      label: "Play a lesson today",
       icon: "🏈",
       have: activeToday ? 1 : 0,
       need: 1,
     },
     {
       id: "xp-chunk",
-      label: `Bank ${xpChunk} XP`,
+      label: `Earn ${xpChunk} XP`,
       icon: "📏",
       have: towardXp,
       need: xpChunk,
     },
     {
       id: "perfect",
-      label: "Call a perfect drive",
+      label: "Nail a perfect lesson",
       icon: "🎯",
       have: Math.min(stats.perfectLessons, 1),
       need: 1,

@@ -885,8 +885,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             <div className="min-w-0 flex-1">
               <p className="label-broadcast text-turf">
                 {briefSteps.length > 0
-                  ? `the brief · ${briefStep + 1} of ${briefSteps.length}`
-                  : "the brief"}
+                  ? `intro · ${briefStep + 1} of ${briefSteps.length}`
+                  : "intro"}
               </p>
               <h2 className="mt-2 font-display text-2xl font-bold leading-snug text-ink sm:text-3xl">
                 {briefSteps.length > 0
@@ -1035,7 +1035,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
               onClick={() => setPhase("intro")}
               className="btn-check"
             >
-              Walk me through it
+              Show me how
             </button>
           ) : (
             <button
@@ -1043,7 +1043,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
               onClick={() => setBriefStep((i) => i + 1)}
               className="press w-full rounded-2xl border-2 border-panel-border bg-panel px-6 py-3.5 font-display text-base font-bold text-ink transition-colors hover:border-turf/50 hover:text-turf"
             >
-              Got it — keep going
+              Got it
             </button>
           )}
         </div>
@@ -1082,7 +1082,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
               onClick={() => setPhase("exercise")}
               className="btn-check max-w-sm"
             >
-              Take the field
+              Let&apos;s practice
             </button>
           )}
         </div>
