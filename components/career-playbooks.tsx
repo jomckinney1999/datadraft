@@ -50,24 +50,34 @@ export default function CareerPlaybooks() {
       <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
         <p className="label-broadcast mb-3 text-gold">
           <span className="mr-2 inline-block h-1.5 w-1.5 bg-gold align-middle" />
-          Career Track · {lex.playbooks}
+          Career Track preview · {lex.playbooks}
         </p>
         <h2 className="max-w-2xl font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
-          Pick your {lex.playbook.toLowerCase()}. We&apos;ll run the rest of the
-          season with you.
+          Want the job, not just the lessons?
         </h2>
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink-soft">
-          Career Track isn&apos;t one generic course with a resume checkbox at
-          the end. It&apos;s a role-specific {lex.playbook.toLowerCase()} — from{" "}
-          {lex.foundation.toLowerCase()} through {lex.applications.toLowerCase()}{" "}
-          — built for people using this to land the job. Stations below are the
-          map; drills marked placeholder are being written. Your sport lens
-          right now:{" "}
+          <strong className="font-semibold text-ink">
+            Free role paths are live on{" "}
+            <a href="/learn" className="text-turf underline underline-offset-2">
+              /learn
+            </a>
+          </strong>{" "}
+          — pick Data Analyst (or another title) and we build your course order.
+          What&apos;s below is the paid Career Track map: resume help, mock
+          interviews, and application support when that tier opens. Stations
+          marked placeholder are still being written. Sport lens right now:{" "}
           <span className="text-ink">
             {sportMeta.icon} {sportMeta.name}
           </span>
           .
         </p>
+
+        <a
+          href="/learn"
+          className="btn-turf mt-6 inline-flex items-center gap-2 border border-turf/80 bg-turf px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-turf-dim"
+        >
+          Start a free role path →
+        </a>
 
         {/* Playbook picker */}
         <div

@@ -10,40 +10,40 @@ import CareerPlaybooks from "@/components/career-playbooks";
 import WaitlistForm from "@/components/waitlist-form";
 
 const STATS = [
-  { label: "Skills taught", value: "6" },
-  { label: "Live lessons", value: "26" },
-  { label: "New data", value: "Weekly" },
+  { label: "Skills taught", value: "7+" },
+  { label: "Live lessons", value: "70+" },
+  { label: "Account needed", value: "None" },
 ];
 
 const WHY_PILLARS = [
   {
     title: "The whole toolkit, not one language",
     blurb:
-      "SQL, Python, R, Git, statistics, visualization — the actual list on a data & tech job posting, on one throughline. Not six disconnected courses you have to stitch together yourself.",
+      "SQL, Python, Excel, R, Git, stats, visualization — what’s actually on the job post, on one path. Not six random courses you have to stitch together.",
     accent: "gold" as const,
   },
   {
     title: "A domain that explains itself",
     blurb:
-      "Nobody needs a primer on “who scored more points.” Sports data is legible on sight, whether you follow a team or not — that's an entire layer of learning most courses make you fight through, gone before you write a single line of code.",
+      "Nobody needs a primer on “who scored more.” Sports data is easy to picture — even if you don’t follow a team — so you spend energy on the tech, not decoding a fake SaaS company.",
     accent: "turf" as const,
   },
   {
     title: "Real data, real mess",
     blurb:
-      "No Titanic.csv, no invented SaaS company. Live sports data — byes, injuries, trades, mid-season roster moves — the same kind of imperfect data you'll actually work with on the job.",
+      "No Titanic.csv. Real NFL weekly fantasy points — byes, injuries, missing games — the same imperfect shape you’ll meet on the job.",
     accent: "gold" as const,
   },
   {
-    title: "Useful before you're “done”",
+    title: "Useful before you’re “done”",
     blurb:
-      "You don't need to finish the roadmap to get value. Answer a real question about a real season while you're still learning — the skill pays for itself before the course does.",
+      "You don’t need to finish the roadmap to get value. Answer a real question about a real season while you’re still learning.",
     accent: "turf" as const,
   },
   {
-    title: "A portfolio story anyone gets instantly",
+    title: "A portfolio story anyone gets",
     blurb:
-      "“I built an analytics tool on NBA shot data” needs zero setup in an interview. It's memorable, easy to talk through, and still real technical work.",
+      "“I analyzed my fantasy league in SQL” needs zero setup in an interview. Memorable, easy to walk through, still real technical work.",
     accent: "gold" as const,
   },
 ];
@@ -51,11 +51,11 @@ const WHY_PILLARS = [
 const WHY_COMPARISON = [
   {
     old: "Toy datasets you memorize, don't understand",
-    now: "Real, living NFL data — NBA & MLB next",
+    now: "Real NFL data you can query in the browser today",
   },
   {
     old: "One language, then start over somewhere else",
-    now: "SQL, Python, R, Git & stats on one throughline",
+    now: "SQL, Python, Excel, R, Git & stats on one throughline",
   },
   {
     old: "Business scenarios you've never lived",
@@ -63,52 +63,52 @@ const WHY_COMPARISON = [
   },
   {
     old: "A portfolio project that looks like everyone else's",
-    now: "A capstone built on a domain any interviewer instantly gets",
+    now: "A capstone on a domain any interviewer instantly gets",
   },
 ];
 
-// Mirrors the live units in lib/curriculum.ts — keep the two in sync.
+// Mirrors the live skills path — keep in sync with /learn courses.
 const ROADMAP = [
   {
     phase: "01",
     title: "SQL",
     blurb:
-      "Select, filter, rank, and aggregate real stat sheets. Four units, written against live data.",
+      "Select, filter, join, and window over real stat sheets. Fundamentals through Advanced — every query runs in your browser.",
     accent: "turf" as const,
   },
   {
     phase: "02",
-    title: "Python & pandas",
+    title: "Excel",
     blurb:
-      "Variables, loops, and DataFrames. Every SQL verb you know has a pandas twin.",
+      "Real formulas against a live grid — lookups, logic, cleaning. The tool most first jobs still hand you on day one.",
     accent: "gold" as const,
   },
   {
     phase: "03",
-    title: "Statistical thinking",
+    title: "Python & pandas",
     blurb:
-      "Mean vs. median, sample size, regression to the mean. Stop reporting flukes.",
+      "Variables, loops, and DataFrames. Every SQL verb you know has a pandas twin — run for real with Pyodide.",
     accent: "turf" as const,
   },
   {
     phase: "04",
-    title: "Visualization",
+    title: "Statistical thinking",
     blurb:
-      "Pick the right chart, label it honestly, cut everything that isn't the argument.",
+      "Mean vs. median, sample size, regression to the mean. Stop reporting flukes as facts.",
     accent: "gold" as const,
   },
   {
     phase: "05",
     title: "Git & GitHub",
     blurb:
-      "Commits, branches, pull requests — what turns your capstone into something hiring managers can open.",
+      "Commits, branches, pull requests — what turns a project into something a hiring manager can open.",
     accent: "turf" as const,
   },
   {
     phase: "06",
-    title: "R & the tidyverse",
+    title: "R & visualization",
     blurb:
-      "dplyr and ggplot2. A huge share of public sports analytics is written in R.",
+      "dplyr / ggplot2 plus chart craft — pick the right chart, label it honestly, cut the junk.",
     accent: "gold" as const,
   },
 ];
@@ -119,8 +119,13 @@ const PLANS = [
     price: "0",
     period: "forever",
     accent: "turf" as const,
-    features: ["Limited SQL sandbox", "Free content library", "Sample season dataset"],
-    cta: "Start learning",
+    features: [
+      "All live lessons (SQL, Python, Excel, more)",
+      "Browser sandboxes — no install",
+      "Practice Field + interview cases",
+      "Your League Scorecard project",
+    ],
+    cta: "Start learning free",
     // Everything currently built is free and open — no account, no card.
     available: true,
   },
@@ -130,7 +135,7 @@ const PLANS = [
     period: "/mo",
     accent: "turf" as const,
     features: [
-      "Unlimited sandbox access",
+      "Unlimited timeouts & deeper practice",
       "Ongoing weekly problem sets",
       "Live season datasets",
     ],
@@ -198,7 +203,7 @@ export default function Home() {
             {/* Broadcast lower-third label */}
             <p className="label-broadcast mb-4 text-gold animate-[fadeUp_0.4s_ease-out_forwards]">
               <span className="mr-2 dot-glow-gold inline-block h-1.5 w-1.5 bg-gold align-middle" />
-              Tech education · Sports as the lens
+              Free beta · Data skills through sports
             </p>
 
             <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-8">
@@ -218,26 +223,33 @@ export default function Home() {
                 </p>
 
                 <p className="mt-4 max-w-md text-base leading-relaxed text-ink-soft animate-[fadeUp_0.45s_ease-out_0.15s_forwards] opacity-0">
-                  SQL, Python, R, Git, statistics — the whole toolkit an
-                  aspiring data analyst or data scientist actually needs, taught
-                  through real NFL data. The sport is the lens; the tech is the
-                  only new thing. You don&apos;t have to watch the games.
+                  Learn SQL, Python, Excel, and more on real NFL data — in your
+                  browser, no account. Pick a job title, follow a clear path,
+                  and ship portfolio work hiring managers actually understand.
+                  You don&apos;t have to watch the games.
                 </p>
 
                 <div className="mt-8 flex flex-wrap items-center gap-3 animate-[fadeUp_0.45s_ease-out_0.2s_forwards] opacity-0">
                   <a
-                    href="#sandbox"
+                    href="/learn"
                     className="btn-turf inline-flex items-center gap-2 border border-turf/80 bg-turf px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-turf-dim"
                   >
-                    Try the sandbox
+                    Start learning free
                   </a>
                   <a
-                    href="#curriculum"
+                    href="#sandbox"
                     className="inline-flex items-center gap-2 border border-panel-border bg-panel/50 px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-ink-soft transition-colors duration-150 hover:border-gold/50 hover:text-gold backdrop-blur-sm"
                   >
-                    See curriculum
+                    Try SQL in the browser
                   </a>
                 </div>
+                <p className="mt-3 font-mono text-[11px] text-ink-muted animate-[fadeUp_0.45s_ease-out_0.22s_forwards] opacity-0">
+                  Or{" "}
+                  <a href="#curriculum" className="text-ink-soft underline underline-offset-2 hover:text-turf">
+                    skim the skill roadmap
+                  </a>
+                  .
+                </p>
 
                 {/* Scoreboard strip */}
                 <div className="mt-10 grid grid-cols-3 gap-px border border-panel-border bg-panel-border/60 animate-[fadeUp_0.45s_ease-out_0.25s_forwards] opacity-0">
@@ -311,14 +323,13 @@ export default function Home() {
               Why SQL Sports
             </p>
             <h2 className="max-w-2xl font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
-              The fastest way to actually learn the stack
+              Learn data skills on data you already get
             </h2>
             <p className="mt-3 max-w-xl text-base leading-relaxed text-ink-soft">
               Most people don&apos;t fail at code because the syntax is hard.
               They fail because they&apos;re learning new tools and an
-              unfamiliar business scenario at the same time, on data they
-              don&apos;t care about. Remove the second problem, and the tech
-              stops being the hard part.
+              unfamiliar business world at the same time. Sports cuts that
+              second problem — so the tech can finally click.
             </p>
 
             <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -384,16 +395,14 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Worth-the-money close */}
+            {/* Worth-the-money close — framed for when paid tiers open */}
             <p className="mt-10 max-w-2xl text-base leading-relaxed text-ink-soft">
               A data analytics bootcamp runs $10,000–20,000. A specialized
-              analytics master&apos;s can run $20,000–50,000. Both are
-              betting that immersion works — dropping you into a domain
-              until it clicks. SQL Sports makes the same bet, except it&apos;s
-              a domain you&apos;ve already got years of immersion in. You&apos;re
-              not paying to learn a new industry and a new stack at once.
-              You&apos;re paying to learn the tech, faster, on a dataset
-              that&apos;s been running in your head since you were a kid.
+              master&apos;s can run $20,000–50,000. Both bet that immersion
+              works. SQL Sports makes the same bet — with a domain you already
+              understand — and right now every live lesson is free while
+              we&apos;re in beta. When paid tiers open, founding rates stay
+              locked for people on the waitlist.
             </p>
 
             {/* Non-fan reassurance */}
@@ -448,9 +457,9 @@ export default function Home() {
               From your first SELECT to a portfolio anyone can open
             </h2>
             <p className="mt-3 max-w-xl text-base leading-relaxed text-ink-soft">
-              Six skills, one roadmap. Each phase unlocks a real question you
-              couldn&apos;t answer in a spreadsheet alone — and all of it is
-              playable now, no account required.
+              One path of skills — not a random catalog. Each phase unlocks
+              questions you couldn&apos;t answer in a spreadsheet alone. All of
+              it is playable now, no account required.
             </p>
 
             <ol className="mt-10 grid gap-4 sm:grid-cols-2">
@@ -484,6 +493,20 @@ export default function Home() {
                 </li>
               ))}
             </ol>
+
+            <div className="mt-10">
+              <a
+                href="/learn"
+                className="btn-turf inline-flex items-center gap-2 border border-turf/80 bg-turf px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-night transition-colors duration-150 hover:bg-turf-dim"
+              >
+                Pick a role and start →
+              </a>
+              <p className="mt-3 max-w-md font-mono text-[11px] leading-relaxed text-ink-muted">
+                Free role paths on /learn build your course order automatically.
+                Interview cases and Resources are ready when you want the
+                job-hunt side.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -498,12 +521,12 @@ export default function Home() {
               Pricing
             </p>
             <h2 className="font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
-              From first line of code to career change
+              From first lesson to career change
             </h2>
             <p className="mt-3 max-w-xl text-base leading-relaxed text-ink-soft">
-              Practice for fun, follow the roadmap to get good, or go all the
-              way with a role-specific playbook and hands-on support landing
-              the job.
+              Start free. When you want more practice depth, a full roadmap
+              credential, or 1:1 career help, the tiers below are the plan —
+              waitlist only until checkout is ready.
             </p>
 
             {/* Nothing is for sale yet — the legal docs are still in review and
@@ -710,7 +733,7 @@ export default function Home() {
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
             <p className="label-broadcast mb-6">
               <span className="mr-2 dot-glow-gold inline-block h-1.5 w-1.5 bg-gold align-middle" />
-              From the same team
+              Sister product · optional
             </p>
 
             <div className="surface relative border border-panel-border bg-panel p-6 sm:p-10">
@@ -724,13 +747,18 @@ export default function Home() {
                     NFL Stat Guru
                   </h2>
                   <p className="mt-2 font-mono text-xs font-semibold uppercase tracking-wider text-gold">
-                    Ask any NFL question. Get an instant answer.
+                    Separate app · ask NFL questions in plain English
                   </p>
                   <p className="mt-4 max-w-xl text-base leading-relaxed text-ink-soft">
-                    Our sister platform for the truly obsessed — the questions
-                    ESPN can&apos;t answer, answered in plain English. Ask a
-                    question, get a real answer, pulled straight from decades
-                    of NFL play-by-play data.
+                    Built by the same team — not part of the SQL Sports
+                    curriculum. If you want instant NFL answers from play-by-play
+                    data, it&apos;s over there. If you want to{" "}
+                    <em className="not-italic text-ink">learn</em> the skills,
+                    stay here and{" "}
+                    <a href="/learn" className="text-turf underline underline-offset-2 hover:text-turf-dim">
+                      start a lesson
+                    </a>
+                    .
                   </p>
 
                   <ul className="mt-6 grid gap-2 sm:grid-cols-2">

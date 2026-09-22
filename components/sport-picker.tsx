@@ -12,17 +12,16 @@ export default function SportPicker() {
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
         <p className="label-broadcast mb-3">
           <span className="mr-2 inline-block h-1.5 w-1.5 bg-turf align-middle" />
-          Step one
+          Your lens
         </p>
         <h2 className="max-w-2xl font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
-          Pick your sport. That&apos;s your lens.
+          Pick a sport flavor. Start with football — it&apos;s live.
         </h2>
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink-soft">
-          The skills are identical whichever you choose — SQL, Python, R, Git,
-          statistics. The sport only decides what the data is about. Football is
-          the lens we&apos;ve built so far; you still don&apos;t have to watch
-          the games, since anything you need to know gets explained in a
-          sentence right where it matters.
+          The skills stay the same whichever you choose. Football is built
+          today with real NFL data; basketball and baseball are on the waitlist.
+          You still don&apos;t have to watch the games — anything you need gets
+          explained in a sentence where it matters.
         </p>
 
         <div

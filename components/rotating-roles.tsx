@@ -18,16 +18,15 @@ import { useEffect, useState } from "react";
 
 export const ROLES = [
   "data analyst",
-  "data scientist",
-  "software engineer",
-  "forward deployed engineer",
-  "AI expert",
   "analytics engineer",
-  "BI developer",
+  "BI analyst",
+  "data scientist",
+  "business analyst",
+  "data engineer",
 ];
 
 const INTERVAL_MS = 2200;
-const LONGEST = "forward deployed engineer";
+const LONGEST = "analytics engineer";
 
 export default function RotatingRoles() {
   const [index, setIndex] = useState(0);
