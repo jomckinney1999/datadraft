@@ -2,8 +2,8 @@
 
 // DataCamp / Duolingo-style lesson player with a real football drive sim:
 // every exercise is a play. Correct answers gain yards; misses burn a down.
-// Soft errors (syntax) cost nothing. 4th-down miss = turnover. Misses are
-// not re-queued — explanation shows, then the next play.
+// Soft errors (syntax) cost nothing. 4th-down miss = turnover. Misses show
+// the right answer, then come back a few snaps later (review queue).
 //
 // Every lesson: brief walk-in, chalkboard theory, then one drive of drills.
 // Immediate feedback after each play; soft errors cost no downs.
@@ -19,7 +19,6 @@ import {
   XP_RETRY,
   PERFECT_BONUS,
   type Exercise,
-  type FillExercise,
   type QueryExercise,
   type CodeExercise,
   type FormulaExercise,
@@ -35,10 +34,24 @@ import {
 } from "@/lib/runtimes";
 import { useModule } from "@/lib/use-module";
 import { useSport } from "@/lib/use-sport";
-import { awardBadges, completeLesson, loadProgress, type Progress } from "@/lib/progress";
+import {
+  awardBadges,
+  completeLesson,
+  displayStreak,
+  loadProgress,
+  type Progress,
+} from "@/lib/progress";
 import { pushProgress } from "@/lib/progress-sync";
-import { canStartLesson, loadEconomy, spendTimeout, spendTickets, COST_INSTANT_REPLAY, COST_CHALLENGE_FLAG } from "@/lib/economy";
+import {
+  canStartLesson,
+  loadEconomy,
+  spendTimeout,
+  spendTickets,
+  COST_INSTANT_REPLAY,
+  COST_CHALLENGE_FLAG,
+} from "@/lib/economy";
 import Coach from "@/components/coach";
+import CoachAssist from "@/components/coach-assist";
 import TimeoutGate from "@/components/timeout-gate";
 import CodeEditor from "@/components/code-editor";
 import ExcelGrid from "@/components/excel-grid";
@@ -53,7 +66,12 @@ import {
 import { MAIN_SHEET, type CellValue } from "@/lib/excel-data";
 import { SHORT_CREDIT } from "@/lib/data-source";
 import DriveField, { burstFromPlay, type FieldBurst } from "@/components/drive-field";
-import { ConfettiBurst, XpFloat, ComboRibbon } from "@/components/lesson-fx";
+import {
+  ConfettiBurst,
+  XpFloat,
+  ComboRibbon,
+  RewardToast,
+} from "@/components/lesson-fx";
 import SfxMuteButton from "@/components/sfx-mute-button";
 import { heatLabel } from "@/lib/gameplay";
 import {
@@ -66,6 +84,13 @@ import {
 import { newlyEarned, statsFrom, type Badge } from "@/lib/achievements";
 import { useCountUp } from "@/lib/use-count-up";
 import { playForPlayKind, playSfx } from "@/lib/sfx";
+import {
+  describeLearnerAnswer,
+  fillSolution,
+  queueAfterMiss,
+  whyWrongMessage,
+  MAX_REVIEWS,
+} from "@/lib/miss-feedback";
 
 type Phase =
   | "loading"
@@ -83,6 +108,12 @@ type Feedback = {
   playKind?: PlayKind;
   solution?: string;
   explain: string;
+  /** Plain “you said X” for miss panels. */
+  yourAnswer?: string;
+  /** Contrast line before the curriculum explain. */
+  whyWrong?: string;
+  /** Miss will reappear later in the drive. */
+  willReview?: boolean;
 };
 
 function normalizeResult(
@@ -105,13 +136,6 @@ function normalizeResult(
     });
   }
   return JSON.stringify(rows);
-}
-
-function fillSolution(ex: FillExercise): string {
-  let i = 0;
-  return ex.parts
-    .map((part) => (part === null ? ex.answer[i++] : part))
-    .join("");
 }
 
 function TheoryCardView({ card }: { card: TheoryCard }) {
@@ -157,6 +181,17 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const driveBeforeMissRef = useRef<DriveState | null>(null);
   const [showMissSolution, setShowMissSolution] = useState(false);
   const [replayMsg, setReplayMsg] = useState<string | null>(null);
+  /** How many times each exercise index has been re-queued after a miss. */
+  const [reviewCounts, setReviewCounts] = useState<Record<number, number>>({});
+  const [rewardToast, setRewardToast] = useState<{
+    label: string;
+    accent: "gold" | "turf" | "ice";
+  } | null>(null);
+  const [completionBoost, setCompletionBoost] = useState<{
+    streak: number;
+    ticketsGained: number;
+    streakGrew: boolean;
+  } | null>(null);
   const [introStep, setIntroStep] = useState(0);
   /**
    * Which beat of the brief's paced walk-in is showing.
@@ -402,11 +437,30 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   useEffect(() => {
     if (phase === "complete" && !savedRef.current && entry) {
       savedRef.current = true;
+      const before = loadProgress();
+      const streakBefore = displayStreak(before);
+      const ticketsBefore = before.tickets ?? 0;
       const saved = completeLesson(entry.lesson.id, finalXp, {
         perfect,
         bestCombo,
         yards: driveYards,
       });
+      const ticketsGained = Math.max(0, (saved.tickets ?? 0) - ticketsBefore);
+      const streakGrew =
+        saved.streak > streakBefore ||
+        (streakBefore === 0 && saved.streak >= 1);
+      setCompletionBoost({
+        streak: saved.streak,
+        ticketsGained,
+        streakGrew,
+      });
+      if (ticketsGained > 0) {
+        setRewardToast({
+          label: `+${ticketsGained} ✦ tickets`,
+          accent: "gold",
+        });
+        window.setTimeout(() => setRewardToast(null), 1600);
+      }
       // Badges are recomputed from the saved stats, so an unlock can never
       // depend on this render having the freshest state.
       const fresh = newlyEarned(statsFrom(saved), saved.badges);
@@ -709,7 +763,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
 
       // Snapshot LOS/downs so Instant Replay can rewind the play.
       driveBeforeMissRef.current = drive;
-      setShowMissSolution(false);
+      setShowMissSolution(true);
       setReplayMsg(null);
 
       const missed = scoreMissPlay(drive, currentIdx);
@@ -717,6 +771,17 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       const kind = missed.state.lastPlay?.kind ?? "incomplete";
       const yards = missed.state.lastPlay?.yards ?? 0;
       setBurst(burstFromPlay(kind, yards, Date.now()));
+
+      const yourAnswer = describeLearnerAnswer(exercise, {
+        mcChoice,
+        fillSlots,
+        queryText,
+        codeText,
+        formulaText,
+      });
+      const reviewsSoFar = reviewCounts[currentIdx] ?? 0;
+      const willReview =
+        kind !== "turnover" && reviewsSoFar < MAX_REVIEWS;
 
       setFeedback({
         correct: false,
@@ -728,9 +793,31 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
         playKind: kind,
         solution: result.solution,
         explain: exercise.explain,
+        yourAnswer,
+        whyWrong: whyWrongMessage(exercise, yourAnswer, result.solution),
+        willReview,
       });
       playForPlayKind(false, kind);
     }
+  }
+
+  /** Free practice on this snap — down already burned; no ticket spend. */
+  function handleTryAgainNow() {
+    if (!feedback || feedback.correct) return;
+    setFeedback(null);
+    setShowMissSolution(false);
+    setReplayMsg(null);
+    setBurst(null);
+    setMcChoice(null);
+    setFillSlots([]);
+    setSoftError(null);
+    setRunError(null);
+    setCodeError(null);
+    setFormulaError(null);
+    setHintShown(false);
+    if (exercise?.type === "query") setQueryText(exercise.starter);
+    if (exercise?.type === "code") setCodeText(exercise.starter);
+    if (exercise?.type === "formula") setFormulaText(exercise.starter);
   }
 
   /** Spend tickets to rewind the miss and re-take this snap. */
@@ -753,6 +840,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     }
 
     setEconomy(next);
+    setRewardToast({ label: `−${cost} ✦`, accent: "gold" });
+    window.setTimeout(() => setRewardToast(null), 1200);
     setDrive(snapshot);
     driveBeforeMissRef.current = null;
     setFeedback(null);
@@ -786,8 +875,14 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       return;
     }
 
-    // Football-first: miss does not re-queue — next play is the next exercise.
-    setQueue((q) => q.slice(1));
+    if (!feedback.correct) {
+      // Duo-style: bring the miss back a few snaps later.
+      const scheduled = queueAfterMiss(queue, currentIdx, reviewCounts);
+      setReviewCounts(scheduled.reviewCounts);
+      setQueue(scheduled.queue);
+    } else {
+      setQueue((q) => q.slice(1));
+    }
     setFeedback(null);
     setShowMissSolution(false);
     driveBeforeMissRef.current = null;
@@ -798,6 +893,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     driveBeforeMissRef.current = null;
     setShowMissSolution(false);
     setReplayMsg(null);
+    setReviewCounts({});
+    setRewardToast(null);
+    setCompletionBoost(null);
     setQueue(activeIdx);
     setDrive(startDrive());
     setCombo(0);
@@ -824,6 +922,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     (exercise.type === "query" ||
       exercise.type === "code" ||
       exercise.type === "formula");
+  const isReviewPlay =
+    currentIdx !== undefined && (reviewCounts[currentIdx] ?? 0) > 0;
 
   return (
     <div
@@ -839,6 +939,11 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
         yards={xpFloat?.yards}
         yardsLabel={gainNoun}
         show={!!xpFloat}
+      />
+      <RewardToast
+        label={rewardToast?.label ?? ""}
+        show={!!rewardToast}
+        accent={rewardToast?.accent}
       />
       {/* top bar — frosted scorebug */}
       <div className="glass sticky top-0 z-20 -mx-4 border-b border-panel-border/50 px-4 py-3.5">
@@ -1102,6 +1207,11 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                   <span className="rounded-full border border-turf/40 bg-turf/15 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-turf">
                     Instructions
                   </span>
+                  {isReviewPlay && (
+                    <span className="rounded-full border border-gold/50 bg-gold/15 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-gold">
+                      Review play
+                    </span>
+                  )}
                   <ComboRibbon combo={combo} />
                 </div>
                 <h2 className="font-display text-xl font-bold leading-snug text-ink sm:text-2xl">
@@ -1131,6 +1241,14 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                             | FormulaExercise
                         ).hint
                       }
+                      <CoachAssist
+                        mode="hint"
+                        prompt={exercise.prompt}
+                        exerciseType={exercise.type}
+                        explain={exercise.explain}
+                        lessonId={lessonId}
+                        label="Ask Coach for another angle"
+                      />
                     </div>
                   ) : (
                     <button
@@ -1170,23 +1288,39 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                       {feedback.correct ? "🎉 " : "🚩 "}
                       {feedback.headline}
                     </p>
+                    {!feedback.correct && feedback.whyWrong && (
+                      <p className="mt-2 text-sm font-medium leading-relaxed text-ink">
+                        {feedback.whyWrong}
+                      </p>
+                    )}
                     <p className="mt-2 text-sm leading-relaxed text-ink-soft">
                       {feedback.explain}
                     </p>
                     {!feedback.correct && feedback.solution && (
-                      showMissSolution ? (
-                        <pre className="mt-3 overflow-x-auto whitespace-pre-wrap rounded-xl border border-panel-border bg-night px-3 py-2 font-mono text-[12px] text-ink-soft">
+                      <div className="mt-3">
+                        <p className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+                          Correct answer
+                        </p>
+                        <pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-xl border border-panel-border bg-night px-3 py-2 font-mono text-[12px] text-ink-soft">
                           {feedback.solution}
                         </pre>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => setShowMissSolution(true)}
-                          className="mt-3 font-mono text-[11px] uppercase tracking-wider text-ink-muted underline-offset-2 hover:text-gold hover:underline"
-                        >
-                          Peek at the film (answer)
-                        </button>
-                      )
+                      </div>
+                    )}
+                    {!feedback.correct && feedback.willReview && (
+                      <p className="mt-3 font-mono text-[11px] uppercase tracking-wider text-gold">
+                        You&apos;ll see this play again in a few snaps
+                      </p>
+                    )}
+                    {!feedback.correct && (
+                      <CoachAssist
+                        mode="why_wrong"
+                        prompt={exercise.prompt}
+                        exerciseType={exercise.type}
+                        learnerAnswer={feedback.yourAnswer}
+                        solution={feedback.solution}
+                        explain={feedback.explain}
+                        lessonId={lessonId}
+                      />
                     )}
                   </div>
                 )}
@@ -1386,6 +1520,11 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                   <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-turf">
                     Your play
                   </span>
+                  {isReviewPlay && (
+                    <span className="rounded-full border border-gold/50 bg-gold/15 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-gold">
+                      Review play
+                    </span>
+                  )}
                   <ComboRibbon combo={combo} />
                 </div>
                 <p className="font-display text-lg font-semibold leading-snug text-ink sm:text-xl">
@@ -1483,27 +1622,47 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                   </div>
                 )}
 
-                {feedback && !feedback.correct && feedback.solution && (
-                  <div className="mt-4">
-                    {showMissSolution ? (
-                      <pre className="overflow-x-auto whitespace-pre-wrap rounded-xl border border-panel-border bg-night px-3 py-2.5 font-mono text-[12px] text-ink-soft">
-                        {feedback.solution}
-                      </pre>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setShowMissSolution(true)}
-                        className="font-mono text-[11px] uppercase tracking-wider text-ink-muted underline-offset-2 hover:text-gold hover:underline"
-                      >
-                        Peek at the film (answer)
-                      </button>
+                {feedback && (
+                  <div
+                    className={`mt-4 animate-feedback-rise ${
+                      feedback.correct ? "feedback-win" : "feedback-miss"
+                    }`}
+                  >
+                    {!feedback.correct && feedback.whyWrong && (
+                      <p className="text-sm font-medium leading-relaxed text-ink">
+                        {feedback.whyWrong}
+                      </p>
+                    )}
+                    <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+                      {feedback.explain}
+                    </p>
+                    {!feedback.correct && feedback.solution && (
+                      <div className="mt-3">
+                        <p className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+                          Correct answer
+                        </p>
+                        <pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-xl border border-panel-border bg-night px-3 py-2.5 font-mono text-[12px] text-ink-soft">
+                          {feedback.solution}
+                        </pre>
+                      </div>
+                    )}
+                    {!feedback.correct && feedback.willReview && (
+                      <p className="mt-3 font-mono text-[11px] uppercase tracking-wider text-gold">
+                        You&apos;ll see this play again in a few snaps
+                      </p>
+                    )}
+                    {!feedback.correct && (
+                      <CoachAssist
+                        mode="why_wrong"
+                        prompt={exercise.prompt}
+                        exerciseType={exercise.type}
+                        learnerAnswer={feedback.yourAnswer}
+                        solution={feedback.solution}
+                        explain={feedback.explain}
+                        lessonId={lessonId}
+                      />
                     )}
                   </div>
-                )}
-                {feedback && (
-                  <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-                    {feedback.explain}
-                  </p>
                 )}
               </div>
             </>
@@ -1562,6 +1721,15 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                     </p>
                   )}
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+                    {!feedback.correct && feedback.playKind !== "turnover" && (
+                      <button
+                        type="button"
+                        onClick={handleTryAgainNow}
+                        className="rounded-2xl border-2 border-ice/50 border-b-4 bg-ice/10 px-5 py-3.5 font-mono text-[12px] font-bold uppercase tracking-wider text-ice transition-colors hover:bg-ice/20"
+                      >
+                        Try again now
+                      </button>
+                    )}
                     {!feedback.correct && driveBeforeMissRef.current && (
                       <button
                         type="button"
@@ -1570,7 +1738,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                       >
                         {feedback.playKind === "turnover"
                           ? `Challenge flag · ${COST_CHALLENGE_FLAG} ✦`
-                          : `Instant replay · ${COST_INSTANT_REPLAY} ✦`}
+                          : `Undo down · ${COST_INSTANT_REPLAY} ✦`}
                         <span className="ml-2 font-normal text-ink-muted normal-case tracking-normal">
                           ({(economy ?? loadEconomy()).tickets} left)
                         </span>
@@ -1589,7 +1757,11 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                         ? "See the film"
                         : feedback.playKind === "td"
                           ? "Celebrate"
-                          : "Continue"}
+                          : feedback.correct
+                            ? "Continue"
+                            : feedback.willReview
+                              ? "Got it — next play"
+                              : "Continue"}
                     </button>
                   </div>
                 </div>
@@ -1612,6 +1784,25 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
               Touchdown!
             </h1>
             <p className="mt-2 text-base text-ink-soft">Lesson complete.</p>
+            {completionBoost && (
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wider ${
+                    completionBoost.streakGrew
+                      ? "border-gold/50 bg-gold/15 text-gold animate-celebrate"
+                      : "border-panel-border text-ink-muted"
+                  }`}
+                >
+                  🔥 {completionBoost.streak}-day heater
+                  {completionBoost.streakGrew ? " · extended!" : ""}
+                </span>
+                {completionBoost.ticketsGained > 0 && (
+                  <span className="inline-flex rounded-full border border-gold/40 bg-gold/10 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-gold">
+                    +{completionBoost.ticketsGained} ✦ tickets
+                  </span>
+                )}
+              </div>
+            )}
           </div>
           <div className="grid w-full max-w-sm grid-cols-2 gap-3">
             <div className="lesson-prompt !p-4 text-left">

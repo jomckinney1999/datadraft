@@ -20,6 +20,7 @@ import CourseArt from "@/components/course-art";
 import CourseCover from "@/components/course-cover";
 import LearnStatusChips from "@/components/learn-status-chips";
 import TestingTools from "@/components/testing-tools";
+import StreakNudge from "@/components/streak-nudge";
 
 function ClockIcon() {
   return (
@@ -211,6 +212,8 @@ export default function LearnCatalogPage() {
           </div>
         </div>
       </section>
+
+      <StreakNudge progress={progress} />
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {CAREER_ROLES.map((role, i) => {

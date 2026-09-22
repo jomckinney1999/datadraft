@@ -114,6 +114,36 @@ export function XpFloat({
   );
 }
 
+export function RewardToast({
+  label,
+  show,
+  accent = "gold",
+}: {
+  label: string;
+  show: boolean;
+  accent?: "gold" | "turf" | "ice";
+}) {
+  if (!show || !label) return null;
+  const border =
+    accent === "turf"
+      ? "border-turf bg-turf text-night"
+      : accent === "ice"
+        ? "border-ice bg-ice text-night"
+        : "border-gold bg-gold text-night";
+  return (
+    <div
+      className="pointer-events-none fixed left-1/2 top-[38%] z-50 -translate-x-1/2 animate-xp-float"
+      aria-hidden
+    >
+      <div
+        className={`rounded-2xl border-2 px-4 py-2 font-display text-base font-bold shadow-scoreboard-gold ${border}`}
+      >
+        {label}
+      </div>
+    </div>
+  );
+}
+
 export function ComboRibbon({ combo }: { combo: number }) {
   if (combo < 2) return null;
   const label =
