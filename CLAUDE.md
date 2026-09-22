@@ -59,6 +59,11 @@ Lesson copy lives mostly in `lib/curriculum.ts` (briefs, film cards, intros, pro
 - A page that also wants an in-context back link renders it via `HomeLink`'s `back` / `backLabel` props, beside the wordmark — never by re-targeting the logo. The roadmap is the reference: logo → `/`, "← all courses" → `/learn`.
 - **The lesson player is the one deliberate exception.** Its top bar stays minimal (quit / downs-and-distance field) and the quit `X` goes to `/learn`, not home: mid-drive the course list is the right destination, and a logo sitting where the X is would make it easy to lose a drive by accident. `/learn` carries the wordmark, so home is one further click.
 
+## Portfolio projects
+
+- **Guided BYO-league project:** `/learn/project/my-league-scorecard` walks learners through exporting their fantasy league (Sleeper API in Colab, or ESPN/Yahoo CSV) and answering scorecard questions in SQL. Notebook: `notebooks/my-league-scorecard.ipynb` — open via the Colab link on the project page. Metadata in `lib/projects.ts`. These are portfolio builds, not graded `lib/finals.ts` lessons.
+- Rebuild the notebook after editing the generator: `python scripts/build-league-scorecard-notebook.py`.
+
 ## Course imagery
 
 - **Course cards use drawn covers, not photos** (`components/course-cover.tsx`). Each of the ten courses has its own scene pairing its subject with the sport (a stat sheet on a field, a ranked board inside a window frame, a route tree, kick trajectories through uprights). They share a `Sky` + `Field` treatment so the set reads as one system.

@@ -261,6 +261,28 @@ export default function LearnCatalogPage() {
         <TestingTools />
       </div>
 
+      <section className="surface mt-8 border border-gold/30 bg-panel p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0 max-w-xl">
+            <p className="label-broadcast text-gold">portfolio project</p>
+            <h2 className="mt-1 font-display text-xl font-bold text-ink">
+              Your League Scorecard
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+              Export your real fantasy league (Sleeper is one click), load it
+              into SQL in Google Colab, and answer the questions managers argue
+              about every week.
+            </p>
+          </div>
+          <Link
+            href="/learn/project/my-league-scorecard"
+            className="btn-gold shrink-0"
+          >
+            Start project →
+          </Link>
+        </div>
+      </section>
+
       <section className="mt-14">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>

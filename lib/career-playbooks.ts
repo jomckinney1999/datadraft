@@ -153,7 +153,7 @@ export const CAREER_PLAYBOOKS: CareerPlaybook[] = [
           { label: "Git / GitHub so managers can open your work", status: "live" },
         ],
         projects: [
-          { label: "Waiver-wire efficiency study", status: "placeholder" },
+          { label: "Your League Scorecard (BYO Sleeper / CSV)", status: "live" },
           { label: "Matchup model you can defend out loud", status: "placeholder" },
           { label: "Dashboard a GM would actually open", status: "placeholder" },
         ],
