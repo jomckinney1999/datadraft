@@ -64,7 +64,9 @@ export default function AccountPage() {
     const { error: signInError } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/account`,
+        // Signing in lands on the dashboard, not the account page: the reason to
+        // log in is to get back to learning, not to look at settings.
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
       },
     });
     if (signInError) {
