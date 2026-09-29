@@ -220,6 +220,33 @@ body {
      top edge and light spilling underneath reads as an object. The spill is
      multiplied by --glow-strength so it disappears in light mode instead of
      turning into a coloured smear. */
+  /* Buttons carry the house typography themselves.
+   *
+   * These used to be colour fills and nothing else, so a button only looked
+   * like one if the call site remembered to add
+   * `font-mono text-[11px] font-bold uppercase tracking-wider px-… py-…`.
+   * Six call sites didn't, and inherited body text instead — which is why a
+   * sentence-case "Copy markdown template" sat next to an uppercase mono link
+   * looking like it came from a different site. Defaults live here so a bare
+   * `className="btn-gold"` is already correct; these sit in @layer components,
+   * so any call site that sets its own size or padding still wins. */
+  .btn-turf,
+  .btn-gold {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1.25rem;
+    font-family: var(--font-ibm-plex-mono), monospace;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgb(var(--c-night));
+    white-space: nowrap;
+  }
+
   .btn-turf {
     background-image: linear-gradient(
       180deg,

@@ -97,7 +97,9 @@ export default function SupportWidget() {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Close support chat" : "Open support chat"}
-        className="btn-turf flex h-12 w-12 items-center justify-center rounded-full border border-turf/50 bg-turf text-night shadow-fab transition-transform duration-150 hover:scale-105"
+        // p-0: this is a round icon button, not a labelled one, so it opts out
+        // of the padding .btn-turf now gives every text button.
+        className="btn-turf flex h-12 w-12 items-center justify-center rounded-full border border-turf/50 bg-turf p-0 text-night shadow-fab transition-transform duration-150 hover:scale-105"
       >
         {open ? (
           <span className="text-xl leading-none">✕</span>

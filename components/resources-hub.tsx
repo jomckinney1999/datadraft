@@ -234,7 +234,7 @@ export default function ResourcesHub() {
 
             <div className="mt-6 flex flex-wrap gap-3">
               <button type="button" onClick={copyResume} className="btn-gold">
-                {copied ? "Copied" : "Copy markdown template"}
+                {copied ? "Copied" : "Copy template"}
               </button>
               <Link
                 href="/learn/project/my-league-scorecard"
