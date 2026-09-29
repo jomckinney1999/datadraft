@@ -7,6 +7,7 @@
 
 import Link from "next/link";
 import PathCast from "@/components/path-cast";
+import { PathChest, PathFlag } from "@/components/path-marks";
 import { useModule } from "@/lib/use-module";
 import type { BoardLesson, BoardSegment, CareerRole } from "@/lib/career-paths";
 import { buildBoard } from "@/lib/career-paths";
@@ -112,7 +113,7 @@ export default function CareerBoard({
                 : ""}
             </p>
             <h1 className="truncate font-display text-xl font-bold text-night sm:text-2xl">
-              {current?.course.title ?? role.title}
+              {current?.lesson.title ?? role.title}
             </h1>
           </div>
         </div>
@@ -146,7 +147,21 @@ export default function CareerBoard({
           }`}
           aria-hidden
         >
-          🏆
+          <span
+            className={
+              lessons.length > 0 &&
+              lessons.every((l) => completedLessons.includes(l.lesson.id))
+                ? "text-turf"
+                : "text-gold"
+            }
+          >
+            <PathFlag
+              won={
+                lessons.length > 0 &&
+                lessons.every((l) => completedLessons.includes(l.lesson.id))
+              }
+            />
+          </span>
         </div>
         <p className="max-w-[14rem] text-center font-mono text-[11px] uppercase tracking-widest text-ink-muted">
           End zone · {role.title}
@@ -220,7 +235,9 @@ function SegmentView({
         style={{ transform: `translateX(${offset * 0.3}px)` }}
         aria-hidden
       >
-        {seg.open ? "⛓️" : "🎁"}
+        <span className={seg.open ? "text-turf" : "text-gold"}>
+          <PathChest open={seg.open} />
+        </span>
       </div>
     );
   }
@@ -238,7 +255,9 @@ function SegmentView({
         }
         aria-hidden
       >
-        {seg.open ? "🏈" : "🏁"}
+        <span className={seg.open ? "text-turf" : "text-gold"}>
+          <PathFlag won={seg.open} />
+        </span>
       </div>
     );
   }

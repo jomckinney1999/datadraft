@@ -33,6 +33,7 @@ import {
   type Lang,
 } from "@/lib/runtimes";
 import { useModule } from "@/lib/use-module";
+import LessonOutline from "@/components/lesson-outline";
 import { useSport } from "@/lib/use-sport";
 import {
   awardBadges,
@@ -203,6 +204,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
    * with a table under it.
    */
   const [briefStep, setBriefStep] = useState(0);
+  const [outlineOpen, setOutlineOpen] = useState(false);
   const [queue, setQueue] = useState<number[]>([]);
   const [drive, setDrive] = useState<DriveState>(() => startDrive());
   const [combo, setCombo] = useState(0);
@@ -977,6 +979,33 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     currentIdx !== undefined && (reviewCounts[currentIdx] ?? 0) > 0;
 
   return (
+    <div className="lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
+      <aside className="sticky top-0 hidden h-screen overflow-hidden border-r border-panel-border lg:block">
+        <LessonOutline
+          lessonId={lesson.id}
+          unitId={entry.unit.id}
+          refreshKey={phase}
+        />
+      </aside>
+      {outlineOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <button
+            type="button"
+            aria-label="Close outline"
+            className="absolute inset-0 bg-night/70"
+            onClick={() => setOutlineOpen(false)}
+          />
+          <div className="absolute inset-y-0 left-0 w-[min(100%,20rem)] overflow-hidden border-r border-panel-border shadow-scoreboard">
+            <LessonOutline
+              lessonId={lesson.id}
+              unitId={entry.unit.id}
+              refreshKey={phase}
+              onClose={() => setOutlineOpen(false)}
+              onNavigate={() => setOutlineOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     <div
       className={`relative mx-auto flex min-h-screen w-full flex-col px-4 pb-32 sm:pb-10 ${
         phase === "exercise" && isHandsOn
@@ -1013,6 +1042,13 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
               />
             </svg>
           </Link>
+          <button
+            type="button"
+            onClick={() => setOutlineOpen(true)}
+            className="status-chip shrink-0 lg:hidden"
+          >
+            Outline
+          </button>
           <DriveField
             drive={drive}
             heat={heatLabel(combo)}
@@ -2041,6 +2077,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

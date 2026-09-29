@@ -23,6 +23,7 @@ import { COURSES } from "@/lib/courses";
 import Coach from "@/components/coach";
 import CourseIntro from "@/components/course-intro";
 import PathCast from "@/components/path-cast";
+import { PathChest, PathFlag } from "@/components/path-marks";
 import HomeLink from "@/components/home-link";
 import LearnRail from "@/components/learn-rail";
 import LearnStatusChips from "@/components/learn-status-chips";
@@ -204,8 +205,8 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
                     aria-hidden
                   />
                 </div>
-                <span className="text-lg" aria-hidden>
-                  {pct === 100 ? "🏈" : "🏁"}
+                <span className="shrink-0 text-gold" aria-hidden>
+                  {pct === 100 ? <PathFlag won /> : <PathFlag won={false} />}
                 </span>
               </div>
             </div>
@@ -241,6 +242,30 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
               hours={courseHours}
               started={completedCount > 0}
             />
+          )}
+
+          {/* Units */}
+          {current && activeUnit && activeIndex >= 0 && pct < 100 && (
+            <div className="sticky top-14 z-10 mt-4 lg:top-3">
+              <div className="unit-banner flex items-center justify-between gap-3 !rounded-2xl !px-4 !py-2.5">
+                <div className="min-w-0">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-night/70">
+                    Unit {activeIndex + 1} · {activeUnit.title}
+                  </p>
+                  <p className="truncate font-display text-base font-bold text-night">
+                    {current.lesson.title}
+                  </p>
+                </div>
+                {gateHref && (
+                  <Link
+                    href={gateHref}
+                    className="shrink-0 rounded-xl bg-night/15 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-night hover:bg-night/25"
+                  >
+                    Snap
+                  </Link>
+                )}
+              </div>
+            </div>
           )}
 
           {/* Units */}
@@ -452,10 +477,10 @@ function UnitBlock({
                 />
               </div>
               <span
-                className={`text-base ${unitComplete ? "" : "opacity-40 grayscale"}`}
+                className={`shrink-0 ${unitComplete ? "text-turf" : "text-gold opacity-50"}`}
                 aria-hidden
               >
-                {unitComplete ? "🏈" : "🏁"}
+                <PathFlag won={unitComplete} />
               </span>
             </div>
           )}
@@ -563,7 +588,9 @@ function LessonPath({
               title={chestOpen ? "First down secured" : "Pick up a first down"}
               aria-hidden
             >
-              {chestOpen ? "⛓️" : "⬇️"}
+              <span className={chestOpen ? "text-turf" : "text-gold"}>
+                <PathChest open={chestOpen} />
+              </span>
             </div>
           );
         }
@@ -576,7 +603,9 @@ function LessonPath({
               title={unitComplete ? "Touchdown — unit complete" : "Drive to the end zone"}
               aria-hidden
             >
-              {unitComplete ? "🏈" : "🏁"}
+              <span className={unitComplete ? "text-turf" : "text-gold"}>
+                <PathFlag won={unitComplete} />
+              </span>
             </div>
           );
         }
