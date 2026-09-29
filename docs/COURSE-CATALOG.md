@@ -755,11 +755,11 @@ Honest state of what exists in `lib/curriculum.ts` today versus this spec:
 | Git & GitHub | 40 | 3 lessons (unit 10) | No |
 | R | 46 | 3 lessons (unit 11) | Yes — WebR |
 | Excel | 52 | **16 lessons (units 15–18)** | Yes — fast-formula-parser |
-| Tableau | 48 | 0 | n/a |
-| Power BI | 50 | 0 | n/a |
-| LLMs & AI | 44 | 0 (unit 12 is a stub) | Planned — Pyodide |
+| Tableau | 48 | **12 lessons (6 units, mc/fill — build the file in Tableau Public)** | No — follow along in Tableau Public |
+| Power BI | 50 | **12 lessons (6 units, mc/fill — build the file in Power BI Desktop)** | No — follow along in Desktop |
+| LLMs & AI | 44 | **10 lessons (5 units, mc/fill — judgment drills, no live model call)** | No |
 
-**71 of 481 lessons exist** (the 3 visualization lessons in unit 9 are folded into Tableau/Power BI above, so they aren't counted here). The catalog page marks unbuilt courses "In build" rather than implying they're ready — keep it that way until the lessons land.
+Tableau, Power BI, and AI are playable: 12, 12, and 10 lessons. Each catalog section is one unit of two lessons, not one lesson per bullet above. The app quizzes the ideas. It does not run Tableau, Power BI, or a model. Courses with no lessons stay "In build".
 
 **Suggested build order**, by demand and by what the existing runtimes already support:
 

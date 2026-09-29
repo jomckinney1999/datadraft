@@ -138,6 +138,9 @@ export const STUDIO_COURSES: StudioCourse[] = [
     colabUrl: "https://colab.research.google.com/",
   }),
   buildCourse("viz", { accent: "gold", colabUrl: null }),
+  buildCourse("tableau", { accent: "turf", colabUrl: null }),
+  buildCourse("powerbi", { accent: "ice", colabUrl: null }),
+  buildCourse("ai", { accent: "gold", colabUrl: null }),
 ].filter((c): c is StudioCourse => Boolean(c));
 
 export function getStudioCourse(id: string): StudioCourse | undefined {

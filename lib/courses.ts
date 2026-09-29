@@ -121,7 +121,7 @@ export const COURSES: Course[] = [
   },
   {
     id: "tableau",
-    moduleId: null,
+    moduleId: "tableau",
     title: "Tableau for Data Visualization",
     mark: "Tab",
     blurb:
@@ -131,11 +131,11 @@ export const COURSES: Course[] = [
     projects: 2,
     level: "Beginner → Advanced",
     accent: "turf",
-    status: "building",
+    status: "live",
   },
   {
     id: "powerbi",
-    moduleId: null,
+    moduleId: "powerbi",
     title: "Power BI & DAX",
     mark: "PBI",
     blurb:
@@ -145,7 +145,7 @@ export const COURSES: Course[] = [
     projects: 2,
     level: "Beginner → Advanced",
     accent: "gold",
-    status: "building",
+    status: "live",
   },
   {
     id: "git",
@@ -178,7 +178,7 @@ export const COURSES: Course[] = [
   },
   {
     id: "ai",
-    moduleId: null,
+    moduleId: "ai",
     title: "LLMs & AI for Analysts",
     mark: "AI",
     blurb:
@@ -188,7 +188,7 @@ export const COURSES: Course[] = [
     projects: 1,
     level: "Beginner → Intermediate",
     accent: "turf",
-    status: "building",
+    status: "live",
   },
 ];
 

@@ -22,7 +22,7 @@ export const CAREER_ROLES: CareerRole[] = [
     id: "data-analyst",
     title: "Data Analyst",
     blurb: "The most common first data job — pull, clean, and present answers.",
-    courseIds: ["sql-fundamentals", "excel", "python", "tableau"],
+    courseIds: ["sql-fundamentals", "excel", "python", "tableau", "ai"],
     why: "SQL to get the data, Excel to present it, Python when the question outgrows a sheet, then visualization so stakeholders can use it without you in the room.",
   },
   {
@@ -43,7 +43,7 @@ export const CAREER_ROLES: CareerRole[] = [
     id: "data-scientist",
     title: "Data Scientist",
     blurb: "Analysis that needs code, stats, and a clean pull from the database.",
-    courseIds: ["sql-fundamentals", "python", "stats", "sql-advanced"],
+    courseIds: ["sql-fundamentals", "python", "stats", "sql-advanced", "ai"],
     why: "SQL first so you are not filtering in memory. Python and stats are the core loop. Advanced SQL shows up when the questions get senior.",
   },
   {

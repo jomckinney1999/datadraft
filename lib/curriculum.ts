@@ -19,6 +19,12 @@ import { SQL_FOUNDATION_UNITS } from "./curriculum-foundations";
 import { SQL_MORE_UNITS } from "./curriculum-sql-more";
 import { SQL_NEXT_UNITS } from "./curriculum-sql-next";
 import {
+  AI_UNIT_IDS,
+  BI_UNITS,
+  POWERBI_UNIT_IDS,
+  TABLEAU_UNIT_IDS,
+} from "./curriculum-bi";
+import {
   ANALYTICS_UNIT_IDS,
   FOUNDATIONS_UNIT_IDS,
   SQL_SHELLS,
@@ -7480,6 +7486,7 @@ export const COURSE = {
     ...SQL_FOUNDATION_UNITS,
     ...SQL_NEXT_UNITS,
     ...SQL_MORE_UNITS,
+    ...BI_UNITS,
     ...FINAL_UNITS,
   ] as Unit[],
 };
@@ -7516,7 +7523,11 @@ export const MODULES: Module[] = [
       ...ANALYTICS_UNIT_IDS,
       "u15", "u16", "u17", "u18", "u26",
       "u7", "u13", "u14", "u25",
-      "u8", "u27", "u9", "u28", "u10", "u29", "u11", "u30",
+      "u8", "u27", "u9", "u28",
+      ...TABLEAU_UNIT_IDS,
+      ...POWERBI_UNIT_IDS,
+      "u10", "u29", "u11", "u30",
+      ...AI_UNIT_IDS,
     ],
   },
   {
@@ -7583,11 +7594,25 @@ export const MODULES: Module[] = [
     unitIds: ["u11", "u30"],
   },
   {
+    id: "tableau",
+    name: "Tableau",
+    blurb:
+      "Dashboards in Tableau Public: the picture, the calculation, and a URL you can send.",
+    unitIds: [...TABLEAU_UNIT_IDS],
+  },
+  {
+    id: "powerbi",
+    name: "Power BI",
+    blurb:
+      "Desktop reports, a star schema, and DAX measures that hear the filters.",
+    unitIds: [...POWERBI_UNIT_IDS],
+  },
+  {
     id: "ai",
     name: "AI & LLMs",
     blurb:
-      "Prompts, evals, retrieval, and shipping AI features — declaring next season.",
-    unitIds: ["u12"],
+      "What a model is doing, how to ask, and what you still have to check yourself.",
+    unitIds: [...AI_UNIT_IDS],
   },
 ];
 
