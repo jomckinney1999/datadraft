@@ -171,6 +171,57 @@ const weekly = weeklyBySeason
     round1(num(r.fantasy_points_ppr)),
   ]);
 
+// ── Injuries and snap counts ──────────────────────────────────────
+// Two things a real analyst reaches for and neither the lessons nor the field
+// had: why a player disappeared from the data, and how much he was actually on
+// the field. Both ship gzipped, so they need inflating by hand — fetch only
+// decompresses what the server marks as Content-Encoding.
+import { gunzipSync } from "node:zlib";
+
+async function fetchGz(url) {
+  process.stdout.write(`fetching ${url.split("/").pop()} … `);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
+  const text = gunzipSync(Buffer.from(await res.arrayBuffer())).toString("utf8");
+  const rows = parse(text, {
+    columns: true,
+    skip_empty_lines: true,
+    relax_column_count: true,
+  });
+  console.log(`${rows.length} rows`);
+  return rows;
+}
+
+const injuryRows = await fetchGz(
+  `https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_${WEEKLY_SEASON}.csv.gz`,
+);
+const injuries = injuryRows
+  .filter((r) => relevant.has(r.full_name) && (r.report_status || r.practice_status))
+  .map((r) => [
+    r.full_name,
+    r.team,
+    r.position,
+    Number(r.week),
+    r.report_status || "",
+    r.report_primary_injury || "",
+    r.practice_status || "",
+  ]);
+
+const snapRows = await fetchGz(
+  `https://github.com/nflverse/nflverse-data/releases/download/snap_counts/snap_counts_${WEEKLY_SEASON}.csv.gz`,
+);
+const snaps = snapRows
+  .filter((r) => relevant.has(r.player) && r.game_type === "REG")
+  .map((r) => [
+    r.player,
+    r.team,
+    r.position,
+    Number(r.week),
+    r.opponent,
+    num(r.offense_snaps),
+    Math.round(num(r.offense_pct) * 100),
+  ]);
+
 const out = {
   source:
     "nflverse-data stats_player release (https://github.com/nflverse/nflverse-data) — free, community-maintained real NFL stats",
@@ -180,6 +231,8 @@ const out = {
   weekly,
   seasons,
   teams: TEAMS,
+  injuries,
+  snaps,
 };
 
 await writeFile(
@@ -187,5 +240,5 @@ await writeFile(
   JSON.stringify(out),
 );
 console.log(
-  `wrote public/field-data.json — ${weekly.length} weekly rows (${WEEKLY_SEASON}), ${seasons.length} season rows, ${TEAMS.length} teams`,
+  `wrote public/field-data.json — ${weekly.length} weekly rows (${WEEKLY_SEASON}), ${seasons.length} season rows, ${TEAMS.length} teams, ${injuries.length} injury rows, ${snaps.length} snap rows`,
 );

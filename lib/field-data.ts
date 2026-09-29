@@ -10,6 +10,10 @@ export type FieldData = {
   weekly: (string | number)[][];
   seasons: (string | number)[][];
   teams: string[][];
+  /** Weekly injury report — why a player vanished from the stat sheet. */
+  injuries: (string | number)[][];
+  /** Weekly snap counts — opportunity, as opposed to production. */
+  snaps: (string | number)[][];
 };
 
 export const FIELD_SCHEMA: {
@@ -67,6 +71,32 @@ export const FIELD_SCHEMA: {
     grain: "one row per NFL team",
     columns: ["team", "name", "conference", "division"],
   },
+  {
+    table: "injuries",
+    grain: "one row per player per week they appeared on an injury report",
+    columns: [
+      "player",
+      "team",
+      "position",
+      "week",
+      "report_status",
+      "injury",
+      "practice_status",
+    ],
+  },
+  {
+    table: "snap_counts",
+    grain: "one row per player per game — how much he was actually on the field",
+    columns: [
+      "player",
+      "team",
+      "position",
+      "week",
+      "opponent",
+      "offense_snaps",
+      "offense_pct",
+    ],
+  },
 ];
 
 function sqlValue(v: string | number): string {
@@ -94,9 +124,21 @@ export function buildFieldSeedSql(data: FieldData): string {
       rec_yards INTEGER, rec_tds INTEGER, fantasy_ppr REAL, ppr_per_game REAL
     );`,
     `CREATE TABLE teams (team TEXT, name TEXT, conference TEXT, division TEXT);`,
+    `CREATE TABLE injuries (
+      player TEXT, team TEXT, position TEXT, week INTEGER,
+      report_status TEXT, injury TEXT, practice_status TEXT
+    );`,
+    `CREATE TABLE snap_counts (
+      player TEXT, team TEXT, position TEXT, week INTEGER, opponent TEXT,
+      offense_snaps INTEGER, offense_pct INTEGER
+    );`,
     insertBatch("player_weeks", data.weekly),
     insertBatch("player_seasons", data.seasons),
     insertBatch("teams", data.teams),
+    // ?? [] so a stale field-data.json from before these tables existed still
+    // boots the sandbox instead of throwing on a missing key.
+    insertBatch("injuries", data.injuries ?? []),
+    insertBatch("snap_counts", data.snaps ?? []),
   ].join("\n");
 }
 
@@ -115,6 +157,24 @@ export const DRILLS: Drill[] = [
     title: "First look",
     prompt: "Take a 10-row peek at the weekly stat sheet. What columns do you have to work with?",
     solution: "SELECT * FROM player_weeks LIMIT 10;",
+  },
+  {
+    id: "snaps-vs-production",
+    tier: "Warm-ups",
+    title: "Snaps versus production",
+    prompt:
+      "Points tell you what a player did. Snaps tell you whether he had the chance. Pull the players who played the most offensive snaps in week 1, with their share of the team's plays.",
+    solution:
+      "SELECT player, team, position, offense_snaps, offense_pct\nFROM snap_counts\nWHERE week = 1\nORDER BY offense_snaps DESC\nLIMIT 15;",
+  },
+  {
+    id: "who-was-hurt",
+    tier: "Warm-ups",
+    title: "Why did he disappear?",
+    prompt:
+      "A player vanishes from the stat sheet and you want to know why. Find everyone listed as Out on the week 2 injury report, and what the injury was.",
+    solution:
+      "SELECT player, team, position, injury, practice_status\nFROM injuries\nWHERE week = 2 AND report_status = 'Out'\nORDER BY team, player;",
   },
   {
     id: "team-season",
