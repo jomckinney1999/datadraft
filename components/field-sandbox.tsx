@@ -14,6 +14,7 @@ import {
   type FieldData,
 } from "@/lib/field-data";
 import Coach from "@/components/coach";
+import TeamChip, { isTeamColumn } from "@/components/team-chip";
 import CodeEditor from "@/components/code-editor";
 
 type EngineStatus = "loading" | "ready" | "error";
@@ -319,7 +320,9 @@ export default function FieldSandbox() {
                             : "text-ink-soft"
                         }`}
                       >
-                        {cell === null ? "null" : String(cell)}
+                        {isTeamColumn(result.columns[ci] ?? "") && cell
+                          ? <TeamChip abbr={String(cell)} />
+                          : cell === null ? "null" : String(cell)}
                       </td>
                     ))}
                   </tr>

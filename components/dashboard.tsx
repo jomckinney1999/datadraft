@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Coach from "@/components/coach";
 import HomeLink from "@/components/home-link";
+import TeamChip from "@/components/team-chip";
 import { COURSES } from "@/lib/courses";
 import { liveLessons, getLesson } from "@/lib/curriculum";
 import { EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
@@ -304,8 +305,10 @@ export default function Dashboard({ live }: { live: LiveWeek | null }) {
                     key={g.id}
                     className="flex items-center justify-between gap-2 rounded-lg border border-panel-border px-2.5 py-1.5"
                   >
-                    <span className="font-mono text-[12px] text-ink">
-                      {g.away} @ {g.home}
+                    <span className="flex items-center gap-1.5 font-mono text-[12px] text-ink">
+                      <TeamChip abbr={g.away} />
+                      <span className="text-ink-muted">@</span>
+                      <TeamChip abbr={g.home} />
                     </span>
                     <span className="font-mono text-[12px] text-ink-soft">
                       {g.final

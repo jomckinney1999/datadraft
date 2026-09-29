@@ -53,6 +53,7 @@ import {
 } from "@/lib/economy";
 import Coach from "@/components/coach";
 import TablePeek from "@/components/table-peek";
+import TeamChip, { isTeamColumn } from "@/components/team-chip";
 import { tablesMentioned } from "@/lib/table-mentions";
 import CoachAssist from "@/components/coach-assist";
 import TimeoutGate from "@/components/timeout-gate";
@@ -1197,7 +1198,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                               key={j}
                               className="px-3 py-1.5 font-mono text-[12px] text-ink"
                             >
-                              {cell === null ? "null" : String(cell)}
+                              {isTeamColumn(briefRows.columns[j] ?? "") && cell
+                                ? <TeamChip abbr={String(cell)} />
+                                : cell === null ? "null" : String(cell)}
                             </td>
                           ))}
                         </tr>
@@ -1634,7 +1637,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                                     key={ci}
                                     className="px-3 py-1.5 font-mono text-[12px] text-ink-soft"
                                   >
-                                    {cell === null ? "null" : String(cell)}
+                                    {isTeamColumn(runResult.columns[ci] ?? "") && cell
+                                      ? <TeamChip abbr={String(cell)} />
+                                      : cell === null ? "null" : String(cell)}
                                   </td>
                                 ))}
                               </tr>

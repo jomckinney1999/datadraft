@@ -21,6 +21,7 @@
 import { useState } from "react";
 import type { QueryExecResult } from "sql.js";
 import { PROVENANCE } from "@/lib/data-source";
+import TeamChip, { isTeamColumn } from "@/components/team-chip";
 
 const KIND = new Map(PROVENANCE.map((p) => [p.table, p.kind]));
 const NOTE = new Map(PROVENANCE.map((p) => [p.table, p.note]));
@@ -140,7 +141,9 @@ export default function TablePeek({
                           key={j}
                           className="whitespace-nowrap px-3 py-1.5 font-mono text-[12px] text-ink"
                         >
-                          {cell === null ? "null" : String(cell)}
+                          {isTeamColumn(rows.columns[j] ?? "") && cell
+                            ? <TeamChip abbr={String(cell)} />
+                            : cell === null ? "null" : String(cell)}
                         </td>
                       ))}
                     </tr>
