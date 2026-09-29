@@ -210,8 +210,8 @@ export const COURSE = {
             goal: "Read any table with SELECT.",
       steps: [
         {
-          title: "You just got the job",
-          body: "Welcome to a fantasy football league. Managers argue every week — who starts, who got lucky, who's quietly winning. Your job: settle it with evidence. Lucky for you, the numbers are already written down.",
+          title: "What you're about to do",
+          body: "You're going to learn SQL by asking real questions of real NFL data — who scored most, who was consistent, who got lucky. Same skill you'd use on sales or signups; the numbers here are just easier to picture.",
         },
         {
           title: "It's just a stack of sheets",
@@ -219,12 +219,12 @@ export const COURSE = {
           note: "If you've opened a spreadsheet, you already get this. Same idea — bigger stack.",
         },
         {
-          title: "Our league keeps three sheets",
-          body: "You'll use all three before this course is done. For now, just peek at what each one holds.",
-          code: "week_results   every game a player actually played\nrosters        who owns which player in our league\nwaiver_wire    the free agents nobody has claimed",
-          note: "week_results is real: 876 NFL games from 2022–2024. The other two are an example league we made up — who owns whom isn't an NFL fact.",
+          title: "The three tables this course uses",
+          body: "One dataset, three tables. You'll query all three before the course is done — for now just see what each one holds.",
+          code: "week_results   one row per player, per game played\nrosters        which player sits on which team\nwaiver_wire    players not on any team",
+          note: "week_results is real: 876 NFL games from 2022–2024. rosters and waiver_wire are small example tables we wrote, so there's something to join against — who owns whom isn't an NFL fact.",
           previewSql: "SELECT * FROM rosters;",
-          previewCaption: "rosters · 5 fantasy teams, 2 starters each",
+          previewCaption: "rosters · 10 rows, the example table",
         },
         {
           title: "One row = one player, one game",
@@ -239,13 +239,13 @@ export const COURSE = {
         },
       ],
             setup:
-              "A database is a stack of tables — grids with columns (stat categories) and rows (entries). Ours has three: week_results, rosters, and waiver_wire. Peek at week_results before we ask you anything.",
+              "A database is a stack of tables — grids with columns across the top and one row per entry. This course uses three: week_results, rosters, and waiver_wire. Peek at week_results before we ask you anything.",
             previewSql: "SELECT * FROM week_results LIMIT 5;",
             previewCaption: "week_results · first 5 rows",
           },
           intro: {
             title: "Databases are just sheets",
-            text: "Tables are grids: columns across the top, rows underneath. We have three — week_results (one row per player per week), rosters, and waiver_wire. SELECT * FROM a table reads the whole sheet.",
+            text: "Tables are grids: columns across the top, rows underneath. This course uses three — week_results (one row per player per week), rosters, and waiver_wire. SELECT * FROM a table reads the whole sheet.",
             code: "SELECT * FROM week_results;",
           },
           film: [

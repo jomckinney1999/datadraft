@@ -16,7 +16,7 @@ export const FINAL_UNITS: Unit[] = [
     title: "Championship Sunday — SQL Final",
     drive: "Championship · Own 25",
     description:
-      "You're the league's analyst on trade deadline day. Same three tables, no new clauses — just real questions managers will ask, answered live in the terminal.",
+      "Everything you've learned, on the same three tables. No new clauses — just the kind of questions someone would actually bring you, answered live in the terminal.",
     skills: ["Capstone", "Joins", "Aggregates", "Windows"],
     status: "live",
     lessons: [

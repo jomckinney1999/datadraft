@@ -18,7 +18,10 @@ import { useModule } from "@/lib/use-module";
 import { type Progress, EMPTY_PROGRESS } from "@/lib/progress";
 import { loadEconomy } from "@/lib/economy";
 import { getTrack, normalizeTrackId } from "@/lib/draft";
+import { introFor } from "@/lib/course-intros";
+import { COURSES } from "@/lib/courses";
 import Coach from "@/components/coach";
+import CourseIntro from "@/components/course-intro";
 import PathCast from "@/components/path-cast";
 import HomeLink from "@/components/home-link";
 import LearnRail from "@/components/learn-rail";
@@ -110,6 +113,9 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
     liveUnits[0]?.id;
 
   const gateHref = current ? `/learn/${current.lesson.id}` : null;
+
+  const courseIntro = introFor(moduleId);
+  const courseHours = COURSES.find((c) => c.moduleId === moduleId)?.hours;
 
   const yardLine = Math.min(100, pct);
   const fieldCaption =
@@ -209,6 +215,18 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
               </p>
             )}
           </section>
+
+          {/* Coach's brief — open before the first lesson, a one-line toggle
+              after. New learners get the orientation; returning ones don't
+              get a wall of text they've already read. */}
+          {courseIntro && (
+            <CourseIntro
+              intro={courseIntro}
+              courseTitle={moduleId === "all" ? COURSE.title : activeModule.name}
+              hours={courseHours}
+              started={completedCount > 0}
+            />
+          )}
 
           {/* Units */}
           {visibleUnits.map((unit) => {

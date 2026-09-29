@@ -42,7 +42,7 @@ export const SQL_FOUNDATION_UNITS: Unit[] = [
         brief: {
           goal: "Pull a single column out of a table.",
           setup:
-            "Your league keeps three seasons of weekly scores. You only want the names.",
+            "The dataset holds three seasons of weekly scores. You only want the names.",
           steps: [
             {
               title: "876 rows. You want one column.",
@@ -341,7 +341,7 @@ export const SQL_FOUNDATION_UNITS: Unit[] = [
           steps: [
             {
               title: "Nobody outside the database says fantasy_pts",
-              body: "You're screenshotting this for your league chat. The heading says fantasy_pts. It should say Points.",
+              body: "You're putting this table in front of someone else. The heading says fantasy_pts. It should say Points.",
             },
             {
               title: "AS renames it in the result",
