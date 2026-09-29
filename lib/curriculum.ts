@@ -226,7 +226,7 @@ export const COURSE = {
             },
             {
               title: "Where this course sits",
-              body: "This is the first course on every job path, including Data Analyst. The tool is called SQL. You use it to pull information out of a list. Courses after this one, like Excel and Python, start from information you can already pull.",
+              body: "On the Data Analyst path, and on most of the others, this is the first course. The Business Analyst path starts in Excel, then comes here. The tool is called SQL. You use it to pull information out of a list. Courses after this one start from a list you can already pull.",
             },
             {
               title: "Picture a printed list",
@@ -2433,30 +2433,46 @@ export const COURSE = {
       title: "Python — The Analyst's Daily Driver",
       drive: "7th Drive · Own 25",
       description:
-        "Variables, lists, loops, and your first DataFrame. SQL pulls the data; Python is where you shape it, script it, and repeat it every week without clicking anything.",
+        "What this course is, what Python is, then a name stuck on a number.",
       skills: ["Variables", "Lists", "Loops", "pandas"],
       status: "live",
       lessons: [
         {
           id: "u7-l1",
           title: "Your First Python Line",
-          blurb: "Name a value. Reuse it. Print it.",
+          blurb: "What this course is, then a name stuck on a number.",
           brief: {
-            goal: "Write and run your first real Python.",
+            goal: "Know what Python is for, then store a number under a name and show it.",
       steps: [
         {
-          title: "You're writing real code",
-          body: "Not a sketch. Real Python, running in your browser. Same language analysts use every day.",
+          title: "What you're here to do",
+          body: "You have names and numbers, and you want the computer to handle them the same way every time. This course is how you write those instructions. We practice on football scores because a number is easy to picture. You don't have to follow the sport.",
         },
         {
-          title: "Stick a name on a value",
-          body: "That's a variable — like a jersey number. Write the name, an equals sign, and the value. Done.",
+          title: "What to expect",
+          body: "Lessons are a few minutes each. You read a little, then you type, and the instructions actually run in this browser. If you miss, you see the right answer and why. Nothing to install. No account. Your progress stays in this browser.",
+        },
+        {
+          title: "Where this course sits",
+          body: "On the Data Analyst and Data Scientist paths, this comes after SQL. SQL pulls a list. This course changes that list and repeats a step. The language is called Python. When a job says you should know how to code, this is usually the one they mean.",
+        },
+        {
+          title: "Picture a note on a player",
+          body: "Imagine a sticky note: Josh Allen, and 24.6 points. You want to use that number again without retyping 24.6. You stick a short label on it, then ask the note to show itself.",
+        },
+        {
+          title: "A label on a value has a name",
+          body: "That label is called a variable. points = 24.6 stores the number under the name points. Text needs quotes, like player = 'Josh Allen'. The same digits inside quotes are just letters. Without quotes, they are a number you can divide.",
+        },
+        {
+          title: "How the answer gets shown",
+          body: "Nothing appears unless you ask. print is the word that shows a value. The lines below store the note, then show the name and the points.",
           code: "points = 24.6\nplayer = 'Josh Allen'\nprint(player, points)",
-          note: "print is how code talks to you. Nothing shows up unless you ask.",
+          note: "You will type lines like this yourself in a minute.",
         },
       ],
             setup:
-              "Python runs live here. A variable is a name stuck on a value. Numbers do math; text needs quotes. Mixing those up is the classic first stumble.",
+              "This course teaches you to write instructions the browser can run. A variable is a name stuck on a value. Numbers do math. Text needs quotes. print shows the result.",
           },
           intro: {
             title: "A variable is a jersey number",
@@ -2760,25 +2776,37 @@ export const COURSE = {
       title: "Statistical Thinking — Reading Noise",
       drive: "8th Drive · Red Zone",
       description:
-        "Averages, variance, sample size, and regression to the mean. The unit that stops you from confidently reporting a fluke — the difference between someone who can query and someone who can analyze.",
+        "What this course is, then why one average can describe nobody.",
       skills: ["Mean vs median", "Sample size", "Variance", "Regression"],
       status: "live",
       lessons: [
         {
           id: "u8-l1",
           title: "Averages Lie",
-          blurb: "Mean vs median — and when each one fools you.",
+          blurb: "What this course is, then why one average can describe nobody.",
           brief: {
-            goal: "Spot when the mean misleads and reach for the median.",
+            goal: "Know what this course is for, then see why one huge week wrecks an average.",
       steps: [
         {
-          title: "Your tools will happily lie",
-          body: "SQL will average anything. Excel will too. Neither warns you when one huge week dragged the number. Stats is the layer that catches that.",
+          title: "What you're here to do",
+          body: "A single number can sound exact and still describe nobody. This course is how you catch that before it goes in a report. The examples are football weeks, because a score is easy to picture.",
         },
         {
-          title: "Mean gets bullied. Median doesn't.",
-          body: "The mean adds and divides — one extreme pulls it. The median is the middle value after you line them up. When they disagree, that gap is the finding.",
-          note: "Report both when they differ. Showing only the flattering one misleads without technically lying.",
+          title: "What to expect",
+          body: "Lessons are a few minutes each. You look at a handful of numbers, then you answer. Most of this course is judgment, not a new language. A miss shows why. Nothing to install.",
+        },
+        {
+          title: "Where this course sits",
+          body: "Take this after you can get numbers out of a list, in SQL, Excel, or Python. Data Scientist takes it after Python. Business Analyst takes it after SQL. The subject is statistics: deciding what a number is allowed to mean.",
+        },
+        {
+          title: "Picture five weeks",
+          body: "A player scores 4, then 5, then 6, then 7, then 48. Four ordinary weeks, and one huge one. Add them and divide by five and you get 14. Nobody in that list actually scored near 14.",
+        },
+        {
+          title: "Two ways to say typical",
+          body: "Add them and divide, and you get the mean. That 48 pulls it up. Line the weeks up and take the middle one, and you get 6. That middle value is the median. When those two disagree, the gap is the story. Report both.",
+          note: "Showing only the flattering one misleads, even when the math is right.",
         },
       ],
             setup:
@@ -3041,25 +3069,37 @@ export const COURSE = {
       title: "Visualization — Make the Point Land",
       drive: "9th Drive · Goal Line",
       description:
-        "Choosing the right chart, labeling it honestly, and cutting everything that isn't the argument. A correct query nobody understands has changed nothing.",
+        "What this course is, then which picture a question actually needs.",
       skills: ["Chart choice", "Axes", "Labels", "Honest scales"],
       status: "live",
       lessons: [
         {
           id: "u9-l1",
           title: "Pick the Right Chart",
-          blurb: "Match the chart to the question — not your mood.",
+          blurb: "What this course is, then which picture a question needs.",
           brief: {
-            goal: "Pick the chart the question actually needs.",
+            goal: "Know what this course is for, then match the picture to the question.",
       steps: [
         {
-          title: "The chart is the argument",
-          body: "Wrong chart type hides what you found. Choosing well isn't aesthetics — it's part of being right.",
+          title: "What you're here to do",
+          body: "You already have a finding. This course is how you show it so someone else sees the same thing, without you standing there. The examples are football numbers, because a score is easy to picture.",
         },
         {
-          title: "The question picks the chart",
-          body: "Compare amounts → bars. Track over time → line. Link two numbers → scatter. Say the question out loud; the chart usually follows.",
-          note: "Pie charts are the usual trap. People compare angles badly — most pies should be bars.",
+          title: "What to expect",
+          body: "Lessons are a few minutes each. You read a question, then you pick the picture that answers it. A miss shows why that picture hid the point. Nothing to install.",
+        },
+        {
+          title: "Where this course sits",
+          body: "This comes after you can pull the numbers, in SQL, Excel, or Python. The skill is called visualization: turning a list into a picture with an honest scale and a clear label.",
+        },
+        {
+          title: "Picture the question first",
+          body: "Someone asks how one player's points moved across the season. You want time along the bottom, points up the side, and a line connecting the weeks. Someone else asks which of eight backs scored the most. You want one bar per player, longest at the top.",
+        },
+        {
+          title: "The question picks the picture",
+          body: "Compare amounts, use bars. Track a number over weeks, use a line. Ask whether two numbers move together, and put one dot per player. A circle sliced into pieces is a pie. People read lengths better than slices, so a pie is usually the wrong picture.",
+          note: "Say the question out loud first. The picture usually follows.",
         },
       ],
             setup:
@@ -3299,26 +3339,42 @@ export const COURSE = {
       title: "Git & GitHub — Show Your Work",
       drive: "10th Drive · Two-Minute Warning",
       description:
-        "Commits, branches, and pull requests. Every analyst job expects this, almost no course teaches it, and it's what turns your capstone into something a hiring manager can actually open.",
+        "What this course is, what Git is, then a save you can return to.",
       skills: ["commit", "branch", "pull request", "clone"],
       status: "live",
       lessons: [
         {
           id: "u10-l1",
           title: "Save States for Code",
-          blurb: "add, commit — and kill analysis_final_v3_REAL.py.",
+          blurb: "What this course is, then a save you can come back to.",
           brief: {
-            goal: "Save your work in git so you can delete boldly.",
+            goal: "Know what Git is for, then save a file as a snapshot you can return to.",
       steps: [
         {
-          title: "Git lets you be reckless",
-          body: "Once work is saved properly, you can try the risky rewrite. Getting back is one command.",
+          title: "What you're here to do",
+          body: "You are going to change files, and you will want yesterday's version back. This course is the save system for that. The files are analysis notes. You don't have to care about the sport in the examples.",
         },
         {
-          title: "A commit is a save point",
-          body: "Stage with add. Save with commit and a message. That message is for future-you — usually with no memory of this.",
-          code: "git add analysis.sql\ngit commit -m 'Add season totals query'",
-          note: "Commit small and often. One change is easy to undo. A week's work in one commit isn't.",
+          title: "What to expect",
+          body: "Lessons are a few minutes each. You read a command, then you fill it in. This course does not run those commands on your computer. It teaches the moves so they are familiar when you do. A miss shows the right command and why.",
+        },
+        {
+          title: "Where this course sits",
+          body: "Analytics Engineer and Data Engineer take this after SQL. Anyone with a project takes it so another person can open the work. The tool is called Git. GitHub is the website where those saved copies live.",
+        },
+        {
+          title: "Picture the file-name pile",
+          body: "You have analysis_final.py, then analysis_final_v2.py, then analysis_final_v3_REAL.py. You are afraid to delete any of them. That pile is what happens when the only save is a new copy of the file.",
+        },
+        {
+          title: "A save you can return to",
+          body: "Git keeps named snapshots of the files you choose. One snapshot is called a commit. You first mark the files that belong in this snapshot. Then you save them with a sentence about what changed. That sentence is the message. Tomorrow you can come back to that snapshot.",
+        },
+        {
+          title: "The two commands",
+          body: "git add marks the file. git commit saves the snapshot. The words after -m are the sentence you will read later. One change per snapshot. A whole week in one snapshot is hard to undo.",
+          code: "git add analysis.py\ngit commit -m \"Add target share calculation\"",
+          note: "The sentence is for you, later, when you have forgotten this afternoon.",
         },
       ],
             setup:
@@ -3566,25 +3622,37 @@ export const COURSE = {
       title: "R & the Tidyverse — The Other Dialect",
       drive: "11th Drive · Overtime",
       description:
-        "dplyr, pipes, and ggplot2. A large share of public sports analytics is written in R — including nflverse, the source of the Practice Field data. Reading it is a real advantage.",
+        "What this course is, what R is, then the same note stored a different way.",
       skills: ["dplyr", "pipes", "ggplot2"],
       status: "live",
       lessons: [
         {
           id: "u11-l1",
           title: "Why R Is Still Here",
-          blurb: "Where R wins — and why sports analytics leans on it.",
+          blurb: "What this course is, then why a second language is worth reading.",
           brief: {
-            goal: "See where R fits next to Python.",
+            goal: "Know what R is for, and how it stores a number under a name.",
       steps: [
         {
-          title: "An honest answer first",
-          body: "For a typical company analyst job, Python is the safer bet. R is worth your time for a specific reason — know that before you sink hours here.",
+          title: "What you're here to do",
+          body: "Some of the sports work worth reading is written in a different language than Python. This course teaches you to read it, and to ask the same kind of questions in it. Football is still just the practice list.",
         },
         {
-          title: "R was built for data from day one",
-          body: "Python grew great data tools. R was designed for stats first — tables, factors, models feel native. That's why academia and a lot of published sports analytics still run on it.",
-          note: "Even if you never write R, reading it helps. A lot of public sports work worth learning from ships as R.",
+          title: "What to expect",
+          body: "Same shape as the other courses. Short lessons. You type, and the language actually runs in this browser. A miss shows the answer and why. Nothing to install.",
+        },
+        {
+          title: "Where this course sits",
+          body: "You do not need this for every job. Take it after Python if you want a second way to work with a list. The language is called R. A lot of public sports research uses it, including the package this site's football numbers come from.",
+        },
+        {
+          title: "Picture the same note",
+          body: "You still have a player and a points number. In Python you stored the number with an equals sign. Here, a small arrow points from the number toward the name.",
+        },
+        {
+          title: "The arrow stores a value",
+          body: "points <- 24.6 means the number sits under the name points. That arrow is how R usually writes 'store this'. An equals sign often works too. You will see the arrow in published work, so that is the one to recognize.",
+          note: "Filter a list, group it, add it up, sort it. Those jobs do not change. R only changes the spelling.",
         },
       ],
             setup:
@@ -4557,37 +4625,54 @@ export const COURSE = {
       title: "Excel: The Grid and Your First Formulas",
       drive: "1st Drive · Own 25",
       description:
-        "Cell addresses, ranges, and the handful of formulas that answer most questions anyone will ask you about a spreadsheet.",
+        "What this course is, what the roster sheet is, then how a box is named.",
       skills: ["A1 notation", "SUM", "AVERAGE", "MAX / MIN", "ROUND"],
       status: "live",
       lessons: [
         {
           id: "u15-l1",
           title: "The Grid: Cells, Rows and Ranges",
-          blurb: "Every cell has an address. Formulas speak in addresses.",
+          blurb: "What this course is, then the roster sheet in front of you.",
           brief: {
-            goal: "Point at any cell or block of cells by name, the way a formula does.",
+            goal: "Know what this course is for, then point at a box on the roster by its address.",
       steps: [
         {
-          title: "Excel shows up on more job posts than anything else here",
-          body: "Unglamorous and everywhere. A lot of analyst jobs are mostly Excel with a little SQL. Being good at it is a hiring signal.",
+          title: "What you're here to do",
+          body: "A lot of the job is a grid of names and numbers, and someone asks you a question about it. This course is how you answer on that grid without counting by hand. The grid is a football roster, because a score is easy to picture.",
         },
         {
-          title: "A spreadsheet is a grid with addresses",
-          body: "Columns get letters. Rows get numbers. A cell is both stuck together — column first, then row. That's the whole address system.",
-          code: "E2        one cell: column E, row 2\nE2:E17    a range: E2 down through E17\nA2:E17    a block: columns A to E, rows 2 to 17",
-          note: "The colon means through. Get comfortable reading these and every formula later is a sentence you can already parse.",
+          title: "What to expect",
+          body: "Lessons are a few minutes each. You type a formula, and it runs on a real workbook in this browser. We grade the number it produces, so a correct formula spelled a different way still passes. A miss shows the answer and why. Nothing to install.",
         },
         {
-          title: "Real formulas, real workbook",
-          body: "Everything here runs against a real two-sheet workbook. Graded on the value produced — not matching expected text. Right answer in a different spelling still passes.",
+          title: "Where this course sits",
+          body: "On the Business Analyst path, this is the first course. On Data Analyst and BI Analyst, it comes after SQL. The tool is Excel: a grid of boxes, saved as one workbook. Later courses assume you can already point at a box and get its number.",
+        },
+        {
+          title: "Picture the roster page",
+          body: "Across the top are labels: player, team, position, games, points. Down the page, each line is one player. The first line is only the labels, not a player. The players start on the next line. That page is the sheet you will practice on. Its name is Roster.",
+        },
+        {
+          title: "A box on that page has an address",
+          body: "Lines down the page are rows. They are numbered. The labels across the top are columns. They get letters. One box is a cell. You name it with the letter first, then the number. E2 means column E, row 2.",
+        },
+        {
+          title: "A stretch of boxes",
+          body: "A colon means through. E2:E17 means column E from row 2 down through row 17, every box in between. That stretch is called a range. Formulas in this course point at cells and ranges. They do not retype the number you can already see.",
+          code: "E2        one box: column E, row 2\nE2:E17    a stretch: E2 down through E17\nA2:E17    a block: columns A to E, rows 2 to 17",
+        },
+        {
+          title: "The sheet under you",
+          body: "The points and the games are real 2024 scoring for these players. Who owns them, and the salary, are an example league we wrote. Row 1 is the labels. The first player is row 2.",
+          previewSheet: "Roster",
+          previewCaption: "Roster. One line is one player. The labels are the top row.",
         },
       ],
             setup:
-              "A spreadsheet is a grid. Letters across, numbers down. Cell address = column then row: E2. A colon means through: E2:E17. That's the whole address system.",
+              "This course teaches you to answer a question on a grid. One line is one player. A box is a cell, named with a letter then a number, like E2. The sheet is called Roster.",
             previewSheet: "Roster",
             previewCaption:
-              "The league roster. Row 1 holds the headers, so the actual data starts at row 2.",
+              "The league roster. The top row is labels, so the first player is the next line.",
           },
           intro: {
             title: "Column letter, then row number",
