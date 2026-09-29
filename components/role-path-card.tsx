@@ -256,7 +256,7 @@ export default function RolePathCard({
 
   return (
     <Link
-      href={href ?? `/learn/path/${role.id}`}
+      href={href ?? `/learn/path/${role.id}?style=choose`}
       onClick={onSelect}
       style={{ animationDelay: `${Math.min(index, 6) * 45}ms` }}
       className={`group relative flex flex-col overflow-hidden rounded-2xl border-2 bg-panel transition-all duration-200 lift animate-fade-up ${a.border} ${a.glow}`}

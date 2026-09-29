@@ -41,8 +41,8 @@ export default function CareerPathPickerPage() {
               What job are you playing for?
             </h1>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-soft">
-              Each path is a Duolingo-style board — courses in order, every
-              lesson on one continuous track. Pick a title to open it.
+              Pick a title. Next you choose how to take it: short Duolingo-style
+              snaps, or video plus Google Colab.
             </p>
           </div>
           <div className="hidden shrink-0 sm:block">
@@ -58,7 +58,6 @@ export default function CareerPathPickerPage() {
             role={role}
             steps={pathSteps(role, progress.completedLessons)}
             index={i}
-            onSelect={() => setRoleId(role.id)}
           />
         ))}
       </div>

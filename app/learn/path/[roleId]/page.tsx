@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CAREER_ROLES, getRole } from "@/lib/career-paths";
@@ -27,5 +28,9 @@ export default function CareerPathPage({
   params: { roleId: string };
 }) {
   if (!getRole(params.roleId)) notFound();
-  return <CareerPathClient roleId={params.roleId} />;
+  return (
+    <Suspense fallback={null}>
+      <CareerPathClient roleId={params.roleId} />
+    </Suspense>
+  );
 }

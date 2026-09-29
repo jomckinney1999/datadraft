@@ -13,6 +13,8 @@ import RolePathCard from "@/components/role-path-card";
 import { liveLessons, ALL_MODULE } from "@/lib/curriculum";
 import { loadProgress, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
 import { useCareerRole } from "@/lib/use-career-role";
+import { useLearnMode } from "@/lib/use-learn-mode";
+import { studioStartForCourseIds } from "@/lib/studio";
 import TrophyCase from "@/components/trophy-case";
 import HomeLink from "@/components/home-link";
 import Coach from "@/components/coach";
@@ -133,6 +135,7 @@ function CourseCard({
 export default function LearnCatalogPage() {
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
   const { roleId, setRoleId } = useCareerRole();
+  const { mode, hydrated: modeReady } = useLearnMode();
 
   useEffect(() => {
     setProgress(loadProgress());
@@ -175,21 +178,33 @@ export default function LearnCatalogPage() {
                 You&apos;re on the {savedRole.title} board
               </h1>
               <p className="mt-1 text-sm text-ink-soft">
-                {resume
-                  ? `Next snap: ${resume.lesson.title}.`
-                  : "Pick up where you left off."}
+                {mode === "studio"
+                  ? "You're on the video and Colab track."
+                  : resume
+                    ? `Next snap: ${resume.lesson.title}.`
+                    : "Pick up where you left off."}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Link
                 href={
-                  resume
-                    ? `/learn/${resume.lesson.id}`
-                    : `/learn/path/${savedRole.id}`
+                  !modeReady || mode === null
+                    ? `/learn/path/${savedRole.id}?style=choose`
+                    : mode === "studio"
+                      ? studioStartForCourseIds(savedRole.courseIds)
+                      : resume
+                        ? `/learn/${resume.lesson.id}`
+                        : `/learn/path/${savedRole.id}`
                 }
                 className="btn-turf inline-flex items-center rounded-xl border border-turf/80 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-night"
               >
                 Continue
+              </Link>
+              <Link
+                href={`/learn/path/${savedRole.id}?style=choose`}
+                className="rounded-xl border border-panel-border px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-ink-soft hover:border-ice/40 hover:text-ice"
+              >
+                Change style
               </Link>
               <button
                 type="button"
@@ -213,7 +228,8 @@ export default function LearnCatalogPage() {
                   What job are you playing for?
                 </h1>
                 <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-soft">
-                  Pick a title and the first lesson opens.
+                  Pick a title. Then choose Duolingo-style snaps, or video
+                  plus Google Colab.
                 </p>
               </div>
               <div className="hidden shrink-0 sm:block">
@@ -225,13 +241,7 @@ export default function LearnCatalogPage() {
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {CAREER_ROLES.map((role, i) => {
               const steps = pathSteps(role, progress.completedLessons);
-              const started = steps.some((s) => s.done > 0);
-              const next = buildBoard(role, progress.completedLessons).current;
-              const href = started
-                ? `/learn/path/${role.id}`
-                : next
-                  ? `/learn/${next.lesson.id}`
-                  : `/learn/path/${role.id}`;
+              const href = `/learn/path/${role.id}?style=choose`;
               return (
                 <RolePathCard
                   key={role.id}
@@ -239,7 +249,6 @@ export default function LearnCatalogPage() {
                   steps={steps}
                   index={i}
                   href={href}
-                  onSelect={() => setRoleId(role.id)}
                 />
               );
             })}

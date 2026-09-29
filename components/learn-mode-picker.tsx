@@ -11,9 +11,12 @@ import type { LearnMode } from "@/lib/use-learn-mode";
 export default function LearnModePicker({
   mode,
   onPick,
+  studioHref = "/learn/studio",
 }: {
   mode: LearnMode | null;
   onPick: (mode: LearnMode) => void;
+  /** Where “Enter Studio” goes. Path pages send you into that job’s first course. */
+  studioHref?: string;
 }) {
   return (
     <section className="mt-6">
@@ -131,7 +134,7 @@ export default function LearnModePicker({
       {mode === "studio" && (
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <Link
-            href="/learn/studio"
+            href={studioHref}
             className="btn-turf inline-flex items-center rounded-xl border border-turf/80 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-night"
           >
             Enter Studio →

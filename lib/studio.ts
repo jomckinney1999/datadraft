@@ -7,7 +7,7 @@
  * can't drift from what drills teach.
  */
 
-import { COURSES } from "./courses";
+import { COURSES, courseById } from "./courses";
 import { getModule, moduleUnits, type Unit } from "./curriculum";
 import { getProject } from "./projects";
 
@@ -142,6 +142,17 @@ export const STUDIO_COURSES: StudioCourse[] = [
 
 export function getStudioCourse(id: string): StudioCourse | undefined {
   return STUDIO_COURSES.find((c) => c.id === id);
+}
+
+/** First live studio course on a career path, in path order. */
+export function studioStartForCourseIds(courseIds: string[]): string {
+  for (const id of courseIds) {
+    const course = courseById(id);
+    if (course?.moduleId && getStudioCourse(course.moduleId)) {
+      return `/learn/studio/${course.moduleId}`;
+    }
+  }
+  return "/learn/studio";
 }
 
 export function findStudioTopic(
