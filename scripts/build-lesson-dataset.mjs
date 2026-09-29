@@ -78,6 +78,54 @@ async function fetchSeason(season) {
   return rows;
 }
 
+// Real schedule for the same seasons. This is what gives the lesson database
+// a DATE — nothing else in it has one, which made every date lesson
+// unteachable — plus opponent, home/away, and the conditions a game was
+// played in. Betting columns (moneylines, spreads, totals) are never read:
+// see docs/PLAN.md, no gambling content.
+const SCHEDULE_URL =
+  "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv";
+
+async function fetchGames() {
+  process.stdout.write("fetching schedules … ");
+  const res = await fetch(SCHEDULE_URL);
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText} for schedules`);
+  const rows = parse(await res.text(), {
+    columns: true,
+    skip_empty_lines: true,
+    relax_column_count: true,
+  });
+  const keep = rows
+    .filter(
+      (g) =>
+        SEASONS.includes(num(g.season)) &&
+        g.game_type === "REG" &&
+        String(g.result ?? "").trim() !== "",
+    )
+    .map((g) => ({
+      game_id: g.game_id,
+      season: num(g.season),
+      week: num(g.week),
+      gameday: g.gameday,
+      weekday: g.weekday,
+      home_team: g.home_team,
+      away_team: g.away_team,
+      home_score: num(g.home_score),
+      away_score: num(g.away_score),
+      roof: g.roof || "unknown",
+      surface: g.surface || "unknown",
+      temp: g.temp === "" || g.temp === undefined ? null : num(g.temp),
+    }))
+    .sort(
+      (a, b) =>
+        a.season - b.season || a.week - b.week || a.gameday.localeCompare(b.gameday),
+    );
+  console.log(`${keep.length} completed regular-season games`);
+  return keep;
+}
+
+const gameRows = await fetchGames();
+
 const wanted = new Set(CAST);
 const weekRows = [];
 
@@ -175,6 +223,25 @@ export const PACKED_WEEKS: PackedWeek[] = [
 ${packed.map((p) => `  ${JSON.stringify(p)},`).join("\n")}
 ];
 
+/**
+ * Real games for the same seasons, from nflverse schedules.
+ * [game_id, season, week, gameday, weekday, home_team, away_team,
+ *  home_score, away_score, roof, surface, temp]
+ */
+export type PackedGame = [
+  string, number, number, string, string, string, string,
+  number, number, string, string, number | null,
+];
+
+export const PACKED_GAMES: PackedGame[] = [
+${gameRows
+  .map(
+    (g) =>
+      `  ${JSON.stringify([g.game_id, g.season, g.week, g.gameday, g.weekday, g.home_team, g.away_team, g.home_score, g.away_score, g.roof, g.surface, g.temp])},`,
+  )
+  .join("\n")}
+];
+
 /** [player, team, position, season, games, points] — real season totals. */
 export const SEASON_TOTALS: [string, string, string, number, number, number][] = [
 ${[...totals.values()]
@@ -237,8 +304,21 @@ await writeFile(
   "utf8",
 );
 
+await writeFile(
+  "public/data/games.csv",
+  csv(
+    ["game_id","season","week","gameday","weekday","home_team","away_team","home_score","away_score","roof","surface","temp"],
+    gameRows.map((g) => [
+      g.game_id, g.season, g.week, g.gameday, g.weekday, g.home_team,
+      g.away_team, g.home_score, g.away_score, g.roof, g.surface,
+      g.temp === null ? "" : g.temp,
+    ]),
+  ),
+  "utf8",
+);
+
 console.log(
-  "public/data/week_results.csv + season_totals.csv written (learner downloads)",
+  "public/data/week_results.csv + season_totals.csv + games.csv written (learner downloads)",
 );
 
 // Quick sanity report so a rebuild that goes wrong is obvious immediately.

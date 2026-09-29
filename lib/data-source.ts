@@ -59,6 +59,11 @@ export const PROVENANCE: TableProvenance[] = [
     note: "Real PPR fantasy points, one row per player per game actually played, 2022–2024 regular seasons, from nflverse-data.",
   },
   {
+    table: "games",
+    kind: "real",
+    note: "Real NFL schedule for the same seasons — one row per completed regular-season game, with the date, the teams, the final score and the conditions. From nflverse-data.",
+  },
+  {
     table: "rosters",
     kind: "league",
     note: "An example fantasy league over real players. Who owns whom is invented — that is a property of one private league, not of the NFL.",

@@ -18,6 +18,7 @@
 // labelled as such wherever they are shown — see PROVENANCE in data-source.ts.
 
 import {
+  PACKED_GAMES,
   PACKED_WEEKS,
   PLAYER_NAMES,
   SEASON_TOTALS,
@@ -112,6 +113,14 @@ export function buildSeedSql(): string {
     `CREATE TABLE waiver_wire (
       player TEXT, team TEXT, position TEXT, pct_rostered INTEGER, trend INTEGER
     );`,
+    // Real schedule, and the only table here with a date in it. week_results
+    // joins to it on season + week, which is what makes opponent, home/away
+    // and playing conditions answerable at all.
+    `CREATE TABLE games (
+      game_id TEXT, season INTEGER, week INTEGER, gameday TEXT, weekday TEXT,
+      home_team TEXT, away_team TEXT, home_score INTEGER, away_score INTEGER,
+      roof TEXT, surface TEXT, temp INTEGER
+    );`,
   ];
 
   const weekValues = weekRows
@@ -137,6 +146,14 @@ export function buildSeedSql(): string {
     `INSERT INTO waiver_wire (player, team, position, pct_rostered, trend) VALUES ${waiverValues};`,
   );
 
+  const gameValues = PACKED_GAMES.map(
+    ([id, season, week, day, weekday, home, away, hs, as_, roof, surface, temp]) =>
+      `('${escapeSqlString(id)}',${season},${week},'${day}','${weekday}','${home}','${away}',${hs},${as_},'${escapeSqlString(roof)}','${escapeSqlString(surface)}',${temp === null ? "NULL" : temp})`,
+  ).join(",");
+  statements.push(
+    `INSERT INTO games (game_id, season, week, gameday, weekday, home_team, away_team, home_score, away_score, roof, surface, temp) VALUES ${gameValues};`,
+  );
+
   return statements.join("\n");
 }
 
@@ -144,6 +161,23 @@ export const SCHEMA: { table: string; columns: string[] }[] = [
   {
     table: "week_results",
     columns: ["player", "team", "position", "season", "week", "fantasy_pts"],
+  },
+  {
+    table: "games",
+    columns: [
+      "game_id",
+      "season",
+      "week",
+      "gameday",
+      "weekday",
+      "home_team",
+      "away_team",
+      "home_score",
+      "away_score",
+      "roof",
+      "surface",
+      "temp",
+    ],
   },
   { table: "rosters", columns: ["team_name", "player"] },
   {
