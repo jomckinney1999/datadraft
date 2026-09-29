@@ -1,10 +1,23 @@
 "use client";
 
-// Right-hand gamification rail — Practice Field, depth chart, daily drills,
-// next trophies. Football framing on Duo's widget layout.
+// Right-hand rail: what you have today, where else you can practise, and
+// where you stand.
+//
+// This was eight separate cards — timeouts, rapid fire, practice field, mock
+// screens, shop, depth chart, daily drills, next badges — which put 18
+// top-level cards on a single course page. Same information, grouped by what
+// the learner is actually asking:
+//
+//   Today          what have I got, and what's left to do
+//   Practice       where else can I go
+//   Your standing  how far along am I
+//   Shop           spend tickets (kept separate: it's transactional)
+//
+// Each destination is one line instead of a card with its own heading,
+// paragraph and button. The paragraphs were explaining things the link name
+// already says.
 
 import Link from "next/link";
-import Coach from "@/components/coach";
 import SidelineShop from "@/components/sideline-shop";
 import {
   BADGES,
@@ -56,23 +69,30 @@ function buildDrills(progress: Progress, stats: BadgeStats): Quest[] {
   ];
 }
 
-function HelmetBadge() {
-  return (
-    <svg viewBox="0 0 48 48" className="h-12 w-12 text-gold" aria-hidden>
-      <ellipse cx="24" cy="26" rx="16" ry="14" fill="currentColor" fillOpacity="0.2" />
-      <path
-        d="M8 26c0-9 7-16 16-16s16 7 16 16v2c0 1.5-1.2 2.5-2.5 2.5H28l-2 4c-.3.6-1 1-1.7 1h-2.6c-.7 0-1.4-.4-1.7-1l-2-4H10.5C9.2 30.5 8 29.5 8 28v-2z"
-        fill="currentColor"
-      />
-      <path
-        d="M26 22h12"
-        stroke="#06080c"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
+/** One destination. The name carries the meaning; the note is four words. */
+const PRACTICE_LINKS: {
+  href: string;
+  name: string;
+  note: string;
+  accent: "gold" | "turf" | "ice";
+}[] = [
+  { href: "/learn/rapid", name: "Rapid Fire", note: "quickfire questions", accent: "gold" },
+  { href: "/learn/arcade", name: "The Arcade", note: "match · drill · kick", accent: "gold" },
+  { href: "/field", name: "Practice Field", note: "free-play SQL", accent: "turf" },
+  { href: "/excel", name: "Spreadsheet", note: "free-play Excel", accent: "turf" },
+  { href: "/interview", name: "Interview cases", note: "scripted scenarios", accent: "ice" },
+];
+
+/**
+ * Written out in full, never built by interpolation: Tailwind generates CSS by
+ * scanning source for complete class names, so `group-hover:text-${x}` would
+ * compile to nothing.
+ */
+const HOVER = {
+  gold: "group-hover:text-gold",
+  turf: "group-hover:text-turf",
+  ice: "group-hover:text-ice",
+} as const;
 
 export default function LearnRail({
   progress,
@@ -84,148 +104,35 @@ export default function LearnRail({
   const stats = statsFrom(progress);
   const drills = buildDrills(progress, stats);
   const league = leagueLabel(stats.lessonsDone);
-  const nextBadges = BADGES.filter((b) => !isEarned(b, stats)).slice(0, 3);
+  const nextBadge = BADGES.filter((b) => !isEarned(b, stats))[0];
 
   return (
     <aside className="flex flex-col gap-4">
-      <div className="section-card relative overflow-hidden">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 yard-lines opacity-40"
-        />
-        <p className="relative label-broadcast text-ice">timeouts today</p>
-        <p className="relative mt-1 font-display text-3xl font-bold text-ink">
-          {progress.seasonPass ? "∞" : progress.timeouts}
-          {!progress.seasonPass && (
-            <span className="text-lg text-ink-muted">
-              /{FREE_DAILY_TIMEOUTS}
-            </span>
-          )}
-        </p>
-        <p className="relative mt-1 text-[12px] leading-relaxed text-ink-muted">
-          {progress.seasonPass
-            ? "Season Pass — unlimited drives."
-            : "Each graded lesson spends one timeout. Practice Field is free."}
-        </p>
-      </div>
-
-      <div className="section-card relative overflow-hidden">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 yard-lines opacity-40"
-        />
-        <p className="relative label-broadcast text-gold">rapid fire</p>
-        <p className="relative mt-1 font-display text-lg font-bold text-ink">
-          Language blitz
-        </p>
-        <p className="relative mt-1 text-sm leading-relaxed text-ink-soft">
-          Non-linear MC snaps — SQL, Python, Excel, and more. Tickets for
-          hits, zero timeouts.
-        </p>
-        <div className="relative mt-3 flex flex-wrap gap-2">
-          <Link
-            href="/learn/rapid"
-            className="inline-flex items-center rounded-xl border border-gold/50 bg-gold/15 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-gold transition-colors hover:border-gold hover:bg-gold/25"
-          >
-            Start Rapid Fire
-          </Link>
-          <Link
-            href="/learn/arcade"
-            className="inline-flex items-center rounded-xl border border-panel-border px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-ink-muted transition-colors hover:border-turf/50 hover:text-turf"
-          >
-            The Arcade
-          </Link>
-        </div>
-      </div>
-
-      <div className="section-card relative overflow-hidden">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 yard-lines opacity-40"
-        />
-        <p className="relative label-broadcast text-turf">open practice</p>
-        <p className="relative mt-1 font-display text-lg font-bold text-ink">
-          Hit the Practice Field
-        </p>
-        <p className="relative mt-1 text-sm leading-relaxed text-ink-soft">
-          Ungraded free play over real NFL data — no timeouts, no scoreboard
-          pressure.
-        </p>
-        <div className="relative mt-3 flex flex-wrap items-end justify-between gap-3">
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href="/field"
-              className="btn-turf inline-flex items-center rounded-xl border border-turf/80 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-night"
-            >
-              SQL Field
-            </Link>
-            <Link
-              href="/excel"
-              className="inline-flex items-center rounded-xl border border-ice/50 bg-ice/10 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-ice transition-colors hover:border-ice hover:bg-ice/20"
-            >
-              Spreadsheet
-            </Link>
-          </div>
-          <Coach mood="happy" size={72} className="shrink-0" />
-        </div>
-      </div>
-
-      <div className="section-card relative overflow-hidden">
-        <p className="label-broadcast text-ice">mock screens</p>
-        <p className="mt-1 font-display text-lg font-bold text-ink">
-          Interview cases
-        </p>
-        <p className="mt-1 text-sm leading-relaxed text-ink-soft">
-          Scripted analyst scenarios — brief, schema, live SQL. Filter Easy /
-          Medium / Hard. Free like the Practice Field.
-        </p>
-        <Link
-          href="/interview"
-          className="mt-3 inline-flex items-center rounded-xl border border-ice/50 bg-ice/10 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-ice transition-colors hover:border-ice hover:bg-ice/20"
-        >
-          Open interview desk
-        </Link>
-      </div>
-
-      <SidelineShop progress={progress} onChange={onProgress} />
-
+      {/* ── Today ─────────────────────────────────────────── */}
       <div className="section-card">
-        <p className="label-broadcast text-gold">depth chart</p>
-        <p className="mt-1 font-display text-base font-bold text-ink">
-          {stats.lessonsDone === 0
-            ? "Earn your roster spot"
-            : "You're moving up the chart"}
-        </p>
-        <div className="mt-3 flex items-center gap-3">
-          <HelmetBadge />
-          <div>
-            <p className="font-mono text-xs uppercase tracking-wider text-ink-muted">
-              Current role
-            </p>
-            <p className="font-display text-lg font-bold text-gold">{league}</p>
-            <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">
-              Ranked from your lessons — live standings land with accounts.
-            </p>
-          </div>
-        </div>
-        <Link
-          href="/learn#trophies"
-          className="mt-4 block w-full rounded-xl border-2 border-panel-border border-b-4 py-2.5 text-center font-mono text-[11px] font-bold uppercase tracking-widest text-ink-soft transition-colors hover:border-gold/50 hover:text-gold"
-        >
-          Open the trophy case
-        </Link>
-      </div>
-
-      <div className="section-card">
-        <div className="flex items-center justify-between gap-2">
-          <p className="font-display text-base font-bold text-ink">
-            Daily Drills
-          </p>
+        <div className="flex items-baseline justify-between gap-2">
+          <p className="label-broadcast text-ice">today</p>
           <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-            today&apos;s sheet
+            {progress.seasonPass ? "season pass" : "free tier"}
           </span>
         </div>
-        <ul className="mt-4 space-y-4">
+
+        <p className="mt-1 font-display text-3xl font-bold text-ink">
+          {progress.seasonPass ? "∞" : progress.timeouts}
+          {!progress.seasonPass && (
+            <span className="text-lg text-ink-muted">/{FREE_DAILY_TIMEOUTS}</span>
+          )}
+          <span className="ml-2 font-mono text-xs uppercase tracking-wider text-ink-muted">
+            timeouts
+          </span>
+        </p>
+        <p className="mt-1 text-[12px] leading-relaxed text-ink-muted">
+          {progress.seasonPass
+            ? "Unlimited graded drives."
+            : "A graded lesson spends one. Everything under Practice is free."}
+        </p>
+
+        <ul className="mt-4 space-y-3 border-t border-panel-border pt-3">
           {drills.map((q) => {
             const pct = Math.min(100, Math.round((q.have / q.need) * 100));
             const done = q.have >= q.need;
@@ -250,9 +157,7 @@ export default function LearnRail({
                     aria-valuemin={0}
                     aria-valuemax={100}
                   >
-                    <span
-                      style={{ width: `${Math.max(pct, done ? 100 : 0)}%` }}
-                    />
+                    <span style={{ width: `${Math.max(pct, done ? 100 : 0)}%` }} />
                   </div>
                   <span
                     className={`quest-chest ${done ? "quest-chest-done" : ""}`}
@@ -268,40 +173,85 @@ export default function LearnRail({
         </ul>
       </div>
 
-      {nextBadges.length > 0 && (
-        <div className="section-card">
-          <p className="label-broadcast text-turf">next hardware</p>
-          <p className="mt-1 font-display text-base font-bold text-ink">
-            Up next on the shelf
-          </p>
-          <ul className="mt-3 space-y-3">
-            {nextBadges.map((badge) => {
-              const { have, need } = badge.progress(stats);
-              const pct = need > 0 ? Math.round((have / need) * 100) : 0;
-              return (
-                <li key={badge.id}>
-                  <div className="flex items-center gap-2">
-                    <span className="opacity-40 grayscale" aria-hidden>
-                      {badge.glyph}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13px] font-semibold text-ink-soft">
-                        {badge.name}
-                      </p>
-                      <div className="quest-bar mt-1">
-                        <span style={{ width: `${pct}%` }} />
-                      </div>
-                    </div>
-                    <span className="font-mono text-[10px] text-ink-muted">
-                      {have}/{need}
-                    </span>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+      {/* ── Practice ──────────────────────────────────────── */}
+      <div className="section-card">
+        <p className="label-broadcast text-turf">practice</p>
+        <p className="mt-1 text-[12px] leading-relaxed text-ink-muted">
+          None of these spend a timeout.
+        </p>
+        <ul className="mt-3 divide-y divide-panel-border border-t border-panel-border">
+          {PRACTICE_LINKS.map((l) => (
+            <li key={l.href}>
+              <Link
+                href={l.href}
+                className="group flex items-center justify-between gap-3 py-2.5 transition-colors"
+              >
+                <span
+                  className={`font-display text-[15px] font-bold text-ink transition-colors ${HOVER[l.accent]}`}
+                >
+                  {l.name}
+                </span>
+                <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+                  {l.note}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* ── Your standing ─────────────────────────────────── */}
+      <div className="section-card">
+        <p className="label-broadcast text-gold">your standing</p>
+        <div className="mt-2 flex items-baseline justify-between gap-3">
+          <p className="font-display text-xl font-bold text-gold">{league}</p>
+          <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+            {stats.lessonsDone} done
+          </span>
         </div>
-      )}
+
+        {nextBadge && (
+          <div className="mt-3 border-t border-panel-border pt-3">
+            <div className="flex items-center gap-2">
+              <span className="opacity-40 grayscale" aria-hidden>
+                {nextBadge.glyph}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13px] font-semibold text-ink-soft">
+                  Next: {nextBadge.name}
+                </p>
+                <div className="quest-bar mt-1">
+                  <span
+                    style={{
+                      width: `${
+                        nextBadge.progress(stats).need > 0
+                          ? Math.round(
+                              (nextBadge.progress(stats).have /
+                                nextBadge.progress(stats).need) *
+                                100,
+                            )
+                          : 0
+                      }%`,
+                    }}
+                  />
+                </div>
+              </div>
+              <span className="font-mono text-[10px] text-ink-muted">
+                {nextBadge.progress(stats).have}/{nextBadge.progress(stats).need}
+              </span>
+            </div>
+          </div>
+        )}
+
+        <Link
+          href="/learn#trophies"
+          className="mt-3 block w-full rounded-xl border border-panel-border py-2 text-center font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted transition-colors hover:border-gold/50 hover:text-gold"
+        >
+          Trophy case
+        </Link>
+      </div>
+
+      <SidelineShop progress={progress} onChange={onProgress} />
     </aside>
   );
 }
