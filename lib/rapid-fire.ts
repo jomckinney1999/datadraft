@@ -127,6 +127,41 @@ function mulberry32(seed: number) {
   };
 }
 
+/** Multiple-choice snaps from one course, for a stop on that course's path. */
+export function dealCourseRound(
+  moduleId: string,
+  size = 5,
+  seed?: number,
+): RapidQuestion[] {
+  const out: RapidQuestion[] = [];
+  for (const { lesson } of liveLessons(moduleId)) {
+    lesson.exercises.forEach((ex, i) => {
+      if (ex.type !== "mc") return;
+      const mc = ex as MCExercise;
+      out.push({
+        id: `${lesson.id}:${i}`,
+        lang: "sql",
+        prompt: mc.prompt,
+        code: mc.code,
+        choices: mc.options,
+        answer: mc.answer,
+        explain: mc.explain,
+        lessonId: lesson.id,
+      });
+    });
+  }
+  if (out.length === 0) return [];
+  const rand = mulberry32(
+    seed ?? (Date.now() ^ (Math.random() * 0x7fffffff)) >>> 0,
+  );
+  const copy = [...out];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy.slice(0, Math.min(size, copy.length));
+}
+
 /** Shuffle a fresh round. Seed optional for tests. */
 export function dealRapidRound(
   langId: RapidLangId,

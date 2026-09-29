@@ -98,10 +98,10 @@ export default function LearnStatusChips({
     : `${progress.timeouts}/${FREE_DAILY_TIMEOUTS}`;
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex max-w-full items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <Link
         href={trophiesHref}
-        className="status-chip hover:border-turf/50"
+        className="status-chip shrink-0 !px-2 !py-1 hover:border-turf/50"
         title={`${earned} badges · ${league}`}
       >
         <HelmetIcon />
@@ -109,7 +109,7 @@ export default function LearnStatusChips({
         <span className="sm:hidden">{league.split(" ")[0]}</span>
       </Link>
       <span
-        className={`status-chip ${streak > 0 ? "border-gold/40 text-gold" : ""}`}
+        className={`status-chip shrink-0 !px-2 !py-1 ${streak > 0 ? "border-gold/40 text-gold" : ""}`}
         title={
           progress.byeWeeks > 0
             ? `Heater · ${progress.byeWeeks} bye week${progress.byeWeeks === 1 ? "" : "s"} ready`
@@ -126,23 +126,23 @@ export default function LearnStatusChips({
         <span className="hidden text-ink-muted md:inline">heater</span>
       </span>
       <span
-        className="status-chip text-ice"
+        className="status-chip shrink-0 !px-2 !py-1 text-ice"
         title="Timeouts left today — each graded drive costs one"
       >
         <ClockIcon />
         {timeoutsLabel}
         <span className="hidden text-ink-muted lg:inline">TO</span>
       </span>
-      <span className="status-chip text-gold" title="Scouting tickets">
+      <span className="status-chip shrink-0 !px-2 !py-1 text-gold" title="Scouting tickets">
         <TicketIcon />
         {progress.tickets}
         <span className="hidden text-ink-muted lg:inline">tix</span>
       </span>
-      <span className="status-chip text-turf" title="Season XP">
+      <span className="status-chip shrink-0 !px-2 !py-1 text-turf" title="Season XP">
         {progress.xp} XP
       </span>
       <span
-        className="status-chip hidden text-ink-soft xl:inline-flex"
+        className="status-chip hidden shrink-0 !px-2 !py-1 text-ink-soft xl:inline-flex"
         title="Career yards"
       >
         {progress.totalYards.toLocaleString()} yd

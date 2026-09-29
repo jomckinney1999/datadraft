@@ -44,7 +44,7 @@ export const COURSES: Course[] = [
     title: "SQL Fundamentals",
     mark: "SQL",
     blurb:
-      "From your first SELECT to JOINs and window functions, every query run against a real database in your browser. The most-asked-for skill on any analyst posting.",
+      "Sixteen modules in order, from what a table is through JOINs and a capstone. Every module has lessons you can play.",
     hours: 10,
     lessons: 60,
     projects: 2,
@@ -67,7 +67,7 @@ export const COURSES: Course[] = [
     title: "Advanced SQL",
     mark: "SQL II",
     blurb:
-      "CTEs, recursion, views, triggers, and indexing — package a query for reuse and reason about what actually makes one fast.",
+      "Twenty-five modules in order: mental models, CTEs, window functions, views, indexing, and the analytical work after that.",
     hours: 6,
     lessons: 25,
     projects: 1,

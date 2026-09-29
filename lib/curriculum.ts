@@ -16,6 +16,13 @@ import { FINAL_UNITS } from "./finals";
 // Redesigned Foundations modules (docs/SQL-REDESIGN.md). Kept in their own
 // file so the rewrite can land module by module without churning this one.
 import { SQL_FOUNDATION_UNITS } from "./curriculum-foundations";
+import { SQL_MORE_UNITS } from "./curriculum-sql-more";
+import { SQL_NEXT_UNITS } from "./curriculum-sql-next";
+import {
+  ANALYTICS_UNIT_IDS,
+  FOUNDATIONS_UNIT_IDS,
+  SQL_SHELLS,
+} from "./sql-outline";
 
 export type MCExercise = {
   type: "mc";
@@ -198,7 +205,7 @@ export const COURSE = {
       title: "Read the Stat Sheet",
       drive: "1st Drive · Own 20",
       description:
-        "What a database is, and how to pull data with SELECT. By the end you can open any sheet and grab the columns you want.",
+        "One row is one player in one game. You'll see the sheet before you ask it anything.",
       skills: ["SELECT", "FROM", "LIMIT"],
       status: "live",
       lessons: [
@@ -208,45 +215,40 @@ export const COURSE = {
           blurb: "Tables, rows, columns — and your first SELECT *.",
           brief: {
             goal: "Read any table with SELECT.",
-      steps: [
-        {
-          title: "What you're about to do",
-          body: "You're going to learn SQL by asking real questions of real NFL data — who scored most, who was consistent, who got lucky. Same skill you'd use on sales or signups; the numbers here are just easier to picture.",
-        },
-        {
-          title: "It's just a stack of sheets",
-          body: "That history lives in a database. Think of a box-score page: categories across the top, one line per thing that happened. A database is a stack of those sheets.",
-          note: "If you've opened a spreadsheet, you already get this. Same idea — bigger stack.",
-        },
-        {
-          title: "The three tables this course uses",
-          body: "One dataset, three tables. You'll query all three before the course is done — for now just see what each one holds.",
-          code: "week_results   one row per player, per game played\nrosters        which player sits on which team\nwaiver_wire    players not on any team",
-          note: "week_results is real: 876 NFL games from 2022–2024. rosters and waiver_wire are small example tables we wrote, so there's something to join against — who owns whom isn't an NFL fact.",
-          previewSql: "SELECT * FROM rosters;",
-          previewCaption: "rosters · 10 rows, the example table",
-        },
-        {
-          title: "One row = one player, one game",
-          body: "Read a row left to right like a box-score line: who, team, position, season, week, points. That's it. Learn one row and you can read all 876.",
-          previewSql: "SELECT * FROM week_results LIMIT 1;",
-          previewCaption: "one row of week_results",
-        },
-        {
-          title: "SELECT means show me",
-          body: "SQL is how you ask for stuff. SELECT means show me. The star means every column. So the line below says: show me week_results, and stop after 5 rows.",
-          code: "SELECT * FROM week_results LIMIT 5;",
-        },
-      ],
-            setup:
-              "A database is a stack of tables — grids with columns across the top and one row per entry. This course uses three: week_results, rosters, and waiver_wire. Peek at week_results before we ask you anything.",
+          steps: [
+            {
+              title: "876 rows. You need to know what one of them is.",
+              body: "This sheet is every game 20 players actually played, 2022 through 2024. Before you ask it a question, read one line.",
+              previewSql: "SELECT * FROM week_results LIMIT 1;",
+              previewCaption: "One row of week_results",
+            },
+            {
+              title: "Left to right, that's the whole record",
+              body: "Who, which team, position, season, week, points. Learn that order and the other 875 rows are the same shape.",
+            },
+            {
+              title: "There are two more sheets, and they aren't the NFL",
+              body: "rosters is who owns whom in an example league. waiver_wire is who's available. We made those up. week_results is the real one.",
+              previewSql: "SELECT * FROM rosters;",
+              previewCaption: "rosters · example league, not a real one",
+            },
+            {
+              title: "Show me the sheet",
+              body: "SELECT means show me. A star means every column. LIMIT 5 means stop after five rows so you're not staring at all 876.",
+              code: "SELECT * FROM week_results LIMIT 5;",
+              previewSql: "SELECT * FROM week_results LIMIT 5;",
+              previewCaption: "Five games, every column",
+            },
+          ],
+          setup:
+            "One row is one player in one week. SELECT * FROM week_results shows you that sheet. The star means every column.",
             previewSql: "SELECT * FROM week_results LIMIT 5;",
             previewCaption: "week_results · first 5 rows",
           },
           intro: {
-            title: "Databases are just sheets",
-            text: "Tables are grids: columns across the top, rows underneath. This course uses three — week_results (one row per player per week), rosters, and waiver_wire. SELECT * FROM a table reads the whole sheet.",
-            code: "SELECT * FROM week_results;",
+            title: "One row is one game",
+            text: "week_results is that sheet: player, team, position, season, week, points. SELECT * reads every column. You'll name the columns yourself in the next module.",
+            code: "SELECT * FROM week_results LIMIT 5;",
           },
           film: [
             {
@@ -577,7 +579,7 @@ export const COURSE = {
       title: "Filter with WHERE",
       drive: "2nd Drive · Own 40",
       description:
-        "Most questions are about some of the data — one player, one season, big games only. WHERE keeps the rows that match and drops the rest.",
+        "You rarely want every row. WHERE keeps the ones that pass a test.",
       skills: ["WHERE", "= > <", "AND / OR", "IN", "BETWEEN"],
       status: "live",
       lessons: [
@@ -587,27 +589,28 @@ export const COURSE = {
           blurb: "WHERE + equals. Text needs quotes.",
           brief: {
             goal: "Keep only the rows you care about with WHERE.",
-      steps: [
-        {
-          title: "You rarely want the whole sheet",
-          body: "So far you've taken whatever the table handed you. Real questions are narrower — how did this player do, which games were huge. Filtering to the rows that matter is the move you'll use most.",
-        },
-        {
-          title: "WHERE is the filter",
-          body: "Add WHERE after the table name and give it a test. SQL checks every row and keeps only the ones that pass. Text goes in single quotes. Numbers stay bare.",
-          code: "SELECT * FROM week_results WHERE player = 'Josh Allen';",
-          note: "One equals sign, not two. SQL uses = to ask “is this equal?” — no ==.",
-        },
-      ],
-            setup:
-              "WHERE keeps only rows that pass a test. Text values go in single quotes; numbers don't. Here's every row for one player — same table, narrowed to one name.",
+          steps: [
+            {
+              title: "You don't want all 876 games",
+              body: "You want Josh Allen's. The rest of the sheet is noise until you say so.",
+            },
+            {
+              title: "WHERE keeps the rows that pass",
+              body: "It sits after the table name. Text goes in single quotes. Numbers don't. One equals sign, not two.",
+              code: "SELECT player, week, fantasy_pts\nFROM week_results\nWHERE player = 'Josh Allen';",
+              previewSql: "SELECT player, week, fantasy_pts FROM week_results WHERE player = 'Josh Allen' LIMIT 5;",
+              previewCaption: "Just Josh Allen",
+            },
+          ],
+          setup:
+            "WHERE player = 'Josh Allen' throws out every other name. Quotes around text. No quotes around a number.",
             previewSql: "SELECT player, week, fantasy_pts FROM week_results WHERE player = 'Josh Allen' LIMIT 5;",
             previewCaption: "WHERE player = 'Josh Allen'",
           },
           intro: {
-            title: "WHERE keeps what matches",
-            text: "WHERE goes after FROM and keeps only rows that pass a test. Text needs single quotes — 'Josh Allen', 'KC'. Numbers go bare.",
-            code: "SELECT * FROM week_results\nWHERE player = 'Josh Allen';",
+            title: "WHERE is the test on each row",
+            text: "Put it after FROM. 'Josh Allen' needs quotes. week = 5 doesn't. Miss the quotes and SQL looks for a column named Josh.",
+            code: "SELECT player, week, fantasy_pts\nFROM week_results\nWHERE player = 'Josh Allen';",
           },
           film: [
             {
@@ -926,7 +929,7 @@ export const COURSE = {
       title: "Sort the Board",
       drive: "3rd Drive · Midfield",
       description:
-        "Ranking is everyday analyst work. ORDER BY sorts your results; with LIMIT it answers every “top N” question.",
+        "The board isn't in order until you say so. ORDER BY, then LIMIT if you only want the top.",
       skills: ["ORDER BY", "DESC / ASC", "Top-N"],
       status: "live",
       lessons: [
@@ -1167,7 +1170,7 @@ export const COURSE = {
       title: "Season Math — Aggregations",
       drive: "4th Drive · Red Zone",
       description:
-        "Turn many game rows into season stats: totals, averages, and counts — per player, per position, per team — with GROUP BY and HAVING.",
+        "A season isn't 300 game rows. GROUP BY folds them into one number per player.",
       skills: ["COUNT / SUM / AVG", "GROUP BY", "AS", "HAVING"],
       status: "live",
       lessons: [
@@ -1514,7 +1517,7 @@ export const COURSE = {
       title: "Two Tables — JOINs",
       drive: "5th Drive · Midfield",
       description:
-        "Combine tables: match rosters to week_results and score whole fantasy matchups. This is how SQL stitches sheets together.",
+        "week_results knows the score. rosters knows who owns the player. JOIN puts them on the same line.",
       skills: ["JOIN", "ON", "LEFT JOIN", "Anti-joins"],
       status: "live",
       lessons: [
@@ -2007,7 +2010,7 @@ export const COURSE = {
       title: "Side-by-Side Stats — Window Functions",
       drive: "6th Drive · Red Zone",
       description:
-        "Rolling averages, ranks within groups, week-over-week trends — keep every row and still add the comparison numbers.",
+        "GROUP BY throws the games away. OVER keeps every game and still adds the season number beside it.",
       skills: ["OVER", "PARTITION BY", "RANK", "LAG", "Running totals"],
       status: "live",
       lessons: [
@@ -6029,7 +6032,7 @@ export const COURSE = {
       title: "Overtime — CTEs & Temp Tables",
       drive: "Overtime, 1st Drive · Own 20",
       description:
-        "Name a subquery so it reads top to bottom. Stash a result so you don't recompute it. Same SQL power — cleaner play-calling.",
+        "A subquery buried in the middle is hard to read. WITH gives that step a name.",
       skills: ["WITH", "Recursive CTEs", "Temp Tables"],
       status: "live",
       lessons: [
@@ -6498,7 +6501,7 @@ export const COURSE = {
       title: "Overtime — Views",
       drive: "Overtime, 2nd Drive · Own 40",
       description:
-        "A CTE forgets when the query ends. A view doesn't — it's a saved SELECT anyone can query like a table, including next week.",
+        "A CTE disappears when the query ends. A view stays, and you query it like a table.",
       skills: ["CREATE VIEW", "Updatable views"],
       status: "live",
       lessons: [
@@ -6851,7 +6854,7 @@ export const COURSE = {
       title: "Overtime — Triggers",
       drive: "Overtime, 3rd Drive · Midfield",
       description:
-        "Everything so far ran when you asked. A trigger runs itself the instant a table changes — nobody has to remember to call it.",
+        "So far every query ran because you asked. A trigger runs itself when a row changes.",
       skills: ["CREATE TRIGGER", "BEFORE / AFTER"],
       status: "live",
       lessons: [
@@ -7115,7 +7118,7 @@ export const COURSE = {
       title: "Overtime — Indexing & Query Plans",
       drive: "Overtime, 4th Drive · Red Zone",
       description:
-        "Right answers aren't enough — this unit is about speed. Read what the database actually did, then give it a faster path.",
+        "A correct query can still be the slow one. Read the plan, then give the lookup a shorter path.",
       skills: ["EXPLAIN QUERY PLAN", "CREATE INDEX", "Composite indexes"],
       status: "live",
       lessons: [
@@ -7374,6 +7377,8 @@ export const COURSE = {
       ],
     },
     ...SQL_FOUNDATION_UNITS,
+    ...SQL_NEXT_UNITS,
+    ...SQL_MORE_UNITS,
     ...FINAL_UNITS,
   ] as Unit[],
 };
@@ -7406,8 +7411,8 @@ export const MODULES: Module[] = [
     blurb:
       "Every skill in order, the way a career-changer should take it: SQL, Python, statistics, charts, Git, R.",
     unitIds: [
-      "u1", "u2", "u3", "u4", "u5", "u6", "u23",
-      "u19", "u20", "u21", "u22", "u24",
+      ...FOUNDATIONS_UNIT_IDS,
+      ...ANALYTICS_UNIT_IDS,
       "u15", "u16", "u17", "u18", "u26",
       "u7", "u13", "u14", "u25",
       "u8", "u27", "u9", "u28", "u10", "u29", "u11", "u30",
@@ -7420,13 +7425,13 @@ export const MODULES: Module[] = [
     // yet built, so it has no module here — see lib/courses.ts "sql-advanced".
     id: "sql-fundamentals",
     name: "SQL Fundamentals",
-    blurb: "Read, filter, sort, join, and aggregate any stat sheet in the database.",
-    unitIds: ["u1", "u2", "u3", "u4", "u5", "u6", "u23"],
+    blurb:
+      "Sixteen modules, in order: from what a table is through JOINs, to a capstone.",
+    unitIds: [...FOUNDATIONS_UNIT_IDS],
   },
   {
-    // Pilot for the curriculum redesign — deliberately absent from
-    // lib/courses.ts, so it has a roadmap URL but no catalog card until the
-    // voice is signed off. See docs/SQL-REDESIGN.md.
+    // Pilot module also lives inside Foundations (module 2). This URL keeps
+    // the voice review reachable on its own. See docs/SQL-REDESIGN.md.
     id: "sql-foundations",
     name: "SQL Foundations (draft)",
     blurb: "Rebuilt SQL course — pilot module while the teaching voice is reviewed.",
@@ -7435,8 +7440,9 @@ export const MODULES: Module[] = [
   {
     id: "sql-advanced",
     name: "Advanced SQL",
-    blurb: "CTEs, views, triggers, and indexing — package a query for reuse.",
-    unitIds: ["u19", "u20", "u21", "u22", "u24"],
+    blurb:
+      "Twenty-five modules, in order: mental models, CTEs, window functions, then the rest of analytical SQL.",
+    unitIds: [...ANALYTICS_UNIT_IDS],
   },
   {
     id: "python",
@@ -7488,6 +7494,21 @@ export function getModule(id: string | null | undefined): Module {
   return MODULES.find((m) => m.id === id) ?? MODULES[0];
 }
 
+function shellUnit(id: string): Unit | undefined {
+  const shell = SQL_SHELLS[id];
+  if (!shell) return undefined;
+  return {
+    id,
+    number: 0,
+    title: shell.title,
+    drive: "Up next",
+    description: shell.description,
+    skills: shell.skills,
+    status: "coming-soon",
+    lessons: [],
+  };
+}
+
 /** Units belonging to a module, in course order (includes coming-soon ones). */
 export function moduleUnits(moduleId: string): Unit[] {
   const mod = getModule(moduleId);
@@ -7495,8 +7516,9 @@ export function moduleUnits(moduleId: string): Unit[] {
   // Order by the module's unitIds, NOT by position in COURSE.units. A course
   // whose units were added later (Python's u13/u14) would otherwise appear at
   // the very end of the all-in-one pathway instead of next to its first unit.
+  // Shell ids in lib/sql-outline.ts become empty coming-soon units.
   return mod.unitIds
-    .map((id) => byId.get(id))
+    .map((id) => byId.get(id) ?? shellUnit(id))
     .filter((u): u is Unit => Boolean(u));
 }
 

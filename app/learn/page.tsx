@@ -250,25 +250,6 @@ export default function LearnCatalogPage() {
 
           <StreakNudge progress={progress} />
 
-          <section className="surface mt-6 overflow-hidden border border-gold/35 bg-panel">
-            <div className="flex flex-wrap items-start justify-between gap-4 p-5">
-              <div className="min-w-0 max-w-xl">
-                <p className="label-broadcast text-gold">rapid fire</p>
-                <h2 className="mt-1 font-display text-xl font-bold text-ink">
-                  Non-linear practice snaps
-                </h2>
-                <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-                  Pick SQL, Python, Excel, and more — shuffled questions from
-                  the real curriculum, 12 seconds each, tickets for hits. No
-                  path order, no timeouts.
-                </p>
-              </div>
-              <Link href="/learn/rapid" className="btn-gold shrink-0">
-                Start Rapid Fire →
-              </Link>
-            </div>
-          </section>
-
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {CAREER_ROLES.map((role, i) => (
               <RolePathCard
@@ -290,47 +271,28 @@ export default function LearnCatalogPage() {
         <TestingTools />
       </div>
 
-      <section className="surface mt-8 border border-gold/30 bg-panel p-5">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="min-w-0 max-w-xl">
-            <p className="label-broadcast text-gold">portfolio project</p>
-            <h2 className="mt-1 font-display text-xl font-bold text-ink">
-              Your League Scorecard
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-              Export your real fantasy league (Sleeper is one click), load it
-              into SQL in Google Colab, and answer the questions managers argue
-              about every week.
-            </p>
-          </div>
-          <Link
-            href="/learn/project/my-league-scorecard"
-            className="btn-gold shrink-0"
-          >
-            Start project →
-          </Link>
-        </div>
-      </section>
-
-      <section className="surface mt-4 border border-panel-border bg-panel p-5">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="min-w-0 max-w-xl">
-            <p className="label-broadcast text-ice">career kit</p>
-            <h2 className="mt-1 font-display text-xl font-bold text-ink">
-              Resumes, outreach &amp; books
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-              Sample resume outlines for your roadmap, job-hunt tactics (yes —
-              including The 2-Hour Job Search), and a short reading list.
-            </p>
-          </div>
-          <Link
-            href="/resources"
-            className="shrink-0 rounded-2xl border-2 border-ice/50 border-b-4 bg-ice/10 px-5 py-3.5 font-mono text-[12px] font-bold uppercase tracking-wider text-ice transition-colors hover:bg-ice/20"
-          >
-            Open resources →
-          </Link>
-        </div>
+      <section className="section-card mt-8">
+        <p className="label-broadcast text-ink-muted">also</p>
+        <ul className="mt-2 divide-y divide-panel-border border-t border-panel-border">
+          {[
+            { href: "/learn/project/my-league-scorecard", name: "Your League Scorecard", note: "your data, in Colab" },
+            { href: "/resources", name: "Career kit", note: "resumes · outreach · books" },
+          ].map((l) => (
+            <li key={l.href}>
+              <Link
+                href={l.href}
+                className="group flex items-center justify-between gap-3 py-2.5"
+              >
+                <span className="font-display text-[15px] font-bold text-ink transition-colors group-hover:text-turf">
+                  {l.name}
+                </span>
+                <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+                  {l.note}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="mt-14">

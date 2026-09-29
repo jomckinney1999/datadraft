@@ -47,7 +47,7 @@ export const COURSE_INTROS: CourseIntro[] = [
       "Pull exactly the columns and rows you want (SELECT, WHERE, ORDER BY)",
       "Summarise a table — totals, averages, counts per group",
       "Combine two tables with JOINs, and spot when a join quietly duplicates rows",
-      "Rank and compare within groups using window functions",
+      "Window functions are in Advanced SQL, not this course",
     ],
     dataset: {
       line: "One dataset the whole way through: weekly NFL fantasy scoring, 876 games from the 2022–2024 seasons. One row is one player in one week.",

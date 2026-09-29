@@ -51,6 +51,12 @@ against 35 SQL lessons today. Every `query` answer key has to run green in
 `scripts/verify-answer-keys.mjs`. This is a content programme measured in
 months of writing, not a single change. Plan it module by module.
 
+The roadmap now follows this order (`lib/sql-outline.ts`, wired 2026-09-29).
+Live units sit in their slots. Everything else is a coming-soon shell, so the
+board shows all 16 and all 25 before the lessons exist. `f2` is Foundations
+module 2. Window functions (`u6`) moved to Analytics module 3. Triggers stay
+as an appendix after the advanced capstone.
+
 ## Module map
 
 Status key: **keep** (content survives, light edit) · **rewrite** (same topic,

@@ -15,6 +15,7 @@ import {
   RAPID_SECONDS,
   awardRapidFire,
   buildRapidBank,
+  dealCourseRound,
   dealRapidRound,
   getRapidLang,
   scoreRapidRound,
@@ -46,13 +47,29 @@ function accentBg(a: "turf" | "ice" | "gold") {
 export default function RapidFire({
   onProgress,
   initialLang,
+  courseModuleId,
+  roundSize = 5,
+  embedded = false,
+  onClose,
 }: {
   onProgress?: (p: Progress) => void;
   initialLang?: RapidLangId;
+  /** Snap round drawn from this course only — played on the path. */
+  courseModuleId?: string;
+  roundSize?: number;
+  embedded?: boolean;
+  onClose?: () => void;
 }) {
-  const [phase, setPhase] = useState<Phase>(initialLang ? "play" : "pick");
-  const [langId, setLangId] = useState<RapidLangId | null>(initialLang ?? null);
-  const [deck, setDeck] = useState<RapidQuestion[]>([]);
+  const [phase, setPhase] = useState<Phase>(
+    courseModuleId || initialLang ? "play" : "pick",
+  );
+  const [missing, setMissing] = useState(false);
+  const [langId, setLangId] = useState<RapidLangId | null>(
+    courseModuleId ? "sql" : (initialLang ?? null),
+  );
+  const [deck, setDeck] = useState<RapidQuestion[]>(() =>
+    courseModuleId ? dealCourseRound(courseModuleId, roundSize) : [],
+  );
   const [idx, setIdx] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const [correct, setCorrect] = useState(0);
@@ -66,10 +83,18 @@ export default function RapidFire({
   const lang = langId ? getRapidLang(langId) : null;
   const q = deck[idx] ?? null;
 
-  const start = useCallback((id: RapidLangId) => {
-    const round = dealRapidRound(id);
-    if (round.length === 0) return;
-    setLangId(id);
+  const start = useCallback((id?: RapidLangId) => {
+    const round = courseModuleId
+      ? dealCourseRound(courseModuleId, roundSize)
+      : id
+        ? dealRapidRound(id)
+        : [];
+    if (round.length === 0) {
+      setMissing(true);
+      return;
+    }
+    setMissing(false);
+    setLangId(id ?? "sql");
     setDeck(round);
     setIdx(0);
     setPicked(null);
@@ -81,11 +106,12 @@ export default function RapidFire({
     setTickets(0);
     setPerfect(false);
     setPhase("play");
-  }, []);
+  }, [courseModuleId, roundSize]);
 
   useEffect(() => {
+    if (courseModuleId) return;
     if (initialLang) start(initialLang);
-  }, [initialLang, start]);
+  }, [courseModuleId, initialLang, start]);
 
   // Countdown
   useEffect(() => {
@@ -135,6 +161,14 @@ export default function RapidFire({
     setPicked(null);
     setLocked(false);
     setSeconds(RAPID_SECONDS);
+  }
+
+  if (embedded && courseModuleId && !q && phase !== "done") {
+    return (
+      <p className="text-center text-sm text-ink-soft">
+        {missing ? "This course doesn't have snap questions yet." : "Loading round…"}
+      </p>
+    );
   }
 
   if (phase === "pick") {
@@ -207,26 +241,40 @@ export default function RapidFire({
           )}
         </div>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={() => langId && start(langId)}
-            className="btn-turf inline-flex rounded-xl border border-turf/80 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-night"
-          >
-            Rematch
-          </button>
-          <button
-            type="button"
-            onClick={() => setPhase("pick")}
-            className="rounded-xl border border-panel-border px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-ink-soft hover:border-turf/40"
-          >
-            Switch language
-          </button>
-          <Link
-            href="/learn"
-            className="font-mono text-[11px] uppercase tracking-wider text-ink-muted hover:text-turf"
-          >
-            Back to learn →
-          </Link>
+          {!embedded && (
+            <button
+              type="button"
+              onClick={() => langId && start(langId)}
+              className="btn-turf inline-flex rounded-xl border border-turf/80 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-night"
+            >
+              Rematch
+            </button>
+          )}
+          {embedded ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-turf inline-flex rounded-xl border border-turf/80 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-night"
+            >
+              Back on the path
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setPhase("pick")}
+              className="rounded-xl border border-panel-border px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-ink-soft hover:border-turf/40"
+            >
+              Switch language
+            </button>
+          )}
+          {!embedded && (
+            <Link
+              href="/learn"
+              className="font-mono text-[11px] uppercase tracking-wider text-ink-muted hover:text-turf"
+            >
+              Back to learn →
+            </Link>
+          )}
         </div>
       </div>
     );

@@ -27,6 +27,7 @@ import HomeLink from "@/components/home-link";
 import LearnRail from "@/components/learn-rail";
 import LearnStatusChips from "@/components/learn-status-chips";
 import TestingTools from "@/components/testing-tools";
+import RapidFire from "@/components/rapid-fire";
 
 const NODE_OFFSETS = [0, 56, 0, -56, 28, -28];
 
@@ -181,11 +182,11 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
                 <div className="field-progress-track">
                   <div
                     className="field-progress-fill"
-                    style={{ width: `${Math.max(pct, pct > 0 ? 4 : 0)}%` }}
+                    style={{ width: `${pct}%` }}
                   />
                   <span
                     className="field-progress-stick"
-                    style={{ left: `${Math.min(Math.max(pct, 8), 96)}%` }}
+                    style={{ left: `${pct}%` }}
                     aria-hidden
                   />
                 </div>
@@ -229,37 +230,53 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
           )}
 
           {/* Units */}
-          {visibleUnits.map((unit) => {
+          {visibleUnits.map((unit, unitIndex) => {
             const liveIndex = liveUnits.findIndex((u) => u.id === unit.id);
-            const displayNumber =
-              liveIndex >= 0
-                ? liveIndex + 1
-                : visibleUnits.findIndex((u) => u.id === unit.id) + 1;
+            // Number from the course outline, so a coming-soon module in the
+            // middle doesn't renumber the live ones. Module 9 stays Module 9.
+            const displayNumber = unitIndex + 1;
             const doneCount = unit.lessons.filter((l) =>
               completed.has(l.id),
             ).length;
             const unlocked =
               unit.status !== "live" ? false : unitUnlocked(liveIndex);
+            const priorLive = [...visibleUnits]
+              .slice(0, unitIndex)
+              .reverse()
+              .find((u) => u.status === "live");
+            const unlockAfter = priorLive
+              ? visibleUnits.findIndex((u) => u.id === priorLive.id) + 1
+              : null;
             const isActive = unit.id === activeUnitId && unlocked;
 
+            const showStop = unit.status === "live" && displayNumber % 4 === 0;
+
             return (
-              <UnitBlock
-                key={unit.id}
-                unit={unit}
-                displayNumber={displayNumber}
-                completedCount={doneCount}
-                unlocked={unlocked}
-                isActive={isActive}
-                nodeState={nodeState}
-                continueHref={
-                  isActive && current
-                    ? `/learn/${current.lesson.id}`
-                    : gateHref && isActive
-                      ? gateHref
-                      : null
-                }
-                continueLabel={gateLabel}
-              />
+              <div key={unit.id}>
+                <UnitBlock
+                  unit={unit}
+                  displayNumber={displayNumber}
+                  unlockAfter={unlockAfter}
+                  completedCount={doneCount}
+                  unlocked={unlocked}
+                  isActive={isActive}
+                  nodeState={nodeState}
+                  continueHref={
+                    isActive && current
+                      ? `/learn/${current.lesson.id}`
+                      : gateHref && isActive
+                        ? gateHref
+                        : null
+                  }
+                  continueLabel={gateLabel}
+                />
+                {showStop && (
+                  <PathStop
+                    moduleId={moduleId}
+                    after={`Unit ${displayNumber}`}
+                  />
+                )}
+              </div>
             );
           })}
 
@@ -280,9 +297,54 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
   );
 }
 
+function PathStop({
+  moduleId,
+  after,
+}: {
+  moduleId: string;
+  after: string;
+}) {
+  const [play, setPlay] = useState(false);
+
+  return (
+    <div className="path-board relative mt-2">
+      <div className="path-rail flex flex-col items-center">
+        {!play ? (
+          <button
+            type="button"
+            onClick={() => setPlay(true)}
+            className="path-node-current relative z-[1] flex h-24 w-24 flex-col items-center justify-center rounded-full border-2 border-gold bg-gold/15 font-display text-xs font-bold text-gold shadow-[0_0_24px_-6px_rgb(var(--c-gold)/0.7)]"
+          >
+            <span aria-hidden className="text-lg">
+              🔥
+            </span>
+            Snap round
+            <span className="mt-0.5 font-mono text-[9px] font-normal uppercase tracking-wider text-ink-muted">
+              {after}
+            </span>
+          </button>
+        ) : (
+          <div className="relative z-[1] w-full max-w-xl rounded-2xl border border-gold/40 bg-panel p-4">
+            <p className="mb-3 text-center font-mono text-[10px] uppercase tracking-widest text-gold">
+              On the path · {after}
+            </p>
+            <RapidFire
+              embedded
+              courseModuleId={moduleId}
+              roundSize={5}
+              onClose={() => setPlay(false)}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function UnitBlock({
   unit,
   displayNumber,
+  unlockAfter,
   completedCount,
   unlocked,
   isActive,
@@ -292,6 +354,8 @@ function UnitBlock({
 }: {
   unit: Unit;
   displayNumber: number;
+  /** Outline number of the live module that has to be finished first. */
+  unlockAfter: number | null;
   completedCount: number;
   unlocked: boolean;
   isActive: boolean;
@@ -356,7 +420,7 @@ function UnitBlock({
 
           {locked && !comingSoon && (
             <p className="mt-3 font-mono text-[11px] text-ink-muted">
-              Move the chains on Unit {displayNumber - 1} to unlock
+              Move the chains on Unit {unlockAfter ?? displayNumber - 1} to unlock
             </p>
           )}
           {comingSoon && (

@@ -76,8 +76,6 @@ const PRACTICE_LINKS: {
   note: string;
   accent: "gold" | "turf" | "ice";
 }[] = [
-  { href: "/learn/rapid", name: "Rapid Fire", note: "quickfire questions", accent: "gold" },
-  { href: "/learn/arcade", name: "The Arcade", note: "match · drill · kick", accent: "gold" },
   { href: "/field", name: "Practice Field", note: "free-play SQL", accent: "turf" },
   { href: "/excel", name: "Spreadsheet", note: "free-play Excel", accent: "turf" },
   { href: "/interview", name: "Interview cases", note: "scripted scenarios", accent: "ice" },
