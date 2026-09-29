@@ -31,12 +31,16 @@ function ensureOutDir(repoRoot) {
   return outDir;
 }
 
+/** Files currently being compiled, so a real import cycle is caught, not fatal. */
+const inFlight = new Set();
+
 /**
  * @param {string} absPath  Absolute path to a .ts file under the repo root.
  * @param {string} repoRoot Repo root, used to resolve the `@/` alias.
  */
 export async function loadTs(absPath, repoRoot) {
   if (loaded.has(absPath)) return loaded.get(absPath);
+  inFlight.add(absPath);
 
   const dir = ensureOutDir(repoRoot);
   const source = readFileSync(absPath, "utf8");
@@ -60,15 +64,32 @@ export async function loadTs(absPath, repoRoot) {
   );
 
   // Compile each dependency first so the sibling it now points at exists.
+  //
+  // Type-only imports are stripped before scanning, because they are erased by
+  // transpilation and are routinely circular: lib/finals.ts does
+  // `import type { Unit } from "./curriculum"` while curriculum.ts imports
+  // finals.ts for its units. Following those meant curriculum → finals →
+  // curriculum → … forever, since a file is only recorded in `loaded` once it
+  // has finished. That recursion ate 4GB and killed the process, which took
+  // the answer-key verifier with it.
+  const scanned = source.replace(/import\s+type\s+[^;]+?;/g, "");
   const deps = [
-    ...[...source.matchAll(/from\s+["']@\/(.+?)["']/g)].map((m) =>
+    ...[...scanned.matchAll(/from\s+["']@\/(.+?)["']/g)].map((m) =>
       join(repoRoot, `${m[1]}.ts`),
     ),
-    ...[...source.matchAll(/from\s+["']\.\.?\/([^"']+?)["']/g)].map((m) =>
+    ...[...scanned.matchAll(/from\s+["']\.\.?\/([^"']+?)["']/g)].map((m) =>
       join(dirname(absPath), `${m[1]}.ts`),
     ),
   ];
   for (const dep of deps) {
+    // A value-level cycle can't be resolved by compiling deps first — say so
+    // instead of recursing into another out-of-memory crash.
+    if (inFlight.has(dep)) {
+      throw new Error(
+        `Circular value import between ${basename(absPath)} and ${basename(dep)}. ` +
+          `Make one side \`import type\`, or move the shared value into its own module.`,
+      );
+    }
     if (existsSync(dep)) await loadTs(dep, repoRoot);
   }
 
@@ -76,5 +97,6 @@ export async function loadTs(absPath, repoRoot) {
   writeFileSync(outFile, rewritten, "utf8");
   const mod = await import(pathToFileURL(outFile).href);
   loaded.set(absPath, mod);
+  inFlight.delete(absPath);
   return mod;
 }

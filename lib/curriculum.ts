@@ -13,6 +13,9 @@
 // or follow the all-in-one pathway.
 
 import { FINAL_UNITS } from "./finals";
+// Redesigned Foundations modules (docs/SQL-REDESIGN.md). Kept in their own
+// file so the rewrite can land module by module without churning this one.
+import { SQL_FOUNDATION_UNITS } from "./curriculum-foundations";
 
 export type MCExercise = {
   type: "mc";
@@ -7370,6 +7373,7 @@ export const COURSE = {
         },
       ],
     },
+    ...SQL_FOUNDATION_UNITS,
     ...FINAL_UNITS,
   ] as Unit[],
 };
@@ -7418,6 +7422,15 @@ export const MODULES: Module[] = [
     name: "SQL Fundamentals",
     blurb: "Read, filter, sort, join, and aggregate any stat sheet in the database.",
     unitIds: ["u1", "u2", "u3", "u4", "u5", "u6", "u23"],
+  },
+  {
+    // Pilot for the curriculum redesign — deliberately absent from
+    // lib/courses.ts, so it has a roadmap URL but no catalog card until the
+    // voice is signed off. See docs/SQL-REDESIGN.md.
+    id: "sql-foundations",
+    name: "SQL Foundations (draft)",
+    blurb: "Rebuilt SQL course — pilot module while the teaching voice is reviewed.",
+    unitIds: ["f2"],
   },
   {
     id: "sql-advanced",
@@ -7495,12 +7508,26 @@ export function liveLessons(
     .flatMap((unit) => unit.lessons.map((lesson) => ({ lesson, unit })));
 }
 
+/**
+ * Every live lesson in the course, regardless of module membership.
+ *
+ * liveLessons() walks a module's unitIds, so a unit that belongs to no module
+ * — or only to one outside the all-in-one pathway, like the Foundations
+ * redesign pilot — is invisible to it. Lesson URLs and static params have to
+ * span the whole course instead, or those lessons 404.
+ */
+export function allLiveLessons(): { lesson: Lesson; unit: Unit }[] {
+  return (COURSE.units as Unit[])
+    .filter((unit) => unit.status === "live")
+    .flatMap((unit) => unit.lessons.map((lesson) => ({ lesson, unit })));
+}
+
 export function getLesson(
   id: string,
 ): { lesson: Lesson; unit: Unit } | undefined {
   // Always resolves against the full course — a lesson URL must work no
   // matter which module the learner currently has selected.
-  return liveLessons(ALL_MODULE).find((entry) => entry.lesson.id === id);
+  return allLiveLessons().find((entry) => entry.lesson.id === id);
 }
 
 export function nextLessonId(

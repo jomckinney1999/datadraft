@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
-import { getLesson, liveLessons } from "@/lib/curriculum";
+import { allLiveLessons, getLesson } from "@/lib/curriculum";
 import LessonPlayer from "@/components/lesson-player";
 
 export function generateStaticParams() {
-  return liveLessons().map(({ lesson }) => ({ lessonId: lesson.id }));
+  return allLiveLessons().map(({ lesson }) => ({ lessonId: lesson.id }));
 }
 
 export default function LessonPage({
