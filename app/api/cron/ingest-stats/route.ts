@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { fetchSeasonStats } from "@/lib/data/nflverse";
+import { currentNflSeason, fetchSeasonStats } from "@/lib/data/nflverse";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // Scheduled ETL job (docs/LAUNCH-PLAN.md Phase 3): pulls the latest season's
@@ -16,8 +16,13 @@ import { createAdminClient } from "@/lib/supabase/admin";
 async function runIngestion(season: number) {
   const stats = await fetchSeasonStats(season);
 
+  // Zero rows used to return 200 with a note, so an ingest that silently
+  // stopped working looked like a healthy cron in Vercel's log. It is a
+  // failure: nflverse always has rows for a season in progress.
   if (stats.length === 0) {
-    return { season, rowsIngested: 0, note: "No rows returned" };
+    throw new Error(
+      `nflverse returned no rows for season ${season} — dead URL, renamed columns, or a season that hasn't started`,
+    );
   }
 
   const supabase = createAdminClient();
@@ -73,7 +78,7 @@ async function handle(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const season = Number(searchParams.get("season")) || new Date().getFullYear();
+  const season = Number(searchParams.get("season")) || currentNflSeason();
 
   try {
     const result = await runIngestion(season);

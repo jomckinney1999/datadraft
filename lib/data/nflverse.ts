@@ -1,14 +1,28 @@
 import { parse } from "csv-parse/sync";
 
 // Real weekly player stats from nflverse-data (community-maintained, free,
-// updated weekly in-season — https://github.com/nflverse/nflverse-data).
-// Verified against the live release before writing this: the "player_stats"
-// release tag holds per-season CSVs at this exact URL pattern, one row per
-// player per week, already including computed fantasy points (standard and
-// PPR). This is the source for Phase 3 of docs/LAUNCH-PLAN.md — it replaces
-// the sandbox's synthetic dataset once wired into the database.
+// updated through the season — https://github.com/nflverse/nflverse-data).
+// One row per player per week, with fantasy points already computed.
+//
+// This used to point at the "player_stats" release, which nflverse retired:
+// it stops at 2024, so the scheduled ingest had been fetching a dead URL and
+// writing nothing. The live release is "stats_player", and it renamed two
+// columns we read — `recent_team` became `team`, `interceptions` became
+// `passing_interceptions` — so a URL-only fix would still have written rows
+// with an undefined team. Verified against the live 2026 file.
 const NFLVERSE_BASE =
-  "https://github.com/nflverse/nflverse-data/releases/download/player_stats";
+  "https://github.com/nflverse/nflverse-data/releases/download/stats_player";
+
+/**
+ * The season currently being played.
+ *
+ * Not `getFullYear()`: an NFL season spans the new year, so a cron running in
+ * January would ask for a season that doesn't exist yet and fail every night
+ * until March.
+ */
+export function currentNflSeason(now = new Date()): number {
+  return now.getMonth() < 2 ? now.getFullYear() - 1 : now.getFullYear();
+}
 
 export type NflverseWeeklyStat = {
   playerId: string;
@@ -57,7 +71,7 @@ export async function fetchSeasonStats(
   season: number,
   options: { includePostseason?: boolean } = {},
 ): Promise<NflverseWeeklyStat[]> {
-  const url = `${NFLVERSE_BASE}/player_stats_${season}.csv`;
+  const url = `${NFLVERSE_BASE}/stats_player_week_${season}.csv`;
   const res = await fetch(url);
 
   if (!res.ok) {
@@ -80,7 +94,9 @@ export async function fetchSeasonStats(
       playerDisplayName: row.player_display_name,
       position: row.position,
       positionGroup: row.position_group,
-      team: row.recent_team,
+      // `team` in the current release; `recent_team` in the retired one, kept
+      // so an archived file still parses instead of yielding undefined.
+      team: row.team ?? row.recent_team,
       season: toNumber(row.season),
       week: toNumber(row.week),
       seasonType: row.season_type,
@@ -89,7 +105,7 @@ export async function fetchSeasonStats(
       attempts: toNumber(row.attempts),
       passingYards: toNumber(row.passing_yards),
       passingTds: toNumber(row.passing_tds),
-      interceptions: toNumber(row.interceptions),
+      interceptions: toNumber(row.passing_interceptions ?? row.interceptions),
       carries: toNumber(row.carries),
       rushingYards: toNumber(row.rushing_yards),
       rushingTds: toNumber(row.rushing_tds),
