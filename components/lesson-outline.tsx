@@ -41,10 +41,10 @@ export default function LessonOutline({
   /** Present on the phone drawer. The desktop rail has no close. */
   onClose?: () => void;
 }) {
-  const module = useMemo(() => moduleForUnit(unitId), [unitId]);
+  const courseModule = useMemo(() => moduleForUnit(unitId), [unitId]);
   const units = useMemo(
-    () => (module ? moduleUnits(module.id) : []),
-    [module],
+    () => (courseModule ? moduleUnits(courseModule.id) : []),
+    [courseModule],
   );
   const [completed, setCompleted] = useState<Set<string>>(new Set());
   const [openUnitId, setOpenUnitId] = useState(unitId);
@@ -62,10 +62,10 @@ export default function LessonOutline({
     row?.scrollIntoView({ block: "nearest" });
   }, [lessonId, openUnitId]);
 
-  if (!module) return null;
+  if (!courseModule) return null;
 
-  const course = courseByModule(module.id);
-  const title = course?.title ?? module.name;
+  const course = courseByModule(courseModule.id);
+  const title = course?.title ?? courseModule.name;
   const live = units.filter((u) => u.status === "live");
   const allLessons = live.flatMap((u) => u.lessons);
   const doneCount = allLessons.filter((l) => completed.has(l.id)).length;
@@ -277,7 +277,7 @@ export default function LessonOutline({
 
       <div className="border-t border-panel-border p-3">
         <Link
-          href={`/learn/track/${module.id}`}
+          href={`/learn/track/${courseModule.id}`}
           onClick={onNavigate}
           className="flex w-full items-center justify-center rounded-xl border border-panel-border px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-ink-soft hover:border-turf/40 hover:text-turf"
         >
