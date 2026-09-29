@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getRole, pathSteps, buildBoard } from "@/lib/career-paths";
-import { studioStartForCourseIds } from "@/lib/studio";
 import { type Progress, EMPTY_PROGRESS } from "@/lib/progress";
 import { loadEconomy } from "@/lib/economy";
 import { useCareerRole } from "@/lib/use-career-role";
@@ -38,15 +37,11 @@ export default function CareerPathClient({ roleId }: { roleId: string }) {
   const doneLessons = lessons.filter((l) =>
     progress.completedLessons.includes(l.lesson.id),
   ).length;
-  const studioHref = studioStartForCourseIds(role.courseIds);
   const showPicker = asking || (hydrated && mode === null);
 
   function pickStyle(next: LearnMode) {
+    if (next === "studio") return;
     setMode(next);
-    if (next === "studio") {
-      router.push(studioHref);
-      return;
-    }
     if (current && doneLessons === 0) {
       router.push(`/learn/${current.lesson.id}`);
       return;
@@ -64,7 +59,7 @@ export default function CareerPathClient({ roleId }: { roleId: string }) {
             href={`/learn/path/${role.id}?style=choose`}
             className="status-chip hover:border-ice/50 hover:text-ice"
           >
-            {mode === "studio" ? "Studio" : "Snaps"} · switch
+            Snaps · style
           </Link>
           <Link
             href="/learn/rapid"
@@ -96,15 +91,11 @@ export default function CareerPathClient({ roleId }: { roleId: string }) {
               {role.title}
             </h1>
             <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">
-              {role.blurb} Same courses either way. Pick how you want to
-              learn them.
+              {role.blurb} Practice snaps are open. Video and Colab
+              are coming soon.
             </p>
           </section>
-          <LearnModePicker
-            mode={mode}
-            onPick={pickStyle}
-            studioHref={studioHref}
-          />
+          <LearnModePicker mode={mode} onPick={pickStyle} />
         </>
       )}
 

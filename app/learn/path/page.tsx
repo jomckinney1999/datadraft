@@ -41,8 +41,8 @@ export default function CareerPathPickerPage() {
               What job are you playing for?
             </h1>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-soft">
-              Pick a title. Next you choose how to take it: short Duolingo-style
-              snaps, or video plus Google Colab.
+              Pick a title. Practice snaps are open. Video and Colab
+              are coming soon.
             </p>
           </div>
           <div className="hidden shrink-0 sm:block">

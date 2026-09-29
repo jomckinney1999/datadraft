@@ -4,19 +4,15 @@
  * Two-tile gate: Practice snaps (Duolingo) vs Studio (Udemy + Colab).
  */
 
-import Link from "next/link";
 import Coach from "@/components/coach";
 import type { LearnMode } from "@/lib/use-learn-mode";
 
 export default function LearnModePicker({
   mode,
   onPick,
-  studioHref = "/learn/studio",
 }: {
   mode: LearnMode | null;
   onPick: (mode: LearnMode) => void;
-  /** Where “Enter Studio” goes. Path pages send you into that job’s first course. */
-  studioHref?: string;
 }) {
   return (
     <section className="mt-6">
@@ -27,12 +23,12 @@ export default function LearnModePicker({
             Pick your experience
           </h2>
           <p className="mt-1 max-w-xl text-sm text-ink-soft">
-            Same skills either way. Switch anytime — nothing is locked in.
+            Practice snaps are open. Video and Colab are on the way.
           </p>
         </div>
-        {mode && (
+        {mode === "drills" && (
           <p className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-            Current · {mode === "drills" ? "Practice snaps" : "Studio"}
+            Current · Practice snaps
           </p>
         )}
       </div>
@@ -84,66 +80,46 @@ export default function LearnModePicker({
           </p>
         </button>
 
-        {/* Studio */}
-        <button
-          type="button"
-          onClick={() => onPick("studio")}
-          className={`group relative overflow-hidden rounded-2xl border-2 p-5 text-left transition-all lift ${
-            mode === "studio"
-              ? "border-ice bg-ice/10 shadow-[0_0_32px_-8px_rgb(var(--c-ice)/0.45)]"
-              : "border-panel-border bg-panel hover:border-ice/50"
-          }`}
+        {/* Studio — visible, not selectable until videos land. */}
+        <div
+          aria-disabled="true"
+          className="relative cursor-default overflow-hidden rounded-2xl border-2 border-dashed border-panel-border bg-panel p-5 text-left opacity-60"
         >
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 yard-lines opacity-30"
+            className="pointer-events-none absolute inset-0 yard-lines opacity-20"
           />
           <div className="relative flex items-start justify-between gap-3">
             <div>
-              <span className="inline-flex rounded-md border border-ice/40 bg-ice/15 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-ice">
-                Option 2 · hands-on
+              <span className="inline-flex rounded-md border border-gold/40 bg-gold/15 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-gold">
+                Coming soon
               </span>
-              <h3 className="mt-3 font-display text-2xl font-bold text-ink group-hover:text-ice">
+              <h3 className="mt-3 font-display text-2xl font-bold text-ink">
                 Studio + Colab
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-                Udemy-style: sidebar topics, video instruction, and a real
-                Google Colab notebook you run yourself. Get your hands dirty
-                with the data.
+                Video lessons and a Google Colab notebook, side by side. Same
+                courses as the snaps. Not open yet.
               </p>
             </div>
-            <Coach mood="think" size={72} className="hidden shrink-0 sm:block" />
+            <Coach mood="think" size={72} className="hidden shrink-0 opacity-70 sm:block" />
           </div>
           <ul className="relative mt-4 space-y-1.5 font-mono text-[11px] text-ink-muted">
             <li className="flex gap-2">
-              <span className="text-ice">▸</span> Course outline + watch stage
+              <span className="text-ink-muted">▸</span> Course outline + watch stage
             </li>
             <li className="flex gap-2">
-              <span className="text-ice">▸</span> Open-in-Colab notebooks
+              <span className="text-ink-muted">▸</span> Open-in-Colab notebooks
             </li>
             <li className="flex gap-2">
-              <span className="text-ice">▸</span> Jump to a graded snap anytime
+              <span className="text-ink-muted">▸</span> Jump to a graded snap anytime
             </li>
           </ul>
-          <p className="relative mt-5 font-mono text-[11px] font-bold uppercase tracking-widest text-ice">
-            {mode === "studio" ? "Selected · open studio →" : "Choose studio →"}
-          </p>
-        </button>
-      </div>
-
-      {mode === "studio" && (
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <Link
-            href={studioHref}
-            className="btn-turf inline-flex items-center rounded-xl border border-turf/80 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-night"
-          >
-            Enter Studio →
-          </Link>
-          <p className="font-mono text-[11px] text-ink-muted">
-            Videos fill in as we film — Colab is live today.
+          <p className="relative mt-5 font-mono text-[11px] font-bold uppercase tracking-widest text-gold">
+            Coming soon
           </p>
         </div>
-      )}
+      </div>
     </section>
   );
 }
