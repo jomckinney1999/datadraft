@@ -1625,6 +1625,21 @@ body {
   animation: sheen 1.4s ease-out 0.3s both;
 }
 
+@keyframes ticker-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-ticker-in {
+  animation: ticker-in 0.45s ease;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-yard-pop,
   .animate-heat-pulse,
@@ -1641,6 +1656,7 @@ body {
   .animate-option-pop,
   .lesson-confetti,
   .sheen,
+  .animate-ticker-in,
   .path-start-pill,
   .path-node-current,
   .path-node-current::before {

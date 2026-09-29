@@ -24,7 +24,7 @@ import { EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
 import { BADGES, isEarned, statsFrom } from "@/lib/achievements";
 import { CAREER_ROLES } from "@/lib/career-paths";
 import { SHORT_CREDIT } from "@/lib/data-source";
-import type { LiveWeek } from "@/lib/live-nfl";
+import type { LiveBoard, LivePerformer, LiveWeek } from "@/lib/live-nfl";
 
 type CourseProgress = {
   id: string;
@@ -261,36 +261,7 @@ export default function Dashboard({ live }: { live: LiveWeek | null }) {
               </span>
             </div>
 
-            {live.performers.length > 0 && (
-              <>
-                <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-turf">
-                  Top fantasy scorers
-                </p>
-                <ul className="mt-2 space-y-2">
-                  {live.performers.map((p, i) => (
-                    <li key={`${p.player}-${i}`} className="flex items-baseline gap-3">
-                      <span className="w-4 shrink-0 font-mono text-[11px] text-ink-muted">
-                        {i + 1}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="font-display text-[15px] font-bold text-ink">
-                          {p.player}
-                        </span>
-                        <span className="ml-2 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-                          {p.position} · {p.team} vs {p.opponent}
-                        </span>
-                        <span className="block text-[12px] leading-snug text-ink-muted">
-                          {p.line}
-                        </span>
-                      </span>
-                      <span className="stat-number shrink-0 text-sm">
-                        {p.points.toFixed(1)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
+            {live.boards.length > 0 && <LeagueBoards boards={live.boards} />}
 
             {live.games.length > 0 && (
               <>
@@ -341,6 +312,120 @@ export default function Dashboard({ live }: { live: LiveWeek | null }) {
         </p>
       </main>
     </>
+  );
+}
+
+function LeagueBoards({ boards }: { boards: LiveBoard[] }) {
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (boards.length < 2 || paused) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const id = window.setInterval(
+      () => setIndex((n) => (n + 1) % boards.length),
+      4800,
+    );
+    return () => window.clearInterval(id);
+  }, [boards.length, paused]);
+
+  const board = boards[index] ?? boards[0];
+  if (!board) return null;
+
+  return (
+    <div
+      className="mt-3"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <p
+          key={board.id}
+          className="animate-ticker-in font-mono text-[10px] uppercase tracking-widest text-turf"
+        >
+          {board.label}
+        </p>
+        <div className="flex items-center gap-1.5" role="tablist" aria-label="Stat boards">
+          {boards.map((b, i) => (
+            <button
+              key={b.id}
+              type="button"
+              role="tab"
+              aria-selected={i === index}
+              aria-label={b.label}
+              onClick={() => setIndex(i)}
+              className={`h-1.5 w-4 rounded-full transition-colors ${
+                i === index ? "bg-turf" : "bg-panel-border hover:bg-ink-muted"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+      <ul key={board.id} className="animate-ticker-in mt-2 space-y-2">
+        {board.rows.map((p, i) => (
+          <PerformerRow
+            key={`${board.id}-${p.player}`}
+            rank={i + 1}
+            player={p}
+            decimals={board.decimals}
+          />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function PerformerRow({
+  rank,
+  player,
+  decimals,
+}: {
+  rank: number;
+  player: LivePerformer;
+  decimals: number;
+}) {
+  return (
+    <li className="flex items-center gap-3">
+      <span className="w-4 shrink-0 font-mono text-[11px] text-ink-muted">
+        {rank}
+      </span>
+      <Headshot name={player.player} src={player.headshot} />
+      <span className="min-w-0 flex-1">
+        <span className="font-display text-[15px] font-bold text-ink">
+          {player.player}
+        </span>
+        <span className="ml-2 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+          {player.position} · {player.team} vs {player.opponent}
+        </span>
+        <span className="block text-[12px] leading-snug text-ink-muted">
+          {player.line}
+        </span>
+      </span>
+      <span className="stat-number shrink-0 text-sm">
+        {player.value.toFixed(decimals)}
+      </span>
+    </li>
+  );
+}
+
+function Headshot({ name, src }: { name: string; src: string | null }) {
+  const [failed, setFailed] = useState(false);
+  const initial = name.trim().charAt(0).toUpperCase() || "?";
+  const show = Boolean(src) && !failed;
+  return (
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-panel-border bg-night">
+      {show ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src!}
+          alt=""
+          className="h-full w-full object-cover"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <span className="font-display text-xs font-bold text-ink-muted">{initial}</span>
+      )}
+    </span>
   );
 }
 

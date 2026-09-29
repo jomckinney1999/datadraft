@@ -47,15 +47,28 @@ export type LivePerformer = {
   team: string;
   position: string;
   opponent: string;
-  points: number;
+  /** The number this board ranks by. */
+  value: number;
   line: string;
+  headshot: string | null;
+};
+
+export type LiveBoard = {
+  id: string;
+  label: string;
+  /** Decimal places for the ranked number. Yards stay whole; points don't. */
+  decimals: number;
+  rows: LivePerformer[];
 };
 
 export type LiveWeek = {
   season: number;
   week: number;
   games: LiveGame[];
+  /** Fantasy board, kept so older readers still have a list. */
   performers: LivePerformer[];
+  /** Ranked lists the dashboard cycles through. */
+  boards: LiveBoard[];
   fetchedAt: string;
 };
 
@@ -74,6 +87,43 @@ const num = (v: string | undefined): number | null => {
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
 };
+
+function performer(
+  r: Record<string, string>,
+  value: number,
+  line: string,
+): LivePerformer {
+  const shot = (r.headshot_url ?? "").trim();
+  return {
+    player: r.player_display_name || r.player_name || "",
+    team: r.team || "",
+    position: r.position || "",
+    opponent: r.opponent_team || "",
+    value,
+    line,
+    headshot: shot.startsWith("http") ? shot : null,
+  };
+}
+
+function topBoard(
+  rows: Record<string, string>[],
+  id: string,
+  label: string,
+  decimals: number,
+  pick: (r: Record<string, string>) => number | null,
+  line: (r: Record<string, string>) => string,
+): LiveBoard | null {
+  const ranked = rows
+    .map((r) => {
+      const value = pick(r);
+      return value === null || value <= 0 ? null : performer(r, value, line(r));
+    })
+    .filter((r): r is LivePerformer => Boolean(r))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
+  if (ranked.length < 3) return null;
+  return { id, label, decimals, rows: ranked };
+}
 
 /** A one-line stat line, so a score means something without clicking through. */
 function statLine(r: Record<string, string>): string {
@@ -125,29 +175,64 @@ export async function getLiveWeek(): Promise<LiveWeek | null> {
       .sort((a, b) => Number(b.final) - Number(a.final));
 
     const weekly = await getCsv(WEEKLY(season));
-    const performers: LivePerformer[] = weekly
-      .filter(
-        (r) =>
-          Number(r.week) === week &&
-          (r.season_type ?? "REG") === "REG" &&
-          num(r.fantasy_points_ppr) !== null,
-      )
-      .map((r) => ({
-        player: r.player_display_name || r.player_name || "",
-        team: r.team || "",
-        position: r.position || "",
-        opponent: r.opponent_team || "",
-        points: num(r.fantasy_points_ppr) ?? 0,
-        line: statLine(r),
-      }))
-      .sort((a, b) => b.points - a.points)
-      .slice(0, 5);
+    const weekRows = weekly.filter(
+      (r) =>
+        Number(r.week) === week &&
+        (r.season_type ?? "REG") === "REG",
+    );
+    const boards = [
+      topBoard(
+        weekRows,
+        "fantasy",
+        "Top fantasy scorers",
+        1,
+        (r) => num(r.fantasy_points_ppr),
+        statLine,
+      ),
+      topBoard(
+        weekRows,
+        "pass",
+        "Passing yards",
+        0,
+        (r) => num(r.passing_yards),
+        (r) => {
+          const tds = num(r.passing_tds);
+          const ints = num(r.passing_interceptions);
+          return `${tds ?? 0} TD${ints ? ` · ${ints} INT` : ""}`;
+        },
+      ),
+      topBoard(
+        weekRows,
+        "rush",
+        "Rushing yards",
+        0,
+        (r) => num(r.rushing_yards),
+        (r) => {
+          const tds = num(r.rushing_tds);
+          const att = num(r.carries);
+          return `${att ?? 0} att${tds ? ` · ${tds} TD` : ""}`;
+        },
+      ),
+      topBoard(
+        weekRows,
+        "rec",
+        "Receiving yards",
+        0,
+        (r) => num(r.receiving_yards),
+        (r) => {
+          const rec = num(r.receptions);
+          const tds = num(r.receiving_tds);
+          return `${rec ?? 0} rec${tds ? ` · ${tds} TD` : ""}`;
+        },
+      ),
+    ].filter((b): b is LiveBoard => Boolean(b));
 
     return {
       season,
       week,
       games,
-      performers,
+      performers: boards[0]?.rows ?? [],
+      boards,
       fetchedAt: new Date().toISOString(),
     };
   } catch {
