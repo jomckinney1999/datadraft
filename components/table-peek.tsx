@@ -23,6 +23,7 @@ import type { QueryExecResult } from "sql.js";
 import { PROVENANCE } from "@/lib/data-source";
 
 const KIND = new Map(PROVENANCE.map((p) => [p.table, p.kind]));
+const NOTE = new Map(PROVENANCE.map((p) => [p.table, p.note]));
 
 export default function TablePeek({
   tables,
@@ -113,6 +114,9 @@ export default function TablePeek({
                   : "loading…"}
             </span>
           </div>
+          <p className="border-b border-panel-border px-3 py-2 text-[13px] leading-relaxed text-ink-soft">
+            {NOTE.get(open)}
+          </p>
           {rows && rows.columns.length > 0 && (
             <div className="max-h-56 overflow-auto">
               <table className="w-full text-left">

@@ -205,7 +205,7 @@ export const COURSE = {
       title: "Read the Stat Sheet",
       drive: "1st Drive · Own 20",
       description:
-        "One row is one player in one game. You'll see the sheet before you ask it anything.",
+        "What this course is, what SQL is, then the sheet you'll practice on.",
       skills: ["SELECT", "FROM", "LIMIT"],
       status: "live",
       lessons: [
@@ -217,31 +217,38 @@ export const COURSE = {
             goal: "Read any table with SELECT.",
           steps: [
             {
-              title: "876 rows. You need to know what one of them is.",
-              body: "This sheet is every game 20 players actually played, 2022 through 2024. Before you ask it a question, read one line.",
+              title: "You're learning to ask data a question",
+              body: "A manager asks who scored the most, who was consistent, who faded. You answer with a query, not by scrolling. Sports is just the data we practice on. The same move works on sales, signups, or anything else in rows.",
+            },
+            {
+              title: "What this course asks of you",
+              body: "Lessons are short. A few minutes each. You'll read a little, then write real SQL in the browser. Get one wrong and you'll see the right answer and why. Nothing to install, and no account. Your progress stays on this device.",
+            },
+            {
+              title: "Where this course sits",
+              body: "This is SQL Foundations, the first course on the path. It runs from your first query to joins and a capstone. Later courses (Excel, Python, and the rest) use data you can already pull. SQL is the starting skill.",
+            },
+            {
+              title: "SQL is how you talk to a table",
+              body: "A table is a grid you already know. Columns across the top, one row underneath for each thing that happened. SQL is the sentence you type to get some of those rows back. SELECT means show me. FROM names the table.",
+              code: "SELECT * FROM week_results LIMIT 5;",
+              note: "The star means every column. LIMIT 5 means stop after five rows.",
+            },
+            {
+              title: "Here's the sheet you'll use",
+              body: "One row is one player in one game. This one is real: 876 games, 20 players, 2022 through 2024. Read one line left to right and the rest of the course is the same shape.",
               previewSql: "SELECT * FROM week_results LIMIT 1;",
               previewCaption: "One row of week_results",
             },
             {
-              title: "Left to right, that's the whole record",
-              body: "Who, which team, position, season, week, points. Learn that order and the other 875 rows are the same shape.",
-            },
-            {
-              title: "There are two more sheets, and they aren't the NFL",
-              body: "rosters is who owns whom in an example league. waiver_wire is who's available. We made those up. week_results is the real one.",
+              title: "Two more sheets, and they aren't the NFL",
+              body: "week_results is the real game log. rosters (who owns whom) and waiver_wire (who's available) are a small example league we wrote, so you have something to combine later. Who owns a player isn't an NFL fact.",
               previewSql: "SELECT * FROM rosters;",
               previewCaption: "rosters · example league, not a real one",
             },
-            {
-              title: "Show me the sheet",
-              body: "SELECT means show me. A star means every column. LIMIT 5 means stop after five rows so you're not staring at all 876.",
-              code: "SELECT * FROM week_results LIMIT 5;",
-              previewSql: "SELECT * FROM week_results LIMIT 5;",
-              previewCaption: "Five games, every column",
-            },
           ],
           setup:
-            "One row is one player in one week. SELECT * FROM week_results shows you that sheet. The star means every column.",
+            "You're here to answer questions with SQL. A table is rows and columns. SELECT asks the table to show you some of them. Our practice sheet is real NFL games.",
             previewSql: "SELECT * FROM week_results LIMIT 5;",
             previewCaption: "week_results · first 5 rows",
           },

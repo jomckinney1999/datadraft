@@ -287,7 +287,16 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
    * beat. Derived up here because the effect that runs it is a hook, and
    * hooks have to sit above the early return that `lesson` comes after.
    */
-  const briefStepsAll = entry?.lesson.brief.steps ?? [];
+  const authoredBrief = entry?.lesson.brief.steps ?? [];
+  const briefStepsAll = entry
+    ? [
+        {
+          title: "What this lesson is",
+          body: `${entry.lesson.brief.goal} ${entry.lesson.brief.setup} We'll look at the idea first, then you'll try it.`,
+        },
+        ...authoredBrief,
+      ]
+    : [];
   const lastBriefBeat =
     briefStepsAll.length === 0 || briefStep >= briefStepsAll.length - 1;
   const briefPreviewSql =
@@ -528,7 +537,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   // A lesson either paces its brief across steps or falls back to one
   // paragraph; the preview and the start button wait for the final beat so
   // the learner isn't reading ahead while still being introduced.
-  const briefSteps = lesson.brief.steps ?? [];
+  const briefSteps = briefStepsAll;
   const onLastBriefStep = lastBriefBeat;
   const activePreviewSql = briefPreviewSql;
   const activePreviewSheet =
@@ -1059,6 +1068,16 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                   {briefSteps[briefStep].note}
                 </p>
               )}
+              <TablePeek
+                tables={tablesMentioned(
+                  briefSteps[briefStep]?.title,
+                  briefSteps[briefStep]?.body,
+                  briefSteps[briefStep]?.note,
+                  briefSteps[briefStep]?.code,
+                )}
+                ready={engineReady}
+                run={runQuery}
+              />
             </div>
           </div>
 
@@ -1198,6 +1217,17 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
         >
           <Coach mood="happy" size={140} />
           <TheoryCardView card={introCards[introStep]} />
+          <div className="w-full max-w-xl text-left">
+            <TablePeek
+              tables={tablesMentioned(
+                introCards[introStep]?.title,
+                introCards[introStep]?.text,
+                introCards[introStep]?.code,
+              )}
+              ready={engineReady}
+              run={runQuery}
+            />
+          </div>
           {introCards.length > 1 && (
             <div className="flex items-center gap-1.5">
               {introCards.map((_, i) => (
