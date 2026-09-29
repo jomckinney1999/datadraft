@@ -26,7 +26,6 @@ import PathCast from "@/components/path-cast";
 import HomeLink from "@/components/home-link";
 import LearnRail from "@/components/learn-rail";
 import LearnStatusChips from "@/components/learn-status-chips";
-import TestingTools from "@/components/testing-tools";
 import RapidFire from "@/components/rapid-fire";
 
 const NODE_OFFSETS = [0, 56, 0, -56, 28, -28];
@@ -71,6 +70,7 @@ function BallIcon() {
 
 export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
+  const [opened, setOpened] = useState<Record<string, boolean>>({});
   const { setModule } = useModule();
 
   useEffect(() => {
@@ -112,19 +112,13 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
     current?.unit.id ??
     liveUnits.find((u) => !u.lessons.every((l) => completed.has(l.id)))?.id ??
     liveUnits[0]?.id;
+  const activeUnit = visibleUnits.find((u) => u.id === activeUnitId);
+  const activeIndex = visibleUnits.findIndex((u) => u.id === activeUnitId);
 
   const gateHref = current ? `/learn/${current.lesson.id}` : null;
 
   const courseIntro = introFor(moduleId);
   const courseHours = COURSES.find((c) => c.moduleId === moduleId)?.hours;
-
-  const yardLine = Math.min(100, pct);
-  const fieldCaption =
-    pct === 100
-      ? "END ZONE — course complete"
-      : completedCount === 0
-        ? "Kickoff · ball on own 25"
-        : `Ball on the ${yardLine}-yard line`;
 
   const gateLabel =
     completedCount === 0
@@ -146,6 +140,20 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
           <LearnStatusChips progress={progress} />
         </div>
       </header>
+
+      <div className="sticky top-0 z-20 -mx-4 mb-4 flex items-center justify-between gap-3 border-b border-panel-border bg-night/95 px-4 py-2 backdrop-blur lg:hidden">
+        <span className="font-mono text-[11px] uppercase tracking-wider text-ink-muted">
+          {progress.seasonPass ? "Unlimited" : `${progress.timeouts} timeouts`}
+        </span>
+        {gateHref && current && (
+          <Link
+            href={gateHref}
+            className="truncate font-mono text-[11px] font-bold uppercase tracking-wider text-turf"
+          >
+            {current.lesson.title} →
+          </Link>
+        )}
+      </div>
 
       <div className="grid gap-8 lg:grid-cols-12 lg:items-start">
         <div className="lg:col-span-8">
@@ -172,12 +180,18 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
             )}
 
             <div className="mt-5">
-              <div className="flex items-baseline justify-between gap-3">
-                <p className="font-mono text-[11px] uppercase tracking-widest text-ink-muted">
-                  {completedCount}/{all.length} drives · {fieldCaption}
-                </p>
-                <p className="stat-number text-sm">{pct}%</p>
-              </div>
+              <p className="font-display text-lg font-bold text-ink">
+                {current && pct < 100
+                  ? current.lesson.title
+                  : pct === 100
+                    ? "Course complete"
+                    : "Next snap"}
+              </p>
+              <p className="mt-1 font-mono text-[11px] uppercase tracking-widest text-ink-muted">
+                {completedCount} done · {Math.max(0, all.length - completedCount)}{" "}
+                still ahead
+                {activeUnit ? ` · ${activeUnit.title}` : ""}
+              </p>
               <div className="field-progress mt-2 flex items-center gap-2">
                 <div className="field-progress-track">
                   <div
@@ -249,7 +263,36 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
               : null;
             const isActive = unit.id === activeUnitId && unlocked;
 
-            const showStop = unit.status === "live" && displayNumber % 4 === 0;
+            const isFocus =
+              unitIndex === activeIndex || unitIndex === activeIndex + 1;
+            const isExpanded = isFocus || opened[unit.id];
+            const showStop =
+              unit.status === "live" &&
+              (displayNumber === 1 || displayNumber % 4 === 0);
+
+            if (!isExpanded) {
+              const done =
+                unit.status === "live" &&
+                unit.lessons.length > 0 &&
+                unit.lessons.every((l) => completed.has(l.id));
+              return (
+                <button
+                  key={unit.id}
+                  type="button"
+                  onClick={() =>
+                    setOpened((prev) => ({ ...prev, [unit.id]: true }))
+                  }
+                  className="mt-3 flex w-full items-center justify-between gap-3 rounded-xl border border-panel-border px-4 py-3 text-left"
+                >
+                  <span className="font-display text-sm font-bold text-ink">
+                    Unit {displayNumber} · {unit.title}
+                  </span>
+                  <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+                    {unit.status !== "live" ? "Soon" : done ? "Done" : "Locked"}
+                  </span>
+                </button>
+              );
+            }
 
             return (
               <div key={unit.id}>
@@ -288,8 +331,7 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
 
         <div className="lg:col-span-4">
           <div className="space-y-4 lg:sticky lg:top-6">
-            <LearnRail progress={progress} onProgress={setProgress} />
-            <TestingTools moduleId={moduleId} onChange={setProgress} />
+            <LearnRail progress={progress} onProgress={setProgress} quiet />
           </div>
         </div>
       </div>

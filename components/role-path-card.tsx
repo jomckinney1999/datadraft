@@ -237,11 +237,14 @@ export default function RolePathCard({
   steps,
   index = 0,
   onSelect,
+  href,
 }: {
   role: CareerRole;
   steps: PathStep[];
   index?: number;
   onSelect?: () => void;
+  /** Where the card goes. Defaults to the role board. */
+  href?: string;
 }) {
   const look = ROLE_LOOK[role.id] ?? ROLE_LOOK["data-analyst"];
   const a = ACCENT[look.accent];
@@ -253,7 +256,7 @@ export default function RolePathCard({
 
   return (
     <Link
-      href={`/learn/path/${role.id}`}
+      href={href ?? `/learn/path/${role.id}`}
       onClick={onSelect}
       style={{ animationDelay: `${Math.min(index, 6) * 45}ms` }}
       className={`group relative flex flex-col overflow-hidden rounded-2xl border-2 bg-panel transition-all duration-200 lift animate-fade-up ${a.border} ${a.glow}`}
@@ -345,7 +348,9 @@ export default function RolePathCard({
         <p
           className={`mt-4 font-mono text-[11px] font-bold uppercase tracking-widest ${a.text}`}
         >
-          Open board →
+          {href && !href.includes("/path/")
+            ? "Start lesson 1 →"
+            : "Open board →"}
         </p>
       </div>
     </Link>

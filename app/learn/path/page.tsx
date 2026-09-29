@@ -13,7 +13,6 @@ import { useCareerRole } from "@/lib/use-career-role";
 import HomeLink from "@/components/home-link";
 import LearnStatusChips from "@/components/learn-status-chips";
 import RolePathCard from "@/components/role-path-card";
-import TestingTools from "@/components/testing-tools";
 import Coach from "@/components/coach";
 
 export default function CareerPathPickerPage() {
@@ -62,10 +61,6 @@ export default function CareerPathPickerPage() {
             onSelect={() => setRoleId(role.id)}
           />
         ))}
-      </div>
-
-      <div className="mt-8 max-w-md">
-        <TestingTools />
       </div>
 
       <p className="mt-10 text-center font-mono text-[10px] uppercase tracking-widest text-ink-muted">

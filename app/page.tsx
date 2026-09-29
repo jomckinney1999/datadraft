@@ -225,9 +225,8 @@ export default function Home() {
                   <Sandbox />
                 </div>
                 <p className="mt-3 font-mono text-[12px] font-medium text-ink-soft">
-                  <span className="text-turf">→</span> Write real SQL, try a
-                  preset, or check the schema. Runs against sample season
-                  data, right in your browser — no account required.
+                  <span className="text-turf">→</span> This is a real query.
+                  Your first lesson is the same thing, shorter.
                 </p>
               </div>
             </div>

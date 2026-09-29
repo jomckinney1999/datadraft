@@ -10,7 +10,7 @@ import Link from "next/link";
  * Marketing sections stay on the homepage; they are just not in the header.
  */
 const ROUTE_LINKS = [
-  { href: "/field", label: "Practice" },
+  { href: "/field", label: "Sandbox" },
   { href: "/interview", label: "Interview" },
   { href: "/resources", label: "Resources" },
   { href: "/account", label: "Account" },

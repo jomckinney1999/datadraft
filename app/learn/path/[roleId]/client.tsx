@@ -9,7 +9,6 @@ import { useCareerRole } from "@/lib/use-career-role";
 import CareerBoard from "@/components/career-board";
 import LearnRail from "@/components/learn-rail";
 import LearnStatusChips from "@/components/learn-status-chips";
-import TestingTools from "@/components/testing-tools";
 import HomeLink from "@/components/home-link";
 
 export default function CareerPathClient({ roleId }: { roleId: string }) {
@@ -95,8 +94,7 @@ export default function CareerPathClient({ roleId }: { roleId: string }) {
 
         <div className="lg:col-span-4">
           <div className="space-y-4 lg:sticky lg:top-6">
-            <LearnRail progress={progress} onProgress={setProgress} />
-            <TestingTools role={role} onChange={setProgress} />
+            <LearnRail progress={progress} onProgress={setProgress} quiet />
           </div>
         </div>
       </div>

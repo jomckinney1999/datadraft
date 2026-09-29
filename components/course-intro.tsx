@@ -32,7 +32,7 @@ export default function CourseIntro({
   /** True once any lesson in this course is done — collapses the brief. */
   started: boolean;
 }) {
-  const [open, setOpen] = useState(!started);
+  const [open, setOpen] = useState(false);
   const how = intro.howItWorks ?? DEFAULT_HOW_IT_WORKS;
 
   if (!open) {
@@ -63,16 +63,14 @@ export default function CourseIntro({
             {intro.greeting}
           </p>
         </div>
-        {started && (
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            aria-label="Hide the brief"
-            className="press shrink-0 rounded-full border border-panel-border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-muted"
-          >
-            hide
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          aria-label="Hide the brief"
+          className="press shrink-0 rounded-full border border-panel-border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-muted"
+        >
+          hide
+        </button>
       </div>
 
       <div className="mt-5 grid gap-5 sm:grid-cols-2">

@@ -95,9 +95,12 @@ const HOVER = {
 export default function LearnRail({
   progress,
   onProgress,
+  /** Course pages: no menu of other products beside the next lesson. */
+  quiet = false,
 }: {
   progress: Progress;
   onProgress?: (p: Progress) => void;
+  quiet?: boolean;
 }) {
   const stats = statsFrom(progress);
   const drills = buildDrills(progress, stats);
@@ -171,7 +174,7 @@ export default function LearnRail({
         </ul>
       </div>
 
-      {/* ── Practice ──────────────────────────────────────── */}
+      {!quiet && (
       <div className="section-card">
         <p className="label-broadcast text-turf">practice</p>
         <p className="mt-1 text-[12px] leading-relaxed text-ink-muted">
@@ -197,8 +200,7 @@ export default function LearnRail({
           ))}
         </ul>
       </div>
-
-      {/* ── Your standing ─────────────────────────────────── */}
+      )}
       <div className="section-card">
         <p className="label-broadcast text-gold">your standing</p>
         <div className="mt-2 flex items-baseline justify-between gap-3">
