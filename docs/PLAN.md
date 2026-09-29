@@ -112,6 +112,22 @@ Most drills are honest `placeholder` stubs; Data Analyst foundation drills that 
 | **Roadmap** | Full Beginner → Advanced course pathway, portfolio capstone, completion credential | $200–500 one-time | Serious learners, not yet job-hunting |
 | **Career Track** | Everything in Roadmap + role-specific playbook (DA / DS / AI Eng / SWE / AE / FDE) + resume/portfolio review + mock interview practice + application strategy support | $1,000–5,000/yr | Andy, once he's decided this is a career move, not a hobby |
 
+### Positioning change: one-stop shop for data careers (2026-09-29)
+
+DataDraft is no longer positioned as "a gamified way to learn to code". The gamified habit loop is **one playbook inside a complete kit** for someone trying to get a data job: skills practice, portfolio projects, interview prep, resumes, outreach scripts, an application tracker, and pay research.
+
+**Decision: the whole self-serve kit is free during beta.** That is a deliberate change to the ladder above, not an oversight. The owner's call, 2026-09-29, on the reasoning that we haven't yet tested whether anyone pays for any of it, and a complete free kit is the strongest word-of-mouth position while the audience is being built.
+
+What this means for the tiers:
+
+- **Career Track's pitch narrows to what genuinely doesn't scale** — a human reading your resume, a human running a mock interview, a human helping with application strategy. Every *asset* (templates, scripts, checklists, tracker, prep material) is free.
+- **Revisit before charging.** When pricing turns on, the question is whether to re-gate any of the kit. Re-gating things people already had free is expensive goodwill; prefer keeping them free and selling the human layer.
+- This supersedes the earlier framing where the kit itself was Career Track's value. The rest of the ladder (Free / Practice / Roadmap) is unchanged.
+
+Built so far (all free, all at `/resources`): resume outlines by role, 7 outreach and cover-letter scripts, LinkedIn checklists, behavioural interview prep + portfolio bar, a downloadable application tracker, and pay-research sources. **No invented salary figures anywhere** — we link to BLS, Levels.fyi, Glassdoor and pay-transparency postings instead, same standard as `lib/career.ts`.
+
+**No gambling content, ever** (decided 2026-09-29): no betting lines, odds, spreads or wagering framing, in the curriculum or the marketing. It changes how app stores, ad networks and employers read a product aimed at career-changers.
+
 This ladder is implemented on the landing page pricing section (`app/page.tsx`, `PLANS` array). Nav `Career Track` → `#career-track` anchors the playbooks section (`components/career-playbooks.tsx`). The pricing section also carries a **founding-cohort pricing badge** (see Must-buy mechanisms, #5) — all four tiers are framed as early/founding pricing.
 
 ### Free-tier sideline economy (added 2026-09-21)

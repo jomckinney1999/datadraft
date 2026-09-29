@@ -141,9 +141,12 @@ appendix or drop it; it does not belong in an analyst path.
 
 ## Decisions I need from you
 
-1. **Betting lines.** The brief lists them for the capstone. Recommend
-   leaving them out: it's a career-change product for beginners, and gambling
-   content changes how app stores, ad networks and employers see it.
+1. ~~Betting lines.~~ **Decided 2026-09-29: out.** The original brief listed
+   them for the capstone. They are not going in — this is a career-change
+   product for beginners, and gambling content changes how app stores, ad
+   networks and employers read it. No odds, lines, spreads or wagering framing
+   anywhere in the curriculum. `docs/CURRICULUM.md` already carried the same
+   warning; this makes it a rule rather than a caution.
 2. **Fraud/risk (Analytics 21) and cohort/retention (9), business analytics
    (22).** None are sports. Either they get a second non-sports dataset, or
    they get taught on sports analogues (retention = "which managers keep

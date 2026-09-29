@@ -34,7 +34,7 @@ const config = {
         },
         // Broadcast blue. Sits between turf and gold on the wheel and gives the
         // palette a cool anchor, so green and gold stop reading as a two-colour
-        // sportsbook. Mostly structural — it lights the page (the room wash in
+        // scoreboard. Mostly structural — it lights the page (the room wash in
         // .bg-stadium, the middle of the .chrome hairline) and colours numbers
         // in the editor. Never use it for success or reward; that is turf's job.
         ice: {
