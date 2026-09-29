@@ -39,6 +39,18 @@ export default function CareerPathClient({ roleId }: { roleId: string }) {
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <LearnStatusChips progress={progress} />
           <Link
+            href="/learn/rapid"
+            className="status-chip hover:border-gold/50 hover:text-gold"
+          >
+            Rapid Fire
+          </Link>
+          <Link
+            href="/learn/arcade"
+            className="status-chip hover:border-gold/50 hover:text-gold"
+          >
+            Arcade
+          </Link>
+          <Link
             href="/learn/path"
             className="status-chip hover:border-turf/50 hover:text-turf"
             onClick={() => setRoleId(null)}

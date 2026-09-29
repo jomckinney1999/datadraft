@@ -114,6 +114,35 @@ export default function LearnRail({
           aria-hidden
           className="pointer-events-none absolute inset-0 yard-lines opacity-40"
         />
+        <p className="relative label-broadcast text-gold">rapid fire</p>
+        <p className="relative mt-1 font-display text-lg font-bold text-ink">
+          Language blitz
+        </p>
+        <p className="relative mt-1 text-sm leading-relaxed text-ink-soft">
+          Non-linear MC snaps — SQL, Python, Excel, and more. Tickets for
+          hits, zero timeouts.
+        </p>
+        <div className="relative mt-3 flex flex-wrap gap-2">
+          <Link
+            href="/learn/rapid"
+            className="inline-flex items-center rounded-xl border border-gold/50 bg-gold/15 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-gold transition-colors hover:border-gold hover:bg-gold/25"
+          >
+            Start Rapid Fire
+          </Link>
+          <Link
+            href="/learn/arcade"
+            className="inline-flex items-center rounded-xl border border-panel-border px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-ink-muted transition-colors hover:border-turf/50 hover:text-turf"
+          >
+            The Arcade
+          </Link>
+        </div>
+      </div>
+
+      <div className="section-card relative overflow-hidden">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 yard-lines opacity-40"
+        />
         <p className="relative label-broadcast text-turf">open practice</p>
         <p className="relative mt-1 font-display text-lg font-bold text-ink">
           Hit the Practice Field

@@ -14,14 +14,17 @@ import RolePathCard from "@/components/role-path-card";
 import { liveLessons, ALL_MODULE } from "@/lib/curriculum";
 import { loadProgress, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
 import { useCareerRole } from "@/lib/use-career-role";
+import { useLearnMode } from "@/lib/use-learn-mode";
 import TrophyCase from "@/components/trophy-case";
 import HomeLink from "@/components/home-link";
 import Coach from "@/components/coach";
 import CourseArt from "@/components/course-art";
 import CourseCover from "@/components/course-cover";
 import LearnStatusChips from "@/components/learn-status-chips";
+import LearnModePicker from "@/components/learn-mode-picker";
 import TestingTools from "@/components/testing-tools";
 import StreakNudge from "@/components/streak-nudge";
+import { StudioCoursePicker } from "@/components/studio-player";
 
 function ClockIcon() {
   return (
@@ -136,24 +139,25 @@ function CourseCard({
 export default function LearnCatalogPage() {
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
   const { roleId, setRoleId, hydrated } = useCareerRole();
+  const { mode, setMode, hydrated: modeHydrated } = useLearnMode();
   const router = useRouter();
 
   useEffect(() => {
     setProgress(loadProgress());
   }, []);
 
-  // Resume last path once hydrated.
+  // Resume last path once hydrated — only in snaps mode.
   useEffect(() => {
-    if (hydrated && roleId) {
+    if (hydrated && modeHydrated && mode === "drills" && roleId) {
       router.replace(`/learn/path/${roleId}`);
     }
-  }, [hydrated, roleId, router]);
+  }, [hydrated, modeHydrated, mode, roleId, router]);
 
   const completed = new Set(progress.completedLessons);
   const allLessons = liveLessons(ALL_MODULE);
   const allDone = allLessons.filter((e) => completed.has(e.lesson.id)).length;
 
-  if (hydrated && roleId) {
+  if (hydrated && modeHydrated && mode === "drills" && roleId) {
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4">
         <p className="font-mono text-xs uppercase tracking-widest text-ink-muted">
@@ -201,38 +205,86 @@ export default function LearnCatalogPage() {
         </div>
       </header>
 
-      <section className="section-card">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="label-broadcast text-turf">draft your path</p>
-            <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
-              What job are you playing for?
-            </h1>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-soft">
-              Pick a title. We build the course formula and put it on a
-              Duolingo-style board — clear courses in order, see exactly where
-              you are.
-            </p>
-          </div>
-          <div className="hidden shrink-0 sm:block">
-            <Coach mood={allDone > 0 ? "happy" : "idle"} size={100} />
-          </div>
-        </div>
-      </section>
+      <LearnModePicker
+        mode={mode}
+        onPick={(next) => {
+          setMode(next);
+          if (next === "studio") {
+            router.push("/learn/studio");
+          }
+        }}
+      />
 
-      <StreakNudge progress={progress} />
+      {mode === "studio" && (
+        <section className="mt-8">
+          <p className="label-broadcast text-ice">studio courses</p>
+          <h2 className="mt-1 font-display text-xl font-bold text-ink">
+            Pick a watch-along course
+          </h2>
+          <div className="mt-4">
+            <StudioCoursePicker />
+          </div>
+        </section>
+      )}
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {CAREER_ROLES.map((role, i) => (
-          <RolePathCard
-            key={role.id}
-            role={role}
-            steps={pathSteps(role, progress.completedLessons)}
-            index={i}
-            onSelect={() => setRoleId(role.id)}
-          />
-        ))}
-      </div>
+      {(mode === "drills" || mode === null) && (
+        <>
+          <section className="section-card mt-8">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="label-broadcast text-turf">draft your path</p>
+                <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
+                  What job are you playing for?
+                </h1>
+                <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-soft">
+                  Pick a title. We build the course formula and put it on a
+                  Duolingo-style board — clear courses in order, see exactly
+                  where you are.
+                </p>
+              </div>
+              <div className="hidden shrink-0 sm:block">
+                <Coach mood={allDone > 0 ? "happy" : "idle"} size={100} />
+              </div>
+            </div>
+          </section>
+
+          <StreakNudge progress={progress} />
+
+          <section className="surface mt-6 overflow-hidden border border-gold/35 bg-panel">
+            <div className="flex flex-wrap items-start justify-between gap-4 p-5">
+              <div className="min-w-0 max-w-xl">
+                <p className="label-broadcast text-gold">rapid fire</p>
+                <h2 className="mt-1 font-display text-xl font-bold text-ink">
+                  Non-linear practice snaps
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+                  Pick SQL, Python, Excel, and more — shuffled questions from
+                  the real curriculum, 12 seconds each, tickets for hits. No
+                  path order, no timeouts.
+                </p>
+              </div>
+              <Link href="/learn/rapid" className="btn-gold shrink-0">
+                Start Rapid Fire →
+              </Link>
+            </div>
+          </section>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {CAREER_ROLES.map((role, i) => (
+              <RolePathCard
+                key={role.id}
+                role={role}
+                steps={pathSteps(role, progress.completedLessons)}
+                index={i}
+                onSelect={() => {
+                  setMode("drills");
+                  setRoleId(role.id);
+                }}
+              />
+            ))}
+          </div>
+        </>
+      )}
 
       <div className="mt-8 max-w-md">
         <TestingTools />
