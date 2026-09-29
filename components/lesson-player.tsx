@@ -51,6 +51,8 @@ import {
   COST_CHALLENGE_FLAG,
 } from "@/lib/economy";
 import Coach from "@/components/coach";
+import TablePeek from "@/components/table-peek";
+import { tablesMentioned } from "@/lib/table-mentions";
 import CoachAssist from "@/components/coach-assist";
 import TimeoutGate from "@/components/timeout-gate";
 import CodeEditor from "@/components/code-editor";
@@ -262,6 +264,20 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     entry && currentIdx !== undefined
       ? entry.lesson.exercises[currentIdx]
       : undefined;
+
+  /**
+   * Tables this question names, so the learner can put one on screen instead
+   * of picturing it. Scanned rather than authored per exercise: the content is
+   * hundreds of drills deep and anything opt-in would be missing from most.
+   */
+  const mentionedTables = useMemo(() => {
+    if (!exercise) return [];
+    const code = "code" in exercise ? exercise.code : undefined;
+    const starter = "starter" in exercise ? exercise.starter : undefined;
+    const parts =
+      exercise.type === "fill" ? exercise.parts.join(" ") : undefined;
+    return tablesMentioned(exercise.prompt, code, starter, parts);
+  }, [exercise]);
 
   /**
    * The SQL the brief should be showing right now.
@@ -1238,6 +1254,11 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 <h2 className="font-display text-xl font-bold leading-snug text-ink sm:text-2xl">
                   {exercise.prompt}
                 </h2>
+                <TablePeek
+                  tables={mentionedTables}
+                  ready={engineReady}
+                  run={runQuery}
+                />
                 <div className="mt-4 hidden sm:block">
                   <Coach
                     mood={
@@ -1582,6 +1603,11 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                     {exercise.code}
                   </pre>
                 )}
+                <TablePeek
+                  tables={mentionedTables}
+                  ready={engineReady}
+                  run={runQuery}
+                />
               </div>
 
               <div className="mt-5 flex-1 pb-4">
