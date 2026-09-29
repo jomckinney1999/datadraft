@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import HomeLink from "@/components/home-link";
-import LearnStatusChips from "@/components/learn-status-chips";
+import AppNav from "@/components/app-nav";
 import RapidFire from "@/components/rapid-fire";
 import {
   EMPTY_PROGRESS,
@@ -23,11 +22,10 @@ export default function RapidPageClient() {
   }, [setMode]);
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-16 sm:px-6">
-      <header className="flex flex-wrap items-center justify-between gap-3 py-5">
-        <HomeLink label="rapid fire" back="/learn" backLabel="learn" />
-        <div className="flex flex-wrap items-center gap-2">
-          <LearnStatusChips progress={progress} />
+    <>
+      <AppNav back="/learn" backLabel="learn" />
+      <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-16 pt-5 sm:px-6">
+        <div className="mb-5 flex flex-wrap items-center gap-2">
           <Link
             href="/learn/studio"
             className="status-chip hover:border-ice/50 hover:text-ice"
@@ -35,9 +33,9 @@ export default function RapidPageClient() {
             Studio
           </Link>
         </div>
-      </header>
 
-      <RapidFire onProgress={setProgress} />
-    </main>
+        <RapidFire onProgress={setProgress} />
+      </main>
+    </>
   );
 }

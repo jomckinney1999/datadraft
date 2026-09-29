@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import HomeLink from "@/components/home-link";
+import AppNav from "@/components/app-nav";
 import StudioPlayer from "@/components/studio-player";
 import { getStudioCourse } from "@/lib/studio";
 import { useLearnMode } from "@/lib/use-learn-mode";
@@ -13,14 +13,10 @@ export default function StudioCourseClient({ courseId }: { courseId: string }) {
   const { roleId } = useCareerRole();
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-16 sm:px-6">
-      <header className="flex flex-wrap items-center justify-between gap-3 py-5">
-        <HomeLink
-          label={course?.title ?? "studio"}
-          back="/learn/studio"
-          backLabel="all studio courses"
-        />
-        <div className="flex flex-wrap items-center gap-2">
+    <>
+      <AppNav back="/learn/studio" backLabel="all studio courses" />
+      <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-16 pt-5 sm:px-6">
+        <div className="mb-5 flex flex-wrap items-center gap-2">
           {course?.colabUrl && (
             <a
               href={course.colabUrl}
@@ -39,9 +35,9 @@ export default function StudioCourseClient({ courseId }: { courseId: string }) {
             Switch to snaps
           </Link>
         </div>
-      </header>
 
-      <StudioPlayer courseId={courseId} />
-    </main>
+        <StudioPlayer courseId={courseId} />
+      </main>
+    </>
   );
 }

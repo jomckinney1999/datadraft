@@ -23,8 +23,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { COURSES, type Course } from "@/lib/courses";
 import { CAREER, type CareerNote } from "@/lib/career";
-import HomeLink from "@/components/home-link";
-import ThemeToggle from "@/components/theme-toggle";
+import AppNav from "@/components/app-nav";
 import Coach from "@/components/coach";
 
 type Goal = "job" | "level-up" | "curious";
@@ -216,224 +215,222 @@ export default function StartPage() {
   const then = rec ? courseById(rec.then) : undefined;
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-3xl px-5 pb-24 pt-6">
-      <div className="mb-8 flex items-center justify-between gap-4">
-        <HomeLink label="where to start" back="/learn" backLabel="all courses" />
-        <ThemeToggle />
-      </div>
+    <>
+      <AppNav back="/learn" backLabel="all courses" />
+      <main className="mx-auto min-h-screen w-full max-w-3xl px-5 pb-24 pt-8">
+        <header className="flex items-start gap-4">
+          <div className="hidden shrink-0 sm:block">
+            <Coach mood="happy" size={92} />
+          </div>
+          <div>
+            <p className="label-broadcast text-turf">the depth chart</p>
+            <h1 className="mt-1 font-display text-3xl font-bold text-ink sm:text-4xl">
+              Which course should you take?
+            </h1>
+            <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+              Ten courses is a lot to choose between, especially if you are new
+              enough that the job titles do not mean much yet. Two questions and
+              we will give you a straight answer and the reasoning behind it.
+            </p>
+          </div>
+        </header>
 
-      <header className="flex items-start gap-4">
-        <div className="hidden shrink-0 sm:block">
-          <Coach mood="happy" size={92} />
-        </div>
-        <div>
-          <p className="label-broadcast text-turf">the depth chart</p>
-          <h1 className="mt-1 font-display text-3xl font-bold text-ink sm:text-4xl">
-            Which course should you take?
-          </h1>
-          <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-            Ten courses is a lot to choose between, especially if you are new
-            enough that the job titles do not mean much yet. Two questions and
-            we will give you a straight answer and the reasoning behind it.
-          </p>
-        </div>
-      </header>
-
-      {/* ── how the roadmap works ── */}
-      <section className="surface mt-10 border border-panel-border bg-panel/40 p-5">
-        <h2 className="font-display text-lg font-bold text-ink">
-          First, how this is put together
-        </h2>
-        <div className="mt-3 space-y-3 text-sm leading-relaxed text-ink-soft">
-          <p>
-            <span className="font-semibold text-ink">A course</span> is one
-            skill, like SQL or Excel. Open one and you land on its{" "}
-            <span className="font-semibold text-ink">roadmap</span> — the list
-            of everything in it, in the order it should be taken.
-          </p>
-          <p>
-            <span className="font-semibold text-ink">A unit</span> is a chapter
-            of that roadmap, and each unit is a handful of{" "}
-            <span className="font-semibold text-ink">lessons</span>. A lesson is
-            a drive: it opens with a brief that walks you in, then a run of
-            drills, and every correct answer moves the ball down the field. Ten
-            to fifteen minutes, one sitting.
-          </p>
-          <p>
-            You do not have to finish one course before starting another, and
-            nothing is locked. Your XP, streak and badges are one shared total
-            across everything, so switching courses never costs you progress —
-            which means the choice below is a starting point, not a commitment.
-          </p>
-        </div>
-      </section>
-
-      {/* ── the two questions ── */}
-      <section className="mt-10">
-        <h2 className="font-display text-lg font-bold text-ink">
-          1. What are you here for?
-        </h2>
-        <div className="mt-3 grid gap-2 sm:grid-cols-3">
-          {GOALS.map((g) => (
-            <Choice
-              key={g.id}
-              active={goal === g.id}
-              label={g.label}
-              sub={g.sub}
-              onClick={() => setGoal(g.id)}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section className="mt-8">
-        <h2 className="font-display text-lg font-bold text-ink">
-          2. Where are you starting from?
-        </h2>
-        <div className="mt-3 grid gap-2 sm:grid-cols-3">
-          {STARTS.map((s) => (
-            <Choice
-              key={s.id}
-              active={start === s.id}
-              label={s.label}
-              sub={s.sub}
-              onClick={() => setStart(s.id)}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* ── the answer ── */}
-      {rec && first && (
-        <section className="animate-fade-up mt-10 space-y-3">
-          <CourseCallout
-            course={first}
-            note={CAREER[first.id]}
-            reason={rec.reason}
-            primary
-          />
-          {then && (
-            <CourseCallout
-              course={then}
-              note={CAREER[then.id]}
-              reason={rec.thenWhy}
-              primary={false}
-            />
-          )}
-          <p className="pt-1 text-[13px] leading-relaxed text-ink-muted">
-            If SQL keeps coming up no matter what you pick, that is not a bug in
-            the quiz. It is the most requested skill on analyst postings and the
-            one most interviews actually test, so it is the honest answer for
-            most people most of the time.
-          </p>
+        {/* ── how the roadmap works ── */}
+        <section className="surface mt-10 border border-panel-border bg-panel/40 p-5">
+          <h2 className="font-display text-lg font-bold text-ink">
+            First, how this is put together
+          </h2>
+          <div className="mt-3 space-y-3 text-sm leading-relaxed text-ink-soft">
+            <p>
+              <span className="font-semibold text-ink">A course</span> is one
+              skill, like SQL or Excel. Open one and you land on its{" "}
+              <span className="font-semibold text-ink">roadmap</span> — the list
+              of everything in it, in the order it should be taken.
+            </p>
+            <p>
+              <span className="font-semibold text-ink">A unit</span> is a chapter
+              of that roadmap, and each unit is a handful of{" "}
+              <span className="font-semibold text-ink">lessons</span>. A lesson is
+              a drive: it opens with a brief that walks you in, then a run of
+              drills, and every correct answer moves the ball down the field. Ten
+              to fifteen minutes, one sitting.
+            </p>
+            <p>
+              You do not have to finish one course before starting another, and
+              nothing is locked. Your XP, streak and badges are one shared total
+              across everything, so switching courses never costs you progress —
+              which means the choice below is a starting point, not a commitment.
+            </p>
+          </div>
         </section>
-      )}
 
-      {/* ── why each one matters ── */}
-      <section className="mt-14">
-        <h2 className="font-display text-2xl font-bold text-ink">
-          Why each skill is worth the hours
-        </h2>
-        <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-          The honest version, including who should skip what. No invented
-          percentages — if we quote a number anywhere on this site, you can go
-          and check it.
-        </p>
-        <div className="mt-5 space-y-3">
-          {COURSES.filter((c) => CAREER[c.id]).map((course) => {
-            const note = CAREER[course.id]!;
-            return (
-              <details
-                key={course.id}
-                className="surface lift group border border-panel-border bg-panel/30 p-4 open:bg-panel/60"
-              >
-                <summary className="flex cursor-pointer list-none items-baseline justify-between gap-3">
-                  <span className="min-w-0">
-                    <span className="block font-display text-base font-bold text-ink">
-                      {course.title}
-                    </span>
-                    <span className="mt-0.5 block text-[13px] leading-snug text-ink-muted">
-                      {note.headline}
-                    </span>
-                  </span>
-                  <span className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-ink-muted group-open:hidden">
-                    why →
-                  </span>
-                </summary>
+        {/* ── the two questions ── */}
+        <section className="mt-10">
+          <h2 className="font-display text-lg font-bold text-ink">
+            1. What are you here for?
+          </h2>
+          <div className="mt-3 grid gap-2 sm:grid-cols-3">
+            {GOALS.map((g) => (
+              <Choice
+                key={g.id}
+                active={goal === g.id}
+                label={g.label}
+                sub={g.sub}
+                onClick={() => setGoal(g.id)}
+              />
+            ))}
+          </div>
+        </section>
 
-                <div className="mt-4 space-y-3 border-t border-panel-border pt-4">
-                  <p className="text-sm leading-relaxed text-ink-soft">
-                    {note.why}
-                  </p>
-                  <div>
-                    <p className="label-broadcast text-turf">in interviews</p>
-                    <p className="mt-1 text-[13px] leading-relaxed text-ink-soft">
-                      {note.inInterviews}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="label-broadcast text-turf">pairs with</p>
-                    <p className="mt-1 text-[13px] leading-relaxed text-ink-soft">
-                      {note.pairsWith}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="label-broadcast text-turf">
-                      roles that ask for it
-                    </p>
-                    <div className="mt-1.5 flex flex-wrap gap-1.5">
-                      {note.roles.map((r) => (
-                        <span
-                          key={r}
-                          className="border border-panel-border bg-panel px-2 py-0.5 font-mono text-[10px] text-ink-muted"
-                        >
-                          {r}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  {note.skipIf && (
-                    <p className="border-l-2 border-gold/50 bg-gold/5 py-2 pl-3 pr-2 text-[13px] leading-relaxed text-ink-muted">
-                      <span className="font-semibold text-gold">
-                        Skip or defer this if:{" "}
+        <section className="mt-8">
+          <h2 className="font-display text-lg font-bold text-ink">
+            2. Where are you starting from?
+          </h2>
+          <div className="mt-3 grid gap-2 sm:grid-cols-3">
+            {STARTS.map((s) => (
+              <Choice
+                key={s.id}
+                active={start === s.id}
+                label={s.label}
+                sub={s.sub}
+                onClick={() => setStart(s.id)}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* ── the answer ── */}
+        {rec && first && (
+          <section className="animate-fade-up mt-10 space-y-3">
+            <CourseCallout
+              course={first}
+              note={CAREER[first.id]}
+              reason={rec.reason}
+              primary
+            />
+            {then && (
+              <CourseCallout
+                course={then}
+                note={CAREER[then.id]}
+                reason={rec.thenWhy}
+                primary={false}
+              />
+            )}
+            <p className="pt-1 text-[13px] leading-relaxed text-ink-muted">
+              If SQL keeps coming up no matter what you pick, that is not a bug in
+              the quiz. It is the most requested skill on analyst postings and the
+              one most interviews actually test, so it is the honest answer for
+              most people most of the time.
+            </p>
+          </section>
+        )}
+
+        {/* ── why each one matters ── */}
+        <section className="mt-14">
+          <h2 className="font-display text-2xl font-bold text-ink">
+            Why each skill is worth the hours
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+            The honest version, including who should skip what. No invented
+            percentages — if we quote a number anywhere on this site, you can go
+            and check it.
+          </p>
+          <div className="mt-5 space-y-3">
+            {COURSES.filter((c) => CAREER[c.id]).map((course) => {
+              const note = CAREER[course.id]!;
+              return (
+                <details
+                  key={course.id}
+                  className="surface lift group border border-panel-border bg-panel/30 p-4 open:bg-panel/60"
+                >
+                  <summary className="flex cursor-pointer list-none items-baseline justify-between gap-3">
+                    <span className="min-w-0">
+                      <span className="block font-display text-base font-bold text-ink">
+                        {course.title}
                       </span>
-                      {note.skipIf}
-                    </p>
-                  )}
-                  {course.moduleId && course.status === "live" && (
-                    <Link
-                      href={`/learn/track/${course.moduleId}`}
-                      className="press inline-block border border-panel-border px-4 py-2 font-mono text-[11px] uppercase tracking-widest text-ink-muted hover:border-turf/50 hover:text-turf"
-                    >
-                      Open the roadmap →
-                    </Link>
-                  )}
-                  {course.status !== "live" && (
-                    <p className="font-mono text-[11px] uppercase tracking-widest text-gold">
-                      In build · not playable yet
-                    </p>
-                  )}
-                </div>
-              </details>
-            );
-          })}
-        </div>
-      </section>
+                      <span className="mt-0.5 block text-[13px] leading-snug text-ink-muted">
+                        {note.headline}
+                      </span>
+                    </span>
+                    <span className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-ink-muted group-open:hidden">
+                      why →
+                    </span>
+                  </summary>
 
-      <div className="mt-12 flex flex-wrap gap-3 border-t border-panel-border pt-6">
-        <Link
-          href="/learn"
-          className="press border border-turf bg-turf/15 px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-widest text-turf hover:bg-turf/25"
-        >
-          See all courses
-        </Link>
-        <Link
-          href="/data"
-          className="press border border-panel-border px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-ink-muted hover:border-turf/50 hover:text-turf"
-        >
-          Where the data comes from
-        </Link>
-      </div>
-    </main>
+                  <div className="mt-4 space-y-3 border-t border-panel-border pt-4">
+                    <p className="text-sm leading-relaxed text-ink-soft">
+                      {note.why}
+                    </p>
+                    <div>
+                      <p className="label-broadcast text-turf">in interviews</p>
+                      <p className="mt-1 text-[13px] leading-relaxed text-ink-soft">
+                        {note.inInterviews}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="label-broadcast text-turf">pairs with</p>
+                      <p className="mt-1 text-[13px] leading-relaxed text-ink-soft">
+                        {note.pairsWith}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="label-broadcast text-turf">
+                        roles that ask for it
+                      </p>
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {note.roles.map((r) => (
+                          <span
+                            key={r}
+                            className="border border-panel-border bg-panel px-2 py-0.5 font-mono text-[10px] text-ink-muted"
+                          >
+                            {r}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    {note.skipIf && (
+                      <p className="border-l-2 border-gold/50 bg-gold/5 py-2 pl-3 pr-2 text-[13px] leading-relaxed text-ink-muted">
+                        <span className="font-semibold text-gold">
+                          Skip or defer this if:{" "}
+                        </span>
+                        {note.skipIf}
+                      </p>
+                    )}
+                    {course.moduleId && course.status === "live" && (
+                      <Link
+                        href={`/learn/track/${course.moduleId}`}
+                        className="press inline-block border border-panel-border px-4 py-2 font-mono text-[11px] uppercase tracking-widest text-ink-muted hover:border-turf/50 hover:text-turf"
+                      >
+                        Open the roadmap →
+                      </Link>
+                    )}
+                    {course.status !== "live" && (
+                      <p className="font-mono text-[11px] uppercase tracking-widest text-gold">
+                        In build · not playable yet
+                      </p>
+                    )}
+                  </div>
+                </details>
+              );
+            })}
+          </div>
+        </section>
+
+        <div className="mt-12 flex flex-wrap gap-3 border-t border-panel-border pt-6">
+          <Link
+            href="/learn"
+            className="press border border-turf bg-turf/15 px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-widest text-turf hover:bg-turf/25"
+          >
+            See all courses
+          </Link>
+          <Link
+            href="/data"
+            className="press border border-panel-border px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest text-ink-muted hover:border-turf/50 hover:text-turf"
+          >
+            Where the data comes from
+          </Link>
+        </div>
+      </main>
+    </>
   );
 }

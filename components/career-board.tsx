@@ -88,7 +88,7 @@ export default function CareerBoard({
 
   return (
     <div className="relative mx-auto w-full max-w-lg">
-      <div className="sticky top-0 z-20 -mx-1 mb-2 px-1 pt-1">
+      <div className="sticky top-14 z-20 -mx-1 mb-2 px-1 pt-1">
         <div className="unit-banner flex items-center gap-3 !rounded-2xl">
           <Link
             href={backHref}

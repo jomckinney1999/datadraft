@@ -22,7 +22,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Coach from "@/components/coach";
-import HomeLink from "@/components/home-link";
+import AppNav from "@/components/app-nav";
 import {
   ARCADE_KICK_ATTEMPTS,
   ARCADE_MATCH_SIZE,
@@ -78,88 +78,87 @@ export default function ArcadeGames() {
   }
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-2xl px-5 py-10">
-      <div className="mb-8">
-        <HomeLink label="arcade" back="/learn" backLabel="all courses" />
-      </div>
-
-      <header className="flex items-start justify-between gap-4">
-        <div>
-          <p className="label-broadcast text-gold">between drives</p>
-          <h1 className="mt-1 font-display text-3xl font-bold text-ink sm:text-4xl">
-            The Arcade
-          </h1>
-          <p className="mt-2 max-w-md text-sm leading-relaxed text-ink-soft">
-            Short games that cost no timeouts and pay scouting tickets. Good for
-            the days you don&rsquo;t have a full drive in you.
-          </p>
-        </div>
-        <Coach mood={payout ? "cheer" : "idle"} size={78} className="hidden sm:block" />
-      </header>
-
-      {payout && (
-        <div className="surface mt-6 rounded-2xl border-2 border-turf/50 bg-turf/10 p-4">
-          <p className="font-display text-lg font-bold text-turf">
-            +{payout.tickets} tickets · +{payout.xp} XP
-          </p>
-          {payout.dailyBonus > 0 && (
-            <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-gold">
-              includes +{payout.dailyBonus} first-arcade-of-the-day bonus
+    <>
+      <AppNav back="/learn" backLabel="all courses" />
+      <main className="mx-auto min-h-screen w-full max-w-2xl px-5 pb-10 pt-8">
+        <header className="flex items-start justify-between gap-4">
+          <div>
+            <p className="label-broadcast text-gold">between drives</p>
+            <h1 className="mt-1 font-display text-3xl font-bold text-ink sm:text-4xl">
+              The Arcade
+            </h1>
+            <p className="mt-2 max-w-md text-sm leading-relaxed text-ink-soft">
+              Short games that cost no timeouts and pay scouting tickets. Good for
+              the days you don&rsquo;t have a full drive in you.
             </p>
-          )}
-          <button
-            type="button"
-            onClick={() => {
-              setPayout(null);
-              setGame(null);
-            }}
-            className="press mt-3 rounded-full border border-turf/50 px-4 py-1.5 font-mono text-[11px] uppercase tracking-wider text-turf"
-          >
-            Back to the arcade
-          </button>
-        </div>
-      )}
+          </div>
+          <Coach mood={payout ? "cheer" : "idle"} size={78} className="hidden sm:block" />
+        </header>
 
-      {!game && !payout && (
-        <div className="mt-8 space-y-3">
-          {GAMES.map((g) => (
+        {payout && (
+          <div className="surface mt-6 rounded-2xl border-2 border-turf/50 bg-turf/10 p-4">
+            <p className="font-display text-lg font-bold text-turf">
+              +{payout.tickets} tickets · +{payout.xp} XP
+            </p>
+            {payout.dailyBonus > 0 && (
+              <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-gold">
+                includes +{payout.dailyBonus} first-arcade-of-the-day bonus
+              </p>
+            )}
             <button
-              key={g.id}
               type="button"
-              onClick={() => setGame(g.id)}
-              className="lift surface block w-full rounded-2xl border border-panel-border bg-panel p-4 text-left transition-colors hover:border-turf/50"
+              onClick={() => {
+                setPayout(null);
+                setGame(null);
+              }}
+              className="press mt-3 rounded-full border border-turf/50 px-4 py-1.5 font-mono text-[11px] uppercase tracking-wider text-turf"
             >
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="font-display text-xl font-bold text-ink">
-                  {g.name}
-                </h2>
-                <span className="shrink-0 rounded-full border border-panel-border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-                  {g.badge}
-                </span>
-              </div>
-              <p className="mt-1 text-sm text-ink-soft">{g.blurb}</p>
+              Back to the arcade
             </button>
-          ))}
-          <p className="pt-2 text-xs leading-relaxed text-ink-muted">
-            Want the language-by-language version instead?{" "}
-            <Link href="/learn/rapid" className="text-turf hover:underline">
-              Rapid Fire
-            </Link>{" "}
-            pulls real drills from the courses.
-          </p>
-        </div>
-      )}
+          </div>
+        )}
 
-      {game === "match" && !payout && (
-        <FilmRoomMatch onDone={(t, p) => finish("match", t, p)} />
-      )}
-      {game === "speed" && !payout && (
-        <TwoMinuteDrill onDone={(t, p) => finish("speed", t, p)} />
-      )}
-      {game === "kick" && !payout && (
-        <ExtraPoint onDone={(t, p) => finish("kick", t, p)} />
-      )}
-    </main>
+        {!game && !payout && (
+          <div className="mt-8 space-y-3">
+            {GAMES.map((g) => (
+              <button
+                key={g.id}
+                type="button"
+                onClick={() => setGame(g.id)}
+                className="lift surface block w-full rounded-2xl border border-panel-border bg-panel p-4 text-left transition-colors hover:border-turf/50"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="font-display text-xl font-bold text-ink">
+                    {g.name}
+                  </h2>
+                  <span className="shrink-0 rounded-full border border-panel-border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+                    {g.badge}
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-ink-soft">{g.blurb}</p>
+              </button>
+            ))}
+            <p className="pt-2 text-xs leading-relaxed text-ink-muted">
+              Want the language-by-language version instead?{" "}
+              <Link href="/learn/rapid" className="text-turf hover:underline">
+                Rapid Fire
+              </Link>{" "}
+              pulls real drills from the courses.
+            </p>
+          </div>
+        )}
+
+        {game === "match" && !payout && (
+          <FilmRoomMatch onDone={(t, p) => finish("match", t, p)} />
+        )}
+        {game === "speed" && !payout && (
+          <TwoMinuteDrill onDone={(t, p) => finish("speed", t, p)} />
+        )}
+        {game === "kick" && !payout && (
+          <ExtraPoint onDone={(t, p) => finish("kick", t, p)} />
+        )}
+      </main>
+    </>
   );
 }
 

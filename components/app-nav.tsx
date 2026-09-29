@@ -1,0 +1,186 @@
+"use client";
+
+/**
+ * One nav for the whole product.
+ *
+ * Every signed-in page used to build its own header: a HomeLink here, a row of
+ * status chips there, an Account link on one board and not the next. So the
+ * answer to "where am I and where can I go" changed from page to page, and the
+ * only reliable way to reach /interview was to already be on /interview.
+ *
+ * Five destinations, one line, always the same, with the current one marked.
+ * The wordmark goes home, which CLAUDE.md requires of every route.
+ *
+ * It is `h-14` at every width on purpose, matching the marketing header. A
+ * header that changed height when the links wrapped would drag every other
+ * sticky element in the app with it — the roadmap's mobile bar and the career
+ * board's progress strip both park directly underneath it at `top-14`.
+ *
+ * A page that also wants an in-context back link passes `back` / `backLabel`
+ * and it renders beside the wordmark, never by re-pointing the wordmark — the
+ * same rule HomeLink follows and for the same reason.
+ *
+ * The lesson player and the interview workspace deliberately do not use this:
+ * mid-drive their top bar stays the task and a way out, so a nav row can't
+ * cost you a drive by accident.
+ */
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
+import LearnStatusChips from "@/components/learn-status-chips";
+
+const LINKS = [
+  { href: "/dashboard", label: "Dashboard", exact: true },
+  { href: "/learn", label: "Learn", exact: false },
+  { href: "/field", label: "Practice", exact: false },
+  { href: "/interview", label: "Interviews", exact: false },
+  { href: "/resources", label: "Career", exact: false },
+];
+
+function isCurrent(pathname: string, href: string, exact: boolean): boolean {
+  return exact
+    ? pathname === href
+    : pathname === href || pathname.startsWith(`${href}/`);
+}
+
+export default function AppNav({
+  back,
+  backLabel,
+}: {
+  /** Optional in-context back target, rendered beside the wordmark. */
+  back?: string;
+  backLabel?: string;
+} = {}) {
+  const pathname = usePathname() ?? "";
+  const [open, setOpen] = useState(false);
+  // Loaded here rather than passed in, so a page can drop <AppNav /> at the
+  // top without threading progress through components that don't need it.
+  const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
+
+  useEffect(() => {
+    setProgress(loadProgress());
+  }, []);
+
+  return (
+    <header className="glass sticky top-0 z-30 border-b border-panel-border/80">
+      <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6">
+        <div className="flex min-w-0 shrink-0 items-baseline gap-3">
+          <Link
+            href="/"
+            aria-label="DataDraft home"
+            className="shrink-0 font-display text-lg font-bold tracking-tight text-pop transition-opacity hover:opacity-80"
+          >
+            Data<span className="text-turf">Draft</span>
+          </Link>
+          {back && (
+            <Link
+              href={back}
+              className="hidden truncate font-mono text-[10px] uppercase tracking-[0.18em] text-ink-muted transition-colors hover:text-turf lg:inline"
+            >
+              ← {backLabel ?? "back"}
+            </Link>
+          )}
+        </div>
+
+        <nav
+          aria-label="Main"
+          className="hidden min-w-0 flex-1 items-center gap-1 md:flex"
+        >
+          {LINKS.map((l) => {
+            const on = isCurrent(pathname, l.href, l.exact);
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                aria-current={on ? "page" : undefined}
+                className={`whitespace-nowrap rounded-lg px-2.5 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors ${
+                  on
+                    ? "bg-turf/15 text-turf"
+                    : "text-ink-muted hover:bg-panel hover:text-ink"
+                }`}
+              >
+                {l.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          <div className="hidden lg:block">
+            <LearnStatusChips progress={progress} />
+          </div>
+          <Link
+            href="/account"
+            aria-current={pathname === "/account" ? "page" : undefined}
+            className={`hidden max-w-[10rem] truncate whitespace-nowrap rounded-lg px-2.5 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors md:inline ${
+              pathname === "/account"
+                ? "bg-turf/15 text-turf"
+                : "text-ink-muted hover:bg-panel hover:text-ink"
+            }`}
+          >
+            {progress.username || "Account"}
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            className="flex h-11 w-11 items-center justify-center text-ink transition-colors hover:text-turf md:hidden"
+          >
+            <svg aria-hidden viewBox="0 0 24 24" fill="none" className="h-5 w-5">
+              <path
+                d={open ? "M6 6l12 12M18 6L6 18" : "M4 7h16M4 12h16M4 17h16"}
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {open && (
+        <nav
+          aria-label="Main"
+          className="border-t border-panel-border/80 bg-night/95 px-4 py-3 backdrop-blur-sm md:hidden"
+        >
+          <div className="mx-auto flex max-w-6xl flex-col gap-0.5">
+            {[...LINKS, { href: "/account", label: "Account", exact: true }].map(
+              (l) => {
+                const on = isCurrent(pathname, l.href, l.exact);
+                return (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    onClick={() => setOpen(false)}
+                    aria-current={on ? "page" : undefined}
+                    className={`rounded-lg px-3 py-2.5 font-mono text-xs font-bold uppercase tracking-wider transition-colors ${
+                      on ? "bg-turf/15 text-turf" : "text-ink-soft hover:bg-panel"
+                    }`}
+                  >
+                    {l.label}
+                  </Link>
+                );
+              },
+            )}
+            {back && (
+              <Link
+                href={back}
+                onClick={() => setOpen(false)}
+                className="rounded-lg px-3 py-2.5 font-mono text-xs uppercase tracking-wider text-ink-muted transition-colors hover:bg-panel"
+              >
+                ← {backLabel ?? "back"}
+              </Link>
+            )}
+            <div className="mt-2 border-t border-panel-border/70 pt-3">
+              <LearnStatusChips progress={progress} />
+            </div>
+          </div>
+        </nav>
+      )}
+    </header>
+  );
+}

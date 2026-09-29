@@ -24,9 +24,8 @@ import Coach from "@/components/coach";
 import CourseIntro from "@/components/course-intro";
 import PathCast from "@/components/path-cast";
 import { PathChest, PathFlag } from "@/components/path-marks";
-import HomeLink from "@/components/home-link";
+import AppNav from "@/components/app-nav";
 import LearnRail from "@/components/learn-rail";
-import LearnStatusChips from "@/components/learn-status-chips";
 import RapidFire from "@/components/rapid-fire";
 
 const NODE_OFFSETS = [0, 56, 0, -56, 28, -28];
@@ -129,238 +128,229 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
         : "Run the next play";
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-24 sm:px-6">
-      <header className="flex flex-wrap items-center justify-between gap-3 py-5">
-        <HomeLink back="/learn" backLabel="all courses" />
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          {progress.username && (
-            <span className="hidden border border-gold/40 bg-gold/5 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-gold lg:inline">
-              GM · {progress.username}
-            </span>
+    <>
+      <AppNav back="/learn" backLabel="all courses" />
+      <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-24 pt-6 sm:px-6">
+        <div className="sticky top-14 z-20 -mx-4 mb-4 flex items-center justify-between gap-3 border-b border-panel-border bg-night/95 px-4 py-2 backdrop-blur lg:hidden">
+          <span className="font-mono text-[11px] uppercase tracking-wider text-ink-muted">
+            {progress.seasonPass ? "Unlimited" : `${progress.timeouts} timeouts`}
+          </span>
+          {gateHref && current && (
+            <Link
+              href={gateHref}
+              className="truncate font-mono text-[11px] font-bold uppercase tracking-wider text-turf"
+            >
+              {current.lesson.title} →
+            </Link>
           )}
-          <LearnStatusChips progress={progress} />
         </div>
-      </header>
 
-      <div className="sticky top-0 z-20 -mx-4 mb-4 flex items-center justify-between gap-3 border-b border-panel-border bg-night/95 px-4 py-2 backdrop-blur lg:hidden">
-        <span className="font-mono text-[11px] uppercase tracking-wider text-ink-muted">
-          {progress.seasonPass ? "Unlimited" : `${progress.timeouts} timeouts`}
-        </span>
-        {gateHref && current && (
-          <Link
-            href={gateHref}
-            className="truncate font-mono text-[11px] font-bold uppercase tracking-wider text-turf"
-          >
-            {current.lesson.title} →
-          </Link>
-        )}
-      </div>
-
-      <div className="grid gap-8 lg:grid-cols-12 lg:items-start">
-        <div className="lg:col-span-8">
-          {/* Slim course header */}
-          <section className="section-card scorebug-card">
-            <p className="label-broadcast text-turf">
-              {moduleId === "all" ? "season roadmap" : "game plan"}
-            </p>
-            <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
-              {moduleId === "all" ? COURSE.title : activeModule.name}
-            </h1>
-            <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">
-              {moduleId === "all" ? COURSE.tagline : activeModule.blurb}
-            </p>
-            {moduleId === "excel" && (
-              <p className="mt-3">
-                <Link
-                  href="/excel"
-                  className="font-mono text-[11px] font-semibold uppercase tracking-wider text-ice hover:underline"
-                >
-                  Open the live Spreadsheet →
-                </Link>
+        <div className="grid gap-8 lg:grid-cols-12 lg:items-start">
+          <div className="lg:col-span-8">
+            {/* Slim course header */}
+            <section className="section-card scorebug-card">
+              <p className="label-broadcast text-turf">
+                {moduleId === "all" ? "season roadmap" : "game plan"}
               </p>
-            )}
-
-            <div className="mt-5">
-              <p className="font-display text-lg font-bold text-ink">
-                {current && pct < 100
-                  ? current.lesson.title
-                  : pct === 100
-                    ? "Course complete"
-                    : "Next snap"}
+              <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
+                {moduleId === "all" ? COURSE.title : activeModule.name}
+              </h1>
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">
+                {moduleId === "all" ? COURSE.tagline : activeModule.blurb}
               </p>
-              <p className="mt-1 font-mono text-[11px] uppercase tracking-widest text-ink-muted">
-                {completedCount} done · {Math.max(0, all.length - completedCount)}{" "}
-                still ahead
-                {activeUnit ? ` · ${activeUnit.title}` : ""}
-              </p>
-              <div className="field-progress mt-2 flex items-center gap-2">
-                <div className="field-progress-track">
-                  <div
-                    className="field-progress-fill"
-                    style={{ width: `${pct}%` }}
-                  />
-                  <span
-                    className="field-progress-stick"
-                    style={{ left: `${pct}%` }}
-                    aria-hidden
-                  />
-                </div>
-                <span className="shrink-0 text-gold" aria-hidden>
-                  {pct === 100 ? <PathFlag won /> : <PathFlag won={false} />}
-                </span>
-              </div>
-            </div>
-
-            {gateHref && (
-              <Link
-                href={gateHref}
-                className="btn-turf mt-5 flex w-full items-center justify-center rounded-2xl border border-turf/80 px-6 py-3.5 font-display text-base font-bold uppercase tracking-wide text-night"
-              >
-                {gateLabel}
-              </Link>
-            )}
-
-            {progress.username && progress.draftedTrack && (
-              <p className="mt-3 text-center font-mono text-[11px] leading-relaxed text-ink-muted">
-                <span className="text-gold">{progress.username}</span>
-                {" · "}
-                <span className="text-ink-soft">
-                  {getTrack(normalizeTrackId(progress.draftedTrack))?.name ??
-                    progress.draftedTrack}
-                </span>
-              </p>
-            )}
-          </section>
-
-          {/* Coach's brief — open before the first lesson, a one-line toggle
-              after. New learners get the orientation; returning ones don't
-              get a wall of text they've already read. */}
-          {courseIntro && (
-            <CourseIntro
-              intro={courseIntro}
-              courseTitle={moduleId === "all" ? COURSE.title : activeModule.name}
-              hours={courseHours}
-              started={completedCount > 0}
-            />
-          )}
-
-          {/* Units */}
-          {current && activeUnit && activeIndex >= 0 && pct < 100 && (
-            <div className="sticky top-14 z-10 mt-4 lg:top-3">
-              <div className="unit-banner flex items-center justify-between gap-3 !rounded-2xl !px-4 !py-2.5">
-                <div className="min-w-0">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-night/70">
-                    Unit {activeIndex + 1} · {activeUnit.title}
-                  </p>
-                  <p className="truncate font-display text-base font-bold text-night">
-                    {current.lesson.title}
-                  </p>
-                </div>
-                {gateHref && (
+              {moduleId === "excel" && (
+                <p className="mt-3">
                   <Link
-                    href={gateHref}
-                    className="shrink-0 rounded-xl bg-night/15 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-night hover:bg-night/25"
+                    href="/excel"
+                    className="font-mono text-[11px] font-semibold uppercase tracking-wider text-ice hover:underline"
                   >
-                    Snap
+                    Open the live Spreadsheet →
                   </Link>
-                )}
+                </p>
+              )}
+
+              <div className="mt-5">
+                <p className="font-display text-lg font-bold text-ink">
+                  {current && pct < 100
+                    ? current.lesson.title
+                    : pct === 100
+                      ? "Course complete"
+                      : "Next snap"}
+                </p>
+                <p className="mt-1 font-mono text-[11px] uppercase tracking-widest text-ink-muted">
+                  {completedCount} done · {Math.max(0, all.length - completedCount)}{" "}
+                  still ahead
+                  {activeUnit ? ` · ${activeUnit.title}` : ""}
+                </p>
+                <div className="field-progress mt-2 flex items-center gap-2">
+                  <div className="field-progress-track">
+                    <div
+                      className="field-progress-fill"
+                      style={{ width: `${pct}%` }}
+                    />
+                    <span
+                      className="field-progress-stick"
+                      style={{ left: `${pct}%` }}
+                      aria-hidden
+                    />
+                  </div>
+                  <span className="shrink-0 text-gold" aria-hidden>
+                    {pct === 100 ? <PathFlag won /> : <PathFlag won={false} />}
+                  </span>
+                </div>
               </div>
-            </div>
-          )}
 
-          {/* Units */}
-          {visibleUnits.map((unit, unitIndex) => {
-            const liveIndex = liveUnits.findIndex((u) => u.id === unit.id);
-            // Number from the course outline, so a coming-soon module in the
-            // middle doesn't renumber the live ones. Module 9 stays Module 9.
-            const displayNumber = unitIndex + 1;
-            const doneCount = unit.lessons.filter((l) =>
-              completed.has(l.id),
-            ).length;
-            const unlocked =
-              unit.status !== "live" ? false : unitUnlocked(liveIndex);
-            const priorLive = [...visibleUnits]
-              .slice(0, unitIndex)
-              .reverse()
-              .find((u) => u.status === "live");
-            const unlockAfter = priorLive
-              ? visibleUnits.findIndex((u) => u.id === priorLive.id) + 1
-              : null;
-            const isActive = unit.id === activeUnitId && unlocked;
-
-            const isFocus =
-              unitIndex === activeIndex || unitIndex === activeIndex + 1;
-            const isExpanded = isFocus || opened[unit.id];
-            const showStop =
-              unit.status === "live" &&
-              (displayNumber === 1 || displayNumber % 4 === 0);
-
-            if (!isExpanded) {
-              const done =
-                unit.status === "live" &&
-                unit.lessons.length > 0 &&
-                unit.lessons.every((l) => completed.has(l.id));
-              return (
-                <button
-                  key={unit.id}
-                  type="button"
-                  onClick={() =>
-                    setOpened((prev) => ({ ...prev, [unit.id]: true }))
-                  }
-                  className="mt-3 flex w-full items-center justify-between gap-3 rounded-xl border border-panel-border px-4 py-3 text-left"
+              {gateHref && (
+                <Link
+                  href={gateHref}
+                  className="btn-turf mt-5 flex w-full items-center justify-center rounded-2xl border border-turf/80 px-6 py-3.5 font-display text-base font-bold uppercase tracking-wide text-night"
                 >
-                  <span className="font-display text-sm font-bold text-ink">
-                    Unit {displayNumber} · {unit.title}
-                  </span>
-                  <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-                    {unit.status !== "live" ? "Soon" : done ? "Done" : "Locked"}
-                  </span>
-                </button>
-              );
-            }
+                  {gateLabel}
+                </Link>
+              )}
 
-            return (
-              <div key={unit.id}>
-                <UnitBlock
-                  unit={unit}
-                  displayNumber={displayNumber}
-                  unlockAfter={unlockAfter}
-                  completedCount={doneCount}
-                  unlocked={unlocked}
-                  isActive={isActive}
-                  nodeState={nodeState}
-                  continueHref={
-                    isActive && current
-                      ? `/learn/${current.lesson.id}`
-                      : gateHref && isActive
-                        ? gateHref
-                        : null
-                  }
-                  continueLabel={gateLabel}
-                />
-                {showStop && (
-                  <PathStop
-                    moduleId={moduleId}
-                    after={`Unit ${displayNumber}`}
-                  />
-                )}
+              {progress.username && progress.draftedTrack && (
+                <p className="mt-3 text-center font-mono text-[11px] leading-relaxed text-ink-muted">
+                  <span className="text-gold">{progress.username}</span>
+                  {" · "}
+                  <span className="text-ink-soft">
+                    {getTrack(normalizeTrackId(progress.draftedTrack))?.name ??
+                      progress.draftedTrack}
+                  </span>
+                </p>
+              )}
+            </section>
+
+            {/* Coach's brief — open before the first lesson, a one-line toggle
+                after. New learners get the orientation; returning ones don't
+                get a wall of text they've already read. */}
+            {courseIntro && (
+              <CourseIntro
+                intro={courseIntro}
+                courseTitle={moduleId === "all" ? COURSE.title : activeModule.name}
+                hours={courseHours}
+                started={completedCount > 0}
+              />
+            )}
+
+            {/* Units */}
+            {current && activeUnit && activeIndex >= 0 && pct < 100 && (
+              <div className="sticky top-[5.75rem] z-10 mt-4 lg:top-[4.25rem]">
+                <div className="unit-banner flex items-center justify-between gap-3 !rounded-2xl !px-4 !py-2.5">
+                  <div className="min-w-0">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-night/70">
+                      Unit {activeIndex + 1} · {activeUnit.title}
+                    </p>
+                    <p className="truncate font-display text-base font-bold text-night">
+                      {current.lesson.title}
+                    </p>
+                  </div>
+                  {gateHref && (
+                    <Link
+                      href={gateHref}
+                      className="shrink-0 rounded-xl bg-night/15 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-night hover:bg-night/25"
+                    >
+                      Snap
+                    </Link>
+                  )}
+                </div>
               </div>
-            );
-          })}
+            )}
 
-          <p className="mt-16 text-center font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-            Progress is saved in this browser · full accounts coming with the
-            season launch
-          </p>
-        </div>
+            {/* Units */}
+            {visibleUnits.map((unit, unitIndex) => {
+              const liveIndex = liveUnits.findIndex((u) => u.id === unit.id);
+              // Number from the course outline, so a coming-soon module in the
+              // middle doesn't renumber the live ones. Module 9 stays Module 9.
+              const displayNumber = unitIndex + 1;
+              const doneCount = unit.lessons.filter((l) =>
+                completed.has(l.id),
+              ).length;
+              const unlocked =
+                unit.status !== "live" ? false : unitUnlocked(liveIndex);
+              const priorLive = [...visibleUnits]
+                .slice(0, unitIndex)
+                .reverse()
+                .find((u) => u.status === "live");
+              const unlockAfter = priorLive
+                ? visibleUnits.findIndex((u) => u.id === priorLive.id) + 1
+                : null;
+              const isActive = unit.id === activeUnitId && unlocked;
 
-        <div className="lg:col-span-4">
-          <div className="space-y-4 lg:sticky lg:top-6">
-            <LearnRail progress={progress} onProgress={setProgress} quiet />
+              const isFocus =
+                unitIndex === activeIndex || unitIndex === activeIndex + 1;
+              const isExpanded = isFocus || opened[unit.id];
+              const showStop =
+                unit.status === "live" &&
+                (displayNumber === 1 || displayNumber % 4 === 0);
+
+              if (!isExpanded) {
+                const done =
+                  unit.status === "live" &&
+                  unit.lessons.length > 0 &&
+                  unit.lessons.every((l) => completed.has(l.id));
+                return (
+                  <button
+                    key={unit.id}
+                    type="button"
+                    onClick={() =>
+                      setOpened((prev) => ({ ...prev, [unit.id]: true }))
+                    }
+                    className="mt-3 flex w-full items-center justify-between gap-3 rounded-xl border border-panel-border px-4 py-3 text-left"
+                  >
+                    <span className="font-display text-sm font-bold text-ink">
+                      Unit {displayNumber} · {unit.title}
+                    </span>
+                    <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+                      {unit.status !== "live" ? "Soon" : done ? "Done" : "Locked"}
+                    </span>
+                  </button>
+                );
+              }
+
+              return (
+                <div key={unit.id}>
+                  <UnitBlock
+                    unit={unit}
+                    displayNumber={displayNumber}
+                    unlockAfter={unlockAfter}
+                    completedCount={doneCount}
+                    unlocked={unlocked}
+                    isActive={isActive}
+                    nodeState={nodeState}
+                    continueHref={
+                      isActive && current
+                        ? `/learn/${current.lesson.id}`
+                        : gateHref && isActive
+                          ? gateHref
+                          : null
+                    }
+                    continueLabel={gateLabel}
+                  />
+                  {showStop && (
+                    <PathStop
+                      moduleId={moduleId}
+                      after={`Unit ${displayNumber}`}
+                    />
+                  )}
+                </div>
+              );
+            })}
+
+            <p className="mt-16 text-center font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+              Progress is saved in this browser · full accounts coming with the
+              season launch
+            </p>
+          </div>
+
+          <div className="lg:col-span-4">
+            <div className="space-y-4 lg:sticky lg:top-6">
+              <LearnRail progress={progress} onProgress={setProgress} quiet />
+            </div>
           </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
 

@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import FieldSandbox from "@/components/field-sandbox";
-import ThemeToggle from "@/components/theme-toggle";
-import HomeLink from "@/components/home-link";
+import AppNav from "@/components/app-nav";
 
 export const metadata: Metadata = {
   title: "The Practice Field — DataDraft",
@@ -12,42 +11,35 @@ export const metadata: Metadata = {
 
 export default function FieldPage() {
   return (
-    <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-16 sm:px-6">
-      <header className="flex items-center justify-between py-5">
-        <HomeLink label="practice field" />
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
+    <>
+      <AppNav />
+      <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-16 pt-5 sm:px-6">
+        <div className="mb-5 flex flex-wrap items-center gap-2">
           <Link
             href="/excel"
             className="status-chip hover:border-ice/50 hover:text-ice"
           >
             Spreadsheet
           </Link>
-          <Link
-            href="/learn"
-            className="border border-turf/50 bg-turf/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-turf transition-colors hover:border-turf hover:bg-turf/20"
-          >
-            Back to lessons
-          </Link>
         </div>
-      </header>
 
-      <div className="mb-6 max-w-2xl">
-        <p className="label-broadcast text-gold">open practice · no refs</p>
-        <h1 className="mt-2 font-display text-3xl font-bold text-ink">
-          The Practice Field
-        </h1>
-        <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-          Real NFL stat sheets, a live SQL engine, and nothing on the line.
-          This is where players get their reps between lessons — run the
-          drills from the drill book, or freelance and chase your own
-          questions. Data: free, community-maintained nflverse stats. Never
-          watch football? Doesn&apos;t matter — out here it&apos;s just rows
-          and columns with better storylines.
-        </p>
-      </div>
+        <div className="mb-6 max-w-2xl">
+          <p className="label-broadcast text-gold">open practice · no refs</p>
+          <h1 className="mt-2 font-display text-3xl font-bold text-ink">
+            The Practice Field
+          </h1>
+          <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+            Real NFL stat sheets, a live SQL engine, and nothing on the line.
+            This is where players get their reps between lessons — run the
+            drills from the drill book, or freelance and chase your own
+            questions. Data: free, community-maintained nflverse stats. Never
+            watch football? Doesn&apos;t matter — out here it&apos;s just rows
+            and columns with better storylines.
+          </p>
+        </div>
 
-      <FieldSandbox />
-    </main>
+        <FieldSandbox />
+      </main>
+    </>
   );
 }

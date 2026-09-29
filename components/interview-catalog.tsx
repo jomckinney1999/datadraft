@@ -15,7 +15,7 @@ import {
   type InterviewProgress,
 } from "@/lib/interview-progress";
 import Coach from "@/components/coach";
-import HomeLink from "@/components/home-link";
+import AppNav from "@/components/app-nav";
 import WaitlistForm from "@/components/waitlist-form";
 
 const FILTERS: { id: Difficulty | "all"; label: string }[] = [
@@ -124,66 +124,82 @@ export default function InterviewCatalog() {
   );
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-5xl px-5 py-10">
-      <div className="mb-8">
-        <HomeLink label="interview" />
-      </div>
+    <>
+      <AppNav />
+      <main className="mx-auto min-h-screen w-full max-w-5xl px-5 pb-10 pt-8">
+        <header className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="label-broadcast text-gold">mock screens · SQL</p>
+            <h1 className="mt-1 font-display text-3xl font-bold text-ink sm:text-4xl">
+              Interview cases
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-soft">
+              Practice cases — brief, schema, live SQL. Filter by difficulty,
+              take your time, peek at a hint if you need one. No timeouts spent.
+            </p>
+          </div>
+          <Coach mood="whistle" size={88} className="hidden shrink-0 sm:block" />
+        </header>
 
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="label-broadcast text-gold">mock screens · SQL</p>
-          <h1 className="mt-1 font-display text-3xl font-bold text-ink sm:text-4xl">
-            Interview cases
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-soft">
-            Practice cases — brief, schema, live SQL. Filter by difficulty,
-            take your time, peek at a hint if you need one. No timeouts spent.
-          </p>
-        </div>
-        <Coach mood="whistle" size={88} className="hidden shrink-0 sm:block" />
-      </header>
-
-      <div className="mt-6 flex flex-wrap items-center gap-3 border border-panel-border bg-panel/30 px-4 py-3">
-        <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-          Difficulty
-        </span>
-        <div className="flex flex-wrap gap-2">
-          {FILTERS.map((f) => (
+        <div className="mt-6 flex flex-wrap items-center gap-3 border border-panel-border bg-panel/30 px-4 py-3">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+            Difficulty
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {FILTERS.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setFilter(f.id)}
+                className={`rounded-full border px-3 py-1 font-mono text-[11px] uppercase tracking-wider transition-colors ${
+                  filter === f.id
+                    ? "border-turf bg-turf/15 text-turf"
+                    : "border-panel-border text-ink-muted hover:border-turf/40 hover:text-ink"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+          {filter !== "all" && (
             <button
-              key={f.id}
               type="button"
-              onClick={() => setFilter(f.id)}
-              className={`rounded-full border px-3 py-1 font-mono text-[11px] uppercase tracking-wider transition-colors ${
-                filter === f.id
-                  ? "border-turf bg-turf/15 text-turf"
-                  : "border-panel-border text-ink-muted hover:border-turf/40 hover:text-ink"
-              }`}
+              onClick={() => setFilter("all")}
+              className="font-mono text-[10px] uppercase tracking-wider text-ink-muted underline-offset-2 hover:text-gold hover:underline"
             >
-              {f.label}
+              Reset filters
             </button>
-          ))}
+          )}
+          <div className="ml-auto flex flex-wrap gap-3 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+            <span>{counts.notStarted} not started</span>
+            <span className="text-gold">{counts.inProgress} in progress</span>
+            <span className="text-turf">{counts.completed} completed</span>
+          </div>
         </div>
-        {filter !== "all" && (
-          <button
-            type="button"
-            onClick={() => setFilter("all")}
-            className="font-mono text-[10px] uppercase tracking-wider text-ink-muted underline-offset-2 hover:text-gold hover:underline"
-          >
-            Reset filters
-          </button>
-        )}
-        <div className="ml-auto flex flex-wrap gap-3 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-          <span>{counts.notStarted} not started</span>
-          <span className="text-gold">{counts.inProgress} in progress</span>
-          <span className="text-turf">{counts.completed} completed</span>
-        </div>
-      </div>
 
-      {inProgress.length > 0 && filter === "all" && (
+        {inProgress.length > 0 && filter === "all" && (
+          <section className="mt-8">
+            <p className="label-broadcast text-gold">In progress</p>
+            <div className="mt-3 grid gap-4 sm:grid-cols-2">
+              {inProgress.map((c) => (
+                <CaseCard
+                  key={c.id}
+                  c={c}
+                  status={progress[c.id]?.status ?? "not_started"}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="mt-8">
-          <p className="label-broadcast text-gold">In progress</p>
+          <p className="label-broadcast text-turf">
+            {filter === "all"
+              ? "All cases"
+              : `${DIFFICULTY_LABEL[filter]} cases`}
+          </p>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
-            {inProgress.map((c) => (
+            {filtered.map((c) => (
               <CaseCard
                 key={c.id}
                 c={c}
@@ -191,53 +207,36 @@ export default function InterviewCatalog() {
               />
             ))}
           </div>
+          {filtered.length === 0 && (
+            <p className="mt-4 text-sm text-ink-muted">
+              No cases at this difficulty yet.
+            </p>
+          )}
         </section>
-      )}
 
-      <section className="mt-8">
-        <p className="label-broadcast text-turf">
-          {filter === "all"
-            ? "All cases"
-            : `${DIFFICULTY_LABEL[filter]} cases`}
-        </p>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2">
-          {filtered.map((c) => (
-            <CaseCard
-              key={c.id}
-              c={c}
-              status={progress[c.id]?.status ?? "not_started"}
-            />
-          ))}
-        </div>
-        {filtered.length === 0 && (
-          <p className="mt-4 text-sm text-ink-muted">
-            No cases at this difficulty yet.
+        <section className="surface mt-12 border border-panel-border bg-panel/40 p-5">
+          <h2 className="font-display text-lg font-bold text-ink">
+            Want a live AI interviewer?
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+            These cases are scripted on purpose — graded, offline-friendly, no
+            API. A conversational interviewer is still on the board. Leave your
+            email and we&apos;ll ping you when it opens.
           </p>
-        )}
-      </section>
+          <div className="mt-4">
+            <WaitlistForm
+              interest="ai-interview"
+              source="interview-catalog"
+              label="Notify me"
+            />
+          </div>
+        </section>
 
-      <section className="surface mt-12 border border-panel-border bg-panel/40 p-5">
-        <h2 className="font-display text-lg font-bold text-ink">
-          Want a live AI interviewer?
-        </h2>
-        <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-          These cases are scripted on purpose — graded, offline-friendly, no
-          API. A conversational interviewer is still on the board. Leave your
-          email and we&apos;ll ping you when it opens.
+        <p className="mt-8 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+          {INTERVIEW_CASES.length} cases · status: {statusLabel("not_started")}{" "}
+          tracking is local to this browser
         </p>
-        <div className="mt-4">
-          <WaitlistForm
-            interest="ai-interview"
-            source="interview-catalog"
-            label="Notify me"
-          />
-        </div>
-      </section>
-
-      <p className="mt-8 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-        {INTERVIEW_CASES.length} cases · status: {statusLabel("not_started")}{" "}
-        tracking is local to this browser
-      </p>
-    </main>
+      </main>
+    </>
   );
 }
