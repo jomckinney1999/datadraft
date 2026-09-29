@@ -288,14 +288,19 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
    * hooks have to sit above the early return that `lesson` comes after.
    */
   const authoredBrief = entry?.lesson.brief.steps ?? [];
+  const alreadyEasesIn = /^(You|What you're|What this course)/.test(
+    authoredBrief[0]?.title ?? "",
+  );
   const briefStepsAll = entry
-    ? [
-        {
-          title: "What this lesson is",
-          body: `${entry.lesson.brief.goal} ${entry.lesson.brief.setup} We'll look at the idea first, then you'll try it.`,
-        },
-        ...authoredBrief,
-      ]
+    ? alreadyEasesIn
+      ? authoredBrief
+      : [
+          {
+            title: "What this lesson is",
+            body: `${entry.lesson.brief.goal} ${entry.lesson.brief.setup} We'll look at the idea first, then you'll try it.`,
+          },
+          ...authoredBrief,
+        ]
     : [];
   const lastBriefBeat =
     briefStepsAll.length === 0 || briefStep >= briefStepsAll.length - 1;
