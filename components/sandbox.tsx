@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Database, QueryExecResult, SqlJsStatic } from "sql.js";
 import { PRESETS, SCHEMA, buildSeedSql } from "@/lib/fantasy-data";
 import { SHORT_CREDIT } from "@/lib/data-source";
+import { FACTS } from "@/lib/lesson-facts.generated";
 import CodeEditor from "@/components/code-editor";
 
 const POSITION_STYLES: Record<string, string> = {
@@ -131,7 +132,7 @@ export default function Sandbox() {
           </div>
           <span className="label-broadcast text-turf">live sandbox</span>
           <span className="hidden font-mono text-[10px] text-ink-muted sm:inline">
-            · 2022–2024 · 20 players · real
+            · {FACTS.seasons[0]}–{FACTS.latest.season} · {FACTS.players} players · real
           </span>
         </div>
         <div className="flex items-center gap-3">

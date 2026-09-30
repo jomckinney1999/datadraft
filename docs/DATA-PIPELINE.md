@@ -62,7 +62,7 @@ node scripts/verify-answer-keys.mjs     # every key still runs and returns rows
   publishes final weekly numbers after Monday night.
 - `lib/data/sleeper.ts` — Sleeper wrappers (state, leagues, rosters, players),
   no auth needed.
-- `lib/data-source.ts` — attribution and the real/invented labelling that `/data`
+- `lib/data-source.ts` — attribution and the per-table provenance labels that `/data`
   renders.
 
 **Two defects found while writing this — both real, neither urgent:**
@@ -102,8 +102,9 @@ GET https://api.sleeper.app/v1/players/nfl/trending/add?lookback_hours=24&limit=
 GET https://api.sleeper.app/v1/players/nfl/trending/drop?lookback_hours=24&limit=25
 ```
 
-This is what finally makes `waiver_wire` a real table instead of an invented
-one — see Phase B.
+The pinned lesson `waiver_wire` is already real as of 2026-09-30 — see
+"The lesson league" below. Trending is still the right source for a *live*
+wire (Phase B), because it is the only one that moves by the hour.
 
 **Caution:** the Sleeper player directory is several MB of JSON and their docs
 ask integrators to fetch it at most once per day and cache it. `lib/data/sleeper.ts`
@@ -123,15 +124,38 @@ Ranked by value-to-effort:
    dump.
 3. **Current-week schedule and game state** (nflverse/Sleeper) — needed for
    anything that says "this week".
-4. **Ownership %** — Sleeper trending is a proxy, not the real figure. True
-   rostered% is platform-specific and not freely available. Label any derived
-   number as a proxy rather than implying precision we do not have.
+4. **Ownership %** — Sleeper's own app reads real rostered and started
+   percentages per player per week from
+   `api.sleeper.app/players/nfl/research/regular/<season>/<week>`, history
+   included. It is not in Sleeper's published docs, so treat it as liable to
+   change, but it is the real platform figure rather than a proxy. The lesson
+   `waiver_wire` is built from it.
 5. **Projections** — the biggest gap and the one with a licensing problem (§8).
 
 **The honesty constraint carries over from `/data`:** anything derived or
-proxied gets labelled as such, the same way `rosters` and `waiver_wire` are
-labelled invented today. `PROVENANCE` in `lib/data-source.ts` is the mechanism
-that already exists for this — extend it rather than inventing a second one.
+proxied gets labelled as such, the same way `rosters` is labelled a draft run
+on real ADP rather than a real league. `PROVENANCE` in `lib/data-source.ts`
+is the mechanism that already exists for this (a `kind` and a chip `label`
+per table) — extend it rather than inventing a second one.
+
+### The lesson league (2026-09-30)
+
+`scripts/build-lesson-dataset.mjs` now builds `rosters` and `waiver_wire` from
+Sleeper as well as `week_results` from nflverse. Both are pinned with the rest
+of the lesson data and describe **2024**, the season every roster lesson
+scores the league on:
+
+- `waiver_wire` — Sleeper's real wire going into 2024 week 10: players under
+  50% rostered with the biggest week-over-week move in rostered share (six
+  risers, two fallers), team as of that week from nflverse.
+- `rosters` — a five-team, two-round snake draft of the twenty-player lesson
+  cast on Sleeper's real 2024 PPR ADP
+  (`api.sleeper.com/projections/nfl/2024?...&order_by=adp_ppr`, also
+  undocumented). Draft order real; managers ours. A real league's rosters
+  belong to its members, so we never pull a stranger's league.
+
+ESPN's equivalent endpoints are undocumented and its terms forbid automated
+access; Yahoo's need an OAuth app and a user login. That is why Sleeper.
 
 ---
 
@@ -207,8 +231,8 @@ the `stats_player` release tag so it does not silently stop at 2024. Add the
 
 **Phase B — Real waiver wire.** Add `getTrendingPlayers()` to
 `lib/data/sleeper.ts`, a 6-hourly cron, and a `trending_players` table. Replace
-the invented `waiver_wire` in the **live** surfaces only — the pinned lesson
-table keeps its labelled, invented version so answer keys stay valid.
+a live wire on the **live** surfaces only — the pinned lesson table stays the
+2024 week-10 snapshot so answer keys stay valid.
 *First genuinely fantasy-relevant feature.*
 
 **Phase C — Freshness in the UI.** Surface "stats through Week N" on `/field`,

@@ -13,6 +13,8 @@
 // or follow the all-in-one pathway.
 
 import { FINAL_UNITS } from "./finals";
+// Numbers the prose quotes come from the data build, never typed in.
+import { FACTS } from "./lesson-facts.generated";
 // Redesigned Foundations modules (docs/SQL-REDESIGN.md). Kept in their own
 // file so the rewrite can land module by module without churning this one.
 import { SQL_FOUNDATION_UNITS } from "./curriculum-foundations";
@@ -244,7 +246,7 @@ export const COURSE = {
             },
             {
               title: "This sheet is real games",
-              body: "The sheet is named week_results. It holds games that were actually played, from 2022 through 2024, for 20 well-known players. Read the one line below. Left to right: the player, their team, position, year, week, and points.",
+              body: `The sheet is named week_results. It holds games that were actually played, from ${FACTS.seasons[0]} through week ${FACTS.latest.week} of ${FACTS.latest.season}, for ${FACTS.players} well-known players. Read the one line below. Left to right: the player, their team, position, year, week, and points.`,
               previewSql: "SELECT * FROM week_results LIMIT 1;",
               previewCaption: "One line from the game sheet. That line is one row.",
             },
@@ -256,10 +258,10 @@ export const COURSE = {
               previewCaption: "Five games from week_results",
             },
             {
-              title: "Two other sheets are made up",
-              body: "week_results is real. The other two are an example fantasy league we wrote so you have people and free agents to combine later. rosters says which made-up team owns a player. waiver_wire is players nobody in that example league has picked. Who owns a player is not an NFL fact.",
+              title: "The other two are a fantasy league",
+              body: `week_results is real NFL scoring. The other two sheets are a fantasy league built from real Sleeper data. rosters says which of five teams drafted a player: the picks follow real ${FACTS.league.season} draft rankings, and the five managers are ours. waiver_wire is Sleeper's real waiver wire from week ${FACTS.league.wireWeek} of ${FACTS.league.season}, the players most leagues had left unclaimed.`,
               previewSql: "SELECT * FROM rosters;",
-              previewCaption: "rosters · the example league, five of its lines",
+              previewCaption: "rosters · the league's draft, a few of its lines",
             },
           ],
           setup:
@@ -348,7 +350,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "SELECT * FROM table_name; — the table is called waiver_wire.",
               explain:
-                "SELECT * FROM waiver_wire; reads the whole free-agent board. Five rows — a quick look.",
+                `SELECT * FROM waiver_wire; reads the whole free-agent board. ${FACTS.league.wireRows} rows — a quick look.`,
             },
             {
               type: "query",
@@ -450,7 +452,7 @@ export const COURSE = {
               bank: ["player", "pct_rostered", "rosters", "*"],
               answer: ["player", "pct_rostered"],
               explain:
-                "Columns by name, comma-separated. pct_rostered is the percent of leagues where that player is taken.",
+                "Columns by name, comma-separated. pct_rostered is the percent of Sleeper leagues where that player is on a roster.",
             },
             {
               type: "query",
@@ -499,7 +501,7 @@ export const COURSE = {
       steps: [
         {
           title: "You don't need every row",
-          body: "week_results has 876 rows — and that's small. Real tables hit millions. Nobody opens a table by reading all of it. You peek at a handful, then ask a real question.",
+          body: `week_results has ${FACTS.rows} rows — and that's small. Real tables hit millions. Nobody opens a table by reading all of it. You peek at a handful, then ask a real question.`,
         },
         {
           title: "LIMIT stops early",
@@ -515,7 +517,7 @@ export const COURSE = {
           },
           intro: {
             title: "Peek with LIMIT",
-            text: "week_results has 876 rows. Want a feel for the data? Add LIMIT n at the very end to cap how many rows come back.",
+            text: `week_results has ${FACTS.rows} rows. Want a feel for the data? Add LIMIT n at the very end to cap how many rows come back.`,
             code: "SELECT * FROM week_results LIMIT 10;",
           },
           film: [
@@ -613,7 +615,7 @@ export const COURSE = {
             goal: "Keep only the rows you care about with WHERE.",
           steps: [
             {
-              title: "You don't want all 876 games",
+              title: `You don't want all ${FACTS.rows} games`,
               body: "You want Josh Allen's. The rest of the sheet is noise until you say so.",
             },
             {
@@ -696,7 +698,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "WHERE player = '…' — mind the quotes and spelling.",
               explain:
-                "One filter took you from 876 rows down to every game Mahomes played.",
+                `One filter took you from ${FACTS.rows} rows down to every game Mahomes played.`,
             },
             {
               type: "query",
@@ -726,7 +728,7 @@ export const COURSE = {
           title: "Compare with the usual symbols",
           body: "Greater than, less than, and their or-equal cousins work how they look. Numbers go in bare — no quotes — because you're comparing quantities, not matching text.",
           code: "WHERE fantasy_pts > 25",
-          note: "Pick thresholds from the data, not a hunch. Nothing here clears 30 in a game, so 25 is what a big afternoon looks like.",
+          note: `Pick thresholds from the data, not a hunch. Only ${FACTS.over25} of ${FACTS.rows} games here clear 25, so 25 is what a big afternoon looks like.`,
         },
         {
           title: "AND means both must be true",
@@ -735,7 +737,7 @@ export const COURSE = {
         },
       ],
             setup:
-              "Beyond equals you get >, <, >=, <=. AND needs both sides true — how you say “big game, this season” in one line. Nothing here clears 30, so 25 is a real big game.",
+              `Beyond equals you get >, <, >=, <=. AND needs both sides true — how you say “big game, this season” in one line. Only ${FACTS.over25} of ${FACTS.rows} games clear 25, so 25 is a real big game.`,
             previewSql:
               "SELECT player, season, week, fantasy_pts FROM week_results WHERE fantasy_pts > 25 ORDER BY fantasy_pts DESC LIMIT 5;",
             previewCaption: "only rows scoring over 25",
@@ -1293,7 +1295,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "COUNT(*) plus a WHERE on player.",
               explain:
-                "37 games — not 50. Missed weeks are missing rows, and COUNT(*) finds that.",
+                `${FACTS.gamesPlayed["Christian McCaffrey"]} games — not ${FACTS.possibleGames}. Missed weeks are missing rows, and COUNT(*) finds that.`,
             },
             {
               type: "query",
@@ -1733,13 +1735,13 @@ export const COURSE = {
             {
               type: "query",
               prompt:
-                "Which fantasy team owns Derrick Henry? Return just the team_name.",
+                "Which fantasy team drafted Saquon Barkley? Return just the team_name.",
               starter: "SELECT r.team_name\nFROM rosters r\n",
-              expected: "SELECT team_name FROM rosters WHERE player = 'Derrick Henry';",
+              expected: "SELECT team_name FROM rosters WHERE player = 'Saquon Barkley';",
               orderMatters: false,
               hint: "This one needs no join at all — rosters already has both columns.",
               explain:
-                "Goal Line Gang — and no join needed. Reach for a join only when the answer spans two tables.",
+                "One table, one answer — no join needed. Reach for a join only when the answer spans two tables.",
             },
           ],
         },
@@ -1858,7 +1860,7 @@ export const COURSE = {
               "Useful questions are often about absence: who isn't rostered, who never ordered. Pattern: LEFT JOIN, then keep rows where the match came back NULL.",
             previewSql:
               "SELECT DISTINCT w.player FROM week_results w LEFT JOIN rosters r ON w.player = r.player WHERE r.player IS NULL ORDER BY w.player;",
-            previewCaption: "six players in the league, on nobody's roster",
+            previewCaption: `${FACTS.league.undrafted} players in the table, on nobody's roster`,
           },
           intro: {
             title: "LEFT JOIN, then keep the NULLs",
@@ -1915,7 +1917,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "Finish it with WHERE r.player IS NULL.",
               explain:
-                "Six names — the waiver pool. Same shape answers “who hasn't done X” anywhere.",
+                `${FACTS.league.undrafted} names — everyone nobody drafted. Same shape answers “who hasn't done X” anywhere.`,
             },
             {
               type: "query",
@@ -1927,7 +1929,7 @@ export const COURSE = {
               orderMatters: false,
               hint: "Same shape, different tables: LEFT JOIN waiver_wire ww ON r.player = ww.player, then WHERE ww.player IS NULL.",
               explain:
-                "Eight of ten rostered players aren't on the wire — same pattern, new question.",
+                `All ${FACTS.league.drafted} — a drafted player is never on the wire, which is the whole point of a wire. Same pattern, new question.`,
             },
           ],
         },
@@ -1996,7 +1998,7 @@ export const COURSE = {
               orderMatters: true,
               hint: "JOIN, WHERE w.season = 2024, GROUP BY r.team_name, ORDER BY total DESC.",
               explain:
-                "Fourth & Long leads; one query covers the whole season.",
+                `${FACTS.league.leader.team} leads; one query covers the whole season.`,
             },
             {
               type: "query",
@@ -2008,7 +2010,7 @@ export const COURSE = {
               orderMatters: true,
               hint: "Group by r.player instead of team, then ORDER BY total DESC LIMIT 1.",
               explain:
-                "Josh Allen — change the GROUP BY and the same join answers a new question.",
+                `${FACTS.league.topRostered.player} — change the GROUP BY and the same join answers a new question.`,
             },
             {
               type: "query",

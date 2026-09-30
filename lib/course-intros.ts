@@ -15,6 +15,8 @@
  * actually drills.
  */
 
+import { FACTS } from "@/lib/lesson-facts.generated";
+
 export type CourseIntro = {
   /** Module id from lib/curriculum.ts MODULES. */
   moduleId: string;
@@ -50,9 +52,9 @@ export const COURSE_INTROS: CourseIntro[] = [
       "Window functions are in Advanced SQL, not this course",
     ],
     dataset: {
-      line: "One dataset the whole way through: weekly NFL fantasy scoring, 876 games from the 2022–2024 seasons. One row is one player in one week.",
+      line: `One dataset the whole way through: weekly NFL fantasy scoring, ${FACTS.rows} games from ${FACTS.seasons[0]} through week ${FACTS.latest.week} of ${FACTS.latest.season}. One row is one player in one week.`,
       tables: ["week_results", "rosters", "waiver_wire"],
-      note: "week_results is real data from nflverse. rosters and waiver_wire are two small tables we wrote so you have something to join against — who owns which player isn't an NFL fact.",
+      note: "week_results is real data from nflverse. rosters and waiver_wire are a fantasy league from Sleeper: a draft run on real 2024 ADP, and the real 2024 waiver wire.",
     },
     outcome: [
       "Open a database you've never seen and answer a real question with SQL",
@@ -71,7 +73,7 @@ export const COURSE_INTROS: CourseIntro[] = [
       "Understand the order a database actually reads your query in",
     ],
     dataset: {
-      line: "Weekly NFL fantasy scoring — 876 real games, 20 players, three seasons. One row is one player in one week.",
+      line: `Weekly NFL fantasy scoring — ${FACTS.rows} real games, ${FACTS.players} players, ${FACTS.seasons[0]} through week ${FACTS.latest.week} of ${FACTS.latest.season}. One row is one player in one week.`,
       tables: ["week_results", "rosters", "waiver_wire"],
       note: "week_results is real. The other two are small example tables for join practice.",
     },

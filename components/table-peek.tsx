@@ -23,7 +23,7 @@ import type { QueryExecResult } from "sql.js";
 import { PROVENANCE } from "@/lib/data-source";
 import TeamChip, { isTeamColumn } from "@/components/team-chip";
 
-const KIND = new Map(PROVENANCE.map((p) => [p.table, p.kind]));
+const PROV = new Map(PROVENANCE.map((p) => [p.table, p]));
 const NOTE = new Map(PROVENANCE.map((p) => [p.table, p.note]));
 
 export default function TablePeek({
@@ -71,7 +71,7 @@ export default function TablePeek({
           Show me
         </span>
         {tables.map((t) => {
-          const kind = KIND.get(t);
+          const prov = PROV.get(t);
           return (
             <button
               key={t}
@@ -86,13 +86,13 @@ export default function TablePeek({
               }`}
             >
               {t}
-              {kind && (
+              {prov && (
                 <span
                   className={`rounded-sm px-1 text-[8px] uppercase tracking-widest ${
-                    kind === "real" ? "text-turf" : "text-gold"
+                    prov.kind === "real" ? "text-turf" : "text-gold"
                   }`}
                 >
-                  {kind === "real" ? "real" : "example"}
+                  {prov.label}
                 </span>
               )}
               <span aria-hidden>{open === t ? "▴" : "▾"}</span>

@@ -300,6 +300,85 @@ for (const lang of ["sql", "python", "r", "excel"]) {
   }
 }
 
+// ── Facts the prose quotes ────────────────────────────────────
+// Lesson text reads numbers from lib/lesson-facts.generated.ts instead of
+// typing them. The builder computes those in JavaScript; this re-derives each
+// one with SQL against the seeded database, so a builder bug cannot put a
+// wrong number in front of a learner either.
+let factsChecked = 0;
+{
+  const { FACTS } = await loadProjectTs(path.join(root, "lib/lesson-facts.generated.ts"), root);
+  const one = (sql) => run(sql).values[0][0];
+  const same = (label, got, want) => {
+    factsChecked++;
+    if (JSON.stringify(got) !== JSON.stringify(want)) {
+      problems.push(`FACTS.${label} is ${JSON.stringify(want)} but the database says ${JSON.stringify(got)}`);
+    }
+  };
+  same("rows", one("SELECT COUNT(*) FROM week_results"), FACTS.rows);
+  same("gamesTable", one("SELECT COUNT(*) FROM games"), FACTS.gamesTable);
+  same("players", one("SELECT COUNT(DISTINCT player) FROM week_results"), FACTS.players);
+  same("teams", one("SELECT COUNT(DISTINCT team) FROM week_results"), FACTS.teams);
+  same("playerTeamPairs", one("SELECT COUNT(*) FROM (SELECT DISTINCT player, team FROM week_results)"), FACTS.playerTeamPairs);
+  same("movers", one("SELECT COUNT(*) FROM (SELECT player FROM week_results GROUP BY player HAVING COUNT(DISTINCT team) > 1)"), FACTS.movers);
+  same("over25", one("SELECT COUNT(*) FROM week_results WHERE fantasy_pts > 25"), FACTS.over25);
+  same("boom30", one("SELECT COUNT(*) FROM week_results WHERE fantasy_pts >= 30"), FACTS.boom30);
+  same("seasons", run("SELECT DISTINCT season FROM games ORDER BY season").values.map((r) => r[0]), [...FACTS.seasons]);
+  same("latest.week", one("SELECT MAX(week) FROM games WHERE season = (SELECT MAX(season) FROM games)"), FACTS.latest.week);
+  same(
+    "possibleGames",
+    one(`SELECT SUM(g) FROM (SELECT season, MAX(n) AS g FROM (
+           SELECT season, team, COUNT(*) AS n FROM (
+             SELECT season, home_team AS team FROM games UNION ALL SELECT season, away_team FROM games
+           ) GROUP BY season, team) GROUP BY season)`),
+    FACTS.possibleGames,
+  );
+  same(
+    "gamesPlayed",
+    Object.fromEntries(run("SELECT player, COUNT(*) FROM week_results GROUP BY player").values.sort((a, b) => (a[0] < b[0] ? -1 : 1))),
+    Object.fromEntries(Object.entries(FACTS.gamesPlayed).sort((a, b) => (a[0] < b[0] ? -1 : 1))),
+  );
+  same(
+    "maxGame",
+    run("SELECT player, season, week, fantasy_pts FROM week_results WHERE fantasy_pts = (SELECT MAX(fantasy_pts) FROM week_results) ORDER BY season, week").values,
+    FACTS.maxGame.games.map((g) => [g.player, g.season, g.week, FACTS.maxGame.pts]),
+  );
+  for (const [player, arc] of Object.entries(FACTS.seasonPpg)) {
+    same(
+      `seasonPpg["${player}"]`,
+      run(`SELECT season, ROUND(AVG(fantasy_pts), 1) FROM week_results WHERE player = '${player.replace(/'/g, "''")}' GROUP BY season ORDER BY season`).values,
+      arc.map((x) => [...x]),
+    );
+  }
+  const L = FACTS.league;
+  same("league.drafted", one("SELECT COUNT(*) FROM rosters"), L.drafted);
+  same("league.undrafted", one("SELECT COUNT(DISTINCT w.player) FROM week_results w LEFT JOIN rosters r ON w.player = r.player WHERE r.player IS NULL"), L.undrafted);
+  same("league.wireRows", one("SELECT COUNT(*) FROM waiver_wire"), L.wireRows);
+  same(
+    "league.leader",
+    run(`SELECT r.team_name, ROUND(SUM(w.fantasy_pts), 1) FROM rosters r JOIN week_results w ON r.player = w.player
+         WHERE w.season = ${L.season} GROUP BY r.team_name ORDER BY 2 DESC LIMIT 1`).values[0],
+    [L.leader.team, L.leader.pts],
+  );
+  same(
+    "league.undraftedByPoints",
+    run(`SELECT w.player FROM week_results w LEFT JOIN rosters r ON w.player = r.player
+         WHERE w.season = ${L.season} AND r.player IS NULL GROUP BY w.player ORDER BY SUM(w.fantasy_pts) DESC`).values.map((r) => r[0]),
+    [...L.undraftedByPoints],
+  );
+  same(
+    "league.topRostered",
+    run(`SELECT r.player, ROUND(SUM(w.fantasy_pts), 1) FROM rosters r JOIN week_results w ON r.player = w.player
+         WHERE w.season = ${L.season} GROUP BY r.player ORDER BY 2 DESC LIMIT 1`).values[0],
+    [L.topRostered.player, L.topRostered.pts],
+  );
+  same(
+    "league.topRiser",
+    run("SELECT player, trend FROM waiver_wire ORDER BY trend DESC LIMIT 1").values[0],
+    [L.topRiser.player, L.topRiser.trend],
+  );
+}
+
 // ── Card art coverage ─────────────────────────────────────────
 // A course, build or case with no scene renders an empty picture slot on
 // its card. The scene maps live in TSX the loader does not transpile, so
@@ -452,6 +531,7 @@ console.log(`python answer keys run    : ${pyChecked}`);
 console.log(`excel formula keys checked: ${formulaChecked}`);
 if (skippedR) console.log(`R keys skipped (no Node WebR): ${skippedR}`);
 console.log(`card art ids checked      : ${artChecked} (courses, builds, cases)`);
+console.log(`prose facts checked       : ${factsChecked} (lib/lesson-facts.generated.ts vs the database)`);
 
 if (problems.length === 0) {
   console.log("\nAll answer keys run, return rows, and have no cutoff ties.");

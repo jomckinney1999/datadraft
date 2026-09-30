@@ -17,11 +17,13 @@
  *
  * Every factual claim below was run against the real seeded database before it
  * was written down — including the ones that sound wrong (a missing comma
- * silently renames a column; DISTINCT player, team returns 24 rows for 20
- * players). See docs/LESSON-GRAMMAR.md, rule 7.
+ * silently renames a column; DISTINCT player, team returns more rows than
+ * there are players). Numbers the prose quotes come from
+ * lib/lesson-facts.generated.ts rather than being typed in. See docs/LESSON-GRAMMAR.md, rule 7.
  */
 
 import type { Unit } from "./curriculum";
+import { FACTS } from "./lesson-facts.generated";
 
 export const SQL_FOUNDATION_UNITS: Unit[] = [
   {
@@ -42,23 +44,23 @@ export const SQL_FOUNDATION_UNITS: Unit[] = [
         brief: {
           goal: "Pull a single column out of a table.",
           setup:
-            "The dataset holds three seasons of weekly scores. You only want the names.",
+            `The dataset holds weekly scores from ${FACTS.seasons[0]} through week ${FACTS.latest.week} of ${FACTS.latest.season}. You only want the names.`,
           steps: [
             {
-              title: "876 rows. You want one column.",
-              body: "Our weekly stat sheet has every game 20 players played across three seasons. Right now you just want to see who's in there — not the points, not the weeks. Just names.",
+              title: `${FACTS.rows} rows. You want one column.`,
+              body: `Our weekly stat sheet has every game ${FACTS.players} players played from ${FACTS.seasons[0]} through week ${FACTS.latest.week} of ${FACTS.latest.season}. Right now you just want to see who's in there — not the points, not the weeks. Just names.`,
             },
             {
               title: "Tell it what, and where",
               body: "Every question you ask a database starts the same way. Name the column you want, then the table it lives in. That's it.",
               code: "SELECT player\nFROM week_results;",
-              note: "LIMIT 5 on the end just stops it early so we can look without 876 rows flying past. More on that later.",
+              note: `LIMIT 5 on the end just stops it early so we can look without ${FACTS.rows} rows flying past. More on that later.`,
             },
             {
               title: "Here's what comes back",
               body: "One column. Same name repeats, because this sheet has one row per game, and players play a lot of games.",
               previewSql: "SELECT player FROM week_results LIMIT 5;",
-              previewCaption: "SELECT player FROM week_results — first 5 of 876 rows",
+              previewCaption: `SELECT player FROM week_results — first 5 of ${FACTS.rows} rows`,
             },
           ],
           previewSql: "SELECT player FROM week_results LIMIT 5;",
@@ -75,14 +77,14 @@ export const SQL_FOUNDATION_UNITS: Unit[] = [
             prompt: "This query runs. What comes back?",
             code: "SELECT team FROM week_results;",
             options: [
-              "One row per team — 17 rows",
-              "The team column for all 876 rows, repeats and all",
+              `One row per team — ${FACTS.teams} rows`,
+              `The team column for all ${FACTS.rows} rows, repeats and all`,
               "Every column, for the team table",
               "An error, because team is a column and not a table",
             ],
             answer: 1,
             explain:
-              "SELECT hands back the column as-is, once per row. 876 rows go in, 876 team values come out — BUF appears on every Josh Allen game.",
+              `SELECT hands back the column as-is, once per row. ${FACTS.rows} rows go in, ${FACTS.rows} team values come out — BUF appears on every Josh Allen game.`,
           },
           {
             type: "fill",
@@ -113,7 +115,7 @@ export const SQL_FOUNDATION_UNITS: Unit[] = [
             orderMatters: false,
             hint: "Same two words as before: SELECT <column> FROM <table>;",
             explain:
-              "Five free agents. Different table, identical pattern — which is the point: learn the shape once and every table opens.",
+              `${FACTS.league.wireRows} free agents. Different table, identical pattern — which is the point: learn the shape once and every table opens.`,
           },
           {
             type: "mc",
@@ -127,7 +129,7 @@ export const SQL_FOUNDATION_UNITS: Unit[] = [
             ],
             answer: 1,
             explain:
-              "Whatever follows FROM is the table. pct_rostered is a column inside it — the percentage of leagues where that player is already taken.",
+              "Whatever follows FROM is the table. pct_rostered is a column inside it — the percentage of Sleeper leagues where that player is already on a roster.",
           },
         ],
       },
@@ -143,7 +145,7 @@ export const SQL_FOUNDATION_UNITS: Unit[] = [
           steps: [
             {
               title: "A name on its own is useless",
-              body: "You pulled the player column and got 876 names. You still can't tell who had a big week. You need the points sitting next to the name.",
+              body: `You pulled the player column and got ${FACTS.rows} names. You still can't tell who had a big week. You need the points sitting next to the name.`,
             },
             {
               title: "Separate them with commas",
@@ -242,11 +244,11 @@ export const SQL_FOUNDATION_UNITS: Unit[] = [
         brief: {
           goal: "Get the unique values in a column.",
           setup:
-            "You want to know which positions are in this table. Scrolling 876 rows won't tell you.",
+            `You want to know which positions are in this table. Scrolling ${FACTS.rows} rows won't tell you.`,
           steps: [
             {
               title: "What's actually in this column?",
-              body: "New table, first question: what values does this column hold? Pull position straight and you get 876 answers, nearly all of them repeats.",
+              body: `New table, first question: what values does this column hold? Pull position straight and you get ${FACTS.rows} answers, nearly all of them repeats.`,
             },
             {
               title: "DISTINCT collapses the repeats",
@@ -255,9 +257,9 @@ export const SQL_FOUNDATION_UNITS: Unit[] = [
             },
             {
               title: "Four rows, and now you know",
-              body: "Quarterbacks, running backs, receivers, tight ends. That's the whole table in four lines instead of 876.",
+              body: `Quarterbacks, running backs, receivers, tight ends. That's the whole table in four lines instead of ${FACTS.rows}.`,
               previewSql: "SELECT DISTINCT position FROM week_results;",
-              previewCaption: "876 rows in, 4 out",
+              previewCaption: `${FACTS.rows} rows in, 4 out`,
             },
           ],
           previewSql: "SELECT DISTINCT position FROM week_results;",
@@ -273,14 +275,14 @@ export const SQL_FOUNDATION_UNITS: Unit[] = [
             prompt: "What does this give you?",
             code: "SELECT DISTINCT team FROM week_results;",
             options: [
-              "Every team value, 876 of them",
+              `Every team value, ${FACTS.rows} of them`,
               "Each team that appears in the table, listed once",
               "The most common team",
               "One row, counting the teams",
             ],
             answer: 1,
             explain:
-              "Each value once — 17 rows here. DISTINCT doesn't count anything or rank anything, it just removes the repeats.",
+              `Each value once — ${FACTS.teams} rows here. DISTINCT doesn't count anything or rank anything, it just removes the repeats.`,
           },
           {
             type: "fill",
@@ -299,7 +301,7 @@ export const SQL_FOUNDATION_UNITS: Unit[] = [
             orderMatters: false,
             hint: "Swap the column. DISTINCT stays where it is.",
             explain:
-              "17 teams. Notice DISTINCT didn't move — it always sits directly after SELECT.",
+              `${FACTS.teams} teams. Notice DISTINCT didn't move — it always sits directly after SELECT.`,
           },
           {
             type: "query",
@@ -309,22 +311,22 @@ export const SQL_FOUNDATION_UNITS: Unit[] = [
             orderMatters: false,
             hint: "SELECT DISTINCT <column> FROM week_results;",
             explain:
-              "2022, 2023, 2024. Three seasons — worth knowing before you write anything that assumes a date range.",
+              `${FACTS.seasons.join(", ")}. ${FACTS.seasons.length} seasons, and the last one only runs through week ${FACTS.latest.week} — worth knowing before you write anything that assumes a date range.`,
           },
           {
             type: "mc",
             prompt:
-              "There are 20 players in this table. This query returns 24 rows. Why?",
+              `There are ${FACTS.players} players in this table. This query returns ${FACTS.playerTeamPairs} rows. Why?`,
             code: "SELECT DISTINCT player, team FROM week_results;",
             options: [
-              "Four rows are duplicated by mistake",
+              "Some rows are duplicated by mistake",
               "DISTINCT only applies to player, so team adds rows",
-              "DISTINCT looks at the whole row — four players changed teams",
-              "It counted four players twice because they missed games",
+              "DISTINCT looks at the whole row — some players changed teams",
+              "It counted some players twice because they missed games",
             ],
             answer: 2,
             explain:
-              "DISTINCT works on the combination you asked for, not on the first column. Four of these players appear with two different teams, so each of them is two distinct player-and-team pairs.",
+              `DISTINCT works on the combination you asked for, not on the first column. ${FACTS.movers} of these players appear with more than one team, and every team a player played for is its own player-and-team pair.`,
           },
         ],
       },
@@ -351,7 +353,7 @@ export const SQL_FOUNDATION_UNITS: Unit[] = [
             {
               title: "Two dashes start a note",
               body: "Anything after -- on a line is ignored. Use it to say why a query does something, which is the part you'll forget first.",
-              code: "-- Weekly scoring, 2022-2024\nSELECT player AS name\nFROM week_results;",
+              code: `-- Weekly scoring, ${FACTS.seasons[0]} onward\nSELECT player AS name\nFROM week_results;`,
             },
           ],
           previewSql:

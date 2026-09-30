@@ -11,6 +11,8 @@
  * answer changes, not the product's story.
  */
 
+import { FACTS } from "@/lib/lesson-facts.generated";
+
 const ITEMS = [
   {
     q: "Do I need to know anything about football?",
@@ -26,7 +28,7 @@ const ITEMS = [
   },
   {
     q: "Is the data real?",
-    a: "Yes. The lesson and question data is weekly NFL scoring from nflverse, 2022 to 2024, pinned so the answers never move under you, and free to download under CC BY 4.0. The example fantasy league — rosters and a waiver wire — is invented, and every place it appears says so.",
+    a: `Yes. The lesson and question data is weekly NFL scoring from nflverse, ${FACTS.seasons[0]} through week ${FACTS.latest.week} of ${FACTS.latest.season}, pinned so the answers never move under you, and free to download under CC BY 4.0. The fantasy league comes from Sleeper: the waiver wire is Sleeper's real wire from week ${FACTS.league.wireWeek} of ${FACTS.league.season}, and the rosters are a draft run on Sleeper's real ${FACTS.league.season} ADP. The draft order is real; the five managers are ours, and every place the league appears says so.`,
   },
   {
     q: "What is a “drive”?",

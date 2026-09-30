@@ -11,6 +11,11 @@
  */
 
 import type { FillExercise, Lesson, MCExercise, QueryExercise, Unit } from "./curriculum";
+import { FACTS } from "./lesson-facts.generated";
+
+/** A real player off the real wire, for the UPDATE and DELETE drills. */
+const WIRE_NAME = FACTS.league.topRiser.player;
+const WIRE_SQL = WIRE_NAME.replace(/'/g, "''");
 
 function lesson(partial: Lesson): Lesson {
   return partial;
@@ -564,7 +569,7 @@ export const SQL_NEXT_UNITS: Unit[] = [
           steps: [
             {
               title: "You don't want to paste ten names",
-              body: "WHERE player IN ('Josh Allen', ...) rots the day the roster changes. The roster is already a table.",
+              body: "WHERE player IN ('Christian McCaffrey', ...) rots the day the roster changes. The roster is already a table.",
             },
             {
               title: "IN accepts a query that returns one column",
@@ -601,18 +606,18 @@ export const SQL_NEXT_UNITS: Unit[] = [
             "IN, then the list. = can't compare a name to a column of many names.",
           ),
           query(
-            "This lists every game. Limit it to players who appear on waiver_wire.",
+            "This lists every game. Limit it to one team's players — the Goal Line Gang — by putting a WHERE inside the subquery.",
             "SELECT player, week, fantasy_pts FROM week_results;",
-            "SELECT player, week, fantasy_pts FROM week_results WHERE player IN (SELECT player FROM waiver_wire);",
-            "Add WHERE player IN (SELECT player FROM waiver_wire).",
-            "The list lives in the other table. You don't type the names.",
+            "SELECT player, week, fantasy_pts FROM week_results WHERE player IN (SELECT player FROM rosters WHERE team_name = 'Goal Line Gang');",
+            "Add WHERE player IN (SELECT player FROM rosters WHERE team_name = 'Goal Line Gang').",
+            "The list lives in the other table, and the subquery can filter it too. You never type a player's name.",
           ),
           query(
-            "Names from week_results that also appear on the wire. One row per name.",
+            "The other half: names from week_results that are on nobody's roster. NOT IN flips the test. One row per name.",
             "-- your query\n",
-            "SELECT DISTINCT player FROM week_results WHERE player IN (SELECT player FROM waiver_wire);",
-            "DISTINCT player, and IN (SELECT player FROM waiver_wire).",
-            "IN keeps the games that match the list. DISTINCT stops the same name repeating once per week.",
+            "SELECT DISTINCT player FROM week_results WHERE player NOT IN (SELECT player FROM rosters);",
+            "DISTINCT player, and NOT IN (SELECT player FROM rosters).",
+            "NOT IN keeps what the list doesn't have. One trap: if the list ever holds a NULL, NOT IN returns nothing at all. rosters has none, so this is safe.",
           ),
         ],
       }),
@@ -766,7 +771,7 @@ export const SQL_NEXT_UNITS: Unit[] = [
         blurb: "UPDATE without WHERE is how a league loses every score.",
         brief: {
           goal: "Update a value, and know which rows will move.",
-          setup: "Josh Allen's trend on the wire needs a correction. Only his.",
+          setup: `${WIRE_NAME}'s trend on the wire needs a correction. Only his.`,
           steps: [
             {
               title: "Picture the rows the statement will touch",
@@ -775,7 +780,7 @@ export const SQL_NEXT_UNITS: Unit[] = [
             {
               title: "SET the new value, WHERE the one row",
               body: "Name the column you're changing and the test that isolates it.",
-              code: "UPDATE waiver_wire\nSET trend = 5\nWHERE player = 'Josh Allen';",
+              code: `UPDATE waiver_wire\nSET trend = 5\nWHERE player = '${WIRE_SQL}';`,
             },
           ],
           previewSql: "SELECT player, trend FROM waiver_wire;",
@@ -784,7 +789,7 @@ export const SQL_NEXT_UNITS: Unit[] = [
         intro: {
           title: "Say the WHERE before you run the UPDATE.",
           text: "A missing WHERE isn't a style nit. It's every row in the table. If you're unsure, SELECT with that same WHERE first and count the rows.",
-          code: "SELECT * FROM waiver_wire WHERE player = 'Josh Allen';",
+          code: `SELECT * FROM waiver_wire WHERE player = '${WIRE_SQL}';`,
         },
         exercises: [
           mc(
@@ -800,14 +805,14 @@ export const SQL_NEXT_UNITS: Unit[] = [
           ),
           fill(
             "Set trend to 5 for one player only.",
-            ["UPDATE waiver_wire SET trend = 5 ", null, " player = 'Josh Allen';"],
+            ["UPDATE waiver_wire SET trend = 5 ", null, ` player = '${WIRE_SQL}';`],
             ["WHERE", "VALUES", "AND", "FROM"],
             ["WHERE"],
             "WHERE is the fence. Without it the SET applies to all rows.",
           ),
           fill(
             "Delete only that player from the wire.",
-            ["DELETE FROM waiver_wire ", null, " player = 'Josh Allen';"],
+            ["DELETE FROM waiver_wire ", null, ` player = '${WIRE_SQL}';`],
             ["WHERE", "SET", "SELECT", "LIMIT"],
             ["WHERE"],
             "DELETE FROM names the table. WHERE is what stops it deleting the rest.",

@@ -154,7 +154,7 @@ export default function FieldSandbox() {
             <p className="mt-4 border-t border-panel-border pt-3 font-mono text-[10px] leading-relaxed text-ink-muted">
               {meta.weeklyRows.toLocaleString()} weekly rows (
               {meta.weeklySeason} season) · {meta.seasonRows.toLocaleString()}{" "}
-              player-seasons ({meta.summarySeasons.join("–")}) · real stats via
+              player-seasons ({meta.summarySeasons[0]}–{meta.summarySeasons[meta.summarySeasons.length - 1]}) · real stats via
               nflverse
             </p>
           )}

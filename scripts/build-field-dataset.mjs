@@ -11,8 +11,8 @@
 import { writeFile } from "node:fs/promises";
 import { parse } from "csv-parse/sync";
 
-const WEEKLY_SEASON = 2025; // full weekly detail for this season
-const SUMMARY_SEASONS = [2023, 2024, 2025]; // season-level rollups
+const WEEKLY_SEASON = 2026; // weekly detail for the current season, through its latest week
+const SUMMARY_SEASONS = [2024, 2025, 2026]; // season-level rollups (the newest is in progress)
 const MIN_SEASON_PPR = 50; // keeps ~top 350 fantasy-relevant players
 const POSITIONS = new Set(["QB", "RB", "WR", "TE"]);
 
@@ -115,7 +115,12 @@ function summarize(rows) {
     s.rec_tds += num(r.receiving_tds);
     s.fantasy_ppr += num(r.fantasy_points_ppr);
   }
-  return [...byPlayer.values()].filter((s) => s.fantasy_ppr >= MIN_SEASON_PPR);
+  // A season still being played is held to the same pace, not the same total:
+  // 50 PPR over 17 weeks is under 3 a week, and asking three weeks of 2026 to
+  // clear 50 kept barely forty players and emptied the weekly table.
+  const weeks = Math.max(...rows.map((r) => Number(r.week) || 0));
+  const bar = MIN_SEASON_PPR * Math.min(1, weeks / 17);
+  return [...byPlayer.values()].filter((s) => s.fantasy_ppr >= bar);
 }
 
 const weeklyBySeason = new Map();

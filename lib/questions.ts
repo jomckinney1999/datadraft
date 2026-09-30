@@ -6,7 +6,9 @@
  * timeout spent. You can solve one on a bus.
  *
  * Every question runs against the same pinned database the lessons use
- * (`lib/fantasy-data.ts`), which is real nflverse weekly scoring, 2022–2024.
+ * (`lib/fantasy-data.ts`), which is real nflverse weekly scoring from 2022
+ * through the newest completed week, plus a league built from real Sleeper
+ * data. Numbers a prompt quotes come from lib/lesson-facts.generated.ts.
  * That matters twice over: the answers are checkable against any box score,
  * and one seeded database means a learner's mental model of the tables
  * carries from a lesson straight into a question.
@@ -37,6 +39,7 @@
  */
 
 import { SCHEMA } from "@/lib/fantasy-data";
+import { FACTS } from "@/lib/lesson-facts.generated";
 
 export type QuestionDifficulty = "easy" | "medium" | "hard";
 
@@ -320,7 +323,7 @@ ORDER BY fantasy_pts DESC;`,
     lang: "sql",
     tags: ["COUNT", "GROUP BY"],
     prompt:
-      "Three seasons is 50-odd games if you never miss one. Nobody does. Count how many games each running back actually shows up for across the whole table.",
+      `The table runs from ${FACTS.seasons[0]} through week ${FACTS.latest.week} of ${FACTS.latest.season} — ${FACTS.possibleGames} games if you never miss one. Nobody does. Count how many games each running back actually shows up for across the whole table.`,
     returns: "player and the count as games, most games first.",
     tables: ["week_results"],
     expected: `SELECT player, COUNT(*) AS games
@@ -331,7 +334,7 @@ ORDER BY games DESC;`,
     orderMatters: true,
     hint: "GROUP BY player turns thousands of rows into one row per player. COUNT(*) counts the rows inside each group.",
     explain:
-      "A missed game is an absent row, not a zero — which is exactly why COUNT(*) is the injury story. Christian McCaffrey comes back with 37, not 50.",
+      `A missed game is an absent row, not a zero — which is exactly why COUNT(*) is the injury story. Christian McCaffrey comes back with ${FACTS.gamesPlayed["Christian McCaffrey"]}, not ${FACTS.possibleGames}.`,
     art: "calendar",
   },
   {
@@ -342,33 +345,33 @@ ORDER BY games DESC;`,
     tags: ["ORDER BY", "LIMIT"],
     prompt:
       "Somebody started these guys. Find the five worst single-game scores in the table.",
-    returns: "player, season, week, fantasy_pts — worst first.",
+    returns: "player, season, week, fantasy_pts — worst first, ties broken by player A–Z.",
     tables: ["week_results"],
     expected: `SELECT player, season, week, fantasy_pts
 FROM week_results
-ORDER BY fantasy_pts ASC
+ORDER BY fantasy_pts ASC, player
 LIMIT 5;`,
     orderMatters: true,
-    hint: "Same shape as finding the best — just sort the other way.",
+    hint: "Same shape as finding the best — sort the other way, then by player so two identical scores always land in the same order.",
     explain:
       "ASC and DESC are the whole difference between a leaderboard and a blooper reel. ASC is the default, so writing it out is a favour to whoever reads the query next.",
     art: "storm",
   },
   {
     id: "whos-on-my-team",
-    players: ["Josh Allen", "Travis Kelce"],
+    players: ["Christian McCaffrey", "Jahmyr Gibbs"],
     title: "Who's On My Team",
     difficulty: "easy",
     lang: "sql",
     tags: ["JOIN"],
     prompt:
-      "The rosters table says who owns whom in an example 5-team league. Pull the Blitz Brothers roster with each player's real NFL team and position.",
+      "The rosters table is a five-team league drafted on real 2024 Sleeper ADP. Pull the Blitz Brothers roster with each player's 2024 NFL team and position.",
     returns: "player, team, position — one row per rostered player, player A–Z.",
     tables: ["rosters", "week_results"],
     expected: `SELECT DISTINCT r.player, w.team, w.position
 FROM rosters r
 JOIN week_results w ON w.player = r.player
-WHERE r.team_name = 'Blitz Brothers'
+WHERE r.team_name = 'Blitz Brothers' AND w.season = 2024
 ORDER BY r.player;`,
     orderMatters: true,
     hint: "week_results has a row per game, so joining straight to it repeats each player. DISTINCT tidies that up.",
@@ -383,7 +386,7 @@ ORDER BY r.player;`,
     lang: "sql",
     tags: ["WHERE", "ORDER BY"],
     prompt:
-      "The waiver table tracks how many leagues have each player rostered and which way that number is moving. Find the players trending up.",
+      "waiver_wire is Sleeper's real waiver wire: the share of Sleeper leagues rostering each player, and how many points that share moved in a week. Find the players trending up.",
     returns: "player, position, pct_rostered, trend — biggest riser first.",
     tables: ["waiver_wire"],
     expected: `SELECT player, position, pct_rostered, trend
@@ -393,7 +396,7 @@ ORDER BY trend DESC;`,
     orderMatters: true,
     hint: "Trending up means a trend above zero.",
     explain:
-      "waiver_wire is an invented example league, not NFL fact — who owns a player is private to one league. The /data page marks which tables are real and which are examples.",
+      `This is Sleeper's real wire going into week ${FACTS.league.wireWeek} of ${FACTS.league.season}. ${FACTS.league.topRiser.player}'s share jumped ${FACTS.league.topRiser.trend} points in a single week — that is what a waiver run looks like in data.`,
     art: "rocket",
   },
   {
@@ -550,13 +553,13 @@ ORDER BY season;`,
   },
   {
     id: "league-standings",
-    players: ["Josh Allen", "Travis Kelce", "Patrick Mahomes"],
+    players: ["Ja'Marr Chase", "Bijan Robinson", "Saquon Barkley"],
     title: "League Standings",
     difficulty: "medium",
     lang: "sql",
     tags: ["JOIN", "SUM", "GROUP BY"],
     prompt:
-      "Five teams, two players each, one season. Add up what each example-league team's roster scored in 2024 and post the standings.",
+      "Five teams, two draft picks each, one season. Add up what each team's roster scored in 2024 and post the standings.",
     returns: "team_name and total_pts rounded to one decimal — highest total first.",
     tables: ["rosters", "week_results"],
     expected: `SELECT r.team_name, ROUND(SUM(w.fantasy_pts), 1) AS total_pts

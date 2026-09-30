@@ -7,6 +7,7 @@
  */
 
 import type { Unit } from "./curriculum";
+import { FACTS } from "./lesson-facts.generated";
 
 export const FINAL_UNITS: Unit[] = [
   // ── SQL Fundamentals ─────────────────────────────────────────────
@@ -46,7 +47,7 @@ export const FINAL_UNITS: Unit[] = [
             },
           ],
           setup:
-            "Trade deadline desk: answer the commissioner's questions with live SQL against the real 2022–2024 PPR data.",
+            `Trade deadline desk: answer the commissioner's questions with live SQL against real PPR data from ${FACTS.seasons[0]} through week ${FACTS.latest.week} of ${FACTS.latest.season}.`,
           previewSql:
             "SELECT player, week, fantasy_pts FROM week_results WHERE season = 2024 ORDER BY fantasy_pts DESC LIMIT 8;",
           previewCaption: "2024 · biggest single-game scores",
@@ -111,7 +112,7 @@ export const FINAL_UNITS: Unit[] = [
             orderMatters: true,
             hint: "JOIN on player, WHERE season = 2024, GROUP BY team_name.",
             explain:
-              "Fourth & Long leads the invented league at 685.9 — now you can settle the group chat with a number.",
+              `${FACTS.league.leader.team} leads the league at ${FACTS.league.leader.pts} — now you can settle the group chat with a number.`,
           },
           {
             type: "query",
@@ -123,7 +124,7 @@ export const FINAL_UNITS: Unit[] = [
             orderMatters: false,
             hint: "COUNT(*) with WHERE fantasy_pts >= 30 — no season filter.",
             explain:
-              "107 boom games in the whole dataset. Rare enough to feel special, common enough to plan around.",
+              `${FACTS.boom30} boom games in the whole dataset. Rare enough to feel special, common enough to plan around.`,
           },
           {
             type: "query",
@@ -147,7 +148,7 @@ export const FINAL_UNITS: Unit[] = [
             orderMatters: true,
             hint: "LEFT JOIN rosters, keep WHERE r.player IS NULL, then aggregate.",
             explain:
-              "Lamar, Gibbs, Barkley, Bijan, Jefferson — elite production sitting off the invented rosters on purpose.",
+              `${FACTS.league.undraftedByPoints.slice(0, 5).join(", ")} — elite production that a five-team, two-round draft never reached.`,
           },
           {
             type: "query",
@@ -171,7 +172,7 @@ export const FINAL_UNITS: Unit[] = [
             orderMatters: true,
             hint: "WHERE player = 'Josh Allen', GROUP BY season, ORDER BY season.",
             explain:
-              "24.7 → 23.1 → 23.7. Stable excellence — the opposite of a one-year spike.",
+              `${FACTS.seasonPpg["Josh Allen"].map(([, ppg]) => ppg).join(" → ")}. Stable excellence — the opposite of a one-year spike.${FACTS.latest.week < 18 ? " The last one is a season still being played." : ""}`,
           },
           {
             type: "mc",

@@ -15,6 +15,10 @@
 import Link from "next/link";
 import TeamChip from "@/components/team-chip";
 import { SHORT_CREDIT } from "@/lib/data-source";
+import { FACTS as DATA } from "@/lib/lesson-facts.generated";
+
+const TOP = DATA.maxGame.games;
+const topWho = TOP.map((g) => `${g.player} in week ${g.week} of ${g.season}`);
 
 /** `SELECT * FROM week_results LIMIT 5`, verbatim. */
 const ROWS: [string, string, string, number, number, number][] = [
@@ -27,18 +31,21 @@ const ROWS: [string, string, string, number, number, number][] = [
 
 const FACTS = [
   {
-    value: "876",
+    value: String(DATA.rows),
     label: "real stat lines",
-    body: "One row per game a player actually played, 2022–2024. Twenty players, eighteen weeks a season.",
+    body: `One row per game a player actually played, ${DATA.seasons[0]} through week ${DATA.latest.week} of ${DATA.latest.season}. ${DATA.players} players, eighteen weeks a season.`,
   },
   {
-    value: "55.4",
+    value: String(DATA.maxGame.pts),
     label: "the biggest single game in the table",
-    body: "Ja'Marr Chase, week 10 of 2024. You will find it with an ORDER BY before your first lesson is over.",
+    body:
+      TOP.length > 1
+        ? `It has happened ${TOP.length} times: ${topWho.join(" and ")}. You will find both with an ORDER BY before your first lesson is over.`
+        : `${topWho[0]}. You will find it with an ORDER BY before your first lesson is over.`,
   },
   {
-    value: "37",
-    label: "games for Christian McCaffrey, not 50",
+    value: String(DATA.gamesPlayed["Christian McCaffrey"]),
+    label: `games for Christian McCaffrey, not ${DATA.possibleGames}`,
     body: "Missed games are absent, not zero. Real data has gaps, and the lessons teach you to see them instead of pretending they are not there.",
   },
 ];
@@ -112,8 +119,8 @@ export default function DataPeek() {
               </table>
             </div>
             <div className="border-t border-panel-border px-4 py-2.5 font-mono text-[10px] text-ink-muted">
-              {SHORT_CREDIT} · the example fantasy league (rosters, waiver wire)
-              is invented and labelled as such
+              {SHORT_CREDIT} · the league tables come from Sleeper: its real
+              waiver wire, and a draft run on its real ADP
             </div>
           </div>
 

@@ -2,8 +2,10 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import {
   DOWNLOADS,
-  LESSON_SEASONS,
+  LATEST,
+  LEAGUE_META,
   PROVENANCE,
+  SEASON_SPAN,
   SOURCES,
 } from "@/lib/data-source";
 import ThemeToggle from "@/components/theme-toggle";
@@ -12,7 +14,7 @@ import AppNav from "@/components/app-nav";
 export const metadata: Metadata = {
   title: "Where the data comes from — DataDraft",
   description:
-    "The NFL statistics behind every DataDraft lesson: the source, the licence, what is real, what is illustrative, and how to download it yourself.",
+    "The NFL statistics and fantasy data behind every DataDraft lesson: the sources, the licences, exactly how much of each table is real, and how to download it yourself.",
 };
 
 export default function DataPage() {
@@ -37,7 +39,7 @@ export default function DataPage() {
 
         {/* ── the source ── */}
         <section className="mt-10">
-          <h2 className="font-display text-xl font-bold text-ink">The source</h2>
+          <h2 className="font-display text-xl font-bold text-ink">The sources</h2>
           {SOURCES.map((src) => (
             <div
               key={src.id}
@@ -70,11 +72,10 @@ export default function DataPage() {
                 rel="noreferrer noopener"
                 className="mt-4 inline-block border border-turf bg-turf/15 px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25"
               >
-                Download the full dataset, free →
+                {src.downloadLabel}
               </a>
               <p className="mt-3 font-mono text-[11px] leading-relaxed text-ink-muted">
-                nflverse is maintained by volunteers. If you use it in your own
-                work, credit them — that is the whole of the licence.
+                {src.creditNote}
               </p>
             </div>
           ))}
@@ -86,10 +87,12 @@ export default function DataPage() {
             What is real, and what is not
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-            The stat lines are real. The fantasy league wrapped around them is
-            invented, because who owns a player is a fact about one private
-            league, not about the NFL. We would rather say so than let you assume
-            otherwise.
+            The stat lines are real, and so is the waiver wire: it is
+            Sleeper&apos;s, from week {LEAGUE_META.wireWeek} of{" "}
+            {LEAGUE_META.season}. The rosters are a draft run on real Sleeper ADP.
+            The order players went in is real, but the five managers are ours,
+            because a real league&apos;s rosters belong to the people in it. We
+            would rather say exactly that than let you assume more.
           </p>
           <div className="mt-4 space-y-2">
             {PROVENANCE.map((t) => (
@@ -105,7 +108,7 @@ export default function DataPage() {
                         : "border-gold/60 bg-gold/10 text-gold"
                     }`}
                   >
-                    {t.kind === "real" ? "real" : "illustrative"}
+                    {t.label}
                   </span>
                   <code className="font-mono text-[12px] text-ink">
                     {t.table}
@@ -159,9 +162,12 @@ export default function DataPage() {
             What is covered
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-            The {LESSON_SEASONS[0]}–{LESSON_SEASONS[LESSON_SEASONS.length - 1]}{" "}
-            regular seasons, PPR scoring, one row per game a player actually
-            played. Missed games are absent rather than recorded as zero, which is
+            Regular seasons from {SEASON_SPAN}, PPR scoring, one row per game a
+            player actually played. The newest season stops at its last
+            completed week when the lesson data was built, and the lesson data
+            is pinned: it is rebuilt by hand, so an answer never changes under
+            you mid-course. The {LATEST.season} season is live elsewhere on the
+            site. Missed games are absent rather than recorded as zero, which is
             why <code className="font-mono text-[12px] text-turf">COUNT(*)</code>{" "}
             on a player returns the games they played and not a tidy 17 — and why
             the JOIN lessons have something real to teach.

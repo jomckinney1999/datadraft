@@ -10,7 +10,7 @@
  * someone three questions into a drive.
  *
  * Collapsed by default so it never competes with the question, and it carries
- * the real/illustrative labelling from lib/data-source.ts rather than a second
+ * the provenance labels from lib/data-source.ts rather than a second
  * copy of that claim, plus a link out to the full provenance page.
  */
 
@@ -19,7 +19,7 @@ import Link from "next/link";
 import { SCHEMA } from "@/lib/fantasy-data";
 import { PROVENANCE } from "@/lib/data-source";
 
-const KIND = new Map(PROVENANCE.map((p) => [p.table, p.kind]));
+const PROV = new Map(PROVENANCE.map((p) => [p.table, p]));
 
 export default function SchemaReference() {
   const [open, setOpen] = useState(false);
@@ -52,22 +52,22 @@ export default function SchemaReference() {
       {open && (
         <div className="animate-fade-up space-y-2 border-t border-panel-border px-3 py-3">
           {SCHEMA.map((t) => {
-            const kind = KIND.get(t.table);
+            const prov = PROV.get(t.table);
             return (
               <div key={t.table}>
                 <div className="flex items-baseline gap-2">
                   <span className="font-mono text-[11px] font-semibold text-gold">
                     {t.table}
                   </span>
-                  {kind && (
+                  {prov && (
                     <span
                       className={`border px-1.5 font-mono text-[9px] uppercase tracking-widest ${
-                        kind === "real"
+                        prov.kind === "real"
                           ? "border-turf/50 text-turf"
                           : "border-gold/50 text-gold"
                       }`}
                     >
-                      {kind === "real" ? "real" : "example"}
+                      {prov.label}
                     </span>
                   )}
                 </div>

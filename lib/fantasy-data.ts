@@ -1,7 +1,8 @@
 // The database every SQL lesson and the landing sandbox query.
 //
-// `week_results` is REAL: nflverse-data weekly PPR fantasy points for the
-// 2022–2024 regular seasons, one row per game a player actually played.
+// `week_results` is REAL: nflverse-data weekly PPR fantasy points from 2022
+// through the newest completed week (LATEST in the generated file), regular
+// season only, one row per game a player actually played.
 // See lib/data-source.ts for attribution and lib/lesson-data.generated.ts
 // for the rows themselves (rebuild with scripts/build-lesson-dataset.mjs).
 //
@@ -12,12 +13,18 @@
 // tidy symmetric curve. Teaching analysis on invented numbers undercuts the
 // entire premise, and learners noticed.
 //
-// `rosters` and `waiver_wire` are the INVENTED league layer: real players,
-// fictional ownership. A waiver wire is a property of one private league, not
-// a fact about the NFL, so there is nothing real to source it from. Both are
-// labelled as such wherever they are shown — see PROVENANCE in data-source.ts.
+// `rosters` and `waiver_wire` are the league layer, and both come from
+// Sleeper. The wire is Sleeper's real 2024 wire: the share of Sleeper leagues
+// rostering each player going into week 10, and how far it moved in a week.
+// The rosters are a draft of the lesson cast run on Sleeper's real 2024 PPR
+// ADP — the draft order is real, the five managers are ours. They used to be
+// hand-invented; a league's rosters belong to one private league, so a draft
+// run on real ADP is as real as a public dataset can make them. What each
+// table is, precisely, is in PROVENANCE in data-source.ts.
 
 import {
+  LEAGUE_ROSTERS,
+  LEAGUE_WAIVER_WIRE,
   PACKED_GAMES,
   PACKED_WEEKS,
   PLAYER_NAMES,
@@ -63,40 +70,34 @@ export function getWeekResults(): WeekResultRow[] {
   }));
 }
 
-/** An example 5-team league slice. Real players, invented ownership.
- *
- * Deliberately not two superteams: elite talent is split so a SELECT * looks
- * like a real draft board. Christian McCaffrey stays rostered so the LEFT JOIN
- * lesson still has a genuine week-1 absence (he was hurt in 2024). Five players
- * stay off both rosters and the wire for the anti-join drills.
+/**
+ * Five teams, two rounds, snake order: each pick is the lesson-cast player
+ * with the best real Sleeper 2024 PPR ADP still on the board. Stored team by
+ * team, the way a league page lists rosters. Built by the dataset script.
  */
-export const ROSTERS: { team_name: string; player: string }[] = [
-  { team_name: "Blitz Brothers", player: "Josh Allen" },
-  { team_name: "Blitz Brothers", player: "Travis Kelce" },
-  { team_name: "Fourth & Long", player: "Patrick Mahomes" },
-  { team_name: "Fourth & Long", player: "Ja'Marr Chase" },
-  { team_name: "Touchdown Factory", player: "Christian McCaffrey" },
-  { team_name: "Touchdown Factory", player: "CeeDee Lamb" },
-  { team_name: "Gridiron Gurus", player: "Tyreek Hill" },
-  { team_name: "Gridiron Gurus", player: "George Kittle" },
-  { team_name: "Goal Line Gang", player: "Derrick Henry" },
-  { team_name: "Goal Line Gang", player: "Puka Nacua" },
-];
+export const ROSTERS: { team_name: string; player: string }[] = LEAGUE_ROSTERS.map(
+  ([team_name, player]) => ({ team_name, player }),
+);
 
-/** Example free-agent pool for the same invented league. */
+/**
+ * Sleeper's real waiver wire going into week 10 of 2024: the biggest risers
+ * and fallers in rostered share among players under 50% rostered.
+ * pct_rostered is the share of Sleeper leagues rostering him that week;
+ * trend is how many points that share moved since week 9.
+ */
 export const WAIVER_WIRE: {
   player: string;
   team: string;
   position: Position;
   pct_rostered: number;
   trend: number;
-}[] = [
-  { player: "Jahmyr Gibbs", team: "DET", position: "RB", pct_rostered: 44, trend: 12 },
-  { player: "Sam LaPorta", team: "DET", position: "TE", pct_rostered: 38, trend: 9 },
-  { player: "Bijan Robinson", team: "ATL", position: "RB", pct_rostered: 31, trend: 7 },
-  { player: "Davante Adams", team: "LV", position: "WR", pct_rostered: 27, trend: 3 },
-  { player: "Amon-Ra St. Brown", team: "DET", position: "WR", pct_rostered: 19, trend: -4 },
-];
+}[] = LEAGUE_WAIVER_WIRE.map(([player, team, position, pct_rostered, trend]) => ({
+  player,
+  team,
+  position: position as Position,
+  pct_rostered,
+  trend,
+}));
 
 function escapeSqlString(value: string): string {
   return value.replace(/'/g, "''");
@@ -111,7 +112,7 @@ export function buildSeedSql(): string {
     );`,
     `CREATE TABLE rosters (team_name TEXT, player TEXT);`,
     `CREATE TABLE waiver_wire (
-      player TEXT, team TEXT, position TEXT, pct_rostered INTEGER, trend INTEGER
+      player TEXT, team TEXT, position TEXT, pct_rostered REAL, trend REAL
     );`,
     // Real schedule, and the only table here with a date in it. week_results
     // joins to it on season + week, which is what makes opponent, home/away
@@ -218,7 +219,7 @@ ORDER BY total DESC;`,
   },
   {
     id: "career",
-    label: "Three-Season Totals",
+    label: "Career Totals",
     query: `SELECT player, COUNT(*) AS games, ROUND(SUM(fantasy_pts), 1) AS total
 FROM week_results
 GROUP BY player

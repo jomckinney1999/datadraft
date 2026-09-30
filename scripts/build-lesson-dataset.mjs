@@ -12,18 +12,48 @@
 //   Release tag `stats_player`, file stats_player_week_<season>.csv
 //   Licence: CC-BY-4.0 (attribution required — see lib/data-source.ts)
 //
+// The fantasy league (`rosters`, `waiver_wire`) comes from Sleeper, whose
+// read-only API is free and needs no key: https://docs.sleeper.com
+//   - rosters: a draft of the lesson cast run on Sleeper's real 2024 PPR ADP
+//   - waiver_wire: Sleeper's real 2024 wire — share of Sleeper leagues
+//     rostering each player, and how far that moved in a week
+// The ADP (`api.sleeper.com/projections`) and rostered-share
+// (`api.sleeper.app/players/nfl/research`) endpoints are the ones Sleeper's
+// own app uses and are not in its published docs, so a rebuild that fails
+// there is the first place to look. ESPN's equivalent is undocumented and its
+// terms forbid automated access; Yahoo's needs an OAuth app and a user login.
+//
 // Outputs:
 //   lib/lesson-data.generated.ts  compact real rows, imported by fantasy-data
 //   public/data/*.csv             the exact seeded tables, for learners to
 //                                 download and open in their own tool
 //
 // Usage: node scripts/build-lesson-dataset.mjs
-// Re-run when you want newer seasons; bump SEASONS below.
+// The lesson data is PINNED (docs/DATA-PIPELINE.md): re-run by hand, then run
+// scripts/verify-answer-keys.mjs and re-check any lesson prose that quotes a
+// number. The newest season is included up to its last completed week.
 
 import { writeFile, mkdir } from "node:fs/promises";
 import { parse } from "csv-parse/sync";
 
-const SEASONS = [2022, 2023, 2024];
+const SEASONS = [2022, 2023, 2024, 2025, 2026];
+
+// The example league plays the 2024 season. Every roster lesson scores it on
+// 2024 games, so the draft and the wire come from 2024 too — a league drafted
+// in 2026 and scored on 2024 would be scored on a season it never played.
+const LEAGUE_SEASON = 2024;
+const LEAGUE_TEAMS = [
+  "Blitz Brothers",
+  "Fourth & Long",
+  "Touchdown Factory",
+  "Gridiron Gurus",
+  "Goal Line Gang",
+];
+const LEAGUE_ROUNDS = 2;
+/** The wire as it stood going into this week of LEAGUE_SEASON. */
+const WIRE_WEEK = 10;
+const WIRE_RISERS = 6;
+const WIRE_FALLERS = 2;
 const BASE =
   "https://github.com/nflverse/nflverse-data/releases/download/stats_player";
 
@@ -128,9 +158,12 @@ const gameRows = await fetchGames();
 
 const wanted = new Set(CAST);
 const weekRows = [];
+/** Every player's rows for the league season — the wire needs their teams. */
+let leagueSeasonRows = [];
 
 for (const season of SEASONS) {
   const rows = await fetchSeason(season);
+  if (season === LEAGUE_SEASON) leagueSeasonRows = rows;
   for (const r of rows) {
     if (r.season_type !== "REG") continue;
     const name = r.player_display_name || r.player_name;
@@ -192,6 +225,118 @@ for (const r of weekRows) {
   totals.set(key, cur);
 }
 
+// ── The fantasy league, from Sleeper ─────────────────────────────
+const norm = (s) => String(s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+async function getJson(url, label) {
+  process.stdout.write(`fetching ${label} … `);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
+  const body = await res.json();
+  console.log("ok");
+  return body;
+}
+
+// Real preseason ADP for the league season, every skill position.
+const adpRows = await getJson(
+  `https://api.sleeper.com/projections/nfl/${LEAGUE_SEASON}?season_type=regular&position[]=QB&position[]=RB&position[]=WR&position[]=TE&order_by=adp_ppr`,
+  `Sleeper ${LEAGUE_SEASON} PPR ADP`,
+);
+const adpByName = new Map();
+for (const e of adpRows) {
+  const adp = e.stats?.adp_ppr;
+  if (typeof adp !== "number" || adp >= 999) continue; // 999 = undrafted
+  const key = norm(`${e.player?.first_name} ${e.player?.last_name}`);
+  // Two players can share a name; keep the one drafted earlier.
+  if (!adpByName.has(key) || adp < adpByName.get(key)) adpByName.set(key, adp);
+}
+
+// Five managers, snake order, each taking the cast player with the best real
+// ADP still on the board. The draft ORDER is real; the league and its team
+// names are ours. Only the cast is on the board because roster lessons join
+// to week_results, and a rostered player with no stat rows there would drop
+// out of every join for a reason no lesson has taught yet.
+const board = CAST.map((player) => {
+  const adp = adpByName.get(norm(player));
+  if (adp === undefined) throw new Error(`no ${LEAGUE_SEASON} Sleeper ADP for ${player}`);
+  return { player, adp };
+}).sort((a, b) => a.adp - b.adp || a.player.localeCompare(b.player));
+
+const picks = [];
+for (let round = 1; round <= LEAGUE_ROUNDS; round++) {
+  const order = round % 2 === 1 ? LEAGUE_TEAMS : [...LEAGUE_TEAMS].reverse();
+  for (const team of order) {
+    const next = board[picks.length];
+    picks.push({ team_name: team, player: next.player, round, pick: picks.length + 1, adp: next.adp });
+  }
+}
+// Stored team by team, the way a league page lists rosters.
+const rosterRows = LEAGUE_TEAMS.flatMap((t) => picks.filter((p) => p.team_name === t));
+
+// The wire: Sleeper's real rostered share going into WIRE_WEEK, against the
+// week before. Under 50% rostered means most leagues have him available.
+const sleeperPlayers = await getJson("https://api.sleeper.app/v1/players/nfl", "Sleeper players");
+const [ownedNow, ownedBefore] = await Promise.all([
+  getJson(
+    `https://api.sleeper.app/players/nfl/research/regular/${LEAGUE_SEASON}/${WIRE_WEEK}`,
+    `Sleeper rostered % ${LEAGUE_SEASON} wk ${WIRE_WEEK}`,
+  ),
+  getJson(
+    `https://api.sleeper.app/players/nfl/research/regular/${LEAGUE_SEASON}/${WIRE_WEEK - 1}`,
+    `Sleeper rostered % ${LEAGUE_SEASON} wk ${WIRE_WEEK - 1}`,
+  ),
+]);
+
+// Team as of the wire week, from nflverse, so it is the team he was actually
+// on that week rather than wherever he plays now.
+const teamAt = new Map(); // gsis id or normalised name -> { week, team }
+for (const r of leagueSeasonRows) {
+  if (r.season_type !== "REG" || num(r.week) > WIRE_WEEK) continue;
+  for (const key of [r.player_id, norm(r.player_display_name || r.player_name)]) {
+    if (!key) continue;
+    const cur = teamAt.get(key);
+    if (!cur || num(r.week) >= cur.week) teamAt.set(key, { week: num(r.week), team: r.team });
+  }
+}
+
+const castKeys = new Set(CAST.map(norm));
+const candidates = [];
+for (const [id, now] of Object.entries(ownedNow)) {
+  const before = ownedBefore[id];
+  const p = sleeperPlayers[id];
+  if (!before || !p || typeof now.owned !== "number") continue;
+  if (!["QB", "RB", "WR", "TE"].includes(p.position)) continue;
+  if (now.owned >= 50) continue;
+  const name = p.full_name || `${p.first_name} ${p.last_name}`;
+  if (castKeys.has(norm(name))) continue;
+  const at = teamAt.get(p.gsis_id?.trim()) ?? teamAt.get(norm(name));
+  if (!at) continue; // never played by then: not a pickup anyone was making
+  candidates.push({
+    player: name,
+    team: at.team,
+    position: p.position,
+    pct_rostered: round1(now.owned),
+    trend: round1(now.owned - before.owned),
+  });
+}
+candidates.sort((a, b) => b.trend - a.trend || a.player.localeCompare(b.player));
+const risers = candidates.slice(0, WIRE_RISERS);
+const fallers = candidates.filter((c) => c.trend < 0).slice(-WIRE_FALLERS);
+// Listed by rostered share, so sorting by trend visibly re-orders it.
+const wireRows = [...risers, ...fallers].sort(
+  (a, b) => b.pct_rostered - a.pct_rostered || a.player.localeCompare(b.player),
+);
+if (!wireRows.some((w) => w.position === "RB")) {
+  throw new Error("waiver wire has no RB — a lesson filters on position = 'RB'");
+}
+
+// How far the newest season goes: its last week with a completed game.
+const latestSeason = Math.max(...gameRows.map((g) => g.season));
+const latestWeek = Math.max(
+  ...gameRows.filter((g) => g.season === latestSeason).map((g) => g.week),
+);
+const builtOn = new Date().toISOString().slice(0, 10);
+
 const playerIndex = new Map(players.map((p, i) => [p, i]));
 
 // Compact encoding: the player name is the largest field by far, so store it
@@ -213,6 +358,30 @@ const generated = `// GENERATED by scripts/build-lesson-dataset.mjs — do not e
 //
 // Rows are ordered season → week → points desc so the first rows a learner
 // sees are different players from the same week.
+
+/** Seasons on file. The newest runs only through \`LATEST.week\`. */
+export const SEASONS_ON_FILE: number[] = ${JSON.stringify(SEASONS)};
+
+/** The newest season's last completed week at build time, and the build date. */
+export const LATEST = ${JSON.stringify({ season: latestSeason, week: latestWeek, builtOn })} as const;
+
+/**
+ * The example fantasy league, from Sleeper (see the builder for endpoints).
+ * rosters: ${LEAGUE_TEAMS.length} teams, ${LEAGUE_ROUNDS}-round snake draft of the lesson cast in
+ * real Sleeper ${LEAGUE_SEASON} PPR ADP order. waiver_wire: Sleeper's real
+ * rostered share going into ${LEAGUE_SEASON} week ${WIRE_WEEK}, and its change from week ${WIRE_WEEK - 1}.
+ */
+export const LEAGUE_META = ${JSON.stringify({ season: LEAGUE_SEASON, teams: LEAGUE_TEAMS.length, rounds: LEAGUE_ROUNDS, wireWeek: WIRE_WEEK })} as const;
+
+/** [team_name, player, round, overall pick, Sleeper ADP] */
+export const LEAGUE_ROSTERS: [string, string, number, number, number][] = [
+${rosterRows.map((r) => `  ${JSON.stringify([r.team_name, r.player, r.round, r.pick, r.adp])},`).join("\n")}
+];
+
+/** [player, team, position, pct_rostered, trend] */
+export const LEAGUE_WAIVER_WIRE: [string, string, string, number, number][] = [
+${wireRows.map((w) => `  ${JSON.stringify([w.player, w.team, w.position, w.pct_rostered, w.trend])},`).join("\n")}
+];
 
 export const PLAYER_NAMES: string[] = ${JSON.stringify(players, null, 0)};
 
@@ -255,6 +424,122 @@ ${[...totals.values()]
 `;
 
 await writeFile("lib/lesson-data.generated.ts", generated, "utf8");
+
+// ── Facts the lesson prose quotes ────────────────────────────────
+// Prose that says "876 rows" or "37 games, not 50" goes stale the moment the
+// data is rebuilt, and it already had: a rebuild once broke twelve lesson
+// explanations in one go. Prose reads these instead of typing the number, and
+// scripts/verify-answer-keys.mjs re-derives each one with SQL, so the builder
+// and the database cannot disagree either. Kept in its own small file so
+// importing a fact never drags the whole dataset into a bundle.
+const teamGames = new Map(); // "season|team" -> games that team played
+for (const g of gameRows) {
+  for (const t of [g.home_team, g.away_team]) {
+    const k = `${g.season}|${t}`;
+    teamGames.set(k, (teamGames.get(k) ?? 0) + 1);
+  }
+}
+const possibleGames = SEASONS.reduce((sum, s) => {
+  const perTeam = [...teamGames].filter(([k]) => k.startsWith(`${s}|`)).map(([, n]) => n);
+  return sum + (perTeam.length ? Math.max(...perTeam) : 0);
+}, 0);
+
+const gamesPlayed = {};
+for (const r of weekRows) gamesPlayed[r.player] = (gamesPlayed[r.player] ?? 0) + 1;
+
+// Per-season average, rounded the way SQLite's ROUND(AVG(x), 1) rounds it.
+// Summing floats and Math.round-ing disagrees at exact halves: McCaffrey's
+// four 2024 games average 11.95, which SQLite prints as 11.9 (the double sits
+// just under .95) and Math.round made 12.0. Sum in whole tenths, divide once,
+// and let toFixed round the double's exact value.
+const tenths = new Map(); // "player|season" -> [sum of tenths, games]
+for (const r of weekRows) {
+  const k = `${r.player}|${r.season}`;
+  const cur = tenths.get(k) ?? [0, 0];
+  tenths.set(k, [cur[0] + Math.round(r.fantasy_pts * 10), cur[1] + 1]);
+}
+const seasonPpg = {};
+for (const [k, [sum, n]] of [...tenths].sort((a, b) => a[0].localeCompare(b[0]))) {
+  const [player, season] = k.split("|");
+  (seasonPpg[player] ??= []).push([Number(season), Number((sum / 10 / n).toFixed(1))]);
+}
+for (const arc of Object.values(seasonPpg)) arc.sort((a, b) => a[0] - b[0]);
+
+const drafted = new Set(rosterRows.map((r) => r.player));
+const leagueTotals = new Map();
+for (const r of weekRows) {
+  if (r.season !== LEAGUE_SEASON) continue;
+  const pick = rosterRows.find((p) => p.player === r.player);
+  if (pick) leagueTotals.set(pick.team_name, (leagueTotals.get(pick.team_name) ?? 0) + r.fantasy_pts);
+}
+const [leaderTeam, leaderPts] = [...leagueTotals].sort((a, b) => b[1] - a[1])[0];
+const undraftedByPoints = [...totals.values()]
+  .filter((t) => t.season === LEAGUE_SEASON && !drafted.has(t.player))
+  .sort((a, b) => b.points - a.points)
+  .map((t) => t.player);
+const topRiser = [...wireRows].sort((a, b) => b.trend - a.trend)[0];
+const topRostered = [...totals.values()]
+  .filter((t) => t.season === LEAGUE_SEASON && drafted.has(t.player))
+  .sort((a, b) => b.points - a.points)[0];
+const teamsPerPlayer = new Map();
+for (const r of weekRows) {
+  if (!teamsPerPlayer.has(r.player)) teamsPerPlayer.set(r.player, new Set());
+  teamsPerPlayer.get(r.player).add(r.team);
+}
+const movers = [...teamsPerPlayer.values()].filter((s) => s.size > 1).length;
+
+const facts = {
+  rows: weekRows.length,
+  gamesTable: gameRows.length,
+  players: players.length,
+  seasons: SEASONS,
+  latest: { season: latestSeason, week: latestWeek },
+  teams: new Set(weekRows.map((r) => r.team)).size,
+  playerTeamPairs: new Set(weekRows.map((r) => `${r.player}|${r.team}`)).size,
+  /** Players who appear with more than one team. */
+  movers,
+  possibleGames,
+  /** The biggest single game on file, and every game that shares it. */
+  maxGame: (() => {
+    const pts = Math.max(...weekRows.map((r) => r.fantasy_pts));
+    return {
+      pts,
+      games: weekRows
+        .filter((r) => r.fantasy_pts === pts)
+        .sort((a, b) => a.season - b.season || a.week - b.week)
+        .map((r) => ({ player: r.player, season: r.season, week: r.week })),
+    };
+  })(),
+  over25: weekRows.filter((r) => r.fantasy_pts > 25).length,
+  boom30: weekRows.filter((r) => r.fantasy_pts >= 30).length,
+  gamesPlayed,
+  seasonPpg,
+  league: {
+    season: LEAGUE_SEASON,
+    wireWeek: WIRE_WEEK,
+    drafted: drafted.size,
+    undrafted: players.length - drafted.size,
+    wireRows: wireRows.length,
+    leader: { team: leaderTeam, pts: round1(leaderPts) },
+    undraftedByPoints,
+    topRiser: { player: topRiser.player, trend: topRiser.trend },
+    topRostered: { player: topRostered.player, pts: round1(topRostered.points) },
+  },
+};
+
+await writeFile(
+  "lib/lesson-facts.generated.ts",
+  `// GENERATED by scripts/build-lesson-dataset.mjs — do not edit by hand.
+//
+// Numbers the lesson prose quotes, derived from the same rows the lessons
+// seed. scripts/verify-answer-keys.mjs re-checks each one against the
+// database. Import from here rather than typing a number into a lesson.
+
+export const FACTS = ${JSON.stringify(facts, null, 2)} as const;
+`,
+  "utf8",
+);
+console.log("lib/lesson-facts.generated.ts written");
 console.log(
   `\nlib/lesson-data.generated.ts — ${weekRows.length} week rows, ${players.length} players, ${totals.size} season totals`,
 );
@@ -317,9 +602,38 @@ await writeFile(
   "utf8",
 );
 
-console.log(
-  "public/data/week_results.csv + season_totals.csv + games.csv written (learner downloads)",
+await writeFile(
+  "public/data/rosters.csv",
+  csv(
+    ["team_name", "player", "round", "pick", "sleeper_adp"],
+    rosterRows.map((r) => [r.team_name, r.player, r.round, r.pick, r.adp]),
+  ),
+  "utf8",
 );
+
+await writeFile(
+  "public/data/waiver_wire.csv",
+  csv(
+    ["player", "team", "position", "pct_rostered", "trend"],
+    wireRows.map((w) => [w.player, w.team, w.position, w.pct_rostered, w.trend]),
+  ),
+  "utf8",
+);
+
+console.log(
+  "public/data/week_results.csv + season_totals.csv + games.csv + rosters.csv + waiver_wire.csv written (learner downloads)",
+);
+
+console.log(`\nleague draft (${LEAGUE_SEASON} Sleeper PPR ADP):`);
+for (const p of picks) {
+  console.log(`  ${String(p.pick).padStart(2)}. ${p.team_name.padEnd(18)} ${p.player.padEnd(20)} ADP ${p.adp}`);
+}
+console.log(`undrafted cast: ${board.slice(picks.length).map((b) => `${b.player} (${b.adp})`).join(", ")}`);
+console.log(`\nwaiver wire going into ${LEAGUE_SEASON} week ${WIRE_WEEK}:`);
+for (const w of wireRows) {
+  console.log(`  ${w.player.padEnd(22)} ${w.team.padEnd(4)} ${w.position.padEnd(3)} ${String(w.pct_rostered).padStart(5)}%  trend ${w.trend > 0 ? "+" : ""}${w.trend}`);
+}
+console.log(`\nnewest data: ${latestSeason} through week ${latestWeek} (built ${builtOn})`);
 
 // Quick sanity report so a rebuild that goes wrong is obvious immediately.
 const top = [...totals.values()].sort((a, b) => b.points - a.points)[0];

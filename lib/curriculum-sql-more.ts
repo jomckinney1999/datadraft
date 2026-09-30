@@ -3,6 +3,7 @@
  */
 
 import type { FillExercise, Lesson, MCExercise, QueryExercise, Unit } from "./curriculum";
+import { FACTS } from "./lesson-facts.generated";
 
 function lesson(partial: Lesson): Lesson {
   return partial;
@@ -349,7 +350,7 @@ export const SQL_MORE_UNITS: Unit[] = [
           steps: [
             {
               title: "One player, many games",
-              body: "Josh Allen is one roster row and many week_results rows. A join keeps every match. That's why the roster 'grows.' It didn't. You're looking at games now.",
+              body: "Saquon Barkley is one roster row and many week_results rows. A join keeps every match. That's why the roster 'grows.' It didn't. You're looking at games now.",
             },
             {
               title: "Count before and after",
@@ -1067,7 +1068,7 @@ export const SQL_MORE_UNITS: Unit[] = [
         },
         intro: {
           title: "Correct and fast aren't the same question.",
-          text: "On 876 rows you won't feel it. On 876 million you will. Filtering in ON for the right-hand table is the habit.",
+          text: `On ${FACTS.rows} rows you won't feel it. On ${FACTS.rows} million you will. Filtering in ON for the right-hand table is the habit.`,
           code: "ON r.player = w.player AND w.season = 2024",
         },
         exercises: [
@@ -1097,9 +1098,9 @@ export const SQL_MORE_UNITS: Unit[] = [
             "Same columns. A smaller right-hand side.",
           ),
           query(
-            "2024, QBs only, player and week. Still from rosters joined to week_results.",
+            "2024, running backs only, player and week. Still from rosters joined to week_results.",
             "-- your query\n",
-            "SELECT r.player, w.week FROM rosters r JOIN week_results w ON r.player = w.player AND w.season = 2024 AND w.position = 'QB';",
+            "SELECT r.player, w.week FROM rosters r JOIN week_results w ON r.player = w.player AND w.season = 2024 AND w.position = 'RB';",
             "Both tests in the ON clause.",
             "Each AND shrinks the match. Don't leave them for a cleanup step you'll forget.",
           ),
