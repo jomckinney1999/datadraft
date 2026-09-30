@@ -35,6 +35,7 @@ import {
   type Lang,
 } from "@/lib/runtimes";
 import { useModule } from "@/lib/use-module";
+import { useRouter } from "next/navigation";
 import LessonOutline from "@/components/lesson-outline";
 import CourseArt, { hasCourseArt } from "@/components/course-art";
 import UnitArt, { hasUnitArt } from "@/components/unit-art";
@@ -178,6 +179,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const [engineReady, setEngineReady] = useState(false);
   const savedRef = useRef(false);
   const { moduleId } = useModule();
+  const router = useRouter();
 
   const [phase, setPhase] = useState<Phase>("loading");
   const [timeoutBlocked, setTimeoutBlocked] = useState(false);
@@ -215,6 +217,53 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const [firstTry, setFirstTry] = useState<Record<number, boolean>>({});
   const [attempted, setAttempted] = useState<Record<number, boolean>>({});
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+
+  /**
+   * The graded play's feedback panel. When a play is graded the panel grows
+   * under the question, and on a laptop screen it grew straight past the
+   * bottom edge — the Continue button with it. The action bar is pinned now,
+   * and this scrolls the page so the panel sits in the space between the
+   * scorebug and the bar: all of it when it fits, otherwise its top just
+   * under the scorebug. Measured, not a fixed margin, because the bar is
+   * twice as tall after a miss (headline plus three buttons) as after a hit.
+   */
+  const feedbackRef = useRef<HTMLDivElement | null>(null);
+  const topBarRef = useRef<HTMLDivElement | null>(null);
+  const actionBarRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!feedback) return;
+    const still = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const id = requestAnimationFrame(() => {
+      const el = feedbackRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const top = (topBarRef.current?.getBoundingClientRect().bottom ?? 0) + 12;
+      const bottom = (actionBarRef.current?.getBoundingClientRect().top ?? window.innerHeight) - 12;
+      let delta = 0;
+      if (r.height > bottom - top) delta = r.top - top;
+      else if (r.bottom > bottom) delta = r.bottom - bottom;
+      else if (r.top < top) delta = r.top - top;
+      if (Math.abs(delta) > 1) {
+        window.scrollBy({ top: delta, behavior: still ? "auto" : "smooth" });
+      }
+    });
+    return () => cancelAnimationFrame(id);
+  }, [feedback]);
+
+  /**
+   * Arrow keys drive the lesson. → is the primary button of whatever screen
+   * you are on (next beat, next card, Check, Continue, next lesson), ← steps
+   * back through the intro, ↑/↓ move the multiple-choice selection. The
+   * listener is attached once and calls whichever handler the latest render
+   * left in this ref, so it always sees current state. Keys typed into an
+   * editor or any text field are never intercepted — the caret needs them.
+   */
+  const keyRef = useRef<((e: KeyboardEvent) => void) | null>(null);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => keyRef.current?.(e);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   // per-exercise inputs
   const [mcChoice, setMcChoice] = useState<number | null>(null);
@@ -771,6 +820,10 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       result = grade();
     }
     if (!result) return; // soft error (code didn't run) — no down burned
+    // It ran and was graded, so any "syntax error — fix & retry" left from an
+    // earlier attempt is stale; leaving it up beside a graded answer read as
+    // though this attempt had failed to run too.
+    setSoftError(null);
 
     const isFirstAttempt = !attempted[currentIdx];
     setAttempted((m) => ({ ...m, [currentIdx]: true }));
@@ -986,6 +1039,79 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       exercise.type === "formula");
   const isReviewPlay =
     currentIdx !== undefined && (reviewCounts[currentIdx] ?? 0) > 0;
+  const checkDisabled =
+    !exercise ||
+    (exercise.type === "mc" && mcChoice === null) ||
+    (exercise.type === "fill" && fillSlots.some((s) => s === null)) ||
+    (exercise.type === "query" && !engineReady) ||
+    (exercise.type === "code" && (!!runtimeLoading || running || checking)) ||
+    (exercise.type === "formula" &&
+      (!formulaText.replace(/^=/, "").trim() || running || checking));
+
+  keyRef.current = (e: KeyboardEvent) => {
+    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    const k = e.key;
+    if (k !== "ArrowRight" && k !== "ArrowLeft" && k !== "ArrowUp" && k !== "ArrowDown") return;
+    const t = e.target;
+    if (
+      t instanceof HTMLElement &&
+      (t.isContentEditable || t.closest("input, textarea, select, [contenteditable='true']"))
+    ) {
+      return;
+    }
+    if (outlineOpen) return;
+    const fwd = k === "ArrowRight";
+    const back = k === "ArrowLeft";
+
+    if (phase === "brief") {
+      if (fwd) {
+        e.preventDefault();
+        if (onLastBriefStep) setPhase("intro");
+        else setBriefStep((i) => i + 1);
+      } else if (back && briefStep > 0) {
+        e.preventDefault();
+        setBriefStep((i) => i - 1);
+      }
+      return;
+    }
+    if (phase === "intro") {
+      if (fwd) {
+        e.preventDefault();
+        if (introStep < introCards.length - 1) setIntroStep((s) => s + 1);
+        else setPhase("exercise");
+      } else if (back) {
+        e.preventDefault();
+        if (introStep > 0) setIntroStep((s) => s - 1);
+        else setPhase("brief");
+      }
+      return;
+    }
+    if (phase === "exercise" && exercise) {
+      if (feedback) {
+        if (fwd) {
+          e.preventDefault();
+          handleContinue();
+        }
+        return;
+      }
+      if (exercise.type === "mc" && (k === "ArrowUp" || k === "ArrowDown")) {
+        e.preventDefault();
+        const n = exercise.options.length;
+        const step = k === "ArrowDown" ? 1 : -1;
+        setMcChoice((c) => (c === null ? (step > 0 ? 0 : n - 1) : (c + step + n) % n));
+        return;
+      }
+      if (fwd && !checkDisabled) {
+        e.preventDefault();
+        void handleCheck();
+      }
+      return;
+    }
+    if (phase === "complete" && fwd && nextId) {
+      e.preventDefault();
+      router.push(`/learn/${nextId}`);
+    }
+  };
 
   return (
     <div className="lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
@@ -1016,7 +1142,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
         </div>
       )}
     <div
-      className={`relative mx-auto flex min-h-screen w-full flex-col px-4 pb-32 sm:pb-10 ${
+      className={`relative mx-auto flex min-h-screen w-full flex-col px-4 ${
         phase === "exercise" && isHandsOn
           ? "max-w-6xl"
           : "max-w-xl sm:max-w-2xl"
@@ -1035,7 +1161,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
         accent={rewardToast?.accent}
       />
       {/* top bar — frosted scorebug */}
-      <div className="glass sticky top-0 z-20 -mx-4 border-b border-panel-border/50 px-4 py-3.5">
+      <div ref={topBarRef} className="glass sticky top-0 z-20 -mx-4 border-b border-panel-border/50 px-4 py-3.5">
         <div className="flex items-center gap-3">
           <Link
             href="/learn"
@@ -1080,7 +1206,10 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       {/* The unit's own picture beside the title, in the same lit card as the
           roadmap's current unit, so walking from the path into a lesson
           keeps the same picture in view. Falls back to the course's. */}
-      {(hasUnitArt(entry.unit.id) || (artId && hasCourseArt(artId))) && (
+      {/* Only on the brief: during plays the scorebug already names the
+          lesson, and this card's height is what pushed Continue off a laptop
+          screen. */}
+      {phase === "brief" && (hasUnitArt(entry.unit.id) || (artId && hasCourseArt(artId))) && (
         <div className="unit-banner mt-4 flex items-center justify-between gap-4 !py-3">
           <div className="min-w-0">
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-turf">
@@ -1101,7 +1230,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       )}
 
       {phase === "brief" && (
-        <div className="animate-fade-up flex flex-1 flex-col justify-center gap-6 pt-6">
+        <div className="flex flex-1 flex-col">
+        <div className="animate-fade-up flex flex-1 flex-col justify-center gap-6 py-6">
           <div className="flex items-start gap-4">
             <div className="hidden shrink-0 sm:block">
               <Coach mood="happy" size={104} />
@@ -1265,30 +1395,38 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             />
           )}
 
-          {onLastBriefStep ? (
-            <button
-              type="button"
-              onClick={() => setPhase("intro")}
-              className="btn-check"
-            >
-              Show me how
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setBriefStep((i) => i + 1)}
-              className="press w-full rounded-2xl border-2 border-panel-border bg-panel px-6 py-3.5 font-display text-base font-bold text-ink transition-colors hover:border-turf/50 hover:text-turf"
-            >
-              Got it
-            </button>
-          )}
+        </div>
+          <div className="lesson-actionbar">
+            {onLastBriefStep ? (
+              <button
+                type="button"
+                onClick={() => setPhase("intro")}
+                aria-keyshortcuts="ArrowRight"
+                className="btn-check"
+              >
+                Show me how
+                <KeyHint />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setBriefStep((i) => i + 1)}
+                aria-keyshortcuts="ArrowRight"
+                className="press w-full rounded-2xl border-2 border-panel-border bg-panel px-6 py-3.5 font-display text-base font-bold text-ink transition-colors hover:border-turf/50 hover:text-turf"
+              >
+                Got it
+                <KeyHint />
+              </button>
+            )}
+          </div>
         </div>
       )}
 
       {phase === "intro" && (
+        <div className="flex flex-1 flex-col">
         <div
           key={introStep}
-          className="animate-fade-up flex flex-1 flex-col items-center justify-center gap-6 text-center"
+          className="animate-fade-up flex flex-1 flex-col items-center justify-center gap-6 py-6 text-center"
         >
           <Coach mood="happy" size={140} />
           <TheoryCardView card={introCards[introStep]} />
@@ -1315,23 +1453,32 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
               ))}
             </div>
           )}
-          {introStep < introCards.length - 1 ? (
-            <button
-              type="button"
-              onClick={() => setIntroStep((s) => s + 1)}
-              className="press w-full max-w-sm rounded-2xl border-2 border-panel-border bg-panel px-6 py-3.5 font-display text-base font-bold text-ink transition-colors hover:border-turf/50 hover:text-turf"
-            >
-              Next
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setPhase("exercise")}
-              className="btn-check max-w-sm"
-            >
-              Let&apos;s practice
-            </button>
-          )}
+        </div>
+          <div className="lesson-actionbar">
+            <div className="mx-auto max-w-sm">
+              {introStep < introCards.length - 1 ? (
+                <button
+                  type="button"
+                  onClick={() => setIntroStep((s) => s + 1)}
+                  aria-keyshortcuts="ArrowRight"
+                  className="press w-full rounded-2xl border-2 border-panel-border bg-panel px-6 py-3.5 font-display text-base font-bold text-ink transition-colors hover:border-turf/50 hover:text-turf"
+                >
+                  Next
+                  <KeyHint />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setPhase("exercise")}
+                  aria-keyshortcuts="ArrowRight"
+                  className="btn-check"
+                >
+                  Let&apos;s practice
+                  <KeyHint />
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
@@ -1433,6 +1580,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 )}
                 {feedback && (
                   <div
+                    ref={feedbackRef}
                     className={`mt-5 animate-feedback-rise ${
                       feedback.correct ? "feedback-win" : "feedback-miss"
                     }`}
@@ -1804,6 +1952,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
 
                 {feedback && (
                   <div
+                    ref={feedbackRef}
                     className={`mt-4 animate-feedback-rise ${
                       feedback.correct ? "feedback-win" : "feedback-miss"
                     }`}
@@ -1848,7 +1997,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             </>
           )}
 
-          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-panel-border/80 bg-night/95 px-4 py-4 backdrop-blur-md lg:static lg:mt-6 lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+          <div ref={actionBarRef} className="lesson-actionbar">
             <div
               className={`mx-auto ${
                 isHandsOn ? "max-w-6xl" : "max-w-xl sm:max-w-none"
@@ -1858,21 +2007,12 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 <button
                   type="button"
                   onClick={handleCheck}
-                  disabled={
-                    (exercise.type === "mc" && mcChoice === null) ||
-                    (exercise.type === "fill" &&
-                      fillSlots.some((s) => s === null)) ||
-                    (exercise.type === "query" && !engineReady) ||
-                    (exercise.type === "code" &&
-                      (!!runtimeLoading || running || checking)) ||
-                    (exercise.type === "formula" &&
-                      (!formulaText.replace(/^=/, "").trim() ||
-                        running ||
-                        checking))
-                  }
+                  disabled={checkDisabled}
+                  aria-keyshortcuts="ArrowRight"
                   className="btn-check"
                 >
                   {checking ? "Checking…" : "Check"}
+                  {!checking && <KeyHint />}
                 </button>
               ) : (
                 <div className="flex flex-col gap-3">
@@ -1900,12 +2040,17 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                       {replayMsg}
                     </p>
                   )}
+                  {/* On a phone the two recovery buttons share a row, so a miss
+                      doesn't stack three full-width buttons into a bar that
+                      eats a third of the screen. On desktop the wrapper
+                      dissolves (sm:contents) and all three sit in one row. */}
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+                    <div className="grid auto-cols-fr grid-flow-col gap-2 empty:hidden sm:contents">
                     {!feedback.correct && feedback.playKind !== "turnover" && (
                       <button
                         type="button"
                         onClick={handleTryAgainNow}
-                        className="rounded-2xl border-2 border-ice/50 border-b-4 bg-ice/10 px-5 py-3.5 font-mono text-[12px] font-bold uppercase tracking-wider text-ice transition-colors hover:bg-ice/20"
+                        className="rounded-2xl border-2 border-ice/50 border-b-4 bg-ice/10 px-3 py-2.5 font-mono text-[11px] font-bold uppercase tracking-wider text-ice transition-colors hover:bg-ice/20 sm:px-5 sm:py-3.5 sm:text-[12px]"
                       >
                         Try again now
                       </button>
@@ -1914,19 +2059,21 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                       <button
                         type="button"
                         onClick={handleInstantReplay}
-                        className="rounded-2xl border-2 border-gold/50 border-b-4 bg-gold/10 px-5 py-3.5 font-mono text-[12px] font-bold uppercase tracking-wider text-gold transition-colors hover:bg-gold/20"
+                        className="rounded-2xl border-2 border-gold/50 border-b-4 bg-gold/10 px-3 py-2.5 font-mono text-[11px] font-bold uppercase tracking-wider text-gold transition-colors hover:bg-gold/20 sm:px-5 sm:py-3.5 sm:text-[12px]"
                       >
                         {feedback.playKind === "turnover"
                           ? `Challenge flag · ${COST_CHALLENGE_FLAG} ✦`
                           : `Undo down · ${COST_INSTANT_REPLAY} ✦`}
-                        <span className="ml-2 font-normal text-ink-muted normal-case tracking-normal">
+                        <span className="ml-2 hidden font-normal text-ink-muted normal-case tracking-normal sm:inline">
                           ({(economy ?? loadEconomy()).tickets} left)
                         </span>
                       </button>
                     )}
+                    </div>
                     <button
                       type="button"
                       onClick={handleContinue}
+                      aria-keyshortcuts="ArrowRight"
                       className={
                         feedback.correct
                           ? "btn-continue-win"
@@ -1942,6 +2089,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                             : feedback.willReview
                               ? "Got it — next play"
                               : "Continue"}
+                      <KeyHint />
                     </button>
                   </div>
                 </div>
@@ -1952,7 +2100,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       )}
 
       {phase === "complete" && (
-        <div className="animate-fade-up flex flex-1 flex-col items-center justify-center gap-6 pt-8 text-center">
+        <div className="animate-fade-up flex flex-1 flex-col items-center justify-center gap-6 pb-10 pt-8 text-center">
           <div className="animate-trophy-in">
             <Coach mood="cheer" size={150} />
           </div>
@@ -2047,8 +2195,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
           )}
           <div className="flex w-full max-w-sm flex-col gap-2.5">
             {nextId ? (
-              <Link href={`/learn/${nextId}`} className="btn-check">
+              <Link href={`/learn/${nextId}`} aria-keyshortcuts="ArrowRight" className="btn-check">
                 Next lesson
+                <KeyHint />
               </Link>
             ) : (
               <p className="text-sm text-ink-muted">
@@ -2067,7 +2216,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       )}
 
       {phase === "turnover" && (
-        <div className="animate-fade-up flex flex-1 flex-col items-center justify-center gap-6 pt-8 text-center">
+        <div className="animate-fade-up flex flex-1 flex-col items-center justify-center gap-6 pb-10 pt-8 text-center">
           <Coach mood="sad" size={140} />
           <div>
             <p className="inline-flex rounded-full border border-gold/50 bg-gold/15 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-wider text-gold">
@@ -2115,5 +2264,20 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       )}
     </div>
     </div>
+  );
+}
+
+/**
+ * "→" beside a primary button's label: this button is also the right-arrow
+ * key. Desktop only — a phone has no arrow keys to hint at.
+ */
+function KeyHint() {
+  return (
+    <kbd
+      aria-hidden
+      className="ml-2 hidden rounded-md border border-current px-1.5 py-0.5 align-middle font-mono text-[10px] font-bold leading-none opacity-50 lg:inline-block"
+    >
+      →
+    </kbd>
   );
 }
