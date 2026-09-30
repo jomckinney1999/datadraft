@@ -14,7 +14,6 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { loadProgress, saveProgress, type Progress } from "@/lib/progress";
-import { readStoredSport, SPORT_STORAGE_KEY } from "@/lib/use-sport";
 import { readStoredModule, MODULE_STORAGE_KEY } from "@/lib/use-module";
 
 type Row = {
@@ -98,13 +97,6 @@ export async function syncProgress(): Promise<Progress | null> {
 
   // Local first, so the learner sees the merged state even if the write fails.
   saveProgress(merged);
-  if (remote?.sport && !readStoredSport()) {
-    try {
-      window.localStorage.setItem(SPORT_STORAGE_KEY, remote.sport);
-    } catch {
-      /* storage blocked — not fatal */
-    }
-  }
   if (remote?.module_id) {
     try {
       window.localStorage.setItem(MODULE_STORAGE_KEY, remote.module_id);
@@ -135,7 +127,9 @@ export async function pushProgress(progress?: Progress): Promise<void> {
       last_active_day: p.lastActiveDay,
       username: p.username,
       drafted_track: p.draftedTrack,
-      sport: readStoredSport(),
+      // The column predates the decision to ship football only. Writing a
+      // constant keeps migration 0004 untouched and keeps the door open.
+      sport: "football",
       module_id: readStoredModule(),
       badges: p.badges,
       best_combo: p.bestCombo,

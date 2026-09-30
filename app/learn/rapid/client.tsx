@@ -10,16 +10,13 @@ import {
   type Progress,
 } from "@/lib/progress";
 import { useEffect } from "react";
-import { useLearnMode } from "@/lib/use-learn-mode";
 
 export default function RapidPageClient() {
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
-  const { setMode } = useLearnMode();
 
   useEffect(() => {
     setProgress(loadProgress());
-    setMode("drills");
-  }, [setMode]);
+  }, []);
 
   return (
     <>
@@ -27,10 +24,10 @@ export default function RapidPageClient() {
       <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-16 pt-5 sm:px-6">
         <div className="mb-5 flex flex-wrap items-center gap-2">
           <Link
-            href="/learn/studio"
-            className="status-chip hover:border-ice/50 hover:text-ice"
+            href="/questions"
+            className="status-chip hover:border-gold/50 hover:text-gold"
           >
-            Studio
+            Question bank
           </Link>
         </div>
 

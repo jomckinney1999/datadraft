@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { readStoredSport } from "@/lib/use-sport";
 
 /**
  * Email capture, used anywhere the product can't deliver yet: the paid tiers,
@@ -41,7 +40,9 @@ export default function WaitlistForm({
           email,
           interest,
           source,
-          sport: readStoredSport(),
+          // One sport. The column stays so the segment is still readable
+          // in the dashboard if a second one ever ships.
+          sport: "football",
         }),
       });
       const data = await res.json().catch(() => ({}));

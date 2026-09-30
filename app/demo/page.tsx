@@ -194,7 +194,6 @@ export default function DemoPage() {
             ["/", "Landing"],
             ["/learn", "Course catalog"],
             ["/field", "Practice Field"],
-            ["/learn/draft", "Draft ceremony"],
             ["/account", "Sign in"],
           ].map(([href, label]) => (
             <Link

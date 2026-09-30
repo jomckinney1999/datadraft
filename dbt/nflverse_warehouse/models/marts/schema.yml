@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: dim_players
+    description: One row per player. Identity only, no performance.
+    columns:
+      - name: player_id
+        tests: [not_null, unique]
+      - name: position
+        tests:
+          - accepted_values:
+              values: ["QB", "RB", "WR", "TE", "K", "FB", "P", "LS"]
+
+  - name: fct_player_weeks
+    description: One row per player per game, with the game's conditions joined on.
+    columns:
+      - name: player_week_key
+        description: >
+          The grain, spelled out. If this is ever not unique the join to the
+          schedule has fanned out and every total downstream is wrong.
+        tests: [not_null, unique]
+      - name: player_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_players')
+              field: player_id
+      - name: game_id
+        description: >
+          Deliberately not `not_null`. A LEFT JOIN that finds nothing tells
+          you something real; forcing it to match would hide it.

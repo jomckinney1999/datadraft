@@ -1,36 +1,39 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  loadChecklist,
+  saveChecklist,
+  type Checklist,
+} from "@/lib/project-progress";
 import Link from "next/link";
 import AppNav from "@/components/app-nav";
 import Coach from "@/components/coach";
 import type { Project } from "@/lib/projects";
 
-const STORAGE_KEY = "sqlsports.project.checklist.v1";
-
-type Checklist = Record<string, boolean>;
-
-function loadChecklist(projectId: string): Checklist {
-  if (typeof window === "undefined") return {};
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    const all = JSON.parse(raw) as Record<string, Checklist>;
-    return all[projectId] ?? {};
-  } catch {
-    return {};
-  }
-}
-
-function saveChecklist(projectId: string, next: Checklist) {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const all = raw ? (JSON.parse(raw) as Record<string, Checklist>) : {};
-    all[projectId] = next;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-  } catch {
-    /* ignore quota / private mode */
-  }
+function StartLink({
+  project,
+  className,
+}: {
+  project: Project;
+  className: string;
+}) {
+  const href =
+    project.colabUrl ??
+    (project.repoPath
+      ? `https://github.com/jomckinney1999/SQL-Sports/tree/main/${project.repoPath}`
+      : null);
+  if (!href) return null;
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={className}
+    >
+      {project.colabUrl ? "Open in Google Colab →" : "Open the starter repo →"}
+    </a>
+  );
 }
 
 export default function ProjectGuide({ project }: { project: Project }) {
@@ -80,20 +83,25 @@ export default function ProjectGuide({ project }: { project: Project }) {
             Why this one
           </p>
           <p className="mt-2 text-sm leading-relaxed text-ink">
-            {project.pitch} Lessons use our shared NFL sheet. This project uses{" "}
-            <em className="not-italic text-turf">your</em> league — the story
-            hiring managers actually remember.
+            {project.pitch} Lessons run on a shared NFL sheet. A project ends
+            in something with your name on it:{" "}
+            <em className="not-italic text-turf">{project.artifact}</em>.
           </p>
-          <a
-            href={project.colabUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-gold mt-5 inline-flex"
-          >
-            Open in Google Colab →
-          </a>
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {project.skills.map((sk) => (
+              <span
+                key={sk}
+                className="rounded-md border border-panel-border px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-muted"
+              >
+                {sk}
+              </span>
+            ))}
+          </div>
+          <StartLink project={project} className="btn-gold mt-5 inline-flex" />
           <p className="mt-2 font-mono text-[10px] text-ink-muted">
-            Runs in the browser. Free Google account. No install.
+            {project.colabUrl
+              ? "Runs in the browser. Free Google account. No install."
+              : "Runs locally on DuckDB. No cloud warehouse, no card."}
           </p>
         </section>
 
@@ -214,14 +222,7 @@ export default function ProjectGuide({ project }: { project: Project }) {
         </section>
 
         <div className="mt-12 flex flex-wrap items-center gap-3">
-          <a
-            href={project.colabUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-gold"
-          >
-            Open in Colab
-          </a>
+          <StartLink project={project} className="btn-gold" />
           <Link
             href="/learn/track/sql-fundamentals"
             className="font-mono text-[11px] uppercase tracking-wider text-ink-muted hover:text-turf"

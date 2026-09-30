@@ -22,9 +22,12 @@ import { COURSES } from "@/lib/courses";
 import { liveLessons, getLesson } from "@/lib/curriculum";
 import { EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
 import { BADGES, isEarned, statsFrom } from "@/lib/achievements";
-import { CAREER_ROLES } from "@/lib/career-paths";
 import { SHORT_CREDIT } from "@/lib/data-source";
 import type { LiveBoard, LivePerformer, LiveWeek } from "@/lib/live-nfl";
+import type { Question } from "@/lib/questions";
+import { DIFFICULTY_XP } from "@/lib/questions";
+import QuestionArt from "@/components/question-art";
+import DifficultyChip from "@/components/difficulty-chip";
 
 type CourseProgress = {
   id: string;
@@ -37,29 +40,38 @@ type CourseProgress = {
 
 const ACTIONS = [
   {
+    href: "/questions",
+    name: "Questions",
+    blurb: "One problem at a time, on real NFL scoring. Nothing to lose.",
+    cta: "Open the bank",
+    accent: "gold" as const,
+  },
+  {
     href: "/learn",
-    name: "Learn",
+    name: "Courses",
     blurb: "SQL, Python, Excel and more, one short lesson at a time.",
     cta: "Browse courses",
     accent: "turf" as const,
   },
   {
-    href: "/field",
-    name: "Practice",
-    blurb: "Free play over real NFL data, plus interview cases. No timeouts.",
-    cta: "Open the field",
+    href: "/projects",
+    name: "Projects",
+    blurb: "Your own league through the Sleeper API, or a dbt warehouse.",
+    cta: "Pick a build",
     accent: "ice" as const,
-  },
-  {
-    href: "/learn/project/my-league-scorecard",
-    name: "Build",
-    blurb: "Turn your own league export into a portfolio piece.",
-    cta: "Start the project",
-    accent: "gold" as const,
   },
 ];
 
-export default function Dashboard({ live }: { live: LiveWeek | null }) {
+export default function Dashboard({
+  live,
+  qotd,
+  day,
+}: {
+  live: LiveWeek | null;
+  qotd: Question;
+  /** League-timezone day, resolved on the server so it can't drift. */
+  day: string;
+}) {
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
   const [hydrated, setHydrated] = useState(false);
 
@@ -98,16 +110,16 @@ export default function Dashboard({ live }: { live: LiveWeek | null }) {
     ? getLesson(upNext.nextLessonId)
     : undefined;
 
-  const role = CAREER_ROLES.find((r) => r.id === progress.draftedTrack);
   const earned = BADGES.filter((b) => isEarned(b, stats)).length;
 
   const steps = [
-    { label: "Pick a career path", done: Boolean(progress.draftedTrack) },
+    { label: "Solve the Question of the Day", done: progress.qotdLastDay !== "" },
     { label: "Finish your first lesson", done: stats.lessonsDone > 0 },
     { label: "Try the Practice Field", done: stats.lessonsDone > 2 },
     { label: "Earn your first badge", done: earned > 0 },
   ];
   const fresh = stats.lessonsDone === 0;
+  const qotdDone = progress.qotdLastDay === day;
 
   return (
     <>
@@ -122,9 +134,7 @@ export default function Dashboard({ live }: { live: LiveWeek | null }) {
                 {progress.username ? `Welcome back, ${progress.username}` : "Welcome back"}
               </h1>
               <p className="mt-2 max-w-lg text-sm leading-relaxed text-ink-soft">
-                {role
-                  ? `You're on the ${role.title} path. Pick up where you left off.`
-                  : "Pick a path when you're ready — or just start the next lesson below."}
+                Solve the day’s question, or pick up the next lesson.
               </p>
             </div>
             <Coach
@@ -165,6 +175,54 @@ export default function Dashboard({ live }: { live: LiveWeek | null }) {
             <Stat label="Lessons" value={stats.lessonsDone} />
             <Stat label="Badges" value={earned} />
           </div>
+        </section>
+
+        {/* The day's question — the reason to open this page on a Tuesday. */}
+        <section className="surface mt-4 overflow-hidden rounded-2xl border border-gold/40 bg-panel">
+          <div className="flex items-center gap-4 p-4 sm:p-5">
+            <span className="hidden h-16 w-24 shrink-0 overflow-hidden rounded-xl sm:block">
+              <QuestionArt art={qotd.art} className="h-full w-full" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-gold">
+                  Question of the day
+                </span>
+                <DifficultyChip difficulty={qotd.difficulty} />
+                {hydrated && qotdDone && (
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-turf">
+                    ✓ Done
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 font-display text-lg font-bold text-ink">
+                {qotd.title}
+              </p>
+              <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-ink-soft">
+                {qotd.prompt}
+              </p>
+            </div>
+            <div className="hidden shrink-0 text-right sm:block">
+              {hydrated && (
+                <p className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+                  {progress.qotdStreak} day
+                  {progress.qotdStreak === 1 ? "" : "s"} running
+                </p>
+              )}
+              <Link
+                href={`/questions/${qotd.id}`}
+                className="press btn-gold mt-2 inline-flex"
+              >
+                {qotdDone ? "Replay" : `Solve · +${DIFFICULTY_XP[qotd.difficulty]} XP`}
+              </Link>
+            </div>
+          </div>
+          <Link
+            href={`/questions/${qotd.id}`}
+            className="block border-t border-panel-border px-4 py-3 text-center font-mono text-[11px] font-bold uppercase tracking-wider text-gold sm:hidden"
+          >
+            {qotdDone ? "Replay today's question" : "Solve today's question →"}
+          </Link>
         </section>
 
         {/* Three ways in */}

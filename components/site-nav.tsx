@@ -4,15 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 
 /*
- * Deliberately short. Section anchors used to double as a table of contents
- * and crowded the bar with seven marketing jumps. Core product routes only —
- * Learn is the primary CTA; Practice / Interview / Account sit beside it.
- * Marketing sections stay on the homepage; they are just not in the header.
+ * Deliberately short, and the same four sections as the in-product AppNav so
+ * crossing from the landing page into the app does not re-arrange the world.
+ * Marketing sections stay on the page; they are not in the bar.
  */
 const ROUTE_LINKS = [
-  { href: "/field", label: "Sandbox" },
-  { href: "/interview", label: "Interview" },
-  { href: "/resources", label: "Resources" },
+  { href: "/questions", label: "Questions" },
+  { href: "/learn", label: "Courses" },
+  { href: "/projects", label: "Projects" },
   { href: "/account", label: "Account" },
 ];
 
@@ -42,10 +41,10 @@ export default function SiteNav() {
           ))}
 
           <Link
-            href="/learn"
+            href="/dashboard"
             className="whitespace-nowrap border border-turf/50 bg-turf/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-turf transition-colors duration-150 hover:border-turf hover:bg-turf/20"
           >
-            Learn
+            Start free
           </Link>
         </nav>
 
@@ -93,11 +92,11 @@ export default function SiteNav() {
             ))}
 
             <Link
-              href="/learn"
+              href="/dashboard"
               onClick={() => setOpen(false)}
               className="mt-2 border border-turf/50 bg-turf/10 px-3 py-2.5 text-center font-mono text-xs uppercase tracking-wider text-turf transition-colors duration-150 hover:border-turf hover:bg-turf/20"
             >
-              Learn
+              Start free
             </Link>
           </div>
         </nav>

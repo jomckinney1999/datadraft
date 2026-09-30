@@ -355,7 +355,7 @@ export default function QuestionWorkspace({
               {verdict === "wrong" && (
                 <div className="mt-3 rounded-xl border border-ice/40 bg-ice/5 p-4">
                   <p className="font-display text-base font-bold text-ice">
-                    Not the grid we're after.
+                    Not the grid we&apos;re after.
                   </p>
                   <p className="mt-1 text-sm leading-relaxed text-ink-soft">
                     Your query ran fine — it just returned something different.

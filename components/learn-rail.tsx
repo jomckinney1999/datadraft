@@ -78,7 +78,7 @@ const PRACTICE_LINKS: {
 }[] = [
   { href: "/field", name: "Practice Field", note: "free-play SQL", accent: "turf" },
   { href: "/excel", name: "Spreadsheet", note: "free-play Excel", accent: "turf" },
-  { href: "/interview", name: "Interview cases", note: "scripted scenarios", accent: "ice" },
+  { href: "/projects", name: "Projects", note: "builds & cases", accent: "ice" },
 ];
 
 /**

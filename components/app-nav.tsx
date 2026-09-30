@@ -31,12 +31,14 @@ import { useEffect, useState } from "react";
 import { EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
 import LearnStatusChips from "@/components/learn-status-chips";
 
+// Four sections, in the order someone moves through them: where am I, what
+// can I solve, what can I learn, what can I build. Adding a fifth means
+// taking one out.
 const LINKS = [
   { href: "/dashboard", label: "Dashboard", exact: true },
-  { href: "/learn", label: "Learn", exact: false },
-  { href: "/field", label: "Practice", exact: false },
-  { href: "/interview", label: "Interviews", exact: false },
-  { href: "/resources", label: "Career", exact: false },
+  { href: "/questions", label: "Questions", exact: false },
+  { href: "/learn", label: "Courses", exact: false },
+  { href: "/projects", label: "Projects", exact: false },
 ];
 
 function isCurrent(pathname: string, href: string, exact: boolean): boolean {

@@ -22,7 +22,7 @@ export default function StreakNudge({ progress }: { progress: Progress }) {
             One lesson lights the heater. Coach is waiting on the sideline.
           </p>
         </div>
-        <Link href="/learn/path" className="font-mono text-[11px] font-bold uppercase tracking-wider text-turf hover:underline">
+        <Link href="/questions" className="font-mono text-[11px] font-bold uppercase tracking-wider text-turf hover:underline">
           Take a snap →
         </Link>
       </div>
@@ -41,7 +41,7 @@ export default function StreakNudge({ progress }: { progress: Progress }) {
           </p>
         </div>
         <Link
-          href="/learn/path"
+          href="/questions"
           className="rounded-xl border border-gold/50 bg-gold/20 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-gold"
         >
           Protect it →

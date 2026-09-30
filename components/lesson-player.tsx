@@ -34,7 +34,6 @@ import {
 } from "@/lib/runtimes";
 import { useModule } from "@/lib/use-module";
 import LessonOutline from "@/components/lesson-outline";
-import { useSport } from "@/lib/use-sport";
 import {
   awardBadges,
   completeLesson,
@@ -175,7 +174,6 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const [engineReady, setEngineReady] = useState(false);
   const savedRef = useRef(false);
   const { moduleId } = useModule();
-  const { sport } = useSport();
 
   const [phase, setPhase] = useState<Phase>("loading");
   const [timeoutBlocked, setTimeoutBlocked] = useState(false);
@@ -556,10 +554,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   // Advance within whichever module the learner picked on the roadmap, so a
   // "just Python" learner isn't dropped into a SQL lesson at the end.
   const nextId = nextLessonId(lesson.id, moduleId);
-  // XP in the learner's own sport's language — yards for football, and the
-  // equivalent unit of ground gained for the other two.
-  const gainNoun =
-    sport === "basketball" ? "pts" : sport === "baseball" ? "bases" : "yards";
+  // One sport, so one noun. This used to branch on the learner's picked
+  // sport; basketball and baseball never had a dataset behind them.
+  const gainNoun = "yards";
   const introCards: TheoryCard[] = [lesson.intro, ...(lesson.film ?? [])];
 
   function runQuery(sql: string): QueryExecResult | undefined {

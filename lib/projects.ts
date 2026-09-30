@@ -1,10 +1,16 @@
 /**
- * Portfolio projects — guided builds that use the learner's own data
- * (or a sample), outside the graded lesson player.
+ * Portfolio builds — guided projects that end in something you can show
+ * someone, outside the graded lesson player.
  *
- * These are not `lib/finals.ts` knowledge checks. A project ships a notebook
- * / README someone can put on a resume. Start with one live project; add more
- * by extending PROJECTS.
+ * These are not `lib/finals.ts` knowledge checks, and they are not the short
+ * scripted cases in `lib/interview-cases.ts` either. A case is thirty minutes
+ * and a right answer. A build takes an afternoon and ends in a repo.
+ *
+ * The bar for adding one: it has to be something a learner could not have
+ * done on any other SQL site. Both of the live ones clear it — one pulls the
+ * learner's own fantasy league through a public API, the other models raw
+ * nflverse releases into a tested dbt warehouse. Neither exists elsewhere
+ * because neither works without football data someone actually cares about.
  */
 
 export type ProjectStep = {
@@ -34,10 +40,16 @@ export type Project = {
   status: "live" | "building";
   /** Course this pairs with best. */
   pairsWith: string;
-  /** Open-in-Colab URL (GitHub → Colab). */
-  colabUrl: string;
+  /** What you leave holding — shown on the card. */
+  artifact: string;
+  /** Skills badge row on the card. */
+  skills: string[];
+  /** Open-in-Colab URL, for notebook builds. */
+  colabUrl?: string;
   /** Raw notebook on GitHub for “view source”. */
-  notebookPath: string;
+  notebookPath?: string;
+  /** Source folder on GitHub, for builds that are a repo rather than a notebook. */
+  repoPath?: string;
   steps: ProjectStep[];
   questions: ProjectQuestion[];
   /** What they walk away with. */
@@ -47,6 +59,7 @@ export type Project = {
 const REPO = "jomckinney1999/SQL-Sports";
 const BRANCH = "main";
 const NOTEBOOK = "notebooks/my-league-scorecard.ipynb";
+const DBT_DIR = "dbt/nflverse_warehouse";
 
 export const PROJECTS: Project[] = [
   {
@@ -60,6 +73,8 @@ export const PROJECTS: Project[] = [
     accent: "gold",
     status: "live",
     pairsWith: "SQL Fundamentals",
+    artifact: "A Colab notebook on your own league",
+    skills: ["APIs", "SQL", "Joins", "Aggregation"],
     notebookPath: NOTEBOOK,
     colabUrl: `https://colab.research.google.com/github/${REPO}/blob/${BRANCH}/${NOTEBOOK}`,
     steps: [
@@ -136,6 +151,95 @@ export const PROJECTS: Project[] = [
       "A Colab notebook with your league loaded",
       "SQL answers to the scorecard questions",
       "A short README: question, data source, one finding",
+    ],
+  },
+
+  {
+    id: "nflverse-dbt-warehouse",
+    title: "Build the Warehouse",
+    blurb:
+      "Model three seasons of raw nflverse releases into a tested dbt warehouse — staging views, a dimension, a fact, and the tests that catch a bad join.",
+    pitch:
+      "Analytics engineering, on data nobody else\u2019s portfolio is using.",
+    hours: "3–4h",
+    level: "After SQL Fundamentals",
+    accent: "turf",
+    status: "live",
+    pairsWith: "Analytics Engineering",
+    artifact: "A dbt repo with passing tests and a lineage graph",
+    skills: ["dbt", "Data modelling", "Testing", "DuckDB"],
+    repoPath: DBT_DIR,
+    steps: [
+      {
+        id: "why",
+        title: "What analytics engineering actually is",
+        body: "Someone has to turn raw exports into tables the rest of the company can trust. That job is modelling, testing and documenting — and dbt is how most teams do it. You are about to do the whole loop on real data.",
+      },
+      {
+        id: "install",
+        title: "Install dbt — on DuckDB, not a cloud warehouse",
+        body: "pip install dbt-duckdb. No account, no credit card, no warehouse to wait on, and DuckDB reads CSVs straight off a URL. The dbt you write here is the same dbt you would run against Snowflake; only the profile file changes.",
+        cta: {
+          label: "Starter project on GitHub",
+          href: `https://github.com/${REPO}/tree/${BRANCH}/${DBT_DIR}`,
+        },
+      },
+      {
+        id: "staging",
+        title: "Write the staging layer",
+        body: "Two models, both views, both boring on purpose: pick the columns worth keeping, rename them the way a human would, cast them. No business logic — the moment staging decides what a good week is, every model downstream inherits that opinion.",
+      },
+      {
+        id: "marts",
+        title: "Build a dimension and a fact",
+        body: "dim_players answers who someone is. fct_player_weeks answers how they did, one row per player per game, with the game\u2019s own conditions joined on. Keeping those two jobs apart is most of what data modelling is.",
+      },
+      {
+        id: "test",
+        title: "Make the grain a test",
+        body: "Write the grain down as a column — player + season + week — and put a unique test on it. If a join ever fans out, every total downstream doubles and nothing errors. That test is the only thing standing between you and a wrong number in a meeting.",
+      },
+      {
+        id: "ship",
+        title: "Run dbt build, then docs",
+        body: "dbt build runs models and tests together, which is the habit worth forming — dbt run tells you nothing about whether the output is right. Then dbt docs generate && dbt docs serve, and screenshot the lineage graph. That picture is what gets you asked about it.",
+      },
+    ],
+    questions: [
+      {
+        id: "q1",
+        prompt: "Which position produced the most total PPR points in 2024?",
+        tip: "Group fct_player_weeks by position. This is the query the mart exists to make one line long.",
+      },
+      {
+        id: "q2",
+        prompt:
+          "Does scoring actually go up indoors? Compare average points by is_indoors.",
+        tip: "is_indoors is a column because you put it there in the mart. That is the payoff of modelling — the analyst never has to know which roof values mean what.",
+      },
+      {
+        id: "q3",
+        prompt:
+          "How many player-weeks have no matching game_id, and why might that be?",
+        tip: "The LEFT JOIN is deliberate. Count the nulls before you assume it is a bug.",
+      },
+      {
+        id: "q4",
+        prompt:
+          "Add a mart that ranks players within their position by weekly points.",
+        tip: "rank() over (partition by season, week, position order by fantasy_points_ppr desc). Then test that rank 1 is unique per partition.",
+      },
+      {
+        id: "q5",
+        prompt:
+          "Break a join on purpose — then watch which test catches it.",
+        tip: "Change the join in fct_player_weeks to match on season and week alone. dbt build should fail on player_week_key. If it does not, your test is not doing its job.",
+      },
+    ],
+    deliverables: [
+      "A dbt project that builds and passes its tests",
+      "A dimension and a fact with the grain written down",
+      "A lineage graph screenshot from dbt docs",
     ],
   },
 ];

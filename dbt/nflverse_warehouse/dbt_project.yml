@@ -1,0 +1,20 @@
+name: nflverse_warehouse
+version: "1.0.0"
+config-version: 2
+
+profile: nflverse_warehouse
+
+model-paths: ["models"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  nflverse_warehouse:
+    staging:
+      # Views: staging is renaming and casting, not storage. Materialising it
+      # would double the disk for no gain and hide the fact that these models
+      # are supposed to be cheap.
+      +materialized: view
+    marts:
+      # Tables: the marts are what gets queried over and over.
+      +materialized: table

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Dashboard from "@/components/dashboard";
 import { getLiveWeek } from "@/lib/live-nfl";
+import { leagueDay, questionOfTheDay } from "@/lib/questions";
 
 export const metadata: Metadata = {
   title: "Dashboard — DataDraft",
@@ -19,5 +20,8 @@ export default async function DashboardPage() {
   // Never throws: getLiveWeek returns null if nflverse is unreachable, and the
   // dashboard simply renders without the league panel.
   const live = await getLiveWeek();
-  return <Dashboard live={live} />;
+  // The day's question is resolved here rather than in the client component
+  // so the server and the browser agree on what "today" is.
+  const day = leagueDay();
+  return <Dashboard live={live} qotd={questionOfTheDay(day)} day={day} />;
 }

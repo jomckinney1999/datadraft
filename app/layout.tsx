@@ -21,9 +21,9 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-const TITLE = "DataDraft — Become a data analyst. Sports are the lens.";
+const TITLE = "DataDraft — SQL practice on real NFL data";
 const DESCRIPTION =
-  "SQL, Python, R, Git, and statistics — everything an aspiring data analyst or data scientist needs, taught through real NFL data. You don't have to watch the games.";
+  "LeetCode for football data. A new SQL question every day on real NFL scoring, courses from SELECT to window functions, and projects you can put your name on. You don't have to watch the games.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://sql-sports.vercel.app"),

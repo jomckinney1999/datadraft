@@ -1,0 +1,15 @@
+# Copy to ~/.dbt/profiles.yml (or set DBT_PROFILES_DIR to this folder).
+#
+# DuckDB on purpose: no cloud account, no credit card, no warehouse to spin
+# up, and it reads CSVs straight off a URL. The dbt you learn here is the
+# same dbt you would run against Snowflake or BigQuery — only the profile
+# changes.
+nflverse_warehouse:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: nflverse.duckdb
+      threads: 4
+      extensions:
+        - httpfs

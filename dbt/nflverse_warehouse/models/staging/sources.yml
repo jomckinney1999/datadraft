@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: nflverse
+    description: >
+      Free, community-maintained NFL data (CC BY 4.0). These are the raw
+      release CSVs, read straight over HTTPS — no loader, no ingestion job.
+      That is a DuckDB luxury; on a real warehouse something would have to
+      land these first, and the models downstream would not change.
+    meta:
+      url: https://github.com/nflverse/nflverse-data
+      licence: CC BY 4.0
+    tables:
+      - name: stats_player_week
+      - name: games

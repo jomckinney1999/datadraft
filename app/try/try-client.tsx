@@ -18,7 +18,6 @@ import {
   type Progress,
 } from "@/lib/progress";
 import { FREE_DAILY_TIMEOUTS } from "@/lib/economy";
-import { CAREER_ROLE_KEY } from "@/lib/use-career-role";
 
 function armGuest(): Progress {
   const existing = loadProgress();
@@ -35,11 +34,6 @@ function armGuest(): Progress {
     tickets: Math.max(existing.tickets, 40),
   };
   saveProgress(next);
-  try {
-    localStorage.removeItem(CAREER_ROLE_KEY);
-  } catch {
-    /* ignore */
-  }
   return next;
 }
 
@@ -56,7 +50,7 @@ export default function TryPage() {
 
   function startFresh() {
     armGuest();
-    router.push("/learn/path");
+    router.push("/learn");
   }
 
   function jumpField() {

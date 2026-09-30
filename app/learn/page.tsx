@@ -1,21 +1,24 @@
 "use client";
 
 /**
- * /learn — pick the job title you want, get an auto-built Duolingo-style path.
- * Course grid stays as a secondary "browse one skill" escape hatch.
+ * Courses.
+ *
+ * This page used to lead with a job-title picker that built a "career path"
+ * out of the courses — Data Analyst, Analytics Engineer, and so on — and the
+ * catalogue itself was folded away behind a disclosure triangle. That was the
+ * wrong bet. Career coaching is a crowded shelf we have no edge on, and the
+ * thing people actually came here for was buried two clicks down.
+ *
+ * So: the ten courses are the page. Pick one, work through it, come back for
+ * the day's question in between.
  */
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { COURSES, type Course } from "@/lib/courses";
-import { CAREER_ROLES, pathSteps, buildBoard } from "@/lib/career-paths";
-import RolePathCard from "@/components/role-path-card";
-import { liveLessons, ALL_MODULE } from "@/lib/curriculum";
+import { liveLessons, ALL_MODULE, getLesson } from "@/lib/curriculum";
 import { loadProgress, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
-import { useCareerRole } from "@/lib/use-career-role";
-import { useLearnMode } from "@/lib/use-learn-mode";
 import TrophyCase from "@/components/trophy-case";
-import Coach from "@/components/coach";
 import CourseArt from "@/components/course-art";
 import CourseCover from "@/components/course-cover";
 import AppNav from "@/components/app-nav";
@@ -99,6 +102,11 @@ function CourseCard({
         <p className="flex-1 text-sm leading-relaxed text-ink-soft">
           {course.blurb}
         </p>
+        {isLive && done > 0 && (
+          <div className="quest-bar mt-3">
+            <span style={{ width: `${built ? (done / built) * 100 : 0}%` }} />
+          </div>
+        )}
         <span
           className={`mt-4 block rounded-xl border px-4 py-2.5 text-center font-display text-sm font-bold tracking-wide ${
             isLive
@@ -130,148 +138,87 @@ function CourseCard({
   );
 }
 
-export default function LearnCatalogPage() {
+export default function CourseCatalogPage() {
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
-  const { roleId, setRoleId } = useCareerRole();
-  const { mode, hydrated: modeReady } = useLearnMode();
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     setProgress(loadProgress());
+    setHydrated(true);
   }, []);
 
   const completed = new Set(progress.completedLessons);
   const allLessons = liveLessons(ALL_MODULE);
   const allDone = allLessons.filter((e) => completed.has(e.lesson.id)).length;
-  const savedRole = CAREER_ROLES.find((r) => r.id === roleId);
-  const resume = savedRole
-    ? buildBoard(savedRole, progress.completedLessons).current
-    : null;
+
+  // The course you are furthest into, so "pick up where you left off" beats
+  // scanning ten cards for the one with a half-full bar on it.
+  const inProgress = COURSES.filter((c) => c.moduleId && c.status === "live")
+    .map((c) => {
+      const lessons = liveLessons(c.moduleId!);
+      const done = lessons.filter((l) => completed.has(l.lesson.id)).length;
+      return {
+        course: c,
+        done,
+        total: lessons.length,
+        next: lessons.find((l) => !completed.has(l.lesson.id)),
+      };
+    })
+    .filter((c) => c.done > 0 && c.done < c.total)
+    .sort((a, b) => b.done - a.done)[0];
+  const resumeId = inProgress?.next?.lesson.id;
+  const resumeLesson = resumeId ? getLesson(resumeId) : undefined;
 
   return (
     <>
       <AppNav />
       <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-24 pt-6 sm:px-6">
-        {savedRole && (
-          <section className="section-card">
-            <p className="label-broadcast text-turf">your board</p>
-            <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <h1 className="font-display text-2xl font-bold text-ink">
-                  You&apos;re on the {savedRole.title} board
-                </h1>
+        <header className="text-center">
+          <h1 className="font-display text-3xl font-bold text-ink sm:text-4xl">
+            Courses
+          </h1>
+          <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">
+            Short lessons, one idea each, on real NFL data. SQL first — it is
+            the one every analytics job actually asks for.
+          </p>
+        </header>
+
+        {hydrated && inProgress && resumeLesson && resumeId && (
+          <section className="surface mt-6 rounded-2xl border border-turf/40 bg-turf/5 p-5">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div className="min-w-0">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-turf">
+                  Pick up where you left off · {inProgress.course.title}
+                </p>
+                <p className="mt-1 font-display text-xl font-bold text-ink">
+                  {resumeLesson.lesson.title}
+                </p>
                 <p className="mt-1 text-sm text-ink-soft">
-                  {resume
-                    ? `Next snap: ${resume.lesson.title}.`
-                    : "Pick up where you left off."}
+                  {inProgress.done}/{inProgress.total} lessons done
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Link
-                  href={
-                    !modeReady || mode === null || mode === "studio"
-                      ? `/learn/path/${savedRole.id}?style=choose`
-                      : resume
-                        ? `/learn/${resume.lesson.id}`
-                        : `/learn/path/${savedRole.id}`
-                  }
-                  className="btn-turf inline-flex items-center rounded-xl border border-turf/80 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-night"
-                >
-                  Continue
-                </Link>
-                <Link
-                  href={`/learn/path/${savedRole.id}?style=choose`}
-                  className="rounded-xl border border-panel-border px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-ink-soft hover:border-ice/40 hover:text-ice"
-                >
-                  Change style
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => setRoleId(null)}
-                  className="rounded-xl border border-panel-border px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-ink-soft hover:border-turf/40"
-                >
-                  Switch job
-                </button>
-              </div>
+              <Link href={`/learn/${resumeId}`} className="press btn-turf">
+                Continue
+              </Link>
             </div>
           </section>
         )}
 
-        {!savedRole && (
-          <>
-            <section className="section-card">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="label-broadcast text-turf">one question</p>
-                  <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
-                    What job are you playing for?
-                  </h1>
-                  <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-soft">
-                    Pick a title. Practice snaps open next. Video and Colab
-                    are coming soon.
-                  </p>
-                </div>
-                <div className="hidden shrink-0 sm:block">
-                  <Coach mood={allDone > 0 ? "happy" : "idle"} size={100} />
-                </div>
-              </div>
-            </section>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {COURSES.map((course) => (
+            <CourseCard key={course.id} course={course} completed={completed} />
+          ))}
+        </div>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {CAREER_ROLES.map((role, i) => {
-                const steps = pathSteps(role, progress.completedLessons);
-                const href = `/learn/path/${role.id}?style=choose`;
-                return (
-                  <RolePathCard
-                    key={role.id}
-                    role={role}
-                    steps={steps}
-                    index={i}
-                    href={href}
-                  />
-                );
-              })}
-            </div>
-          </>
+        {hydrated && (
+          <p className="mt-6 text-center font-mono text-[11px] uppercase tracking-wider text-ink-muted">
+            {allDone}/{allLessons.length} lessons cleared across every course
+          </p>
         )}
 
-        <details className="section-card mt-8">
-          <summary className="cursor-pointer font-mono text-[11px] uppercase tracking-widest text-ink-muted">
-            Courses, project, trophies
-          </summary>
-          <div className="mt-4">
-          <ul className="mt-2 divide-y divide-panel-border border-t border-panel-border">
-            {[
-              { href: "/learn/project/my-league-scorecard", name: "Your League Scorecard", note: "your data, in Colab" },
-              { href: "/resources", name: "Career kit", note: "resumes · outreach · books" },
-            ].map((l) => (
-              <li key={l.href}>
-                <Link
-                  href={l.href}
-                  className="group flex items-center justify-between gap-3 py-2.5"
-                >
-                  <span className="font-display text-[15px] font-bold text-ink transition-colors group-hover:text-turf">
-                    {l.name}
-                  </span>
-                  <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-                    {l.note}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-
-          <h2 className="mt-8 font-display text-lg font-bold text-ink">Courses</h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {COURSES.map((course) => (
-              <CourseCard key={course.id} course={course} completed={completed} />
-            ))}
-          </div>
-
-          <div id="trophies" className="mt-8">
-            <TrophyCase />
-          </div>
-          </div>
-        </details>
+        <div id="trophies" className="mt-10">
+          <TrophyCase />
+        </div>
       </main>
     </>
   );

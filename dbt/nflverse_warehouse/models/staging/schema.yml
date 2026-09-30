@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: stg_player_weeks
+    description: One row per player per regular-season game played, 2022–2024.
+    columns:
+      - name: player_id
+        description: nflverse GSIS id. Stable across seasons and team changes.
+        tests: [not_null]
+      - name: season
+        tests:
+          - not_null
+          - accepted_values:
+              values: [2022, 2023, 2024]
+              quote: false
+      - name: week
+        tests: [not_null]
+      - name: fantasy_points_ppr
+        description: >
+          Can be negative. A lost fumble outweighs a two-yard catch, and a
+          test asserting this is >= 0 will fail on real data — which is the
+          point of testing against real data.
+        tests: [not_null]
+
+  - name: stg_games
+    description: One row per regular-season game, 2022–2024.
+    columns:
+      - name: game_id
+        tests: [not_null, unique]
+      - name: roof
+        tests:
+          - accepted_values:
+              values: ["dome", "closed", "outdoors", "open"]
