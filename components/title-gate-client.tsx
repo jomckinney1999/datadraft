@@ -80,7 +80,10 @@ export default function TitleGateClient() {
 
     window.addEventListener("keydown", onKey, true);
     gate.addEventListener("pointerdown", start);
-    pressRef.current?.focus({ preventScroll: true });
+    // Focusing the button on a phone scrolls the visual viewport under the
+    // fixed title screen, and the ref ends up off the screen.
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    if (!coarse) pressRef.current?.focus({ preventScroll: true });
 
     // Pressed before the page finished loading: play it now.
     if (window.__ddGatePress) start();

@@ -3437,3 +3437,30 @@ html[data-gate-opened] .gate-pop {
     opacity: 0;
   }
 }
+
+/* Phones: the iris and the arm-swing are the parts that break.
+   The exit paints a ring about three screens wide and Safari's mask animation
+   of that size stalls the page. The raised arm is a rotation in viewBox
+   units, which mobile Safari applies around the wrong point and flings the
+   ref off the screen. The blow pose is already drawn with the arm up, so on
+   a phone the pose snaps and the gate fades. */
+@media (max-width: 700px), (hover: none) and (pointer: coarse) {
+  .gate-rays,
+  .gate-rays-hot {
+    width: 120vmax;
+    height: 120vmax;
+    margin: -60vmax 0 0 -60vmax;
+  }
+  .title-gate[data-phase="blow"] .ref-signal,
+  .title-gate[data-phase="blow"] .gate-stage {
+    animation: none;
+  }
+  .title-gate[data-phase="exit"] {
+    -webkit-mask-image: none;
+    mask-image: none;
+    animation: gate-fade 0.45s ease forwards;
+  }
+  .title-gate[data-phase="exit"]::after {
+    content: none;
+  }
+}
