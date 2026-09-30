@@ -400,9 +400,48 @@ function RetentionLock() {
   );
 }
 
+/**
+ * Build a Fantasy Prediction Model — a chart whose solid history turns into a
+ * dashed forecast inside a shaded range, and a crystal ball with a football
+ * in it: a prediction, drawn literally.
+ */
+function PredictionModel() {
+  return (
+    <>
+      <Shadow y={134} rx={66} />
+      <rect x="18" y="30" width="118" height="92" rx="8" fill={c("night-100")} stroke={N} strokeWidth="1.8" />
+      <path d="M26 110 H128" stroke={c("ink", 0.25)} strokeWidth="1.2" />
+      <path d="M88 76 L128 44 L128 88 Z" fill={c("gold", 0.22)} />
+      <path d="M28 100 L42 92 L54 96 L66 82 L78 86 L88 70" fill="none" stroke={c("ice")} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M88 70 L128 60" fill="none" stroke={c("gold")} strokeWidth="3.2" strokeDasharray="5 4" strokeLinecap="round" />
+      {[
+        [28, 100],
+        [42, 92],
+        [54, 96],
+        [66, 82],
+        [78, 86],
+        [88, 70],
+      ].map(([x, y]) => (
+        <circle key={x} cx={x} cy={y} r="3" fill={c("ice")} stroke={N} strokeWidth="1.2" />
+      ))}
+      <circle cx="128" cy="60" r="4.5" fill={c("gold")} stroke={N} strokeWidth="1.6" />
+      <text x="30" y="46" fontSize="8" fontWeight="800" fill={c("ink-muted")} fontFamily={MONO}>
+        NEXT WEEK
+      </text>
+      <path d="M140 118 L176 118 L170 128 L146 128 Z" fill={c("gold-dim")} stroke={N} strokeWidth="1.8" strokeLinejoin="round" />
+      <circle cx="158" cy="92" r="27" fill={c("ice", 0.3)} stroke={N} strokeWidth="2.4" />
+      <circle cx="158" cy="92" r="27" fill="none" stroke={c("ice")} strokeWidth="1.2" />
+      <Football x={158} y={94} rx={14} rot={-25} />
+      <path d="M142 78 Q148 70 158 69" fill="none" stroke={c("ink")} strokeWidth="2.4" strokeLinecap="round" opacity="0.7" />
+      <Sparkle x={184} y={64} r={5} fill={c("gold")} />
+      <Sparkle x={134} y={24} r={4} />
+    </>
+  );
+}
 const SCENES: Record<string, { tone: Tone; Scene: () => JSX.Element }> = {
   "my-league-scorecard": { tone: "gold", Scene: LeagueScorecard },
   "nflverse-dbt-warehouse": { tone: "turf", Scene: Warehouse },
+  "fantasy-points-model": { tone: "gold", Scene: PredictionModel },
   "waiver-pulse": { tone: "turf", Scene: WaiverPulse },
   "slate-leaders": { tone: "gold", Scene: SlateLeaders },
   "league-standings": { tone: "ice", Scene: PowerRankings },

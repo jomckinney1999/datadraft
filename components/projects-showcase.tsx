@@ -17,6 +17,8 @@ const PITCH: Record<string, string> = {
     "Nobody else's portfolio has your league in it. Pull it through a free public API, load it into SQL, and answer the questions your group chat argues about every week.",
   "nflverse-dbt-warehouse":
     "Analytics engineering, for real: model three seasons of raw nflverse releases into a tested dbt warehouse. Runs on DuckDB — no cloud account, no card, no waiting.",
+  "fantasy-points-model":
+    "Forecast every player's points before kickoff from real NFL history, then find out honestly whether you beat his last-three average. Ends with next week's projections.",
 };
 
 export default function ProjectsShowcase() {
@@ -39,7 +41,7 @@ export default function ProjectsShowcase() {
           </p>
         </div>
 
-        <div className="sequence mt-10 grid gap-5 lg:grid-cols-2">
+        <div className="sequence mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {builds.map((p) => (
             <Link
               key={p.id}
