@@ -1,7 +1,7 @@
 import Link from "next/link";
 import SiteNav from "@/components/site-nav";
+import SiteFooter from "@/components/site-footer";
 import SupportWidget from "@/components/support-widget";
-import WaitlistForm from "@/components/waitlist-form";
 import QotdPanel from "@/components/qotd-panel";
 import SuccessStories from "@/components/success-stories";
 import FieldBackdrop from "@/components/field-backdrop";
@@ -9,6 +9,13 @@ import CourseRail from "@/components/course-rail";
 import WorkspaceShot from "@/components/workspace-shot";
 import CountUp from "@/components/count-up";
 import Reveal from "@/components/reveal";
+import LiveWeekStrip from "@/components/live-week-strip";
+import DriveExplainer from "@/components/drive-explainer";
+import TrophyStrip from "@/components/trophy-strip";
+import ProjectsShowcase from "@/components/projects-showcase";
+import DataPeek from "@/components/data-peek";
+import Faq from "@/components/faq";
+import FinalCta from "@/components/final-cta";
 import {
   LANG_LABEL,
   QUESTIONS,
@@ -20,28 +27,39 @@ import { INTERVIEW_CASES } from "@/lib/interview-cases";
 import { COURSES } from "@/lib/courses";
 import { ALL_MODULE, liveLessons } from "@/lib/curriculum";
 import { liveProjects } from "@/lib/projects";
+import { getLiveWeek } from "@/lib/live-nfl";
 
 /**
  * The landing page.
  *
- * It used to open with a free-form SQL sandbox beside five reasons to trust
- * us, a sport picker for two sports with no data behind them, a four-phase
- * career roadmap and a set of job-title playbooks — seventeen phone screens
- * before the footer.
+ * A long scroll, on purpose, and every section on it earns its place by
+ * answering the next question a sceptical visitor would ask:
  *
- * Now it does one thing: put the day's real question in front of you and let
- * you solve it without signing up. Everything else answers "and then what",
- * in the order people ask it — what can I practise, what does it look like,
- * what can I learn, what will I have at the end.
+ *   is this real? → solve today's question, now, without an account
+ *   is it football? → this week's actual scores and stat lines
+ *   what languages? → four, running for real
+ *   how does a lesson feel? → the drive, drawn with the real field
+ *   what does solving look like? → the workspace
+ *   what's in it? → the catalogue going past
+ *   what do I get? → trophies, then projects
+ *   why football? → because it explains itself
+ *   is the data real? → here are the rows
+ *   what happens to people? → illustrative paths, labelled as such
+ *   anything else? → the FAQ
+ *   ok → first snap's yours
  *
  * Every section carries `data-reveal-section`, and things inside carry
  * `.reveal` (and `.sequence` where a row should arrive one card at a time).
  * See components/reveal.tsx — nothing hides until JavaScript arms it, so a
  * failed script costs the animation, never the content.
+ *
+ * Every number on this page is counted, not planned, and there are no
+ * learner counts because we do not have any yet worth stating.
  */
 
-// The day's question turns over at midnight Eastern, so this can't be baked
-// at build time and doesn't need to be rendered per request.
+// The day's question turns over at midnight Eastern and the live panel
+// parses a couple of megabytes of nflverse CSV, so this is rebuilt hourly:
+// never per request, never baked forever.
 export const revalidate = 3600;
 
 /** The tiles drifting behind the languages band. */
@@ -81,43 +99,32 @@ const TONE: Record<string, string> = {
   gold: "text-gold",
 };
 
-export default function Home() {
+const AUDIENCE =
+  "fantasy managers who want the numbers · analysts who want reps · career-switchers who need a portfolio nobody else has · students bored of Titanic.csv · ";
+
+export default async function Home() {
   const day = leagueDay();
   // SQL on the landing page, always: Python costs ~12 MB of Pyodide and R
   // ~30 MB of WebR on first run, and a front door does not get to spend that
   // before anyone has asked for anything.
   const qotd = questionOfTheDay(day, "sql");
+  // Never throws: null when nflverse is unreachable, and the strip hides.
+  const live = await getLiveWeek();
+
   const liveCourses = COURSES.filter((c) => c.status === "live").length;
   // Lessons that exist, not the planned total across all ten courses.
   // Counting the plan puts a number on the front page nobody can go and find.
   const lessonCount = liveLessons(ALL_MODULE).length;
+  const projectCount = liveProjects().length + INTERVIEW_CASES.length;
   const langs = ["sql", "python", "r", "excel"] as const;
 
-  const WAYS = [
-    {
-      href: "/questions",
-      name: "Questions",
-      count: `${QUESTIONS.length} problems`,
-      blurb:
-        "One problem, one answer, no lesson wrapped around it. A fresh Question of the Day in every language, and a streak that only survives if you solve one.",
-      accent: "gold" as const,
-    },
-    {
-      href: "/learn",
-      name: "Courses",
-      count: `${liveCourses} live`,
-      blurb:
-        "Short lessons that carry you from your first SELECT to window functions, pandas and lookups — with the scoreboard on screen the whole way.",
-      accent: "turf" as const,
-    },
-    {
-      href: "/projects",
-      name: "Projects",
-      count: `${liveProjects().length + INTERVIEW_CASES.length} builds & cases`,
-      blurb:
-        "Pull your own fantasy league through the Sleeper API, or model raw nflverse data into a tested dbt warehouse you can hand to an interviewer.",
-      accent: "ice" as const,
-    },
+  const PROOF = [
+    { value: QUESTIONS.length, label: "Questions", note: "Four languages, graded on what your code produces." },
+    { value: lessonCount, label: "Lessons", note: "One idea each, with the scoreboard on screen." },
+    { value: liveCourses, label: "Courses live", note: "From your first SELECT to window functions." },
+    { value: projectCount, label: "Builds & cases", note: "Ending in a repo, a notebook, or a right answer." },
+    { value: 3, label: "Real seasons", note: "2022 to 2024, pinned so the answers hold still." },
+    { value: 876, label: "Stat lines", note: "One per game a player actually played." },
   ];
 
   return (
@@ -166,22 +173,38 @@ export default function Home() {
                 Start learning free →
               </Link>
             </div>
+          </div>
+        </section>
 
-            <div className="reveal mt-14 grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-panel-border bg-panel-border/60">
-              {[
-                { label: "Questions", value: QUESTIONS.length, suffix: "" },
-                { label: "Lessons", value: lessonCount, suffix: "" },
-                // 876 rows in week_results: one per game a player actually
-                // played, across three seasons. Not 876 games — there are 815.
-                { label: "Real stat lines", value: 876, suffix: "" },
-              ].map((s) => (
-                <div key={s.label} className="bg-panel/90 px-3 py-5 backdrop-blur">
+        {/* ── Built for / by the numbers ─────────────────── */}
+        <section
+          data-reveal-section
+          className="border-b border-panel-border bg-night/40"
+        >
+          <div className="overflow-hidden border-b border-panel-border py-3">
+            <div
+              aria-hidden
+              className="flex w-max animate-marquee whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.2em] text-ink-muted"
+            >
+              <span className="px-4">Built for {AUDIENCE}</span>
+              <span className="px-4">Built for {AUDIENCE}</span>
+            </div>
+          </div>
+          <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
+            <div className="sequence grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+              {PROOF.map((s) => (
+                <div
+                  key={s.label}
+                  className="reveal surface rounded-2xl border border-panel-border bg-panel px-4 py-5 text-center"
+                >
                   <CountUp
                     to={s.value}
-                    suffix={s.suffix}
                     className="stat-glow font-display text-3xl font-bold sm:text-4xl"
                   />
                   <p className="label-broadcast mt-1 text-[10px]">{s.label}</p>
+                  <p className="mt-2 text-[12px] leading-snug text-ink-muted">
+                    {s.note}
+                  </p>
                 </div>
               ))}
             </div>
@@ -191,9 +214,9 @@ export default function Home() {
         {/* ── Today's question, playable ─────────────────── */}
         <section
           data-reveal-section
-          className="border-b border-panel-border bg-night/40"
+          className="wash-gold border-b border-panel-border"
         >
-          <div className="sequence mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24">
+          <div className="sequence relative mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24">
             <div className="reveal mb-6 text-center">
               <p className="label-broadcast text-gold">today&apos;s question</p>
               <h2 className="mt-2 font-display text-3xl font-bold text-ink sm:text-4xl">
@@ -210,6 +233,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* ── This week in the league (live) ─────────────── */}
+        <LiveWeekStrip live={live} />
 
         {/* ── Four languages ─────────────────────────────── */}
         <section
@@ -273,6 +299,9 @@ export default function Home() {
           </div>
         </section>
 
+        {/* ── A lesson is a drive ────────────────────────── */}
+        <DriveExplainer />
+
         {/* ── What solving one looks like ────────────────── */}
         <section
           data-reveal-section
@@ -297,9 +326,12 @@ export default function Home() {
         </section>
 
         {/* ── The catalogue, going past ──────────────────── */}
-        <section data-reveal-section className="border-b border-panel-border py-16 sm:py-24">
-          <div className="sequence mx-auto mb-10 max-w-6xl px-4 text-center sm:px-6">
-            <p className="reveal label-broadcast text-ice">the catalogue</p>
+        <section
+          data-reveal-section
+          className="wash-turf border-b border-panel-border py-16 sm:py-24"
+        >
+          <div className="sequence relative mx-auto mb-10 max-w-6xl px-4 text-center sm:px-6">
+            <p className="reveal label-broadcast text-turf">the catalogue</p>
             <h2 className="reveal mt-2 font-display text-2xl font-bold text-ink sm:text-4xl">
               Ten courses, one throughline
             </h2>
@@ -309,8 +341,10 @@ export default function Home() {
               lesson that taught it.
             </p>
           </div>
-          <CourseRail />
-          <div className="mt-10 text-center">
+          <div className="relative">
+            <CourseRail />
+          </div>
+          <div className="relative mt-10 text-center">
             <Link
               href="/learn"
               className="rounded-xl border border-panel-border px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-wider text-ink-soft transition-colors hover:border-turf/50 hover:text-turf"
@@ -320,48 +354,13 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Three ways in ──────────────────────────────── */}
-        <section
-          data-reveal-section
-          className="border-b border-panel-border bg-night/40"
-        >
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-            <h2 className="reveal text-center font-display text-2xl font-bold text-ink sm:text-4xl">
-              Three ways to get reps
-            </h2>
-            <div
-              className="sequence mt-10 grid gap-4 sm:grid-cols-3"
-              style={{ ["--reveal-delay-children" as string]: "0.1s" }}
-            >
-              {WAYS.map((w) => (
-                <Link
-                  key={w.href}
-                  href={w.href}
-                  className="reveal ring-lift surface group flex flex-col rounded-2xl border border-panel-border bg-panel p-6"
-                >
-                  <div className="flex items-baseline justify-between gap-2">
-                    <p
-                      className={`font-display text-xl font-bold ${TONE[w.accent]}`}
-                    >
-                      {w.name}
-                    </p>
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-                      {w.count}
-                    </span>
-                  </div>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-soft">
-                    {w.blurb}
-                  </p>
-                  <p className="mt-5 font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors group-hover:text-ink">
-                    Open →
-                  </p>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
+        {/* ── Something to play for ──────────────────────── */}
+        <TrophyStrip />
 
-        {/* ── Why this works ─────────────────────────────── */}
+        {/* ── Projects ───────────────────────────────────── */}
+        <ProjectsShowcase />
+
+        {/* ── Why football ───────────────────────────────── */}
         <section data-reveal-section className="border-b border-panel-border">
           <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 sm:py-24">
             <h2 className="reveal text-center font-display text-2xl font-bold text-ink sm:text-4xl">
@@ -391,65 +390,20 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            <p className="reveal mt-12 text-center font-mono text-[11px] text-ink-muted">
-              Every number on this site is a real NFL result you can check
-              against a box score.{" "}
-              <Link href="/data" className="text-turf hover:underline">
-                Where the data comes from
-              </Link>
-            </p>
           </div>
         </section>
+
+        {/* ── The data is real ───────────────────────────── */}
+        <DataPeek />
 
         <SuccessStories />
 
-        {/* ── Weekly challenge waitlist ──────────────────── */}
-        <section data-reveal-section className="border-t border-panel-border">
-          <div className="sequence mx-auto max-w-2xl px-4 py-16 text-center sm:px-6 sm:py-20">
-            <p className="reveal label-broadcast text-ice">coming next</p>
-            <h2 className="reveal mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
-              A weekly challenge on the week that just happened
-            </h2>
-            <p className="reveal mx-auto mt-3 max-w-lg text-sm leading-relaxed text-ink-soft">
-              The daily questions run on three pinned seasons so the answers
-              never move under you. The weekly one won&apos;t. Leave an email
-              and we&apos;ll tell you when it lands.
-            </p>
-            <div className="reveal mx-auto mt-6 max-w-sm">
-              <WaitlistForm
-                interest="weekly-challenge"
-                source="home"
-                label="Notify me"
-              />
-            </div>
-          </div>
-        </section>
+        <Faq />
+
+        <FinalCta />
       </main>
 
-      <footer className="border-t border-panel-border">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-4 py-8 sm:flex-row sm:items-center sm:px-6">
-          <div>
-            <p className="font-display text-sm font-semibold text-ink">
-              Data<span className="text-turf">Draft</span>
-            </p>
-            <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-              SQL · Python · R · Excel · Football as the lens
-            </p>
-          </div>
-          <div className="flex flex-col items-start gap-1 sm:items-end">
-            <Link
-              href="/data"
-              className="font-mono text-[11px] text-ink-muted underline underline-offset-2 transition-colors hover:text-turf"
-            >
-              Real NFL data from nflverse · source &amp; download
-            </Link>
-            <p className="font-mono text-[11px] text-ink-muted">
-              © {new Date().getFullYear()} DataDraft
-            </p>
-          </div>
-        </div>
-      </footer>
-
+      <SiteFooter />
       <SupportWidget />
     </div>
   );
