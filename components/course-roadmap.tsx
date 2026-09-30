@@ -26,6 +26,7 @@ import PathCast from "@/components/path-cast";
 import { PathChest, PathFlag } from "@/components/path-marks";
 import AppNav from "@/components/app-nav";
 import CourseArt, { hasCourseArt } from "@/components/course-art";
+import UnitArt, { hasUnitArt } from "@/components/unit-art";
 import LearnRail from "@/components/learn-rail";
 import RapidFire from "@/components/rapid-fire";
 
@@ -246,19 +247,26 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
             {/* Units */}
             {current && activeUnit && activeIndex >= 0 && pct < 100 && (
               <div className="sticky top-[5.75rem] z-10 mt-4 lg:top-[4.25rem]">
-                <div className="unit-banner flex items-center justify-between gap-3 !rounded-2xl !px-4 !py-2.5">
-                  <div className="min-w-0">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-night/70">
-                      Unit {activeIndex + 1} · {activeUnit.title}
-                    </p>
-                    <p className="truncate font-display text-base font-bold text-night">
-                      {current.lesson.title}
-                    </p>
+                <div className="unit-banner flex items-center justify-between gap-3 !rounded-2xl !px-3 !py-2">
+                  <div className="flex min-w-0 items-center gap-3">
+                    {hasUnitArt(activeUnit.id) && (
+                      <span className="hidden h-11 w-[60px] shrink-0 overflow-hidden rounded-lg border border-panel-border bg-night/60 sm:block">
+                        <UnitArt id={activeUnit.id} className="h-full w-full" />
+                      </span>
+                    )}
+                    <div className="min-w-0">
+                      <p className="truncate font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-turf">
+                        Unit {activeIndex + 1} · {activeUnit.title}
+                      </p>
+                      <p className="truncate font-display text-base font-bold text-ink">
+                        {current.lesson.title}
+                      </p>
+                    </div>
                   </div>
                   {gateHref && (
                     <Link
                       href={gateHref}
-                      className="shrink-0 rounded-xl bg-night/15 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-night hover:bg-night/25"
+                      className="press btn-turf shrink-0 rounded-xl px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-night"
                     >
                       Snap
                     </Link>
@@ -306,9 +314,14 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
                     onClick={() =>
                       setOpened((prev) => ({ ...prev, [unit.id]: true }))
                     }
-                    className="mt-3 flex w-full items-center justify-between gap-3 rounded-xl border border-panel-border px-4 py-3 text-left"
+                    className="lift mt-3 flex w-full items-center gap-3 rounded-xl border border-panel-border bg-panel/40 px-3 py-2 text-left transition-colors hover:border-turf/40"
                   >
-                    <span className="font-display text-sm font-bold text-ink">
+                    {hasUnitArt(unit.id) && (
+                      <span className="h-10 w-14 shrink-0 overflow-hidden rounded-lg border border-panel-border bg-night/60">
+                        <UnitArt id={unit.id} className="h-full w-full" />
+                      </span>
+                    )}
+                    <span className="min-w-0 flex-1 font-display text-sm font-bold text-ink">
                       Unit {displayNumber} · {unit.title}
                     </span>
                     <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
@@ -441,15 +454,23 @@ function UnitBlock({
     <section className={`mt-8 ${locked && !comingSoon ? "opacity-90" : ""}`}>
       {isActive && !locked ? (
         <div className="unit-banner">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-night/70">
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-turf">
                 {unit.drive} · Unit {displayNumber}
               </p>
-              <h2 className="mt-1 font-display text-xl font-bold text-night sm:text-2xl">
+              <h2 className="mt-1 font-display text-xl font-bold text-ink sm:text-2xl">
                 {unit.title}
               </h2>
+              <p className="mt-2 font-mono text-[11px] uppercase tracking-wider text-ink-muted">
+                {completedCount} of {total} plays run
+              </p>
             </div>
+            {hasUnitArt(unit.id) && (
+              <div className="h-20 w-28 shrink-0 overflow-hidden rounded-xl border border-turf/30 bg-night/60 sm:h-28 sm:w-40">
+                <UnitArt id={unit.id} className="h-full w-full" />
+              </div>
+            )}
           </div>
         </div>
       ) : (
@@ -457,7 +478,7 @@ function UnitBlock({
           className={`section-card ${locked ? "section-card-locked" : ""}`}
         >
           <div className="flex items-start justify-between gap-3">
-            <div>
+            <div className="min-w-0">
               <p className="label-broadcast text-gold">
                 {comingSoon ? "coming soon" : unit.drive}
               </p>
@@ -465,7 +486,18 @@ function UnitBlock({
                 Unit {displayNumber} · {unit.title}
               </h2>
             </div>
-            {locked && <LockIcon className="h-6 w-6 text-ink-muted" />}
+            {hasUnitArt(unit.id) ? (
+              <div className="relative h-16 w-[88px] shrink-0 overflow-hidden rounded-lg border border-panel-border bg-night/60 sm:h-20 sm:w-28">
+                <UnitArt id={unit.id} className="h-full w-full" />
+                {locked && (
+                  <span className="absolute bottom-1 right-1 rounded-full border border-panel-border bg-night/85 p-1">
+                    <LockIcon className="h-3.5 w-3.5 text-ink-muted" />
+                  </span>
+                )}
+              </div>
+            ) : (
+              locked && <LockIcon className="h-6 w-6 text-ink-muted" />
+            )}
           </div>
 
           {!comingSoon && (

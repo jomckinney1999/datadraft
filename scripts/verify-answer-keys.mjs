@@ -408,6 +408,15 @@ let artChecked = 0;
       problems.push(`project/case "${id}" has no scene in components/project-art.tsx`);
     }
   }
+  // Every unit a course shows on its roadmap carries its own picture.
+  const unitIds = new Set(
+    curriculum.MODULES.filter((m) => m.id !== curriculum.ALL_MODULE).flatMap((m) => m.unitIds),
+  );
+  for (const id of unitIds) {
+    if (!hasScene("components/unit-art.tsx", id)) {
+      problems.push(`unit "${id}" has no scene in components/unit-art.tsx`);
+    }
+  }
 }
 
 // ── Interview cases (dedicated seeds, not the lesson DB) ─────────────
@@ -530,7 +539,7 @@ if (questionR) console.log(`question R keys skipped (no Node WebR): ${questionR}
 console.log(`python answer keys run    : ${pyChecked}`);
 console.log(`excel formula keys checked: ${formulaChecked}`);
 if (skippedR) console.log(`R keys skipped (no Node WebR): ${skippedR}`);
-console.log(`card art ids checked      : ${artChecked} (courses, builds, cases)`);
+console.log(`card art ids checked      : ${artChecked} (courses, builds, cases, units)`);
 console.log(`prose facts checked       : ${factsChecked} (lib/lesson-facts.generated.ts vs the database)`);
 
 if (problems.length === 0) {

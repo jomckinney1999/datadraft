@@ -37,6 +37,7 @@ import {
 import { useModule } from "@/lib/use-module";
 import LessonOutline from "@/components/lesson-outline";
 import CourseArt, { hasCourseArt } from "@/components/course-art";
+import UnitArt, { hasUnitArt } from "@/components/unit-art";
 import {
   awardBadges,
   completeLesson,
@@ -1076,17 +1077,25 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
         </div>
       </div>
 
-      {artId && hasCourseArt(artId) && (
-        <div className="relative mt-4 h-32 overflow-hidden rounded-2xl border-2 border-panel-border border-b-4 bg-night">
-          <CourseArt id={artId} className="absolute inset-0 h-full w-full" />
-          <div className="course-scrim absolute inset-0" />
-          <div className="relative flex h-full flex-col justify-end p-4">
+      {/* The unit's own picture beside the title, in the same lit card as the
+          roadmap's current unit, so walking from the path into a lesson
+          keeps the same picture in view. Falls back to the course's. */}
+      {(hasUnitArt(entry.unit.id) || (artId && hasCourseArt(artId))) && (
+        <div className="unit-banner mt-4 flex items-center justify-between gap-4 !py-3">
+          <div className="min-w-0">
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-turf">
               {entry.unit.title}
             </p>
             <p className="font-display text-lg font-bold leading-tight text-ink">
               {lesson.title}
             </p>
+          </div>
+          <div className="h-20 w-28 shrink-0 overflow-hidden rounded-xl border border-turf/30 bg-night/60 sm:h-24 sm:w-32">
+            {hasUnitArt(entry.unit.id) ? (
+              <UnitArt id={entry.unit.id} className="h-full w-full" />
+            ) : (
+              artId && <CourseArt id={artId} className="h-full w-full" />
+            )}
           </div>
         </div>
       )}

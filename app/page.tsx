@@ -132,7 +132,7 @@ export default async function Home() {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="football-cursor min-h-screen">
       <Reveal />
       <SiteNav />
 

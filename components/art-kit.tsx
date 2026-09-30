@@ -355,8 +355,8 @@ export function slicePath(cx: number, cy: number, r: number, a0: number, a1: num
 
 /**
  * The frame every scene sits in: the viewBox, the tone's glow, and the
- * scene on top. `align="left"` pins it to the left of a wide box, for
- * banners that carry something else on the right.
+ * scene on top. `align="left"` / `"right"` pins it to one side of a wide box,
+ * for banners that carry text on the other.
  */
 export function ArtSvg({
   tone,
@@ -369,7 +369,7 @@ export function ArtSvg({
   /** Namespaced by the caller: c- courses, p- projects. */
   glowId: string;
   className?: string;
-  align?: "center" | "left";
+  align?: "center" | "left" | "right";
   children: ReactNode;
 }) {
   return (
@@ -378,7 +378,9 @@ export function ArtSvg({
       className={className}
       role="presentation"
       aria-hidden
-      preserveAspectRatio={align === "left" ? "xMinYMid meet" : "xMidYMid meet"}
+      preserveAspectRatio={
+        align === "left" ? "xMinYMid meet" : align === "right" ? "xMaxYMid meet" : "xMidYMid meet"
+      }
     >
       <Glow t={tone} id={glowId} />
       {children}
