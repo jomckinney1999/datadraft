@@ -8,6 +8,7 @@ import FieldBackdrop from "@/components/field-backdrop";
 import CourseRail from "@/components/course-rail";
 import WorkspaceShot from "@/components/workspace-shot";
 import CountUp from "@/components/count-up";
+import GlowGrid from "@/components/glow-grid";
 import Reveal from "@/components/reveal";
 import LiveWeekStrip from "@/components/live-week-strip";
 import DriveExplainer from "@/components/drive-explainer";
@@ -28,6 +29,7 @@ import { COURSES } from "@/lib/courses";
 import { ALL_MODULE, liveLessons } from "@/lib/curriculum";
 import { liveProjects } from "@/lib/projects";
 import { getLiveWeek } from "@/lib/live-nfl";
+import { FACTS } from "@/lib/lesson-facts.generated";
 
 /**
  * The landing page.
@@ -82,7 +84,7 @@ const WHY = [
   {
     title: "Real data, real mess",
     blurb:
-      "No Titanic.csv. Three seasons of actual NFL scoring — byes, injuries, weeks that simply aren't there — the same awkward shape you meet on the job.",
+      `No Titanic.csv. Every week from ${FACTS.seasons[0]} to now of actual NFL scoring — byes, injuries, weeks that simply aren't there — the same awkward shape you meet on the job.`,
     accent: "gold" as const,
   },
   {
@@ -118,13 +120,15 @@ export default async function Home() {
   const projectCount = liveProjects().length + INTERVIEW_CASES.length;
   const langs = ["sql", "python", "r", "excel"] as const;
 
-  const PROOF = [
-    { value: QUESTIONS.length, label: "Questions", note: "Four languages, graded on what your code produces." },
-    { value: lessonCount, label: "Lessons", note: "One idea each, with the scoreboard on screen." },
-    { value: liveCourses, label: "Courses live", note: "From your first SELECT to window functions." },
-    { value: projectCount, label: "Builds & cases", note: "Ending in a repo, a notebook, or a right answer." },
-    { value: 3, label: "Real seasons", note: "2022 to 2024, pinned so the answers hold still." },
-    { value: 876, label: "Stat lines", note: "One per game a player actually played." },
+  // Each number is also a door: hover lights it, a click goes to the thing
+  // it counts. Tones rotate so no two neighbours glow the same colour.
+  const PROOF: { value: number; label: string; note: string; href: string; tone: "turf" | "ice" | "gold" }[] = [
+    { value: QUESTIONS.length, label: "Questions", note: "Four languages, graded on what your code produces.", href: "/questions", tone: "gold" },
+    { value: lessonCount, label: "Lessons", note: "One idea each, with the scoreboard on screen.", href: "/learn", tone: "turf" },
+    { value: liveCourses, label: "Courses live", note: "From your first SELECT to window functions.", href: "/learn", tone: "ice" },
+    { value: projectCount, label: "Builds & cases", note: "Ending in a repo, a notebook, or a right answer.", href: "/projects", tone: "gold" },
+    { value: FACTS.seasons.length, label: "Real seasons", note: `${FACTS.seasons[0]} through week ${FACTS.latest.week} of ${FACTS.latest.season}, pinned so the answers hold still.`, href: "/data", tone: "turf" },
+    { value: FACTS.rows, label: "Stat lines", note: "One per game a player actually played.", href: "/data", tone: "ice" },
   ];
 
   return (
@@ -134,14 +138,19 @@ export default async function Home() {
 
       <main>
         {/* ── Hero ───────────────────────────────────────── */}
+        {/* Exactly one screen tall (less the 57px sticky nav), content
+            centred, so the first thing anyone sees is the headline on a
+            moving field and nothing else. svh rather than vh so a phone's
+            collapsing address bar doesn't push the buttons off the bottom.
+            The numbers and the ticker start where the scroll starts. */}
         <section
           data-reveal-section
-          className="field-stage edge-fade-y border-b border-panel-border"
+          className="field-stage edge-fade-y flex min-h-[calc(100svh-3.5rem-1px)] flex-col justify-center border-b border-panel-border"
         >
           <FieldBackdrop />
           <div aria-hidden className="field-layer dot-field" />
 
-          <div className="sequence relative mx-auto max-w-4xl px-4 pb-20 pt-16 text-center sm:px-6 sm:pb-28 sm:pt-28">
+          <div className="sequence relative mx-auto w-full max-w-4xl px-4 py-20 text-center sm:px-6">
             <p className="reveal inline-flex items-center gap-2 rounded-full border border-panel-border bg-panel/70 px-4 py-1.5 font-mono text-[11px] uppercase tracking-wider text-ink-soft backdrop-blur">
               <span className="dot-glow-gold inline-block h-1.5 w-1.5 rounded-full bg-gold" />
               Free beta · no account needed
@@ -159,10 +168,10 @@ export default async function Home() {
               Get sharp at <span className="text-ink">SQL</span>,{" "}
               <span className="text-ink">Python</span>,{" "}
               <span className="text-ink">R</span> and{" "}
-              <span className="text-ink">Excel</span> on three seasons of real
-              NFL scoring. A new question every morning, courses that run your
-              code for real, and projects worth putting your name on. You
-              don&apos;t have to watch the games.
+              <span className="text-ink">Excel</span> on every week of real
+              NFL scoring since {FACTS.seasons[0]}. A new question every
+              morning, courses that run your code for real, and projects worth
+              putting your name on. You don&apos;t have to watch the games.
             </p>
 
             <div className="reveal mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -174,12 +183,30 @@ export default async function Home() {
               </Link>
             </div>
           </div>
+
+          <a
+            href="#by-the-numbers"
+            className="scroll-cue absolute bottom-6 left-1/2 z-10 -ml-8 flex w-16 flex-col items-center gap-1 font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft transition-colors hover:text-turf"
+          >
+            Scroll
+            <svg aria-hidden viewBox="0 0 16 10" className="h-2.5 w-4">
+              <path
+                d="M2 2 L8 8 L14 2"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </a>
         </section>
 
         {/* ── Built for / by the numbers ─────────────────── */}
         <section
+          id="by-the-numbers"
           data-reveal-section
-          className="border-b border-panel-border bg-night/40"
+          className="scroll-mt-14 border-b border-panel-border bg-night/40"
         >
           <div className="overflow-hidden border-b border-panel-border py-3">
             <div
@@ -191,23 +218,29 @@ export default async function Home() {
             </div>
           </div>
           <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-            <div className="sequence grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            {/* The reveal lives on the wrapper, the glow on the card: the
+                reveal animation holds its last transform, which would
+                silently cancel a hover lift on the same element. */}
+            <GlowGrid className="sequence grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
               {PROOF.map((s) => (
-                <div
-                  key={s.label}
-                  className="reveal surface rounded-2xl border border-panel-border bg-panel px-4 py-5 text-center"
-                >
-                  <CountUp
-                    to={s.value}
-                    className="stat-glow font-display text-3xl font-bold sm:text-4xl"
-                  />
-                  <p className="label-broadcast mt-1 text-[10px]">{s.label}</p>
-                  <p className="mt-2 text-[12px] leading-snug text-ink-muted">
-                    {s.note}
-                  </p>
+                <div key={s.label} className="reveal">
+                  <Link
+                    href={s.href}
+                    data-tone={s.tone}
+                    className="glow-card surface block h-full rounded-2xl border border-panel-border bg-panel px-4 py-5 text-center"
+                  >
+                    <CountUp
+                      to={s.value}
+                      className="glow-num stat-glow font-display text-3xl font-bold sm:text-4xl"
+                    />
+                    <p className="label-broadcast mt-1 text-[10px]">{s.label}</p>
+                    <p className="mt-2 text-[12px] leading-snug text-ink-muted">
+                      {s.note}
+                    </p>
+                  </Link>
                 </div>
               ))}
-            </div>
+            </GlowGrid>
           </div>
         </section>
 

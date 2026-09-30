@@ -187,6 +187,110 @@ body {
       var(--shadow-surface);
   }
 
+  /* ── Glow card ────────────────────────────────────────────────
+     A stat card that answers the pointer. At rest it is an ordinary
+     `.surface` card. On hover or keyboard focus it lifts, its border and
+     the light underneath take its own accent (data-tone), a soft light
+     follows the cursor across it (--mx/--my, written by glow-grid.tsx), and
+     a bright arc chases round its edge. The arc is a conic gradient masked to
+     a 1px ring, turned by animating a registered angle, so it is one
+     pseudo-element and no extra markup. Its animation is paused until hover
+     so six idle cards cost nothing. `.glow-card:hover` out-specifies
+     `.surface`, which is what lets the hover shadow replace the resting one. */
+  .glow-card {
+    --glow: var(--c-turf);
+    --mx: 50%;
+    --my: 0%;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    transition:
+      transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 280ms ease,
+      border-color 280ms ease;
+  }
+  .glow-card[data-tone="ice"] {
+    --glow: var(--c-ice);
+  }
+  .glow-card[data-tone="gold"] {
+    --glow: var(--c-gold);
+  }
+
+  .glow-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(
+      240px circle at var(--mx) var(--my),
+      rgb(var(--glow) / 0.24),
+      transparent 65%
+    );
+    opacity: 0;
+    transition: opacity 280ms ease;
+  }
+
+  .glow-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: conic-gradient(
+      from var(--glow-angle),
+      transparent 0% 58%,
+      rgb(var(--glow) / 0.95) 76%,
+      transparent 92%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 280ms ease;
+    animation: glow-orbit 3.4s linear infinite paused;
+  }
+
+  .glow-card:hover,
+  .glow-card:focus-visible {
+    transform: translate3d(0, -6px, 0);
+    border-color: rgb(var(--glow) / 0.55);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / var(--surface-specular)),
+      0 24px 50px -20px rgb(var(--glow) / 0.6),
+      0 0 70px -14px rgb(var(--glow) / 0.45);
+  }
+
+  .glow-card:hover::before,
+  .glow-card:focus-visible::before,
+  .glow-card:hover::after,
+  .glow-card:focus-visible::after {
+    opacity: 1;
+  }
+
+  .glow-card:hover::after,
+  .glow-card:focus-visible::after {
+    animation-play-state: running;
+  }
+
+  /* The number is gradient-clipped text (.stat-glow, unlayered), so a
+     text-shadow here would both lose to it and paint over the fill. A
+     drop-shadow filter glows the rendered gradient instead, and --stat-tint
+     swaps the gradient's lower colour to the card's accent. */
+  .glow-card .glow-num {
+    transition: filter 280ms ease;
+  }
+
+  .glow-card:hover .glow-num,
+  .glow-card:focus-visible .glow-num {
+    --stat-tint: var(--glow);
+    filter: drop-shadow(0 0 14px rgb(var(--glow) / 0.65)) brightness(1.12);
+  }
+
   /* Hero-level panels. A hairline that shifts turf → ice → gold along its length,
      done as a masked gradient border rather than four elements. */
   .chrome {
@@ -1771,6 +1875,249 @@ body {
   transition: background 120ms linear;
 }
 
+/* The moving field. The plane is tilted once; the child inside it slides
+   down by exactly one repeat of the line pattern (320px — five 64px yards,
+   the fifth one bold) and snaps back, so the loop has no seam. Sliding a
+   child keeps the animation on the compositor; animating background-position
+   on a tilted, masked layer this size would repaint it every frame. */
+.field-plane {
+  overflow: hidden;
+  transform: perspective(700px) rotateX(60deg) scale(2.4);
+  transform-origin: 50% 100%;
+  mask-image: linear-gradient(to top, black 0%, transparent 82%);
+  -webkit-mask-image: linear-gradient(to top, black 0%, transparent 82%);
+}
+
+.field-plane-scroll {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -320px;
+  bottom: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgb(var(--c-ink) / 0.16) 0 2px,
+      transparent 2px 320px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgb(var(--c-ink) / 0.06) 0 1px,
+      transparent 1px 64px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgb(var(--c-turf) / 0.07) 0 1px,
+      transparent 1px 96px
+    );
+  animation: field-advance 11s linear infinite;
+  will-change: transform;
+}
+
+@keyframes field-advance {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 320px, 0);
+  }
+}
+
+/* Chalkboard plays. Each route draws on, holds, fades and redraws; the
+   arrowhead waits for the line to reach it. Offense is a ring, defense an X,
+   exactly as a coach would chalk it. */
+.field-plays {
+  width: 100%;
+  height: 100%;
+}
+
+.play-route {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  animation: play-draw 8s ease-in-out infinite;
+}
+
+.play-tip {
+  opacity: 0;
+  animation: play-tip 8s ease-in-out infinite;
+}
+
+.play-tone-turf .play-route {
+  stroke: rgb(var(--c-turf) / 0.6);
+}
+.play-tone-turf .play-tip {
+  fill: rgb(var(--c-turf) / 0.6);
+}
+.play-tone-ice .play-route {
+  stroke: rgb(var(--c-ice) / 0.6);
+}
+.play-tone-ice .play-tip {
+  fill: rgb(var(--c-ice) / 0.6);
+}
+.play-tone-gold .play-route {
+  stroke: rgb(var(--c-gold) / 0.55);
+}
+.play-tone-gold .play-tip {
+  fill: rgb(var(--c-gold) / 0.55);
+}
+
+.play-o {
+  fill: rgb(var(--c-night) / 0.6);
+  stroke: rgb(var(--c-ink) / 0.35);
+  stroke-width: 2.5;
+}
+
+.play-x {
+  fill: none;
+  stroke: rgb(var(--c-ice) / 0.35);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+@keyframes play-draw {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  38% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  74% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  90%,
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes play-tip {
+  0%,
+  34% {
+    opacity: 0;
+  }
+  40%,
+  74% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* A pass in flight. The outer span crosses the field at a steady speed; the
+   inner one rises and falls on its own easing (up fast, hang, down) and tilts
+   with the arc, which is what makes it read as thrown rather than slid. The
+   flight takes the first half of the loop and the ball is gone for the rest,
+   so it arrives every so often instead of circling like a screensaver. */
+.ball-x {
+  position: absolute;
+  left: 0;
+  opacity: 0;
+  animation: ball-cross 15s linear infinite;
+}
+
+.ball-one {
+  top: 62%;
+}
+
+.ball-two {
+  top: 70%;
+  animation-duration: 19s;
+  animation-delay: 7s;
+  animation-name: ball-cross-back;
+}
+
+.ball-y {
+  display: block;
+  animation: ball-arc 15s infinite;
+}
+
+.ball-two .ball-y {
+  animation-duration: 19s;
+  animation-delay: 7s;
+}
+
+@keyframes ball-cross {
+  0% {
+    transform: translate3d(-8vw, 0, 0);
+    opacity: 0;
+  }
+  3% {
+    opacity: 0.7;
+  }
+  42% {
+    opacity: 0.7;
+  }
+  46%,
+  100% {
+    transform: translate3d(104vw, 0, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes ball-cross-back {
+  0% {
+    transform: translate3d(104vw, 0, 0) scaleX(-1);
+    opacity: 0;
+  }
+  3% {
+    opacity: 0.6;
+  }
+  42% {
+    opacity: 0.6;
+  }
+  46%,
+  100% {
+    transform: translate3d(-8vw, 0, 0) scaleX(-1);
+    opacity: 0;
+  }
+}
+
+@keyframes ball-arc {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-28deg);
+    animation-timing-function: cubic-bezier(0.33, 0.66, 0.66, 1);
+  }
+  23% {
+    transform: translate3d(0, -34vh, 0) rotate(0deg);
+    animation-timing-function: cubic-bezier(0.33, 0, 0.66, 0.33);
+  }
+  46%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(28deg);
+  }
+}
+
+/* "Scroll" under the hero: a nudge that the page keeps going. */
+.scroll-cue {
+  animation: scroll-cue 2.2s ease-in-out infinite;
+}
+
+@keyframes scroll-cue {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate3d(0, 6px, 0);
+    opacity: 1;
+  }
+}
+
 /* ── Auto-scrolling course rail ────────────────────────────────────
  *
  * The track holds the cards twice and slides exactly half its width, so the
@@ -1998,12 +2345,26 @@ html[data-reveal-armed] [data-revealed="true"] .reveal {
   background: linear-gradient(
     180deg,
     rgb(var(--c-ink)),
-    rgb(var(--c-turf) / 0.85)
+    rgb(var(--stat-tint, var(--c-turf)) / 0.85)
   );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  text-shadow: 0 0 34px rgb(var(--c-turf) / 0.22);
+  text-shadow: 0 0 34px rgb(var(--stat-tint, var(--c-turf)) / 0.22);
+}
+
+/* The angle .glow-card's ring turns through. Registered so it can be
+   animated at all: an unregistered custom property only ever jumps. */
+@property --glow-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes glow-orbit {
+  to {
+    --glow-angle: 360deg;
+  }
 }
 
 /* The editor chrome on the product shot. */
@@ -2083,6 +2444,34 @@ html[data-reveal-armed] [data-revealed="true"] .reveal {
   }
   .field-turf {
     opacity: 0.5;
+  }
+  /* The field holds still and the plays are simply drawn, finished — a
+     chalkboard rather than a replay. The passes are motion or nothing, so
+     they go. */
+  .field-plane-scroll,
+  .scroll-cue {
+    animation: none;
+  }
+  .play-route {
+    animation: none;
+    stroke-dashoffset: 0;
+    opacity: 0.7;
+  }
+  .play-tip {
+    animation: none;
+    opacity: 0.7;
+  }
+  .ball-x {
+    display: none;
+  }
+  /* The stat cards still light up — colour is not motion — but they stay
+     put and the ring holds still. */
+  .glow-card:hover,
+  .glow-card:focus-visible {
+    transform: none;
+  }
+  .glow-card::after {
+    animation: none;
   }
   /* The reveal survives; the travel does not. The page still composes
      itself as you scroll rather than snapping into place, but nothing
