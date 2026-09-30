@@ -20,14 +20,34 @@
  * the right idea and still fail on a column they were never asked for. Say it
  * explicitly, every time.
  *
+ * **Four languages, one bank.** SQL runs against that database. Python and R
+ * run in Pyodide / WebR (`lib/runtimes.ts`) against a `setup` prelude that
+ * builds the same real 2024 season out of a literal, and are graded on what
+ * the code *prints* — same as the lesson player's `code` drills. Excel
+ * evaluates a real formula against the workbook in `lib/excel-data.ts` and is
+ * graded on the value produced, so any correct spelling passes.
+ *
  * **Run `node scripts/verify-answer-keys.mjs` after touching any question.**
- * It executes every key against the real database and fails on a key that
- * errors, returns nothing, or sits on an untied-LIMIT trap.
+ * It executes every SQL key against the real database, every Python key in
+ * Pyodide, and every Excel key through the shipped engine, and fails on a key
+ * that errors, returns or prints nothing, or sits on an untied-LIMIT trap. R
+ * keys are skipped — there is no supported Node build of WebR — and the
+ * script says so rather than passing them silently, which is why the R
+ * questions here stay deliberately short.
  */
 
 import { SCHEMA } from "@/lib/fantasy-data";
 
 export type QuestionDifficulty = "easy" | "medium" | "hard";
+
+/**
+ * Which runtime grades this question.
+ *
+ * `sql` and `excel` run locally with no download. `python` pulls ~12 MB of
+ * Pyodide and `r` ~30 MB of WebR, on first use only — which is why the
+ * landing page's Question of the Day is pinned to SQL.
+ */
+export type QuestionLang = "sql" | "python" | "r" | "excel";
 
 /** Which drawn scene sits on the card. See components/question-art.tsx. */
 export type QuestionArt =
@@ -44,14 +64,23 @@ export type Question = {
   id: string;
   title: string;
   difficulty: QuestionDifficulty;
+  lang: QuestionLang;
   /** Short concept labels for the filter chips. */
   tags: string[];
   /** The situation, in plain English. Two or three sentences at most. */
   prompt: string;
   /** Exactly which columns, in which order. Required — see the file note. */
   returns: string;
-  /** Tables this question touches, so the schema panel can show only those. */
+  /** SQL only: tables this question touches, so the panel shows only those. */
   tables: string[];
+  /**
+   * Python / R only: code run before the learner's, building the data they
+   * work on. The answer key runs against the identical prelude, so grading
+   * compares two programs that saw the same world.
+   */
+  setup?: string;
+  /** Excel only: which sheet of lib/excel-data.ts the formula is graded on. */
+  sheet?: string;
   /** Optional first line in the editor. Keep it a nudge, not a skeleton. */
   starter?: string;
   expected: string;
@@ -68,6 +97,104 @@ export const DIFFICULTY_LABEL: Record<QuestionDifficulty, string> = {
   hard: "Hard",
 };
 
+export const LANG_LABEL: Record<QuestionLang, string> = {
+  sql: "SQL",
+  python: "Python",
+  r: "R",
+  excel: "Excel",
+};
+
+/** Shown before a cold start, so a 30 MB download is never a surprise. */
+export const LANG_WEIGHT: Partial<Record<QuestionLang, string>> = {
+  python: "~12 MB first run",
+  r: "~30 MB first run",
+};
+
+/**
+ * The 2024 season, as a literal, for the Python and R questions.
+ *
+ * Same twenty players and the same real totals the SQL questions aggregate
+ * out of `week_results` — read out of the database, not typed from memory.
+ * Inlined rather than fetched: Pyodide has no network without a shim, and a
+ * question that fails because a CDN blinked teaches nothing.
+ *
+ * Built as a dict-of-lists rather than a parsed CSV so the prelude reads the
+ * way a learner's own scratch file would, and so nothing here depends on
+ * which string-quoting survives a build step.
+ */
+const PLAYERS = [
+  "Lamar Jackson",
+  "Ja'Marr Chase",
+  "Josh Allen",
+  "Jahmyr Gibbs",
+  "Saquon Barkley",
+  "Bijan Robinson",
+  "Derrick Henry",
+  "Justin Jefferson",
+  "Amon-Ra St. Brown",
+  "Jalen Hurts",
+  "Patrick Mahomes",
+  "CeeDee Lamb",
+  "Davante Adams",
+  "George Kittle",
+  "Tyreek Hill",
+  "A.J. Brown",
+  "Puka Nacua",
+  "Travis Kelce",
+  "Sam LaPorta",
+  "Christian McCaffrey",
+];
+const POSITIONS = [
+  "QB", "WR", "QB", "RB", "RB", "RB", "RB", "WR", "WR", "QB",
+  "QB", "WR", "WR", "TE", "WR", "WR", "WR", "TE", "TE", "RB",
+];
+const TEAMS = [
+  "BAL", "CIN", "BUF", "DET", "PHI", "ATL", "BAL", "MIN", "DET", "PHI",
+  "KC", "DAL", "NYJ", "SF", "MIA", "PHI", "LA", "KC", "DET", "SF",
+];
+const GAMES = [17, 17, 16, 17, 16, 17, 17, 17, 17, 15, 16, 15, 14, 15, 17, 13, 11, 16, 16, 4];
+const POINTS = [
+  430.4, 403.0, 379.1, 362.9, 355.3, 341.7, 336.4, 317.5, 316.2, 315.0,
+  282.9, 263.4, 241.3, 236.6, 218.2, 216.9, 206.6, 195.4, 174.6, 47.8,
+];
+const BEST = [
+  36.1, 55.4, 51.9, 46.0, 46.2, 31.3, 35.9, 36.4, 38.7, 35.1,
+  28.8, 39.6, 42.8, 24.8, 28.1, 25.0, 41.8, 25.0, 18.4, 16.7,
+];
+
+const pyList = (xs: (string | number)[]) =>
+  xs.map((x) => (typeof x === "number" ? String(x) : JSON.stringify(x))).join(", ");
+
+/** Python prelude: pandas, one DataFrame called `df`. */
+export const PY_SETUP = `import pandas as pd
+
+df = pd.DataFrame({
+    "player": [${pyList(PLAYERS)}],
+    "position": [${pyList(POSITIONS)}],
+    "team": [${pyList(TEAMS)}],
+    "games": [${pyList(GAMES)}],
+    "points": [${pyList(POINTS)}],
+    "best": [${pyList(BEST)}],
+})
+`;
+
+const rVec = (xs: (string | number)[]) =>
+  `c(${xs.map((x) => (typeof x === "number" ? String(x) : JSON.stringify(x))).join(", ")})`;
+
+/** R prelude: dplyr, one data frame called `df`. */
+export const R_SETUP = `suppressMessages(library(dplyr))
+
+df <- data.frame(
+  player = ${rVec(PLAYERS)},
+  position = ${rVec(POSITIONS)},
+  team = ${rVec(TEAMS)},
+  games = ${rVec(GAMES)},
+  points = ${rVec(POINTS)},
+  best = ${rVec(BEST)},
+  stringsAsFactors = FALSE
+)
+`;
+
 export const DIFFICULTY_XP: Record<QuestionDifficulty, number> = {
   easy: 10,
   medium: 20,
@@ -80,6 +207,7 @@ export const QUESTIONS: Question[] = [
     id: "week-3-hammer",
     title: "Week 3 Hammer",
     difficulty: "easy",
+    lang: "sql",
     tags: ["ORDER BY", "LIMIT", "WHERE"],
     prompt:
       "Your league chat is arguing about who had the biggest week 3 of the 2024 season. Settle it.",
@@ -101,6 +229,7 @@ LIMIT 1;`,
     id: "the-quarterbacks",
     title: "Name the Quarterbacks",
     difficulty: "easy",
+    lang: "sql",
     tags: ["DISTINCT", "WHERE"],
     prompt:
       "You've been handed a table with thousands of weekly stat lines and you want to know which quarterbacks are even in it. Each one should appear once.",
@@ -120,6 +249,7 @@ ORDER BY player;`,
     id: "thirty-burger",
     title: "Thirty Burger",
     difficulty: "easy",
+    lang: "sql",
     tags: ["WHERE", "ORDER BY"],
     prompt:
       "A 30-point game wins you the week on its own. Find every one of them from the 2024 season.",
@@ -139,6 +269,7 @@ ORDER BY fantasy_pts DESC;`,
     id: "games-actually-played",
     title: "Games Actually Played",
     difficulty: "easy",
+    lang: "sql",
     tags: ["COUNT", "GROUP BY"],
     prompt:
       "Three seasons is 50-odd games if you never miss one. Nobody does. Count how many games each running back actually shows up for across the whole table.",
@@ -159,6 +290,7 @@ ORDER BY games DESC;`,
     id: "rough-afternoon",
     title: "Rough Afternoon",
     difficulty: "easy",
+    lang: "sql",
     tags: ["ORDER BY", "LIMIT"],
     prompt:
       "Somebody started these guys. Find the five worst single-game scores in the table.",
@@ -178,6 +310,7 @@ LIMIT 5;`,
     id: "whos-on-my-team",
     title: "Who's On My Team",
     difficulty: "easy",
+    lang: "sql",
     tags: ["JOIN"],
     prompt:
       "The rosters table says who owns whom in an example 5-team league. Pull the Blitz Brothers roster with each player's real NFL team and position.",
@@ -198,6 +331,7 @@ ORDER BY r.player;`,
     id: "waiver-risers",
     title: "Waiver Risers",
     difficulty: "easy",
+    lang: "sql",
     tags: ["WHERE", "ORDER BY"],
     prompt:
       "The waiver table tracks how many leagues have each player rostered and which way that number is moving. Find the players trending up.",
@@ -217,6 +351,7 @@ ORDER BY trend DESC;`,
     id: "the-slate",
     title: "The Slate",
     difficulty: "easy",
+    lang: "sql",
     tags: ["COUNT", "GROUP BY"],
     prompt:
       "The games table is the real NFL schedule. Count how many games each season holds.",
@@ -236,6 +371,7 @@ ORDER BY season;`,
     id: "indoor-football",
     title: "Indoor Football",
     difficulty: "easy",
+    lang: "sql",
     tags: ["IN", "COUNT"],
     prompt:
       "Roof tells you whether the weather was a factor. Count the 2024 games played under a roof — that's 'dome' or 'closed'.",
@@ -253,6 +389,7 @@ WHERE season = 2024 AND roof IN ('dome', 'closed');`,
     id: "tight-end-premium",
     title: "Tight End Premium",
     difficulty: "easy",
+    lang: "sql",
     tags: ["AVG", "GROUP BY", "ROUND"],
     prompt:
       "People say tight end is a wasteland and quarterback is a cheat code. Get the average score per game for each position in 2024 and see.",
@@ -275,6 +412,7 @@ ORDER BY avg_pts DESC;`,
     id: "points-per-game",
     title: "Points Per Game",
     difficulty: "medium",
+    lang: "sql",
     tags: ["GROUP BY", "HAVING", "AVG"],
     prompt:
       "Season totals reward players who stayed healthy. Per-game scoring is the fairer comparison. Rank the 2024 season by points per game, but only for players with at least 10 games — a two-game sample is noise.",
@@ -296,6 +434,7 @@ ORDER BY ppg DESC;`,
     id: "boom-games",
     title: "Boom Games",
     difficulty: "medium",
+    lang: "sql",
     tags: ["CASE", "SUM", "GROUP BY"],
     prompt:
       "A ceiling matters more than an average in a head-to-head league. For 2024, count how many 20-point games each player had — including the players who had none.",
@@ -317,6 +456,7 @@ ORDER BY boom_games DESC, player;`,
     id: "floor-and-ceiling",
     title: "Floor and Ceiling",
     difficulty: "medium",
+    lang: "sql",
     tags: ["MIN", "MAX", "HAVING"],
     prompt:
       "Two backs can average the same and feel completely different to own. Show each running back's worst game, best game and average for 2024, with at least 8 games played.",
@@ -341,6 +481,7 @@ ORDER BY MAX(fantasy_pts) - MIN(fantasy_pts) DESC;`,
     id: "year-over-year",
     title: "Year Over Year",
     difficulty: "medium",
+    lang: "sql",
     tags: ["GROUP BY", "Multiple grains"],
     prompt:
       "Amon-Ra St. Brown's owners want to know whether he is still climbing. Show his per-game scoring for each season in the table.",
@@ -361,6 +502,7 @@ ORDER BY season;`,
     id: "league-standings",
     title: "League Standings",
     difficulty: "medium",
+    lang: "sql",
     tags: ["JOIN", "SUM", "GROUP BY"],
     prompt:
       "Five teams, two players each, one season. Add up what each example-league team's roster scored in 2024 and post the standings.",
@@ -382,6 +524,7 @@ ORDER BY total_pts DESC;`,
     id: "thursday-night",
     title: "Thursday Night",
     difficulty: "medium",
+    lang: "sql",
     tags: ["JOIN", "AVG"],
     prompt:
       "Thursday games have a reputation for being ugly. week_results has no date on it, but games does — join them and compare average scoring by day of week in 2024.",
@@ -406,6 +549,7 @@ ORDER BY avg_pts DESC;`,
     id: "weather-report",
     title: "Weather Report",
     difficulty: "medium",
+    lang: "sql",
     tags: ["JOIN", "CASE", "GROUP BY"],
     prompt:
       "Indoor football is supposed to be easier football. Join the schedule and compare average scoring indoors ('dome' or 'closed') against outdoors, for 2024.",
@@ -431,6 +575,7 @@ ORDER BY avg_pts DESC;`,
     id: "the-untouchables",
     title: "The Untouchables",
     difficulty: "medium",
+    lang: "sql",
     tags: ["HAVING", "MIN"],
     prompt:
       "A dud week costs you the matchup. Find the 2024 players who never had one — nobody below 5 points all season, minimum 10 games.",
@@ -452,6 +597,7 @@ ORDER BY games, player;`,
     id: "top-of-each-week",
     title: "Top of Each Week",
     difficulty: "medium",
+    lang: "sql",
     tags: ["Subquery", "GROUP BY"],
     prompt:
       "Who owned each week? For the first six weeks of 2024, find the single highest-scoring player in each one.",
@@ -477,6 +623,7 @@ ORDER BY w.week;`,
     id: "who-improved",
     title: "Who Improved",
     difficulty: "medium",
+    lang: "sql",
     tags: ["CASE", "HAVING", "AVG"],
     prompt:
       "Draft boards are built on last year. Find the players whose 2024 points per game beat their 2023 — counting only players who actually played in both seasons.",
@@ -500,6 +647,7 @@ ORDER BY ppg_2024 - ppg_2023 DESC;`,
     id: "opponent-unmasked",
     title: "Opponent Unmasked",
     difficulty: "medium",
+    lang: "sql",
     tags: ["JOIN", "CASE"],
     prompt:
       "week_results never says who the player was up against. The schedule does. Work out Ja'Marr Chase's 2024 opponent, week by week.",
@@ -527,6 +675,7 @@ ORDER BY w.week;`,
     id: "rank-your-position",
     title: "Rank Your Position",
     difficulty: "hard",
+    lang: "sql",
     tags: ["Window", "RANK", "PARTITION BY"],
     prompt:
       "Overall totals flatter quarterbacks. Rank every 2024 player against their own position by total points instead.",
@@ -550,6 +699,7 @@ ORDER BY position, pos_rank;`,
     id: "rolling-form",
     title: "Rolling Form",
     difficulty: "hard",
+    lang: "sql",
     tags: ["Window", "Frame", "AVG"],
     prompt:
       "One huge week can carry a season average for a month. Smooth Lamar Jackson's 2024 out with a three-week rolling average — this week and the two before it.",
@@ -571,6 +721,7 @@ ORDER BY week;`,
     id: "back-to-back",
     title: "Back to Back",
     difficulty: "hard",
+    lang: "sql",
     tags: ["Window", "LAG"],
     prompt:
       "Two monster weeks in a row is when a manager starts believing. Find every time a player went 25+ in 2024 immediately after another 25+ week.",
@@ -600,6 +751,7 @@ ORDER BY player, week;`,
     id: "share-of-the-load",
     title: "Share of the Load",
     difficulty: "hard",
+    lang: "sql",
     tags: ["Window", "Ratio", "JOIN"],
     prompt:
       "Every fantasy team has a guy carrying it. For 2024, work out what share of each example-league team's points came from each of its two players.",
@@ -627,6 +779,7 @@ ORDER BY team_name, pct_of_team DESC;`,
     id: "best-of-each-season",
     title: "Best of Each Season",
     difficulty: "hard",
+    lang: "sql",
     tags: ["Window", "ROW_NUMBER", "Top-N"],
     prompt:
       "Give the highlight reel: the three biggest single games of each season, with the week they happened.",
@@ -653,6 +806,7 @@ ORDER BY season, fantasy_pts DESC;`,
     id: "the-drop-off",
     title: "The Drop-Off",
     difficulty: "hard",
+    lang: "sql",
     tags: ["Window", "LEAD", "Gap"],
     prompt:
       "Draft strategy lives in the cliffs — the spot where the next guy at your position is a lot worse. For 2024 running backs, show each one's total and how far the next back down the list sits behind them.",
@@ -678,6 +832,7 @@ ORDER BY total_pts DESC;`,
     id: "quiet-weeks",
     title: "The Quiet Weeks",
     difficulty: "hard",
+    lang: "sql",
     tags: ["LEFT JOIN", "NULL", "Anti-join"],
     prompt:
       "Puka Nacua missed time in 2024 and the table just has no row for those weeks. List every week 1–17 of 2024 where he has no stat line at all.",
@@ -701,6 +856,7 @@ ORDER BY wk.week;`,
     id: "streak-finder",
     title: "Streak Finder",
     difficulty: "hard",
+    lang: "sql",
     tags: ["Window", "Gaps and islands"],
     prompt:
       "A player is 'hot' when they clear 20 points several weeks running. For 2024, find the longest such streak for each player who ever managed two in a row.",
@@ -727,6 +883,342 @@ ORDER BY streak_weeks DESC, player;`,
       "Gaps and islands: for a run of consecutive weeks, week minus row-number is constant, so that difference becomes a group key for the run. It looks like a trick the first time and like a tool every time after.",
     art: "heat",
   },
+  // ── Python ────────────────────────────────────────────────────
+  //
+  // `df` is already in scope — the prelude builds it. Grading compares what
+  // your code prints, so the answer has to come out of print().
+  {
+    id: "py-top-scorer",
+    title: "Name the Leader",
+    difficulty: "easy",
+    lang: "python",
+    tags: ["idxmax", "Indexing"],
+    prompt:
+      "The 2024 season is in a DataFrame called df. Print the name of the player who scored the most total points.",
+    returns: "One line: the player's name and nothing else.",
+    tables: [],
+    setup: PY_SETUP,
+    starter: "# df is already loaded. Columns: player, position, team, games, points, best\n",
+    expected: 'print(df.loc[df["points"].idxmax(), "player"])',
+    hint: "idxmax() gives you the index label of the biggest value, and .loc looks a row up by it.",
+    explain:
+      "max() gives you the number; idxmax() gives you the row it came from. Almost every 'who' question in pandas is the second one.",
+    art: "trophy",
+  },
+  {
+    id: "py-count-by-position",
+    title: "Count the Room",
+    difficulty: "easy",
+    lang: "python",
+    tags: ["value_counts", "Dict"],
+    prompt:
+      "Before you analyse anything, find out what is in front of you. Print how many players there are at each position.",
+    returns: "A dict, e.g. {'WR': 7, 'RB': 5, ...} — print it with print().",
+    tables: [],
+    setup: PY_SETUP,
+    starter: "# how many players per position?\n",
+    expected: 'print(df["position"].value_counts().to_dict())',
+    hint: "value_counts() counts each distinct value. to_dict() turns the result into a plain dict.",
+    explain:
+      "value_counts() is the first thing to reach for on any new column. It tells you the shape of the data before you build anything on top of it.",
+    art: "depth",
+  },
+  {
+    id: "py-points-per-game",
+    title: "Per Game, Not Per Season",
+    difficulty: "medium",
+    lang: "python",
+    tags: ["New column", "round", "sort_values"],
+    prompt:
+      "Season totals reward whoever stayed healthy. Work out points per game for every player, then print the top five names.",
+    returns: "A list of five names, best points-per-game first.",
+    tables: [],
+    setup: PY_SETUP,
+    starter: '# add a ppg column, then print the top five players as a list\n',
+    expected:
+      'df["ppg"] = df["points"] / df["games"]\nprint(df.sort_values("ppg", ascending=False)["player"].head(5).tolist())',
+    hint: "Dividing two columns gives you a new column. Assign it, sort by it, then take the player column.",
+    explain:
+      "Christian McCaffrey played four games and is nowhere near the season leaderboard — but he is not bottom of this one. Which number you divide by decides who looks good.",
+    art: "stopwatch",
+  },
+  {
+    id: "py-filter-threshold",
+    title: "The Three Hundred Club",
+    difficulty: "medium",
+    lang: "python",
+    tags: ["Boolean mask", "Filtering"],
+    prompt:
+      "Print the names of every player who cleared 300 points, highest scorer first.",
+    returns: "A list of names, highest points first.",
+    tables: [],
+    setup: PY_SETUP,
+    starter: "# filter to 300+ points, sort high to low, print the names\n",
+    expected:
+      'print(df[df["points"] >= 300].sort_values("points", ascending=False)["player"].tolist())',
+    hint: 'df["points"] >= 300 gives you True/False per row. Put that inside df[...] to keep only the Trues.',
+    explain:
+      "A boolean mask is the pandas version of WHERE. Everything else — filtering, sorting, selecting a column — chains off it.",
+    art: "heat",
+  },
+  {
+    id: "py-group-mean",
+    title: "Which Position Scores",
+    difficulty: "medium",
+    lang: "python",
+    tags: ["groupby", "mean", "round"],
+    prompt:
+      "Print the average total points for each position, rounded to one decimal.",
+    returns: "A dict of position to average, e.g. {'QB': 340.7, ...}.",
+    tables: [],
+    setup: PY_SETUP,
+    starter: "# average points per position, rounded to 1dp, as a dict\n",
+    expected:
+      'print(df.groupby("position")["points"].mean().round(1).to_dict())',
+    hint: "groupby the position, pick the points column, take the mean, round it, then to_dict().",
+    explain:
+      "groupby → pick a column → aggregate is the pandas shape of GROUP BY. If you can read the SQL version you can read this one.",
+    art: "scoreboard",
+  },
+  {
+    id: "py-two-stats",
+    title: "Floor and Ceiling",
+    difficulty: "hard",
+    lang: "python",
+    tags: ["agg", "Multiple aggregates"],
+    prompt:
+      "For each position, print the number of players, their average total points and their best single game — all in one pass.",
+    returns:
+      "Print the resulting DataFrame with columns in this order: players, avg_points, top_game, indexed by position and rounded to one decimal.",
+    tables: [],
+    setup: PY_SETUP,
+    starter:
+      '# one groupby, three aggregates, named players / avg_points / top_game\n',
+    expected:
+      'out = df.groupby("position").agg(\n    players=("player", "count"),\n    avg_points=("points", "mean"),\n    top_game=("best", "max"),\n).round(1)\nprint(out)',
+    hint: "agg() takes keyword arguments: new_name=(column, function). That names the output columns for you.",
+    explain:
+      "Named aggregation is how you get three summaries out of one pass instead of three merges. The names are yours, so the result is readable without a legend.",
+    art: "clipboard",
+  },
+  {
+    id: "py-availability",
+    title: "The Availability Tax",
+    difficulty: "hard",
+    lang: "python",
+    tags: ["Filtering", "Sorting", "Derived column"],
+    prompt:
+      "A player who scores well but misses games is a different asset from one who does not. Find everyone who played fewer than 16 of 17 games and show what they averaged when they did play.",
+    returns:
+      "Print the resulting DataFrame with columns player, games, ppg (rounded to one decimal), highest ppg first, with the default index reset away.",
+    tables: [],
+    setup: PY_SETUP,
+    starter: "# who missed time, and what did they do when available?\n",
+    expected:
+      'out = df[df["games"] < 16].copy()\nout["ppg"] = (out["points"] / out["games"]).round(1)\nout = out.sort_values("ppg", ascending=False)[["player", "games", "ppg"]].reset_index(drop=True)\nprint(out)',
+    hint: "Filter first, .copy() so pandas does not warn you, then build the column on the filtered frame.",
+    explain:
+      "The .copy() is not superstition. Assigning a column to a slice of another frame is the SettingWithCopyWarning, and the fix is to decide up front whether you are making a new frame.",
+    art: "routes",
+  },
+
+  // ── R ─────────────────────────────────────────────────────────
+  //
+  // Deliberately short. There is no supported Node build of WebR, so the
+  // verifier cannot execute these keys the way it does the SQL and Python
+  // ones — which means every R question here has to be simple enough to be
+  // obviously right on reading.
+  {
+    id: "r-top-scorer",
+    title: "Name the Leader (R)",
+    difficulty: "easy",
+    lang: "r",
+    tags: ["Indexing", "which.max"],
+    prompt:
+      "The same 2024 season, this time as a data frame called df. Print the name of the player who scored the most total points.",
+    returns: "One line: the player's name.",
+    tables: [],
+    setup: R_SETUP,
+    starter: "# df is loaded. Columns: player, position, team, games, points, best\n",
+    expected: 'print(df$player[which.max(df$points)])',
+    hint: "which.max() gives you the position of the largest value, and you can index a column with it.",
+    explain:
+      "max() gives the value, which.max() gives where it is. Same distinction as pandas' max and idxmax.",
+    art: "trophy",
+  },
+  {
+    id: "r-filter-arrange",
+    title: "Receivers Only",
+    difficulty: "easy",
+    lang: "r",
+    tags: ["dplyr", "filter", "arrange"],
+    prompt:
+      "Print every wide receiver who scored 250 or more points, highest first, showing just the name and the points.",
+    returns: "The filtered data frame, printed, with player and points only.",
+    tables: [],
+    setup: R_SETUP,
+    starter: "# dplyr is loaded\n",
+    expected:
+      'df %>%\n  filter(position == "WR", points >= 250) %>%\n  arrange(desc(points)) %>%\n  select(player, points) %>%\n  print()',
+    hint: "filter() takes several conditions separated by commas, and they are ANDed together.",
+    explain:
+      "The pipe reads as a sentence: take the data, keep these rows, sort them, keep these columns. That readability is most of why dplyr won.",
+    art: "routes",
+  },
+  {
+    id: "r-group-summarise",
+    title: "Group and Summarise",
+    difficulty: "medium",
+    lang: "r",
+    tags: ["dplyr", "group_by", "summarise"],
+    prompt:
+      "Print the number of players and their average total points for each position, rounded to one decimal, best average first.",
+    returns:
+      "A data frame with position, n and avg_points, sorted by avg_points descending.",
+    tables: [],
+    setup: R_SETUP,
+    starter: "# group, summarise, arrange\n",
+    expected:
+      'df %>%\n  group_by(position) %>%\n  summarise(n = n(), avg_points = round(mean(points), 1)) %>%\n  arrange(desc(avg_points)) %>%\n  as.data.frame() %>%\n  print()',
+    hint: "n() counts the rows in each group and does not take an argument.",
+    explain:
+      "group_by() does nothing on its own — it tags the frame, and summarise() is what collapses it. Forgetting the second half is the most common dplyr mistake there is.",
+    art: "depth",
+  },
+
+  // ── Excel ─────────────────────────────────────────────────────
+  //
+  // Graded on the value the formula produces, not on the text, so any
+  // correct spelling passes. A formula that references no cell is rejected
+  // even when the number is right — reading the answer off the grid is not
+  // the skill.
+  {
+    id: "xl-best-season",
+    title: "Highest on the Sheet",
+    difficulty: "easy",
+    lang: "excel",
+    tags: ["MAX", "Ranges"],
+    prompt:
+      "The Roster sheet has one row per player, with season points in column E. Return the highest points total on the sheet.",
+    returns: "A single number.",
+    tables: [],
+    sheet: "Roster",
+    starter: "=",
+    expected: "=MAX(E2:E17)",
+    hint: "Give MAX the range of the points column, not the whole column.",
+    explain:
+      "A range is two corners with a colon between them. Getting the last row wrong is how a formula quietly stops seeing your newest data.",
+    art: "scoreboard",
+  },
+  {
+    id: "xl-count-receivers",
+    title: "How Many Receivers",
+    difficulty: "easy",
+    lang: "excel",
+    tags: ["COUNTIFS", "Criteria"],
+    prompt:
+      "Position is in column C. Count how many players on the Roster sheet are wide receivers.",
+    returns: "A single number.",
+    tables: [],
+    sheet: "Roster",
+    starter: "=",
+    expected: '=COUNTIFS(C2:C17,"WR")',
+    hint: "COUNTIFS takes a range and then what to match in it.",
+    explain:
+      'The criteria goes in quotes because it is text. Excel will not tell you off for leaving them out — it will just return 0, which looks like an answer.',
+    art: "clipboard",
+  },
+  {
+    id: "xl-owner-total",
+    title: "One Manager's Haul",
+    difficulty: "medium",
+    lang: "excel",
+    tags: ["SUMIFS", "Conditional totals"],
+    prompt:
+      "Owner is in column G and points are in column E. Total up every point Jordan's players scored.",
+    returns: "A single number.",
+    tables: [],
+    sheet: "Roster",
+    starter: "=",
+    expected: '=SUMIFS(E2:E17,G2:G17,"Jordan")',
+    hint: "SUMIFS puts the range you are adding up first, then the range you are testing, then the test.",
+    explain:
+      "SUMIF and SUMIFS take their arguments in opposite orders, which is the single most reliable way to waste ten minutes in a spreadsheet. SUMIFS first, always.",
+    art: "trophy",
+  },
+  {
+    id: "xl-lookup-team",
+    title: "Look Somebody Up",
+    difficulty: "medium",
+    lang: "excel",
+    tags: ["XLOOKUP", "Lookup"],
+    prompt:
+      "Player names are in column A and NFL teams in column B. Return the team Davante Adams played for.",
+    returns: "A three-letter team code.",
+    tables: [],
+    sheet: "Roster",
+    starter: "=",
+    expected: '=XLOOKUP("Davante Adams",A2:A17,B2:B17)',
+    hint: "XLOOKUP takes what you are looking for, where to look for it, and what to bring back.",
+    explain:
+      "XLOOKUP replaced VLOOKUP because you say what to search and what to return, rather than counting columns — inserting a column no longer breaks it. NYJ, by the way: this sheet is the 2024 season, and he was not on the Raiders for most of it.",
+    art: "routes",
+  },
+  {
+    id: "xl-per-game-average",
+    title: "Average Per Game",
+    difficulty: "medium",
+    lang: "excel",
+    tags: ["AVERAGEIFS", "ROUND"],
+    prompt:
+      "Games are in column D and points in column E. Find the average points per season for quarterbacks only (position in column C), rounded to one decimal.",
+    returns: "A single number to one decimal place.",
+    tables: [],
+    sheet: "Roster",
+    starter: "=",
+    expected: '=ROUND(AVERAGEIFS(E2:E17,C2:C17,"QB"),1)',
+    hint: "AVERAGEIFS has the same argument order as SUMIFS. Wrap the whole thing in ROUND.",
+    explain:
+      "Rounding on the outside, not the inside. Round each value first and you get the average of rounded numbers, which is not the same thing and quietly drifts.",
+    art: "stopwatch",
+  },
+  {
+    id: "xl-who-scored-most",
+    title: "Who, Not How Much",
+    difficulty: "hard",
+    lang: "excel",
+    tags: ["INDEX", "MATCH", "MAX"],
+    prompt:
+      "MAX tells you the biggest number. Return the name of the player it belongs to — names in column A, points in column E.",
+    returns: "A player's name.",
+    tables: [],
+    sheet: "Roster",
+    starter: "=",
+    expected: "=INDEX(A2:A17,MATCH(MAX(E2:E17),E2:E17,0))",
+    hint: "MATCH finds which position a value sits at. INDEX pulls the value at that position out of another range.",
+    explain:
+      "INDEX and MATCH split the job in two: find where, then fetch what. It is the same move as pandas' idxmax and SQL's 'match back against the group maximum' — every tool has this problem and this shape of answer.",
+    art: "trophy",
+  },
+  {
+    id: "xl-clean-the-import",
+    title: "Clean the Export",
+    difficulty: "hard",
+    lang: "excel",
+    tags: ["TRIM", "VALUE", "Dirty data"],
+    prompt:
+      "The Import sheet is the same league as a bad export: names padded with spaces in column A and points stored as text in column B. Return the total of the points column as an actual number.",
+    returns: "A single number.",
+    tables: [],
+    sheet: "Import",
+    starter: "=",
+    expected:
+      "=VALUE(TRIM(B2))+VALUE(TRIM(B3))+VALUE(TRIM(B4))+VALUE(TRIM(B5))+VALUE(TRIM(B7))",
+    hint: "SUM ignores text entirely, so it returns 0 here. Convert each value, and notice that one row is blank.",
+    explain:
+      "SUM over text returns 0 rather than an error, which is the dangerous part — nothing goes red, the number is just wrong. Row 6 is empty too, and VALUE on a blank is an error, so it has to be left out.",
+    art: "weather",
+  },
 ];
 
 export const QUESTION_COUNT = QUESTIONS.length;
@@ -747,6 +1239,16 @@ export function schemaFor(q: Question) {
 // the thing you can argue about with someone in another timezone, and a
 // server-rendered date has to agree with the client's or React hydration
 // tears the card in half.
+//
+// **There is a daily per language, not one daily overall.** A single rotation
+// across the whole bank would hand a SQL learner an R question on a Tuesday
+// and break a streak they had done nothing to lose. So each language has its
+// own rotation, and solving any of them counts for the day.
+//
+// The landing page and the dashboard both show the SQL one. That is not a
+// judgement about SQL — it is that Python costs ~12 MB of Pyodide and R ~30 MB
+// of WebR on first run, and a landing page does not get to spend that before
+// anyone has asked for anything.
 
 const LEAGUE_TZ = "America/New_York";
 const MS_PER_DAY = 86_400_000;
@@ -763,8 +1265,8 @@ export function leagueDay(now: Date = new Date()): string {
 }
 
 /**
- * A stride co-prime with the bank size, so stepping by it visits every
- * question before repeating any. Near the golden ratio of the bank, which
+ * A stride co-prime with the pool size, so stepping by it visits every
+ * question before repeating any. Near the golden ratio of the pool, which
  * keeps consecutive days far apart in the list rather than marching through
  * easy-to-hard in order.
  */
@@ -776,9 +1278,28 @@ function dailyStride(n: number): number {
   return 1;
 }
 
-export function questionOfTheDay(day: string = leagueDay()): Question {
-  const n = QUESTIONS.length;
+export function questionsIn(lang: QuestionLang): Question[] {
+  return QUESTIONS.filter((q) => q.lang === lang);
+}
+
+export function questionOfTheDay(
+  day: string = leagueDay(),
+  lang: QuestionLang = "sql",
+): Question {
+  const pool = questionsIn(lang);
+  // Never throws on an empty pool: a language with no questions yet falls
+  // back to SQL rather than crashing a server render.
+  if (pool.length === 0) return questionsIn("sql")[0];
   const dayNumber = Math.floor(Date.parse(`${day}T00:00:00Z`) / MS_PER_DAY);
-  const index = ((dayNumber * dailyStride(n)) % n + n) % n;
-  return QUESTIONS[index];
+  const n = pool.length;
+  const index = (((dayNumber * dailyStride(n)) % n) + n) % n;
+  return pool[index];
+}
+
+/**
+ * Is this the daily for its own language? Solving any language's daily
+ * advances the same streak, which is the point of splitting them.
+ */
+export function isDailyQuestion(day: string, q: Question): boolean {
+  return questionOfTheDay(day, q.lang).id === q.id;
 }

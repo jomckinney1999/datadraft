@@ -33,6 +33,31 @@ const curriculum = await loadProjectTs(path.join(root, "lib/curriculum.ts"), roo
 const excel = await loadProjectTs(path.join(root, "lib/excel-engine.ts"), root);
 const excelData = await loadProjectTs(path.join(root, "lib/excel-data.ts"), root);
 
+// One Pyodide for the whole run. Booting it twice doubles a slow step, and
+// the second copy would be identical anyway.
+let pyHandle = null;
+async function getPy() {
+  if (!pyHandle) {
+    pyHandle = await loadPyodide();
+    await pyHandle.loadPackage("pandas");
+  }
+  return pyHandle;
+}
+
+/** Run code and report what it printed, the way the browser grades it. */
+async function runPython(code) {
+  const py = await getPy();
+  let out = "";
+  py.setStdout({ batched: (t) => (out += t + "\n") });
+  py.setStderr({ batched: (t) => (out += t + "\n") });
+  try {
+    await py.runPythonAsync(code);
+  } catch (e) {
+    return { stdout: out, error: String(e).split("\n").filter(Boolean).pop() };
+  }
+  return { stdout: out, error: null };
+}
+
 const SQL = await initSqlJs();
 const db = new SQL.Database();
 db.run(data.buildSeedSql());
@@ -127,6 +152,9 @@ for (const unit of curriculum.COURSE.units) {
 // prompt is the thing that is wrong.
 const questions = await loadProjectTs(path.join(root, "lib/questions.ts"), root);
 let questionChecked = 0;
+let questionPy = 0;
+let questionXl = 0;
+let questionR = 0;
 const seenQuestionIds = new Set();
 for (const q of questions.QUESTIONS) {
   questionChecked++;
@@ -136,7 +164,54 @@ for (const q of questions.QUESTIONS) {
   seenQuestionIds.add(q.id);
 
   if (!q.returns || !q.returns.trim()) {
-    problems.push(`${label} has no \`returns\` line — grading compares grids, so the learner must be told which columns in which order`);
+    problems.push(`${label} has no \`returns\` line — grading compares output, so the learner must be told exactly what to produce`);
+  }
+
+  // Python and R are graded on printed output against a shared prelude, so
+  // the prelude is part of the answer key and a missing one silently grades
+  // every learner wrong.
+  if ((q.lang === "python" || q.lang === "r") && !q.setup) {
+    problems.push(`${label} is ${q.lang} but has no \`setup\` — there is no data for the code to run against`);
+  }
+
+  if (q.lang === "python") {
+    questionPy++;
+    const out = await runPython(`${q.setup}
+${q.expected}`);
+    if (out.error) {
+      problems.push(`${label} python answer key FAILED: ${out.error}`);
+    } else if (!out.stdout.trim()) {
+      problems.push(
+        `${label} python answer key PRINTED NOTHING — grading compares printed output, so this marks every learner wrong`,
+      );
+    }
+    continue;
+  }
+
+  if (q.lang === "excel") {
+    questionXl++;
+    const sheet = q.sheet ?? excelData.MAIN_SHEET;
+    if (!excelData.WORKBOOK[sheet]) {
+      problems.push(`${label} names sheet "${sheet}", which is not in the workbook`);
+      continue;
+    }
+    const res = await excel.evaluateFormula(q.expected, sheet);
+    if (res.error) {
+      problems.push(`${label} formula answer key FAILED: ${q.expected} → ${res.error}`);
+    } else if (res.value === null || res.value === "") {
+      problems.push(`${label} formula answer key returned BLANK`);
+    } else if (!excel.referencesCells(q.expected)) {
+      problems.push(
+        `${label} answer key references no cell (${q.expected}) — the anti-hardcode guard would reject this exact answer`,
+      );
+    }
+    continue;
+  }
+
+  if (q.lang === "r") {
+    // No supported Node build of WebR. Say so rather than passing silently.
+    questionR++;
+    continue;
   }
 
   for (const t of q.tables) {
@@ -194,20 +269,25 @@ for (const q of questions.QUESTIONS) {
   }
 }
 
-// Every question must get its own day before any repeats. The rotation walks
-// a stride co-prime with the bank size to guarantee that; if someone adds a
-// question and the stride silently stops being co-prime, this catches it.
-{
-  const seen = new Set();
-  const start = "2026-01-01";
-  const startMs = Date.parse(`${start}T00:00:00Z`);
-  for (let i = 0; i < questions.QUESTIONS.length; i++) {
-    const day = new Date(startMs + i * 86400000).toISOString().slice(0, 10);
-    seen.add(questions.questionOfTheDay(day).id);
+// Every question must get its own day before any repeats, within its own
+// language. The rotation walks a stride co-prime with that language's pool
+// size to guarantee it; if someone adds a question and the stride silently
+// stops being co-prime, this catches it.
+for (const lang of ["sql", "python", "r", "excel"]) {
+  const pool = questions.questionsIn(lang);
+  if (pool.length === 0) {
+    problems.push(`no questions at all in ${lang} — the nav offers a filter with nothing behind it`);
+    continue;
   }
-  if (seen.size !== questions.QUESTIONS.length) {
+  const seen = new Set();
+  const startMs = Date.parse("2026-01-01T00:00:00Z");
+  for (let i = 0; i < pool.length; i++) {
+    const day = new Date(startMs + i * 86400000).toISOString().slice(0, 10);
+    seen.add(questions.questionOfTheDay(day, lang).id);
+  }
+  if (seen.size !== pool.length) {
     problems.push(
-      `QOTD rotation repeats: ${questions.QUESTIONS.length} questions but only ${seen.size} distinct in the first ${questions.QUESTIONS.length} days`,
+      `QOTD rotation repeats in ${lang}: ${pool.length} questions but only ${seen.size} distinct in the first ${pool.length} days`,
     );
   }
 }
@@ -259,25 +339,15 @@ for (const unit of curriculum.COURSE.units) {
 }
 
 let pyChecked = 0;
-if (pyExercises.length) {
-  const py = await loadPyodide();
-  await py.loadPackage("pandas");
-  for (const [label, ex] of pyExercises) {
-    pyChecked++;
-    let out = "";
-    py.setStdout({ batched: (t) => (out += t + "\n") });
-    py.setStderr({ batched: (t) => (out += t + "\n") });
-    try {
-      await py.runPythonAsync(ex.expected);
-    } catch (e) {
-      problems.push(`${label} python answer key FAILED: ${String(e).split("\n").pop()}`);
-      continue;
-    }
-    if (!out.trim()) {
-      problems.push(
-        `${label} python answer key printed NOTHING — grading compares printed output, so every learner would be marked wrong`,
-      );
-    }
+for (const [label, ex] of pyExercises) {
+  pyChecked++;
+  const res = await runPython(ex.expected);
+  if (res.error) {
+    problems.push(`${label} python answer key FAILED: ${res.error}`);
+  } else if (!res.stdout.trim()) {
+    problems.push(
+      `${label} python answer key printed NOTHING — grading compares printed output, so every learner would be marked wrong`,
+    );
   }
 }
 
@@ -337,7 +407,8 @@ for (const [label, ex] of formulaExercises) {
 console.log(`brief previews checked : ${previews}`);
 console.log(`query answer keys checked: ${checked}`);
 console.log(`interview keys checked   : ${interviewChecked}`);
-console.log(`question bank keys checked: ${questionChecked}`);
+console.log(`question bank keys checked: ${questionChecked} (sql ${questionChecked - questionPy - questionXl - questionR}, python ${questionPy}, excel ${questionXl})`);
+if (questionR) console.log(`question R keys skipped (no Node WebR): ${questionR}`);
 console.log(`python answer keys run    : ${pyChecked}`);
 console.log(`excel formula keys checked: ${formulaChecked}`);
 if (skippedR) console.log(`R keys skipped (no Node WebR): ${skippedR}`);

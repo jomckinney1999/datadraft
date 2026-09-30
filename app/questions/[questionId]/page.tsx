@@ -4,8 +4,9 @@ import QuestionWorkspace from "@/components/question-workspace";
 import {
   QUESTIONS,
   getQuestion,
+  isDailyQuestion,
   leagueDay,
-  questionOfTheDay,
+  questionsIn,
 } from "@/lib/questions";
 
 export const revalidate = 3600;
@@ -43,13 +44,17 @@ export default function QuestionPage({
   if (!question) notFound();
 
   const day = leagueDay();
-  const index = QUESTIONS.findIndex((q) => q.id === question.id);
-  const next = QUESTIONS[(index + 1) % QUESTIONS.length];
+  // "Next" stays inside the language you are already working in. Throwing
+  // someone from a SQL question straight into a 30 MB R download because it
+  // happened to be the next array entry is not a next question, it is a exit.
+  const pool = questionsIn(question.lang);
+  const index = pool.findIndex((q) => q.id === question.id);
+  const next = pool[(index + 1) % pool.length];
 
   return (
     <QuestionWorkspace
       question={question}
-      isQotd={questionOfTheDay(day).id === question.id}
+      isQotd={isDailyQuestion(day, question)}
       day={day}
       prevDay={previousDay(day)}
       nextId={next.id === question.id ? null : next.id}

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import QuestionBank from "@/components/question-bank";
-import { leagueDay, questionOfTheDay } from "@/lib/questions";
+import { leagueDay } from "@/lib/questions";
 
 export const metadata: Metadata = {
   title: "Questions — DataDraft",
   description:
-    "LeetCode-style SQL problems on real NFL data, plus a new Question of the Day every morning.",
+    "LeetCode-style SQL, Python, R and Excel problems on real NFL data, plus a new Question of the Day in every language."
 };
 
 // The day's question changes at midnight Eastern, so the page can't be baked
@@ -16,5 +16,5 @@ export const revalidate = 3600;
 
 export default function QuestionsPage() {
   const day = leagueDay();
-  return <QuestionBank qotd={questionOfTheDay(day)} day={day} />;
+  return <QuestionBank day={day} />;
 }
