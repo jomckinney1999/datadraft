@@ -37,6 +37,23 @@ export default function QotdPanel({ question }: { question: Question }) {
   const [error, setError] = useState<string | null>(null);
   const [verdict, setVerdict] = useState<"right" | "wrong" | null>(null);
   const [hintOpen, setHintOpen] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+
+  function showAnswer() {
+    const answer = question.expected.trim();
+    setSql(answer);
+    setRevealed(true);
+    setVerdict(null);
+    setError(null);
+    const db = dbRef.current;
+    if (!db) return;
+    try {
+      setResult(db.exec(answer)[0] ?? null);
+    } catch (e) {
+      setResult(null);
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -165,6 +182,14 @@ export default function QotdPanel({ question }: { question: Question }) {
             className="press btn-gold disabled:opacity-40"
           >
             Submit
+          </button>
+          <button
+            type="button"
+            onClick={showAnswer}
+            disabled={!ready}
+            className="rounded-xl border border-ice/40 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-wider text-ice transition-colors hover:border-ice hover:bg-ice/10 disabled:opacity-40"
+          >
+            {revealed ? "Answer filled in" : "Show me the answer"}
           </button>
           <span className="hidden font-mono text-[10px] text-ink-muted md:inline">
             ⌘ / Ctrl + Enter
