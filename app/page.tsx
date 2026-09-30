@@ -12,6 +12,7 @@ import GlowGrid from "@/components/glow-grid";
 import HeadlineTile from "@/components/headline-tile";
 import StickerLink from "@/components/sticker-cta";
 import TitleGate from "@/components/title-gate";
+import WhyArt from "@/components/why-art";
 import Reveal from "@/components/reveal";
 import LiveWeekStrip from "@/components/live-week-strip";
 import DriveExplainer from "@/components/drive-explainer";
@@ -83,20 +84,29 @@ const WHY = [
     blurb:
       "Nobody needs a primer on who scored more. Your energy goes into the code, not into decoding a made-up SaaS company with invented departments.",
     accent: "turf" as const,
+    art: "explains-itself" as const,
   },
   {
     title: "Real data, real mess",
     blurb:
       `No Titanic.csv. Every week from ${FACTS.seasons[0]} to now of actual NFL scoring — byes, injuries, weeks that simply aren't there — the same awkward shape you meet on the job.`,
     accent: "gold" as const,
+    art: "real-mess" as const,
   },
   {
     title: "Useful before you're finished",
     blurb:
       "You don't have to complete anything to get value. Answer a real question about a real season in the next ninety seconds.",
     accent: "ice" as const,
+    art: "before-finished" as const,
   },
 ];
+
+const HOVER_BORDER: Record<string, string> = {
+  turf: "hover:border-turf/50",
+  ice: "hover:border-ice/50",
+  gold: "hover:border-gold/50",
+};
 
 const TONE: Record<string, string> = {
   turf: "text-turf",
@@ -407,27 +417,29 @@ export default async function Home() {
             <h2 className="reveal text-center font-display text-2xl font-bold text-ink sm:text-4xl">
               Why football, of all things
             </h2>
-            <div className="sequence mt-10 grid gap-8 sm:grid-cols-3">
+            <div className="sequence mt-10 grid gap-5 sm:grid-cols-3">
               {WHY.map((p) => (
+                // The reveal sits on a wrapper: reveal-rise holds its final
+                // transform, which would cancel the card's hover lift.
                 <div key={p.title} className="reveal">
-                  <span
-                    aria-hidden
-                    className={`block h-px w-10 ${
-                      p.accent === "turf"
-                        ? "bg-turf"
-                        : p.accent === "ice"
-                          ? "bg-ice"
-                          : "bg-gold"
-                    }`}
-                  />
-                  <p
-                    className={`mt-4 font-display text-lg font-bold ${TONE[p.accent]}`}
+                  <div
+                    className={`lift surface group h-full overflow-hidden rounded-2xl border border-panel-border bg-panel transition-colors ${HOVER_BORDER[p.accent]}`}
                   >
-                    {p.title}
-                  </p>
-                  <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-                    {p.blurb}
-                  </p>
+                    <div className="h-44 overflow-hidden border-b border-panel-border bg-night/60">
+                      <WhyArt
+                        id={p.art}
+                        className="h-full w-full transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] motion-safe:group-hover:scale-[1.07]"
+                      />
+                    </div>
+                    <div className="p-5">
+                      <p className={`font-display text-lg font-bold ${TONE[p.accent]}`}>
+                        {p.title}
+                      </p>
+                      <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+                        {p.blurb}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
