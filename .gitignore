@@ -41,3 +41,6 @@ next-env.d.ts
 
 # Obsidian workspace config for docs/ — editor state, not project state.
 .obsidian/
+
+# Playwright MCP scratch output (snapshots, console logs, screenshots).
+.playwright-mcp/

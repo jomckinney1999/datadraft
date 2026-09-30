@@ -355,6 +355,7 @@ export default function QuestionWorkspace({
               <div className="relative h-36 overflow-hidden border-b border-panel-border">
                 <QuestionArt
                   art={question.art}
+                  align="left"
                   className="absolute inset-0 h-full w-full"
                 />
                 <div className="absolute inset-y-0 right-4 flex items-center">

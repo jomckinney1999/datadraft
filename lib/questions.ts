@@ -49,16 +49,55 @@ export type QuestionDifficulty = "easy" | "medium" | "hard";
  */
 export type QuestionLang = "sql" | "python" | "r" | "excel";
 
-/** Which drawn scene sits on the card. See components/question-art.tsx. */
+/**
+ * Which drawn scene sits on the card. One per idea in a title, and the
+ * rule is literal: a quarterback question shows a quarterback, a burger
+ * question shows a burger. See components/question-art.tsx.
+ */
 export type QuestionArt =
-  | "trophy"
-  | "scoreboard"
-  | "clipboard"
-  | "stopwatch"
-  | "routes"
+  | "binoculars"
+  | "boom"
+  | "broom"
+  | "burger"
+  | "calendar"
+  | "chalkboard"
+  | "clicker"
+  | "cliff"
+  | "crown"
+  | "dome"
+  | "double-flame"
+  | "film"
+  | "floor-ceiling"
+  | "foam-finger"
+  | "hammer"
+  | "huddle"
+  | "jersey"
+  | "magnifier"
+  | "mask"
+  | "medals"
+  | "medkit"
+  | "money-bag"
+  | "night-game"
+  | "peak"
+  | "pie"
+  | "podium"
+  | "positions"
+  | "ppg"
+  | "quarterback"
+  | "receiver"
+  | "rocket"
+  | "scale"
+  | "shield"
+  | "spotlight"
+  | "stairs"
+  | "storm"
+  | "ticket"
+  | "tight-end"
+  | "velvet-rope"
+  | "wave"
   | "weather"
-  | "depth"
-  | "heat";
+  | "years"
+  | "zzz";
 
 export type Question = {
   id: string;
@@ -231,7 +270,7 @@ LIMIT 1;`,
     hint: "Filter to the one week first, then sort biggest-to-smallest and stop after one row.",
     explain:
       "ORDER BY decides what 'top' means and LIMIT decides how much of it you keep. Without the sort, LIMIT 1 just hands you whichever row the database happened to reach first.",
-    art: "trophy",
+    art: "hammer",
   },
   {
     id: "the-quarterbacks",
@@ -251,7 +290,7 @@ ORDER BY player;`,
     hint: "One row per game played means the same name repeats. DISTINCT collapses the repeats.",
     explain:
       "DISTINCT works across every column you selected, not just the first one. Add a column and you can get more rows back, not fewer.",
-    art: "clipboard",
+    art: "quarterback",
   },
   {
     id: "thirty-burger",
@@ -271,7 +310,7 @@ ORDER BY fantasy_pts DESC;`,
     hint: "Two conditions on the same WHERE, joined with AND.",
     explain:
       "Filtering and sorting are separate jobs. WHERE decides which rows survive; ORDER BY decides what order the survivors come back in.",
-    art: "heat",
+    art: "burger",
   },
   {
     id: "games-actually-played",
@@ -293,7 +332,7 @@ ORDER BY games DESC;`,
     hint: "GROUP BY player turns thousands of rows into one row per player. COUNT(*) counts the rows inside each group.",
     explain:
       "A missed game is an absent row, not a zero — which is exactly why COUNT(*) is the injury story. Christian McCaffrey comes back with 37, not 50.",
-    art: "depth",
+    art: "calendar",
   },
   {
     id: "rough-afternoon",
@@ -313,7 +352,7 @@ LIMIT 5;`,
     hint: "Same shape as finding the best — just sort the other way.",
     explain:
       "ASC and DESC are the whole difference between a leaderboard and a blooper reel. ASC is the default, so writing it out is a favour to whoever reads the query next.",
-    art: "scoreboard",
+    art: "storm",
   },
   {
     id: "whos-on-my-team",
@@ -335,7 +374,7 @@ ORDER BY r.player;`,
     hint: "week_results has a row per game, so joining straight to it repeats each player. DISTINCT tidies that up.",
     explain:
       "Joining a one-row-per-thing table to a many-rows-per-thing table gives you the many. That is usually a bug, and DISTINCT is the quickest tell that you have hit it.",
-    art: "clipboard",
+    art: "jersey",
   },
   {
     id: "waiver-risers",
@@ -355,7 +394,7 @@ ORDER BY trend DESC;`,
     hint: "Trending up means a trend above zero.",
     explain:
       "waiver_wire is an invented example league, not NFL fact — who owns a player is private to one league. The /data page marks which tables are real and which are examples.",
-    art: "routes",
+    art: "rocket",
   },
   {
     id: "the-slate",
@@ -375,7 +414,7 @@ ORDER BY season;`,
     hint: "One group per season, count the rows in each.",
     explain:
       "Counting rows per group is the fastest sanity check on any new table. If a season came back with 40 games you would know something was wrong before you built anything on top of it.",
-    art: "scoreboard",
+    art: "chalkboard",
   },
   {
     id: "indoor-football",
@@ -393,7 +432,7 @@ WHERE season = 2024 AND roof IN ('dome', 'closed');`,
     hint: "IN ('a', 'b') is shorter than writing the same column twice with OR.",
     explain:
       "'dome' is a stadium that is always closed; 'closed' is a retractable roof they shut that day. Different facts, same consequence for the players — which is why the filter has to take both.",
-    art: "weather",
+    art: "dome",
   },
   {
     id: "tight-end-premium",
@@ -414,7 +453,7 @@ ORDER BY avg_pts DESC;`,
     hint: "AVG over the group, ROUND on the outside of it.",
     explain:
       "An average across a whole position hides the shape of it. Quarterbacks win here because every one of them plays every snap, not because the position is deeper.",
-    art: "depth",
+    art: "tight-end",
   },
 
   // ── Medium ────────────────────────────────────────────────────
@@ -438,7 +477,7 @@ ORDER BY ppg DESC;`,
     hint: "WHERE filters rows before grouping. The 10-game rule is about the group, so it needs HAVING.",
     explain:
       "WHERE runs before GROUP BY and HAVING runs after. That ordering is the whole reason you cannot put COUNT(*) in a WHERE — at that point the groups do not exist yet.",
-    art: "trophy",
+    art: "ppg",
   },
   {
     id: "boom-games",
@@ -460,7 +499,7 @@ ORDER BY boom_games DESC, player;`,
     hint: "Filtering to 20+ in the WHERE would drop the players who never got there. Count conditionally instead.",
     explain:
       "SUM(CASE WHEN … THEN 1 ELSE 0 END) counts a subset without throwing away the rest of the group. It is the standard move any time 'including the zeroes' is part of the question.",
-    art: "heat",
+    art: "boom",
   },
   {
     id: "floor-and-ceiling",
@@ -485,7 +524,7 @@ ORDER BY MAX(fantasy_pts) - MIN(fantasy_pts) DESC;`,
     hint: "You can ORDER BY an expression built from aggregates, even one you did not select.",
     explain:
       "Spread is the number nobody puts on a leaderboard and everybody feels. The widest one here is a player you would have started every week and cursed half of them.",
-    art: "scoreboard",
+    art: "floor-ceiling",
   },
   {
     id: "year-over-year",
@@ -507,7 +546,7 @@ ORDER BY season;`,
     hint: "One row per season means GROUP BY season, even though you are looking at one player.",
     explain:
       "The grain of your answer is whatever you put in the GROUP BY. Same table, same filter — group by season and you get a career arc, group by week and you get a heartbeat.",
-    art: "routes",
+    art: "years",
   },
   {
     id: "league-standings",
@@ -530,7 +569,7 @@ ORDER BY total_pts DESC;`,
     hint: "Join first so every stat line knows which team owns it, then group by the owner.",
     explain:
       "Join, then aggregate. Aggregating first and joining after is a real technique, but it is the wrong instinct here and it is how double-counted totals get shipped.",
-    art: "trophy",
+    art: "podium",
   },
   {
     id: "thursday-night",
@@ -555,7 +594,7 @@ ORDER BY avg_pts DESC;`,
     hint: "A stat line belongs to the one game where that player's team appears — on either side of it.",
     explain:
       "The join key is season, week and 'this team played in it', which is two columns OR'd together. Getting that condition wrong is how one stat line silently becomes two.",
-    art: "weather",
+    art: "night-game",
   },
   {
     id: "weather-report",
@@ -603,7 +642,7 @@ ORDER BY games, player;`,
     hint: "'Never below 5' is a fact about the whole group, which makes it a MIN inside a HAVING.",
     explain:
       "Any 'never' or 'always' question is a MIN or MAX in disguise. Never below 5 is exactly MIN(fantasy_pts) >= 5, and it is one condition instead of a subquery.",
-    art: "depth",
+    art: "shield",
   },
   {
     id: "top-of-each-week",
@@ -629,7 +668,7 @@ ORDER BY w.week;`,
     hint: "Find each week's maximum first, then keep only the rows that match it.",
     explain:
       "Grouping gives you the maximum but loses the name attached to it. Matching rows back against the per-group maximum is how you keep both — and it is the problem window functions were invented to make easier.",
-    art: "trophy",
+    art: "crown",
   },
   {
     id: "who-improved",
@@ -654,7 +693,7 @@ ORDER BY ppg_2024 - ppg_2023 DESC;`,
     hint: "One row per player with a column per season. AVG ignores NULLs, so a CASE with no ELSE gives you each season's average cleanly.",
     explain:
       "AVG skipping NULLs is the whole trick. CASE WHEN season = 2023 leaves every 2024 row NULL, so the average is over 2023 alone without a second pass through the table.",
-    art: "routes",
+    art: "stairs",
   },
   {
     id: "opponent-unmasked",
@@ -681,7 +720,7 @@ ORDER BY w.week;`,
     hint: "The opponent is whichever side of the game isn't your team — a CASE picks it.",
     explain:
       "A schedule stores a game once, with a home side and an away side. Turning that into 'who did this team play' always costs you a CASE, in every sport and every schema.",
-    art: "clipboard",
+    art: "mask",
   },
 
   // ── Hard ──────────────────────────────────────────────────────
@@ -707,7 +746,7 @@ ORDER BY position, pos_rank;`,
     hint: "The window runs after the grouping, so it can rank on SUM(fantasy_pts) directly.",
     explain:
       "PARTITION BY restarts the ranking for each position, so you get four number ones instead of one. It is the difference between a leaderboard and a set of leaderboards.",
-    art: "depth",
+    art: "medals",
   },
   {
     id: "rolling-form",
@@ -730,7 +769,7 @@ ORDER BY week;`,
     hint: "ROWS BETWEEN 2 PRECEDING AND CURRENT ROW is the window frame you want.",
     explain:
       "Without a frame, a windowed AVG runs over everything up to the current row and keeps growing. The frame is what makes it rolling rather than cumulative — and the first two rows average fewer than three weeks, which is correct, not a bug.",
-    art: "heat",
+    art: "wave",
   },
   {
     id: "back-to-back",
@@ -761,7 +800,7 @@ ORDER BY player, week;`,
     hint: "LAG gives you the previous row's value. Check the previous week number too — a bye week makes 'the row before' and 'last week' two different things.",
     explain:
       "LAG reaches back a row, not back a week, and those come apart the moment a player misses a game. Carrying the previous week number along is the cheap guard against calling a week 4 and week 9 pair back-to-back.",
-    art: "heat",
+    art: "double-flame",
   },
   {
     id: "share-of-the-load",
@@ -790,7 +829,7 @@ ORDER BY team_name, pct_of_team DESC;`,
     hint: "Aggregate to one row per player first. Then a window SUM over the team gives you the denominator without a second query.",
     explain:
       "A percent-of-total needs two grains at once: the row and the group it sits in. A window function is how you get the group total onto the row without joining the table back to itself.",
-    art: "scoreboard",
+    art: "pie",
   },
   {
     id: "best-of-each-season",
@@ -818,7 +857,7 @@ ORDER BY season, fantasy_pts DESC;`,
     hint: "Number the rows within each season, then keep the first three.",
     explain:
       "Top-N-per-group is the single most common thing window functions get used for in real analytics work. ROW_NUMBER over a partition, filter on the number, done.",
-    art: "trophy",
+    art: "film",
   },
   {
     id: "the-drop-off",
@@ -844,7 +883,7 @@ ORDER BY total_pts DESC;`,
     hint: "LEAD is LAG pointing the other way — it reads the next row in the window's order.",
     explain:
       "The last row has no next row, so its gap is NULL rather than zero. That distinction is the point: NULL means 'there is nothing here', and a zero would have claimed the cliff was flat.",
-    art: "depth",
+    art: "cliff",
   },
   {
     id: "quiet-weeks",
@@ -869,7 +908,7 @@ ORDER BY wk.week;`,
     hint: "You can only find a missing row by starting from a list of what should be there and LEFT JOINing onto it.",
     explain:
       "This is an anti-join: keep everything on the left, then keep only the rows where the right side came back empty. Absence is never findable from the table that is missing the rows — you always have to bring a list of what should exist.",
-    art: "clipboard",
+    art: "zzz",
   },
   {
     id: "streak-finder",
@@ -901,7 +940,7 @@ ORDER BY streak_weeks DESC, player;`,
     hint: "Keep only the 20-point weeks, then subtract a row number from the week number. Consecutive weeks all land on the same value.",
     explain:
       "Gaps and islands: for a run of consecutive weeks, week minus row-number is constant, so that difference becomes a group key for the run. It looks like a trick the first time and like a tool every time after.",
-    art: "heat",
+    art: "magnifier",
   },
   // ── Python ────────────────────────────────────────────────────
   //
@@ -924,7 +963,7 @@ ORDER BY streak_weeks DESC, player;`,
     hint: "idxmax() gives you the index label of the biggest value, and .loc looks a row up by it.",
     explain:
       "max() gives you the number; idxmax() gives you the row it came from. Almost every 'who' question in pandas is the second one.",
-    art: "trophy",
+    art: "foam-finger",
   },
   {
     id: "py-count-by-position",
@@ -942,7 +981,7 @@ ORDER BY streak_weeks DESC, player;`,
     hint: "value_counts() counts each distinct value. to_dict() turns the result into a plain dict.",
     explain:
       "value_counts() is the first thing to reach for on any new column. It tells you the shape of the data before you build anything on top of it.",
-    art: "depth",
+    art: "clicker",
   },
   {
     id: "py-points-per-game",
@@ -962,7 +1001,7 @@ ORDER BY streak_weeks DESC, player;`,
     hint: "Dividing two columns gives you a new column. Assign it, sort by it, then take the player column.",
     explain:
       "Christian McCaffrey played four games and is nowhere near the season leaderboard — but he is not bottom of this one. Which number you divide by decides who looks good.",
-    art: "stopwatch",
+    art: "ticket",
   },
   {
     id: "py-filter-threshold",
@@ -981,7 +1020,7 @@ ORDER BY streak_weeks DESC, player;`,
     hint: 'df["points"] >= 300 gives you True/False per row. Put that inside df[...] to keep only the Trues.',
     explain:
       "A boolean mask is the pandas version of WHERE. Everything else — filtering, sorting, selecting a column — chains off it.",
-    art: "heat",
+    art: "velvet-rope",
   },
   {
     id: "py-group-mean",
@@ -1000,7 +1039,7 @@ ORDER BY streak_weeks DESC, player;`,
     hint: "groupby the position, pick the points column, take the mean, round it, then to_dict().",
     explain:
       "groupby → pick a column → aggregate is the pandas shape of GROUP BY. If you can read the SQL version you can read this one.",
-    art: "scoreboard",
+    art: "positions",
   },
   {
     id: "py-two-stats",
@@ -1021,7 +1060,7 @@ ORDER BY streak_weeks DESC, player;`,
     hint: "agg() takes keyword arguments: new_name=(column, function). That names the output columns for you.",
     explain:
       "Named aggregation is how you get three summaries out of one pass instead of three merges. The names are yours, so the result is readable without a legend.",
-    art: "clipboard",
+    art: "floor-ceiling",
   },
   {
     id: "py-availability",
@@ -1042,7 +1081,7 @@ ORDER BY streak_weeks DESC, player;`,
     hint: "Filter first, .copy() so pandas does not warn you, then build the column on the filtered frame.",
     explain:
       "The .copy() is not superstition. Assigning a column to a slice of another frame is the SettingWithCopyWarning, and the fix is to decide up front whether you are making a new frame.",
-    art: "routes",
+    art: "medkit",
   },
 
   // ── R ─────────────────────────────────────────────────────────
@@ -1068,7 +1107,7 @@ ORDER BY streak_weeks DESC, player;`,
     hint: "which.max() gives you the position of the largest value, and you can index a column with it.",
     explain:
       "max() gives the value, which.max() gives where it is. Same distinction as pandas' max and idxmax.",
-    art: "trophy",
+    art: "foam-finger",
   },
   {
     id: "r-filter-arrange",
@@ -1087,7 +1126,7 @@ ORDER BY streak_weeks DESC, player;`,
     hint: "filter() takes several conditions separated by commas, and they are ANDed together.",
     explain:
       "The pipe reads as a sentence: take the data, keep these rows, sort them, keep these columns. That readability is most of why dplyr won.",
-    art: "routes",
+    art: "receiver",
   },
   {
     id: "r-group-summarise",
@@ -1107,7 +1146,7 @@ ORDER BY streak_weeks DESC, player;`,
     hint: "n() counts the rows in each group and does not take an argument.",
     explain:
       "group_by() does nothing on its own — it tags the frame, and summarise() is what collapses it. Forgetting the second half is the most common dplyr mistake there is.",
-    art: "depth",
+    art: "huddle",
   },
 
   // ── Excel ─────────────────────────────────────────────────────
@@ -1132,7 +1171,7 @@ ORDER BY streak_weeks DESC, player;`,
     hint: "Give MAX the range of the points column, not the whole column.",
     explain:
       "A range is two corners with a colon between them. Getting the last row wrong is how a formula quietly stops seeing your newest data.",
-    art: "scoreboard",
+    art: "peak",
   },
   {
     id: "xl-count-receivers",
@@ -1150,7 +1189,7 @@ ORDER BY streak_weeks DESC, player;`,
     hint: "COUNTIFS takes a range and then what to match in it.",
     explain:
       'The criteria goes in quotes because it is text. Excel will not tell you off for leaving them out — it will just return 0, which looks like an answer.',
-    art: "clipboard",
+    art: "receiver",
   },
   {
     id: "xl-owner-total",
@@ -1169,7 +1208,7 @@ ORDER BY streak_weeks DESC, player;`,
     hint: "SUMIFS puts the range you are adding up first, then the range you are testing, then the test.",
     explain:
       "SUMIF and SUMIFS take their arguments in opposite orders, which is the single most reliable way to waste ten minutes in a spreadsheet. SUMIFS first, always.",
-    art: "trophy",
+    art: "money-bag",
   },
   {
     id: "xl-lookup-team",
@@ -1188,7 +1227,7 @@ ORDER BY streak_weeks DESC, player;`,
     hint: "XLOOKUP takes what you are looking for, where to look for it, and what to bring back.",
     explain:
       "XLOOKUP replaced VLOOKUP because you say what to search and what to return, rather than counting columns — inserting a column no longer breaks it. NYJ, by the way: this sheet is the 2024 season, and he was not on the Raiders for most of it.",
-    art: "routes",
+    art: "binoculars",
   },
   {
     id: "xl-per-game-average",
@@ -1206,7 +1245,7 @@ ORDER BY streak_weeks DESC, player;`,
     hint: "AVERAGEIFS has the same argument order as SUMIFS. Wrap the whole thing in ROUND.",
     explain:
       "Rounding on the outside, not the inside. Round each value first and you get the average of rounded numbers, which is not the same thing and quietly drifts.",
-    art: "stopwatch",
+    art: "scale",
   },
   {
     id: "xl-who-scored-most",
@@ -1225,7 +1264,7 @@ ORDER BY streak_weeks DESC, player;`,
     hint: "MATCH finds which position a value sits at. INDEX pulls the value at that position out of another range.",
     explain:
       "INDEX and MATCH split the job in two: find where, then fetch what. It is the same move as pandas' idxmax and SQL's 'match back against the group maximum' — every tool has this problem and this shape of answer.",
-    art: "trophy",
+    art: "spotlight",
   },
   {
     id: "xl-clean-the-import",
@@ -1244,7 +1283,7 @@ ORDER BY streak_weeks DESC, player;`,
     hint: "SUM ignores text entirely, so it returns 0 here. Convert each value, and notice that one row is blank.",
     explain:
       "SUM over text returns 0 rather than an error, which is the dangerous part — nothing goes red, the number is just wrong. Row 6 is empty too, and VALUE on a blank is an error, so it has to be left out.",
-    art: "weather",
+    art: "broom",
   },
 ];
 

@@ -2243,7 +2243,8 @@ html[data-reveal-armed] [data-revealed="true"] .reveal {
   right: -8%;
   top: -18%;
   width: 62%;
-  opacity: 0.22;
+  /* Raised from 0.22 once the picture started meaning something. */
+  opacity: 0.3;
   pointer-events: none;
   filter: saturate(1.2);
 }

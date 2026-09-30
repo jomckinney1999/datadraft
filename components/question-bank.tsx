@@ -275,7 +275,7 @@ export default function QuestionBank({ day }: { day: string }) {
                   href={`/questions/${q.id}`}
                   className="lift surface flex items-center gap-4 rounded-xl border border-panel-border bg-panel px-4 py-3 transition-colors hover:border-turf/40"
                 >
-                  <span className="hidden h-12 w-16 shrink-0 overflow-hidden rounded-lg sm:block">
+                  <span className="h-11 w-14 shrink-0 overflow-hidden rounded-lg border border-panel-border bg-night/60 sm:h-14 sm:w-[76px]">
                     <QuestionArt art={q.art} className="h-full w-full" />
                   </span>
                   <span className="min-w-0 flex-1">
