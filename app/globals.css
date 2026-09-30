@@ -392,8 +392,9 @@ body {
   /* Lesson player — Duolingo-weight actions + loud win/miss, sports palette.
      Scoped class names so the marketing site keeps its broadcast look. */
   .lesson-prompt {
-    border-radius: 1rem;
-    border: 1px solid rgb(var(--c-panel-border));
+    border-radius: 1.25rem;
+    border: 2px solid rgb(var(--c-panel-border));
+    border-bottom-width: 4px;
     background-color: rgb(var(--c-panel));
     box-shadow: var(--shadow-surface);
     padding: 1.25rem 1.35rem;
@@ -513,16 +514,22 @@ body {
   .option-chip {
     border-radius: 1rem;
     border: 2px solid rgb(var(--c-panel-border));
+    border-bottom-width: 4px;
     background-color: rgb(var(--c-panel) / 0.85);
     padding: 0.9rem 1.1rem;
     text-align: left;
     font-size: 0.95rem;
     line-height: 1.4;
     color: rgb(var(--c-ink-soft));
-    transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+    transition:
+      transform 0.28s cubic-bezier(0.2, 0.7, 0.3, 1),
+      border-color 0.28s ease,
+      background-color 0.28s ease,
+      color 0.28s ease;
   }
   .option-chip:hover:not(:disabled) {
-    border-color: rgb(var(--c-turf) / 0.45);
+    transform: translateY(-2px);
+    border-color: rgb(var(--c-turf) / 0.55);
     color: rgb(var(--c-ink));
   }
   .option-chip-on {
@@ -1690,6 +1697,41 @@ body {
 }
 .press:active { transform: scale(0.97); }
 
+/* The two front-door buttons. Larger than a normal accent button, and the
+   hover travels instead of snapping — lift, glow, and a short press back. */
+.btn-hero {
+  padding: 1rem 1.75rem;
+  border-radius: 1rem;
+  border-bottom: 4px solid rgb(0 0 0 / 0.35);
+  font-size: 0.8125rem;
+  letter-spacing: 0.1em;
+  transition:
+    transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1),
+    box-shadow 0.32s cubic-bezier(0.2, 0.7, 0.3, 1),
+    filter 0.32s ease,
+    border-bottom-width 0.12s ease;
+}
+.btn-hero:hover {
+  transform: translateY(-4px);
+  filter: brightness(1.07);
+}
+.btn-hero:active {
+  transform: translateY(1px);
+  border-bottom-width: 2px;
+  filter: brightness(0.97);
+  transition-duration: 0.08s;
+}
+.btn-hero.btn-turf:hover {
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.32),
+    0 16px 36px -10px rgb(var(--c-turf) / calc(0.85 * var(--glow-strength)));
+}
+.btn-hero.btn-gold:hover {
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.34),
+    0 16px 36px -10px rgb(var(--c-gold) / calc(0.8 * var(--glow-strength)));
+}
+
 /* Cards lift toward the reader on hover. Transform only — animating box-shadow
    or height forces layout on every frame. */
 .lift {
@@ -2428,6 +2470,8 @@ html[data-reveal-armed] [data-revealed="true"] .reveal {
     animation: none;
   }
   .press:active,
+  .btn-hero:hover,
+  .btn-hero:active,
   .lift:hover,
   a:hover .path-node:not(.path-node-locked),
   a:active .path-node:not(.path-node-locked) {

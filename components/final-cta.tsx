@@ -37,10 +37,10 @@ export default function FinalCta() {
           real season.
         </p>
         <div className="reveal mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link href="/questions" className="press btn-gold">
+          <Link href="/questions" className="btn-gold btn-hero">
             Practice questions
           </Link>
-          <Link href="/dashboard" className="press btn-turf">
+          <Link href="/dashboard" className="btn-turf btn-hero">
             Start learning free →
           </Link>
         </div>

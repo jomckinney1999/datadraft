@@ -14,6 +14,8 @@ import type { Database, QueryExecResult } from "sql.js";
 import { buildSeedSql } from "@/lib/fantasy-data";
 import {
   getLesson,
+  MODULES,
+  ALL_MODULE,
   nextLessonId,
   XP_PER_EXERCISE,
   XP_RETRY,
@@ -34,6 +36,7 @@ import {
 } from "@/lib/runtimes";
 import { useModule } from "@/lib/use-module";
 import LessonOutline from "@/components/lesson-outline";
+import CourseArt, { hasCourseArt } from "@/components/course-art";
 import {
   awardBadges,
   completeLesson,
@@ -540,6 +543,13 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
 
   if (!entry || phase === "loading") return null;
   const { lesson } = entry;
+  const artId =
+    MODULES.find(
+      (m) =>
+        m.id !== ALL_MODULE &&
+        m.id !== "sql-foundations" &&
+        m.unitIds.includes(entry.unit.id),
+    )?.id ?? null;
   // A lesson either paces its brief across steps or falls back to one
   // paragraph; the preview and the start button wait for the final beat so
   // the learner isn't reading ahead while still being introduced.
@@ -1065,6 +1075,21 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
           )}
         </div>
       </div>
+
+      {artId && hasCourseArt(artId) && (
+        <div className="relative mt-4 h-32 overflow-hidden rounded-2xl border-2 border-panel-border border-b-4 bg-night">
+          <CourseArt id={artId} className="absolute inset-0 h-full w-full" />
+          <div className="course-scrim absolute inset-0" />
+          <div className="relative flex h-full flex-col justify-end p-4">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-turf">
+              {entry.unit.title}
+            </p>
+            <p className="font-display text-lg font-bold leading-tight text-ink">
+              {lesson.title}
+            </p>
+          </div>
+        </div>
+      )}
 
       {phase === "brief" && (
         <div className="animate-fade-up flex flex-1 flex-col justify-center gap-6 pt-6">
