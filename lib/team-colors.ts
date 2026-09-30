@@ -1,8 +1,13 @@
 /**
- * Team colours, made safe to show on the charcoal canvas.
+ * Team colours, made safe to show on the charcoal canvas — and, for
+ * scoreboards only, the crest.
  *
- * Colours only — logos and wordmarks are trademarks and are used nowhere in
- * this product (same reason the course covers are drawn, see CLAUDE.md).
+ * Team marks are trademarks (the reason the course covers are drawn, see
+ * CLAUDE.md), and this file was colours-only until 2026-09-30, when score
+ * tiles gained logos: a scoreboard without crests reads as a spreadsheet.
+ * `teamLogo` hands back the ESPN URL nflverse lists; `components/team-logo.tsx`
+ * hotlinks it as a plain <img>, never proxied through our domain, and falls
+ * back to the swatch. Dense SQL result grids stay on `TeamChip` and colour.
  *
  * The raw colours can't be used as-is: several primaries are near-black
  * (Raiders #000000, Ravens #241773, Steelers #101820) and disappear against
@@ -55,6 +60,11 @@ function lighten(hex: string, amount: number) {
 
 export function teamName(abbr: string): string {
   return BY_ABBR.get(abbr)?.name ?? abbr;
+}
+
+/** The crest URL nflverse lists for `abbr`, or null. Scoreboards only. */
+export function teamLogo(abbr: string): string | null {
+  return BY_ABBR.get(abbr)?.logo ?? null;
 }
 
 /**

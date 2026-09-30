@@ -18,6 +18,8 @@ import Link from "next/link";
 import Coach from "@/components/coach";
 import AppNav from "@/components/app-nav";
 import TeamChip from "@/components/team-chip";
+import TeamLogo from "@/components/team-logo";
+import Headshot from "@/components/headshot";
 import { COURSES } from "@/lib/courses";
 import { liveLessons, getLesson } from "@/lib/curriculum";
 import { EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
@@ -333,9 +335,9 @@ export default function Dashboard({
                       className="flex items-center justify-between gap-2 rounded-lg border border-panel-border px-2.5 py-1.5"
                     >
                       <span className="flex items-center gap-1.5 font-mono text-[12px] text-ink">
-                        <TeamChip abbr={g.away} />
+                        <TeamLogo abbr={g.away} size={20} />
                         <span className="text-ink-muted">@</span>
-                        <TeamChip abbr={g.home} />
+                        <TeamLogo abbr={g.home} size={20} />
                       </span>
                       <span className="font-mono text-[12px] text-ink-soft">
                         {g.final
@@ -463,27 +465,6 @@ function PerformerRow({
         {player.value.toFixed(decimals)}
       </span>
     </li>
-  );
-}
-
-function Headshot({ name, src }: { name: string; src: string | null }) {
-  const [failed, setFailed] = useState(false);
-  const initial = name.trim().charAt(0).toUpperCase() || "?";
-  const show = Boolean(src) && !failed;
-  return (
-    <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-panel-border bg-night">
-      {show ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={src!}
-          alt=""
-          className="h-full w-full object-cover"
-          onError={() => setFailed(true)}
-        />
-      ) : (
-        <span className="font-display text-xs font-bold text-ink-muted">{initial}</span>
-      )}
-    </span>
   );
 }
 

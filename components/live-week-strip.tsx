@@ -2,21 +2,25 @@
  * This week in the league, on the front page.
  *
  * The one section here that is not about us. Real scores and real stat lines
- * from the week that just happened, straight from nflverse, rendered with
- * team colours. It is the fastest possible answer to "is this actually a
- * football site or a SQL site wearing a helmet".
+ * from the week that just happened, straight from nflverse. It is the fastest
+ * possible answer to "is this actually a football site or a SQL site wearing
+ * a helmet".
  *
  * Renders nothing at all when the fetch fails — `getLiveWeek()` never throws
  * — rather than a panel apologising for itself. The page is complete without
  * it; it is a bonus, not a load-bearing wall.
  *
- * Team colours only. No logos, no wordmarks, no player photos: `headshot`
- * exists on the type and is deliberately not used here, because a landing
- * page full of licensed likenesses is not a decision to make by accident.
+ * Score tiles carry team crests and performer rows carry headshots — both
+ * hotlinked from the sources nflverse lists, never proxied through our
+ * domain, each with a fallback (colour swatch, initial) so a dead URL never
+ * leaves a broken-image icon in a score line. Decided 2026-09-30; before
+ * that the strip was colours-only.
  */
 
 import Link from "next/link";
 import TeamChip from "@/components/team-chip";
+import TeamLogo from "@/components/team-logo";
+import Headshot from "@/components/headshot";
 import type { LiveWeek } from "@/lib/live-nfl";
 import { SHORT_CREDIT } from "@/lib/data-source";
 
@@ -68,9 +72,9 @@ export default function LiveWeekStrip({ live }: { live: LiveWeek | null }) {
                     className="reveal flex items-center justify-between gap-3 rounded-xl border border-panel-border bg-night/40 px-3 py-2.5"
                   >
                     <span className="flex items-center gap-2 font-mono text-[12px] text-ink">
-                      <TeamChip abbr={g.away} />
+                      <TeamLogo abbr={g.away} />
                       <span className="text-ink-muted">@</span>
-                      <TeamChip abbr={g.home} />
+                      <TeamLogo abbr={g.home} />
                     </span>
                     <span className="font-mono text-[12px] text-ink-soft">
                       {g.final
@@ -98,6 +102,7 @@ export default function LiveWeekStrip({ live }: { live: LiveWeek | null }) {
                     <span className="w-4 shrink-0 font-mono text-[11px] text-ink-muted">
                       {i + 1}
                     </span>
+                    <Headshot name={p.player} src={p.headshot} size={36} />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-display text-[15px] font-bold text-ink">
                         {p.player}
