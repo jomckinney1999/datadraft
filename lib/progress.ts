@@ -48,6 +48,17 @@ export type Progress = {
   arcadeDay: string;
   /** Arcade wins today (first win pays a daily bonus). */
   arcadeWinsToday: number;
+  // ── question bank (lib/questions.ts) ──
+  /** Ids of questions solved, so a re-solve doesn't pay XP twice. */
+  solvedQuestions: string[];
+  /**
+   * Question-of-the-Day streak, kept apart from `streak` on purpose. The
+   * lesson streak is "you showed up"; this one is "you solved the day's
+   * problem", which is a harder and more interesting thing to keep alive.
+   */
+  qotdStreak: number;
+  /** League-timezone day (YYYY-MM-DD) the QOTD was last solved. */
+  qotdLastDay: string;
 };
 
 const KEY = "sqlsports.progress.v1";
@@ -81,6 +92,9 @@ export const EMPTY_PROGRESS: Progress = {
   dailyQuestsClaimed: [],
   arcadeDay: "",
   arcadeWinsToday: 0,
+  solvedQuestions: [],
+  qotdStreak: 0,
+  qotdLastDay: "",
 };
 
 function today(): string {
@@ -145,6 +159,12 @@ export function loadProgress(): Progress {
       arcadeDay: typeof parsed.arcadeDay === "string" ? parsed.arcadeDay : "",
       arcadeWinsToday:
         typeof parsed.arcadeWinsToday === "number" ? parsed.arcadeWinsToday : 0,
+      solvedQuestions: Array.isArray(parsed.solvedQuestions)
+        ? parsed.solvedQuestions.filter((x) => typeof x === "string")
+        : [],
+      qotdStreak: typeof parsed.qotdStreak === "number" ? parsed.qotdStreak : 0,
+      qotdLastDay:
+        typeof parsed.qotdLastDay === "string" ? parsed.qotdLastDay : "",
     };
   } catch {
     return EMPTY_PROGRESS;
@@ -233,6 +253,58 @@ export function completeLesson(
     next.doubleTickets = next.doubleTickets - 1;
   }
   next.tickets = (next.tickets ?? 0) + ticketGain;
+
+  save(next);
+  return next;
+}
+
+/**
+ * Bank a solved question.
+ *
+ * XP is paid once per question, because otherwise re-running a solved
+ * question is an XP faucet and the number stops meaning anything. The solve
+ * still counts for the daily streak every time, which is the behaviour you
+ * want — coming back is the habit being rewarded, not grinding.
+ *
+ * `day` and `prevDay` are league-timezone days from lib/questions.ts, passed
+ * in rather than computed here so this module stays free of date-formatting
+ * and the caller decides what "today" means.
+ */
+export function solveQuestion(
+  questionId: string,
+  earnedXp: number,
+  isQotd: boolean,
+  day: string,
+  prevDay: string,
+): Progress {
+  const p = loadProgress();
+  const firstSolve = !p.solvedQuestions.includes(questionId);
+  const t = today();
+
+  let streak: number;
+  if (p.lastActiveDay === t) streak = Math.max(p.streak, 1);
+  else if (p.lastActiveDay === yesterday()) streak = p.streak + 1;
+  else streak = 1;
+
+  let qotdStreak = p.qotdStreak;
+  if (isQotd && p.qotdLastDay !== day) {
+    qotdStreak = p.qotdLastDay === prevDay ? p.qotdStreak + 1 : 1;
+  }
+
+  const next: Progress = {
+    ...p,
+    xp: p.xp + (firstSolve ? earnedXp : 0),
+    solvedQuestions: firstSolve
+      ? [...p.solvedQuestions, questionId]
+      : p.solvedQuestions,
+    streak,
+    lastActiveDay: t,
+    qotdStreak,
+    qotdLastDay: isQotd ? day : p.qotdLastDay,
+    // Tickets are the small, repeatable reward. A solved question pays less
+    // than a cleared drive, and the day's question pays a bonus on top.
+    tickets: (p.tickets ?? 0) + (firstSolve ? 5 : 1) + (isQotd ? 10 : 0),
+  };
 
   save(next);
   return next;

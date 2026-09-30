@@ -117,6 +117,101 @@ for (const unit of curriculum.COURSE.units) {
   }
 }
 
+// ── Question bank (same seeded lesson DB) ───────────────────
+//
+// A question is graded by comparing the learner's result grid to the key's,
+// so a key that errors or returns nothing marks every learner wrong with no
+// way for them to tell. The `returns` line is checked for the same reason a
+// tie at a LIMIT cutoff is: it is the contract the learner is graded against,
+// and if the key's column count does not match what the prompt promised, the
+// prompt is the thing that is wrong.
+const questions = await loadProjectTs(path.join(root, "lib/questions.ts"), root);
+let questionChecked = 0;
+const seenQuestionIds = new Set();
+for (const q of questions.QUESTIONS) {
+  questionChecked++;
+  const label = `question ${q.id}`;
+
+  if (seenQuestionIds.has(q.id)) problems.push(`${label} DUPLICATE id`);
+  seenQuestionIds.add(q.id);
+
+  if (!q.returns || !q.returns.trim()) {
+    problems.push(`${label} has no \`returns\` line — grading compares grids, so the learner must be told which columns in which order`);
+  }
+
+  for (const t of q.tables) {
+    if (!data.SCHEMA.some((s) => s.table === t)) {
+      problems.push(`${label} names table "${t}", which is not in the seeded schema`);
+    }
+  }
+
+  let res;
+  try {
+    res = run(q.expected);
+  } catch (e) {
+    problems.push(`${label} answer key FAILED: ${e.message}`);
+    continue;
+  }
+  if (!res || res.values.length === 0) {
+    problems.push(`${label} answer key returned NO ROWS`);
+    continue;
+  }
+
+  // An answer key that never mentions a table is a hardcoded result.
+  if (!/\bfrom\b/i.test(q.expected)) {
+    problems.push(`${label} answer key has no FROM — it is not reading the data`);
+  }
+
+  // Same cutoff-tie trap as the lesson keys: if the key stops at N and rows
+  // N and N+1 are identical on every ORDER BY column, an equally correct
+  // learner query can return the other row and grade wrong.
+  const m = /order\s+by\s+(.+?)\s+limit\s+(\d+)/is.exec(q.expected);
+  if (m) {
+    const limit = Number(m[2]);
+    const orderCols = m[1]
+      .split(",")
+      .map((c) => c.trim().replace(/\s+(asc|desc)$/i, "").replace(/^.*\./, ""))
+      .filter(Boolean);
+    const unlimited = q.expected.replace(/\s+limit\s+\d+\s*;?\s*$/i, ";");
+    try {
+      const full = run(unlimited);
+      if (full && full.values.length > limit) {
+        const idx = orderCols
+          .map((c) => full.columns.findIndex((col) => col.toLowerCase() === c.toLowerCase()))
+          .filter((i) => i >= 0);
+        if (idx.length) {
+          const key = (row) => idx.map((i) => String(row[i])).join("");
+          if (key(full.values[limit - 1]) === key(full.values[limit])) {
+            problems.push(
+              `${label} TIE AT CUTOFF: rows ${limit} and ${limit + 1} are identical on every ORDER BY column (${orderCols.join(", ")})`,
+            );
+          }
+        }
+      }
+    } catch {
+      /* the limited form already ran */
+    }
+  }
+}
+
+// Every question must get its own day before any repeats. The rotation walks
+// a stride co-prime with the bank size to guarantee that; if someone adds a
+// question and the stride silently stops being co-prime, this catches it.
+{
+  const seen = new Set();
+  const start = "2026-01-01";
+  const startMs = Date.parse(`${start}T00:00:00Z`);
+  for (let i = 0; i < questions.QUESTIONS.length; i++) {
+    const day = new Date(startMs + i * 86400000).toISOString().slice(0, 10);
+    seen.add(questions.questionOfTheDay(day).id);
+  }
+  if (seen.size !== questions.QUESTIONS.length) {
+    problems.push(
+      `QOTD rotation repeats: ${questions.QUESTIONS.length} questions but only ${seen.size} distinct in the first ${questions.QUESTIONS.length} days`,
+    );
+  }
+}
+
 // ── Interview cases (dedicated seeds, not the lesson DB) ─────────────
 const interview = await loadProjectTs(
   path.join(root, "lib/interview-cases.ts"),
@@ -242,6 +337,7 @@ for (const [label, ex] of formulaExercises) {
 console.log(`brief previews checked : ${previews}`);
 console.log(`query answer keys checked: ${checked}`);
 console.log(`interview keys checked   : ${interviewChecked}`);
+console.log(`question bank keys checked: ${questionChecked}`);
 console.log(`python answer keys run    : ${pyChecked}`);
 console.log(`excel formula keys checked: ${formulaChecked}`);
 if (skippedR) console.log(`R keys skipped (no Node WebR): ${skippedR}`);
