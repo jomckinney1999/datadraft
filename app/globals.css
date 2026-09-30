@@ -2897,3 +2897,543 @@ html[data-reveal-armed] [data-revealed="true"] .reveal {
     animation: none;
   }
 }
+
+/* ── The title screen (components/title-gate*.tsx, components/referee.tsx) ──
+   Hidden unless the inline gate script put data-gate="on" on <html> before
+   the first paint, so without JavaScript it simply never exists. Phases are
+   data-phase on .title-gate: idle → blow → exit. The blow's big beats (burst,
+   shake, second ring) are delayed 0.25s to land on the long blast of the
+   whistle (WHISTLE.longAt in lib/whistle.ts). */
+
+/* Inherits so the iris's gold rim (::after) can read it. */
+@property --iris {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+.title-gate {
+  display: none;
+}
+
+html[data-gate="on"] {
+  overflow: hidden;
+}
+
+html[data-gate="on"] .title-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 46%, rgb(var(--c-turf) / 0.2), transparent 70%),
+    rgb(var(--c-night));
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Broadcast rays behind the ref, like the rays behind every drawing — turf
+   while he waits, gold and fast once he blows. */
+.gate-rays {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 180vmax;
+  height: 180vmax;
+  margin: -90vmax 0 0 -90vmax;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgb(var(--c-turf) / 0.1) 0deg 7deg,
+    transparent 7deg 20deg
+  );
+  -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 42%);
+  mask-image: radial-gradient(circle, #000 0%, transparent 42%);
+  animation: gate-spin 60s linear infinite;
+  pointer-events: none;
+}
+.gate-rays-hot {
+  background: repeating-conic-gradient(
+    from 6deg,
+    rgb(var(--c-gold) / 0.2) 0deg 7deg,
+    transparent 7deg 20deg
+  );
+  opacity: 0;
+  animation-duration: 7s;
+  transition: opacity 0.12s ease;
+}
+.title-gate:not([data-phase="idle"]) .gate-rays-hot {
+  opacity: 1;
+}
+@keyframes gate-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+.gate-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+/* Everything is sized by the screen's height as well as its width, so a short
+   laptop window or a landscape phone still fits wordmark, ref and button. */
+.gate-wordmark {
+  font-size: clamp(1.9rem, min(7vw, 8.5svh), 4.25rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  animation: gate-drop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes gate-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-48px) scale(0.9);
+  }
+}
+
+.gate-ref {
+  position: relative;
+  width: min(40svh, 300px, 62vw);
+  aspect-ratio: 200 / 260;
+  margin-top: clamp(0.5rem, 2.5svh, 1.5rem);
+  animation: gate-ref-in 0.75s 0.12s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes gate-ref-in {
+  0% {
+    opacity: 0;
+    transform: translateY(60px) scale(0.6, 0.5);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-8px) scale(0.96, 1.08);
+  }
+}
+.gate-ref-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Poses: both drawn, one shown. A snap between held poses, not a tween. */
+.title-gate .pose-blow,
+.title-gate:not([data-phase="idle"]) .pose-idle {
+  opacity: 0;
+}
+.title-gate:not([data-phase="idle"]) .pose-blow {
+  opacity: 1;
+}
+
+.ref-body {
+  transform-box: view-box;
+  transform-origin: 100px 250px;
+}
+.title-gate[data-phase="idle"] .ref-body {
+  animation: ref-bob 1.4s ease-in-out infinite;
+}
+@keyframes ref-bob {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  50% {
+    transform: translateY(-5px) scale(0.985, 1.015);
+  }
+}
+.ref-blink {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ref-blink 3.4s infinite;
+}
+@keyframes ref-blink {
+  0%,
+  90%,
+  100% {
+    transform: scaleY(1);
+  }
+  94% {
+    transform: scaleY(0.1);
+  }
+}
+
+/* The blow: squash as he fills his lungs, stretch as he blows, then a quiver
+   for as long as the long blast lasts. */
+.title-gate[data-phase="blow"] .ref-body {
+  animation: ref-blow 1.05s linear both;
+}
+@keyframes ref-blow {
+  0% {
+    transform: scale(1.12, 0.84);
+  }
+  12% {
+    transform: translateY(-16px) scale(0.92, 1.1);
+  }
+  24% {
+    transform: translateY(0) scale(1.08, 0.94);
+  }
+  32% {
+    transform: scale(0.97, 1.04);
+  }
+  40%,
+  56%,
+  72%,
+  88% {
+    transform: scale(1.025, 0.975);
+  }
+  48%,
+  64%,
+  80% {
+    transform: scale(0.985, 1.02);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+.ref-signal {
+  transform-box: view-box;
+  transform-origin: 68px 126px;
+}
+.title-gate[data-phase="blow"] .ref-signal {
+  animation: ref-signal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes ref-signal {
+  from {
+    transform: rotate(-150deg);
+  }
+}
+.ref-cheeks {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.title-gate[data-phase="blow"] .ref-cheeks {
+  animation: ref-puff 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes ref-puff {
+  from {
+    transform: scale(0.3);
+  }
+}
+.ref-whistle {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+}
+.title-gate:not([data-phase="idle"]) .ref-whistle {
+  animation: ref-rattle 0.06s linear infinite alternate;
+}
+@keyframes ref-rattle {
+  from {
+    transform: rotate(-5deg);
+  }
+  to {
+    transform: rotate(5deg);
+  }
+}
+.ref-sound path {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+}
+.title-gate:not([data-phase="idle"]) .ref-sound path {
+  animation: ref-sound 0.42s ease-out infinite;
+}
+.title-gate:not([data-phase="idle"]) .ref-sound path:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.title-gate:not([data-phase="idle"]) .ref-sound path:nth-child(3) {
+  animation-delay: 0.2s;
+}
+@keyframes ref-sound {
+  0% {
+    opacity: 0;
+    transform: translateX(-6px) scale(0.7);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(12px) scale(1.2);
+  }
+}
+
+/* Shockwaves off the whistle (its chamber sits at 59% × 41.5% of the ref). */
+.gate-ref {
+  isolation: isolate;
+}
+/* Behind the ref: a ring drawn over his face hides the best frame. */
+.gate-ring {
+  z-index: -1;
+  position: absolute;
+  left: 59%;
+  top: 41.5%;
+  width: 3rem;
+  height: 3rem;
+  margin: -1.5rem 0 0 -1.5rem;
+  border: 5px solid rgb(var(--c-gold));
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+}
+.gate-ring-2 {
+  border-color: rgb(var(--c-ice));
+}
+.gate-ring-3 {
+  border-color: rgb(var(--c-turf));
+}
+.title-gate[data-phase="blow"] .gate-ring {
+  animation: gate-ring 0.8s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+.title-gate[data-phase="blow"] .gate-ring-2 {
+  animation-delay: 0.25s;
+}
+.title-gate[data-phase="blow"] .gate-ring-3 {
+  animation-delay: 0.5s;
+}
+@keyframes gate-ring {
+  0% {
+    opacity: 1;
+    transform: scale(0.3);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(8);
+  }
+}
+
+/* TWEEET! — a comic starburst sticker, popped on the long blast. */
+.gate-burst {
+  position: absolute;
+  left: 54%;
+  top: -4%;
+  width: min(58%, 175px);
+  opacity: 0;
+  transform-origin: 15% 95%;
+  filter: drop-shadow(0 5px 0 rgb(var(--c-night)));
+  pointer-events: none;
+}
+.gate-burst-shape {
+  fill: rgb(var(--c-gold));
+  stroke: rgb(var(--c-night));
+}
+.gate-burst-text {
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  fill: rgb(var(--c-night));
+}
+.title-gate:not([data-phase="idle"]) .gate-burst {
+  animation: gate-burst 0.5s 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes gate-burst {
+  0% {
+    opacity: 1;
+    transform: scale(0) rotate(-35deg);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.18) rotate(-4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-10deg);
+  }
+}
+
+.title-gate[data-phase="blow"] .gate-stage {
+  animation: gate-shake 0.6s 0.25s linear both;
+}
+@keyframes gate-shake {
+  0%,
+  100% {
+    transform: none;
+  }
+  10% {
+    transform: translate(-7px, 3px) rotate(-0.7deg);
+  }
+  20% {
+    transform: translate(6px, -4px) rotate(0.6deg);
+  }
+  30% {
+    transform: translate(-5px, -2px) rotate(-0.4deg);
+  }
+  40% {
+    transform: translate(4px, 3px) rotate(0.4deg);
+  }
+  55% {
+    transform: translate(-3px, 1px);
+  }
+  70% {
+    transform: translate(2px, -1px);
+  }
+  85% {
+    transform: translate(-1px, 1px);
+  }
+}
+
+/* "Press any button" — a gold sticker that breathes until you do. */
+.gate-press {
+  margin-top: clamp(1rem, 4svh, 2.25rem);
+  padding: 0.8rem 1.7rem 1rem;
+  border: 3px solid rgb(var(--c-night));
+  border-radius: 1.15rem;
+  background-color: rgb(var(--c-gold));
+  box-shadow:
+    inset 0 -5px 0 0 rgb(var(--c-gold-dim)),
+    0 6px 0 0 rgb(var(--c-night)),
+    0 18px 36px -10px rgb(var(--c-gold) / calc(0.65 * var(--glow-strength)));
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: rgb(var(--c-night));
+  animation:
+    gate-rise 0.55s 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+    gate-pulse 1.1s 1s ease-in-out infinite;
+}
+.gate-tap {
+  display: none;
+}
+@media (hover: none) and (pointer: coarse) {
+  .gate-key {
+    display: none;
+  }
+  .gate-tap {
+    display: inline;
+  }
+}
+@keyframes gate-rise {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.8);
+  }
+}
+@keyframes gate-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+.title-gate:not([data-phase="idle"]) .gate-press {
+  animation: gate-press-out 0.3s cubic-bezier(0.5, 0, 0.75, 0) forwards;
+}
+@keyframes gate-press-out {
+  to {
+    opacity: 0;
+    transform: translateY(40px) scale(0.7);
+  }
+}
+
+.gate-hint {
+  margin-top: clamp(0.9rem, 3svh, 1.75rem);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(var(--c-ink-muted));
+  animation: gate-rise 0.5s 0.6s ease-out both;
+  transition: opacity 0.2s ease;
+}
+.title-gate:not([data-phase="idle"]) .gate-hint {
+  opacity: 0;
+}
+
+/* Exit: a cartoon iris opening from the middle of the screen. */
+.title-gate[data-phase="exit"] {
+  -webkit-mask-image: radial-gradient(circle at 50% 46%, transparent var(--iris), #000 calc(var(--iris) + 1px));
+  mask-image: radial-gradient(circle at 50% 46%, transparent var(--iris), #000 calc(var(--iris) + 1px));
+  animation: gate-iris 0.6s cubic-bezier(0.55, 0, 0.85, 0.35) forwards;
+  pointer-events: none;
+}
+/* The rim: a gold ring outlined in night riding the edge of the hole, which
+   is what makes it read as a cartoon iris rather than a fade. */
+.title-gate[data-phase="exit"]::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: calc((var(--iris) + 16px) * 2);
+  height: calc((var(--iris) + 16px) * 2);
+  transform: translate(-50%, -50%);
+  border: 12px solid rgb(var(--c-gold));
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 4px rgb(var(--c-night)),
+    0 0 0 4px rgb(var(--c-night));
+  pointer-events: none;
+}
+@keyframes gate-iris {
+  0% {
+    --iris: 0px;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    --iris: 160vmax;
+    opacity: 0;
+  }
+}
+
+/* The hero springs up under the iris. */
+html[data-gate-opened] .gate-pop {
+  animation: gate-hero 0.8s 0.12s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes gate-hero {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.9);
+  }
+}
+
+/* Reduced motion keeps the title screen and the whistle — a key press and a
+   sound are not motion — but nothing shakes, spins, flies or springs: the
+   poses swap, the burst simply appears, and the gate fades away. */
+@media (prefers-reduced-motion: reduce) {
+  .gate-rays,
+  .gate-wordmark,
+  .gate-ref,
+  .ref-body,
+  .ref-blink,
+  .ref-signal,
+  .ref-cheeks,
+  .ref-whistle,
+  .ref-sound path,
+  .gate-ring,
+  .gate-press,
+  .gate-hint,
+  .title-gate .gate-stage,
+  .title-gate .gate-burst,
+  html[data-gate-opened] .gate-pop {
+    animation: none !important;
+  }
+  .title-gate:not([data-phase="idle"]) .gate-burst {
+    opacity: 1;
+    transform: rotate(-10deg);
+  }
+  .title-gate:not([data-phase="idle"]) .ref-sound path {
+    opacity: 1;
+  }
+  .title-gate[data-phase="exit"] {
+    -webkit-mask-image: none;
+    mask-image: none;
+    animation: gate-fade 0.5s ease forwards;
+  }
+}
+@keyframes gate-fade {
+  to {
+    opacity: 0;
+  }
+}

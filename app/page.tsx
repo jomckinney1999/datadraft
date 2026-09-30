@@ -11,6 +11,7 @@ import CountUp from "@/components/count-up";
 import GlowGrid from "@/components/glow-grid";
 import HeadlineTile from "@/components/headline-tile";
 import StickerLink from "@/components/sticker-cta";
+import TitleGate from "@/components/title-gate";
 import Reveal from "@/components/reveal";
 import LiveWeekStrip from "@/components/live-week-strip";
 import DriveExplainer from "@/components/drive-explainer";
@@ -135,6 +136,8 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen">
+      {/* First in the markup so its script decides before anything paints. */}
+      <TitleGate />
       <Reveal />
       <SiteNav />
 
@@ -152,7 +155,7 @@ export default async function Home() {
           <FieldBackdrop />
           <div aria-hidden className="field-layer dot-field" />
 
-          <div className="sequence relative mx-auto w-full max-w-4xl px-4 py-20 text-center sm:px-6">
+          <div className="gate-pop sequence relative mx-auto w-full max-w-4xl px-4 py-20 text-center sm:px-6">
             <Link
               href="/account"
               className="reveal inline-flex items-center gap-2 rounded-full border-2 border-gold/70 bg-gold/15 px-5 py-2 font-mono text-xs font-bold uppercase tracking-[0.2em] text-gold shadow-[0_0_28px_-6px_rgb(var(--c-gold)/0.85)] transition-transform duration-300 hover:-translate-y-0.5"
