@@ -50,6 +50,7 @@ export default function QuestionPage({
   const pool = questionsIn(question.lang);
   const index = pool.findIndex((q) => q.id === question.id);
   const next = pool[(index + 1) % pool.length];
+  const prev = pool[(index - 1 + pool.length) % pool.length];
 
   return (
     <QuestionWorkspace
@@ -58,6 +59,9 @@ export default function QuestionPage({
       day={day}
       prevDay={previousDay(day)}
       nextId={next.id === question.id ? null : next.id}
+      prevId={prev.id === question.id ? null : prev.id}
+      position={index + 1}
+      total={pool.length}
     />
   );
 }

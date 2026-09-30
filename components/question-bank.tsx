@@ -36,6 +36,14 @@ import AppNav from "@/components/app-nav";
 import QotdCard from "@/components/qotd-card";
 
 type LangFilter = "all" | QuestionLang;
+
+/**
+ * Remembered per browser. A Python learner should land on the Python daily,
+ * not reselect it every visit; picking "All" clears the memory rather than
+ * storing it, so a cleared filter is the same as a fresh one.
+ */
+const LANG_KEY = "sqlsports.questions.lang";
+const LANG_VALUES: readonly string[] = ["sql", "python", "r", "excel"];
 type DiffFilter = "all" | QuestionDifficulty;
 
 const LANGS: QuestionLang[] = ["sql", "python", "r", "excel"];
@@ -73,7 +81,23 @@ export default function QuestionBank({ day }: { day: string }) {
   useEffect(() => {
     setProgress(loadProgress());
     setHydrated(true);
+    try {
+      const saved = window.localStorage.getItem(LANG_KEY);
+      if (saved && LANG_VALUES.includes(saved)) setLang(saved as QuestionLang);
+    } catch {
+      /* storage blocked — the default is fine */
+    }
   }, []);
+
+  function pickLang(next: LangFilter) {
+    setLang(next);
+    try {
+      if (next === "all") window.localStorage.removeItem(LANG_KEY);
+      else window.localStorage.setItem(LANG_KEY, next);
+    } catch {
+      /* storage blocked — the pick still applies for this visit */
+    }
+  }
 
   const solved = useMemo(
     () => new Set(progress.solvedQuestions),
@@ -138,7 +162,7 @@ export default function QuestionBank({ day }: { day: string }) {
                 <button
                   key={l}
                   type="button"
-                  onClick={() => setLang(lang === l ? "all" : l)}
+                  onClick={() => pickLang(lang === l ? "all" : l)}
                   aria-pressed={lang === l}
                   className={`surface rounded-xl border bg-panel px-4 py-3 text-left transition-colors ${
                     lang === l
@@ -177,7 +201,7 @@ export default function QuestionBank({ day }: { day: string }) {
               <button
                 key={l}
                 type="button"
-                onClick={() => setLang(l)}
+                onClick={() => pickLang(l)}
                 aria-pressed={lang === l}
                 className={`rounded-lg border px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors ${
                   lang === l

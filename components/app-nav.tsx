@@ -57,6 +57,23 @@ export default function AppNav({
 } = {}) {
   const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
+
+  // Escape closes the drawer, as it does every other overlay on the web.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  // Arriving on a new route closes it too. The link handlers already do
+  // this for a tap; this covers back/forward, where no link was tapped.
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
   // Loaded here rather than passed in, so a page can drop <AppNav /> at the
   // top without threading progress through components that don't need it.
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);

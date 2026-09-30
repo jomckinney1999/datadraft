@@ -130,7 +130,15 @@ export default function QotdPanel({ question }: { question: Question }) {
           ))}
         </p>
 
-        <div className="mt-3">
+        <div
+          className="mt-3"
+          onKeyDown={(e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+              e.preventDefault();
+              if (ready) attempt(true);
+            }
+          }}
+        >
           <CodeEditor
             value={sql}
             onChange={setSql}
@@ -158,6 +166,9 @@ export default function QotdPanel({ question }: { question: Question }) {
           >
             Submit
           </button>
+          <span className="hidden font-mono text-[10px] text-ink-muted md:inline">
+            ⌘ / Ctrl + Enter
+          </span>
           <button
             type="button"
             onClick={() => setHintOpen((v) => !v)}

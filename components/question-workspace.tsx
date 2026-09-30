@@ -30,6 +30,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Database, QueryExecResult } from "sql.js";
+import type { CellValue } from "@/lib/excel-data";
 import type { Question } from "@/lib/questions";
 import {
   DIFFICULTY_XP,
@@ -56,6 +57,61 @@ type Outcome = {
   text?: string;
   error?: string;
 };
+
+/**
+ * One honest sentence about the *shape* of a wrong answer: column names and
+ * row count for SQL, line count for printed output, kind of value for Excel.
+ * Shape, never values. It points at the mistake without handing over the
+ * answer, which is the whole difference between a hint and a leak.
+ */
+function gridDiag(
+  mine: QueryExecResult | undefined,
+  key: QueryExecResult | undefined,
+  orderMatters: boolean,
+): string {
+  if (!key) return "";
+  const cols = (r?: QueryExecResult) => (r?.columns ?? []).join(", ");
+  const rows = (r?: QueryExecResult) => r?.values.length ?? 0;
+  const plural = (n: number) => (n === 1 ? "" : "s");
+  if (!mine) {
+    return `Your query returned no rows. The answer is ${rows(key)} row${plural(rows(key))} with columns ${cols(key)}.`;
+  }
+  if (cols(mine).toLowerCase() !== cols(key).toLowerCase()) {
+    return `Your grid has columns ${cols(mine) || "(none)"}. The answer has ${cols(key)} — same columns, same order, same names.`;
+  }
+  if (rows(mine) !== rows(key)) {
+    return `Right columns, wrong count: you returned ${rows(mine)} row${plural(rows(mine))}, the answer has ${rows(key)}. Check the filter, the grouping, or the LIMIT.`;
+  }
+  return orderMatters
+    ? "Same columns, same row count, different values or order — check a calculation, a rounding, or the ORDER BY."
+    : "Same columns, same row count, different values — check a calculation or a rounding.";
+}
+
+function printDiag(mine: string, key: string): string {
+  const lines = (s: string) => s.trim().split(/\r?\n/).length;
+  if (!mine.trim()) {
+    return "Nothing was printed. Grading compares printed output, so the answer has to come out of print().";
+  }
+  const m = lines(mine);
+  const k = lines(key);
+  if (m !== k) return `You printed ${m} line${m === 1 ? "" : "s"}; the answer prints ${k}.`;
+  return "Same number of lines, different content — check a rounding, a sort order, or a column name.";
+}
+
+function valueDiag(mine: CellValue | boolean, key: CellValue | boolean): string {
+  const kind = (v: CellValue | boolean) =>
+    typeof v === "number"
+      ? "a number"
+      : typeof v === "boolean"
+        ? "TRUE/FALSE"
+        : v === null || v === ""
+          ? "blank"
+          : "text";
+  if (kind(mine) !== kind(key)) {
+    return `Your formula returns ${kind(mine)}; the answer is ${kind(key)}.`;
+  }
+  return "Right kind of value, wrong amount — check the range you pointed at.";
+}
 
 function ResultGrid({ res }: { res: QueryExecResult }) {
   return (
@@ -99,6 +155,9 @@ export default function QuestionWorkspace({
   day,
   prevDay,
   nextId,
+  prevId,
+  position,
+  total,
 }: {
   question: Question;
   isQotd: boolean;
@@ -106,6 +165,10 @@ export default function QuestionWorkspace({
   day: string;
   prevDay: string;
   nextId: string | null;
+  prevId: string | null;
+  /** 1-based index within this language's pool, for "3 of 29". */
+  position: number;
+  total: number;
 }) {
   const isSql = question.lang === "sql";
   const isExcel = question.lang === "excel";
@@ -118,6 +181,7 @@ export default function QuestionWorkspace({
   );
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [verdict, setVerdict] = useState<"right" | "wrong" | null>(null);
+  const [diag, setDiag] = useState<string | null>(null);
   const [hintOpen, setHintOpen] = useState(false);
   const [solutionOpen, setSolutionOpen] = useState(false);
   const [alreadySolved, setAlreadySolved] = useState(false);
@@ -192,7 +256,7 @@ export default function QuestionWorkspace({
         if (!grade) return;
         const key = db.exec(question.expected)[0];
         const ok = resultsMatch(mine, key, question.orderMatters ?? false);
-        finish(ok);
+        finish(ok, ok ? null : gridDiag(mine, key, question.orderMatters ?? false));
         return;
       }
 
@@ -217,7 +281,8 @@ export default function QuestionWorkspace({
         setOutcome({ text: engine.formatValue(mine.value) });
         if (!grade) return;
         const key = await engine.evaluateFormula(question.expected, sheet);
-        finish(engine.valuesMatch(mine.value, key.value));
+        const okX = engine.valuesMatch(mine.value, key.value);
+        finish(okX, okX ? null : valueDiag(mine.value, key.value));
         return;
       }
 
@@ -236,16 +301,17 @@ export default function QuestionWorkspace({
         setOutcome({ text: mine.stdout || "(nothing printed)" });
         if (!grade) return;
         const key = await rt.runCode(lang, `${prelude}\n${question.expected}`);
-        finish(
+        const okP =
           Boolean(mine.stdout.trim()) &&
-            mine.stdout.trim() === (key.stdout ?? "").trim(),
-        );
+          mine.stdout.trim() === (key.stdout ?? "").trim();
+        finish(okP, okP ? null : printDiag(mine.stdout, key.stdout ?? ""));
       } finally {
         setBooting(false);
       }
 
-      function finish(ok: boolean) {
+      function finish(ok: boolean, why: string | null = null) {
         setVerdict(ok ? "right" : "wrong");
+        setDiag(why);
         playSfx(ok ? "touchdown" : "miss");
         if (!ok) return;
         const firstSolve = !alreadySolved;
@@ -277,9 +343,14 @@ export default function QuestionWorkspace({
     <>
       <AppNav back="/questions" backLabel="all questions" />
       <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-24 pt-5 sm:px-6">
-        <div className="grid gap-4 lg:grid-cols-12">
+        {/* On a phone this is a column in reading order: the problem, then
+            the editor, then the tables and hints. On a desktop it is two
+            columns, with the editor spanning both rows on the right. Putting
+            the editor third on a phone meant scrolling past every reference
+            block before you could type a character. */}
+        <div className="flex flex-col gap-4 lg:grid lg:grid-cols-12 lg:items-start">
           {/* ── The problem ───────────────────────────────── */}
-          <section className="lg:col-span-5">
+          <section className="order-1 lg:col-span-5 lg:col-start-1 lg:row-start-1">
             <div className="surface overflow-hidden rounded-2xl border border-panel-border bg-panel">
               <div className="relative h-36 overflow-hidden border-b border-panel-border">
                 <QuestionArt
@@ -339,7 +410,10 @@ export default function QuestionWorkspace({
                 </div>
               </div>
             </div>
+          </section>
 
+          {/* -- Reference: tables, prelude, hints -- */}
+          <section className="order-3 lg:col-span-5 lg:col-start-1 lg:row-start-2">
             {/* What you're working on. Only the tables this question touches —
                 a learner who has to scroll past three irrelevant ones to find
                 a column name stops looking and guesses. */}
@@ -415,7 +489,7 @@ export default function QuestionWorkspace({
           </section>
 
           {/* ── The workspace ─────────────────────────────── */}
-          <section className="lg:col-span-7">
+          <section className="order-2 lg:col-span-7 lg:col-start-6 lg:row-span-2 lg:row-start-1">
             <div className="surface rounded-2xl border border-panel-border bg-panel p-4 sm:p-5">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <p className="label-broadcast text-ice">
@@ -432,14 +506,27 @@ export default function QuestionWorkspace({
                 </span>
               </div>
 
-              <CodeEditor
-                value={code}
-                onChange={setCode}
-                lang={question.lang}
-                rows={isExcel ? 2 : 12}
-                ariaLabel={`${LANG_LABEL[question.lang]} for ${question.title}`}
-                disabled={booting}
-              />
+              {/* Cmd/Ctrl+Enter submits, the way every editor of this shape
+                  does. Caught on a wrapper because the keydown bubbles up out
+                  of the textarea; preventDefault stops it inserting a newline
+                  on the way. */}
+              <div
+                onKeyDown={(e) => {
+                  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                    e.preventDefault();
+                    if (canPress) void attempt(true);
+                  }
+                }}
+              >
+                <CodeEditor
+                  value={code}
+                  onChange={setCode}
+                  lang={question.lang}
+                  rows={isExcel ? 2 : 12}
+                  ariaLabel={`${LANG_LABEL[question.lang]} for ${question.title}`}
+                  disabled={booting}
+                />
+              </div>
 
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <button
@@ -458,6 +545,9 @@ export default function QuestionWorkspace({
                 >
                   {booting ? "Starting…" : "Submit"}
                 </button>
+                <span className="hidden font-mono text-[10px] text-ink-muted md:inline">
+                  ⌘ / Ctrl + Enter submits
+                </span>
                 <button
                   type="button"
                   onClick={() => {
@@ -467,6 +557,7 @@ export default function QuestionWorkspace({
                     );
                     setOutcome(null);
                     setVerdict(null);
+                    setDiag(null);
                   }}
                   className="ml-auto font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors hover:text-ink"
                 >
@@ -500,6 +591,11 @@ export default function QuestionWorkspace({
                     your output against what the question asks for:{" "}
                     <span className="text-ink">{question.returns}</span>
                   </p>
+                  {diag && (
+                    <p className="mt-2 rounded-lg border border-ice/30 bg-night/40 px-3 py-2 font-mono text-[12px] leading-relaxed text-ice">
+                      {diag}
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -569,6 +665,35 @@ export default function QuestionWorkspace({
             </div>
           </section>
         </div>
+
+        <nav
+          aria-label="Question navigation"
+          className="mt-6 flex items-center justify-between gap-3 border-t border-panel-border pt-4 font-mono text-[11px] uppercase tracking-wider"
+        >
+          {prevId ? (
+            <Link
+              href={`/questions/${prevId}`}
+              className="text-ink-muted transition-colors hover:text-ink"
+            >
+              ← Previous
+            </Link>
+          ) : (
+            <span />
+          )}
+          <span className="text-ink-muted">
+            {LANG_LABEL[question.lang]} · {position} of {total}
+          </span>
+          {nextId ? (
+            <Link
+              href={`/questions/${nextId}`}
+              className="text-ink-muted transition-colors hover:text-ink"
+            >
+              Next →
+            </Link>
+          ) : (
+            <span />
+          )}
+        </nav>
       </main>
     </>
   );
