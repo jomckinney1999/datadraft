@@ -38,3 +38,6 @@ next-env.d.ts
 .vercel
 .env*
 !.env.local.example
+
+# Obsidian workspace config for docs/ — editor state, not project state.
+.obsidian/
