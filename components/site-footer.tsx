@@ -8,7 +8,7 @@
  */
 
 import Link from "next/link";
-import { REPO_URL } from "@/lib/repo";
+import { REPO_URL } from "@/lib/site";
 
 const COLUMNS = [
   {

@@ -10,8 +10,8 @@
  * The weekly-challenge waitlist rides underneath as the quiet second ask.
  */
 
-import Link from "next/link";
 import Coach from "@/components/coach";
+import StickerLink from "@/components/sticker-cta";
 import WaitlistForm from "@/components/waitlist-form";
 
 export default function FinalCta() {
@@ -36,13 +36,13 @@ export default function FinalCta() {
           account. Ninety seconds from now you&apos;ll have run real SQL on a
           real season.
         </p>
-        <div className="reveal mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link href="/questions" className="btn-gold btn-hero">
+        <div className="reveal mt-8 flex flex-wrap items-center justify-center gap-4">
+          <StickerLink href="/questions" tone="gold" icon="question">
             Practice questions
-          </Link>
-          <Link href="/account" className="btn-turf btn-hero">
-            Start learning free →
-          </Link>
+          </StickerLink>
+          <StickerLink href="/account" tone="turf" icon="football" arrow>
+            Start learning free
+          </StickerLink>
         </div>
 
         <div className="reveal mx-auto mt-14 max-w-md rounded-2xl border border-panel-border bg-panel/70 p-5 backdrop-blur">

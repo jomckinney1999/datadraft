@@ -10,7 +10,7 @@ import Link from "next/link";
 import AppNav from "@/components/app-nav";
 import ProjectArt from "@/components/project-art";
 import type { Project } from "@/lib/projects";
-import { REPO_URL } from "@/lib/repo";
+import { REPO_URL } from "@/lib/site";
 
 function StartLink({
   project,

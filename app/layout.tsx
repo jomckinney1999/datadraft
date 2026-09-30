@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import { SITE_URL } from "@/lib/site";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -26,13 +27,13 @@ const DESCRIPTION =
   "LeetCode for football data. A new SQL question every day on real NFL scoring, courses from SELECT to window functions, and projects you can put your name on. You don't have to watch the games.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://sql-sports.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
-    url: "https://sql-sports.vercel.app",
+    url: SITE_URL,
     siteName: "DataDraft",
     type: "website",
     images: [

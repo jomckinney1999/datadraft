@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
+import { SITE_URL } from "@/lib/site";
 
 // Creates a Stripe Checkout session for the Practice tier subscription.
 // Roadmap/Career Track checkout can follow this same pattern once their
@@ -15,7 +16,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Not signed in" }, { status: 401 });
   }
 
-  const origin = request.headers.get("origin") ?? "https://sql-sports.vercel.app";
+  const origin = request.headers.get("origin") ?? SITE_URL;
 
   const session = await getStripe().checkout.sessions.create({
     mode: "subscription",

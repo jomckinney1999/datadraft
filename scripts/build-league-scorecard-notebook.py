@@ -512,7 +512,7 @@ File → **Download .ipynb** (or copy to Drive). That’s the portfolio piece.
 
 ---
 
-*Built for [DataDraft](https://sql-sports.vercel.app) — Your League Scorecard project.*"""
+*Built for [DataDraft](https://data-draft.vercel.app) — Your League Scorecard project.*"""
     )
 )
 

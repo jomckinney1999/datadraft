@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import TryPage from "./try-client";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Try DataDraft — free beta",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
     title: "Try DataDraft — free beta",
     description:
       "Free beta. Create an account and learn SQL through real NFL data in your browser.",
-    url: "https://sql-sports.vercel.app/try",
+    url: `${SITE_URL}/try`,
   },
 };
 

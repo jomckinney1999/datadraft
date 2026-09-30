@@ -10,6 +10,7 @@ import WorkspaceShot from "@/components/workspace-shot";
 import CountUp from "@/components/count-up";
 import GlowGrid from "@/components/glow-grid";
 import HeadlineTile from "@/components/headline-tile";
+import StickerLink from "@/components/sticker-cta";
 import Reveal from "@/components/reveal";
 import LiveWeekStrip from "@/components/live-week-strip";
 import DriveExplainer from "@/components/drive-explainer";
@@ -178,13 +179,13 @@ export default async function Home() {
               putting your name on. You don&apos;t have to watch the games.
             </p>
 
-            <div className="reveal mt-8 flex flex-wrap items-center justify-center gap-3">
-              <Link href="/questions" className="btn-gold btn-hero">
+            <div className="reveal mt-8 flex flex-wrap items-center justify-center gap-4">
+              <StickerLink href="/questions" tone="gold" icon="question">
                 Practice questions
-              </Link>
-              <Link href="/account" className="btn-turf btn-hero">
-                Start learning free →
-              </Link>
+              </StickerLink>
+              <StickerLink href="/account" tone="turf" icon="football" arrow>
+                Start learning free
+              </StickerLink>
             </div>
           </div>
 

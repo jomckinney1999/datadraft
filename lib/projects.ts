@@ -14,7 +14,7 @@
  * works without football data someone actually cares about.
  */
 
-import { REPO } from "@/lib/repo";
+import { REPO } from "@/lib/site";
 
 export type ProjectStep = {
   id: string;
