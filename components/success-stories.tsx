@@ -46,9 +46,24 @@ const STORIES = [
   },
 ];
 
-function StoryCard({ story }: { story: (typeof STORIES)[number] }) {
+/**
+ * Cards sit at alternating heights so the row reads as a hand laid down
+ * rather than a list. The offset is derived from the index rather than
+ * stored on the story, so reordering the copy cannot leave a gap.
+ */
+const OFFSET = ["sm:translate-y-0", "sm:-translate-y-5", "sm:translate-y-4"];
+
+function StoryCard({
+  story,
+  index,
+}: {
+  story: (typeof STORIES)[number];
+  index: number;
+}) {
   return (
-    <div className="surface flex w-[320px] shrink-0 flex-col justify-between border border-panel-border bg-panel/90 p-5 backdrop-blur-sm sm:w-[360px]">
+    <div
+      className={`surface ring-lift flex w-[320px] shrink-0 flex-col justify-between rounded-2xl border border-panel-border bg-panel/90 p-5 backdrop-blur-sm sm:w-[360px] ${OFFSET[index % OFFSET.length]}`}
+    >
       <div>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -98,24 +113,28 @@ export default function SuccessStories() {
   return (
     <section
       id="stories"
-      className="border-t border-panel-border bg-night/60 py-16 sm:py-20"
+      data-reveal-section
+      className="border-t border-panel-border bg-night/60 py-16 sm:py-24"
     >
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <p className="label-broadcast mb-3">
+      <div className="sequence mx-auto max-w-6xl px-4 sm:px-6">
+        <p className="reveal label-broadcast mb-3">
           <span className="mr-2 inline-block h-1.5 w-1.5 bg-turf align-middle" />
           What the path can look like
         </p>
-        <h2 className="max-w-2xl font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
-          Fantasy football in, SQL skills out.
+        <h2 className="reveal max-w-2xl font-display text-3xl font-bold tracking-tight text-pop sm:text-4xl">
+          Fantasy football in, data skills out.
         </h2>
-        <p className="mt-3 max-w-xl text-base leading-relaxed text-ink-soft">
+        <p className="reveal mt-3 max-w-xl text-base leading-relaxed text-ink-soft">
           DataDraft is brand new — these are illustrative example paths
           showing what the curriculum is designed to do, not verified
           testimonials from real members.
         </p>
       </div>
 
-      <div className="relative mt-10 overflow-hidden">
+      {/* overflow-hidden is load-bearing: the track is `w-max`, so letting
+          it escape pushes the whole page sideways. The staggered cards get
+          their vertical room from the track’s padding instead. */}
+      <div className="reveal relative mt-12 overflow-hidden">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-night to-transparent sm:w-32"
@@ -124,9 +143,9 @@ export default function SuccessStories() {
           aria-hidden
           className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-night to-transparent sm:w-32"
         />
-        <div className="flex w-max animate-marquee gap-4 px-4 hover:[animation-play-state:paused] sm:gap-5 sm:px-6">
+        <div className="flex w-max animate-marquee gap-4 px-4 py-6 hover:[animation-play-state:paused] sm:gap-5 sm:px-6">
           {track.map((story, i) => (
-            <StoryCard key={`${story.initials}-${i}`} story={story} />
+            <StoryCard key={`${story.initials}-${i}`} story={story} index={i} />
           ))}
         </div>
       </div>
