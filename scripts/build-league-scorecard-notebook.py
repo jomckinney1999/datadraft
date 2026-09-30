@@ -30,7 +30,7 @@ cells.append(
     md(
         """# Your League Scorecard
 
-**SQL Sports portfolio project** — pull *your* fantasy league, load it into SQL, answer real questions.
+**DataDraft portfolio project** — pull *your* fantasy league, load it into SQL, answer real questions.
 
 You'll need:
 - A free [Google](https://accounts.google.com/) account (for Colab)
@@ -38,7 +38,7 @@ You'll need:
 
 Run cells **top to bottom**. Don't skip the setup cells.
 
-> Privacy: this notebook talks to Sleeper's *public* API from *your* Colab session. Nothing is sent to SQL Sports servers."""
+> Privacy: this notebook talks to Sleeper's *public* API from *your* Colab session. Nothing is sent to DataDraft servers."""
     )
 )
 
@@ -512,7 +512,7 @@ File → **Download .ipynb** (or copy to Drive). That’s the portfolio piece.
 
 ---
 
-*Built for [SQL Sports](https://sql-sports.vercel.app) — Your League Scorecard project.*"""
+*Built for [DataDraft](https://sql-sports.vercel.app) — Your League Scorecard project.*"""
     )
 )
 
@@ -533,4 +533,9 @@ nb = {
 
 NB_PATH.parent.mkdir(parents=True, exist_ok=True)
 NB_PATH.write_text(json.dumps(nb, indent=1), encoding="utf-8")
+# A copy the site serves, so learners can download it and upload it to Colab
+# when they can't reach the GitHub repo.
+PUBLIC_COPY = NB_PATH.parents[1] / "public" / "notebooks" / NB_PATH.name
+PUBLIC_COPY.parent.mkdir(parents=True, exist_ok=True)
+PUBLIC_COPY.write_text(json.dumps(nb, indent=1), encoding="utf-8")
 print("Wrote", NB_PATH, "·", len(cells), "cells")

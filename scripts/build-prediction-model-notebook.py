@@ -398,4 +398,9 @@ nb = {
 
 NB_PATH.parent.mkdir(parents=True, exist_ok=True)
 NB_PATH.write_text(json.dumps(nb, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+# A copy the site serves, so learners can download it and upload it to Colab
+# when they can't reach the GitHub repo.
+PUBLIC_COPY = NB_PATH.parents[1] / "public" / "notebooks" / NB_PATH.name
+PUBLIC_COPY.parent.mkdir(parents=True, exist_ok=True)
+PUBLIC_COPY.write_text(json.dumps(nb, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 print(f"wrote {NB_PATH} ({len(cells)} cells)")

@@ -7,11 +7,14 @@
  * and a right answer. A build takes an afternoon and ends in a repo.
  *
  * The bar for adding one: it has to be something a learner could not have
- * done on any other SQL site. Both of the live ones clear it — one pulls the
- * learner's own fantasy league through a public API, the other models raw
- * nflverse releases into a tested dbt warehouse. Neither exists elsewhere
- * because neither works without football data someone actually cares about.
+ * done on any other SQL site. All three live ones clear it — one pulls the
+ * learner's own fantasy league through a public API, one models raw nflverse
+ * releases into a tested dbt warehouse, one forecasts next week's points and
+ * grades itself against the obvious guess. None exists elsewhere because none
+ * works without football data someone actually cares about.
  */
+
+import { REPO } from "@/lib/repo";
 
 export type ProjectStep = {
   id: string;
@@ -56,7 +59,6 @@ export type Project = {
   deliverables: string[];
 };
 
-const REPO = "jomckinney1999/SQL-Sports";
 const BRANCH = "main";
 const NOTEBOOK = "notebooks/my-league-scorecard.ipynb";
 const DBT_DIR = "dbt/nflverse_warehouse";

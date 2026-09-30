@@ -10,6 +10,7 @@ import Link from "next/link";
 import AppNav from "@/components/app-nav";
 import ProjectArt from "@/components/project-art";
 import type { Project } from "@/lib/projects";
+import { REPO_URL } from "@/lib/repo";
 
 function StartLink({
   project,
@@ -21,7 +22,7 @@ function StartLink({
   const href =
     project.colabUrl ??
     (project.repoPath
-      ? `https://github.com/jomckinney1999/SQL-Sports/tree/main/${project.repoPath}`
+      ? `${REPO_URL}/tree/main/${project.repoPath}`
       : null);
   if (!href) return null;
   return (
@@ -99,10 +100,25 @@ export default function ProjectGuide({ project }: { project: Project }) {
               </span>
             ))}
           </div>
-          <StartLink project={project} className="btn-gold mt-5 inline-flex" />
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <StartLink project={project} className="btn-gold inline-flex" />
+            {/* The notebook is also served from this site, so a learner is
+                never stuck on GitHub access: Colab opens GitHub notebooks
+                only from a public repo, and File → Upload notebook takes the
+                downloaded copy on any account. */}
+            {project.notebookPath && (
+              <a
+                href={`/${project.notebookPath}`}
+                download
+                className="rounded-xl border border-panel-border px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-wider text-ink-soft transition-colors hover:border-gold/50 hover:text-gold"
+              >
+                Download the notebook
+              </a>
+            )}
+          </div>
           <p className="mt-2 font-mono text-[10px] text-ink-muted">
             {project.colabUrl
-              ? "Runs in the browser. Free Google account. No install."
+              ? "Runs in the browser. Free Google account. No install. If Colab can't open it, download it and use File → Upload notebook."
               : "Runs locally on DuckDB. No cloud warehouse, no card."}
           </p>
         </section>

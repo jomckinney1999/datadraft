@@ -8,6 +8,7 @@
  */
 
 import Link from "next/link";
+import { REPO_URL } from "@/lib/repo";
 
 const COLUMNS = [
   {
@@ -38,7 +39,7 @@ const COLUMNS = [
         external: true,
       },
       {
-        href: "https://github.com/jomckinney1999/SQL-Sports",
+        href: REPO_URL,
         label: "Source on GitHub",
         external: true,
       },
