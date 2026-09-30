@@ -203,14 +203,14 @@ export default function QotdPanel({ question }: { question: Question }) {
         {verdict === "right" && (
           <div className="mt-3 rounded-xl border border-turf/50 bg-turf/10 px-4 py-3">
             <p className="font-display text-base font-bold text-turf">
-              That&apos;s it — and you did it without an account.
+              That&apos;s it. Save it on a free account so it stays yours.
             </p>
             <p className="mt-1 text-sm leading-relaxed text-ink-soft">
               {question.explain}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Link href="/questions" className="press btn-turf">
-                Next question
+              <Link href="/account" className="press btn-turf">
+                Create a free account
               </Link>
               <Link
                 href="/learn"

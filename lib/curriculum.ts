@@ -230,7 +230,7 @@ export const COURSE = {
             },
             {
               title: "What to expect",
-              body: "Lessons are a few minutes each. You read a little, then you type the question yourself. If you miss, you see the right answer and why, and you can try again. Nothing to install. No account. Your progress stays in this browser.",
+              body: "Lessons are a few minutes each. You read a little, then you type the question yourself. If you miss, you see the right answer and why, and you can try again. Nothing to install. A free account keeps your progress.",
             },
             {
               title: "Where this course sits",
@@ -2458,7 +2458,7 @@ export const COURSE = {
         },
         {
           title: "What to expect",
-          body: "Lessons are a few minutes each. You read a little, then you type, and the instructions actually run in this browser. If you miss, you see the right answer and why. Nothing to install. No account. Your progress stays in this browser.",
+          body: "Lessons are a few minutes each. You read a little, then you type, and the instructions actually run in this browser. If you miss, you see the right answer and why. Nothing to install. A free account keeps your progress.",
         },
         {
           title: "Where this course sits",

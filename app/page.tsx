@@ -37,7 +37,7 @@ import { FACTS } from "@/lib/lesson-facts.generated";
  * A long scroll, on purpose, and every section on it earns its place by
  * answering the next question a sceptical visitor would ask:
  *
- *   is this real? → solve today's question, now, without an account
+ *   is this real? → solve today's question, then save it on a free account
  *   is it football? → this week's actual scores and stat lines
  *   what languages? → four, running for real
  *   how does a lesson feel? → the drive, drawn with the real field
@@ -151,10 +151,13 @@ export default async function Home() {
           <div aria-hidden className="field-layer dot-field" />
 
           <div className="sequence relative mx-auto w-full max-w-4xl px-4 py-20 text-center sm:px-6">
-            <p className="reveal inline-flex items-center gap-2 rounded-full border border-panel-border bg-panel/70 px-4 py-1.5 font-mono text-[11px] uppercase tracking-wider text-ink-soft backdrop-blur">
-              <span className="dot-glow-gold inline-block h-1.5 w-1.5 rounded-full bg-gold" />
-              Free beta · no account needed
-            </p>
+            <Link
+              href="/account"
+              className="reveal inline-flex items-center gap-2 rounded-full border-2 border-gold/70 bg-gold/15 px-5 py-2 font-mono text-xs font-bold uppercase tracking-[0.2em] text-gold shadow-[0_0_28px_-6px_rgb(var(--c-gold)/0.85)] transition-transform duration-300 hover:-translate-y-0.5"
+            >
+              <span className="dot-glow-gold inline-block h-2 w-2 rounded-full bg-gold" />
+              Free beta
+            </Link>
 
             <h1 className="reveal mt-6 font-display text-[2.6rem] font-bold leading-[1.02] tracking-tight text-pop sm:text-6xl lg:text-7xl">
               Data practice that
@@ -178,7 +181,7 @@ export default async function Home() {
               <Link href="/questions" className="btn-gold btn-hero">
                 Practice questions
               </Link>
-              <Link href="/dashboard" className="btn-turf btn-hero">
+              <Link href="/account" className="btn-turf btn-hero">
                 Start learning free →
               </Link>
             </div>

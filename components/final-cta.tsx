@@ -40,7 +40,7 @@ export default function FinalCta() {
           <Link href="/questions" className="btn-gold btn-hero">
             Practice questions
           </Link>
-          <Link href="/dashboard" className="btn-turf btn-hero">
+          <Link href="/account" className="btn-turf btn-hero">
             Start learning free →
           </Link>
         </div>

@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import TryPage from "./try-client";
 
 export const metadata: Metadata = {
-  title: "Try DataDraft — no account needed",
+  title: "Try DataDraft — free beta",
   description:
-    "Guest invite: learn SQL through real NFL data in your browser. No sign-up.",
+    "Free beta. Create an account and learn SQL through real NFL data in your browser.",
   openGraph: {
-    title: "Try DataDraft — no account needed",
+    title: "Try DataDraft — free beta",
     description:
-      "Guest invite: learn SQL through real NFL data in your browser. No sign-up.",
+      "Free beta. Create an account and learn SQL through real NFL data in your browser.",
     url: "https://sql-sports.vercel.app/try",
   },
 };

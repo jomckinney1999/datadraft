@@ -41,7 +41,7 @@ export default function SiteNav() {
           ))}
 
           <Link
-            href="/dashboard"
+            href="/account"
             className="whitespace-nowrap border border-turf/50 bg-turf/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-turf transition-colors duration-150 hover:border-turf hover:bg-turf/20"
           >
             Start free
@@ -92,7 +92,7 @@ export default function SiteNav() {
             ))}
 
             <Link
-              href="/dashboard"
+              href="/account"
               onClick={() => setOpen(false)}
               className="mt-2 border border-turf/50 bg-turf/10 px-3 py-2.5 text-center font-mono text-xs uppercase tracking-wider text-turf transition-colors duration-150 hover:border-turf hover:bg-turf/20"
             >

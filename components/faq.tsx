@@ -20,7 +20,7 @@ const ITEMS = [
   },
   {
     q: "Is it actually free?",
-    a: "Yes, all of it, for the whole beta. No card, and no account needed to start — progress saves in your browser. Sign in with an email if you want it to follow you across devices.",
+    a: "Yes, all of it, for the whole beta. No card. A free account is how you start — email yourself a link, and your progress follows you to the next device.",
   },
   {
     q: "Which languages can I practise?",

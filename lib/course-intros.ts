@@ -37,7 +37,7 @@ export const DEFAULT_HOW_IT_WORKS = [
   "Lessons are short. A few minutes each, one idea at a time.",
   "Every lesson opens with a walkthrough, then you answer questions and write real code.",
   "Get one wrong and you'll see the answer and why, then that question comes back a couple of snaps later.",
-  "Nothing to install and no account needed — it all runs in this browser, and your progress saves here.",
+  "Nothing to install. A free account keeps your progress when you switch devices.",
 ];
 
 export const COURSE_INTROS: CourseIntro[] = [

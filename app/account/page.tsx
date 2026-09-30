@@ -1,8 +1,7 @@
 "use client";
 
 // Accounts, magic-link only — no passwords to manage, leak, or reset.
-// An account is purely for portability: it carries progress between devices.
-// Everything on the site works signed out, and always should during beta.
+// The free start on the homepage lands here so a learner becomes a user.
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -107,19 +106,14 @@ export default function AccountPage() {
                   <Coach mood="idle" size={96} />
                 </div>
                 <div>
-                  <p className="label-broadcast text-turf">optional</p>
+                  <p className="label-broadcast text-gold">free beta</p>
                   <h1 className="mt-1 font-display text-2xl font-bold text-ink">
-                    Keep your progress on every device.
+                    Create your free account.
                   </h1>
                   <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-                    Right now your XP and finished lessons live only in this
-                    browser — clear it, or open the site on your phone, and
-                    they&apos;re gone. An account carries them with you.
-                  </p>
-                  <p className="mt-2 font-mono text-[11px] leading-relaxed text-ink-muted">
-                    No password. We email you a link, you click it, that&apos;s
-                    the whole thing. Everything on the site keeps working signed
-                    out.
+                    Your lessons, XP, and streak should follow you, not one
+                    browser. We email a link. You click it. That&apos;s the
+                    sign-in.
                   </p>
                 </div>
               </div>

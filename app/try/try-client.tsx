@@ -69,7 +69,7 @@ export default function TryPage() {
 
       <div className="mt-10 flex flex-col items-center text-center">
         <Coach mood="happy" size={120} />
-        <p className="label-broadcast mt-4 text-turf">beta · no account</p>
+        <p className="label-broadcast mt-4 text-gold">free beta</p>
         <h1 className="mt-2 font-display text-3xl font-bold text-ink sm:text-4xl">
           Try DataDraft
         </h1>
@@ -132,8 +132,8 @@ export default function TryPage() {
             ✓
           </span>
           <span>
-            <strong className="text-ink">No account required.</strong> Clearing
-            site data wipes progress — that&apos;s expected for guest mode.
+            <strong className="text-ink">A free account keeps it.</strong> Guest
+            mode lives in this browser only — clearing site data wipes it.
           </span>
         </li>
       </ul>
