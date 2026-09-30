@@ -44,6 +44,8 @@ import { playSfx } from "@/lib/sfx";
 import CodeEditor from "@/components/code-editor";
 import QuestionArt from "@/components/question-art";
 import AppNav from "@/components/app-nav";
+import { FaceCluster } from "@/components/qotd-card";
+import { featuredPlayers } from "@/lib/question-players";
 import Coach from "@/components/coach";
 import ExcelGrid from "@/components/excel-grid";
 import DifficultyChip from "@/components/difficulty-chip";
@@ -268,6 +270,7 @@ export default function QuestionWorkspace({
 
   const tables = schemaFor(question);
   const weight = LANG_WEIGHT[question.lang];
+  const players = featuredPlayers(question, 3);
   const canPress = isSql || isExcel ? ready : !booting;
 
   return (
@@ -278,11 +281,14 @@ export default function QuestionWorkspace({
           {/* ── The problem ───────────────────────────────── */}
           <section className="lg:col-span-5">
             <div className="surface overflow-hidden rounded-2xl border border-panel-border bg-panel">
-              <div className="relative h-28 overflow-hidden border-b border-panel-border">
+              <div className="relative h-36 overflow-hidden border-b border-panel-border">
                 <QuestionArt
                   art={question.art}
                   className="absolute inset-0 h-full w-full"
                 />
+                <div className="absolute inset-y-0 right-4 flex items-center">
+                  <FaceCluster players={players} size={72} names={false} />
+                </div>
                 {isQotd && (
                   <span className="absolute left-4 top-4 rounded-full border border-gold/50 bg-night/80 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-gold">
                     Question of the day

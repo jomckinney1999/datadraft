@@ -26,6 +26,8 @@ import { resultsMatch } from "@/lib/sql-grade";
 import CodeEditor from "@/components/code-editor";
 import QuestionArt from "@/components/question-art";
 import DifficultyChip from "@/components/difficulty-chip";
+import { FaceCluster } from "@/components/qotd-card";
+import { featuredPlayers } from "@/lib/question-players";
 
 export default function QotdPanel({ question }: { question: Question }) {
   const dbRef = useRef<Database | null>(null);
@@ -85,27 +87,31 @@ export default function QotdPanel({ question }: { question: Question }) {
   }
 
   const tables = schemaFor(question);
+  const players = featuredPlayers(question, 3);
 
   return (
-    <div className="surface overflow-hidden rounded-2xl border border-panel-border bg-panel">
-      <div className="relative flex items-center gap-4 border-b border-panel-border px-5 py-4">
-        <span className="h-14 w-20 shrink-0 overflow-hidden rounded-lg">
-          <QuestionArt art={question.art} className="h-full w-full" />
-        </span>
-        <div className="min-w-0">
+    <div className="qotd-hero overflow-hidden rounded-2xl">
+      <QuestionArt art={question.art} className="qotd-hero-art" />
+      <div className="qotd-sheen" aria-hidden />
+      <div className="relative flex flex-wrap items-center gap-5 border-b border-gold/20 px-5 py-5">
+        <FaceCluster players={players} size={64} names={false} />
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-gold/50 bg-gold/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-gold">
               Question of the day
             </span>
             <DifficultyChip difficulty={question.difficulty} />
           </div>
-          <p className="mt-1 truncate font-display text-lg font-bold text-ink">
+          <p className="mt-1 font-display text-2xl font-bold text-pop sm:text-3xl">
             {question.title}
+          </p>
+          <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+            {players.map((p) => p.name).join(" · ")}
           </p>
         </div>
       </div>
 
-      <div className="px-5 py-4">
+      <div className="relative px-5 py-4">
         <p className="text-[15px] leading-relaxed text-ink-soft">
           {question.prompt}
         </p>

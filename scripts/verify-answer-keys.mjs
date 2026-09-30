@@ -163,6 +163,14 @@ for (const q of questions.QUESTIONS) {
   if (seenQuestionIds.has(q.id)) problems.push(`${label} DUPLICATE id`);
   seenQuestionIds.add(q.id);
 
+  // The faces on the card come from `players`. A name that is not one of the
+  // twenty lesson players would render as an initial in a circle, silently.
+  for (const name of q.players ?? []) {
+    if (!data.PLAYERS.includes(name)) {
+      problems.push(`${label} names player "${name}", who is not in the lesson data`);
+    }
+  }
+
   if (!q.returns || !q.returns.trim()) {
     problems.push(`${label} has no \`returns\` line — grading compares output, so the learner must be told exactly what to produce`);
   }

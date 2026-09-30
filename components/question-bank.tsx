@@ -33,6 +33,7 @@ import { EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
 import QuestionArt from "@/components/question-art";
 import DifficultyChip from "@/components/difficulty-chip";
 import AppNav from "@/components/app-nav";
+import QotdCard from "@/components/qotd-card";
 
 type LangFilter = "all" | QuestionLang;
 type DiffFilter = "all" | QuestionDifficulty;
@@ -114,48 +115,18 @@ export default function QuestionBank({ day }: { day: string }) {
         </header>
 
         {/* ── Question of the Day ─────────────────────────── */}
-        <section className="surface relative mt-6 overflow-hidden rounded-2xl border border-panel-border bg-panel">
-          <div className="grid items-center gap-4 sm:grid-cols-5">
-            <div className="order-2 p-5 sm:order-1 sm:col-span-3 sm:p-6">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full border border-gold/50 bg-gold/10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-gold">
-                  {LANG_LABEL[qotd.lang]} question of the day
-                </span>
-                <DifficultyChip difficulty={qotd.difficulty} />
-              </div>
-              <h2 className="mt-3 font-display text-2xl font-bold text-ink sm:text-3xl">
-                {qotd.title}
-              </h2>
-              <p className="mt-2 max-w-md text-sm leading-relaxed text-ink-soft">
-                {qotd.prompt}
-              </p>
-              <div className="mt-4 flex flex-wrap items-center gap-3">
-                <Link href={`/questions/${qotd.id}`} className="press btn-gold">
-                  {qotdDone ? "Solve it again" : "Attempt now"}
-                </Link>
-                {hydrated && (
-                  <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-ink-muted">
-                    <FlameIcon lit={progress.qotdStreak > 0} />
-                    {progress.qotdStreak} day
-                    {progress.qotdStreak === 1 ? "" : "s"} running
-                  </span>
-                )}
-                {qotdDone && (
-                  <span className="font-mono text-[11px] uppercase tracking-wider text-turf">
-                    ✓ Today&apos;s is done
-                  </span>
-                )}
-              </div>
-              <p className="mt-3 font-mono text-[10px] leading-relaxed text-ink-muted">
-                Every language has its own daily. Solve any one of them and the
-                streak survives.
-              </p>
-            </div>
-            <div className="order-1 h-36 sm:order-2 sm:col-span-2 sm:h-44">
-              <QuestionArt art={qotd.art} className="h-full w-full" />
-            </div>
-          </div>
-        </section>
+        <div className="mt-6">
+          <QotdCard
+            question={qotd}
+            done={qotdDone}
+            streak={progress.qotdStreak}
+            hydrated={hydrated}
+          />
+          <p className="mt-3 text-center font-mono text-[10px] leading-relaxed text-ink-muted">
+            Every language has its own daily. Solve any one of them and the
+            streak survives.
+          </p>
+        </div>
 
         {/* ── Progress per language ───────────────────────── */}
         {hydrated && (

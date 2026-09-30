@@ -89,6 +89,13 @@ export type Question = {
   /** Shown after a correct answer — the idea, not a restatement. */
   explain: string;
   art: QuestionArt;
+  /**
+   * The players this question is about, for the faces on its card. Names
+   * must be lesson players (the verifier checks). Leave it off and the card
+   * picks by the position the prompt mentions, then by a stable slice of the
+   * roster — see lib/question-players.ts.
+   */
+  players?: string[];
 };
 
 export const DIFFICULTY_LABEL: Record<QuestionDifficulty, string> = {
@@ -205,6 +212,7 @@ export const QUESTIONS: Question[] = [
   // ── Easy ──────────────────────────────────────────────────────
   {
     id: "week-3-hammer",
+    players: ["Saquon Barkley", "Josh Allen", "Derrick Henry"],
     title: "Week 3 Hammer",
     difficulty: "easy",
     lang: "sql",
@@ -267,6 +275,7 @@ ORDER BY fantasy_pts DESC;`,
   },
   {
     id: "games-actually-played",
+    players: ["Christian McCaffrey", "Jahmyr Gibbs"],
     title: "Games Actually Played",
     difficulty: "easy",
     lang: "sql",
@@ -308,6 +317,7 @@ LIMIT 5;`,
   },
   {
     id: "whos-on-my-team",
+    players: ["Josh Allen", "Travis Kelce"],
     title: "Who's On My Team",
     difficulty: "easy",
     lang: "sql",
@@ -479,6 +489,7 @@ ORDER BY MAX(fantasy_pts) - MIN(fantasy_pts) DESC;`,
   },
   {
     id: "year-over-year",
+    players: ["Amon-Ra St. Brown"],
     title: "Year Over Year",
     difficulty: "medium",
     lang: "sql",
@@ -500,6 +511,7 @@ ORDER BY season;`,
   },
   {
     id: "league-standings",
+    players: ["Josh Allen", "Travis Kelce", "Patrick Mahomes"],
     title: "League Standings",
     difficulty: "medium",
     lang: "sql",
@@ -621,6 +633,7 @@ ORDER BY w.week;`,
   },
   {
     id: "who-improved",
+    players: ["Ja'Marr Chase", "Saquon Barkley", "Bijan Robinson"],
     title: "Who Improved",
     difficulty: "medium",
     lang: "sql",
@@ -645,6 +658,7 @@ ORDER BY ppg_2024 - ppg_2023 DESC;`,
   },
   {
     id: "opponent-unmasked",
+    players: ["Ja'Marr Chase"],
     title: "Opponent Unmasked",
     difficulty: "medium",
     lang: "sql",
@@ -697,6 +711,7 @@ ORDER BY position, pos_rank;`,
   },
   {
     id: "rolling-form",
+    players: ["Lamar Jackson"],
     title: "Rolling Form",
     difficulty: "hard",
     lang: "sql",
@@ -719,6 +734,7 @@ ORDER BY week;`,
   },
   {
     id: "back-to-back",
+    players: ["Jahmyr Gibbs", "Lamar Jackson"],
     title: "Back to Back",
     difficulty: "hard",
     lang: "sql",
@@ -749,6 +765,7 @@ ORDER BY player, week;`,
   },
   {
     id: "share-of-the-load",
+    players: ["Patrick Mahomes", "Ja'Marr Chase"],
     title: "Share of the Load",
     difficulty: "hard",
     lang: "sql",
@@ -777,6 +794,7 @@ ORDER BY team_name, pct_of_team DESC;`,
   },
   {
     id: "best-of-each-season",
+    players: ["Ja'Marr Chase", "Josh Allen", "Justin Jefferson"],
     title: "Best of Each Season",
     difficulty: "hard",
     lang: "sql",
@@ -830,6 +848,7 @@ ORDER BY total_pts DESC;`,
   },
   {
     id: "quiet-weeks",
+    players: ["Puka Nacua"],
     title: "The Quiet Weeks",
     difficulty: "hard",
     lang: "sql",
@@ -854,6 +873,7 @@ ORDER BY wk.week;`,
   },
   {
     id: "streak-finder",
+    players: ["Bijan Robinson", "Jalen Hurts"],
     title: "Streak Finder",
     difficulty: "hard",
     lang: "sql",
@@ -889,6 +909,7 @@ ORDER BY streak_weeks DESC, player;`,
   // your code prints, so the answer has to come out of print().
   {
     id: "py-top-scorer",
+    players: ["Lamar Jackson"],
     title: "Name the Leader",
     difficulty: "easy",
     lang: "python",
@@ -925,6 +946,7 @@ ORDER BY streak_weeks DESC, player;`,
   },
   {
     id: "py-points-per-game",
+    players: ["Christian McCaffrey", "Lamar Jackson"],
     title: "Per Game, Not Per Season",
     difficulty: "medium",
     lang: "python",
@@ -1003,6 +1025,7 @@ ORDER BY streak_weeks DESC, player;`,
   },
   {
     id: "py-availability",
+    players: ["Christian McCaffrey", "Puka Nacua", "A.J. Brown"],
     title: "The Availability Tax",
     difficulty: "hard",
     lang: "python",
@@ -1030,6 +1053,7 @@ ORDER BY streak_weeks DESC, player;`,
   // obviously right on reading.
   {
     id: "r-top-scorer",
+    players: ["Lamar Jackson"],
     title: "Name the Leader (R)",
     difficulty: "easy",
     lang: "r",
@@ -1130,6 +1154,7 @@ ORDER BY streak_weeks DESC, player;`,
   },
   {
     id: "xl-owner-total",
+    players: ["Lamar Jackson", "Jahmyr Gibbs", "Derrick Henry"],
     title: "One Manager's Haul",
     difficulty: "medium",
     lang: "excel",
@@ -1148,6 +1173,7 @@ ORDER BY streak_weeks DESC, player;`,
   },
   {
     id: "xl-lookup-team",
+    players: ["Davante Adams"],
     title: "Look Somebody Up",
     difficulty: "medium",
     lang: "excel",
@@ -1184,6 +1210,7 @@ ORDER BY streak_weeks DESC, player;`,
   },
   {
     id: "xl-who-scored-most",
+    players: ["Lamar Jackson"],
     title: "Who, Not How Much",
     difficulty: "hard",
     lang: "excel",

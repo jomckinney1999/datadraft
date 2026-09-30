@@ -28,8 +28,7 @@ import { SHORT_CREDIT } from "@/lib/data-source";
 import type { LiveBoard, LivePerformer, LiveWeek } from "@/lib/live-nfl";
 import type { Question } from "@/lib/questions";
 import { DIFFICULTY_XP } from "@/lib/questions";
-import QuestionArt from "@/components/question-art";
-import DifficultyChip from "@/components/difficulty-chip";
+import QotdCard from "@/components/qotd-card";
 
 type CourseProgress = {
   id: string;
@@ -180,52 +179,15 @@ export default function Dashboard({
         </section>
 
         {/* The day's question — the reason to open this page on a Tuesday. */}
-        <section className="surface mt-4 overflow-hidden rounded-2xl border border-gold/40 bg-panel">
-          <div className="flex items-center gap-4 p-4 sm:p-5">
-            <span className="hidden h-16 w-24 shrink-0 overflow-hidden rounded-xl sm:block">
-              <QuestionArt art={qotd.art} className="h-full w-full" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-gold">
-                  Question of the day
-                </span>
-                <DifficultyChip difficulty={qotd.difficulty} />
-                {hydrated && qotdDone && (
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-turf">
-                    ✓ Done
-                  </span>
-                )}
-              </div>
-              <p className="mt-1 font-display text-lg font-bold text-ink">
-                {qotd.title}
-              </p>
-              <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-ink-soft">
-                {qotd.prompt}
-              </p>
-            </div>
-            <div className="hidden shrink-0 text-right sm:block">
-              {hydrated && (
-                <p className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-                  {progress.qotdStreak} day
-                  {progress.qotdStreak === 1 ? "" : "s"} running
-                </p>
-              )}
-              <Link
-                href={`/questions/${qotd.id}`}
-                className="press btn-gold mt-2 inline-flex"
-              >
-                {qotdDone ? "Replay" : `Solve · +${DIFFICULTY_XP[qotd.difficulty]} XP`}
-              </Link>
-            </div>
-          </div>
-          <Link
-            href={`/questions/${qotd.id}`}
-            className="block border-t border-panel-border px-4 py-3 text-center font-mono text-[11px] font-bold uppercase tracking-wider text-gold sm:hidden"
-          >
-            {qotdDone ? "Replay today's question" : "Solve today's question →"}
-          </Link>
-        </section>
+        <div className="mt-4">
+          <QotdCard
+            question={qotd}
+            done={qotdDone}
+            streak={progress.qotdStreak}
+            hydrated={hydrated}
+            variant="compact"
+          />
+        </div>
 
         {/* Three ways in */}
         <div className="mt-4 grid gap-3 sm:grid-cols-3">

@@ -2209,3 +2209,94 @@ html[data-reveal-armed] [data-revealed="true"] .reveal {
   color: rgb(var(--c-gold));
   box-shadow: 0 0 28px -8px rgb(var(--c-gold) / 0.6);
 }
+
+/* ── Question of the Day hero ──────────────────────────────────────
+ * The one card on the site that is allowed to shout. A gold-lit panel with
+ * the day's players as ringed headshots, a slow sheen crossing it, and the
+ * question's art blown up behind everything as light rather than as an
+ * icon. Everything animated here is off under reduced motion.
+ */
+.qotd-hero {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(
+      ellipse 60% 70% at 100% 0%,
+      rgb(var(--c-gold) / 0.16),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 50% 60% at 0% 100%,
+      rgb(var(--c-turf) / 0.12),
+      transparent 60%
+    ),
+    linear-gradient(160deg, rgb(var(--c-panel)) 0%, rgb(var(--c-night)) 100%);
+  box-shadow:
+    0 0 0 1px rgb(var(--c-gold) / 0.35),
+    0 30px 80px -30px rgb(var(--c-gold) / 0.35),
+    inset 0 1px 0 rgb(var(--c-ink) / 0.08);
+}
+
+/* The art, as atmosphere: oversized, faint, pushed off the corner. */
+.qotd-hero-art {
+  position: absolute;
+  right: -8%;
+  top: -18%;
+  width: 62%;
+  opacity: 0.22;
+  pointer-events: none;
+  filter: saturate(1.2);
+}
+
+.qotd-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    110deg,
+    transparent 35%,
+    rgb(var(--c-ink) / 0.07) 48%,
+    transparent 61%
+  );
+  background-size: 260% 100%;
+  animation: qotd-sheen-slide 9s linear infinite;
+}
+
+@keyframes qotd-sheen-slide {
+  from {
+    background-position: 180% 0;
+  }
+  to {
+    background-position: -80% 0;
+  }
+}
+
+/* A headshot with its team colour as a halo. `--ring` is set inline from
+   the team's accent (the same function TeamChip already paints with). */
+.face-ring {
+  border-radius: 9999px;
+  box-shadow:
+    0 0 0 3px rgb(var(--c-night)),
+    0 0 0 5px var(--ring, rgb(var(--c-panel-border))),
+    0 0 30px -6px var(--ring, transparent);
+}
+
+.face-float {
+  animation: face-bob 6s ease-in-out infinite alternate;
+}
+
+@keyframes face-bob {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-7px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qotd-sheen,
+  .face-float {
+    animation: none;
+  }
+}
