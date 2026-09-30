@@ -9,6 +9,7 @@ import CourseRail from "@/components/course-rail";
 import WorkspaceShot from "@/components/workspace-shot";
 import CountUp from "@/components/count-up";
 import GlowGrid from "@/components/glow-grid";
+import HeadlineTile from "@/components/headline-tile";
 import Reveal from "@/components/reveal";
 import LiveWeekStrip from "@/components/live-week-strip";
 import DriveExplainer from "@/components/drive-explainer";
@@ -132,7 +133,7 @@ export default async function Home() {
   ];
 
   return (
-    <div className="football-cursor min-h-screen">
+    <div className="min-h-screen">
       <Reveal />
       <SiteNav />
 
@@ -160,7 +161,7 @@ export default async function Home() {
             </Link>
 
             <h1 className="reveal mt-6 font-display text-[2.6rem] font-bold leading-[1.02] tracking-tight text-pop sm:text-6xl lg:text-7xl">
-              Data practice that
+              Data practice <HeadlineTile /> that
               <br />
               <span className="title-glow-turf text-turf">
                 sounds like Sunday

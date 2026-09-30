@@ -2192,32 +2192,75 @@ body {
   }
 }
 
-/* ── The home page's football cursor ────────────────────────────────
- * A football instead of the arrow, and a thrown one (speed lines) over
- * anything clickable. Scoped to the landing page with .football-cursor: the
- * work surfaces — lessons, the question workspace — keep the system cursor,
- * where an unfamiliar pointer costs accuracy. Text fields keep the I-beam,
- * so the question-of-the-day editor still looks like somewhere to type.
- * SVG first, PNG for any browser that will not take an SVG cursor, then the
- * system cursor. Both images put the ball's nose at (7, 7).
+/* ── The tile inside the hero headline ──────────────────────────────
+ * See components/headline-tile.tsx. Six tiles stacked in one inline slot,
+ * sized in em so it scales with the headline at every breakpoint. Each runs
+ * the same 13.2s loop offset by its 2.2s turn: flip in with a small
+ * overshoot, hold, flip out; the next is already on its way in. Before its
+ * first turn a tile sits at its base opacity 0, so only one is ever lit.
  */
-.football-cursor,
-.football-cursor * {
-  cursor: url("/cursors/football.svg") 7 7, url("/cursors/football.png") 7 7, auto;
+.hl-tiles {
+  position: relative;
+  display: inline-block;
+  width: 0.92em;
+  height: 0.92em;
+  margin: 0 0.06em;
+  vertical-align: -0.12em;
+  perspective: 420px;
 }
 
-.football-cursor :is(a, button, summary, label, select, [role="button"]),
-.football-cursor :is(a, button, summary, label, [role="button"]) * {
-  cursor: url("/cursors/football-hover.svg") 7 7, url("/cursors/football-hover.png") 7 7,
-    pointer;
+.hl-tile {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.24em;
+  opacity: 0;
+  transform-origin: 50% 50%;
+  animation: hl-cycle 13.2s cubic-bezier(0.3, 0.7, 0.3, 1) infinite;
+  box-shadow:
+    inset 0 0.05em 0 0 rgb(255 255 255 / 0.4),
+    inset 0 -0.06em 0 0 rgb(0 0 0 / 0.2),
+    0 0 0 0.035em rgb(var(--c-night)),
+    0 0.14em 0.5em -0.08em rgb(var(--tile-glow) / 0.65);
 }
 
-.football-cursor :is(input, textarea, [contenteditable="true"]) {
-  cursor: text;
+.hl-tone-turf {
+  --tile-glow: var(--c-turf);
+  background: linear-gradient(160deg, rgb(var(--c-turf)), rgb(var(--c-turf-dim)));
+}
+.hl-tone-gold {
+  --tile-glow: var(--c-gold);
+  background: linear-gradient(160deg, rgb(var(--c-gold)), rgb(var(--c-gold-dim)));
+}
+.hl-tone-ice {
+  --tile-glow: var(--c-ice);
+  background: linear-gradient(160deg, rgb(var(--c-ice)), rgb(var(--c-ice-dim)));
 }
 
-.football-cursor :is(button, input, select, textarea):disabled {
-  cursor: not-allowed;
+@keyframes hl-cycle {
+  0% {
+    opacity: 0;
+    transform: rotateY(-90deg) scale(0.6);
+  }
+  3% {
+    opacity: 1;
+    transform: rotateY(8deg) scale(1.08);
+  }
+  5% {
+    opacity: 1;
+    transform: rotateY(0deg) scale(1);
+  }
+  14% {
+    opacity: 1;
+    transform: rotateY(0deg) scale(1);
+  }
+  16.667%,
+  100% {
+    opacity: 0;
+    transform: rotateY(90deg) scale(0.6);
+  }
 }
 /* ── Auto-scrolling course rail ────────────────────────────────────
  *
@@ -2566,6 +2609,13 @@ html[data-reveal-armed] [data-revealed="true"] .reveal {
   }
   .ball-x {
     display: none;
+  }
+  /* The headline tile holds on its first face. */
+  .hl-tile {
+    animation: none;
+  }
+  .hl-tile:first-child {
+    opacity: 1;
   }
   /* The stat cards still light up — colour is not motion — but they stay
      put and the ring holds still. */
