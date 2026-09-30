@@ -8,7 +8,7 @@ import {
 } from "@/lib/project-progress";
 import Link from "next/link";
 import AppNav from "@/components/app-nav";
-import Coach from "@/components/coach";
+import ProjectArt from "@/components/project-art";
 import type { Project } from "@/lib/projects";
 
 function StartLink({
@@ -58,10 +58,10 @@ export default function ProjectGuide({ project }: { project: Project }) {
 
   return (
     <>
-      <AppNav back="/learn" backLabel="all courses" />
+      <AppNav back="/projects" backLabel="all projects" />
       <main className="mx-auto min-h-screen w-full max-w-3xl px-5 pb-10 pt-8">
-        <header className="flex flex-wrap items-start justify-between gap-4">
-          <div>
+        <header className="flex items-start justify-between gap-5">
+          <div className="min-w-0 flex-1">
             <p className="label-broadcast text-gold">portfolio project</p>
             <h1 className="mt-1 font-display text-3xl font-bold text-ink sm:text-4xl">
               {project.title}
@@ -75,7 +75,9 @@ export default function ProjectGuide({ project }: { project: Project }) {
               <span className="status-chip">Pairs with {project.pairsWith}</span>
             </div>
           </div>
-          <Coach mood="whistle" size={88} className="hidden shrink-0 sm:block" />
+          <div className="hidden h-32 w-44 shrink-0 overflow-hidden rounded-xl border border-panel-border bg-night/60 sm:block">
+            <ProjectArt id={project.id} className="h-full w-full" />
+          </div>
         </header>
 
         <section className="surface mt-8 border border-panel-border bg-panel p-5">

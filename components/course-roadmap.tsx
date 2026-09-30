@@ -25,6 +25,7 @@ import CourseIntro from "@/components/course-intro";
 import PathCast from "@/components/path-cast";
 import { PathChest, PathFlag } from "@/components/path-marks";
 import AppNav from "@/components/app-nav";
+import CourseArt, { hasCourseArt } from "@/components/course-art";
 import LearnRail from "@/components/learn-rail";
 import RapidFire from "@/components/rapid-fire";
 
@@ -149,15 +150,24 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
           <div className="lg:col-span-8">
             {/* Slim course header */}
             <section className="section-card scorebug-card">
-              <p className="label-broadcast text-turf">
-                {moduleId === "all" ? "season roadmap" : "game plan"}
-              </p>
-              <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
-                {moduleId === "all" ? COURSE.title : activeModule.name}
-              </h1>
-              <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">
-                {moduleId === "all" ? COURSE.tagline : activeModule.blurb}
-              </p>
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="label-broadcast text-turf">
+                    {moduleId === "all" ? "season roadmap" : "game plan"}
+                  </p>
+                  <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
+                    {moduleId === "all" ? COURSE.title : activeModule.name}
+                  </h1>
+                  <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">
+                    {moduleId === "all" ? COURSE.tagline : activeModule.blurb}
+                  </p>
+                </div>
+                {hasCourseArt(moduleId) && (
+                  <div className="hidden h-28 w-40 shrink-0 overflow-hidden rounded-xl border border-panel-border bg-night/60 sm:block">
+                    <CourseArt id={moduleId} className="h-full w-full" />
+                  </div>
+                )}
+              </div>
               {moduleId === "excel" && (
                 <p className="mt-3">
                   <Link

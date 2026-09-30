@@ -20,7 +20,6 @@ import { liveLessons, ALL_MODULE, getLesson } from "@/lib/curriculum";
 import { loadProgress, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
 import TrophyCase from "@/components/trophy-case";
 import CourseArt from "@/components/course-art";
-import CourseCover from "@/components/course-cover";
 import AppNav from "@/components/app-nav";
 
 function ClockIcon() {
@@ -65,20 +64,17 @@ function CourseCard({
         .length
     : 0;
   const isLive = course.status === "live";
-  const accentText = course.accent === "turf" ? "text-turf" : "text-gold";
   const accentBorder =
     course.accent === "turf" ? "hover:border-turf/60" : "hover:border-gold/60";
 
   const body = (
     <>
-      <div className="relative overflow-hidden border-b border-panel-border bg-night">
-        <CourseCover
+      <div className="relative h-44 overflow-hidden border-b border-panel-border bg-night/60">
+        <CourseArt
           id={course.id}
-          accent={course.accent}
           className="absolute inset-0 h-full w-full transition-transform duration-500 group-hover:scale-105"
         />
-        <div aria-hidden className="cover-scrim pointer-events-none absolute inset-0" />
-        <div className="relative flex items-center justify-between px-4 pt-4">
+        <div className="relative flex items-center justify-between px-4 pt-3">
           <span className="inline-flex items-center gap-1.5 border border-panel-border bg-panel/80 px-2 py-1 font-mono text-[10px] text-ink-soft">
             <ClockIcon />
             {course.hours}h
@@ -88,18 +84,12 @@ function CourseCard({
             {course.lessons * 10}
           </span>
         </div>
-        <div className="relative flex min-h-[120px] flex-col items-center justify-center px-5 pb-5 pt-2 text-center">
-          <CourseArt
-            id={course.id}
-            className={`h-[60px] w-full max-w-[160px] ${accentText}`}
-          />
-          <h3 className="mt-2 font-display text-base font-bold uppercase leading-tight tracking-tight text-pop">
-            {course.title}
-          </h3>
-        </div>
       </div>
       <div className="flex flex-1 flex-col p-4">
-        <p className="flex-1 text-sm leading-relaxed text-ink-soft">
+        <h3 className="font-display text-lg font-bold leading-tight text-ink">
+          {course.title}
+        </h3>
+        <p className="mt-1.5 flex-1 text-sm leading-relaxed text-ink-soft">
           {course.blurb}
         </p>
         {isLive && done > 0 && (

@@ -19,6 +19,7 @@ import { playSfx } from "@/lib/sfx";
 import CodeEditor from "@/components/code-editor";
 import Coach from "@/components/coach";
 import HomeLink from "@/components/home-link";
+import ProjectArt from "@/components/project-art";
 
 function formatMs(totalSec: number): string {
   const m = Math.floor(totalSec / 60);
@@ -194,7 +195,7 @@ export default function InterviewWorkspace({
   if (done) {
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col px-4 py-10">
-        <HomeLink label="interview" back="/interview" backLabel="all cases" />
+        <HomeLink label="case" back="/projects" backLabel="all projects" />
         <div className="mt-10 flex flex-col items-center text-center">
           <Coach mood="cheer" size={120} />
           <p className="mt-4 label-broadcast text-turf">case cleared</p>
@@ -207,7 +208,7 @@ export default function InterviewWorkspace({
             the kind of walkthrough you&apos;d want in a real screen.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link href="/interview" className="btn-turf px-5 py-2.5">
+            <Link href="/projects" className="btn-turf px-5 py-2.5">
               Back to cases
             </Link>
             <button
@@ -231,7 +232,7 @@ export default function InterviewWorkspace({
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 pb-10 sm:px-6">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-panel-border/60 py-4">
-        <HomeLink label="interview" back="/interview" backLabel="cases" />
+        <HomeLink label="case" back="/projects" backLabel="all projects" />
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 rounded-xl border border-panel-border bg-panel/60 px-3 py-1.5 font-mono text-[12px] text-ink">
             <span className="tabular-nums">{formatMs(seconds)}</span>
@@ -259,7 +260,10 @@ export default function InterviewWorkspace({
       </header>
 
       <div className="mt-4 text-center">
-        <h1 className="font-display text-xl font-bold text-ink sm:text-2xl">
+        <div className="mx-auto h-24 w-36 overflow-hidden rounded-xl border border-panel-border bg-night/60">
+          <ProjectArt id={interviewCase.id} className="h-full w-full" />
+        </div>
+        <h1 className="mt-1 font-display text-xl font-bold text-ink sm:text-2xl">
           {interviewCase.title}
         </h1>
         <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-ink-muted">

@@ -23,7 +23,6 @@
 
 import Link from "next/link";
 import { COURSES, type Course } from "@/lib/courses";
-import CourseCover from "@/components/course-cover";
 import CourseArt from "@/components/course-art";
 
 function RailCard({ course }: { course: Course }) {
@@ -31,28 +30,17 @@ function RailCard({ course }: { course: Course }) {
   const accentText = course.accent === "turf" ? "text-turf" : "text-gold";
   const body = (
     <>
-      <div className="relative h-32 overflow-hidden border-b border-panel-border bg-night">
-        <CourseCover
+      <div className="relative h-36 overflow-hidden border-b border-panel-border bg-night/60">
+        <CourseArt
           id={course.id}
-          accent={course.accent}
           className="absolute inset-0 h-full w-full transition-transform duration-700 group-hover:scale-110"
         />
-        <div
-          aria-hidden
-          className="cover-scrim pointer-events-none absolute inset-0"
-        />
-        <div className="relative flex h-full flex-col items-center justify-center px-4 text-center">
-          <CourseArt
-            id={course.id}
-            className={`h-10 w-full max-w-[120px] ${accentText}`}
-          />
-          <p className="mt-1.5 font-display text-[13px] font-bold uppercase leading-tight tracking-tight text-pop">
-            {course.title}
-          </p>
-        </div>
       </div>
       <div className="flex flex-1 flex-col p-3">
-        <div className="flex flex-wrap gap-1.5">
+        <p className="font-display text-[15px] font-bold leading-tight text-ink">
+          {course.title}
+        </p>
+        <div className="mt-2 flex flex-wrap gap-1.5">
           <span className="rounded-md border border-panel-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
             {course.lessons} lessons
           </span>
@@ -60,11 +48,13 @@ function RailCard({ course }: { course: Course }) {
             {course.hours}h
           </span>
         </div>
-        <p className="mt-2 line-clamp-2 flex-1 text-[12px] leading-relaxed text-ink-muted">
+        {/* No flex-1 here: a stretched clamp box shows the clamped-off line
+            underneath its own ellipsis. The CTA takes the slack instead. */}
+        <p className="mt-2 line-clamp-2 text-[12px] leading-relaxed text-ink-muted">
           {course.blurb}
         </p>
         <p
-          className={`mt-2 font-mono text-[10px] font-bold uppercase tracking-wider ${
+          className={`mt-auto pt-2 font-mono text-[10px] font-bold uppercase tracking-wider ${
             live ? accentText : "text-ink-muted"
           }`}
         >

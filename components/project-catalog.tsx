@@ -24,6 +24,7 @@ import { INTERVIEW_CASES } from "@/lib/interview-cases";
 import { loadInterviewProgress, type InterviewProgress } from "@/lib/interview-progress";
 import { loadChecklist } from "@/lib/project-progress";
 import DifficultyChip from "@/components/difficulty-chip";
+import ProjectArt from "@/components/project-art";
 import AppNav from "@/components/app-nav";
 import Coach from "@/components/coach";
 
@@ -105,8 +106,14 @@ export default function ProjectCatalog() {
                   <Link
                     key={p.id}
                     href={`/projects/${p.id}`}
-                    className="lift surface flex flex-col rounded-2xl border border-panel-border bg-panel p-5 transition-colors hover:border-gold/50"
+                    className="lift surface group flex flex-col overflow-hidden rounded-2xl border border-panel-border bg-panel p-5 transition-colors hover:border-gold/50"
                   >
+                    <div className="-mx-5 -mt-5 mb-4 h-40 overflow-hidden border-b border-panel-border bg-night/60">
+                      <ProjectArt
+                        id={p.id}
+                        className="h-full w-full transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
                     <div className="flex items-start justify-between gap-3">
                       <p
                         className={`font-display text-lg font-bold ${
@@ -161,6 +168,9 @@ export default function ProjectCatalog() {
                       href={`/projects/case/${c.id}`}
                       className="lift surface flex items-center gap-4 rounded-xl border border-panel-border bg-panel px-4 py-3 transition-colors hover:border-ice/40"
                     >
+                      <span className="h-11 w-14 shrink-0 overflow-hidden rounded-lg border border-panel-border bg-night/60 sm:h-14 sm:w-[76px]">
+                        <ProjectArt id={c.id} className="h-full w-full" />
+                      </span>
                       <span className="min-w-0 flex-1">
                         <span className="font-display text-[15px] font-bold text-ink">
                           {c.title}

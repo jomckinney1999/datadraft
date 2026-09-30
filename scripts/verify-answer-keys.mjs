@@ -300,6 +300,37 @@ for (const lang of ["sql", "python", "r", "excel"]) {
   }
 }
 
+// ── Card art coverage ─────────────────────────────────────────
+// A course, build or case with no scene renders an empty picture slot on
+// its card. The scene maps live in TSX the loader does not transpile, so
+// read their keys straight out of the source.
+let artChecked = 0;
+{
+  const fs = await import("node:fs");
+  const hasScene = (file, id) => {
+    artChecked++;
+    return new RegExp(`(^|\\s)"?${id.replace(/[-]/g, "\\-")}"?: \\{ tone:`, "m").test(
+      fs.readFileSync(path.join(root, file), "utf8"),
+    );
+  };
+  const courses = await loadProjectTs(path.join(root, "lib/courses.ts"), root);
+  for (const course of courses.COURSES) {
+    if (!hasScene("components/course-art.tsx", course.id)) {
+      problems.push(`course "${course.id}" has no scene in components/course-art.tsx`);
+    }
+  }
+  const projects = await loadProjectTs(path.join(root, "lib/projects.ts"), root);
+  const cases = await loadProjectTs(path.join(root, "lib/interview-cases.ts"), root);
+  for (const id of [
+    ...projects.PROJECTS.map((p) => p.id),
+    ...cases.INTERVIEW_CASES.map((c) => c.id),
+  ]) {
+    if (!hasScene("components/project-art.tsx", id)) {
+      problems.push(`project/case "${id}" has no scene in components/project-art.tsx`);
+    }
+  }
+}
+
 // ── Interview cases (dedicated seeds, not the lesson DB) ─────────────
 const interview = await loadProjectTs(
   path.join(root, "lib/interview-cases.ts"),
@@ -420,6 +451,7 @@ if (questionR) console.log(`question R keys skipped (no Node WebR): ${questionR}
 console.log(`python answer keys run    : ${pyChecked}`);
 console.log(`excel formula keys checked: ${formulaChecked}`);
 if (skippedR) console.log(`R keys skipped (no Node WebR): ${skippedR}`);
+console.log(`card art ids checked      : ${artChecked} (courses, builds, cases)`);
 
 if (problems.length === 0) {
   console.log("\nAll answer keys run, return rows, and have no cutoff ties.");
