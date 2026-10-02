@@ -131,7 +131,27 @@ export type QuestionArt =
   | "ladder"
   | "high-five"
   | "framed-jersey"
-  | "milestone";
+  | "milestone"
+  | "sandwich-board"
+  | "ice-cube"
+  | "slide"
+  | "clipboard"
+  | "fingerprint"
+  | "balloon"
+  | "colander"
+  | "magic-hat"
+  | "tug-of-war"
+  | "sweater"
+  | "suitcase"
+  | "starting-blocks"
+  | "tier-cake"
+  | "castle"
+  | "seesaw"
+  | "boomerang"
+  | "spring"
+  | "speedometer"
+  | "elevator"
+  | "spirit-level";
 
 export type Question = {
   id: string;
@@ -2104,6 +2124,506 @@ ORDER BY season, week, player;`,
     hint: "Keep only the 30-point games, then ROW_NUMBER() OVER (PARTITION BY player ORDER BY season, week), and keep 1.",
     explain: "'First' needs an order that spans seasons: season, then week. Sorting by week alone would put a week-2 game from 2025 ahead of a week-9 game from 2022.",
     art: "milestone",
+  },
+  // ── Bank growth, batch 2 (added 2026-10-02) ───────────────────
+  // The rest of the schema (temperature, surface, the waiver wire) and the
+  // asks that turn up in analyst screens: a median, tiers, variance, a
+  // uniqueness check, a window over a window.
+  {
+    id: "saturday-special",
+    title: "Saturday Special",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["WHERE", "COUNT", "GROUP BY"],
+    prompt: "Late in the season the NFL starts borrowing college football's Saturdays. Count the Saturday games in each season.",
+    returns: "season, saturday_games — oldest first. Seasons with no Saturday games don't appear.",
+    tables: ["games"],
+    expected: `SELECT season, COUNT(*) AS saturday_games
+FROM games
+WHERE weekday = 'Saturday'
+GROUP BY season
+ORDER BY season;`,
+    orderMatters: true,
+    hint: "Filter to Saturday first, then group what's left by season.",
+    explain: "WHERE runs before GROUP BY, so a season with no Saturday games has no rows left to group — it vanishes rather than showing a 0.",
+    art: "sandwich-board",
+  },
+  {
+    id: "cold-one",
+    title: "Cold One",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["ORDER BY", "LIMIT", "NULL"],
+    prompt: "Find the three coldest games in the table, by kickoff temperature.",
+    returns: "gameday, home_team, away_team, temp — coldest first.",
+    tables: ["games"],
+    expected: `SELECT gameday, home_team, away_team, temp
+FROM games
+WHERE temp IS NOT NULL
+ORDER BY temp, gameday
+LIMIT 3;`,
+    orderMatters: true,
+    hint: "Indoor games have no temperature, and SQLite sorts NULL before every number. Keep them out with IS NOT NULL.",
+    explain:
+      "Sort a column with blanks in it and the blanks go first in SQLite. Without the IS NOT NULL your 'coldest games' would be three dome games with no temperature at all.",
+    art: "ice-cube",
+  },
+  {
+    id: "sliding-down",
+    title: "Sliding Down",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["WHERE", "ORDER BY"],
+    prompt: "The waiver wire shows who's rising and who's falling. Find the players whose rostered share went down.",
+    returns: "player, team, pct_rostered, trend — biggest drop first, then player A–Z.",
+    tables: ["waiver_wire"],
+    expected: `SELECT player, team, pct_rostered, trend
+FROM waiver_wire
+WHERE trend < 0
+ORDER BY trend, player;`,
+    orderMatters: true,
+    hint: "A falling player has a negative trend. The biggest drop is the most negative number, which sorts first in plain ascending order.",
+    explain: "'Biggest drop first' is ascending order on a negative number. And the two fallers here moved by exactly the same amount, which is why the tie-break is in the question.",
+    art: "slide",
+  },
+  {
+    id: "roll-call",
+    title: "Roll Call",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["COUNT DISTINCT", "GROUP BY"],
+    prompt: "The twenty players in week_results get traded and signed around. How many different NFL teams do they cover in each season?",
+    returns: "season, teams — oldest first.",
+    tables: ["week_results"],
+    expected: `SELECT season, COUNT(DISTINCT team) AS teams
+FROM week_results
+GROUP BY season
+ORDER BY season;`,
+    orderMatters: true,
+    hint: "COUNT(DISTINCT team) counts each team once, however many rows it has.",
+    explain: "COUNT(*) counts rows; COUNT(DISTINCT x) counts different values of x. Mixing them up is one of the most common ways a number in a report ends up quietly wrong.",
+    art: "clipboard",
+  },
+  {
+    id: "fingerprints",
+    title: "Fingerprints",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["COUNT DISTINCT", "Dedup", "Data quality"],
+    prompt:
+      "Before you join anything on game_id, check it really identifies one game: count the rows in games and the number of different game_id values.",
+    returns: "total_rows, distinct_ids — one row.",
+    tables: ["games"],
+    expected: `SELECT COUNT(*) AS total_rows,
+       COUNT(DISTINCT game_id) AS distinct_ids
+FROM games;`,
+    orderMatters: true,
+    hint: "Two aggregates, no GROUP BY: one counts rows, the other counts distinct ids.",
+    explain:
+      "If the two numbers match, game_id is unique and safe to join on. If they don't, every join on it multiplies rows. Analysts run this check before trusting a key, not after a total comes out wrong.",
+    art: "fingerprint",
+  },
+  {
+    id: "inflation",
+    title: "Inflation",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["AVG", "GROUP BY", "ROUND"],
+    prompt: "Is scoring going up? Find the average combined score of a game (both teams together) for each season.",
+    returns: "season, avg_points rounded to 1 decimal — oldest first.",
+    tables: ["games"],
+    expected: `SELECT season, ROUND(AVG(home_score + away_score), 1) AS avg_points
+FROM games
+GROUP BY season
+ORDER BY season;`,
+    orderMatters: true,
+    hint: "Add the two scores inside the AVG: AVG(home_score + away_score).",
+    explain: "An aggregate can wrap an expression, not just a column. Adding first and averaging second gives the average game, which is what the question asked.",
+    art: "balloon",
+  },
+  {
+    id: "leaky-defense",
+    title: "Leaky Defense",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["UNION ALL", "AVG", "LIMIT"],
+    prompt:
+      "Which defenses gave up the most? Find the three 2024 teams that allowed the most points per game. Each game lists the home team's points allowed in one column and the away team's in another.",
+    returns: "team, allowed_pg rounded to 1 decimal — most allowed first. Three rows.",
+    tables: ["games"],
+    expected: `WITH allowed AS (
+  SELECT home_team AS team, away_score AS pa FROM games WHERE season = 2024
+  UNION ALL
+  SELECT away_team, home_score FROM games WHERE season = 2024
+)
+SELECT team, ROUND(AVG(pa), 1) AS allowed_pg
+FROM allowed
+GROUP BY team
+ORDER BY allowed_pg DESC
+LIMIT 3;`,
+    orderMatters: true,
+    hint: "Points allowed by the home team are the away team's score, and the other way round. UNION ALL the two into one list of team and points allowed, then average per team.",
+    explain:
+      "UNION ALL stacks two queries with the same columns. Keep the ALL: plain UNION removes duplicate rows, and two games where a team allowed 24 are two rows, not one.",
+    art: "colander",
+  },
+  {
+    id: "magic-number",
+    title: "Magic Number",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["UNION ALL", "GROUP BY", "LIMIT"],
+    prompt: "Some scores come up again and again. Across every team's score in every 2024 game, which three final scores happened most often?",
+    returns: "score, times — most common first. Three rows.",
+    tables: ["games"],
+    expected: `WITH scores AS (
+  SELECT home_score AS score FROM games WHERE season = 2024
+  UNION ALL
+  SELECT away_score FROM games WHERE season = 2024
+)
+SELECT score, COUNT(*) AS times
+FROM scores
+GROUP BY score
+ORDER BY times DESC
+LIMIT 3;`,
+    orderMatters: true,
+    hint: "Every game has two scores, so stack home_score and away_score into one column with UNION ALL, then count each value.",
+    explain:
+      "The most common value is the mode. Football scores come in 3s and 7s, so a handful of totals turn up far more than the rest — counting is how you find which.",
+    art: "magic-hat",
+  },
+  {
+    id: "turf-war",
+    title: "Turf War",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["CASE", "LIKE", "GROUP BY"],
+    prompt:
+      "The surface column has seven different values, but the argument is grass against artificial turf. Group every game as 'grass', 'turf' (any surface with turf in its name) or 'unknown', and compare the scoring.",
+    returns: "kind, games, avg_points (combined score, rounded to 1 decimal) — most games first.",
+    tables: ["games"],
+    expected: `SELECT CASE WHEN surface = 'grass' THEN 'grass'
+            WHEN surface LIKE '%turf%' THEN 'turf'
+            ELSE 'unknown' END AS kind,
+       COUNT(*) AS games,
+       ROUND(AVG(home_score + away_score), 1) AS avg_points
+FROM games
+GROUP BY kind
+ORDER BY games DESC;`,
+    orderMatters: true,
+    hint: "CASE WHEN surface = 'grass' … WHEN surface LIKE '%turf%' … ELSE 'unknown' END, then GROUP BY that CASE.",
+    explain:
+      "Grouping by a CASE turns seven messy labels into the three categories the question is about. CASE stops at the first WHEN that's true, so put the specific cases first.",
+    art: "tug-of-war",
+  },
+  {
+    id: "sweater-weather",
+    title: "Sweater Weather",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["Dates", "NULL", "AVG"],
+    prompt:
+      "How fast does it get cold? For the 2024 outdoor games, find the average kickoff temperature in each calendar month, and how many games in that month actually have a temperature.",
+    returns: "month (as '09', '10', …), measured (games with a temp), avg_temp rounded to 1 decimal — warmest first.",
+    tables: ["games"],
+    expected: `SELECT strftime('%m', gameday) AS month,
+       COUNT(temp) AS measured,
+       ROUND(AVG(temp), 1) AS avg_temp
+FROM games
+WHERE season = 2024 AND roof = 'outdoors'
+GROUP BY month
+ORDER BY avg_temp DESC;`,
+    orderMatters: true,
+    hint: "COUNT(temp) counts only the games with a temperature; COUNT(*) would count them all. AVG skips the blanks on its own.",
+    explain:
+      "COUNT(column) and AVG(column) both ignore NULLs, so they agree with each other about which games count. Showing that count beside an average is how you tell a reader how much data is behind it.",
+    art: "sweater",
+  },
+  {
+    id: "journeyman",
+    title: "Journeyman",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["COUNT DISTINCT", "HAVING"],
+    prompt: "Some players don't stay put. Find every player who appears for more than one NFL team in the table.",
+    returns: "player, teams — most teams first, then player A–Z.",
+    tables: ["week_results"],
+    expected: `SELECT player, COUNT(DISTINCT team) AS teams
+FROM week_results
+GROUP BY player
+HAVING COUNT(DISTINCT team) > 1
+ORDER BY teams DESC, player;`,
+    orderMatters: true,
+    hint: "Group by player, count the distinct teams, and keep the groups with more than one.",
+    explain:
+      "A player's team lives on every row, so it can change from one row to the next. That's why 'what team is he on?' needs a date to answer, and why a player table keyed only on name goes wrong after a trade.",
+    art: "suitcase",
+  },
+  {
+    id: "fast-start",
+    title: "Fast Start",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["CASE", "Pivot", "HAVING"],
+    prompt:
+      "Who came out flying? For 2024, compare each player's points per game in weeks 1–4 with the rest of his season, and keep the players who were better early.",
+    returns: "player, first4_ppg, rest_ppg (both rounded to 1 decimal) — player A–Z.",
+    tables: ["week_results"],
+    expected: `SELECT player,
+       ROUND(AVG(CASE WHEN week <= 4 THEN fantasy_pts END), 1) AS first4_ppg,
+       ROUND(AVG(CASE WHEN week > 4 THEN fantasy_pts END), 1) AS rest_ppg
+FROM week_results
+WHERE season = 2024
+GROUP BY player
+HAVING AVG(CASE WHEN week <= 4 THEN fantasy_pts END) > AVG(CASE WHEN week > 4 THEN fantasy_pts END)
+ORDER BY player;`,
+    orderMatters: true,
+    hint: "AVG(CASE WHEN week <= 4 THEN fantasy_pts END) averages only the early weeks. Compare the two averages in HAVING, before rounding.",
+    explain:
+      "Compare the unrounded averages in HAVING and round only what you display. Rounding first can turn 'slightly better' into 'equal' and drop a row that belongs.",
+    art: "starting-blocks",
+  },
+  {
+    id: "tier-list",
+    title: "Tier List",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["NTILE", "Window", "Ranking"],
+    prompt:
+      "Every fantasy podcast does a tier list. Split the 2024 players with at least 8 games into four tiers by points per game, tier 1 being the best.",
+    returns: "player, ppg rounded to 1 decimal, tier — by tier, then ppg highest first, then player A–Z.",
+    tables: ["week_results"],
+    expected: `WITH ppg AS (
+  SELECT player, AVG(fantasy_pts) AS ppg
+  FROM week_results
+  WHERE season = 2024
+  GROUP BY player
+  HAVING COUNT(*) >= 8
+)
+SELECT player, ROUND(ppg, 1) AS ppg,
+       NTILE(4) OVER (ORDER BY ppg DESC) AS tier
+FROM ppg
+ORDER BY tier, ppg DESC, player;`,
+    orderMatters: true,
+    hint: "NTILE(4) OVER (ORDER BY ppg DESC) deals the rows into four groups as evenly as it can, best first.",
+    explain:
+      "NTILE splits rows into equal-sized groups by position, not by value: 19 players become tiers of 5, 5, 5 and 4. Equal-width tiers (every 5 points) would need a CASE instead.",
+    art: "tier-cake",
+  },
+  {
+    id: "fortress",
+    title: "Fortress",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["SUM", "Conditional aggregation", "HAVING"],
+    prompt: "Some stadiums are hard to win in. Find the 2024 teams that lost at most one home game.",
+    returns: "team, home_wins, home_losses — fewest losses first, then most wins, then team A–Z.",
+    tables: ["games"],
+    expected: `SELECT home_team AS team,
+       SUM(home_score > away_score) AS home_wins,
+       SUM(home_score < away_score) AS home_losses
+FROM games
+WHERE season = 2024
+GROUP BY home_team
+HAVING SUM(home_score < away_score) <= 1
+ORDER BY home_losses, home_wins DESC, team;`,
+    orderMatters: true,
+    hint: "Only home games matter, so group by home_team. Count wins and losses with SUM(condition), and filter the losses in HAVING.",
+    explain: "The same SUM(condition) can be a column you show and a filter in HAVING. Grouping by home_team is what makes these home records rather than overall ones.",
+    art: "castle",
+  },
+  {
+    id: "median-game",
+    players: ["Patrick Mahomes"],
+    title: "The Median Game",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["Median", "ROW_NUMBER", "Window"],
+    prompt:
+      "Averages get dragged around by a couple of huge games. Find Patrick Mahomes's median game in 2024 — the middle one when they're sorted — and his average next to it.",
+    returns: "median_pts, avg_pts — both rounded to 1 decimal. One row.",
+    tables: ["week_results"],
+    expected: `WITH g AS (
+  SELECT fantasy_pts,
+         ROW_NUMBER() OVER (ORDER BY fantasy_pts) AS rn,
+         COUNT(*) OVER () AS n
+  FROM week_results
+  WHERE player = 'Patrick Mahomes' AND season = 2024
+)
+SELECT ROUND(AVG(fantasy_pts), 1) AS median_pts,
+       (SELECT ROUND(AVG(fantasy_pts), 1)
+        FROM week_results
+        WHERE player = 'Patrick Mahomes' AND season = 2024) AS avg_pts
+FROM g
+WHERE rn IN ((n + 1) / 2, (n + 2) / 2);`,
+    orderMatters: true,
+    hint:
+      "SQLite has no MEDIAN. Number the games in order with ROW_NUMBER and count them with COUNT(*) OVER (). With an even count the median is the average of the two middle rows: (n + 1) / 2 and (n + 2) / 2 in whole-number division.",
+    explain:
+      "With an odd count both expressions point at the same middle row; with an even count they point at the two middle rows, and AVG splits the difference. The median sitting below the average means a few big games pulled the average up.",
+    art: "seesaw",
+  },
+  {
+    id: "revenge-game",
+    title: "Revenge Game",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["ROW_NUMBER", "Self-join", "CTE"],
+    prompt:
+      "Division rivals meet twice. In 2024, find every pair of teams that met twice where the loser of the first game won the second.",
+    returns: "team_a, team_b (alphabetical within the pair), first_winner, revenge_by — by team_a, then team_b.",
+    tables: ["games"],
+    expected: `WITH meetings AS (
+  SELECT MIN(home_team, away_team) AS team_a,
+         MAX(home_team, away_team) AS team_b,
+         CASE WHEN home_score > away_score THEN home_team ELSE away_team END AS winner,
+         ROW_NUMBER() OVER (
+           PARTITION BY MIN(home_team, away_team), MAX(home_team, away_team)
+           ORDER BY gameday
+         ) AS meeting
+  FROM games
+  WHERE season = 2024 AND home_score <> away_score
+)
+SELECT f.team_a, f.team_b, f.winner AS first_winner, s.winner AS revenge_by
+FROM meetings f
+JOIN meetings s
+  ON s.team_a = f.team_a AND s.team_b = f.team_b
+WHERE f.meeting = 1 AND s.meeting = 2 AND f.winner <> s.winner
+ORDER BY f.team_a, f.team_b;`,
+    orderMatters: true,
+    hint:
+      "Name each pair the same way whoever was at home: MIN(home_team, away_team) and MAX(home_team, away_team). Number each pair's meetings by date, then join meeting 1 to meeting 2.",
+    explain:
+      "In SQLite, MIN and MAX with two arguments compare those two values on one row. Putting the pair in alphabetical order makes 'KC at DEN' and 'DEN at KC' the same pair, which is what lets the two meetings find each other.",
+    art: "boomerang",
+  },
+  {
+    id: "bounce-back",
+    title: "Bounce Back",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["LAG", "Window", "CTE"],
+    prompt: "A bad week, then a monster one. Find every 2024 game where a player scored 25 or more straight after a game under 10.",
+    returns: "player, week, prev_pts, fantasy_pts — in week order, then player A–Z.",
+    tables: ["week_results"],
+    expected: `WITH seq AS (
+  SELECT player, week, fantasy_pts,
+         LAG(fantasy_pts) OVER (PARTITION BY player ORDER BY week) AS prev_pts
+  FROM week_results
+  WHERE season = 2024
+)
+SELECT player, week, prev_pts, fantasy_pts
+FROM seq
+WHERE prev_pts < 10 AND fantasy_pts >= 25
+ORDER BY week, player;`,
+    orderMatters: true,
+    hint: "LAG(fantasy_pts) OVER (PARTITION BY player ORDER BY week) gives each row the player's previous game. Filter on it in an outer query.",
+    explain:
+      "'Previous game' means previous row for that player, which skips bye weeks and injuries automatically. You can't filter on a window in the same SELECT's WHERE, hence the CTE.",
+    art: "spring",
+  },
+  {
+    id: "first-to-100",
+    title: "First to 100",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["Running total", "Window", "GROUP BY"],
+    prompt: "Race to a hundred. For each player, in which week of 2024 did his season total first reach 100 points?",
+    returns: "player, week_reached — earliest first, then player A–Z.",
+    tables: ["week_results"],
+    expected: `WITH run AS (
+  SELECT player, week,
+         SUM(fantasy_pts) OVER (PARTITION BY player ORDER BY week) AS total
+  FROM week_results
+  WHERE season = 2024
+)
+SELECT player, MIN(week) AS week_reached
+FROM run
+WHERE total >= 100
+GROUP BY player
+ORDER BY week_reached, player;`,
+    orderMatters: true,
+    hint: "A running total per player (SUM … OVER PARTITION BY player ORDER BY week), then the smallest week where it's at least 100.",
+    explain: "Windows and GROUP BY work in layers: the window builds the running total on every row, then a normal aggregate picks the first week past the line.",
+    art: "speedometer",
+  },
+  {
+    id: "elevator",
+    title: "Elevator",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["RANK", "LAG", "Window"],
+    prompt:
+      "Each week of 2024, rank the players who played by points (1 is the week's best). Then find the five biggest climbs: a player's rank in one game against his rank in his game before.",
+    returns: "player, week, prev_rank, wk_rank, climb (prev_rank minus wk_rank) — biggest climb first, then week, then player A–Z. Five rows.",
+    tables: ["week_results"],
+    expected: `WITH ranked AS (
+  SELECT player, week,
+         RANK() OVER (PARTITION BY week ORDER BY fantasy_pts DESC) AS wk_rank
+  FROM week_results
+  WHERE season = 2024
+),
+moves AS (
+  SELECT player, week, wk_rank,
+         LAG(wk_rank) OVER (PARTITION BY player ORDER BY week) AS prev_rank
+  FROM ranked
+)
+SELECT player, week, prev_rank, wk_rank, prev_rank - wk_rank AS climb
+FROM moves
+WHERE prev_rank IS NOT NULL
+ORDER BY climb DESC, week, player
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "Two windows in two steps: RANK within each week first, then LAG over each player's ranks. A window can't contain another window, so they need separate CTEs.",
+    explain:
+      "Each window answers a question about one grouping: the rank compares players within a week, the LAG compares weeks within a player. Stacking CTEs lets you ask one about the other.",
+    art: "elevator",
+  },
+  {
+    id: "mr-steady",
+    title: "Mr. Steady",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["Variance", "AVG", "HAVING", "LIMIT"],
+    prompt:
+      "Some players score the same every week; others swing wildly. Among 2024 players with at least 12 games, find the five with the lowest variance in weekly points. SQLite has no VARIANCE function, so you'll build it.",
+    returns: "player, games, ppg, variance (both rounded to 1 decimal) — lowest variance first. Five rows.",
+    tables: ["week_results"],
+    expected: `SELECT player,
+       COUNT(*) AS games,
+       ROUND(AVG(fantasy_pts), 1) AS ppg,
+       ROUND(AVG(fantasy_pts * fantasy_pts) - AVG(fantasy_pts) * AVG(fantasy_pts), 1) AS variance
+FROM week_results
+WHERE season = 2024
+GROUP BY player
+HAVING COUNT(*) >= 12
+ORDER BY variance
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "Variance is the average of the squares minus the square of the average: AVG(x * x) - AVG(x) * AVG(x).",
+    explain:
+      "That formula is the population variance, and its square root is the standard deviation. A low variance means a player's floor and ceiling are close together — steady, whatever his average.",
+    art: "spirit-level",
   },
 ];
 

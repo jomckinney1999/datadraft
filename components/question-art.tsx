@@ -122,6 +122,26 @@ export const ART_TONE: Record<QuestionArt, Tone> = {
   "high-five": "turf",
   "framed-jersey": "gold",
   milestone: "turf",
+  "sandwich-board": "gold",
+  "ice-cube": "ice",
+  slide: "gold",
+  clipboard: "turf",
+  fingerprint: "ice",
+  balloon: "gold",
+  colander: "ice",
+  "magic-hat": "gold",
+  "tug-of-war": "turf",
+  sweater: "ice",
+  suitcase: "gold",
+  "starting-blocks": "turf",
+  "tier-cake": "gold",
+  castle: "ice",
+  seesaw: "gold",
+  boomerang: "turf",
+  spring: "ice",
+  speedometer: "gold",
+  elevator: "turf",
+  "spirit-level": "gold",
 };
 
 // ── Scenes, one per title idea ───────────────────────────────────
@@ -2506,6 +2526,413 @@ function Milestone() {
   );
 }
 
+/** Saturday Special — a diner sandwich board chalked SAT SPECIAL. */
+function SandwichBoard() {
+  return (
+    <g>
+      <Shadow y={134} rx={52} />
+      <path d="M60 132 L84 26 H116 L140 132" fill="none" stroke={N} strokeWidth="5" strokeLinejoin="round" />
+      <path d="M60 132 L84 26 H116 L140 132" fill="none" stroke={c("gold-dim")} strokeWidth="2.5" strokeLinejoin="round" />
+      <path d="M68 118 L88 34 H112 L132 118 Z" fill={c("night-100")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <text x="100" y="56" textAnchor="middle" fontSize="11" fontWeight="900" fill={c("ink")} fontFamily={MONO}>
+        SAT
+      </text>
+      <text x="100" y="72" textAnchor="middle" fontSize="8" fontWeight="900" fill={c("gold")} fontFamily={MONO}>
+        SPECIAL
+      </text>
+      <Football x={100} y={94} rx={14} />
+      <path d="M84 110 H116" stroke={c("ink", 0.6)} strokeWidth="2" strokeDasharray="3 3" />
+      <Sparkle x={150} y={36} r={6} fill={c("gold")} />
+    </g>
+  );
+}
+
+/** Cold One — a football frozen inside an ice cube. */
+function IceCube() {
+  return (
+    <g>
+      <Shadow y={134} rx={52} />
+      <path d="M58 54 L100 36 L146 52 L104 72 Z" fill={c("ice", 0.55)} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M58 54 V112 L104 130 V72 Z" fill={c("ice", 0.35)} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M146 52 V110 L104 130 V72 Z" fill={c("ice", 0.45)} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <g opacity="0.85">
+        <Football x={102} y={92} rx={20} rot={-22} />
+      </g>
+      <path d="M66 64 V92 M72 60 L80 56" stroke={c("ink", 0.8)} strokeWidth="3" strokeLinecap="round" />
+      <path d="M150 124 Q156 132 162 124 Q156 112 150 124 Z" fill={c("ice")} stroke={N} strokeWidth="1.4" />
+      <path d={starPath(40, 34, 6, 9, 3.5, 0)} fill={c("ice")} />
+    </g>
+  );
+}
+
+/** Sliding Down — a football going down a playground slide. */
+function Slide() {
+  return (
+    <g>
+      <Shadow y={134} rx={70} />
+      <path d="M48 132 V48 M64 132 V48" stroke={N} strokeWidth="5" />
+      <path d="M48 132 V48 M64 132 V48" stroke={c("ink-muted")} strokeWidth="2.5" />
+      <path d="M48 66 H64 M48 86 H64 M48 106 H64" stroke={c("ink-muted")} strokeWidth="3" />
+      <rect x="42" y="40" width="30" height="10" rx="3" fill={c("ice")} stroke={N} strokeWidth="2" />
+      <path d="M70 46 Q110 56 132 108 Q140 124 166 126 L168 134 Q132 134 122 112 Q104 70 70 56 Z" fill={c("gold")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <Football x={112} y={74} rx={14} rot={46} />
+      <path d="M94 62 L88 52 M100 70 L92 64" stroke={c("ink-muted")} strokeWidth="2.6" strokeLinecap="round" />
+      <path d="M150 60 V84 M142 76 L150 86 L158 76" stroke={c("gold")} strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** Roll Call — a clipboard with a checklist of names. */
+function Clipboard() {
+  return (
+    <g>
+      <Shadow y={134} rx={46} />
+      <rect x="58" y="26" width="84" height="106" rx="6" fill={c("gold-dim")} stroke={N} strokeWidth="2.2" />
+      <rect x="66" y="36" width="68" height="88" rx="2" fill={c("ink")} stroke={N} strokeWidth="1.8" />
+      <rect x="84" y="20" width="32" height="14" rx="4" fill={c("ink-muted")} stroke={N} strokeWidth="2" />
+      {[50, 68, 86, 104].map((y, i) => (
+        <g key={y}>
+          <rect x="72" y={y - 6} width="10" height="10" rx="2" fill="none" stroke={N} strokeWidth="1.6" />
+          {i < 3 && <path d={`M73 ${y - 1} L77 ${y + 3} L84 ${y - 7}`} stroke={c("turf")} strokeWidth="2.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />}
+          <path d={`M88 ${y} H${126 - i * 6}`} stroke={c("ink-muted")} strokeWidth="2.4" strokeLinecap="round" />
+        </g>
+      ))}
+      <path d="M154 102 L150 128" stroke={N} strokeWidth="5" strokeLinecap="round" />
+      <path d="M154 102 L150 128" stroke={c("gold")} strokeWidth="3" strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** Fingerprints — a fingerprint under a magnifying glass. */
+function Fingerprint() {
+  const rings = [10, 17, 24, 31, 38].map((r) => `M${100 - r} 84 Q${100 - r} ${84 - r * 1.25} 100 ${84 - r * 1.25} Q${100 + r} ${84 - r * 1.25} ${100 + r} 84 Q${100 + r} ${84 + r * 0.8} ${100 + r * 0.4} ${84 + r}`);
+  return (
+    <g>
+      <Shadow y={134} rx={48} />
+      <ellipse cx="100" cy="82" rx="46" ry="52" fill={c("ink-soft", 0.2)} />
+      {rings.map((d, i) => (
+        <path key={i} d={d} fill="none" stroke={c("ice")} strokeWidth="3.4" strokeLinecap="round" />
+      ))}
+      <circle cx="140" cy="56" r="22" fill={c("ink", 0.12)} stroke={N} strokeWidth="5" />
+      <circle cx="140" cy="56" r="22" fill="none" stroke={c("gold")} strokeWidth="2.5" />
+      <path d="M156 72 L176 94" stroke={N} strokeWidth="9" strokeLinecap="round" />
+      <path d="M156 72 L176 94" stroke={c("gold-dim")} strokeWidth="5" strokeLinecap="round" />
+      <path d="M128 46 Q132 40 140 40" stroke={c("ink", 0.8)} strokeWidth="2.6" fill="none" strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** Inflation — a football-patterned balloon being pumped up. */
+function Balloon() {
+  return (
+    <g>
+      <Shadow y={134} rx={50} />
+      <path d="M120 96 Q116 112 124 120" stroke={c("ink-muted")} strokeWidth="2" fill="none" />
+      <ellipse cx="120" cy="58" rx="38" ry="40" fill={c("gold")} stroke={N} strokeWidth="2.4" />
+      <path d="M116 98 L124 98 L120 92 Z" fill={c("gold-dim")} stroke={N} strokeWidth="1.6" />
+      <path d="M120 34 V82" stroke={c("ink")} strokeWidth="2.4" />
+      <path d="M114 44 H126 M114 52 H126 M114 60 H126 M114 68 H126" stroke={c("ink")} strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M96 36 Q100 28 110 26" stroke={c("ink", 0.7)} strokeWidth="3.4" fill="none" strokeLinecap="round" />
+      <rect x="48" y="96" width="14" height="36" rx="3" fill={c("ice")} stroke={N} strokeWidth="2" />
+      <path d="M55 96 V80 M44 80 H66" stroke={N} strokeWidth="4" strokeLinecap="round" />
+      <path d="M62 124 Q92 128 118 118" stroke={c("night-100")} strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M164 30 V18 M164 18 L158 24 M164 18 L170 24" stroke={c("turf")} strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** Leaky Defense — a colander with a football falling straight through. */
+function Colander() {
+  const holes: [number, number][] = [
+    [74, 70], [90, 72], [106, 72], [122, 70], [82, 84], [98, 86], [114, 84], [90, 98], [106, 98],
+  ];
+  return (
+    <g>
+      <Shadow y={134} rx={44} />
+      <path d="M50 58 H150 Q146 104 100 108 Q54 104 50 58 Z" fill={c("ice")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <ellipse cx="100" cy="58" rx="50" ry="9" fill={c("ice")} stroke={N} strokeWidth="2.2" />
+      <ellipse cx="100" cy="58" rx="42" ry="6" fill={c("night")} />
+      <path d="M50 58 H34 M150 58 H166" stroke={N} strokeWidth="5" strokeLinecap="round" />
+      {holes.map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r="3" fill={c("night")} />
+      ))}
+      <Football x={100} y={124} rx={13} rot={70} />
+      <path d="M84 112 L80 118 M116 112 L120 118 M100 110 V116" stroke={c("ice")} strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M100 40 V22 M94 30 L100 22 L106 30" stroke={c("gold")} strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** Magic Number — a top hat with a 20 card rising out of it. */
+function MagicHat() {
+  return (
+    <g>
+      <Shadow y={134} rx={54} />
+      <g transform="rotate(-8 100 50)">
+        <rect x="80" y="26" width="40" height="52" rx="4" fill={c("ink")} stroke={N} strokeWidth="2" />
+        <text x="100" y="60" textAnchor="middle" fontSize="20" fontWeight="900" fill={N} fontFamily={SANS}>
+          20
+        </text>
+      </g>
+      <ellipse cx="100" cy="128" rx="54" ry="8" fill={c("night-100")} stroke={N} strokeWidth="2.2" />
+      <path d="M66 74 H134 V124 Q100 132 66 124 Z" fill={c("night-100")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <ellipse cx="100" cy="74" rx="34" ry="6" fill={c("night")} stroke={N} strokeWidth="2" />
+      <rect x="66" y="108" width="68" height="9" fill={c("gold")} stroke={N} strokeWidth="1.6" />
+      <Sparkle x={54} y={50} r={8} fill={c("gold")} />
+      <Sparkle x={150} y={40} r={6} />
+      <Sparkle x={144} y={84} r={4} fill={c("gold")} />
+    </g>
+  );
+}
+
+/** Turf War — a tug of war across grass on one side and striped turf on the other. */
+function TugOfWar() {
+  return (
+    <g>
+      <path d="M10 118 H100 V140 H10 Z" fill={c("turf")} />
+      <path d="M100 118 H190 V140 H100 Z" fill={c("turf-dim")} />
+      <path d="M112 118 V140 M128 118 V140 M144 118 V140 M160 118 V140 M176 118 V140" stroke={c("ink", 0.4)} strokeWidth="2" />
+      <path d="M20 118 L24 110 M30 118 L32 108 M44 118 L40 110 M60 118 L64 110 M76 118 L74 108" stroke={c("turf-dim")} strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M100 118 V40" stroke={c("ink", 0.5)} strokeWidth="2" strokeDasharray="5 5" />
+      <path d="M14 84 Q100 96 186 84" stroke={N} strokeWidth="9" fill="none" strokeLinecap="round" />
+      <path d="M14 84 Q100 96 186 84" stroke={c("gold-dim")} strokeWidth="5" fill="none" strokeLinecap="round" />
+      <path d="M100 90 L94 112 L106 112 Z" fill={c("gold")} stroke={N} strokeWidth="1.8" strokeLinejoin="round" />
+      <Football x={44} y={66} rx={14} rot={-20} />
+      <Football x={156} y={66} rx={14} rot={20} />
+      <text x="46" y="40" textAnchor="middle" fontSize="9" fontWeight="900" fill={c("turf")} fontFamily={MONO}>
+        GRASS
+      </text>
+      <text x="154" y="40" textAnchor="middle" fontSize="9" fontWeight="900" fill={c("ice")} fontFamily={MONO}>
+        TURF
+      </text>
+    </g>
+  );
+}
+
+/** Sweater Weather — a knitted sweater with a football on the chest. */
+function Sweater() {
+  return (
+    <g>
+      <Shadow y={134} rx={58} />
+      <path
+        d="M70 30 L86 26 Q100 38 114 26 L130 30 L162 62 L146 80 L136 70 V128 H64 V70 L54 80 L38 62 Z"
+        fill={c("turf")}
+        stroke={N}
+        strokeWidth="2.4"
+        strokeLinejoin="round"
+      />
+      <path d="M86 26 Q100 44 114 26" stroke={N} strokeWidth="2" fill={c("turf-dim")} />
+      <path d="M64 118 H136 M64 122 H136" stroke={c("turf-dim")} strokeWidth="2.4" />
+      <path d="M140 74 L150 64 M60 74 L50 64" stroke={c("turf-dim")} strokeWidth="2.4" />
+      <path d="M70 58 H130" stroke={c("ink", 0.85)} strokeWidth="3" strokeDasharray="4 4" />
+      <path d="M70 104 H130" stroke={c("ink", 0.85)} strokeWidth="3" strokeDasharray="4 4" />
+      <Football x={100} y={82} rx={16} />
+      <path d={starPath(170, 26, 6, 8, 3, 0)} fill={c("ice")} />
+      <path d={starPath(30, 34, 6, 6, 2.5, 30)} fill={c("ice")} />
+    </g>
+  );
+}
+
+/** Journeyman — a suitcase covered in travel stickers. */
+function Suitcase() {
+  return (
+    <g>
+      <Shadow y={134} rx={60} />
+      <path d="M84 50 V38 Q84 32 90 32 H110 Q116 32 116 38 V50" fill="none" stroke={N} strokeWidth="6" />
+      <path d="M84 50 V38 Q84 32 90 32 H110 Q116 32 116 38 V50" fill="none" stroke={c("gold-dim")} strokeWidth="3" />
+      <rect x="40" y="48" width="120" height="78" rx="8" fill={c("gold-dim")} stroke={N} strokeWidth="2.4" />
+      <path d="M40 74 H160" stroke={N} strokeWidth="2" />
+      <rect x="92" y="68" width="16" height="12" rx="2" fill={c("ink-muted")} stroke={N} strokeWidth="1.6" />
+      <circle cx="66" cy="98" r="13" fill={c("ice")} stroke={N} strokeWidth="1.8" />
+      <rect x="112" y="88" width="34" height="22" rx="4" fill={c("turf")} stroke={N} strokeWidth="1.8" transform="rotate(-10 129 99)" />
+      <path d="M118 98 H140" stroke={N} strokeWidth="1.6" transform="rotate(-10 129 99)" />
+      <Football x={66} y={98} rx={8} />
+      <path d={starPath(138, 58, 5, 7, 3, -90)} fill={c("ink")} stroke={N} strokeWidth="1" />
+      <circle cx="56" cy="128" r="5" fill={c("night-100")} stroke={N} strokeWidth="1.6" />
+      <circle cx="144" cy="128" r="5" fill={c("night-100")} stroke={N} strokeWidth="1.6" />
+    </g>
+  );
+}
+
+/** Fast Start — sprint starting blocks, a football on the line, a GO flag. */
+function StartingBlocks() {
+  return (
+    <g>
+      <path d="M10 120 H190 V140 H10 Z" fill={c("gold-dim", 0.6)} />
+      <path d="M10 120 H190" stroke={c("ink")} strokeWidth="3" />
+      <rect x="60" y="112" width="70" height="8" rx="2" fill={c("ink-muted")} stroke={N} strokeWidth="1.8" />
+      <path d="M68 112 L80 92 L92 112 Z" fill={c("ice")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <path d="M100 112 L112 88 L124 112 Z" fill={c("ice")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <Football x={150} y={108} rx={14} />
+      <path d="M128 100 H116 M130 108 H120" stroke={c("ink-muted")} strokeWidth="2.6" strokeLinecap="round" />
+      <path d="M40 120 V30" stroke={N} strokeWidth="3" />
+      <path d="M40 30 H76 L68 42 L76 54 H40 Z" fill={c("turf")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <text x="56" y="47" textAnchor="middle" fontSize="11" fontWeight="900" fill={N} fontFamily={SANS}>
+        GO
+      </text>
+    </g>
+  );
+}
+
+/** Tier List — a four-tier cake, the top tier gold. */
+function TierCake() {
+  const tiers: [number, number, string][] = [
+    [96, 80, "ice"],
+    [76, 64, "turf"],
+    [58, 48, "ink-soft"],
+    [42, 32, "gold"],
+  ];
+  return (
+    <g>
+      <Shadow y={134} rx={58} />
+      <ellipse cx="100" cy="128" rx="58" ry="7" fill={c("ink-muted")} stroke={N} strokeWidth="2" />
+      {tiers.map(([y, w, t], i) => (
+        <g key={i}>
+          <rect x={100 - w / 2} y={y} width={w} height={i === 0 ? 30 : 18} rx="4" fill={c(t)} stroke={N} strokeWidth="2" />
+          <text x={100} y={y + (i === 0 ? 20 : 13)} textAnchor="middle" fontSize="9" fontWeight="900" fill={N} fontFamily={MONO}>
+            {4 - i}
+          </text>
+        </g>
+      ))}
+      <path d="M100 42 V28" stroke={N} strokeWidth="2.4" />
+      <path d={starPath(100, 22, 5, 9, 4, -90)} fill={c("gold")} stroke={N} strokeWidth="1.4" />
+      <Sparkle x={150} y={40} r={6} />
+    </g>
+  );
+}
+
+/** Fortress — a castle keep with a football flag on top. */
+function Castle() {
+  return (
+    <g>
+      <Shadow y={134} rx={66} />
+      <path d="M40 132 V66 H52 V58 H62 V66 H72 V58 H82 V66 H92 V132 Z" fill={c("ink-muted")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M108 132 V66 H118 V58 H128 V66 H138 V58 H148 V66 H160 V132 Z" fill={c("ink-muted")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M78 132 V50 H88 V42 H98 V50 H102 V42 H112 V50 H122 V132 Z" fill={c("ink-soft")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M88 132 V108 Q100 94 112 108 V132 Z" fill={c("night-100")} stroke={N} strokeWidth="2" />
+      <rect x="94" y="64" width="12" height="18" rx="6" fill={c("night")} stroke={N} strokeWidth="1.6" />
+      <path d="M100 42 V16" stroke={N} strokeWidth="2.4" />
+      <path d="M100 16 H128 L122 24 L128 32 H100 Z" fill={c("gold")} stroke={N} strokeWidth="1.8" strokeLinejoin="round" />
+      <Football x={112} y={24} rx={6} />
+      <path d="M52 80 H62 M136 80 H146" stroke={N} strokeWidth="2" />
+    </g>
+  );
+}
+
+/** The Median Game — a seesaw balanced on its middle point. */
+function Seesaw() {
+  return (
+    <g>
+      <Shadow y={134} rx={70} />
+      <path d="M84 132 L100 98 L116 132 Z" fill={c("gold")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <rect x="22" y="90" width="156" height="9" rx="4" fill={c("ice")} stroke={N} strokeWidth="2.2" />
+      <circle cx="100" cy="94.5" r="4" fill={c("ink")} stroke={N} strokeWidth="1.6" />
+      <Football x={44} y={80} rx={14} />
+      <Football x={68} y={82} rx={10} />
+      <Football x={146} y={76} rx={18} />
+      <path d="M100 86 V30" stroke={c("gold")} strokeWidth="2.4" strokeDasharray="4 4" />
+      <rect x="82" y="18" width="36" height="16" rx="4" fill={c("night-100")} stroke={N} strokeWidth="1.8" />
+      <text x="100" y="30" textAnchor="middle" fontSize="8" fontWeight="900" fill={c("gold")} fontFamily={MONO}>
+        MID
+      </text>
+    </g>
+  );
+}
+
+/** Revenge Game — a boomerang curving back to where it was thrown from. */
+function Boomerang() {
+  return (
+    <g>
+      <Shadow y={134} rx={52} />
+      <path d="M40 112 Q60 28 140 40 Q172 46 160 74" stroke={c("ink-muted")} strokeWidth="2.4" strokeDasharray="5 6" fill="none" />
+      <path d="M156 70 L160 80 L168 72" stroke={c("ink-muted")} strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <g transform="rotate(-20 100 96)">
+        <path d="M60 92 Q100 58 140 92 Q132 104 122 98 Q100 80 78 98 Q68 104 60 92 Z" fill={c("gold-dim")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+        <path d="M74 88 Q100 68 126 88" stroke={c("gold")} strokeWidth="3" fill="none" strokeLinecap="round" />
+      </g>
+      <Football x={50} y={118} rx={13} rot={-14} />
+      <path d={starPath(160, 30, 6, 10, 4, 0)} fill={c("gold")} stroke={N} strokeWidth="1.2" />
+    </g>
+  );
+}
+
+/** Bounce Back — a coiled spring launching a football. */
+function Spring() {
+  const coil = Array.from({ length: 6 }, (_, i) => `M76 ${126 - i * 8} Q100 ${120 - i * 8} 124 ${126 - i * 8}`).join(" ");
+  return (
+    <g>
+      <Shadow y={134} rx={40} />
+      <rect x="66" y="126" width="68" height="8" rx="2" fill={c("ink-muted")} stroke={N} strokeWidth="1.8" />
+      <path d={coil} stroke={N} strokeWidth="6" fill="none" strokeLinecap="round" />
+      <path d={coil} stroke={c("ice")} strokeWidth="3" fill="none" strokeLinecap="round" />
+      <rect x="70" y="76" width="60" height="8" rx="2" fill={c("ink-muted")} stroke={N} strokeWidth="1.8" />
+      <Football x={112} y={34} rx={18} rot={-30} />
+      <path d="M92 58 L84 70 M108 60 L106 72 M124 58 L130 70" stroke={c("gold")} strokeWidth="3" strokeLinecap="round" />
+      <path d="M40 112 V58 M34 66 L40 58 L46 66" stroke={c("turf")} strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** First to 100 — a speedometer with the needle at 100. */
+function Speedometer() {
+  const ticks = [0, 1, 2, 3, 4, 5].map((i) => {
+    const a = Math.PI + (i * Math.PI) / 5;
+    return `M${r1(100 + 46 * Math.cos(a))} ${r1(104 + 46 * Math.sin(a))} L${r1(100 + 56 * Math.cos(a))} ${r1(104 + 56 * Math.sin(a))}`;
+  });
+  return (
+    <g>
+      <Shadow y={132} rx={66} />
+      <path d="M36 104 A64 64 0 0 1 164 104 Z" fill={c("night-100")} stroke={N} strokeWidth="2.4" />
+      <path d="M48 104 A52 52 0 0 1 152 104" fill="none" stroke={c("turf")} strokeWidth="6" />
+      <path d="M134 66 A52 52 0 0 1 152 104" fill="none" stroke={c("gold")} strokeWidth="6" />
+      <path d={ticks.join(" ")} stroke={c("ink")} strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M100 104 L142 74" stroke={N} strokeWidth="6" strokeLinecap="round" />
+      <path d="M100 104 L142 74" stroke={c("gold")} strokeWidth="3" strokeLinecap="round" />
+      <circle cx="100" cy="104" r="8" fill={c("ink-soft")} stroke={N} strokeWidth="2" />
+      <rect x="76" y="112" width="48" height="18" rx="4" fill={c("ink")} stroke={N} strokeWidth="1.8" />
+      <text x="100" y="125.5" textAnchor="middle" fontSize="12" fontWeight="900" fill={N} fontFamily={MONO}>
+        100
+      </text>
+      <Sparkle x={160} y={50} r={6} fill={c("gold")} />
+    </g>
+  );
+}
+
+/** Elevator — open elevator doors, the up arrow lit, a football riding up. */
+function Elevator() {
+  return (
+    <g>
+      <Shadow y={134} rx={52} />
+      <rect x="54" y="30" width="92" height="102" rx="4" fill={c("ink-muted")} stroke={N} strokeWidth="2.4" />
+      <rect x="64" y="44" width="72" height="88" fill={c("night-100")} stroke={N} strokeWidth="2" />
+      <path d="M64 44 H80 V132 H64 Z M120 44 H136 V132 H120 Z" fill={c("ink-soft")} stroke={N} strokeWidth="1.8" />
+      <Football x={100} y={92} rx={16} rot={-8} />
+      <rect x="80" y="18" width="40" height="16" rx="3" fill={c("night")} stroke={N} strokeWidth="1.8" />
+      <path d="M100 22 L108 30 H92 Z" fill={c("turf")} />
+      <circle cx="160" cy="84" r="8" fill={c("turf")} stroke={N} strokeWidth="2" />
+      <path d="M156 86 L160 80 L164 86" stroke={N} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="160" cy="104" r="8" fill={c("ink-soft")} stroke={N} strokeWidth="2" />
+    </g>
+  );
+}
+
+/** Mr. Steady — a spirit level with its bubble dead centre. */
+function SpiritLevel() {
+  return (
+    <g>
+      <Shadow y={132} rx={74} />
+      <rect x="24" y="78" width="152" height="34" rx="6" fill={c("gold")} stroke={N} strokeWidth="2.4" />
+      <rect x="76" y="86" width="48" height="18" rx="9" fill={c("turf", 0.55)} stroke={N} strokeWidth="2" />
+      <ellipse cx="100" cy="95" rx="8" ry="5" fill={c("ink")} />
+      <path d="M92 86 V104 M108 86 V104" stroke={N} strokeWidth="1.8" />
+      <circle cx="44" cy="95" r="6" fill={c("night-100")} stroke={N} strokeWidth="1.6" />
+      <circle cx="156" cy="95" r="6" fill={c("night-100")} stroke={N} strokeWidth="1.6" />
+      <Football x={100} y={58} rx={20} />
+      <path d="M60 40 H140" stroke={c("ink-muted")} strokeWidth="2.4" strokeDasharray="5 5" />
+    </g>
+  );
+}
+
 const SCENES: Record<QuestionArt, () => JSX.Element> = {
   hammer: Hammer,
   quarterback: Quarterback,
@@ -2581,6 +3008,26 @@ const SCENES: Record<QuestionArt, () => JSX.Element> = {
   "high-five": HighFive,
   "framed-jersey": FramedJersey,
   milestone: Milestone,
+  "sandwich-board": SandwichBoard,
+  "ice-cube": IceCube,
+  slide: Slide,
+  clipboard: Clipboard,
+  fingerprint: Fingerprint,
+  balloon: Balloon,
+  colander: Colander,
+  "magic-hat": MagicHat,
+  "tug-of-war": TugOfWar,
+  sweater: Sweater,
+  suitcase: Suitcase,
+  "starting-blocks": StartingBlocks,
+  "tier-cake": TierCake,
+  castle: Castle,
+  seesaw: Seesaw,
+  boomerang: Boomerang,
+  spring: Spring,
+  speedometer: Speedometer,
+  elevator: Elevator,
+  "spirit-level": SpiritLevel,
 };
 
 export default function QuestionArt({
