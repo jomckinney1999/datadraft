@@ -33,6 +33,7 @@ import type { Database, QueryExecResult } from "sql.js";
 import ChartIt from "@/components/chart-it";
 import { NFLVERSE_CREDIT } from "@/lib/chart";
 import { SITE_URL } from "@/lib/site";
+import { dailyNumber, shareText } from "@/lib/daily-share";
 import type { CellValue } from "@/lib/excel-data";
 import type { Question } from "@/lib/questions";
 import {
@@ -191,6 +192,9 @@ export default function QuestionWorkspace({
   const [reward, setReward] = useState<{ xp: number; tickets: number } | null>(
     null,
   );
+  // Graded submissions this visit, for the daily question's share line.
+  const [tries, setTries] = useState(0);
+  const [shareNote, setShareNote] = useState<string | null>(null);
 
   useEffect(() => {
     setAlreadySolved(loadProgress().solvedQuestions.includes(question.id));
@@ -244,6 +248,7 @@ export default function QuestionWorkspace({
   const attempt = useCallback(
     async (grade: boolean) => {
       setVerdict(null);
+      if (grade) setTries((t) => t + 1);
 
       if (isSql) {
         const db = dbRef.current;
@@ -624,6 +629,31 @@ export default function QuestionWorkspace({
                             ? `+${reward.xp} XP · +${reward.tickets} tickets`
                             : `+${reward.tickets} ticket${reward.tickets === 1 ? "" : "s"} · already banked the XP for this one`}
                         </p>
+                      )}
+                      {isQotd && tries > 0 && (
+                        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-gold/40 bg-gold/10 px-3 py-2">
+                          <span className="font-mono text-base tracking-[0.12em]" aria-hidden>
+                            {"🟨".repeat(Math.min(9, tries - 1))}🟩
+                          </span>
+                          <span className="text-xs text-ink-soft">
+                            Today&apos;s question in {tries} {tries === 1 ? "try" : "tries"}.
+                          </span>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              const how = await shareText(
+                                `DataDraft Daily SQL #${dailyNumber(day)} · solved in ${tries} ${tries === 1 ? "try" : "tries"}
+${"🟨".repeat(Math.min(9, tries - 1))}🟩
+Same question for everyone today:
+${SITE_URL}/questions?ref=share`,
+                              );
+                              setShareNote(how === "copied" ? "Copied" : how === "failed" ? "Couldn't copy" : null);
+                            }}
+                            className="press ml-auto rounded-lg border border-gold/60 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-wider text-gold transition-colors hover:bg-gold/15"
+                          >
+                            {shareNote ?? "Share"}
+                          </button>
+                        </div>
                       )}
                       <div className="mt-3 flex flex-wrap gap-2">
                         {nextId && (

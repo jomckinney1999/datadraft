@@ -7,8 +7,14 @@
  * The rounds arrive computed (lib/stat-duel.ts, in a server component), so
  * this file is only the game. Progress for the day lives in this browser —
  * `sqlsports.duel.v1` holds today's picks so a reload doesn't reset you, and
- * `sqlsports.duel.streak.v1` counts days in a row. "Run it yourself" loads
- * the same in-browser database as the questions, and only when asked.
+ * `sqlsports.duel.history.v1` keeps every day's score, from which the
+ * Wordle-style stats — played, average, streak, best streak, spread — are
+ * recomputed rather than counted, so they can't drift. "Run it yourself"
+ * loads the same in-browser database as the questions, and only when asked.
+ *
+ * The share text carries a challenge link (`?r=1-GGRGG`: which rounds were
+ * right, never which side was picked), and a friend who opens it sees the
+ * score to beat. The link's preview card is drawn by /api/og/duel.
  *
  * Keys: ← / 1 picks the left card, → / 2 the right, Enter moves on.
  */
@@ -25,12 +31,21 @@ import CodeEditor from "@/components/code-editor";
 import ChartIt from "@/components/chart-it";
 import { NFLVERSE_CREDIT } from "@/lib/chart";
 import { SITE_URL } from "@/lib/site";
+import {
+  encodeDuelResult,
+  formatCountdown,
+  msUntilNextLeagueDay,
+  shareText,
+  squares,
+  type DuelResult,
+} from "@/lib/daily-share";
 
 const DAY_KEY = "sqlsports.duel.v1";
-const STREAK_KEY = "sqlsports.duel.streak.v1";
+const HISTORY_KEY = "sqlsports.duel.history.v1";
 
 type Saved = { day: string; picks: (0 | 1)[] };
-type Streak = { last: string; streak: number };
+/** Score by day, for every duel finished in this browser. */
+type History = Record<string, number>;
 
 const read = <T,>(key: string): T | null => {
   try {
@@ -60,28 +75,37 @@ const prettyDay = (day: string) =>
 export default function StatDuel({
   duel,
   qotdId,
+  challenge,
 }: {
   duel: Duel;
   /** Today's SQL question — where a finished duel sends you next. */
   qotdId: string;
+  /** A friend's result, from the link they shared. */
+  challenge: DuelResult | null;
 }) {
   const [picks, setPicks] = useState<(0 | 1)[]>([]);
   const [current, setCurrent] = useState(0);
   const [hydrated, setHydrated] = useState(false);
-  const [streak, setStreak] = useState(0);
+  const [history, setHistory] = useState<History>({});
   const total = duel.rounds.length;
   const finished = picks.length >= total;
+  const scoreOf = (p: (0 | 1)[]) => p.filter((x, i) => duel.rounds[i] && x === winnerOf(duel.rounds[i])).length;
 
   useEffect(() => {
     const saved = read<Saved>(DAY_KEY);
+    const h = read<History>(HISTORY_KEY) ?? {};
     if (saved && saved.day === duel.day) {
       setPicks(saved.picks);
       // Finished earlier today: open on the score, not on round five.
       setCurrent(saved.picks.length >= total ? total : saved.picks.length);
+      if (saved.picks.length >= total && h[duel.day] === undefined) {
+        h[duel.day] = scoreOf(saved.picks);
+        write(HISTORY_KEY, h);
+      }
     }
-    const s = read<Streak>(STREAK_KEY);
-    if (s && (s.last === duel.day || s.last === dayBefore(duel.day))) setStreak(s.streak);
+    setHistory(h);
     setHydrated(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [duel.day, total]);
 
   function pick(side: 0 | 1) {
@@ -90,10 +114,9 @@ export default function StatDuel({
     setPicks(next);
     write(DAY_KEY, { day: duel.day, picks: next } satisfies Saved);
     if (next.length === total) {
-      const s = read<Streak>(STREAK_KEY);
-      const run = s && s.last === dayBefore(duel.day) ? s.streak + 1 : s && s.last === duel.day ? s.streak : 1;
-      write(STREAK_KEY, { last: duel.day, streak: run } satisfies Streak);
-      setStreak(run);
+      const h = { ...(read<History>(HISTORY_KEY) ?? {}), [duel.day]: scoreOf(next) };
+      write(HISTORY_KEY, h);
+      setHistory(h);
     }
   }
 
@@ -138,6 +161,26 @@ export default function StatDuel({
         </p>
       </header>
 
+      {challenge && !(hydrated && finished) && (
+        <div className="mx-auto mt-5 flex max-w-md items-center justify-center gap-3 rounded-2xl border-2 border-gold/60 bg-gold/10 px-4 py-3 text-center">
+          <span className="font-mono text-lg tracking-[0.15em]" aria-hidden>
+            {squares(challenge.grid)}
+          </span>
+          <span className="text-sm text-ink">
+            {challenge.number === duel.number ? (
+              <>
+                A friend scored <strong className="text-gold">{challenge.score}/5</strong> on today&apos;s duel. Your turn.
+              </>
+            ) : (
+              <>
+                A friend scored <strong className="text-gold">{challenge.score}/5</strong> on Stat Duel #{challenge.number}.
+                Today&apos;s is #{duel.number} — beat it.
+              </>
+            )}
+          </span>
+        </div>
+      )}
+
       <ol className="mt-6 flex justify-center gap-2" aria-label="Rounds">
         {duel.rounds.map((r, i) => {
           const done = i < picks.length;
@@ -171,7 +214,15 @@ export default function StatDuel({
       )}
 
       {showSummary && (
-        <Summary duel={duel} picks={picks} score={score} streak={streak} qotdId={qotdId} onReview={(i) => setCurrent(i)} />
+        <Summary
+          duel={duel}
+          picks={picks}
+          score={score}
+          history={history}
+          challenge={challenge}
+          qotdId={qotdId}
+          onReview={(i) => setCurrent(i)}
+        />
       )}
     </div>
   );
@@ -427,46 +478,79 @@ function ProveIt({ round }: { round: DuelRound }) {
   );
 }
 
+/** Wordle's numbers, recomputed from the history every time. */
+function statsOf(history: History, today: string, total: number) {
+  const days = Object.keys(history).sort();
+  const dist = Array.from({ length: total + 1 }, () => 0);
+  let sum = 0;
+  for (const d of days) {
+    const sc = Math.max(0, Math.min(total, history[d]));
+    dist[sc]++;
+    sum += sc;
+  }
+  // Runs of consecutive days. The current run counts if it ends today or
+  // yesterday (today's duel may not be played yet).
+  let best = 0;
+  let run = 0;
+  let prev: string | null = null;
+  for (const d of days) {
+    run = prev && dayBefore(d) === prev ? run + 1 : 1;
+    best = Math.max(best, run);
+    prev = d;
+  }
+  const last = days[days.length - 1];
+  const current = last && (last === today || last === dayBefore(today)) ? run : 0;
+  return { played: days.length, avg: days.length ? sum / days.length : 0, current, best, dist };
+}
+
 function Summary({
   duel,
   picks,
   score,
-  streak,
+  history,
+  challenge,
   qotdId,
   onReview,
 }: {
   duel: Duel;
   picks: (0 | 1)[];
   score: number;
-  streak: number;
+  history: History;
+  challenge: DuelResult | null;
   qotdId: string;
   onReview: (i: number) => void;
 }) {
   const [note, setNote] = useState<string | null>(null);
-  const squares = duel.rounds.map((r, i) => (picks[i] === winnerOf(r) ? "🟩" : "🟥")).join("");
-  const link = `${SITE_URL}/questions/duel`;
-  const text = `DataDraft Stat Duel #${duel.number} · ${score}/${duel.rounds.length}\n${squares}\n${link}`;
+  const [left, setLeft] = useState<number | null>(null);
   const total = duel.rounds.length;
+  const grid = duel.rounds.map((r, i) => picks[i] === winnerOf(r));
+  const link = `${SITE_URL}/questions/duel?r=${encodeDuelResult(duel.number, grid)}`;
+  const text = `DataDraft Stat Duel #${duel.number} 🏈 ${score}/${total}\n${squares(grid)}\nWho had more? Beat me:\n${link}`;
+  const stats = statsOf(history, duel.day, total);
+  const peak = Math.max(1, ...stats.dist);
+
+  useEffect(() => {
+    const tick = () => setLeft(msUntilNextLeagueDay());
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, []);
 
   async function share() {
-    try {
-      if (navigator.share) {
-        await navigator.share({ text });
-        return;
-      }
-    } catch {
-      // Cancelled, or not allowed — fall through to copying.
-    }
-    try {
-      await navigator.clipboard.writeText(text);
-      setNote("Copied. Paste it in the group chat.");
-    } catch {
-      setNote("Couldn't copy. Select the grid above instead.");
-    }
+    const how = await shareText(text);
+    setNote(how === "copied" ? "Copied. Paste it in the group chat." : how === "failed" ? "Couldn't copy. Select the grid above instead." : null);
   }
 
   const verdict =
     score === total ? "A perfect duel." : score >= total - 1 ? "Nearly perfect." : score >= total / 2 ? "Solid." : "Rough day at the office.";
+  const beat =
+    challenge && challenge.number === duel.number
+      ? score > challenge.score
+        ? `You beat your friend's ${challenge.score}/5.`
+        : score === challenge.score
+          ? `Tied with your friend at ${score}/5.`
+          : `Your friend wins this one, ${challenge.score}/5.`
+      : null;
 
   return (
     <section className="mt-6 text-center" aria-live="polite">
@@ -483,12 +567,10 @@ function Summary({
         >
           {verdict}
         </p>
+        {beat && <p className="mt-1 text-sm text-ink-soft">{beat}</p>}
         <p className="mt-3 select-all font-mono text-2xl tracking-[0.2em]" aria-label={`${score} of ${total} right`}>
-          {squares}
+          {squares(grid)}
         </p>
-        {streak > 1 && (
-          <p className="mt-2 font-mono text-[11px] uppercase tracking-wider text-gold">{streak} days in a row</p>
-        )}
         <div className="mt-5 flex flex-wrap justify-center gap-2">
           <button type="button" onClick={share} className="press btn-gold">
             Share result
@@ -498,7 +580,43 @@ function Summary({
           </Link>
         </div>
         <p className="mt-2 min-h-[1rem] font-mono text-[10px] text-ink-muted" aria-live="polite">
-          {note ?? "Five new duels tomorrow, at midnight Eastern."}
+          {note ?? "Your link shows friends the score to beat — not the answers."}
+        </p>
+
+        {/* Wordle's panel: the numbers that make tomorrow worth coming back for. */}
+        <div className="mt-5 grid grid-cols-4 gap-2 border-t border-panel-border pt-5">
+          {[
+            [stats.played, "played"],
+            [stats.avg.toFixed(1), "avg score"],
+            [stats.current, "streak"],
+            [stats.best, "best streak"],
+          ].map(([v, label]) => (
+            <div key={String(label)}>
+              <p className="font-display text-2xl font-bold text-ink">{v}</p>
+              <p className="font-mono text-[9px] uppercase tracking-wider text-ink-muted">{label}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 space-y-1 text-left" aria-label="How your scores spread">
+          {stats.dist
+            .map((count, sc) => ({ count, sc }))
+            .reverse()
+            .map(({ count, sc }) => (
+              <div key={sc} className="flex items-center gap-2">
+                <span className="w-8 shrink-0 text-right font-mono text-[11px] text-ink-muted">{sc}/5</span>
+                <span
+                  className={`flex h-5 items-center justify-end rounded-sm px-1.5 font-mono text-[11px] font-bold ${
+                    sc === score ? "bg-turf text-night" : "bg-panel-border text-ink"
+                  }`}
+                  style={{ width: `${Math.max(8, (count / peak) * 100)}%` }}
+                >
+                  {count}
+                </span>
+              </div>
+            ))}
+        </div>
+        <p className="mt-4 font-mono text-[11px] uppercase tracking-wider text-ink-muted">
+          Next duel in <span className="text-gold">{left === null ? "--:--:--" : formatCountdown(left)}</span>
         </p>
       </div>
 

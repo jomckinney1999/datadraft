@@ -24,6 +24,7 @@
 
 import { getWeekResults, type WeekResultRow } from "@/lib/fantasy-data";
 import { LATEST, PACKED_GAMES } from "@/lib/lesson-data.generated";
+import { DAILY_LAUNCH, dailyNumber } from "@/lib/daily-share";
 
 export type DuelSide = {
   name: string;
@@ -50,8 +51,8 @@ export type DuelRound = {
 
 export type Duel = { day: string; number: number; rounds: DuelRound[] };
 
-/** Duel #1. */
-export const DUEL_LAUNCH = "2026-10-02";
+/** Duel #1 — the same numbering as every daily (lib/daily-share.ts). */
+export const DUEL_LAUNCH = DAILY_LAUNCH;
 const ROUNDS = 5;
 
 // ── Seeded randomness ───────────────────────────────────────────────────
@@ -311,9 +312,7 @@ function pickPair(built: Built, band: Band, r: () => number, used: Set<string>):
   return r() < 0.5 ? [p.a, p.b] : [p.b, p.a];
 }
 
-export function duelNumber(day: string): number {
-  return Math.floor((Date.parse(`${day}T00:00:00Z`) - Date.parse(`${DUEL_LAUNCH}T00:00:00Z`)) / 86_400_000) + 1;
-}
+export const duelNumber = dailyNumber;
 
 /** The day's five rounds. Pure: the same day always gives the same duel. */
 export function dailyDuel(day: string): Duel {
