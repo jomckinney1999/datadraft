@@ -36,12 +36,14 @@ export const metadata: Metadata = {
     url: SITE_URL,
     siteName: "DataDraft",
     type: "website",
+    // A drawn card (app/api/og/card), not the 1.9 MB stadium photo: it
+    // says what the site is in the preview itself, and it loads fast.
     images: [
       {
-        url: "/hero-stadium-night.png",
-        width: 1536,
-        height: 1024,
-        alt: "DataDraft",
+        url: "/api/og/card",
+        width: 1200,
+        height: 630,
+        alt: "DataDraft — LeetCode for football data",
       },
     ],
   },
@@ -49,7 +51,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: TITLE,
     description: DESCRIPTION,
-    images: ["/hero-stadium-night.png"],
+    images: ["/api/og/card"],
   },
 };
 

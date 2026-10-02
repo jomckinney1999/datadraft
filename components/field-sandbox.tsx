@@ -123,7 +123,7 @@ export default function FieldSandbox() {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
       {/* left rail: coach, schema, drills */}
       <aside className="space-y-5">
         <div className="surface border border-panel-border bg-panel/70 p-4">

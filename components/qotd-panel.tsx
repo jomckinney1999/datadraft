@@ -31,7 +31,10 @@ import { featuredPlayers } from "@/lib/question-players";
 
 export default function QotdPanel({ question }: { question: Question }) {
   const dbRef = useRef<Database | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const [ready, setReady] = useState(false);
+  /** Set once the panel is near the screen or touched; that's when the engine loads. */
+  const [wanted, setWanted] = useState(false);
   const [sql, setSql] = useState(question.starter ?? "SELECT ");
   const [result, setResult] = useState<QueryExecResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +58,32 @@ export default function QotdPanel({ question }: { question: Question }) {
     }
   }
 
+  // The engine and the lesson database are ~1 MB before compression, and
+  // this panel sits below the hero. Loading them on page load made every
+  // visitor pay for it, including the ones who never scroll. So they load
+  // when the panel comes within a screen of view, or the moment it's touched.
   useEffect(() => {
+    const el = rootRef.current;
+    if (!el || wanted) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setWanted(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setWanted(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "600px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [wanted]);
+
+  useEffect(() => {
+    if (!wanted) return;
     let cancelled = false;
     let db: Database | null = null;
     Promise.all([
@@ -77,7 +105,7 @@ export default function QotdPanel({ question }: { question: Question }) {
       db?.close();
       dbRef.current = null;
     };
-  }, []);
+  }, [wanted]);
 
   function attempt(grade: boolean) {
     const db = dbRef.current;
@@ -107,7 +135,7 @@ export default function QotdPanel({ question }: { question: Question }) {
   const players = featuredPlayers(question, 3);
 
   return (
-    <div className="qotd-hero overflow-hidden rounded-2xl">
+    <div ref={rootRef} onFocusCapture={() => setWanted(true)} onPointerDown={() => setWanted(true)} className="qotd-hero overflow-hidden rounded-2xl">
       <QuestionArt art={question.art} className="qotd-hero-art" />
       <div className="qotd-sheen" aria-hidden />
       <div className="relative flex flex-wrap items-center gap-5 border-b border-gold/20 px-5 py-5">

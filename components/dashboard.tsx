@@ -31,6 +31,7 @@ import { DIFFICULTY_XP } from "@/lib/questions";
 import QotdCard from "@/components/qotd-card";
 import DuelCard from "@/components/duel-card";
 import DraftCard from "@/components/draft-card";
+import { TourButton } from "@/components/welcome-tour";
 
 type CourseProgress = {
   id: string;
@@ -134,10 +135,22 @@ export default function Dashboard({
             <div className="min-w-0">
               <p className="label-broadcast text-gold">your locker</p>
               <h1 className="mt-1 font-display text-2xl font-bold text-ink sm:text-3xl">
-                {progress.username ? `Welcome back, ${progress.username}` : "Welcome back"}
+                {fresh && hydrated
+                  ? "Welcome to DataDraft"
+                  : progress.username
+                    ? `Welcome back, ${progress.username}`
+                    : "Welcome back"}
               </h1>
               <p className="mt-2 max-w-lg text-sm leading-relaxed text-ink-soft">
                 Solve the day’s question, or pick up the next lesson.
+              </p>
+              <p className="mt-2 text-xs text-ink-muted">
+                New here?{" "}
+                <TourButton className="font-semibold text-gold hover:underline" />
+                {" · "}
+                <Link href="/welcome" className="font-semibold text-ice hover:underline">
+                  Map of the site
+                </Link>
               </p>
             </div>
             <Coach

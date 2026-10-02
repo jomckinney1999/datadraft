@@ -14,6 +14,7 @@ const COLUMNS = [
   {
     title: "Practice",
     links: [
+      { href: "/welcome", label: "Start here" },
       { href: "/questions", label: "Questions" },
       { href: "/learn", label: "Courses" },
       { href: "/projects", label: "Projects" },

@@ -175,9 +175,9 @@ export default function RapidFire({
     return (
       <div>
         <p className="label-broadcast text-gold">rapid fire</p>
-        <h2 className="mt-1 font-display text-2xl font-bold text-ink">
+        <h1 className="mt-1 font-display text-2xl font-bold text-ink">
           Pick a language. No path order.
-        </h2>
+        </h1>
         <p className="mt-2 max-w-xl text-sm text-ink-soft">
           {RAPID_ROUND_SIZE} shuffled questions from the real curriculum ·{" "}
           {RAPID_SECONDS}s each · tickets for hits. Zero timeouts.

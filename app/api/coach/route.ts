@@ -2,15 +2,46 @@ import { generateText } from "ai";
 import { NextResponse } from "next/server";
 
 /**
- * Coach Blitz — short, Duo-style tips. Uses Vercel AI Gateway when configured;
- * otherwise returns 503 so the UI can fall back to the written hint/explain.
+ * Coach Blitz — short, Duo-style tips. Uses Vercel AI Gateway; when the
+ * gateway can't answer it returns 503 so the UI falls back to the written
+ * hint, explain, or Query Doctor's diagnosis.
  *
- * Auth: AI Gateway via OIDC on Vercel, or AI_GATEWAY_API_KEY locally.
+ * Auth: on Vercel the gateway authenticates with the deployment's OIDC token
+ * (no key to manage); locally, set AI_GATEWAY_API_KEY. Spend is capped by an
+ * AI Gateway budget on the project, which is the hard limit. The per-visitor
+ * limit below is a soft one, so one tab can't burn the month's budget.
+ *
  * Never send full lesson dumps — only the active prompt + attempt.
  */
 
 export const runtime = "nodejs";
 export const maxDuration = 20;
+
+/**
+ * gpt-5-mini is a reasoning model: output tokens include its thinking, and it
+ * doesn't take a temperature. Reasoning is set to minimal so the budget goes
+ * on the answer — at 220 tokens with default reasoning it could think through
+ * the whole allowance and say nothing.
+ */
+const MODEL = "openai/gpt-5-mini";
+const MAX_OUTPUT_TOKENS = 500;
+
+/** Asks per visitor per hour, per server instance. Best effort; the budget is the real cap. */
+const PER_HOUR = 20;
+const asks = new Map<string, number[]>();
+
+function overLimit(ip: string): boolean {
+  const now = Date.now();
+  const recent = (asks.get(ip) ?? []).filter((t) => now - t < 3_600_000);
+  if (recent.length >= PER_HOUR) {
+    asks.set(ip, recent);
+    return true;
+  }
+  recent.push(now);
+  asks.set(ip, recent);
+  if (asks.size > 5000) asks.clear(); // keep a long-lived instance from growing forever
+  return false;
+}
 
 type CoachBody = {
   mode: "hint" | "why_wrong" | "diagnose";
@@ -34,13 +65,9 @@ Rules:
 - Football flavor is light seasoning, not jargon.
 - No markdown headings. No bullet walls.`;
 
-function coachAvailable(): boolean {
-  return Boolean(
-    process.env.AI_GATEWAY_API_KEY ||
-      process.env.VERCEL_OIDC_TOKEN ||
-      process.env.AWS_ROLE_ARN,
-  );
-}
+/** Errors that mean "the coach isn't switched on", as opposed to a one-off failure. */
+const UNAVAILABLE =
+  /auth|api key|unauthori[sz]ed|forbidden|not configured|oidc|credit|insufficient|payment|quota|budget|free tier|402|401|403/i;
 
 export async function POST(req: Request) {
   let body: CoachBody;
@@ -54,9 +81,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });
   }
 
-  // Soft gate: without gateway credentials, don't pretend.
-  if (!process.env.AI_GATEWAY_API_KEY && process.env.NODE_ENV === "development") {
-    // Still try — local `vercel env pull` / gateway may inject auth.
+  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "local";
+  if (overLimit(ip)) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
 
   const userBits = [
@@ -79,24 +106,26 @@ export async function POST(req: Request) {
 
   try {
     const { text } = await generateText({
-      model: "openai/gpt-5-mini",
+      model: MODEL,
       system: SYSTEM,
       prompt: userBits.join("\n\n"),
-      maxOutputTokens: 220,
-      temperature: 0.4,
+      maxOutputTokens: MAX_OUTPUT_TOKENS,
+      providerOptions: { openai: { reasoningEffort: "minimal" } },
     });
 
     const cleaned = text.trim();
     if (!cleaned) {
+      console.error("[coach] empty answer", { mode: body.mode, model: MODEL });
       return NextResponse.json({ error: "empty" }, { status: 502 });
     }
     return NextResponse.json({ text: cleaned });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "coach_failed";
-    // Common when gateway isn't linked yet — UI shows written explain instead.
-    const unavailable =
-      /auth|api key|unauthorized|not configured|oidc/i.test(message) ||
-      !coachAvailable();
+    const message = err instanceof Error ? err.message : String(err);
+    // The real reason goes to the function logs (`vercel logs`), so a coach
+    // that's off can be diagnosed instead of guessed at. The visitor only
+    // ever sees "Coach isn't switched on yet".
+    console.error("[coach] gateway call failed", { mode: body.mode, model: MODEL, message });
+    const unavailable = UNAVAILABLE.test(message);
     return NextResponse.json(
       {
         error: unavailable ? "unavailable" : "coach_failed",

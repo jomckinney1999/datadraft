@@ -23,7 +23,7 @@ export default function QueryDoctorPanel({
   prompt: string;
   returns: string;
 }) {
-  const [coach, setCoach] = useState<{ state: "idle" | "loading" | "done" | "off"; text?: string }>({ state: "idle" });
+  const [coach, setCoach] = useState<{ state: "idle" | "loading" | "done" | "off" | "limited"; text?: string }>({ state: "idle" });
 
   if (!findings.length) return null;
 
@@ -42,7 +42,8 @@ export default function QueryDoctorPanel({
         }),
       });
       const body = (await res.json()) as { text?: string };
-      setCoach(res.ok && body.text ? { state: "done", text: body.text } : { state: "off" });
+      if (res.status === 429) setCoach({ state: "limited" });
+      else setCoach(res.ok && body.text ? { state: "done", text: body.text } : { state: "off" });
     } catch {
       setCoach({ state: "off" });
     }
@@ -76,6 +77,9 @@ export default function QueryDoctorPanel({
         )}
         {coach.state === "loading" && <p className="font-mono text-[11px] text-ink-muted">Coach is reading your query…</p>}
         {coach.state === "done" && <p className="text-sm leading-relaxed text-ink">{coach.text}</p>}
+        {coach.state === "limited" && (
+          <p className="text-xs text-ink-muted">You&apos;ve asked Coach a lot this hour. The notes above still hold — try again in a bit.</p>
+        )}
         {coach.state === "off" && (
           <p className="text-xs text-ink-muted">
             Coach isn&apos;t switched on yet. The notes above are the whole diagnosis — and they never give the answer away.

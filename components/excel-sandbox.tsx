@@ -252,7 +252,7 @@ export default function ExcelSandbox() {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-12">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
       <div className="lg:col-span-8">
         {/* Title bar */}
         <div className="overflow-hidden border border-panel-border bg-panel">

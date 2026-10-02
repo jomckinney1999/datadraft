@@ -22,9 +22,21 @@ export function generateMetadata({
 }): Metadata {
   const q = getQuestion(params.questionId);
   if (!q) return { title: "Question — DataDraft" };
+  const title = `${q.title} — DataDraft`;
+  // The preview card shows the question itself, so a shared link reads as
+  // a challenge rather than as the front page.
+  const image = `/api/og/card?${new URLSearchParams({
+    kind: "question",
+    t: q.title,
+    d: q.difficulty,
+    l: q.lang,
+    s: q.prompt.slice(0, 150),
+  })}`;
   return {
-    title: `${q.title} — DataDraft`,
+    title,
     description: q.prompt,
+    openGraph: { title, description: q.prompt, images: [{ url: image, width: 1200, height: 630 }] },
+    twitter: { card: "summary_large_image", title, description: q.prompt, images: [image] },
   };
 }
 

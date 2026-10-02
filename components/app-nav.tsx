@@ -27,7 +27,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { WelcomePrompt } from "@/components/welcome-tour";
 import { EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
 import LearnStatusChips from "@/components/learn-status-chips";
 
@@ -83,6 +84,12 @@ export default function AppNav({
   }, []);
 
   return (
+    <>
+    {/* The first-visit tour offer. It reads the query string (?tour=1, ?r=),
+        which needs a Suspense boundary so static pages stay static. */}
+    <Suspense fallback={null}>
+      <WelcomePrompt />
+    </Suspense>
     <header className="glass sticky top-0 z-30 border-b border-panel-border/80">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6">
         <div className="flex min-w-0 shrink-0 items-baseline gap-3">
@@ -201,5 +208,6 @@ export default function AppNav({
         </nav>
       )}
     </header>
+    </>
   );
 }
