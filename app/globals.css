@@ -32,6 +32,13 @@
   --c-ice: 28 176 246;
   --c-ice-dim: 20 140 200;
 
+  /* Bronze is a metal, not a fourth accent: it exists for the Hall of Fame's
+     drawn trophies and their nameplates, where a medal made of dimmed gold
+     read as a gold medal on the bronze shelf. Keep it off buttons and chips. */
+  --c-bronze: 205 127 50;
+  --c-bronze-hi: 236 172 110;
+  --c-bronze-dim: 140 82 32;
+
   --c-ink: 241 247 251;
   --c-ink-soft: 200 210 216;
   --c-ink-muted: 160 172 180;
@@ -2789,21 +2796,374 @@ html[data-reveal-armed] [data-revealed="true"] .reveal {
   transform: rotate(180deg);
 }
 
-/* Badge tiers. Bronze borrows a dimmed gold rather than inventing a fourth
-   accent; the palette has three and adding one for a trophy ring is how a
-   design system starts leaking. */
-.tier-bronze {
-  border-color: rgb(var(--c-gold) / 0.35);
-  color: rgb(var(--c-gold) / 0.75);
+
+/* ── The Hall of Fame ──────────────────────────────────────────────
+ * The trophy case on /learn and its window on the home page, built as a lit
+ * display cabinet: a night frame with gold trim and a brass crown plate, a
+ * back wall with a spotlight over every earned spot, glass shelves the
+ * trophies are reflected in, and a pane of glass across the front that
+ * catches a slow sweep of light. The trophies are `components/hof-trophy.tsx`.
+ *
+ * In the components layer, like the other materials, so a utility on the
+ * same element still wins. Each tier lights its own spot (`--hof-tint`):
+ * gold in gold, silver in ice (cool light reads as silver on this canvas),
+ * bronze in bronze.
+ */
+@layer components {
+  .hof-shelf[data-tier="gold"],
+  .hof-slot[data-tier="gold"] {
+    --hof-tint: var(--c-gold);
+  }
+  .hof-shelf[data-tier="silver"],
+  .hof-slot[data-tier="silver"] {
+    --hof-tint: var(--c-ice);
+  }
+  .hof-shelf[data-tier="bronze"],
+  .hof-slot[data-tier="bronze"] {
+    --hof-tint: var(--c-bronze);
+  }
+
+  .hof-cabinet {
+    position: relative;
+    padding: 8px;
+    border-radius: 26px;
+    border: 2px solid rgb(var(--c-gold-dim) / 0.75);
+    background: linear-gradient(180deg, rgb(var(--c-panel)), rgb(var(--c-night-100)));
+    box-shadow:
+      0 0 0 3px rgb(var(--c-night)),
+      inset 0 1px 0 rgb(var(--c-gold) / 0.55),
+      0 40px 90px -40px rgb(0 0 0 / 0.85),
+      0 0 140px -50px rgb(var(--c-gold) / calc(0.6 * var(--glow-strength)));
+  }
+  @media (min-width: 640px) {
+    .hof-cabinet {
+      padding: 12px;
+    }
+  }
+
+  /* The brass plate across the top edge: the name over the door. */
+  .hof-crown {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    z-index: 5;
+    transform: translate(-50%, -58%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    white-space: nowrap;
+    padding: 6px 16px;
+    border: 2px solid rgb(var(--c-night));
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgb(var(--c-gold)), rgb(var(--c-gold-dim)));
+    color: rgb(var(--c-night));
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    box-shadow:
+      0 3px 0 rgb(var(--c-night)),
+      inset 0 1px 0 rgb(var(--c-ink) / 0.6);
+  }
+  @media (min-width: 640px) {
+    .hof-crown {
+      font-size: 13px;
+      padding: 7px 22px;
+    }
+  }
+  .hof-star {
+    font-size: 0.85em;
+    opacity: 0.75;
+  }
+
+  /* The back wall: dark, faintly fluted, lit from above. */
+  .hof-interior {
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    padding: 30px 6px 10px;
+    background:
+      radial-gradient(ellipse 70% 30% at 50% 0%, rgb(var(--c-gold) / 0.1), transparent 70%),
+      repeating-linear-gradient(90deg, rgb(var(--c-ink) / 0.02) 0 1px, transparent 1px 44px),
+      linear-gradient(180deg, rgb(var(--c-night-200)), rgb(var(--c-night)));
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--c-night)),
+      inset 0 22px 40px -22px rgb(0 0 0 / 0.85),
+      inset 0 -30px 50px -30px rgb(0 0 0 / 0.6);
+  }
+  @media (min-width: 640px) {
+    .hof-interior {
+      padding: 38px 14px 16px;
+    }
+  }
+
+  .hof-shelf + .hof-shelf {
+    margin-top: 22px;
+  }
+
+  /* A wing's name, hung on the wall above its shelf. */
+  .hof-wing {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    margin: 0 auto 4px;
+    padding: 3px 10px;
+    border: 1px solid rgb(var(--hof-tint) / 0.4);
+    border-radius: 999px;
+    background: rgb(var(--c-night) / 0.7);
+    color: rgb(var(--hof-tint));
+    font-family: var(--font-ibm-plex-mono), monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .hof-wing-count {
+    color: rgb(var(--c-ink-muted));
+  }
+
+  /* One spot on the shelf. Slots sit edge to edge (the grid has no gap), so
+     their ledges join into one continuous shelf at any column count. */
+  .hof-slot {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding-top: 12px;
+    text-align: center;
+  }
+  /* The spotlight: a soft cone from the top of the spot, only when earned.
+     A locked spot stays dark, and that is the gap you want to fill. */
+  .hof-slot::before {
+    content: "";
+    position: absolute;
+    inset: -18px 4% auto;
+    height: 82%;
+    background: radial-gradient(ellipse 46% 100% at 50% 0%, rgb(var(--hof-tint) / 0.3), rgb(var(--hof-tint) / 0.06) 62%, transparent 74%);
+    opacity: 0;
+    transition: opacity 400ms ease;
+    pointer-events: none;
+  }
+  .hof-slot[data-earned="true"]::before {
+    opacity: 1;
+  }
+
+  .hof-stage {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    height: 118px;
+  }
+  /* The Inner Circle's shelf stands taller: the top shelf is the one you
+     look up to. Per shelf, not per trophy, or a mixed shelf (the home page's
+     window) would drop one ledge below the rest. */
+  .hof-shelf[data-tier="gold"] .hof-stage {
+    height: 134px;
+  }
+  @media (min-width: 640px) {
+    .hof-stage {
+      height: 140px;
+    }
+    .hof-shelf[data-tier="gold"] .hof-stage {
+      height: 164px;
+    }
+  }
+  .hof-trophy {
+    height: 100%;
+    width: auto;
+    transition:
+      transform 360ms cubic-bezier(0.2, 0.9, 0.3, 1.25),
+      filter 360ms ease;
+    filter: drop-shadow(0 5px 4px rgb(0 0 0 / 0.55));
+    /* Standing on glass: the plinth shows again in the shelf below it. */
+    -webkit-box-reflect: below 0 linear-gradient(transparent 84%, rgb(var(--c-ink) / 0.32));
+  }
+  .hof-slot[data-earned="true"] .hof-trophy {
+    filter:
+      drop-shadow(0 0 16px rgb(var(--hof-tint) / 0.45))
+      drop-shadow(0 5px 4px rgb(0 0 0 / 0.55));
+  }
+  .hof-slot[data-earned="false"] .hof-trophy {
+    opacity: 0.85;
+  }
+  .hof-slot[data-earned="true"]:hover .hof-trophy {
+    transform: translateY(-6px) scale(1.05);
+    filter:
+      drop-shadow(0 0 24px rgb(var(--hof-tint) / 0.7))
+      drop-shadow(0 12px 8px rgb(0 0 0 / 0.5));
+  }
+
+  /* A glint that catches the light now and then, staggered by --i so the
+     case twinkles rather than blinking in unison. */
+  .hof-sparkle {
+    position: absolute;
+    top: 6%;
+    left: 70%;
+    width: 16px;
+    height: 16px;
+    background: rgb(var(--c-ink));
+    clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
+    opacity: 0;
+    animation: hof-twinkle 5.2s ease-in-out infinite;
+    animation-delay: calc(var(--i, 0) * -0.83s);
+    pointer-events: none;
+  }
+  .hof-slot[data-tier="silver"] .hof-sparkle {
+    top: 18%;
+    left: 66%;
+  }
+  .hof-slot[data-tier="bronze"] .hof-sparkle {
+    top: 40%;
+    left: 36%;
+  }
+
+  /* The glass shelf: a bright front edge, a faint cool body, and a shadow
+     under it. Translucent, so the reflection shows through it. */
+  .hof-ledge {
+    position: relative;
+    z-index: 1;
+    height: 12px;
+    background:
+      linear-gradient(180deg, rgb(var(--c-ink) / 0.5) 0 1px, rgb(var(--c-ice) / 0.1) 1px, rgb(var(--c-ink) / 0.05) 70%, rgb(var(--c-night) / 0.6));
+    box-shadow: 0 12px 16px -10px rgb(0 0 0 / 0.85);
+  }
+  .hof-slot[data-earned="true"] .hof-ledge {
+    background:
+      radial-gradient(ellipse 42% 100% at 50% 0%, rgb(var(--hof-tint) / 0.35), transparent),
+      linear-gradient(180deg, rgb(var(--c-ink) / 0.5) 0 1px, rgb(var(--c-ice) / 0.1) 1px, rgb(var(--c-ink) / 0.05) 70%, rgb(var(--c-night) / 0.6));
+  }
+
+  /* The nameplate: engraved brass once it is yours, a dark plate until then. */
+  .hof-plate {
+    position: relative;
+    z-index: 2;
+    margin: 12px 5px 4px;
+    padding: 7px 7px 8px;
+    border: 1px solid rgb(var(--c-panel-border));
+    border-radius: 9px;
+    background: rgb(var(--c-panel) / 0.92);
+  }
+  .hof-slot[data-earned="true"] .hof-plate {
+    border: 2px solid rgb(var(--c-night));
+    background: linear-gradient(180deg, rgb(var(--c-gold)), rgb(var(--c-gold-dim)));
+    box-shadow:
+      0 3px 0 rgb(var(--c-night)),
+      inset 0 1px 0 rgb(var(--c-ink) / 0.55);
+  }
+  .hof-slot[data-tier="silver"][data-earned="true"] .hof-plate {
+    background: linear-gradient(180deg, rgb(var(--c-ink)), rgb(var(--c-ink-muted)));
+  }
+  .hof-slot[data-tier="bronze"][data-earned="true"] .hof-plate {
+    background: linear-gradient(180deg, rgb(var(--c-bronze-hi)), rgb(var(--c-bronze)));
+  }
+  .hof-plate-name {
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: rgb(var(--c-ink-soft));
+  }
+  .hof-plate-req {
+    margin-top: 2px;
+    font-size: 10.5px;
+    line-height: 1.3;
+    color: rgb(var(--c-ink-muted));
+  }
+  .hof-plate-stamp {
+    margin-top: 4px;
+    font-family: var(--font-ibm-plex-mono), monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .hof-slot[data-earned="true"] .hof-plate-name,
+  .hof-slot[data-earned="true"] .hof-plate-req,
+  .hof-slot[data-earned="true"] .hof-plate-stamp {
+    color: rgb(var(--c-night));
+  }
+  .hof-slot[data-earned="true"] .hof-plate-req {
+    font-weight: 500;
+  }
+  @media (min-width: 640px) {
+    .hof-plate {
+      margin-inline: 8px;
+    }
+    .hof-plate-name {
+      font-size: 13px;
+    }
+  }
+
+  /* The pane of glass over the front: a lit top edge, two fixed streaks,
+     and a sheen that sweeps across now and then. Clicks pass through. */
+  .hof-glass {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, rgb(var(--c-ink) / 0.07), transparent 16%),
+      linear-gradient(112deg, transparent 0 17%, rgb(var(--c-ink) / 0.05) 18% 23%, transparent 24% 61%, rgb(var(--c-ink) / 0.035) 62% 64%, transparent 65%);
+    box-shadow:
+      inset 0 1px 0 rgb(var(--c-ink) / 0.25),
+      inset 0 0 0 1px rgb(var(--c-ink) / 0.06),
+      inset 0 0 36px rgb(var(--c-ice) / 0.05);
+  }
+  .hof-glass::after {
+    content: "";
+    position: absolute;
+    top: -10%;
+    bottom: -10%;
+    left: 0;
+    width: 28%;
+    background: linear-gradient(100deg, transparent, rgb(var(--c-ink) / 0.08) 40%, rgb(var(--c-ink) / 0.14) 50%, rgb(var(--c-ink) / 0.08) 60%, transparent);
+    transform: translateX(-150%) skewX(-16deg);
+    animation: hof-sweep 10s ease-in-out infinite 1.5s;
+  }
 }
-.tier-silver {
-  border-color: rgb(var(--c-ice) / 0.55);
-  color: rgb(var(--c-ice));
+
+@keyframes hof-sweep {
+  0% {
+    transform: translateX(-150%) skewX(-16deg);
+  }
+  32%,
+  100% {
+    transform: translateX(480%) skewX(-16deg);
+  }
 }
-.tier-gold {
-  border-color: rgb(var(--c-gold));
-  color: rgb(var(--c-gold));
-  box-shadow: 0 0 28px -8px rgb(var(--c-gold) / 0.6);
+@keyframes hof-twinkle {
+  0%,
+  72%,
+  100% {
+    opacity: 0;
+    transform: scale(0.3) rotate(0deg);
+  }
+  82% {
+    opacity: 1;
+    transform: scale(1) rotate(45deg);
+  }
+  92% {
+    opacity: 0;
+    transform: scale(0.4) rotate(90deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hof-glass::after,
+  .hof-sparkle {
+    animation: none;
+    display: none;
+  }
+  .hof-trophy {
+    transition: none;
+  }
+  .hof-slot[data-earned="true"]:hover .hof-trophy {
+    transform: none;
+  }
 }
 
 /* ── Question of the Day hero ──────────────────────────────────────

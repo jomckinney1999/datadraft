@@ -1,5 +1,5 @@
 /**
- * Trophy case: what a learner has actually achieved, in football terms.
+ * The Hall of Fame: what a learner has actually achieved, in football terms.
  *
  * Badges are evaluated from stats that already exist in `Progress` rather than
  * from a separate event log. That means they are recomputed, not incremented —
@@ -20,7 +20,7 @@ export type Badge = {
   name: string;
   /** How to earn it, phrased as the requirement. */
   requirement: string;
-  /** Emoji used as the trophy-case glyph. */
+  /** Emoji shown beside the badge's name on its nameplate. */
   glyph: string;
   tier: "bronze" | "silver" | "gold";
   /** Progress toward the badge, for the "3 / 5" bar. */
@@ -199,12 +199,40 @@ export function newlyEarned(stats: BadgeStats, already: string[]): Badge[] {
   return BADGES.filter((b) => isEarned(b, stats) && !have.has(b.id));
 }
 
+/**
+ * The locked badge closest to done, for "next enshrinement": highest share
+ * of the way there, ties to the lower tier, then to list order. Nearest
+ * rather than first-in-the-list, so someone four lessons from Workhorse is
+ * pointed at Workhorse and not at a 7-day streak they haven't started.
+ */
+export function nextEnshrinement(stats: BadgeStats): Badge | undefined {
+  const rank = { bronze: 0, silver: 1, gold: 2 } as const;
+  let best: { badge: Badge; share: number } | undefined;
+  for (const badge of BADGES) {
+    const { have, need } = badge.progress(stats);
+    if (have >= need) continue;
+    const share = need > 0 ? have / need : 0;
+    if (
+      !best ||
+      share > best.share ||
+      (share === best.share && rank[badge.tier] < rank[best.badge.tier])
+    ) {
+      best = { badge, share };
+    }
+  }
+  return best?.badge;
+}
+
+/**
+ * The three wings of the Hall, top shelf first. Gold sits at eye level,
+ * where a real case puts the piece it is proudest of.
+ */
+export const WINGS: { tier: Badge["tier"]; name: string }[] = [
+  { tier: "gold", name: "The Inner Circle" },
+  { tier: "silver", name: "All-Pro Wing" },
+  { tier: "bronze", name: "Rookie Wing" },
+];
+
 export function badgeById(id: string): Badge | undefined {
   return BADGES.find((b) => b.id === id);
 }
-
-export const TIER_CLASS: Record<Badge["tier"], string> = {
-  bronze: "border-gold/40 text-gold",
-  silver: "border-ink-soft/40 text-ink-soft",
-  gold: "border-turf/50 text-turf",
-};

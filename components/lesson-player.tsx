@@ -10,6 +10,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import HofTrophy from "@/components/hof-trophy";
 import type { Database, QueryExecResult } from "sql.js";
 import { buildSeedSql } from "@/lib/fantasy-data";
 import {
@@ -2168,20 +2169,19 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
           {unlocked.length > 0 && (
             <div className="w-full max-w-sm">
               <p className="label-broadcast text-gold">
-                {unlocked.length === 1 ? "badge unlocked" : "badges unlocked"}
+                Enshrined in your Hall of Fame
               </p>
               <div className="mt-2 space-y-2">
                 {unlocked.map((badge, i) => (
                   <div
                     key={badge.id}
-                    className="animate-badge-drop sheen flex items-center gap-3 border border-gold/50 bg-gold/10 p-3 text-left"
+                    className="animate-badge-drop sheen flex items-center gap-3 rounded-xl border border-gold/50 bg-gold/10 p-3 text-left"
                     style={{ animationDelay: `${i * 120}ms` }}
                   >
-                    <span className="text-2xl leading-none" aria-hidden>
-                      {badge.glyph}
-                    </span>
+                    <HofTrophy tier={badge.tier} earned className="h-14 w-12 shrink-0" />
                     <div className="min-w-0">
                       <p className="font-display text-sm font-bold text-ink">
+                        <span aria-hidden>{badge.glyph} </span>
                         {badge.name}
                       </p>
                       <p className="text-[12px] leading-snug text-ink-muted">
@@ -2191,6 +2191,12 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                   </div>
                 ))}
               </div>
+              <Link
+                href="/learn#trophies"
+                className="mt-2 inline-block font-mono text-[10px] font-bold uppercase tracking-wider text-gold hover:underline"
+              >
+                See it in the case →
+              </Link>
             </div>
           )}
           <div className="flex w-full max-w-sm flex-col gap-2.5">

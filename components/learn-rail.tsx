@@ -20,8 +20,7 @@
 import Link from "next/link";
 import SidelineShop from "@/components/sideline-shop";
 import {
-  BADGES,
-  isEarned,
+  nextEnshrinement,
   statsFrom,
   type BadgeStats,
 } from "@/lib/achievements";
@@ -105,7 +104,7 @@ export default function LearnRail({
   const stats = statsFrom(progress);
   const drills = buildDrills(progress, stats);
   const league = leagueLabel(stats.lessonsDone);
-  const nextBadge = BADGES.filter((b) => !isEarned(b, stats))[0];
+  const nextBadge = nextEnshrinement(stats);
 
   return (
     <aside className="flex flex-col gap-4">
@@ -218,7 +217,7 @@ export default function LearnRail({
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[13px] font-semibold text-ink-soft">
-                  Next: {nextBadge.name}
+                  Next enshrinement: {nextBadge.name}
                 </p>
                 <div className="quest-bar mt-1">
                   <span
@@ -247,7 +246,7 @@ export default function LearnRail({
           href="/learn#trophies"
           className="mt-3 block w-full rounded-xl border border-panel-border py-2 text-center font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted transition-colors hover:border-gold/50 hover:text-gold"
         >
-          Trophy case
+          Hall of Fame
         </Link>
       </div>
 

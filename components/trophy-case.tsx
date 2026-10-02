@@ -1,23 +1,26 @@
 "use client";
 
 /**
- * The trophy case on /learn: every badge, earned and unearned, with progress.
+ * The Hall of Fame on /learn: every badge, earned and unearned, standing in a
+ * lit glass case — gold at eye level, then silver, then bronze.
  *
- * Locked badges are shown rather than hidden. A trophy case that only lists
- * what you already have gives a learner nothing to aim at, and "3 / 5 lessons"
- * on a locked badge is a far better prompt to start another lesson than an
- * empty shelf. Requirements are always stated, never mysterious.
+ * Locked badges are shown rather than hidden. A case that only holds what you
+ * already have gives a learner nothing to aim at, and a dark silhouette with
+ * "3/5" on its nameplate is a far better prompt to start another lesson than
+ * an empty shelf. Requirements are always stated, never mysterious.
  */
 
 import { useEffect, useState } from "react";
 import {
   BADGES,
-  TIER_CLASS,
+  WINGS,
   isEarned,
+  nextEnshrinement,
   statsFrom,
   type BadgeStats,
 } from "@/lib/achievements";
 import { displayStreak, loadProgress } from "@/lib/progress";
+import { HofCabinet, HofSlot } from "@/components/hof-trophy";
 
 export default function TrophyCase() {
   const [stats, setStats] = useState<BadgeStats | null>(null);
@@ -34,22 +37,35 @@ export default function TrophyCase() {
   if (!stats) return null;
 
   const earned = BADGES.filter((b) => isEarned(b, stats)).length;
+  const next = nextEnshrinement(stats);
+  let slot = 0;
 
   return (
     <section className="mt-12">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="label-broadcast text-turf">the trophy case</p>
-          <h2 className="mt-1 font-display text-2xl font-bold text-ink">
-            {earned} of {BADGES.length} earned
-          </h2>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="border border-panel-border bg-panel/60 px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-ink-muted">
+      <div className="text-center">
+        <p className="label-broadcast text-gold">the hall of fame</p>
+        <h2 className="mt-1 font-display text-3xl font-bold text-ink sm:text-4xl">
+          {earned === 0 ? (
+            "The lights are on"
+          ) : (
+            <>
+              <span className="text-gold">{earned}</span> of {BADGES.length} enshrined
+            </>
+          )}
+        </h2>
+        <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">
+          {earned === 0
+            ? "And the case is empty. Finish one lesson and First Snap takes the first spot in the Rookie Wing."
+            : earned === BADGES.length
+              ? "Every spot in the case is filled. First ballot, every one."
+              : "No committee, no vote. Every trophy in this case was earned on the field — lessons cleared, perfect drives, days in a row."}
+        </p>
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+          <span className="rounded-full border border-panel-border bg-panel/60 px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-ink-muted">
             {stats.totalYards.toLocaleString()} career yds
           </span>
           <span
-            className={`border px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest ${
+            className={`rounded-full border px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest ${
               streak > 0
                 ? "border-gold/50 bg-gold/10 text-gold"
                 : "border-panel-border bg-panel/60 text-ink-muted"
@@ -57,58 +73,38 @@ export default function TrophyCase() {
           >
             🔥 {streak} day{streak === 1 ? "" : "s"}
           </span>
+          {next && (
+            <span className="rounded-full border border-turf/40 bg-turf/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-turf">
+              Next enshrinement: {next.name} · {next.progress(stats).have}/{next.progress(stats).need}
+            </span>
+          )}
         </div>
       </div>
 
-      <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        {BADGES.map((badge, i) => {
-          const { have, need } = badge.progress(stats);
-          const done = have >= need;
+      <HofCabinet className="mt-10">
+        {WINGS.map((wing) => {
+          const badges = BADGES.filter((b) => b.tier === wing.tier);
+          const inWing = badges.filter((b) => isEarned(b, stats)).length;
           return (
-            <div
-              key={badge.id}
-              style={{ animationDelay: `${Math.min(i, 9) * 40}ms` }}
-              className={`lift animate-fade-up flex items-start gap-3 border p-3 ${
-                done
-                  ? `bg-panel/60 ${TIER_CLASS[badge.tier]}`
-                  : "border-panel-border bg-panel/20"
-              }`}
-            >
-              <span
-                className={`text-xl leading-none ${done ? "" : "opacity-25 grayscale"}`}
-                aria-hidden
-              >
-                {badge.glyph}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p
-                  className={`font-display text-sm font-bold ${
-                    done ? "text-ink" : "text-ink-muted"
-                  }`}
-                >
-                  {badge.name}
-                </p>
-                <p className="mt-0.5 text-[12px] leading-snug text-ink-muted">
-                  {badge.requirement}
-                </p>
-                {!done && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <div className="h-1 flex-1 overflow-hidden rounded-full bg-panel">
-                      <div
-                        className="h-full rounded-full bg-turf/60"
-                        style={{ width: `${need > 0 ? (have / need) * 100 : 0}%` }}
-                      />
-                    </div>
-                    <span className="shrink-0 font-mono text-[10px] text-ink-muted">
-                      {have}/{need}
-                    </span>
-                  </div>
-                )}
-              </div>
+            <div key={wing.tier} className="hof-shelf" data-tier={wing.tier}>
+              <p className="hof-wing">
+                {wing.name}
+                <span className="hof-wing-count">
+                  {inWing}/{badges.length}
+                </span>
+              </p>
+              <ul className="grid grid-cols-2 sm:grid-cols-4">
+                {badges.map((badge) => {
+                  const { have, need } = badge.progress(stats);
+                  return (
+                    <HofSlot key={badge.id} badge={badge} have={have} need={need} index={slot++} />
+                  );
+                })}
+              </ul>
             </div>
           );
         })}
-      </div>
+      </HofCabinet>
     </section>
   );
 }

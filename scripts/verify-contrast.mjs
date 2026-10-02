@@ -61,6 +61,12 @@ function check(label, marker) {
   for (const k of SYNTAX) add(`${k} on panel`, t[k], panel);
   for (const k of ACCENTS) add(`${k} on ${k}/10 chip`, t[k], over(t[k], panel, 0.1));
   for (const k of ACCENTS) add(`night on ${k} fill`, night, t[k]);
+  // The Hall of Fame: night type on each nameplate at the dark end of its
+  // metal gradient, and the bronze wing label on the case's back wall.
+  for (const k of ["--c-gold-dim", "--c-ink-muted", "--c-bronze"]) {
+    add(`night on ${k} plate`, night, t[k]);
+  }
+  add("--c-bronze on night", t["--c-bronze"], night);
 
   const failed = rows.filter(([, r]) => r < AA);
   console.log(`\n${label}`);
