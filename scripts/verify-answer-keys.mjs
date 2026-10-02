@@ -288,7 +288,10 @@ for (const lang of ["sql", "python", "r", "excel"]) {
     continue;
   }
   const seen = new Set();
-  const startMs = Date.parse("2026-01-01T00:00:00Z");
+  // Count from the day the whole pool is in the rotation: a question with an
+  // `added` date only joins on that day, so before it the pool is smaller.
+  const latest = pool.map((q) => q.added).filter(Boolean).sort().pop();
+  const startMs = Date.parse(`${latest && latest > "2026-01-01" ? latest : "2026-01-01"}T00:00:00Z`);
   for (let i = 0; i < pool.length; i++) {
     const day = new Date(startMs + i * 86400000).toISOString().slice(0, 10);
     seen.add(questions.questionOfTheDay(day, lang).id);
@@ -517,6 +520,55 @@ let draftChecked = 0;
   }
 }
 
+// ── Interview prep ────────────────────────────────────────────
+// Every interview pattern needs enough questions to be practice, and Query
+// Doctor has to keep naming the right mistake for the classic wrong answers.
+// Each case is a real wrong query against a real question's key; the
+// expected finding is the one a tutor would lead with.
+let doctorChecked = 0;
+{
+  const ip = await loadProjectTs(path.join(root, "lib/interview-patterns.ts"), root);
+  for (const p of ip.PATTERNS) {
+    const n = ip.questionsFor(p).length;
+    if (n < ip.MIN_PER_PATTERN) problems.push(`Interview pattern "${p.name}" has ${n} SQL questions; it needs ${ip.MIN_PER_PATTERN}`);
+  }
+  const doc = await loadProjectTs(path.join(root, "lib/query-doctor.ts"), root);
+  const qs = await loadProjectTs(path.join(root, "lib/questions.ts"), root);
+  const schemaOf = (q) => qs.schemaFor(q).map((t) => ({ name: t.table, columns: t.columns }));
+  const cases = [
+    ["week-3-hammer", "SELECT player, team, pts FROM week_results", "no-such-column"],
+    ["week-3-hammer", "SELECT TOP 1 player, team, fantasy_pts FROM week_results", "top"],
+    ["week-3-hammer", "SELECT player, team, fantasy_pts, FROM week_results", "trailing-comma"],
+    ["week-3-hammer", "SELECT player, team, fantasy_pts FROM week_results WHERE season = 2024 AND week = 3 ORDER BY fantasy_pts LIMIT 1", "limit-sort"],
+    ["week-3-hammer", "SELECT player, team, fantasy_pts FROM week_results WHERE season = 2024 AND week = 3 ORDER BY fantasy_pts DESC", "too-many-rows"],
+    ["donut-week", "SELECT r.team_name, r.player, COALESCE(w.fantasy_pts, 0) AS week1_pts FROM rosters r JOIN week_results w ON w.player = r.player AND w.season = 2024 AND w.week = 1 ORDER BY week1_pts DESC, r.player", "too-few-rows"],
+    ["donut-week", "SELECT r.team_name, r.player, w.fantasy_pts AS week1_pts FROM rosters r LEFT JOIN week_results w ON w.player = r.player AND w.season = 2024 AND w.week = 1 ORDER BY week1_pts DESC, r.player", "values"],
+    ["donut-week", "SELECT r.team_name, r.player, COALESCE(w.fantasy_pts, 0) AS week1_pts FROM rosters r LEFT JOIN week_results w ON w.player = r.player WHERE w.season = 2024 AND w.week = 1 ORDER BY week1_pts DESC, r.player", "left-join-where"],
+    ["above-the-line", "WITH ppg AS (SELECT player, position, AVG(fantasy_pts) AS ppg FROM week_results WHERE season = 2024 GROUP BY player, position) SELECT player, position, ppg FROM ppg p WHERE ppg > (SELECT AVG(ppg) FROM ppg x WHERE x.position = p.position) ORDER BY position, ppg DESC", "rounding"],
+    ["above-the-line", "SELECT player, position, AVG(fantasy_pts) AS ppg FROM week_results WHERE AVG(fantasy_pts) > 10 GROUP BY player", "aggregate-in-where"],
+    ["have-you-seen-this-running-back", "SELECT week FROM week_results WHERE season = 2024 AND player = 'Christian McCaffrey' AND fantasy_pts = NULL", "no-rows"],
+  ];
+  for (const [id, sql, want] of cases) {
+    doctorChecked++;
+    const q = qs.QUESTIONS.find((x) => x.id === id);
+    if (!q) {
+      problems.push(`Query Doctor case: no question ${id}`);
+      continue;
+    }
+    let mine = null;
+    let error = null;
+    try {
+      mine = run(sql) ?? null;
+    } catch (e) {
+      error = e.message;
+    }
+    const found = doc.diagnoseSql({ sql, error, mine, key: run(q.expected), orderMatters: q.orderMatters ?? false, schema: schemaOf(q) });
+    if (!found.some((f) => f.kind === want)) {
+      problems.push(`Query Doctor on ${id}: expected "${want}", got ${found.map((f) => f.kind).join(", ") || "nothing"} for: ${sql.slice(0, 70)}…`);
+    }
+  }
+}
+
 // ── Card art coverage ─────────────────────────────────────────
 // A course, build or case with no scene renders an empty picture slot on
 // its card. The scene maps live in TSX the loader does not transpile, so
@@ -681,6 +733,7 @@ console.log(`card art ids checked      : ${artChecked} (courses, builds, cases, 
 console.log(`prose facts checked       : ${factsChecked} (lib/lesson-facts.generated.ts vs the database)`);
 console.log(`stat duel rounds checked  : ${duelChecked} (180 days from launch, numbers vs their SQL)`);
 console.log(`draft room checks         : ${draftChecked} (scouting presets per season, drafts from every slot)`);
+console.log(`query doctor cases        : ${doctorChecked} (known wrong answers, the diagnosis a tutor would lead with)`);
 
 if (problems.length === 0) {
   console.log("\nAll answer keys run, return rows, and have no cutoff ties.");

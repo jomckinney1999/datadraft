@@ -69,7 +69,7 @@ const bioById = new Map(nflPlayers.map((p) => [p.gsis_id, p]));
 // Names differ between the two sources by suffix (Brian Thomas Jr., Kenneth
 // Walker III) and by short first names (Josh / Joshua), so every spelling a
 // player goes by is a key, suffixes stripped.
-const nameKey = (s) => norm(String(s ?? "").replace(/(jr|sr|ii|iii|iv|v)\.?$/i, ""));
+const nameKey = (s) => norm(String(s ?? "").replace(/\b(jr|sr|ii|iii|iv|v)\.?$/i, ""));
 const bioByName = new Map();
 for (const p of nflPlayers) {
   if (!POSITIONS.includes(p.position)) continue;

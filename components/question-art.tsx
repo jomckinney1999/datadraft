@@ -91,6 +91,17 @@ export const ART_TONE: Record<QuestionArt, Tone> = {
   scale: "gold",
   spotlight: "gold",
   broom: "turf",
+  turkey: "gold",
+  gift: "ice",
+  hourglass: "gold",
+  "leaf-snow": "ice",
+  "high-jump": "turf",
+  mirror: "ice",
+  "milk-carton": "turf",
+  donut: "gold",
+  thermometer: "ice",
+  fiddle: "gold",
+  "record-book": "turf",
 };
 
 // ── Scenes, one per title idea ───────────────────────────────────
@@ -1724,6 +1735,284 @@ function Broom() {
   );
 }
 
+/** Thanksgiving Triple-Header — a roast turkey on a platter, three footballs in front. */
+function Turkey() {
+  return (
+    <g>
+      <Shadow y={134} rx={70} />
+      <ellipse cx="100" cy="112" rx="70" ry="15" fill={c("ink-soft")} stroke={N} strokeWidth="2" />
+      <ellipse cx="100" cy="109" rx="58" ry="9" fill={c("ink", 0.9)} />
+      <path d="M52 104 Q50 58 100 56 Q150 58 148 104 Z" fill={c("gold-dim")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M66 78 Q78 64 98 62" stroke={c("gold")} strokeWidth="4" strokeLinecap="round" fill="none" />
+      <g transform="rotate(-28 50 82)">
+        <ellipse cx="50" cy="82" rx="16" ry="11" fill={c("gold-dim")} stroke={N} strokeWidth="2" />
+        <rect x="26" y="79" width="12" height="6" rx="2" fill={c("ink")} stroke={N} strokeWidth="1.5" />
+        <circle cx="24" cy="79" r="4" fill={c("ink")} stroke={N} strokeWidth="1.5" />
+        <circle cx="24" cy="86" r="4" fill={c("ink")} stroke={N} strokeWidth="1.5" />
+      </g>
+      <g transform="rotate(28 150 82)">
+        <ellipse cx="150" cy="82" rx="16" ry="11" fill={c("gold-dim")} stroke={N} strokeWidth="2" />
+        <rect x="162" y="79" width="12" height="6" rx="2" fill={c("ink")} stroke={N} strokeWidth="1.5" />
+        <circle cx="176" cy="79" r="4" fill={c("ink")} stroke={N} strokeWidth="1.5" />
+        <circle cx="176" cy="86" r="4" fill={c("ink")} stroke={N} strokeWidth="1.5" />
+      </g>
+      <path d="M100 56 V30" stroke={N} strokeWidth="2" />
+      <path d="M100 30 H124 L118 37 L124 44 H100 Z" fill={c("gold")} stroke={N} strokeWidth="1.8" strokeLinejoin="round" />
+      <text x="110" y="41" textAnchor="middle" fontSize="10" fontWeight="900" fill={N} fontFamily={SANS}>
+        3
+      </text>
+      <Football x={72} y={124} rx={12} />
+      <Football x={100} y={126} rx={12} />
+      <Football x={128} y={124} rx={12} />
+    </g>
+  );
+}
+
+/** Christmas Football — a wrapped gift with a football peeking out of the top. */
+function Gift() {
+  return (
+    <g>
+      <Shadow y={132} rx={50} />
+      <Football x={100} y={66} rx={20} rot={-12} />
+      <rect x="62" y="74" width="76" height="56" rx="4" fill={c("ice")} stroke={N} strokeWidth="2.2" />
+      <rect x="93" y="74" width="14" height="56" fill={c("gold")} stroke={N} strokeWidth="1.6" />
+      <g transform="rotate(-14 64 66)">
+        <rect x="56" y="60" width="88" height="16" rx="3" fill={c("ice")} stroke={N} strokeWidth="2.2" />
+        <rect x="93" y="60" width="14" height="16" fill={c("gold")} stroke={N} strokeWidth="1.6" />
+      </g>
+      <path d="M100 52 Q84 36 76 46 Q72 56 98 56 Z" fill={c("gold")} stroke={N} strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M100 52 Q116 36 124 46 Q128 56 102 56 Z" fill={c("gold")} stroke={N} strokeWidth="1.8" strokeLinejoin="round" />
+      <circle cx="100" cy="54" r="4.5" fill={c("gold-dim")} stroke={N} strokeWidth="1.6" />
+      <path d="M70 92 H90 M70 104 H90 M110 92 H130 M110 104 H130" stroke={c("ink", 0.45)} strokeWidth="2" strokeLinecap="round" />
+      <Sparkle x={44} y={50} r={7} fill={c("gold")} />
+      <Sparkle x={158} y={40} r={5} />
+      <Sparkle x={162} y={96} r={4} fill={c("gold")} />
+    </g>
+  );
+}
+
+/** Short Week — an hourglass running out, tagged four days. */
+function Hourglass() {
+  return (
+    <g>
+      <Shadow y={134} rx={40} />
+      <rect x="66" y="22" width="68" height="10" rx="3" fill={c("gold-dim")} stroke={N} strokeWidth="2" />
+      <rect x="66" y="118" width="68" height="10" rx="3" fill={c("gold-dim")} stroke={N} strokeWidth="2" />
+      <path d="M74 32 Q74 62 98 75 Q74 88 74 118 H126 Q126 88 102 75 Q126 62 126 32 Z" fill={c("ice", 0.25)} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M84 50 H116 Q112 62 100 70 Q88 62 84 50 Z" fill={c("gold")} />
+      <path d="M100 70 V112" stroke={c("gold")} strokeWidth="2" />
+      <path d="M78 116 Q100 92 122 116 Z" fill={c("gold")} stroke={N} strokeWidth="1.2" />
+      <path d="M80 38 Q80 56 92 66" stroke={c("ink", 0.6)} strokeWidth="2.4" strokeLinecap="round" fill="none" />
+      <g transform="rotate(10 152 62)">
+        <rect x="132" y="50" width="48" height="24" rx="5" fill={c("ink")} stroke={N} strokeWidth="2" />
+        <text x="156" y="66" textAnchor="middle" fontSize="11" fontWeight="900" fill={N} fontFamily={MONO}>
+          4 DAYS
+        </text>
+      </g>
+      <path d="M126 58 L134 60" stroke={N} strokeWidth="1.6" />
+    </g>
+  );
+}
+
+/** Fall Into Winter — a falling leaf, a football, and a snowflake. */
+function LeafSnow() {
+  const arms = [0, 60, 120, 180, 240, 300].map((deg) => {
+    const a = (deg * Math.PI) / 180;
+    const x = r1(150 + 22 * Math.cos(a));
+    const y = r1(62 + 22 * Math.sin(a));
+    const bx = r1(150 + 13 * Math.cos(a));
+    const by = r1(62 + 13 * Math.sin(a));
+    const s1x = r1(bx + 6 * Math.cos(a + 0.9));
+    const s1y = r1(by + 6 * Math.sin(a + 0.9));
+    const s2x = r1(bx + 6 * Math.cos(a - 0.9));
+    const s2y = r1(by + 6 * Math.sin(a - 0.9));
+    return `M150 62 L${x} ${y} M${bx} ${by} L${s1x} ${s1y} M${bx} ${by} L${s2x} ${s2y}`;
+  });
+  return (
+    <g>
+      <Shadow y={132} rx={46} />
+      <g transform="rotate(-30 50 60)">
+        <path d="M50 30 Q74 50 50 92 Q26 50 50 30 Z" fill={c("gold")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+        <path d="M50 36 V98 M50 54 L60 46 M50 54 L40 46 M50 70 L61 61 M50 70 L39 61" stroke={c("gold-dim")} strokeWidth="2" strokeLinecap="round" fill="none" />
+      </g>
+      <path d="M70 102 Q100 86 128 78" stroke={c("ink-muted")} strokeWidth="2" strokeDasharray="4 5" fill="none" />
+      <Football x={100} y={112} rx={24} rot={-8} />
+      <path d={arms.join(" ")} stroke={N} strokeWidth="6" strokeLinecap="round" />
+      <path d={arms.join(" ")} stroke={c("ice")} strokeWidth="3" strokeLinecap="round" />
+      <circle cx="150" cy="62" r="4" fill={c("ink")} stroke={N} strokeWidth="1.4" />
+    </g>
+  );
+}
+
+/** Above the Line — a football clearing a high-jump bar marked AVG. */
+function HighJump() {
+  return (
+    <g>
+      <Shadow y={134} rx={66} />
+      <rect x="34" y="52" width="8" height="80" rx="2" fill={c("turf")} stroke={N} strokeWidth="2" />
+      <rect x="158" y="52" width="8" height="80" rx="2" fill={c("turf")} stroke={N} strokeWidth="2" />
+      <rect x="30" y="128" width="16" height="6" rx="2" fill={c("turf-dim")} stroke={N} strokeWidth="1.5" />
+      <rect x="154" y="128" width="16" height="6" rx="2" fill={c("turf-dim")} stroke={N} strokeWidth="1.5" />
+      <rect x="38" y="82" width="124" height="9" rx="4" fill={c("gold")} stroke={N} strokeWidth="2" />
+      <text x="100" y="89.5" textAnchor="middle" fontSize="8" fontWeight="900" fill={N} fontFamily={MONO}>
+        AVG
+      </text>
+      <path d="M54 118 Q82 26 132 52" stroke={c("ink-muted")} strokeWidth="2" strokeDasharray="4 5" fill="none" />
+      <Football x={112} y={46} rx={20} rot={24} />
+      <Sparkle x={140} y={28} r={6} fill={c("gold")} />
+      <Sparkle x={76} y={40} r={4} />
+    </g>
+  );
+}
+
+/** Beating Yourself — a football squaring up to its own reflection. */
+function Mirror() {
+  return (
+    <g>
+      <Shadow y={134} rx={62} />
+      <path d="M128 132 L134 116 M156 132 L150 116" stroke={N} strokeWidth="3" strokeLinecap="round" />
+      <ellipse cx="142" cy="72" rx="32" ry="44" fill={c("gold-dim")} stroke={N} strokeWidth="2.2" />
+      <ellipse cx="142" cy="72" rx="25" ry="37" fill={c("ice", 0.35)} stroke={N} strokeWidth="1.6" />
+      <path d="M126 50 Q130 40 138 38" stroke={c("ink", 0.7)} strokeWidth="3" strokeLinecap="round" fill="none" />
+      <g opacity="0.75">
+        <Football x={142} y={84} rx={16} rot={-20} fill={c("gold")} />
+      </g>
+      <Football x={62} y={100} rx={24} rot={20} />
+      <path d="M86 70 L100 62 M86 80 L104 78" stroke={c("gold")} strokeWidth="3" strokeLinecap="round" />
+      <path d="M30 50 L44 36 L52 46 L66 30" stroke={c("turf")} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M58 30 H66 V38" stroke={c("turf")} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </g>
+  );
+}
+
+/** Have You Seen This Running Back? — a milk carton with a missing poster. */
+function MilkCarton() {
+  return (
+    <g>
+      <Shadow y={134} rx={44} />
+      <path d="M130 52 L150 42 V118 L130 130 Z" fill={c("ink-muted")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <path d="M70 52 L84 30 H136 L130 52 Z" fill={c("ink-soft")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <path d="M130 52 L136 30 L150 42 Z" fill={c("ink-muted")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <rect x="84" y="24" width="52" height="8" rx="1.5" fill={c("ink")} stroke={N} strokeWidth="1.8" />
+      <rect x="70" y="52" width="60" height="78" fill={c("ink")} stroke={N} strokeWidth="2.2" />
+      <text x="100" y="66" textAnchor="middle" fontSize="7" fontWeight="900" fill={N} fontFamily={MONO}>
+        HAVE YOU SEEN
+      </text>
+      <rect x="78" y="72" width="44" height="42" rx="3" fill={c("ice", 0.25)} stroke={c("ice")} strokeWidth="2" />
+      <MiniHelmet x={100} y={90} fill={c("turf")} />
+      <text x="100" y="110" textAnchor="middle" fontSize="8" fontWeight="900" fill={N} fontFamily={SANS}>
+        RB
+      </text>
+      <text x="100" y="124" textAnchor="middle" fontSize="7" fontWeight="900" fill={c("gold-dim")} fontFamily={MONO}>
+        MISSING
+      </text>
+    </g>
+  );
+}
+
+/** Donut Week — a frosted donut, which is to say a zero. */
+function Donut() {
+  const sprinkles: [number, number, number, string][] = [
+    [74, 62, 30, "turf"],
+    [92, 50, -20, "gold"],
+    [118, 52, 60, "ink"],
+    [134, 70, -40, "turf"],
+    [130, 94, 20, "gold"],
+    [70, 90, -60, "ink"],
+    [86, 108, 40, "gold"],
+    [112, 110, -10, "turf"],
+  ];
+  return (
+    <g>
+      <Shadow y={134} rx={52} />
+      <circle cx="102" cy="80" r="46" fill={c("gold-dim")} stroke={N} strokeWidth="2.4" />
+      <path
+        d="M102 40 Q118 38 128 48 Q142 52 142 68 Q150 82 140 94 Q138 112 120 114 Q106 124 92 116 Q72 116 66 100 Q54 86 62 70 Q62 50 80 46 Q90 38 102 40 Z"
+        fill={c("ice")}
+        stroke={N}
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <circle cx="102" cy="80" r="15" fill={c("night")} stroke={N} strokeWidth="2.2" />
+      {sprinkles.map(([x, y, rot, t], i) => (
+        <rect key={i} x={x - 5} y={y - 1.6} width="10" height="3.2" rx="1.6" fill={c(t)} transform={`rotate(${rot} ${x} ${y})`} />
+      ))}
+      <path d="M72 58 Q78 48 90 44" stroke={c("ink", 0.7)} strokeWidth="3" strokeLinecap="round" fill="none" />
+      <g transform="rotate(8 164 40)">
+        <rect x="146" y="30" width="38" height="20" rx="4" fill={c("gold")} stroke={N} strokeWidth="1.8" />
+        <text x="165" y="44" textAnchor="middle" fontSize="10" fontWeight="900" fill={N} fontFamily={MONO}>
+          WK 1
+        </text>
+      </g>
+    </g>
+  );
+}
+
+/** Temperature Unknown — a thermometer with a question mark where the reading should be. */
+function Thermometer() {
+  return (
+    <g>
+      <Shadow y={134} rx={40} />
+      <rect x="86" y="24" width="24" height="88" rx="12" fill={c("ink")} stroke={N} strokeWidth="2.2" />
+      <circle cx="98" cy="114" r="17" fill={c("ice")} stroke={N} strokeWidth="2.2" />
+      <rect x="93" y="70" width="10" height="40" rx="5" fill={c("ice")} />
+      <path d="M110 40 H104 M110 52 H104 M110 64 H104 M110 76 H104 M110 88 H104" stroke={N} strokeWidth="1.8" />
+      <path d="M92 32 V62" stroke={c("ink", 0.9)} strokeWidth="3" strokeLinecap="round" opacity="0.6" />
+      <path d="M126 26 H176 Q182 26 182 32 V64 Q182 70 176 70 H140 L130 80 L132 70 H126 Q120 70 120 64 V32 Q120 26 126 26 Z" fill={c("gold")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <text x="151" y="60" textAnchor="middle" fontSize="32" fontWeight="900" fill={N} fontFamily={SANS}>
+        ?
+      </text>
+      <path d="M30 120 Q46 92 64 120 Z" fill={c("ink-soft")} stroke={N} strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M40 120 V110 M54 120 V110" stroke={N} strokeWidth="1.4" />
+    </g>
+  );
+}
+
+/** Second Fiddle — a fiddle and its bow, with a silver 2. */
+function Fiddle() {
+  return (
+    <g>
+      <Shadow y={134} rx={44} />
+      <g transform="rotate(-18 98 82)">
+        <rect x="94" y="16" width="8" height="48" rx="2" fill={c("night-100")} stroke={N} strokeWidth="1.8" />
+        <circle cx="98" cy="14" r="6" fill={c("gold-dim")} stroke={N} strokeWidth="1.8" />
+        <path d="M98 56 C74 56 72 74 82 82 C70 90 70 116 98 120 C126 116 126 90 114 82 C124 74 122 56 98 56 Z" fill={c("gold-dim")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+        <path d="M86 84 Q82 92 86 100 M110 84 Q114 92 110 100" stroke={N} strokeWidth="2" fill="none" strokeLinecap="round" />
+        <rect x="90" y="104" width="16" height="5" rx="1.5" fill={c("night-100")} stroke={N} strokeWidth="1.4" />
+        <path d="M95.5 18 V106 M100.5 18 V106" stroke={c("ink", 0.8)} strokeWidth="0.9" />
+        <path d="M80 70 Q86 64 92 62" stroke={c("gold", 0.9)} strokeWidth="2.6" strokeLinecap="round" fill="none" />
+      </g>
+      <path d="M44 120 L150 34" stroke={N} strokeWidth="4" strokeLinecap="round" />
+      <path d="M46 116 L148 34" stroke={c("ink-soft")} strokeWidth="1.6" />
+      <circle cx="152" cy="94" r="18" fill={c("ink-soft")} stroke={N} strokeWidth="2.2" />
+      <circle cx="152" cy="94" r="12.5" fill="none" stroke={c("ink", 0.7)} strokeWidth="1.4" />
+      <text x="152" y="101" textAnchor="middle" fontSize="19" fontWeight="900" fill={N} fontFamily={SANS}>
+        2
+      </text>
+    </g>
+  );
+}
+
+/** Team Record Book — an open record book, a football on one page, a gold ribbon. */
+function RecordBook() {
+  return (
+    <g>
+      <Shadow y={132} rx={66} />
+      <path d="M30 46 Q64 40 100 50 Q136 40 170 46 V124 Q136 118 100 128 Q64 118 30 124 Z" fill={c("turf-dim")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M36 42 Q68 36 98 46 V122 Q68 112 36 118 Z" fill={c("ink")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <path d="M164 42 Q132 36 102 46 V122 Q132 112 164 118 Z" fill={c("ink")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <Football x={67} y={78} rx={17} rot={-12} />
+      <path d="M50 102 Q68 98 86 104" stroke={c("ink-muted")} strokeWidth="2" strokeLinecap="round" fill="none" />
+      <path d="M114 62 Q132 58 152 62 M114 74 Q132 70 152 74 M114 86 Q132 82 152 86 M114 98 Q130 95 140 98" stroke={c("ink-muted")} strokeWidth="2.2" strokeLinecap="round" fill="none" />
+      <text x="133" y="58" textAnchor="middle" fontSize="8" fontWeight="900" fill={c("gold-dim")} fontFamily={MONO}>
+        No. 1
+      </text>
+      <path d="M140 40 V70 L146 64 L152 70 V40" fill={c("gold")} stroke={N} strokeWidth="1.8" strokeLinejoin="round" />
+      <Sparkle x={34} y={30} r={6} fill={c("gold")} />
+    </g>
+  );
+}
+
 const SCENES: Record<QuestionArt, () => JSX.Element> = {
   hammer: Hammer,
   quarterback: Quarterback,
@@ -1768,6 +2057,17 @@ const SCENES: Record<QuestionArt, () => JSX.Element> = {
   scale: Scale,
   spotlight: Spotlight,
   broom: Broom,
+  turkey: Turkey,
+  gift: Gift,
+  hourglass: Hourglass,
+  "leaf-snow": LeafSnow,
+  "high-jump": HighJump,
+  mirror: Mirror,
+  "milk-carton": MilkCarton,
+  donut: Donut,
+  thermometer: Thermometer,
+  fiddle: Fiddle,
+  "record-book": RecordBook,
 };
 
 export default function QuestionArt({

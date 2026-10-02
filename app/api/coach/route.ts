@@ -13,12 +13,14 @@ export const runtime = "nodejs";
 export const maxDuration = 20;
 
 type CoachBody = {
-  mode: "hint" | "why_wrong";
+  mode: "hint" | "why_wrong" | "diagnose";
   prompt: string;
   exerciseType: string;
   learnerAnswer?: string;
   solution?: string;
   explain?: string;
+  /** diagnose: Query Doctor's findings (lib/query-doctor.ts). Never the key. */
+  findings?: string;
   /** Optional lesson id for logging — not required. */
   lessonId?: string;
 };
@@ -28,6 +30,7 @@ Rules:
 - 2–4 short sentences max. Talk like Duo: warm, plain, contractions OK.
 - Never dump a full multi-statement solution unless mode is why_wrong AND a solution was provided — then show it briefly and say why theirs missed.
 - In "hint" mode: nudge toward the idea; do NOT give the final answer.
+- In "diagnose" mode: you get the learner's SQL and a diagnosis of what is wrong. Explain the mistake in plain words and say which part of THEIR query to change. Never write the full corrected query, and never invent numbers from the answer — you haven't seen it.
 - Football flavor is light seasoning, not jargon.
 - No markdown headings. No bullet walls.`;
 
@@ -69,6 +72,9 @@ export async function POST(req: Request) {
   }
   if (body.explain) {
     userBits.push(`Curriculum tip: ${body.explain.slice(0, 400)}`);
+  }
+  if (body.mode === "diagnose" && body.findings) {
+    userBits.push(`Diagnosis:\n${body.findings.slice(0, 900)}`);
   }
 
   try {

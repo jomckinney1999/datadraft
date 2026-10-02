@@ -100,7 +100,18 @@ export type QuestionArt =
   | "wave"
   | "weather"
   | "years"
-  | "zzz";
+  | "zzz"
+  | "turkey"
+  | "gift"
+  | "hourglass"
+  | "leaf-snow"
+  | "high-jump"
+  | "mirror"
+  | "milk-carton"
+  | "donut"
+  | "thermometer"
+  | "fiddle"
+  | "record-book";
 
 export type Question = {
   id: string;
@@ -131,6 +142,15 @@ export type Question = {
   /** Shown after a correct answer — the idea, not a restatement. */
   explain: string;
   art: QuestionArt;
+  /**
+   * The first day this question can be a Question of the Day (YYYY-MM-DD).
+   * The daily rotation is computed over the pool, so adding questions
+   * re-deals every future day — and, without this, today's too, swapping the
+   * question people are already sharing ("same question for everyone
+   * today"). New questions appear in the bank at once and join the rotation
+   * from the day after they ship.
+   */
+  added?: string;
   /**
    * The players this question is about, for the faces on its card. Names
    * must be lesson players (the verifier checks). Leave it off and the card
@@ -1288,6 +1308,304 @@ ORDER BY streak_weeks DESC, player;`,
       "SUM over text returns 0 rather than an error, which is the dangerous part — nothing goes red, the number is just wrong. Row 6 is empty too, and VALUE on a blank is an error, so it has to be left out.",
     art: "broom",
   },
+  // ── Interview patterns (added 2026-10-02) ─────────────────────
+  // Written to fill the patterns analyst screens test that the bank had
+  // fewest of: dates, subqueries and CTEs, ranking within groups, and NULLs.
+  // lib/interview-patterns.ts counts them; the verifier wants four of each.
+  {
+    id: "christmas-football",
+    title: "Christmas Football",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["Dates", "strftime", "GROUP BY"],
+    prompt:
+      "The league has started owning Christmas Day too, whatever day of the week it lands on. For each season, how many games were played on December 25th, and what day of the week was it?",
+    returns: "season, weekday, games — one row per season, oldest first.",
+    tables: ["games"],
+    expected: `SELECT season, weekday, COUNT(*) AS games
+FROM games
+WHERE strftime('%m-%d', gameday) = '12-25'
+GROUP BY season, weekday
+ORDER BY season;`,
+    orderMatters: true,
+    hint: "strftime('%m-%d', gameday) turns a date into just its month and day, so you can compare it with '12-25'.",
+    explain:
+      "Matching on '%m-%d' ignores the year, which is exactly what a holiday needs. Grouping by season and weekday gives one row per Christmas.",
+    art: "gift",
+  },
+  {
+    id: "temperature-unknown",
+    title: "Temperature Unknown",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["NULL", "GROUP BY", "COUNT"],
+    prompt:
+      "The temp column is blank for a lot of games. Before you average it, find out whether the blanks are random or mean something: for each roof type, count the games and how many have no temperature.",
+    returns: "roof, games, missing_temp — most missing_temp first.",
+    tables: ["games"],
+    expected: `SELECT roof,
+       COUNT(*) AS games,
+       SUM(temp IS NULL) AS missing_temp
+FROM games
+GROUP BY roof
+ORDER BY missing_temp DESC;`,
+    orderMatters: true,
+    hint: "COUNT(*) counts every row. SUM(temp IS NULL) counts the rows where temp is missing, because a true comparison is 1.",
+    explain:
+      "NULL isn't one thing. Indoors it means 'doesn't apply': nobody records the weather under a dome. Outdoors it means 'wasn't recorded'. Checking where the blanks live before you average a column is half of real data work.",
+    art: "thermometer",
+  },
+  {
+    id: "thanksgiving-triple-header",
+    title: "Thanksgiving Triple-Header",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["Dates", "strftime", "WHERE"],
+    prompt:
+      "Thanksgiving means three NFL games before dessert. It falls on the fourth Thursday of November, and the schedule has plenty of other November Thursdays to trip over. List every Thanksgiving game in the table.",
+    returns: "season, gameday, home_team, away_team — by gameday, then home_team A–Z.",
+    tables: ["games"],
+    expected: `SELECT season, gameday, home_team, away_team
+FROM games
+WHERE strftime('%m', gameday) = '11'
+  AND weekday = 'Thursday'
+  AND CAST(strftime('%d', gameday) AS INTEGER) BETWEEN 22 AND 28
+ORDER BY gameday, home_team;`,
+    orderMatters: true,
+    hint: "The fourth Thursday of a month always lands between the 22nd and the 28th. strftime('%d', gameday) gives you the day of the month.",
+    explain:
+      "Dates in SQLite are text shaped YYYY-MM-DD, and strftime pulls a piece out of them. 'Fourth Thursday' becomes two plain conditions: it's a Thursday, and the day of the month is 22 to 28.",
+    art: "turkey",
+  },
+  {
+    id: "fall-into-winter",
+    title: "Fall Into Winter",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["Dates", "strftime", "GROUP BY", "AVG"],
+    prompt:
+      "Does scoring change as the season goes from September sun to January cold? For 2024, take every game and work out the average combined score, both teams together, for each calendar month.",
+    returns: "month (as '09', '10', …), games, avg_points rounded to 1 decimal — highest average first.",
+    tables: ["games"],
+    expected: `SELECT strftime('%m', gameday) AS month,
+       COUNT(*) AS games,
+       ROUND(AVG(home_score + away_score), 1) AS avg_points
+FROM games
+WHERE season = 2024
+GROUP BY month
+ORDER BY avg_points DESC;`,
+    orderMatters: true,
+    hint: "strftime('%m', gameday) gives the month as '09', '10' and so on. Group by it, and add the two scores together before you average.",
+    explain:
+      "You can group by something you compute, not just a column that exists. The 2024 season runs into January, which is why a 'season' and a calendar year are different things.",
+    art: "leaf-snow",
+  },
+  {
+    id: "above-the-line",
+    title: "Above the Line",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["Subquery", "CTE", "AVG"],
+    prompt:
+      "Your league says a player is only 'good' if he beats the average at his position. Using each player's 2024 points per game, find everyone whose PPG is higher than the average PPG of the players at his position.",
+    returns: "player, position, ppg rounded to 1 decimal — by position A–Z, then ppg highest first.",
+    tables: ["week_results"],
+    expected: `WITH ppg AS (
+  SELECT player, position, AVG(fantasy_pts) AS ppg
+  FROM week_results
+  WHERE season = 2024
+  GROUP BY player, position
+)
+SELECT player, position, ROUND(ppg, 1) AS ppg
+FROM ppg p
+WHERE ppg > (SELECT AVG(ppg) FROM ppg x WHERE x.position = p.position)
+ORDER BY position, ppg DESC;`,
+    orderMatters: true,
+    hint: "Work out each player's PPG first (a CTE is the tidy way). Then compare each row with a subquery that averages the PPGs at the same position.",
+    explain:
+      "This is an answer about an answer: you need every player's average before you can average them by position. The CTE names the first step so the second can read it, and the subquery works out the position average for each row.",
+    art: "high-jump",
+  },
+  {
+    id: "beating-yourself",
+    title: "Beating Yourself",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["CTE", "JOIN", "SUM"],
+    prompt:
+      "A consistency question: how often does a player beat his own average? For each player in 2024, count his games and how many of them scored more than his own 2024 average.",
+    returns: "player, games, above_own_avg — most above_own_avg first, then player A–Z.",
+    tables: ["week_results"],
+    expected: `WITH avgs AS (
+  SELECT player, AVG(fantasy_pts) AS avg_pts
+  FROM week_results
+  WHERE season = 2024
+  GROUP BY player
+)
+SELECT w.player,
+       COUNT(*) AS games,
+       SUM(w.fantasy_pts > a.avg_pts) AS above_own_avg
+FROM week_results w
+JOIN avgs a ON a.player = w.player
+WHERE w.season = 2024
+GROUP BY w.player
+ORDER BY above_own_avg DESC, w.player;`,
+    orderMatters: true,
+    hint: "A CTE of each player's 2024 average, joined back onto his weekly rows. Then count the rows where fantasy_pts is bigger than the average.",
+    explain:
+      "Joining an aggregate back onto the rows it came from is one of the most-used moves in analytics: every row gets to see its own group's number. In SQLite a comparison is 1 or 0, so SUM(condition) counts where it's true.",
+    art: "mirror",
+  },
+  {
+    id: "donut-week",
+    players: ["Christian McCaffrey", "Saquon Barkley"],
+    title: "Donut Week",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["LEFT JOIN", "COALESCE", "NULL"],
+    prompt:
+      "Your league's week 1 recap should list every rostered player and what he scored in week 1 of 2024. A player who didn't play still belongs on the list, with a zero next to his name.",
+    returns: "team_name, player, week1_pts (0 if he didn't play) — highest week1_pts first, then player A–Z.",
+    tables: ["rosters", "week_results"],
+    expected: `SELECT r.team_name, r.player,
+       COALESCE(w.fantasy_pts, 0) AS week1_pts
+FROM rosters r
+LEFT JOIN week_results w
+  ON w.player = r.player AND w.season = 2024 AND w.week = 1
+ORDER BY week1_pts DESC, r.player;`,
+    orderMatters: true,
+    hint: "A LEFT JOIN from rosters keeps every rostered player. COALESCE(x, 0) turns the NULL from a missing game into a 0.",
+    explain:
+      "LEFT JOIN keeps the row and fills the gap with NULL; COALESCE swaps the NULL for a value you choose. Put the season and week conditions in the ON clause: in WHERE they would throw the NULL rows away again — the classic LEFT JOIN trap.",
+    art: "donut",
+  },
+  {
+    id: "have-you-seen-this-running-back",
+    players: ["Christian McCaffrey"],
+    title: "Have You Seen This Running Back?",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["CTE", "LEFT JOIN", "NULL", "Anti-join"],
+    prompt:
+      "Christian McCaffrey's 2024 had more empty weeks than full ones. List every week of the 2024 season where he has no row in the table. The table has no row for a game a player missed, so you'll need a list of the weeks to compare against.",
+    returns: "week — in order, one row per week he has no game.",
+    tables: ["week_results"],
+    expected: `SELECT wk.week
+FROM (SELECT DISTINCT week FROM week_results WHERE season = 2024) wk
+LEFT JOIN week_results w
+  ON w.week = wk.week
+ AND w.season = 2024
+ AND w.player = 'Christian McCaffrey'
+WHERE w.player IS NULL
+ORDER BY wk.week;`,
+    orderMatters: true,
+    hint: "Build the list of 2024 weeks (SELECT DISTINCT week …), LEFT JOIN his rows onto it, and keep the weeks where nothing matched: IS NULL.",
+    explain:
+      "You can't find missing rows by looking at rows that exist. Make the full list of what should be there, LEFT JOIN what is there, and the NULLs are the gaps. It's the same move as finding customers with no orders.",
+    art: "milk-carton",
+  },
+  {
+    id: "short-week",
+    title: "Short Week",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["Dates", "julianday", "LAG", "CTE"],
+    prompt:
+      "Sunday then Thursday is the shortest rest in football: four days. In 2024, which teams played on four days' rest or less at least twice? Every game has a home team and an away team, so a team's schedule is spread across two columns.",
+    returns: "team, short_weeks — most short weeks first, then team A–Z.",
+    tables: ["games"],
+    expected: `WITH team_games AS (
+  SELECT home_team AS team, gameday FROM games WHERE season = 2024
+  UNION ALL
+  SELECT away_team AS team, gameday FROM games WHERE season = 2024
+),
+rest AS (
+  SELECT team,
+         julianday(gameday) - julianday(LAG(gameday) OVER (PARTITION BY team ORDER BY gameday)) AS days
+  FROM team_games
+)
+SELECT team, COUNT(*) AS short_weeks
+FROM rest
+WHERE days <= 4
+GROUP BY team
+HAVING COUNT(*) >= 2
+ORDER BY short_weeks DESC, team;`,
+    orderMatters: true,
+    hint: "Stack home and away into one column with UNION ALL. Then LAG(gameday) over each team's games gives the game before, and julianday() turns dates into numbers you can subtract.",
+    explain:
+      "Two moves analysts use constantly: UNION ALL to turn two columns into one, and LAG to compare each row with the one before it. julianday makes the gap between dates a plain subtraction.",
+    art: "hourglass",
+  },
+  {
+    id: "second-fiddle",
+    players: ["Derrick Henry", "Amon-Ra St. Brown", "Travis Kelce"],
+    title: "Second Fiddle",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["ROW_NUMBER", "PARTITION BY", "CTE"],
+    prompt:
+      "Every team has a star. Who's the second-best? For each NFL team with at least two players in the table, find the player with the second-highest point total in 2024.",
+    returns: "team, player, total_pts rounded to 1 decimal — by team A–Z.",
+    tables: ["week_results"],
+    expected: `WITH totals AS (
+  SELECT team, player, SUM(fantasy_pts) AS total_pts
+  FROM week_results
+  WHERE season = 2024
+  GROUP BY team, player
+),
+ranked AS (
+  SELECT team, player, total_pts,
+         ROW_NUMBER() OVER (PARTITION BY team ORDER BY total_pts DESC) AS rn
+  FROM totals
+)
+SELECT team, player, ROUND(total_pts, 1) AS total_pts
+FROM ranked
+WHERE rn = 2
+ORDER BY team;`,
+    orderMatters: true,
+    hint: "Total each player's 2024 points per team, number them within each team with ROW_NUMBER() OVER (PARTITION BY team ORDER BY the total DESC), and keep number 2.",
+    explain:
+      "ROW_NUMBER starts again at 1 in every partition, so 'the Nth best in each group' is one window and a WHERE. A team with only one player never gets a 2, so it drops out on its own.",
+    art: "fiddle",
+  },
+  {
+    id: "team-record-book",
+    players: ["Ja'Marr Chase", "Josh Allen", "Saquon Barkley"],
+    title: "Team Record Book",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["ROW_NUMBER", "PARTITION BY", "Top-N"],
+    prompt:
+      "For every team in the 2024 data, find the single best fantasy game anyone had while playing for it: who, which week, and the score.",
+    returns: "team, player, week, fantasy_pts — best score first, then team A–Z.",
+    tables: ["week_results"],
+    expected: `WITH ranked AS (
+  SELECT team, player, week, fantasy_pts,
+         ROW_NUMBER() OVER (PARTITION BY team ORDER BY fantasy_pts DESC) AS rn
+  FROM week_results
+  WHERE season = 2024
+)
+SELECT team, player, week, fantasy_pts
+FROM ranked
+WHERE rn = 1
+ORDER BY fantasy_pts DESC, team;`,
+    orderMatters: true,
+    hint: "ROW_NUMBER() OVER (PARTITION BY team ORDER BY fantasy_pts DESC) puts each team's best game at 1. Filter for 1 in an outer query: a window can't go in WHERE.",
+    explain:
+      "Top-1 per group is the most common window question in analyst screens. GROUP BY can give you the best score per team but not who scored it; a window keeps the whole row.",
+    art: "record-book",
+  },
 ];
 
 export const QUESTION_COUNT = QUESTIONS.length;
@@ -1355,7 +1673,7 @@ export function questionOfTheDay(
   day: string = leagueDay(),
   lang: QuestionLang = "sql",
 ): Question {
-  const pool = questionsIn(lang);
+  const pool = questionsIn(lang).filter((q) => !q.added || q.added <= day);
   // Never throws on an empty pool: a language with no questions yet falls
   // back to SQL rather than crashing a server render.
   if (pool.length === 0) return questionsIn("sql")[0];

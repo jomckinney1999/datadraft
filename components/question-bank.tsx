@@ -36,6 +36,9 @@ import AppNav from "@/components/app-nav";
 import QotdCard from "@/components/qotd-card";
 import DuelCard from "@/components/duel-card";
 import DraftCard from "@/components/draft-card";
+import PassTag from "@/components/pass-tag";
+import WhyArt from "@/components/why-art";
+import { PATTERNS, questionsFor } from "@/lib/interview-patterns";
 import { FACTS } from "@/lib/lesson-facts.generated";
 
 type LangFilter = "all" | QuestionLang;
@@ -80,6 +83,12 @@ export default function QuestionBank({ day }: { day: string }) {
   const [diff, setDiff] = useState<DiffFilter>("all");
   const [unsolvedOnly, setUnsolvedOnly] = useState(false);
   const [query, setQuery] = useState("");
+  /** An interview pattern to narrow the list to (SQL only). */
+  const [pattern, setPattern] = useState<string | null>(null);
+  const patternIds = useMemo(() => {
+    const p = PATTERNS.find((x) => x.id === pattern);
+    return p ? new Set(questionsFor(p).map((q) => q.id)) : null;
+  }, [pattern]);
 
   useEffect(() => {
     setProgress(loadProgress());
@@ -114,6 +123,7 @@ export default function QuestionBank({ day }: { day: string }) {
   const qotd = questionOfTheDay(day, lang === "all" ? "sql" : lang);
 
   const shown = QUESTIONS.filter((q) => {
+    if (patternIds && !patternIds.has(q.id)) return false;
     if (lang !== "all" && q.lang !== lang) return false;
     if (diff !== "all" && q.difficulty !== diff) return false;
     if (unsolvedOnly && solved.has(q.id)) return false;
@@ -200,8 +210,86 @@ export default function QuestionBank({ day }: { day: string }) {
           </div>
         )}
 
+        {/* ── Interview prep ──────────────────────────────── */}
+        <section id="interview" className="mt-10 scroll-mt-20">
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <p className="label-broadcast text-turf">interview prep</p>
+              <h2 className="mt-1 font-display text-xl font-bold text-ink sm:text-2xl">
+                The SQL patterns analyst screens test
+              </h2>
+            </div>
+            <PassTag />
+          </div>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {PATTERNS.map((p) => {
+              const qs = questionsFor(p);
+              const done = qs.filter((q) => solved.has(q.id)).length;
+              const on = pattern === p.id;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => {
+                    setPattern(on ? null : p.id);
+                    if (!on) {
+                      pickLang("sql");
+                      document.getElementById("bank-filters")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                  }}
+                  className={`surface rounded-xl border bg-panel px-4 py-3 text-left transition-colors ${
+                    on ? "border-turf/70" : "border-panel-border hover:border-turf/40"
+                  }`}
+                >
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="font-display text-sm font-bold text-ink">{p.name}</span>
+                    <span className="font-mono text-[11px] text-ink-muted">
+                      {hydrated ? `${done}/${qs.length}` : qs.length}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-xs leading-snug text-ink-soft">{p.asks}</p>
+                  <div className="quest-bar mt-2">
+                    <span style={{ width: `${hydrated && qs.length ? (done / qs.length) * 100 : 0}%` }} />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          <Link
+            href="/questions/mock"
+            className="lift surface group mt-3 flex items-center gap-4 overflow-hidden rounded-2xl border border-panel-border bg-panel p-3 pr-5 transition-colors hover:border-turf/50"
+          >
+            <span className="h-16 w-24 shrink-0 overflow-hidden rounded-xl border border-panel-border bg-night/60">
+              <WhyArt id="before-finished" className="h-full w-full" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="label-broadcast text-turf">mock sql screens</span>
+              <span className="mt-0.5 block font-display text-base font-bold text-ink sm:text-lg">
+                Rehearse the technical round, against the clock
+              </span>
+              <span className="mt-0.5 hidden text-xs leading-relaxed text-ink-soft sm:block">
+                Two or three unseen questions, 20 or 45 minutes, no hints — then a report on what went wrong.
+              </span>
+            </span>
+            <span className="shrink-0 font-mono text-[11px] font-bold uppercase tracking-wider text-turf">Start →</span>
+          </Link>
+        </section>
+
         {/* ── Filters ─────────────────────────────────────── */}
-        <div className="mt-6 space-y-2">
+        <div id="bank-filters" className="mt-6 scroll-mt-20 space-y-2">
+          {pattern && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">Pattern</span>
+              <button
+                type="button"
+                onClick={() => setPattern(null)}
+                className="rounded-lg border border-turf bg-turf/15 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-turf"
+              >
+                {PATTERNS.find((x) => x.id === pattern)?.name} ✕
+              </button>
+            </div>
+          )}
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
               Language

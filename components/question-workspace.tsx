@@ -54,6 +54,8 @@ import { featuredPlayers } from "@/lib/question-players";
 import Coach from "@/components/coach";
 import ExcelGrid from "@/components/excel-grid";
 import DifficultyChip from "@/components/difficulty-chip";
+import QueryDoctorPanel from "@/components/query-doctor-panel";
+import { diagnoseSql, type Finding } from "@/lib/query-doctor";
 
 type Outcome = {
   /** Rendered output: a grid for SQL, text for everything else. */
@@ -186,6 +188,8 @@ export default function QuestionWorkspace({
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [verdict, setVerdict] = useState<"right" | "wrong" | null>(null);
   const [diag, setDiag] = useState<string | null>(null);
+  /** SQL only: Query Doctor's findings on the last wrong or broken query. */
+  const [findings, setFindings] = useState<Finding[] | null>(null);
   const [hintOpen, setHintOpen] = useState(false);
   const [solutionOpen, setSolutionOpen] = useState(false);
   const [alreadySolved, setAlreadySolved] = useState(false);
@@ -248,23 +252,29 @@ export default function QuestionWorkspace({
   const attempt = useCallback(
     async (grade: boolean) => {
       setVerdict(null);
+      setFindings(null);
       if (grade) setTries((t) => t + 1);
 
       if (isSql) {
         const db = dbRef.current;
         if (!db) return;
+        const schema = schemaFor(question).map((t) => ({ name: t.table, columns: t.columns }));
         let mine: QueryExecResult | undefined;
         try {
           mine = db.exec(code)[0];
         } catch (e) {
-          setOutcome({ error: e instanceof Error ? e.message : String(e) });
+          const error = e instanceof Error ? e.message : String(e);
+          setOutcome({ error });
+          setFindings(diagnoseSql({ sql: code, error, schema }));
           return;
         }
         setOutcome({ grid: mine });
         if (!grade) return;
         const key = db.exec(question.expected)[0];
-        const ok = resultsMatch(mine, key, question.orderMatters ?? false);
-        finish(ok, ok ? null : gridDiag(mine, key, question.orderMatters ?? false));
+        const orderMatters = question.orderMatters ?? false;
+        const ok = resultsMatch(mine, key, orderMatters);
+        if (!ok) setFindings(diagnoseSql({ sql: code, mine, key, orderMatters, schema }));
+        finish(ok, ok ? null : gridDiag(mine, key, orderMatters));
         return;
       }
 
@@ -567,6 +577,7 @@ export default function QuestionWorkspace({
                     setOutcome(null);
                     setVerdict(null);
                     setDiag(null);
+                    setFindings(null);
                   }}
                   className="ml-auto font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors hover:text-ink"
                 >
@@ -589,6 +600,9 @@ export default function QuestionWorkspace({
                   {outcome.error}
                 </p>
               )}
+              {outcome?.error && isSql && findings && (
+                <QueryDoctorPanel findings={findings} sql={code} prompt={question.prompt} returns={question.returns} />
+              )}
 
               {verdict === "wrong" && (
                 <div className="mt-3 rounded-xl border border-ice/40 bg-ice/5 p-4">
@@ -600,10 +614,14 @@ export default function QuestionWorkspace({
                     your output against what the question asks for:{" "}
                     <span className="text-ink">{question.returns}</span>
                   </p>
-                  {diag && (
-                    <p className="mt-2 rounded-lg border border-ice/30 bg-night/40 px-3 py-2 font-mono text-[12px] leading-relaxed text-ice">
-                      {diag}
-                    </p>
+                  {isSql && findings?.length ? (
+                    <QueryDoctorPanel findings={findings} sql={code} prompt={question.prompt} returns={question.returns} />
+                  ) : (
+                    diag && (
+                      <p className="mt-2 rounded-lg border border-ice/30 bg-night/40 px-3 py-2 font-mono text-[12px] leading-relaxed text-ice">
+                        {diag}
+                      </p>
+                    )
                   )}
                 </div>
               )}

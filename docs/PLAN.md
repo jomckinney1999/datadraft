@@ -125,9 +125,26 @@ Most drills are honest `placeholder` stubs; Data Analyst foundation drills that 
 | Tier | What's included | Price | Who it's for |
 |---|---|---|---|
 | **Free** | Free content, limited graded drives (**5 timeouts/day**), scouting tickets + bye weeks (streak freezes), unlimited Practice Field | $0 | Top-of-funnel, everyone |
-| **Practice** (**Season Pass** in-product) | Unlimited timeouts, ongoing problem sets, live season datasets | $15–30/mo | Hobbyists, casual skill-builders |
+| **Practice** (**Season Pass** in-product) | The career tier — see "Season Pass: the career tier" below | **$19.99/mo or $119/yr** (proposed 2026-10-02, not live) | The numbers person who wants the job |
 | **Roadmap** | Full Beginner → Advanced course pathway, portfolio capstone, completion credential | $200–500 one-time | Serious learners, not yet job-hunting |
 | **Career Track** | Everything in Roadmap + role-specific playbook (DA / DS / AI Eng / SWE / AE / FDE) + resume/portfolio review + mock interview practice + application strategy support | $1,000–5,000/yr | Andy, once he's decided this is a career move, not a hobby |
+
+### Season Pass: the career tier (decided 2026-10-02)
+
+The paid tier is about getting the job, not the hobby — hobbyists stay happy on free, and the career-minded minority is who pays. Proposed price **$19.99/month or $119/year** (about $10/month; sell the annual plan at the draft in August, because monthly-only churns when the fantasy season ends). Nothing is for sale until the four gates in "Before we can charge money" clear; until then every feature below is built, labelled "Season Pass · free in early access", and open (`PAYWALL_LIVE` in `lib/season-pass.ts`).
+
+| Feature | Status |
+|---|---|
+| **Query Doctor**: why your query is wrong, without the answer | Live |
+| **Ask Coach**: the conversational version, on the doctor's diagnosis | Built; needs Vercel AI Gateway switched on |
+| **Mock SQL screens**: timed phone and technical screens with a report | Live |
+| **Interview patterns**: the nine SQL patterns screens test, with progress | Live; every pattern has at least 4 questions (bank at 57) |
+| **Depth**: the bank grown towards ~300, solutions and explanations on each | In progress |
+| **Proof for employers**: public profile, verifiable certificates, add to LinkedIn | Needs accounts switched on (server-side progress) |
+| **Weekly in-season drop + leaderboard** | Needs accounts and a weekly build of live data |
+| **Interview cases** grown from 6 to ~25 | Not started |
+
+**Never paywalled:** the daily question, the Stat Duel, the current Draft Room season, Chart it, your own league, and the first units of every course. They are how people find us.
 
 ### Positioning change: one-stop shop for data careers (2026-09-29)
 
