@@ -291,6 +291,13 @@ export default async function Home() {
             <div className="reveal">
               <QotdPanel question={qotd} />
             </div>
+            <p className="reveal mt-5 text-center text-sm text-ink-soft">
+              Not ready to write SQL?{" "}
+              <Link href="/questions/duel" className="font-semibold text-gold hover:underline">
+                Play today&apos;s Stat Duel
+              </Link>{" "}
+              — five head-to-heads, no code, every answer with the SQL that proves it.
+            </p>
           </div>
         </section>
 

@@ -29,6 +29,7 @@ import type { LiveBoard, LivePerformer, LiveWeek } from "@/lib/live-nfl";
 import type { Question } from "@/lib/questions";
 import { DIFFICULTY_XP } from "@/lib/questions";
 import QotdCard from "@/components/qotd-card";
+import DuelCard from "@/components/duel-card";
 
 type CourseProgress = {
   id: string;
@@ -187,6 +188,9 @@ export default function Dashboard({
             hydrated={hydrated}
             variant="compact"
           />
+        </div>
+        <div className="mt-3">
+          <DuelCard day={day} compact />
         </div>
 
         {/* Three ways in */}

@@ -379,6 +379,53 @@ let factsChecked = 0;
   );
 }
 
+// ── Stat Duel ─────────────────────────────────────────────────
+// Each round's numbers are computed in JavaScript and shown first; the SQL is
+// what "Prove it" shows and runs. Generate half a year of future days and
+// fail on any disagreement between the two, a tie, a mismatched position, a
+// first row that isn't the answer, or a day that can't fill five rounds.
+let duelChecked = 0;
+{
+  const duel = await loadProjectTs(path.join(root, "lib/stat-duel.ts"), root);
+  const start = Date.parse(`${duel.DUEL_LAUNCH}T00:00:00Z`);
+  for (let d = 0; d < 180; d++) {
+    const day = new Date(start + d * 86_400_000).toISOString().slice(0, 10);
+    const today = duel.dailyDuel(day);
+    if (today.rounds.length !== 5) problems.push(`Stat Duel ${day}: only ${today.rounds.length} rounds`);
+    if (JSON.stringify(duel.dailyDuel(day)) !== JSON.stringify(today)) {
+      problems.push(`Stat Duel ${day} is not the same duel twice`);
+    }
+    const names = today.rounds.flatMap((r) => [r.a.name, r.b.name]);
+    if (new Set(names).size !== names.length) problems.push(`Stat Duel ${day}: a name appears in two rounds`);
+    for (const r of today.rounds) {
+      duelChecked++;
+      const tag = `Stat Duel ${day} round ${r.n}`;
+      let res;
+      try {
+        res = run(r.sql);
+      } catch (e) {
+        problems.push(`${tag} SQL failed: ${e.message}`);
+        continue;
+      }
+      const got = new Map((res?.values ?? []).map((row) => [row[0], row[1]]));
+      for (const side of [r.a, r.b]) {
+        if (!got.has(side.name)) problems.push(`${tag}: the SQL returns no row for ${side.name}`);
+        else if (Math.abs(Number(got.get(side.name)) - side.value) > 1e-9) {
+          problems.push(`${tag}: shows ${side.name} at ${side.value} but the SQL says ${got.get(side.name)}`);
+        }
+      }
+      if (r.a.value.toFixed(r.decimals) === r.b.value.toFixed(r.decimals)) problems.push(`${tag}: a tie`);
+      const winner = duel.duelWinner(r) === 0 ? r.a.name : r.b.name;
+      if (res?.values?.[0]?.[0] !== winner) {
+        problems.push(`${tag}: the SQL ranks ${res?.values?.[0]?.[0]} first but the answer is ${winner}`);
+      }
+      if (r.a.kind === "player" && r.a.position !== r.b.position) {
+        problems.push(`${tag}: ${r.a.position} against ${r.b.position}`);
+      }
+    }
+  }
+}
+
 // ── Card art coverage ─────────────────────────────────────────
 // A course, build or case with no scene renders an empty picture slot on
 // its card. The scene maps live in TSX the loader does not transpile, so
@@ -541,6 +588,7 @@ console.log(`excel formula keys checked: ${formulaChecked}`);
 if (skippedR) console.log(`R keys skipped (no Node WebR): ${skippedR}`);
 console.log(`card art ids checked      : ${artChecked} (courses, builds, cases, units)`);
 console.log(`prose facts checked       : ${factsChecked} (lib/lesson-facts.generated.ts vs the database)`);
+console.log(`stat duel rounds checked  : ${duelChecked} (180 days from launch, numbers vs their SQL)`);
 
 if (problems.length === 0) {
   console.log("\nAll answer keys run, return rows, and have no cutoff ties.");

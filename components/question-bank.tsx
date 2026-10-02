@@ -34,6 +34,8 @@ import QuestionArt from "@/components/question-art";
 import DifficultyChip from "@/components/difficulty-chip";
 import AppNav from "@/components/app-nav";
 import QotdCard from "@/components/qotd-card";
+import DuelCard from "@/components/duel-card";
+import { FACTS } from "@/lib/lesson-facts.generated";
 
 type LangFilter = "all" | QuestionLang;
 
@@ -132,7 +134,8 @@ export default function QuestionBank({ day }: { day: string }) {
             Questions
           </h1>
           <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">
-            SQL, Python, R and Excel on real NFL scoring, 2022&ndash;2024. One
+            SQL, Python, R and Excel on real NFL scoring, {FACTS.seasons[0]}{" "}
+            through week {FACTS.latest.week} of {FACTS.latest.season}. One
             problem at a time, no lesson around it, nothing to lose for a wrong
             answer.
           </p>
@@ -150,6 +153,10 @@ export default function QuestionBank({ day }: { day: string }) {
             Every language has its own daily. Solve any one of them and the
             streak survives.
           </p>
+          {/* The warm-up: no code to guess, every answer with its SQL. */}
+          <div className="mt-4">
+            <DuelCard day={day} />
+          </div>
         </div>
 
         {/* ── Progress per language ───────────────────────── */}
