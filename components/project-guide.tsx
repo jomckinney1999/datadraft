@@ -9,6 +9,7 @@ import {
 import Link from "next/link";
 import AppNav from "@/components/app-nav";
 import ProjectArt from "@/components/project-art";
+import LeagueLab from "@/components/league-lab";
 import type { Project } from "@/lib/projects";
 import { REPO_URL } from "@/lib/site";
 
@@ -122,6 +123,8 @@ export default function ProjectGuide({ project }: { project: Project }) {
               : "Runs locally on DuckDB. No cloud warehouse, no card."}
           </p>
         </section>
+
+        {project.id === "my-league-scorecard" && <LeagueLab />}
 
         <section className="mt-10">
           <div className="flex flex-wrap items-end justify-between gap-2">

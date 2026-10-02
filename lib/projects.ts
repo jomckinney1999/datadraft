@@ -84,7 +84,7 @@ export const PROJECTS: Project[] = [
       {
         id: "platform",
         title: "Pick how you'll get the data",
-        body: "Sleeper is the easy path — free public API, no passwords, no CSV wrestling. ESPN and Yahoo work too: fill a small CSV template from your league app, then upload it in Colab.",
+        body: "Sleeper is the easy path — free public API, no passwords, no CSV wrestling. ESPN and Yahoo work too: fill a small CSV template from your league app, then upload it in Colab. Want to see your league before opening Colab? Load it in the panel above — same tables, right in this tab.",
       },
       {
         id: "export",
@@ -109,6 +109,11 @@ export const PROJECTS: Project[] = [
         id: "questions",
         title: "Answer the scorecard questions",
         body: "Write real SQL against your league. Hints sit under each question. Solutions are at the bottom — try first, peek second.",
+      },
+      {
+        id: "chart",
+        title: "Chart it for the group chat",
+        body: "Run the luck query in the panel above (or any query of your own) and press Chart it. You get a chart of your league with everyone's name on it — post it in the league chat and watch the arguments start.",
       },
       {
         id: "ship",
@@ -153,6 +158,7 @@ export const PROJECTS: Project[] = [
     deliverables: [
       "A Colab notebook with your league loaded",
       "SQL answers to the scorecard questions",
+      "A chart of your league, made with Chart it, for the group chat",
       "A short README: question, data source, one finding",
     ],
   },

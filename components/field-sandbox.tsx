@@ -16,6 +16,9 @@ import {
 import Coach from "@/components/coach";
 import TeamChip, { isTeamColumn } from "@/components/team-chip";
 import CodeEditor from "@/components/code-editor";
+import ChartIt from "@/components/chart-it";
+import { NFLVERSE_CREDIT } from "@/lib/chart";
+import { SITE_URL } from "@/lib/site";
 
 type EngineStatus = "loading" | "ready" | "error";
 
@@ -255,6 +258,16 @@ export default function FieldSandbox() {
             )}
           </span>
           <div className="flex items-center gap-2">
+            {result && meta && (
+              <ChartIt
+                grid={result}
+                title={activeDrill?.title ?? "From the Practice Field"}
+                subtitle={`${meta.weeklySeason} season · one SQL query on real NFL data`}
+                credit={NFLVERSE_CREDIT}
+                shareUrl={`${SITE_URL}/field`}
+                shareText="Made this from one SQL query on real NFL data."
+              />
+            )}
             <button
               type="button"
               onClick={() => {

@@ -30,6 +30,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Database, QueryExecResult } from "sql.js";
+import ChartIt from "@/components/chart-it";
+import { NFLVERSE_CREDIT } from "@/lib/chart";
+import { SITE_URL } from "@/lib/site";
 import type { CellValue } from "@/lib/excel-data";
 import type { Question } from "@/lib/questions";
 import {
@@ -645,10 +648,20 @@ export default function QuestionWorkspace({
 
               {outcome?.grid && (
                 <div className="mt-4">
-                  <p className="mb-1.5 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-                    your result · {outcome.grid.values.length} row
-                    {outcome.grid.values.length === 1 ? "" : "s"}
-                  </p>
+                  <div className="mb-1.5 flex items-center justify-between gap-2">
+                    <p className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+                      your result · {outcome.grid.values.length} row
+                      {outcome.grid.values.length === 1 ? "" : "s"}
+                    </p>
+                    <ChartIt
+                      grid={outcome.grid}
+                      title={question.title}
+                      subtitle={isQotd ? "Today's DataDraft question · one SQL query on real NFL data" : "One SQL query on real NFL data"}
+                      credit={NFLVERSE_CREDIT}
+                      shareUrl={`${SITE_URL}/questions/${question.id}`}
+                      shareText={isQotd ? `Solved today's DataDraft question: ${question.title}` : `${question.title}, in one SQL query.`}
+                    />
+                  </div>
                   <ResultGrid res={outcome.grid} />
                 </div>
               )}

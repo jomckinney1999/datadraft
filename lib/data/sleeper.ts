@@ -3,7 +3,10 @@
 // for fantasy-platform sync (Phase 5). Endpoints verified live before
 // writing this. Full reference: https://docs.sleeper.com/
 //
-// This module is foundational for Phase 5, not wired into any UI yet.
+// Used in the browser by the League Scorecard's "run it on your league" panel
+// (lib/league-load.ts): the API answers cross-origin requests from anywhere
+// (`access-control-allow-origin: *`), so a learner's league goes straight
+// from Sleeper into their tab and never touches our servers.
 
 const SLEEPER_BASE = "https://api.sleeper.app/v1";
 
@@ -29,6 +32,7 @@ export type SleeperLeague = {
   status: string;
   total_rosters: number;
   scoring_settings: Record<string, number>;
+  settings?: { playoff_week_start?: number };
 };
 
 export type SleeperRoster = {
@@ -36,6 +40,15 @@ export type SleeperRoster = {
   owner_id: string | null;
   players: string[];
   starters: string[];
+};
+
+export type SleeperMatchup = {
+  roster_id: number;
+  matchup_id: number | null;
+  points: number | null;
+  starters?: string[] | null;
+  players?: string[] | null;
+  players_points?: Record<string, number> | null;
 };
 
 async function sleeperGet<T>(path: string): Promise<T> {
@@ -68,6 +81,10 @@ export function getLeagueRosters(leagueId: string) {
 
 export function getLeagueUsers(leagueId: string) {
   return sleeperGet<SleeperUser[]>(`/league/${leagueId}/users`);
+}
+
+export function getLeagueMatchups(leagueId: string, week: number) {
+  return sleeperGet<SleeperMatchup[]>(`/league/${leagueId}/matchups/${week}`);
 }
 
 /**

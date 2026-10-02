@@ -165,15 +165,24 @@ managers"""
 
 cells.append(
     code(
-        """# Pull every week that has matchup data
+        """# Completed regular-season weeks only. A week still being played, or a
+# future week (Sleeper returns those with rosters but 0 points), would count
+# as a 0-0 game; playoffs are a different competition. Same rule as the
+# in-browser panel on the project page, so both give the same numbers.
+state = sleeper_get("/state/nfl")
+last_week = (league.get("settings", {}).get("playoff_week_start") or 15) - 1
+if league["season"] == state["season"]:
+    if state["season_type"] == "regular":
+        last_week = min(last_week, state["week"] - 1)
+    elif state["season_type"] != "post":
+        last_week = 0
+
 rows = []
 starter_rows = []
 
-for week in range(1, 23):
+for week in range(1, last_week + 1):
     matchups = sleeper_get(f"/league/{LEAGUE_ID}/matchups/{week}")
-    if not matchups:
-        continue
-    if week > 1 and all(not m.get("players") for m in matchups):
+    if not matchups or all(not m.get("points") for m in matchups):
         continue
 
     by_matchup = {}
@@ -496,7 +505,20 @@ for label, src in solutions:
 
 cells.append(
     md(
-        """## 5 · Write your finding
+        """## 5 · Chart it for the group chat
+
+Your league chat will care about a chart more than a table. The project page
+has the same tables in the browser, with a **Chart it** button on every
+result: load your league at
+[data-draft.vercel.app/projects/my-league-scorecard](https://data-draft.vercel.app/projects/my-league-scorecard),
+press **Who's actually good?** (all-play vs. real win %), then **Chart it** and
+download the PNG. Paste any query from this notebook there and it runs as-is."""
+    )
+)
+
+cells.append(
+    md(
+        """## 6 · Write your finding
 
 In a new text cell (or a README next to this notebook), finish these three lines:
 
