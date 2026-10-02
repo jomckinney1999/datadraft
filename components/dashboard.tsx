@@ -30,6 +30,7 @@ import type { Question } from "@/lib/questions";
 import { DIFFICULTY_XP } from "@/lib/questions";
 import QotdCard from "@/components/qotd-card";
 import DuelCard from "@/components/duel-card";
+import DraftCard from "@/components/draft-card";
 
 type CourseProgress = {
   id: string;
@@ -189,8 +190,9 @@ export default function Dashboard({
             variant="compact"
           />
         </div>
-        <div className="mt-3">
+        <div className="mt-3 grid gap-3 lg:grid-cols-2">
           <DuelCard day={day} compact />
+          <DraftCard compact />
         </div>
 
         {/* Three ways in */}

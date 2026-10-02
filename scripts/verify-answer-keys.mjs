@@ -426,6 +426,97 @@ let duelChecked = 0;
   }
 }
 
+// ── Draft Room ────────────────────────────────────────────────
+// The scouting database must never contain the season being drafted (that
+// would make the draft a lookup), every scouting preset has to run and
+// return players, and the engine has to be deterministic, fill every
+// lineup, and give each pair of teams exactly two regular-season games.
+let draftChecked = 0;
+{
+  const fs = await import("node:fs");
+  const sim = await loadProjectTs(path.join(root, "lib/draft-sim.ts"), root);
+  const scout = await loadProjectTs(path.join(root, "lib/draft-scout.ts"), root);
+  const { DRAFT_SEASONS } = await loadProjectTs(path.join(root, "lib/draft-seasons.generated.ts"), root);
+  if (!DRAFT_SEASONS.length) problems.push("Draft Room: no seasons built");
+  for (const meta of DRAFT_SEASONS) {
+    const tag = `Draft Room ${meta.season}`;
+    const data = JSON.parse(fs.readFileSync(path.join(root, "public/draft", `${meta.season}.json`), "utf8"));
+    if (data.board.length < sim.TOTAL_PICKS + 48) problems.push(`${tag}: board of ${data.board.length} is too small`);
+    if (new Set(data.board.map((p) => p.id)).size !== data.board.length) problems.push(`${tag}: duplicate player ids`);
+    if (data.scout.some((r) => r[1] >= data.season)) problems.push(`${tag}: scouting rows from the season being drafted`);
+    for (const p of data.board) {
+      if (!(p.adp > 0)) problems.push(`${tag}: ${p.name} has no ADP`);
+      if ((data.points[p.id] ?? []).length !== sim.LAST_WEEK) problems.push(`${tag}: ${p.name} has no ${sim.LAST_WEEK}-week points`);
+    }
+
+    // The scouting desk, on the real data, with picks in flight.
+    const db = new SQL.Database();
+    scout.seedScouting(db, data);
+    const league = sim.makeLeague(data.season, "verify", 2);
+    const picks = sim.autodraftRest(league, data, []);
+    scout.syncPicks(db, data, league, picks.slice(0, 30));
+    for (const preset of scout.scoutPresets(data)) {
+      draftChecked++;
+      try {
+        const res = db.exec(preset.sql)[0];
+        if (!res || !res.values.length) problems.push(`${tag} preset "${preset.label}" returns no rows`);
+        else if (!res.columns.includes("player")) problems.push(`${tag} preset "${preset.label}" has no player column to draft from`);
+        else {
+          const gone = new Set(picks.slice(0, 30).map((id) => data.board.find((p) => p.id === id)?.name));
+          const leaked = res.values.map((r) => r[res.columns.indexOf("player")]).filter((n) => gone.has(n));
+          if (leaked.length) problems.push(`${tag} preset "${preset.label}" shows drafted players: ${leaked.slice(0, 3).join(", ")}`);
+        }
+      } catch (e) {
+        problems.push(`${tag} preset "${preset.label}" failed: ${e.message}`);
+      }
+    }
+    scout.addResults(db, data);
+    try {
+      if (!db.exec(scout.resultsQuery(data))[0]?.values.length) problems.push(`${tag}: the results query returns nothing`);
+    } catch (e) {
+      problems.push(`${tag}: the results query failed: ${e.message}`);
+    }
+    db.close();
+
+    // The engine, from every slot.
+    for (let slot = 0; slot < sim.TEAMS; slot++) {
+      draftChecked++;
+      const lg = sim.makeLeague(data.season, `v${slot}x`, slot);
+      const all = sim.autodraftRest(lg, data, []);
+      if (all.length !== sim.TOTAL_PICKS || new Set(all).size !== all.length) {
+        problems.push(`${tag} slot ${slot + 1}: the draft didn't produce ${sim.TOTAL_PICKS} different picks`);
+        continue;
+      }
+      if (JSON.stringify(sim.autodraftRest(lg, data, [])) !== JSON.stringify(all)) {
+        problems.push(`${tag} slot ${slot + 1}: the same draft twice came out differently`);
+      }
+      sim.rosters(all).forEach((roster, team) => {
+        const lineup = sim.bestLineup(data, roster, 1);
+        if (lineup.spots.some((x) => x.id === null)) {
+          problems.push(`${tag} slot ${slot + 1}: team ${team + 1} can't fill a lineup`);
+        }
+      });
+      const games = new Map();
+      sim.schedule(lg).forEach((week) =>
+        week.forEach(([a, b]) => {
+          const k = [a, b].sort().join("-");
+          games.set(k, (games.get(k) ?? 0) + 1);
+        }),
+      );
+      if (games.size !== (sim.TEAMS * (sim.TEAMS - 1)) / 2 || [...games.values()].some((n) => n !== 2)) {
+        problems.push(`${tag} slot ${slot + 1}: the schedule isn't everyone-plays-everyone-twice`);
+      }
+      const result = sim.simulateSeason(lg, data, all);
+      const me = sim.summarize(result, slot);
+      const code = sim.encodeResult({ season: data.season, seed: lg.seed, slot, w: me.w, l: me.l, pf: me.pf, finish: me.finish });
+      const back = sim.parseResult(code);
+      if (!back || back.seed !== lg.seed || back.slot !== slot || back.w !== me.w) {
+        problems.push(`${tag} slot ${slot + 1}: the share code ${code} doesn't read back`);
+      }
+    }
+  }
+}
+
 // ── Card art coverage ─────────────────────────────────────────
 // A course, build or case with no scene renders an empty picture slot on
 // its card. The scene maps live in TSX the loader does not transpile, so
@@ -589,6 +680,7 @@ if (skippedR) console.log(`R keys skipped (no Node WebR): ${skippedR}`);
 console.log(`card art ids checked      : ${artChecked} (courses, builds, cases, units)`);
 console.log(`prose facts checked       : ${factsChecked} (lib/lesson-facts.generated.ts vs the database)`);
 console.log(`stat duel rounds checked  : ${duelChecked} (180 days from launch, numbers vs their SQL)`);
+console.log(`draft room checks         : ${draftChecked} (scouting presets per season, drafts from every slot)`);
 
 if (problems.length === 0) {
   console.log("\nAll answer keys run, return rows, and have no cutoff ties.");

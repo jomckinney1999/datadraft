@@ -35,6 +35,7 @@ import { ALL_MODULE, liveLessons } from "@/lib/curriculum";
 import { liveProjects } from "@/lib/projects";
 import { getLiveWeek } from "@/lib/live-nfl";
 import { FACTS } from "@/lib/lesson-facts.generated";
+import DraftCard from "@/components/draft-card";
 
 /**
  * The landing page.
@@ -298,6 +299,9 @@ export default async function Home() {
               </Link>{" "}
               — five head-to-heads, no code, every answer with the SQL that proves it.
             </p>
+            <div className="reveal mx-auto mt-5 max-w-2xl">
+              <DraftCard />
+            </div>
           </div>
         </section>
 

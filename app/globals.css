@@ -3824,3 +3824,24 @@ html[data-gate-opened] .gate-pop {
     content: none;
   }
 }
+
+/* The Draft Room's "on the clock" light: a slow gold pulse beside "You're on
+   the clock", so your turn is visible from across the screen. */
+.draft-clock {
+  box-shadow: 0 0 0 0 rgb(var(--c-gold) / 0.6);
+  animation: draft-clock 1.6s ease-out infinite;
+}
+@keyframes draft-clock {
+  0% {
+    box-shadow: 0 0 0 0 rgb(var(--c-gold) / 0.6);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 10px rgb(var(--c-gold) / 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .draft-clock {
+    animation: none;
+  }
+}

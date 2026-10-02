@@ -35,6 +35,7 @@ import DifficultyChip from "@/components/difficulty-chip";
 import AppNav from "@/components/app-nav";
 import QotdCard from "@/components/qotd-card";
 import DuelCard from "@/components/duel-card";
+import DraftCard from "@/components/draft-card";
 import { FACTS } from "@/lib/lesson-facts.generated";
 
 type LangFilter = "all" | QuestionLang;
@@ -154,8 +155,9 @@ export default function QuestionBank({ day }: { day: string }) {
             streak survives.
           </p>
           {/* The warm-up: no code to guess, every answer with its SQL. */}
-          <div className="mt-4">
+          <div className="mt-4 space-y-3">
             <DuelCard day={day} />
+            <DraftCard />
           </div>
         </div>
 
