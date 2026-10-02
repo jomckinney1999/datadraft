@@ -111,7 +111,27 @@ export type QuestionArt =
   | "donut"
   | "thermometer"
   | "fiddle"
-  | "record-book";
+  | "record-book"
+  | "goose"
+  | "necktie"
+  | "photo-finish"
+  | "can-opener"
+  | "letter-j"
+  | "lawnmower"
+  | "house"
+  | "party-blower"
+  | "fireworks"
+  | "road-sign"
+  | "snowball"
+  | "buckets"
+  | "boxing-gloves"
+  | "chef-hat"
+  | "train"
+  | "gone-fishing"
+  | "ladder"
+  | "high-five"
+  | "framed-jersey"
+  | "milestone";
 
 export type Question = {
   id: string;
@@ -1605,6 +1625,485 @@ ORDER BY fantasy_pts DESC, team;`,
     explain:
       "Top-1 per group is the most common window question in analyst screens. GROUP BY can give you the best score per team but not who scored it; a window keeps the whole row.",
     art: "record-book",
+  },
+  // ── Bank growth, batch 1 (added 2026-10-02) ───────────────────
+  // Team results from `games`: records, margins, streaks, byes — the table
+  // the bank had barely used, and the shape of most real analyst work.
+  {
+    id: "goose-egg",
+    title: "Goose Egg",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["WHERE", "OR"],
+    prompt: "A goose egg is a zero on the scoreboard. Find every game in the table where one team didn't score at all.",
+    returns: "season, week, home_team, away_team, home_score, away_score — by season, then week, then home_team A–Z.",
+    tables: ["games"],
+    expected: `SELECT season, week, home_team, away_team, home_score, away_score
+FROM games
+WHERE home_score = 0 OR away_score = 0
+ORDER BY season, week, home_team;`,
+    orderMatters: true,
+    hint: "Either side can be the one with zero, so the WHERE needs OR.",
+    explain:
+      "OR keeps a row when either condition is true. Two conditions on two different columns is the usual way to say 'either side'.",
+    art: "goose",
+  },
+  {
+    id: "tied-up",
+    title: "Tied Up",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["WHERE", "Alias"],
+    prompt: "Ties are rare in the NFL — overtime usually settles it. Find every game in the table that still ended level.",
+    returns: "season, week, home_team, away_team, and the score both teams finished on as final_score — oldest first.",
+    tables: ["games"],
+    expected: `SELECT season, week, home_team, away_team, home_score AS final_score
+FROM games
+WHERE home_score = away_score
+ORDER BY season, week;`,
+    orderMatters: true,
+    hint: "Compare the two score columns with each other. When they're equal, either one is the final score: rename it with AS.",
+    explain:
+      "A WHERE can compare two columns of the same row, not just a column and a value. AS renames a column in your result without touching the table.",
+    art: "necktie",
+  },
+  {
+    id: "photo-finish",
+    title: "Photo Finish",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["ABS", "BETWEEN", "GROUP BY"],
+    prompt: "A game decided by a field goal or less is a photo finish. For each season, count the games won by 1, 2 or 3 points.",
+    returns: "season, close_games — oldest season first.",
+    tables: ["games"],
+    expected: `SELECT season, COUNT(*) AS close_games
+FROM games
+WHERE ABS(home_score - away_score) BETWEEN 1 AND 3
+GROUP BY season
+ORDER BY season;`,
+    orderMatters: true,
+    hint: "ABS(home_score - away_score) is the margin whoever won. BETWEEN 1 AND 3 keeps out ties, which are a margin of 0.",
+    explain: "ABS turns 'who won by how much' into one number. BETWEEN includes both ends, so 1 and 3 both count.",
+    art: "photo-finish",
+  },
+  {
+    id: "season-opener",
+    title: "Season Opener",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["MIN", "GROUP BY"],
+    prompt: "When did each season kick off? Find the date of the first game of every season in the table.",
+    returns: "season, opener (the earliest gameday) — oldest first.",
+    tables: ["games"],
+    expected: `SELECT season, MIN(gameday) AS opener
+FROM games
+GROUP BY season
+ORDER BY season;`,
+    orderMatters: true,
+    hint: "MIN works on dates: text shaped YYYY-MM-DD sorts in date order.",
+    explain:
+      "MIN and MAX work on anything that sorts, not just numbers. Dates stored as YYYY-MM-DD sort correctly as plain text, which is why so many databases store them that way.",
+    art: "can-opener",
+  },
+  {
+    id: "the-j-team",
+    title: "The J Team",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["LIKE", "DISTINCT"],
+    prompt: "Your league is drafting an all-J lineup. List every player in the table whose name starts with J, once each.",
+    returns: "player — A–Z.",
+    tables: ["week_results"],
+    expected: `SELECT DISTINCT player
+FROM week_results
+WHERE player LIKE 'J%'
+ORDER BY player;`,
+    orderMatters: true,
+    hint: "LIKE 'J%' matches anything that starts with J. The % stands for any run of characters.",
+    explain: "LIKE uses % for any run of characters and _ for exactly one. DISTINCT stops each name repeating once per game played.",
+    art: "letter-j",
+  },
+  {
+    id: "grass-is-greener",
+    title: "Grass Is Greener",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["COUNT", "GROUP BY", "ORDER BY"],
+    prompt: "Some players swear they're faster on turf. Before anyone argues, count the 2024 games played on each kind of surface.",
+    returns: "surface, games — most games first, then surface A–Z.",
+    tables: ["games"],
+    expected: `SELECT surface, COUNT(*) AS games
+FROM games
+WHERE season = 2024
+GROUP BY surface
+ORDER BY games DESC, surface;`,
+    orderMatters: true,
+    hint: "GROUP BY surface, COUNT(*) in each group, then sort by the count. Two surfaces tie, so sort by name second.",
+    explain:
+      "Look at what comes back: 'unknown' is a value someone typed, not a NULL, so it gets counted like any other surface. Grouping is the quickest way to see how a column is really spelled.",
+    art: "lawnmower",
+  },
+  {
+    id: "home-sweet-home",
+    title: "Home Sweet Home",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["SUM", "Conditional aggregation", "GROUP BY"],
+    prompt: "Is home-field advantage real? For each season, count how many games the home team won and how many the away team won.",
+    returns: "season, home_wins, away_wins — oldest first. Ties count for neither.",
+    tables: ["games"],
+    expected: `SELECT season,
+       SUM(home_score > away_score) AS home_wins,
+       SUM(away_score > home_score) AS away_wins
+FROM games
+GROUP BY season
+ORDER BY season;`,
+    orderMatters: true,
+    hint: "In SQLite a comparison is 1 when it's true, so SUM(home_score > away_score) counts home wins.",
+    explain:
+      "Counting with SUM(condition) is conditional aggregation: several counts side by side from one pass over the table, instead of one query per count.",
+    art: "house",
+  },
+  {
+    id: "blowout",
+    title: "Blowout",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["CASE", "ABS", "LIMIT"],
+    prompt: "Find the five most lopsided games of the 2024 season: who won, who lost, and by how much.",
+    returns: "gameday, winner, loser, margin — biggest margin first, earliest gameday first when margins tie.",
+    tables: ["games"],
+    expected: `SELECT gameday,
+       CASE WHEN home_score > away_score THEN home_team ELSE away_team END AS winner,
+       CASE WHEN home_score > away_score THEN away_team ELSE home_team END AS loser,
+       ABS(home_score - away_score) AS margin
+FROM games
+WHERE season = 2024
+ORDER BY margin DESC, gameday
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "CASE WHEN home_score > away_score THEN home_team ELSE away_team END picks the winner. Flip it round for the loser.",
+    explain:
+      "The table stores home and away, not winner and loser. CASE relabels each row by what happened. And the tie-break isn't decoration: two games share a margin right at the cutoff, so without it the fifth row is a coin toss.",
+    art: "party-blower",
+  },
+  {
+    id: "fireworks-show",
+    title: "Fireworks Show",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["WHERE", "ORDER BY", "Expression"],
+    prompt: "Both offenses showed up. Find every 2024 game where both teams scored 30 or more.",
+    returns: "week, home_team, away_team, home_score, away_score — most combined points first, then week.",
+    tables: ["games"],
+    expected: `SELECT week, home_team, away_team, home_score, away_score
+FROM games
+WHERE season = 2024 AND home_score >= 30 AND away_score >= 30
+ORDER BY home_score + away_score DESC, week;`,
+    orderMatters: true,
+    hint: "Both scores need their own condition. You can ORDER BY a calculation — home_score + away_score — without selecting it.",
+    explain: "ORDER BY isn't limited to columns you selected: it can sort by any expression over the row.",
+    art: "fireworks",
+  },
+  {
+    id: "road-warriors",
+    title: "Road Warriors",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["GROUP BY", "HAVING"],
+    prompt: "Winning away from home is the hard part. Which teams won at least six road games in 2024?",
+    returns: "team, road_wins — most road wins first, then team A–Z.",
+    tables: ["games"],
+    expected: `SELECT away_team AS team, COUNT(*) AS road_wins
+FROM games
+WHERE season = 2024 AND away_score > home_score
+GROUP BY away_team
+HAVING COUNT(*) >= 6
+ORDER BY road_wins DESC, team;`,
+    orderMatters: true,
+    hint: "A road win is a row where the away team outscored the home team. Group by away_team, then HAVING keeps teams with six or more.",
+    explain:
+      "WHERE filters rows before grouping (only road wins); HAVING filters groups after (only teams with enough of them). Most 'at least N' questions need both.",
+    art: "road-sign",
+  },
+  {
+    id: "snowball",
+    players: ["Josh Allen"],
+    title: "Snowball",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["Running total", "Window", "SUM"],
+    prompt: "Watch Josh Allen's 2024 season build. For each week he played, show his points and his running total so far.",
+    returns: "week, fantasy_pts, running_total rounded to 1 decimal — in week order.",
+    tables: ["week_results"],
+    expected: `SELECT week, fantasy_pts,
+       ROUND(SUM(fantasy_pts) OVER (ORDER BY week), 1) AS running_total
+FROM week_results
+WHERE player = 'Josh Allen' AND season = 2024
+ORDER BY week;`,
+    orderMatters: true,
+    hint: "SUM(fantasy_pts) OVER (ORDER BY week) adds up every row up to and including the current one.",
+    explain: "A window with ORDER BY becomes a running calculation: each row sees the rows before it. Unlike GROUP BY, every week keeps its own row.",
+    art: "snowball",
+  },
+  {
+    id: "bust-solid-boom",
+    title: "Bust, Solid, Boom",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["CASE", "Pivot", "Conditional aggregation"],
+    prompt:
+      "Sort every 2024 game into three buckets: a bust is under 10 points, solid is 10 up to 20, and a boom is 20 or more. Count each bucket for each position.",
+    returns: "position, busts, solid, booms — positions A–Z.",
+    tables: ["week_results"],
+    expected: `SELECT position,
+       SUM(fantasy_pts < 10) AS busts,
+       SUM(fantasy_pts >= 10 AND fantasy_pts < 20) AS solid,
+       SUM(fantasy_pts >= 20) AS booms
+FROM week_results
+WHERE season = 2024
+GROUP BY position
+ORDER BY position;`,
+    orderMatters: true,
+    hint: "One SUM per bucket, each with its own condition: SUM(fantasy_pts < 10) and so on.",
+    explain: "Turning categories into columns like this is a pivot. Mind the edges: 10 is solid, not a bust, and 20 is a boom.",
+    art: "buckets",
+  },
+  {
+    id: "rematch",
+    title: "Rematch",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["CASE", "GROUP BY", "HAVING"],
+    prompt: "Division rivals meet twice a season. Which teams did KC play twice in 2024?",
+    returns: "opponent, games — opponents A–Z.",
+    tables: ["games"],
+    expected: `SELECT CASE WHEN home_team = 'KC' THEN away_team ELSE home_team END AS opponent,
+       COUNT(*) AS games
+FROM games
+WHERE season = 2024 AND 'KC' IN (home_team, away_team)
+GROUP BY opponent
+HAVING COUNT(*) = 2
+ORDER BY opponent;`,
+    orderMatters: true,
+    hint: "KC can be home or away. A CASE picks whichever team isn't KC; group by that and keep the counts of 2.",
+    explain:
+      "When what you care about can sit in either of two columns, CASE pulls it into one. 'KC' IN (home_team, away_team) is a tidy way to say 'on either side'.",
+    art: "boxing-gloves",
+  },
+  {
+    id: "home-cooking",
+    title: "Home Cooking",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["JOIN", "CASE", "Pivot"],
+    prompt:
+      "Do players score more at home? For 2024, compare each player's points per game at home and on the road. Only count players with at least 10 games. week_results doesn't say who was at home — games does.",
+    returns: "player, home_ppg, away_ppg (both rounded to 1 decimal) — biggest home advantage (home_ppg minus away_ppg) first, then player A–Z.",
+    tables: ["week_results", "games"],
+    expected: `SELECT w.player,
+       ROUND(AVG(CASE WHEN g.home_team = w.team THEN w.fantasy_pts END), 1) AS home_ppg,
+       ROUND(AVG(CASE WHEN g.away_team = w.team THEN w.fantasy_pts END), 1) AS away_ppg
+FROM week_results w
+JOIN games g
+  ON g.season = w.season AND g.week = w.week AND w.team IN (g.home_team, g.away_team)
+WHERE w.season = 2024
+GROUP BY w.player
+HAVING COUNT(*) >= 10
+ORDER BY home_ppg - away_ppg DESC, w.player;`,
+    orderMatters: true,
+    hint: "Join each stat line to its game on season, week and team (the team is either the home or the away team). Then AVG(CASE WHEN home THEN points END) — AVG skips the NULLs the CASE leaves for away games.",
+    explain:
+      "AVG ignores NULL, so a CASE with no ELSE averages only the rows that match. That's how one GROUP BY gives you a home average and a road average side by side.",
+    art: "chef-hat",
+  },
+  {
+    id: "winning-streak",
+    title: "Winning Streak",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["Gaps and islands", "ROW_NUMBER", "CTE", "UNION ALL"],
+    prompt:
+      "Hot teams string wins together. For every team that won at least seven in a row during the 2024 season, find its longest winning streak.",
+    returns: "team, longest_streak — longest first, then team A–Z.",
+    tables: ["games"],
+    expected: `WITH team_games AS (
+  SELECT home_team AS team, gameday, home_score > away_score AS won FROM games WHERE season = 2024
+  UNION ALL
+  SELECT away_team, gameday, away_score > home_score FROM games WHERE season = 2024
+),
+grouped AS (
+  SELECT team, won,
+         ROW_NUMBER() OVER (PARTITION BY team ORDER BY gameday)
+       - ROW_NUMBER() OVER (PARTITION BY team, won ORDER BY gameday) AS grp
+  FROM team_games
+),
+streaks AS (
+  SELECT team, COUNT(*) AS streak
+  FROM grouped
+  WHERE won = 1
+  GROUP BY team, grp
+)
+SELECT team, MAX(streak) AS longest_streak
+FROM streaks
+GROUP BY team
+HAVING MAX(streak) >= 7
+ORDER BY longest_streak DESC, team;`,
+    orderMatters: true,
+    hint:
+      "Put each team's games in one list with UNION ALL. Number all of a team's games, and separately number its wins: across a run of wins the difference between the two numbers stays the same. Group by that difference and count.",
+    explain:
+      "This is gaps and islands. The two ROW_NUMBERs drift apart by one at every loss, so the wins that share a difference belong to the same streak.",
+    art: "train",
+  },
+  {
+    id: "gone-fishing",
+    title: "Gone Fishing",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["CROSS JOIN", "Anti-join", "CTE"],
+    prompt: "Every team gets one week off. Find each team's 2024 bye week: the week it has no game at all.",
+    returns: "team, bye_week — by bye_week, then team A–Z.",
+    tables: ["games"],
+    expected: `WITH teams AS (SELECT DISTINCT home_team AS team FROM games WHERE season = 2024),
+weeks AS (SELECT DISTINCT week FROM games WHERE season = 2024),
+played AS (
+  SELECT home_team AS team, week FROM games WHERE season = 2024
+  UNION
+  SELECT away_team, week FROM games WHERE season = 2024
+)
+SELECT t.team, w.week AS bye_week
+FROM teams t
+CROSS JOIN weeks w
+LEFT JOIN played p ON p.team = t.team AND p.week = w.week
+WHERE p.team IS NULL
+ORDER BY bye_week, t.team;`,
+    orderMatters: true,
+    hint: "Build every team-week pair with a CROSS JOIN of teams and weeks, LEFT JOIN the games that happened, and keep the pairs where nothing matched.",
+    explain:
+      "To find what's missing, build everything that could exist, then take away what does. CROSS JOIN builds the grid; LEFT JOIN … IS NULL does the taking away.",
+    art: "gone-fishing",
+  },
+  {
+    id: "power-rankings",
+    title: "Power Rankings",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["DENSE_RANK", "UNION ALL", "CTE"],
+    prompt:
+      "Point differential (points scored minus points allowed) is the stat-head's power ranking. Rank the 2024 teams by it, giving tied teams the same rank with no gap after them, and show the top ten.",
+    returns: "team, point_diff, power_rank — by power_rank, then team A–Z. Ten rows.",
+    tables: ["games"],
+    expected: `WITH team_games AS (
+  SELECT home_team AS team, home_score - away_score AS diff FROM games WHERE season = 2024
+  UNION ALL
+  SELECT away_team, away_score - home_score FROM games WHERE season = 2024
+)
+SELECT team, SUM(diff) AS point_diff,
+       DENSE_RANK() OVER (ORDER BY SUM(diff) DESC) AS power_rank
+FROM team_games
+GROUP BY team
+ORDER BY power_rank, team
+LIMIT 10;`,
+    orderMatters: true,
+    hint: "Stack home and away into one list per team with UNION ALL, sum the differential, then DENSE_RANK() OVER (ORDER BY that sum DESC).",
+    explain:
+      "RANK skips a number after a tie (1, 2, 3, 3, 5); DENSE_RANK doesn't (1, 2, 3, 3, 4). Which you want depends on the question. Two teams tie at third here, so it shows.",
+    art: "ladder",
+  },
+  {
+    id: "high-five",
+    title: "High Five",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["Self-join", "JOIN"],
+    prompt: "Two teammates both going off in the same week is a fantasy dream. Find every 2024 week where two players on the same NFL team both scored 20 or more.",
+    returns: "week, team, player_a, player_b — player_a before player_b alphabetically; in week order, then team, then player_a, then player_b.",
+    tables: ["week_results"],
+    expected: `SELECT a.week, a.team, a.player AS player_a, b.player AS player_b
+FROM week_results a
+JOIN week_results b
+  ON b.season = a.season AND b.week = a.week AND b.team = a.team AND a.player < b.player
+WHERE a.season = 2024 AND a.fantasy_pts >= 20 AND b.fantasy_pts >= 20
+ORDER BY a.week, a.team, a.player, b.player;`,
+    orderMatters: true,
+    hint: "Join week_results to itself on season, week and team. a.player < b.player keeps each pair once and stops a player pairing with himself.",
+    explain:
+      "A self-join compares rows of one table with each other. The < is the trick: = would pair everyone with themselves, and != would list every pair twice.",
+    art: "high-five",
+  },
+  {
+    id: "career-year",
+    title: "Career Year",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["ROW_NUMBER", "PARTITION BY", "Top-N", "HAVING"],
+    prompt: "Every player has a season he'd frame. For each player, find his best season by points per game, counting only seasons with at least 8 games.",
+    returns: "player, season, ppg rounded to 1 decimal — best ppg first, then player A–Z.",
+    tables: ["week_results"],
+    expected: `WITH seasons AS (
+  SELECT player, season, AVG(fantasy_pts) AS ppg
+  FROM week_results
+  GROUP BY player, season
+  HAVING COUNT(*) >= 8
+),
+ranked AS (
+  SELECT player, season, ppg,
+         ROW_NUMBER() OVER (PARTITION BY player ORDER BY ppg DESC) AS rn
+  FROM seasons
+)
+SELECT player, season, ROUND(ppg, 1) AS ppg
+FROM ranked
+WHERE rn = 1
+ORDER BY ppg DESC, player;`,
+    orderMatters: true,
+    hint: "PPG per player per season with HAVING COUNT(*) >= 8, then ROW_NUMBER() OVER (PARTITION BY player ORDER BY ppg DESC), and keep 1.",
+    explain: "The HAVING runs before the window, so short seasons never get to compete. Filter first, rank second, and a four-game hot streak can't be anyone's career year.",
+    art: "framed-jersey",
+  },
+  {
+    id: "milestone-game",
+    title: "Milestone Game",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-03",
+    tags: ["ROW_NUMBER", "PARTITION BY", "CTE"],
+    prompt: "Thirty points is a milestone. For each player, find the first game in the table where he reached 30.",
+    returns: "player, season, week, fantasy_pts — earliest first (season, then week), then player A–Z.",
+    tables: ["week_results"],
+    expected: `WITH ranked AS (
+  SELECT player, season, week, fantasy_pts,
+         ROW_NUMBER() OVER (PARTITION BY player ORDER BY season, week) AS rn
+  FROM week_results
+  WHERE fantasy_pts >= 30
+)
+SELECT player, season, week, fantasy_pts
+FROM ranked
+WHERE rn = 1
+ORDER BY season, week, player;`,
+    orderMatters: true,
+    hint: "Keep only the 30-point games, then ROW_NUMBER() OVER (PARTITION BY player ORDER BY season, week), and keep 1.",
+    explain: "'First' needs an order that spans seasons: season, then week. Sorting by week alone would put a week-2 game from 2025 ahead of a week-9 game from 2022.",
+    art: "milestone",
   },
 ];
 
