@@ -13,6 +13,7 @@ import HeadlineTile from "@/components/headline-tile";
 import StickerLink from "@/components/sticker-cta";
 import TitleGate from "@/components/title-gate";
 import WhyArt from "@/components/why-art";
+import ChartYourLeague from "@/components/chart-your-league";
 import Reveal from "@/components/reveal";
 import LiveWeekStrip from "@/components/live-week-strip";
 import DriveExplainer from "@/components/drive-explainer";
@@ -115,7 +116,7 @@ const TONE: Record<string, string> = {
 };
 
 const AUDIENCE =
-  "fantasy managers who want the numbers · analysts who want reps · career-switchers who need a portfolio nobody else has · students bored of Titanic.csv · ";
+  "the commissioner with the 40-tab spreadsheet · the one who brings stats to the group chat · Excel pros who know SQL is next · anyone who's said “I want to get into data” · ";
 
 export default async function Home() {
   const day = leagueDay();
@@ -174,32 +175,39 @@ export default async function Home() {
               Free beta
             </Link>
 
-            <h1 className="reveal mt-6 font-display text-[2.6rem] font-bold leading-[1.02] tracking-tight text-pop sm:text-6xl lg:text-7xl">
-              Data practice <HeadlineTile /> that
-              <br />
-              <span className="title-glow-turf text-turf">
-                sounds like Sunday
+            {/* One person, in their own words: the fantasy league's numbers
+                person, who wants it to be their job (docs/PLAN.md, Target
+                user). Not "everyone who might learn SQL". */}
+            <h1 className="reveal mt-6 font-display font-bold leading-[1.04] tracking-tight text-pop">
+              <span className="mx-auto block max-w-3xl text-[1.85rem] sm:text-5xl lg:text-[3.4rem]">
+                You&apos;re already the numbers person in your league.
+              </span>
+              {/* One row at every width: the tile belongs to the phrase. */}
+              <span className="mt-3 block whitespace-nowrap text-[2.1rem] sm:text-[3.3rem] md:text-6xl lg:text-7xl">
+                <span className="title-glow-turf text-turf">Make it your job</span> <HeadlineTile />
               </span>
             </h1>
 
             <p className="reveal mx-auto mt-6 max-w-2xl text-base leading-relaxed text-ink-soft sm:text-lg">
-              Get sharp at <span className="text-ink">SQL</span>,{" "}
-              <span className="text-ink">Python</span>,{" "}
-              <span className="text-ink">R</span> and{" "}
-              <span className="text-ink">Excel</span> on every week of real
-              NFL scoring since {FACTS.seasons[0]}. A new question every
-              morning, courses that run your code for real, and projects worth
-              putting your name on. You don&apos;t have to watch the games.
+              Practice <span className="text-ink">SQL</span>,{" "}
+              <span className="text-ink">Python</span> and{" "}
+              <span className="text-ink">Excel</span> on real NFL stats, the
+              same ones you argue about every Sunday. Chart who got lucky in
+              your own league, and build a portfolio an interviewer will
+              actually remember.
             </p>
 
             <div className="reveal mt-8 flex flex-wrap items-center justify-center gap-4">
-              <StickerLink href="/questions" tone="gold" icon="question">
-                Practice questions
+              <StickerLink href={`/questions/${qotd.id}`} tone="gold" icon="question">
+                Solve today&apos;s question
               </StickerLink>
-              <StickerLink href="/account" tone="turf" icon="football" arrow>
-                Start learning free
+              <StickerLink href="/projects/my-league-scorecard#your-league" tone="turf" icon="football" arrow>
+                Chart your league
               </StickerLink>
             </div>
+            <p className="reveal mt-5 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-muted">
+              Free · no signup · 90 seconds
+            </p>
           </div>
 
           <a
@@ -271,7 +279,8 @@ export default async function Home() {
             <div className="reveal mb-6 text-center">
               <p className="label-broadcast text-gold">today&apos;s question</p>
               <h2 className="mt-2 font-display text-3xl font-bold text-ink sm:text-4xl">
-                Don&apos;t take our word for it. Solve one.
+                A new question every morning. Like waivers, but for your
+                career.
               </h2>
               <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-ink-soft">
                 A real database, running in your browser, right here on this
@@ -284,6 +293,9 @@ export default async function Home() {
             </div>
           </div>
         </section>
+
+        {/* ── Chart your league ──────────────────────────── */}
+        <ChartYourLeague />
 
         {/* ── This week in the league (live) ─────────────── */}
         <LiveWeekStrip live={live} />
@@ -384,12 +396,12 @@ export default async function Home() {
           <div className="sequence relative mx-auto mb-10 max-w-6xl px-4 text-center sm:px-6">
             <p className="reveal label-broadcast text-turf">the catalogue</p>
             <h2 className="reveal mt-2 font-display text-2xl font-bold text-ink sm:text-4xl">
-              Ten courses, one throughline
+              From the spreadsheet you know to the SQL interviews ask for
             </h2>
             <p className="reveal mx-auto mt-3 max-w-xl text-sm leading-relaxed text-ink-soft">
-              Start at SELECT and finish somewhere useful. Every course runs on
-              the same football data, so nothing you learn is trapped in the
-              lesson that taught it.
+              Start where you are, Excel or SELECT, and finish somewhere
+              useful. Every course runs on the same football data, so nothing
+              you learn is trapped in the lesson that taught it.
             </p>
           </div>
           <div className="relative">
@@ -415,7 +427,7 @@ export default async function Home() {
         <section data-reveal-section className="border-b border-panel-border">
           <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 sm:py-24">
             <h2 className="reveal text-center font-display text-2xl font-bold text-ink sm:text-4xl">
-              Why football, of all things
+              Why your league is the best dataset you&apos;ll ever learn on
             </h2>
             <div className="sequence mt-10 grid gap-5 sm:grid-cols-3">
               {WHY.map((p) => (
@@ -453,7 +465,7 @@ export default async function Home() {
 
         <Faq />
 
-        <FinalCta />
+        <FinalCta qotdId={qotd.id} />
       </main>
 
       <SiteFooter />

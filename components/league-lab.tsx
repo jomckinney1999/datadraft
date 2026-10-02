@@ -263,7 +263,7 @@ export default function LeagueLab() {
   const chartPreset = data && active && sql === active.sql ? active.chart(data) : undefined;
 
   return (
-    <section className="mt-8">
+    <section id="your-league" className="mt-8 scroll-mt-20">
       <p className="label-broadcast text-gold">no colab needed</p>
       <h2 className="mt-1 font-display text-xl font-bold text-ink">Run it on your league, right here</h2>
       <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-soft">

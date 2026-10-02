@@ -325,6 +325,8 @@ function drawScatter(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec,
   ctx.textAlign = "right";
   haloText(ctx, `avg ${fmt(ay)}`, p.x1 - 6, py(ay) - 6, T.inkSoft, T.bg, 5);
 
+  // Corner captions, remembered so no dot label lands on one.
+  const corners: Box[] = [];
   if (spec.quadrants) {
     setFont(ctx, 700, 22, T.mono);
     const [tl, tr, bl, br] = spec.quadrants;
@@ -332,7 +334,10 @@ function drawScatter(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec,
       if (!text) return;
       ctx.textAlign = align;
       ctx.textBaseline = base;
-      haloText(ctx, text.toUpperCase(), x, y, T.gold, T.bg, 6);
+      const label = text.toUpperCase();
+      const w = ctx.measureText(label).width;
+      corners.push({ x: align === "right" ? x - w : x, y: base === "bottom" ? y - 24 : y, w, h: 24 });
+      haloText(ctx, label, x, y, T.gold, T.bg, 6);
     };
     q(tl, p.x0 + 16, p.y0 + 12, "left", "top");
     q(tr, p.x1 - 16, p.y0 + 40, "right", "top");
@@ -350,7 +355,7 @@ function drawScatter(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec,
     return top ? (right ? T.turf : T.gold) : right ? T.series[1] : T.inkMuted;
   };
   const r = marks.length > 80 ? 8 : marks.length > 40 ? 10 : 12;
-  const taken: Box[] = marks.map((m) => ({ x: px(m.x) - r, y: py(m.y) - r, w: r * 2, h: r * 2 }));
+  const taken: Box[] = [...corners, ...marks.map((m) => ({ x: px(m.x) - r, y: py(m.y) - r, w: r * 2, h: r * 2 }))];
   for (const m of marks) {
     ctx.beginPath();
     ctx.arc(px(m.x), py(m.y), r, 0, Math.PI * 2);

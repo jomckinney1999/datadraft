@@ -33,11 +33,12 @@ export default function ProjectsShowcase() {
         <div className="sequence text-center">
           <p className="reveal label-broadcast text-ice">projects</p>
           <h2 className="reveal mt-2 font-display text-2xl font-bold text-ink sm:text-4xl">
-            Leave with something you can show
+            Your league, in your portfolio
           </h2>
           <p className="reveal mx-auto mt-3 max-w-lg text-sm leading-relaxed text-ink-soft">
-            Not a certificate. A repo, a notebook, a lineage graph — the kind
-            of thing an interviewer clicks on and asks you about.
+            Not a certificate. Your own fantasy league in SQL, a model that
+            predicts next week, a warehouse with tests — the kind of thing an
+            interviewer clicks on and asks you about.
           </p>
         </div>
 

@@ -24,7 +24,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 
 const TITLE = "DataDraft — SQL practice on real NFL data";
 const DESCRIPTION =
-  "LeetCode for football data. A new SQL question every day on real NFL scoring, courses from SELECT to window functions, and projects you can put your name on. You don't have to watch the games.";
+  "You're already the numbers person in your fantasy league. Make it your job: practice SQL, Python and Excel on real NFL stats, chart your own league, and build a portfolio an interviewer remembers.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

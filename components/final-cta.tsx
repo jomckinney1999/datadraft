@@ -14,7 +14,7 @@ import Coach from "@/components/coach";
 import StickerLink from "@/components/sticker-cta";
 import WaitlistForm from "@/components/waitlist-form";
 
-export default function FinalCta() {
+export default function FinalCta({ qotdId }: { qotdId?: string }) {
   return (
     <section
       data-reveal-section
@@ -37,11 +37,11 @@ export default function FinalCta() {
           real season.
         </p>
         <div className="reveal mt-8 flex flex-wrap items-center justify-center gap-4">
-          <StickerLink href="/questions" tone="gold" icon="question">
-            Practice questions
+          <StickerLink href={qotdId ? `/questions/${qotdId}` : "/questions"} tone="gold" icon="question">
+            Solve today&apos;s question
           </StickerLink>
-          <StickerLink href="/account" tone="turf" icon="football" arrow>
-            Start learning free
+          <StickerLink href="/projects/my-league-scorecard#your-league" tone="turf" icon="football" arrow>
+            Chart your league
           </StickerLink>
         </div>
 

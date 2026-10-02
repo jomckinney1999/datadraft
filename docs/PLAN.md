@@ -2,7 +2,9 @@
 
 This is the source of truth for product structure, pricing, and positioning decisions. Update it whenever the business model changes, *before* or alongside code changes — this is what future Claude/Cursor sessions read to understand why the landing page is shaped the way it is.
 
-Last updated: 2026-08-10 (**positioning pivot** — the narrow single-language/single-sport launch strategy was reversed by owner decision; see Big picture vision).
+Last updated: 2026-10-02 (**target user and messaging** — one avatar, written for directly; see Target user and Messaging).
+
+> **Read this first.** On 2026-09-30 the product narrowed (CLAUDE.md, "What this is"): four sections, football only, and no career kit, coaching playbooks or sport picker. Where this doc still describes those — the multi-sport vision, Career Track playbooks, `/resources` — it is history, kept for the reasoning, not the plan. The price ranges in the ladder are still the working assumption. Nothing is for sale yet.
 
 ## Big picture vision
 
@@ -57,30 +59,45 @@ DataDraft is **one business with a single pricing ladder** — not a separate ed
 
 Overall picture: **freelance work + DataDraft** — two things, not three. An earlier plan had career coaching as a third, standalone business; that was folded into DataDraft because it's cleaner to run and matches what the target user actually needs to justify paying for the top tier (see below).
 
-## Target user: "Andy"
+## Target user (decided 2026-10-02)
 
-Andy is the persona the pricing ladder is built against — specifically, the question "what would Andy pay $1,000–5,000/year for?"
+**The fantasy league's numbers person who wants it to be their job.** One person, and everything on the site is written to them:
 
-Key insight: the sports-themed hook (fantasy football as the dataset) is what gets Andy in the door, but it is not what gets him to spend real money. Nobody pays $1–5K/year for "make fantasy football more fun." He pays that much when the calculation shifts from **hobby** to **career investment**.
+- **Who:** roughly 23–35, has played in a home league for years — often the commissioner, or the one who keeps the rankings spreadsheet.
+- **Job:** works near data but not in it — operations, finance, marketing, sales ops, supply chain, teaching, or a recent business/econ grad. Comfortable in Excel; SQL is the wall.
+- **History:** started an online SQL course or the Google Data Analytics certificate and stalled. Did a Titanic or fake-company project and felt nothing.
+- **Goal:** a first data analyst job, or becoming the data person at their current company, within 6–12 months. On the side: win the league, settle arguments with numbers.
+- **Pains:** practice feels like homework; no portfolio project anyone cares about; SQL interview questions are intimidating; long courses don't stick.
+- **Where they are:** fantasy podcasts, r/fantasyfootball, the Sleeper app, advanced-stats sites; data-career YouTube, r/SQL, r/dataanalysis, LinkedIn.
+- **When they're reachable:** August draft prep, midweek waivers in season, and January — the fantasy season ends just as job searches and resolutions start.
+- **Objections:** "Will employers take a football project seriously?" · "I'm not technical." · "I don't have time." The FAQ answers these, in that order.
 
-Andy's math: if this genuinely helps him land a data analyst role (even at the entry-level $55–70K range), spending $2–3K is a trivial, obviously-worth-it bet compared to the alternative paths to the same outcome — a bootcamp ($10–20K+) or an online analytics master's ($20–50K). He isn't comparing the price to a $20/month app; he's comparing it to those other paths, and DataDraft is radically cheaper than all of them. That comparison is what makes $1–5K feel reasonable to him, not the sandbox itself.
+**Why this person and not a wider net.** The football lens only helps someone who already speaks football; for a non-fan, generic SQL sites do the same job with nothing extra to learn. Fandom is what brings them in; career intent is what makes them practise daily and pay — a pure hobbyist enjoys a question but won't grind SQL. Their week already runs on the NFL calendar, which is the retention bet. And they come with a group: a league is 10–12 friends in a chat, and Chart it gives them something to post there.
 
-What Andy actually wants at that price point (an annual "Career Track" membership):
+**Secondary (welcome, not built for):** working analysts who are fans and want daily reps (easiest to convert, best beta testers); college students who want a portfolio (volume, little money). **Not targeted:** non-fans (the reassurance lives in the FAQ, not the hero), hobby-only players (fine on free), anyone wanting career coaching (cut 2026-09-30), bettors (no gambling content, ever).
 
-- Full structured roadmap access — Beginner through Advanced/Portfolio, not piecemeal
-- Unlimited sandbox practice — not rate-limited like the cheap tier
-- A real portfolio capstone built on actual NFL/fantasy data — resume-ready, interview-talkable. This is the single biggest thing separating "I took a course" from "I can do the job."
-- A cohort/community element — peers on the same roadmap, accountability, momentum. Solo online learning has notoriously high dropout, and Andy knows this about himself.
-- A certification/completion credential — something concrete for LinkedIn
-- Application support — resume/portfolio review, mock interview practice using the material he built. This is where the offering brushes right up against career coaching.
+**This replaces "Andy".** The earlier persona was a career-changer paying $1–5K a year for coaching and application support. The person is the same — fan turning career-changer — but the product no longer sells coaching, so what they pay for is practice that sticks and projects worth showing, not a human reading their resume.
 
-### The honest tension
+## Messaging (decided 2026-10-02)
 
-At $1–5K, Andy is functionally expecting something adjacent to career coaching — portfolio review, interview readiness — even without calling it that. The decision made here: **include a light version of career support inside the top tier** rather than keeping "education only" and carving career coaching out as a separate paid business. This blurs the line slightly between "education platform" and "career coach," but it matches what Andy actually needs to justify the spend, and it's simpler to run as one business.
+The line everything ladders up to: **"You're already the numbers person in your league. Make it your job."** Three supporting ideas, in their words:
 
-### Volume expectations
+1. **Identity** — the commissioner with the 40-tab spreadsheet, the one who brings stats to the group chat. That is already analyst behaviour.
+2. **Fun first** — practise on the stats you already argue about; chart who got lucky in your own league.
+3. **Career payoff** — a portfolio an interviewer remembers ("I modelled my fantasy league"), built ninety seconds a day.
 
-Career Track is a **small, high-value slice** of the user base, not the bulk of it. Most users will stay in the cheap/free tiers for the hobby use case. Career Track is a few hundred serious career-changers paying a lot, not thousands of casual fans paying a little. Both segments matter for revenue, but they serve different motivations within the same audience — pricing and messaging for each tier should reflect that (don't sell Career Track to casual hobbyists, don't gate the fun stuff behind it).
+Rules: talk to one person, not four audiences. The two asks everywhere are **Solve today's question** (90 seconds, no signup) and **Chart your league**. Use their vocabulary — league, waivers, start/sit, the group chat, commissioner — and never promise a job; promise the skills and the story.
+
+## Market size: can this avatar reach $20k/month? (2026-10-02)
+
+Yes — at $20k a month the avatar is not the limit; reaching it is. Illustrative, with assumptions stated, not a forecast:
+
+- **Payers:** ~$15/month or ~$99/year, many on annual → roughly $10/month blended → **about 2,000 paying members.**
+- **Free base:** freemium learning products convert low single-digit percent of engaged users → **about 40,000–65,000 engaged free users** over time.
+- **Steady state:** at ~5% monthly churn, ~100 payers to replace each month → **about 2,500 new free signups a month (~80 a day).**
+- **Pool:** tens of millions of Americans play fantasy football. If even 1% work near spreadsheets and want a data career, that is hundreds of thousands of people, of whom 2,000 need to pay.
+
+Where narrow caps out: somewhere past $50–100k/month (~10,000 payers) the plan would need to widen — non-fans, students, other sports, team sales. That is the normal order: win a beachhead, then expand; the product already serves the wider groups, only the marketing is narrow. The real risks are **distribution** (no audience yet: fantasy Reddit, fantasy Twitter via Chart it, a weekly chart we post ourselves), **seasonality** (peak September–January: sell annual at the draft; run "the season's over — now get the job" January–March) and **who pays** (the career-minded minority, so the paid tier has to be about the career). A possible second line later: a commissioner plan with weekly charts for the whole league.
 
 ## Core "why" argument (positioning)
 
@@ -180,3 +197,5 @@ When asked to change pricing, positioning, or add/remove tiers on the site: upda
 "You don't have to watch football" is now stated explicitly across the funnel: a gold callout in the landing Why section ("Don't watch football? You're still in the right place."), plus one-liners on the Draft Day name screen, the /learn course card, and the Practice Field intro.
 
 Reasoning: the fantasy hook remains the lead pitch (see Target user: Andy — it's what gets fans in the door), but requiring fandom was never real — CURRICULUM.md has always listed fantasy experience as "helpful but not required." This message removes a signup barrier for non-fans without repositioning the product. The claims are kept honest per the trust pillar: football context genuinely is taught in-line, one sentence at a time, and the SQL genuinely transfers unchanged to work data. Don't escalate this into a "sports-agnostic" pitch — that's the multi-sport expansion decision, which stays off the live site until the flagship proves itself.
+
+**Updated 2026-10-02:** the reassurance moved out of the hero and into the FAQ ("Do I need to know a lot about football?"). It still removes the barrier for anyone who arrives; it just isn't the pitch any more, because non-fans aren't who the page is written to (see Target user).

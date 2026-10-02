@@ -13,10 +13,26 @@
 
 import { FACTS } from "@/lib/lesson-facts.generated";
 
+// Ordered by what the person we're built for asks first: the fantasy
+// league's numbers person who wants a data job (docs/PLAN.md, Target user).
+// Their doubts are about whether it counts, whether they can, and whether
+// they have time — not about football.
 const ITEMS = [
   {
-    q: "Do I need to know anything about football?",
-    a: "No. Nobody needs a primer on who scored more points. The sport is the lens, not the test — every question is about the data, and the football is there so the data means something. You will pick up more than you expect, but nothing here requires it.",
+    q: "Will an employer take a football project seriously?",
+    a: "The skills are identical: a JOIN on fantasy scores is the same JOIN on sales data, and the projects use the tools teams actually use — SQL, pandas, dbt, scikit-learn. What's different is the story. “I pulled my league from an API and worked out who was lucky” takes one breath to explain, and it shows the thing interviewers are really testing: that you can find a question in messy data and answer it.",
+  },
+  {
+    q: "I'm good at Excel but I've never written code. Is this for me?",
+    a: "That's exactly who it's for. There's an Excel course that runs real formulas, and SQL is the natural next step from there — a WHERE is a filter, a GROUP BY is a pivot table. Everything runs in your browser, so there's nothing to install.",
+  },
+  {
+    q: "How much time does it take?",
+    a: "The daily question takes about ninety seconds. A lesson is one drive, a few minutes. Projects take an afternoon. Coming back every day does more for you than a weekend marathon, which is why there's a new question every morning.",
+  },
+  {
+    q: "Does it work with my league if I'm not on Sleeper?",
+    a: "Yes. Sleeper loads straight from your username. On ESPN or Yahoo, fill a small CSV of weekly scores — manager, week, points for, points against, win — and drop it in. Either way your league stays in your browser; nothing is sent to us.",
   },
   {
     q: "Is it actually free?",
@@ -35,8 +51,8 @@ const ITEMS = [
     a: "A lesson. You start first-and-ten on your own 25, every question is a play, right answers gain yards and wrong ones burn a down. Reach the end zone and the lesson is cleared. It replaces the hearts most apps use, and it turns out to be a much better way to know how you are doing.",
   },
   {
-    q: "What about basketball or baseball?",
-    a: "Not yet, and not by accident. We would rather do one sport properly — real data, real questions, real projects — than three sports as a label on a dropdown. If a second one ships it will have a dataset behind it first.",
+    q: "Do I need to know a lot about football?",
+    a: "No. Nobody needs a primer on who scored more points. The sport is the lens, not the test — every question is about the data, and the football is there so the data means something. You will pick up more than you expect, but nothing here requires it.",
   },
 ];
 

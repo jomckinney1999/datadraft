@@ -1,5 +1,5 @@
 /**
- * Pictures for the home page's "Why football, of all things" cards, drawn
+ * Pictures for the home page's "Why your league is the best dataset" cards, drawn
  * with the same kit as every question, course and project (art-kit /
  * art-props), so the argument arrives as a picture before it arrives as a
  * paragraph. Same rule as the rest: the picture is what the heading says.
