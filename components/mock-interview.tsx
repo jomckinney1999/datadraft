@@ -11,7 +11,7 @@
  * timed assessment. Finished screens are kept in `sqlsports.mock.history.v1`.
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { Database, QueryExecResult } from "sql.js";
 import CodeEditor from "@/components/code-editor";
@@ -23,6 +23,7 @@ import PrepArt, { hasPrepArt } from "@/components/prep-art";
 import { usePass } from "@/lib/use-pass";
 import { FREE_ALLOWANCE } from "@/lib/season-pass";
 import QueryDoctorPanel from "@/components/query-doctor-panel";
+import FilmRoom from "@/components/film-room";
 import { loadProgress, solveQuestion } from "@/lib/progress";
 import { DIFFICULTY_XP, getQuestion, schemaFor, type Question } from "@/lib/questions";
 import { diagnoseSql } from "@/lib/query-doctor";
@@ -608,6 +609,7 @@ function Report({ live, db, onAgain }: { live: Live; db: Database | null; onAgai
 function ReportItem({ q, n, answer, db }: { q: Question; n: number; answer: MockAnswer; db: Database | null }) {
   const [show, setShow] = useState(false);
   const solved = answer.solvedAt !== null;
+  const getDb = useCallback(() => db, [db]);
   const findings = useMemo(() => {
     if (solved || !db || !answer.lastSql.trim()) return [];
     const schema = schemaFor(q).map((t) => ({ name: t.table, columns: t.columns }));
@@ -640,7 +642,10 @@ function ReportItem({ q, n, answer, db }: { q: Question; n: number; answer: Mock
 
       {answer.lastSql.trim() && (
         <div className="mt-3">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">your {solved ? "answer" : "last submission"}</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">your {solved ? "answer" : "last submission"}</p>
+            {db && <FilmRoom sql={answer.lastSql} getDb={getDb} subject="yours" />}
+          </div>
           <pre className="mt-1 overflow-x-auto rounded-lg border border-panel-border bg-night/60 p-3 font-mono text-[12px] leading-relaxed text-ink-soft">
             {answer.lastSql}
           </pre>
@@ -669,6 +674,7 @@ function ReportItem({ q, n, answer, db }: { q: Question; n: number; answer: Mock
             {q.expected}
           </pre>
           <p className="mt-2 text-sm leading-relaxed text-ink-soft">{q.explain}</p>
+          {db && <FilmRoom sql={q.expected} getDb={getDb} subject="answer" variant="cta" className="mt-2" />}
         </div>
       )}
     </section>

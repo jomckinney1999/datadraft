@@ -62,6 +62,7 @@ import Coach from "@/components/coach";
 import ExcelGrid from "@/components/excel-grid";
 import DifficultyChip from "@/components/difficulty-chip";
 import QueryDoctorPanel from "@/components/query-doctor-panel";
+import FilmRoom from "@/components/film-room";
 import PassOffer from "@/components/pass-offer";
 import PassTag from "@/components/pass-tag";
 import { usePass } from "@/lib/use-pass";
@@ -224,6 +225,9 @@ export default function QuestionWorkspace({
   const [offer, setOffer] = useState(false);
   const [afterDailyOffer, setAfterDailyOffer] = useState(false);
   const [shareNote, setShareNote] = useState<string | null>(null);
+  /** SQL only: the query behind the result on screen, for the Film Room. */
+  const [ranSql, setRanSql] = useState<string | null>(null);
+  const getDb = useCallback(() => dbRef.current, []);
 
   useEffect(() => {
     setAlreadySolved(loadProgress().solvedQuestions.includes(question.id));
@@ -298,6 +302,7 @@ export default function QuestionWorkspace({
           return;
         }
         setOutcome({ grid: mine });
+        setRanSql(code);
         if (!grade) return;
         const key = db.exec(question.expected)[0];
         const orderMatters = question.orderMatters ?? false;
@@ -559,9 +564,14 @@ export default function QuestionWorkspace({
                 {solutionOpen ? "Hide solution" : "Show solution"}
               </button>
               {solutionOpen && (
-                <pre className="overflow-x-auto rounded-xl border border-gold/30 bg-night/60 px-4 py-3 font-mono text-[12px] leading-relaxed text-ink-soft">
-                  {question.expected}
-                </pre>
+                <>
+                  <pre className="overflow-x-auto rounded-xl border border-gold/30 bg-night/60 px-4 py-3 font-mono text-[12px] leading-relaxed text-ink-soft">
+                    {question.expected}
+                  </pre>
+                  {isSql && ready && (
+                    <FilmRoom sql={question.expected} getDb={getDb} subject="answer" variant="cta" locked={locked} onLocked={() => setOffer(true)} />
+                  )}
+                </>
               )}
             </div>
           </section>
@@ -703,6 +713,12 @@ export default function QuestionWorkspace({
                       <p className="mt-1 text-sm leading-relaxed text-ink-soft">
                         {question.explain}
                       </p>
+                      {isSql && (
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                          <FilmRoom sql={question.expected} getDb={getDb} subject="answer" variant="cta" locked={locked} onLocked={() => setOffer(true)} />
+                          <span className="text-xs text-ink-muted">Our answer, clause by clause, in the order the database runs it.</span>
+                        </div>
+                      )}
                       {reward && (
                         <p className="mt-2 font-mono text-[11px] uppercase tracking-wider text-gold">
                           {reward.xp > 0
@@ -793,6 +809,10 @@ ${SITE_URL}/questions/${question.id}/vs/${encodeDailyResult(dailyNumber(day), tr
                       your result · {outcome.grid.values.length} row
                       {outcome.grid.values.length === 1 ? "" : "s"}
                     </p>
+                    <div className="flex items-center gap-2">
+                    {ranSql && (
+                      <FilmRoom sql={ranSql} getDb={getDb} subject="yours" locked={locked} onLocked={() => setOffer(true)} />
+                    )}
                     <ChartIt
                       grid={outcome.grid}
                       title={question.title}
@@ -801,6 +821,7 @@ ${SITE_URL}/questions/${question.id}/vs/${encodeDailyResult(dailyNumber(day), tr
                       shareUrl={`${SITE_URL}/questions/${question.id}`}
                       shareText={isQotd ? `Solved today's DataDraft question: ${question.title}` : `${question.title}, in one SQL query.`}
                     />
+                    </div>
                   </div>
                   <ResultGrid res={outcome.grid} />
                 </div>

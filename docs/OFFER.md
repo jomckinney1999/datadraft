@@ -22,6 +22,7 @@ The sales side of `docs/PLAN.md`: what we sell, at what price, the words we sell
 | Courses | The first unit of every course (5 graded lessons a day) | **Every lesson in every course, no daily limit** |
 | Question bank | Today's questions, any question for 7 days after it was a daily, and a starter set | **The whole bank** (80 SQL today, growing to ~150; plus Python, R, Excel), with solutions |
 | Query Doctor | 1 diagnosis a day | **On every miss**, plus Ask Coach |
+| Film Room (replay a query clause by clause, in the order the database runs it) | On the free questions | **Every query, every question** (added Oct 3) |
 | Mock SQL screens | 1 phone screen, to try it | **Unlimited**, phone and technical, with the report |
 | Interview patterns | See them | **Track your progress on all nine** |
 | Cases | First case | **All of them** |
@@ -71,6 +72,7 @@ Roadmap ($200–500 one-time) and Career Track ($1–5k/yr) came off the ladder 
 - **Card bullets (Season Pass):**
   - Every question in the bank, with solutions: SQL interview questions on real NFL data, plus Python, R and Excel
   - The Query Doctor on every miss: why your query is wrong, without giving the answer away
+  - The Film Room: replay any query clause by clause, in the order the database runs it
   - Timed mock SQL screens, graded like the real thing, with a report after
   - Every course, every lesson, no daily limit
   - The nine patterns analyst screens test, and where you stand on each

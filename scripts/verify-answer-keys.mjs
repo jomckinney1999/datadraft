@@ -655,6 +655,36 @@ let doctorChecked = 0;
   }
 }
 
+// ── Film Room ─────────────────────────────────────────────────
+// Every SQL answer can be replayed clause by clause (lib/sql-steps.ts). Each
+// step has to run on its own, and the last has to land on the key's result,
+// or the replay would teach a different answer from the one being graded.
+let filmSteps = 0;
+{
+  const st = await loadProjectTs(path.join(root, "lib/sql-steps.ts"), root);
+  const qs = await loadProjectTs(path.join(root, "lib/questions.ts"), root);
+  for (const q of qs.QUESTIONS.filter((x) => x.lang === "sql")) {
+    const plan = st.planSteps(q.expected);
+    if (!plan || plan.steps.length < 2) {
+      problems.push(`Film Room can't replay ${q.id}: ${plan ? "only one step" : "the planner couldn't read it"}`);
+      continue;
+    }
+    for (const step of plan.steps) {
+      filmSteps++;
+      try {
+        db.exec(st.stepCountSql(step));
+        db.exec(st.stepSql(step));
+      } catch (e) {
+        problems.push(`Film Room step "${step.label}" of ${q.id} doesn't run: ${e.message}`);
+      }
+    }
+    const last = run(st.stepSql(plan.steps[plan.steps.length - 1]));
+    if (JSON.stringify(last) !== JSON.stringify(run(q.expected))) {
+      problems.push(`Film Room's last step of ${q.id} isn't the key's result`);
+    }
+  }
+}
+
 // ── Card art coverage ─────────────────────────────────────────
 // A course, build or case with no scene renders an empty picture slot on
 // its card. The scene maps live in TSX the loader does not transpile, so
@@ -820,6 +850,7 @@ console.log(`prose facts checked       : ${factsChecked} (lib/lesson-facts.gener
 console.log(`stat duel rounds checked  : ${duelChecked} (180 days from launch, numbers vs their SQL)`);
 console.log(`draft room checks         : ${draftChecked} (scouting presets per season, drafts from every slot)`);
 console.log(`query doctor cases        : ${doctorChecked} (known wrong answers, the diagnosis a tutor would lead with)`);
+console.log(`film room steps           : ${filmSteps} (every SQL answer replayed clause by clause, each step run)`);
 
 if (problems.length === 0) {
   console.log("\nAll answer keys run, return rows, and have no cutoff ties.");

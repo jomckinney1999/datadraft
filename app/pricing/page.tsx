@@ -34,6 +34,7 @@ const COMPARE: [string, string, string][] = [
   ["Courses", "First unit of each (5 graded lessons a day)", "Every lesson, no daily limit"],
   ["Question bank", "Today's, any question for 7 days after it was the daily, and a starter set", "The whole bank, with solutions"],
   ["Query Doctor", "1 diagnosis a day", "Every miss, plus Ask Coach"],
+  ["Film Room replays", "On the free questions", "Every query, every question"],
   ["Mock SQL screens", "1 phone screen to try", "Unlimited, phone and technical"],
   ["Interview patterns", "See them", "Track all nine"],
   ["Cases", "The first one", "All of them"],

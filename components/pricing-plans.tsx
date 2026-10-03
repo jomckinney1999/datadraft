@@ -20,6 +20,7 @@ type Billing = "annual" | "monthly";
 const PASS_BULLETS = [
   "Every question in the bank, with solutions: SQL interview questions on real NFL data, plus Python, R and Excel",
   "The Query Doctor on every miss: why your query is wrong, without giving the answer away",
+  "The Film Room: replay any query clause by clause, in the order the database runs it",
   "Timed mock SQL screens, graded like the real thing, with a report after",
   "Every course, every lesson, no daily limit",
   "The nine patterns analyst screens test, and where you stand on each",

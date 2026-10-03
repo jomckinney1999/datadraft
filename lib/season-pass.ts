@@ -26,6 +26,7 @@ export const PAYWALL_LIVE = false;
 
 export type PassFeature =
   | "query-doctor"
+  | "film-room"
   | "ai-coach"
   | "mock-interviews"
   | "interview-paths"
@@ -38,6 +39,10 @@ export const PASS_FEATURES: Record<PassFeature, { name: string; blurb: string }>
   "query-doctor": {
     name: "Query Doctor",
     blurb: "Why your query is wrong — the clause, the column, the kind of mistake — without giving away the answer.",
+  },
+  "film-room": {
+    name: "Film Room",
+    blurb: "Replay any query clause by clause, in the order the database runs it, with the rows left at every step.",
   },
   "ai-coach": {
     name: "Ask Coach",
