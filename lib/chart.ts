@@ -40,6 +40,8 @@ export type ChartSpec = {
   label: number | null;
   /** A column of team abbreviations, to colour marks in team colours. */
   team: number | null;
+  /** With a team column: draw each team's crest (as the dot, beside the bar, at the line's end). */
+  logos: boolean;
   /** Scatter only: captions for the four corners the averages make. */
   quadrants: Quadrants | null;
   /** Bottom-right of the image. Required by CC BY when the data is nflverse. */
@@ -142,6 +144,7 @@ export function suggestSpec(
     credit: base.credit,
     label,
     team,
+    logos: team !== null,
     quadrants: null,
   };
 

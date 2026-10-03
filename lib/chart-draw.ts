@@ -12,6 +12,11 @@
  * dashed, and labels are placed so they never collide — the extremes first,
  * because those are the names a chart is posted for. Colours come from the
  * theme tokens at draw time (readTheme), team colours from teamAccent.
+ *
+ * With a team column, each team's crest is drawn too: as the dot itself on a
+ * scatter, between the name and the bar, and at the end of a line. Crests
+ * arrive as loaded images (`Crests`); any team whose crest hasn't loaded, or
+ * failed, is drawn exactly as before, so a slow CDN costs a dot, not a chart.
  */
 
 import {
@@ -84,6 +89,30 @@ export function readTheme(): ChartTheme {
     sans: font("--font-inter", "sans-serif"),
     mono: font("--font-ibm-plex-mono", "monospace"),
   };
+}
+
+/** Loaded team crests by abbreviation (see `teamCrest`). */
+export type Crests = Map<string, HTMLImageElement>;
+
+/** The crest to draw for `team`, or null to draw the plain mark. */
+function crestFor(crests: Crests | null, spec: ChartSpec, team: string | null): HTMLImageElement | null {
+  if (!crests || !spec.logos || !team) return null;
+  const img = crests.get(team);
+  return img && img.complete && img.naturalWidth ? img : null;
+}
+
+/**
+ * A crest centred on (cx, cy). The night shadow does what the outline does
+ * for a dot: lifts it off the gridlines and keeps two overlapping crests
+ * apart.
+ */
+function drawCrest(ctx: CanvasRenderingContext2D, img: HTMLImageElement, cx: number, cy: number, size: number, T: ChartTheme) {
+  ctx.save();
+  ctx.shadowColor = T.night;
+  ctx.shadowBlur = Math.max(4, size * 0.14);
+  ctx.shadowOffsetY = Math.max(2, size * 0.05);
+  ctx.drawImage(img, cx - size / 2, cy - size / 2, size, size);
+  ctx.restore();
 }
 
 type Plot = { x0: number; y0: number; x1: number; y1: number };
@@ -290,7 +319,7 @@ function drawAxes(
 
 // ── Scatter ─────────────────────────────────────────────────────────────
 
-function drawScatter(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec, marks: Mark[], T: ChartTheme) {
+function drawScatter(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec, marks: Mark[], T: ChartTheme, crests: Crests | null) {
   const xs = marks.map((m) => m.x);
   const ys = marks.map((m) => m.y);
   const span = (a: number[]) => Math.max(...a) - Math.min(...a) || Math.abs(a[0]) || 1;
@@ -321,12 +350,20 @@ function drawScatter(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec,
   setFont(ctx, 600, 19, T.mono);
   ctx.textBaseline = "bottom";
   ctx.textAlign = "left";
-  haloText(ctx, `avg ${fmt(ax)}`, px(ax) + 8, p.y0 + 24, T.inkSoft, T.bg, 5);
+  const avgX = `avg ${fmt(ax)}`;
+  const avgY = `avg ${fmt(ay)}`;
+  const avgXW = ctx.measureText(avgX).width;
+  const avgYW = ctx.measureText(avgY).width;
+  haloText(ctx, avgX, px(ax) + 8, p.y0 + 24, T.inkSoft, T.bg, 5);
   ctx.textAlign = "right";
-  haloText(ctx, `avg ${fmt(ay)}`, p.x1 - 6, py(ay) - 6, T.inkSoft, T.bg, 5);
+  haloText(ctx, avgY, p.x1 - 6, py(ay) - 6, T.inkSoft, T.bg, 5);
 
-  // Corner captions, remembered so no dot label lands on one.
-  const corners: Box[] = [];
+  // Corner captions and the two averages, remembered so no dot label lands
+  // on one.
+  const corners: Box[] = [
+    { x: px(ax) + 8, y: p.y0 + 2, w: avgXW, h: 22 },
+    { x: p.x1 - 6 - avgYW, y: py(ay) - 28, w: avgYW, h: 22 },
+  ];
   if (spec.quadrants) {
     setFont(ctx, 700, 22, T.mono);
     const [tl, tr, bl, br] = spec.quadrants;
@@ -354,17 +391,35 @@ function drawScatter(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec,
     const right = m.x >= ax;
     return top ? (right ? T.turf : T.gold) : right ? T.series[1] : T.inkMuted;
   };
-  const r = marks.length > 80 ? 8 : marks.length > 40 ? 10 : 12;
-  const taken: Box[] = [...corners, ...marks.map((m) => ({ x: px(m.x) - r, y: py(m.y) - r, w: r * 2, h: r * 2 }))];
-  for (const m of marks) {
+  // A crest has to be bigger than a dot to be recognised: 54px across on a
+  // chart of 32 teams, smaller as the chart gets crowded, and smaller again
+  // when every crest also carries a name (players) and needs room for it.
+  const dotR = marks.length > 80 ? 8 : marks.length > 40 ? 10 : 12;
+  const named = spec.label !== null && spec.label !== spec.team;
+  const crestR = (marks.length > 80 ? 15 : marks.length > 40 ? 20 : 27) - (named ? 5 : 0);
+  const crest = marks.map((m) => crestFor(crests, spec, m.team));
+  const radius = marks.map((_, i) => (crest[i] ? crestR : dotR));
+  const taken: Box[] = [
+    ...corners,
+    ...marks.map((m, i) => ({ x: px(m.x) - radius[i], y: py(m.y) - radius[i], w: radius[i] * 2, h: radius[i] * 2 })),
+  ];
+  marks.forEach((m, i) => {
+    const img = crest[i];
+    if (img) {
+      drawCrest(ctx, img, px(m.x), py(m.y), crestR * 2, T);
+      return;
+    }
     ctx.beginPath();
-    ctx.arc(px(m.x), py(m.y), r, 0, Math.PI * 2);
+    ctx.arc(px(m.x), py(m.y), dotR, 0, Math.PI * 2);
     ctx.fillStyle = corner(m);
     ctx.fill();
     ctx.lineWidth = 3.5;
     ctx.strokeStyle = T.night;
     ctx.stroke();
-  }
+  });
+  const radiusOf = new Map(marks.map((m, i) => [m, radius[i]]));
+  // A crest already says "KC"; a label that only repeats it is noise.
+  const crested = new Set(marks.filter((_, i) => crest[i]));
 
   // Labels: the extremes first, then anyone with room. A label that would
   // collide is left off rather than printed on top of another.
@@ -385,6 +440,8 @@ function drawScatter(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec,
   let placed = 0;
   for (const m of order) {
     if (placed >= MAX_LABELS || !m.label) break;
+    if (crested.has(m) && m.label === m.team) continue;
+    const r = radiusOf.get(m) ?? dotR;
     const w = ctx.measureText(m.label).width;
     const cx = px(m.x);
     const cy = py(m.y);
@@ -434,7 +491,7 @@ function drawScatter(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec,
 
 // ── Bars ────────────────────────────────────────────────────────────────
 
-function drawBars(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec, marks: Mark[], T: ChartTheme) {
+function drawBars(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec, marks: Mark[], T: ChartTheme, crests: Crests | null) {
   const cols = describeColumns(grid);
   const byTime = spec.label !== null && cols[spec.label]?.timeLike;
   const sorted = byTime
@@ -449,12 +506,18 @@ function drawBars(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec, ma
   const sx = niceScale(Math.min(0, ...vals), Math.max(0, ...vals));
   setFont(ctx, 700, 22, T.mono);
   const valueW = Math.max(...vals.map((v) => ctx.measureText(fmt(v)).width));
-  const p: Plot = { x0: PAD + labelW + 22, y0: 196, x1: W - PAD - valueW - 22, y1: H - 196 };
+  const y0 = 196;
+  const y1 = H - 196;
+  const band = (y1 - y0) / shown.length;
+  const barH = Math.min(52, band * 0.7);
+  // The crest sits between the name and the bar, a little taller than the bar.
+  const crest = shown.map((m) => crestFor(crests, spec, m.team));
+  const crestS = Math.min(barH + 10, 58);
+  const crestW = crest.some(Boolean) ? crestS + 12 : 0;
+  const p: Plot = { x0: PAD + labelW + 22 + crestW, y0, x1: W - PAD - valueW - 22, y1 };
   drawAxes(ctx, p, sx, null, T, prettyName(grid.columns[spec.y]), null);
 
   const px = (v: number) => p.x0 + ((v - sx.lo) / (sx.hi - sx.lo)) * (p.x1 - p.x0);
-  const band = (p.y1 - p.y0) / shown.length;
-  const barH = Math.min(52, band * 0.7);
   const zero = px(0);
   shown.forEach((m, i) => {
     const cy = p.y0 + band * i + band / 2;
@@ -479,7 +542,9 @@ function drawBars(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec, ma
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
     ctx.fillStyle = T.ink;
-    ctx.fillText(fit(ctx, labels[i], labelW, 600, 22, 16, T.sans), p.x0 - 16, cy);
+    ctx.fillText(fit(ctx, labels[i], labelW, 600, 22, 16, T.sans), p.x0 - 16 - crestW, cy);
+    const img = crest[i];
+    if (img) drawCrest(ctx, img, p.x0 - 14 - crestS / 2, cy, crestS, T);
     setFont(ctx, 700, 22, T.mono);
     ctx.textAlign = "left";
     ctx.fillStyle = T.ink;
@@ -496,7 +561,7 @@ function drawBars(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec, ma
 
 // ── Lines ───────────────────────────────────────────────────────────────
 
-function drawLines(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec, marks: Mark[], T: ChartTheme) {
+function drawLines(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec, marks: Mark[], T: ChartTheme, crests: Crests | null) {
   const groups = new Map<string, Mark[]>();
   for (const m of marks) {
     const k = m.series ?? prettyName(grid.columns[spec.y]);
@@ -523,14 +588,20 @@ function drawLines(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec, m
       ? { lo: xmin, hi: xmax === xmin ? xmin + 1 : xmax, step: 1, ticks: Array.from({ length: Math.max(xmax - xmin, 1) + 1 }, (_, i) => xmin + i) }
       : niceScale(xmin, xmax);
 
+  const teamOf = (ms: Mark[]) => (ms.every((m) => m.team && m.team === ms[0].team) ? ms[0].team : null);
+  // A line that is one team all the way gets its crest at the end, before
+  // the name.
+  const crest = series.map((s) => crestFor(crests, spec, teamOf(s.ms)));
+  const CREST = 36;
+  const crestW = crest.some(Boolean) ? CREST + 10 : 0;
+
   setFont(ctx, 600, 21, T.sans);
   const nameW = Math.min(300, Math.max(...series.map((s) => ctx.measureText(s.name).width)));
-  const p: Plot = { x0: PAD + 44 + yTicksWidth(ctx, sy, T) + 18, y0: 196, x1: W - PAD - nameW - 30, y1: H - 196 };
+  const p: Plot = { x0: PAD + 44 + yTicksWidth(ctx, sy, T) + 18, y0: 196, x1: W - PAD - nameW - 30 - crestW, y1: H - 196 };
   drawAxes(ctx, p, sx, sy, T, prettyName(grid.columns[spec.x]), prettyName(grid.columns[spec.y]), (v) => fmt(v, sx.step < 1 ? sx.step : 1));
 
   const px = (v: number) => p.x0 + ((v - sx.lo) / (sx.hi - sx.lo || 1)) * (p.x1 - p.x0);
   const py = (v: number) => p.y1 - ((v - sy.lo) / (sy.hi - sy.lo)) * (p.y1 - p.y0);
-  const teamOf = (ms: Mark[]) => (ms.every((m) => m.team && m.team === ms[0].team) ? ms[0].team : null);
   const colors = series.map((s, i) => {
     const t = teamOf(s.ms);
     return t ? teamAccent(t) : T.series[i % T.series.length];
@@ -562,9 +633,9 @@ function drawLines(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec, m
   });
 
   // Names at the line ends, nudged apart so none sits on another.
-  const ends = series.map((s, i) => ({ name: s.name, y: py(last(s)), x: px(s.ms[s.ms.length - 1].x), color: colors[i] }));
+  const ends = series.map((s, i) => ({ name: s.name, y: py(last(s)), x: px(s.ms[s.ms.length - 1].x), color: colors[i], crest: crest[i] }));
   const byY = [...ends].sort((a, b) => a.y - b.y);
-  const GAP = 26;
+  const GAP = crestW ? CREST + 2 : 26;
   for (let i = 1; i < byY.length; i++) byY[i].y = Math.max(byY[i].y, byY[i - 1].y + GAP);
   const overflow = byY.length ? byY[byY.length - 1].y - p.y1 : 0;
   if (overflow > 0) byY.forEach((e) => (e.y -= overflow));
@@ -572,7 +643,11 @@ function drawLines(ctx: CanvasRenderingContext2D, grid: Grid, spec: ChartSpec, m
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
   for (const e of byY) {
-    haloText(ctx, fit(ctx, e.name, nameW, 600, 21, 15, T.sans), p.x1 + 18, e.y, e.color, T.bg, 6);
+    if (e.crest) drawCrest(ctx, e.crest, p.x1 + 18 + CREST / 2, e.y, CREST, T);
+    setFont(ctx, 600, 21, T.sans);
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    haloText(ctx, fit(ctx, e.name, nameW, 600, 21, 15, T.sans), p.x1 + 18 + crestW, e.y, e.color, T.bg, 6);
   }
   if (total > series.length) {
     setFont(ctx, 500, 18, T.mono);
@@ -589,15 +664,16 @@ export function drawChart(
   spec: ChartSpec,
   theme: ChartTheme,
   logo: HTMLImageElement | null,
+  crests: Crests | null = null,
 ): void {
   ctx.save();
   ctx.clearRect(0, 0, W, H);
   drawFrame(ctx, spec, theme, logo);
   const marks = marksFor(grid, spec);
   if (marks.length) {
-    if (spec.kind === "scatter") drawScatter(ctx, grid, spec, marks, theme);
-    else if (spec.kind === "line") drawLines(ctx, grid, spec, marks, theme);
-    else drawBars(ctx, grid, spec, marks, theme);
+    if (spec.kind === "scatter") drawScatter(ctx, grid, spec, marks, theme, crests);
+    else if (spec.kind === "line") drawLines(ctx, grid, spec, marks, theme, crests);
+    else drawBars(ctx, grid, spec, marks, theme, crests);
   } else {
     setFont(ctx, 600, 28, theme.sans);
     ctx.fillStyle = theme.inkMuted;

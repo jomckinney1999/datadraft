@@ -62,9 +62,24 @@ export function teamName(abbr: string): string {
   return BY_ABBR.get(abbr)?.name ?? abbr;
 }
 
-/** The crest URL nflverse lists for `abbr`, or null. Scoreboards only. */
+/** The crest URL nflverse lists for `abbr`, or null. Scoreboards and charts, never dense grids. */
 export function teamLogo(abbr: string): string | null {
   return BY_ABBR.get(abbr)?.logo ?? null;
+}
+
+/**
+ * The same crest, sized for drawing on a chart: ESPN's own resizer at `px`
+ * square (~9 KB instead of the 500px master), and ESPN's dark-background
+ * variant, which differs for eight teams whose usual mark sinks into a dark
+ * field (DAL, DEN, GB, LAR, LV, MIN, NYG, NYJ) and is the same image for the
+ * rest. Still ESPN's CDN, never our domain. ESPN sends
+ * `Access-Control-Allow-Origin: *`, which is what lets a canvas that draws
+ * it still export a PNG. A URL of any other shape gets null, so a changed
+ * source falls back to a dot rather than an image that would block export.
+ */
+export function teamCrest(abbr: string, px = 128): string | null {
+  const m = teamLogo(abbr)?.match(/^https:\/\/a\.espncdn\.com\/i\/teamlogos\/nfl\/500(?:-dark)?\/([a-z]+\.png)$/);
+  return m ? `https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500-dark/${m[1]}&w=${px}&h=${px}` : null;
 }
 
 /**

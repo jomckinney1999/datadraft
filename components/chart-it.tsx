@@ -22,7 +22,8 @@ import {
   type Grid,
   type Quadrants,
 } from "@/lib/chart";
-import { drawChart, H, readTheme, W } from "@/lib/chart-draw";
+import { drawChart, H, readTheme, W, type Crests } from "@/lib/chart-draw";
+import { teamCrest } from "@/lib/team-colors";
 
 const KIND_LABEL: Record<ChartKind, string> = {
   bar: "Bars",
@@ -60,8 +61,11 @@ export default function ChartIt({
   const [spec, setSpec] = useState<ChartSpec | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [logoReady, setLogoReady] = useState(false);
+  const [crestsIn, setCrestsIn] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const logoRef = useRef<HTMLImageElement | null>(null);
+  const crestsRef = useRef<Crests>(new Map());
+  const crestFrame = useRef<number | null>(null);
   const openerRef = useRef<HTMLButtonElement | null>(null);
   const closeRef = useRef<HTMLButtonElement | null>(null);
 
@@ -81,6 +85,54 @@ export default function ChartIt({
     logoRef.current = img;
   }, [open]);
 
+  // The crests of the teams in this result, fetched from ESPN when the
+  // dialog opens. `crossOrigin` is what keeps the canvas exportable (ESPN
+  // allows any origin); without it the first crest drawn would make Download
+  // and Copy throw. The chart draws straight away with dots and redraws as
+  // crests land, one redraw per frame however many arrive in it. A crest that
+  // fails stays a dot.
+  const teamCol = spec?.team ?? null;
+  const logosOn = spec?.logos ?? false;
+  const teams = useMemo(() => {
+    if (teamCol === null) return "";
+    const seen = new Set<string>();
+    for (const r of grid.values) {
+      const v = r[teamCol];
+      if (typeof v === "string" && v) seen.add(v);
+    }
+    return Array.from(seen).sort().join(",");
+  }, [grid, teamCol]);
+
+  useEffect(() => {
+    if (!open || !logosOn || !teams) return;
+    const crests = crestsRef.current;
+    const landed = () => {
+      if (crestFrame.current !== null) return;
+      crestFrame.current = requestAnimationFrame(() => {
+        crestFrame.current = null;
+        setCrestsIn((n) => n + 1);
+      });
+    };
+    for (const abbr of teams.split(",")) {
+      const src = teamCrest(abbr);
+      if (!src || crests.has(abbr)) continue;
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.referrerPolicy = "no-referrer";
+      img.decoding = "async";
+      img.onload = landed;
+      img.src = src;
+      crests.set(abbr, img);
+    }
+  }, [open, logosOn, teams]);
+
+  useEffect(
+    () => () => {
+      if (crestFrame.current !== null) cancelAnimationFrame(crestFrame.current);
+    },
+    [],
+  );
+
   // Draw once the page's fonts are in, so the PNG carries them.
   useEffect(() => {
     if (!open || !spec) return;
@@ -96,12 +148,12 @@ export default function ChartIt({
         ]).catch(() => null)
       : Promise.resolve(null);
     fonts.then(() => {
-      if (!cancelled) drawChart(ctx, grid, spec, theme, logoRef.current);
+      if (!cancelled) drawChart(ctx, grid, spec, theme, logoRef.current, crestsRef.current);
     });
     return () => {
       cancelled = true;
     };
-  }, [open, spec, grid, logoReady]);
+  }, [open, spec, grid, logoReady, crestsIn]);
 
   useEffect(() => {
     if (!open) return;
@@ -262,6 +314,22 @@ export default function ChartIt({
                     ]}
                   />
                 </div>
+
+                {spec.team !== null && (
+                  <button
+                    type="button"
+                    aria-pressed={spec.logos}
+                    onClick={() => set({ logos: !spec.logos })}
+                    className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors ${
+                      spec.logos
+                        ? "border-gold bg-gold/15 text-gold"
+                        : "border-panel-border text-ink-soft hover:border-gold/50"
+                    }`}
+                  >
+                    Team logos
+                    <span aria-hidden>{spec.logos ? "On" : "Off"}</span>
+                  </button>
+                )}
 
                 <label className="block">
                   <span className="mb-1 block font-mono text-[10px] uppercase tracking-widest text-ink-muted">Title</span>
