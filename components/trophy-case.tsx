@@ -1,8 +1,12 @@
 "use client";
 
 /**
- * The Hall of Fame on /learn: every badge, earned and unearned, standing in a
- * lit glass case — gold at eye level, then silver, then bronze.
+ * The Hall of Fame on /achievements: every badge, earned and unearned,
+ * standing in a lit glass case — gold at eye level, then silver, then bronze.
+ *
+ * Lives under Dashboard (your locker), not Courses — trophies are about what
+ * you've done across the whole product, the way a game opens its achievement
+ * cabinet from the home screen.
  *
  * Locked badges are shown rather than hidden. A case that only holds what you
  * already have gives a learner nothing to aim at, and a dark silhouette with
@@ -10,7 +14,7 @@
  * an empty shelf. Requirements are always stated, never mysterious.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BADGES,
   WINGS,
@@ -21,15 +25,22 @@ import {
 } from "@/lib/achievements";
 import { displayStreak, loadProgress } from "@/lib/progress";
 import { HofCabinet, HofSlot } from "@/components/hof-trophy";
+import { playSfx } from "@/lib/sfx";
 
 export default function TrophyCase() {
   const [stats, setStats] = useState<BadgeStats | null>(null);
   const [streak, setStreak] = useState(0);
+  const announced = useRef(false);
 
   useEffect(() => {
     const p = loadProgress();
-    setStats(statsFrom(p));
+    const s = statsFrom(p);
+    setStats(s);
     setStreak(displayStreak(p));
+    if (!announced.current && BADGES.some((b) => isEarned(b, s))) {
+      announced.current = true;
+      playSfx("unlock");
+    }
   }, []);
 
   // Server render and first paint show nothing rather than a flash of zeros —
@@ -41,9 +52,9 @@ export default function TrophyCase() {
   let slot = 0;
 
   return (
-    <section className="mt-12">
+    <section id="hall" className="scroll-mt-20">
       <div className="text-center">
-        <p className="label-broadcast text-gold">the hall of fame</p>
+        <p className="label-broadcast text-gold">achievements · hall of fame</p>
         <h2 className="mt-1 font-display text-3xl font-bold text-ink sm:text-4xl">
           {earned === 0 ? (
             "The lights are on"

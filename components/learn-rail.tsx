@@ -243,7 +243,7 @@ export default function LearnRail({
         )}
 
         <Link
-          href="/learn#trophies"
+          href="/achievements"
           className="mt-3 block w-full rounded-xl border border-panel-border py-2 text-center font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted transition-colors hover:border-gold/50 hover:text-gold"
         >
           Hall of Fame

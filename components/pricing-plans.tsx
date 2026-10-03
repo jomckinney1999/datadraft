@@ -13,7 +13,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { FOUNDING, PASS_PLANS, type PassPlan } from "@/lib/season-pass";
+import WaitlistForm from "@/components/waitlist-form";
+import { FOUNDING, PASS_PLANS, PAYWALL_LIVE, type PassPlan } from "@/lib/season-pass";
 
 type Billing = "annual" | "monthly";
 
@@ -137,16 +138,37 @@ export default function PricingPlans({ foundingOpen, foundingLeft }: { foundingO
               </li>
             ))}
           </ul>
-          <button type="button" onClick={buy} disabled={busy} className="press btn-gold mt-6 justify-center py-3 text-base disabled:opacity-60">
-            {busy ? "Opening checkout…" : plan === "founding" ? "Become a founding member" : "Get the Season Pass"}
-          </button>
-          <p className="mt-2 text-center font-mono text-[11px] text-ink-muted">
-            14-day full refund · cancel in two clicks
-          </p>
-          {note && (
-            <p role="alert" className="mt-2 text-center text-sm text-gold">
-              {note}
-            </p>
+          {PAYWALL_LIVE ? (
+            <>
+              <button
+                type="button"
+                onClick={buy}
+                disabled={busy}
+                className="press btn-gold mt-6 justify-center py-3 text-base disabled:opacity-60"
+              >
+                {busy ? "Opening checkout…" : plan === "founding" ? "Become a founding member" : "Get the Season Pass"}
+              </button>
+              <p className="mt-2 text-center font-mono text-[11px] text-ink-muted">
+                14-day full refund · cancel in two clicks
+              </p>
+              {note && (
+                <p role="alert" className="mt-2 text-center text-sm text-gold">
+                  {note}
+                </p>
+              )}
+            </>
+          ) : (
+            <div className="mt-6">
+              <p className="mb-3 text-center text-sm text-ink-soft">
+                {plan === "founding"
+                  ? `Get first dibs on the founding ${PASS_PLANS.founding.price}/yr price.`
+                  : "Join the list — we'll email you when the Pass opens."}
+              </p>
+              <WaitlistForm interest="practice" source={`pricing-${plan}`} label="Join the waitlist" compact />
+              <p className="mt-2 text-center font-mono text-[11px] text-ink-muted">
+                Free in early access today · nothing charges from this page
+              </p>
+            </div>
           )}
         </section>
       </div>

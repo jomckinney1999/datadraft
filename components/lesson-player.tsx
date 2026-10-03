@@ -2230,7 +2230,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 ))}
               </div>
               <Link
-                href="/learn#trophies"
+                href="/achievements"
                 className="mt-2 inline-block font-mono text-[10px] font-bold uppercase tracking-wider text-gold hover:underline"
               >
                 See it in the case →

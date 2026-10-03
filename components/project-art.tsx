@@ -1,5 +1,5 @@
 /**
- * The drawn picture on a project card — the two builds and the six cases —
+ * The drawn picture on a project card — the builds and the cases —
  * from the same kit and under the same rule as the questions and courses:
  * the picture is what the title says.
  *
@@ -438,6 +438,101 @@ function PredictionModel() {
     </>
   );
 }
+/** Bye Week Gaps — a depth chart with two blank slots stamped BYE. */
+function ByeWeekGaps() {
+  const slots = [
+    { y: 48, name: "ALLEN", filled: true },
+    { y: 68, name: "BARKLEY", filled: true },
+    { y: 88, name: "KELCE", filled: false },
+    { y: 108, name: "JEFF", filled: false },
+  ];
+  return (
+    <g>
+      <Shadow y={138} rx={62} />
+      <rect x="28" y="18" width="144" height="112" rx="8" fill={c("panel")} stroke={N} strokeWidth="2.4" />
+      <text x="100" y="36" textAnchor="middle" fontSize="9" fontWeight="900" fill={c("ice")} fontFamily={MONO} letterSpacing="1.5">
+        DEPTH CHART
+      </text>
+      {slots.map((s) => (
+        <g key={s.y}>
+          <rect
+            x="40"
+            y={s.y}
+            width="120"
+            height="16"
+            rx="4"
+            fill={s.filled ? c("turf", 0.35) : c("night-100")}
+            stroke={N}
+            strokeWidth="1.6"
+            strokeDasharray={s.filled ? undefined : "4 3"}
+          />
+          <text
+            x="100"
+            y={s.y + 11.5}
+            textAnchor="middle"
+            fontSize="9"
+            fontWeight="900"
+            fill={s.filled ? c("ink") : c("gold")}
+            fontFamily={MONO}
+          >
+            {s.filled ? s.name : "BYE"}
+          </text>
+        </g>
+      ))}
+      <Sparkle x={178} y={28} r={5} fill={c("gold")} />
+    </g>
+  );
+}
+
+/** Trade Ledger — two manager chips swapping footballs across a ledger line. */
+function TradeLedger() {
+  return (
+    <g>
+      <Shadow y={138} rx={64} />
+      <rect x="24" y="22" width="152" height="100" rx="8" fill={c("night-100")} stroke={N} strokeWidth="2.2" />
+      <text x="100" y="40" textAnchor="middle" fontSize="9" fontWeight="900" fill={c("gold")} fontFamily={MONO} letterSpacing="1.5">
+        TRADE LEDGER
+      </text>
+      <rect x="36" y="52" width="52" height="28" rx="6" fill={c("turf")} stroke={N} strokeWidth="1.8" />
+      <text x="62" y="70" textAnchor="middle" fontSize="10" fontWeight="900" fill={N} fontFamily={MONO}>
+        J
+      </text>
+      <rect x="112" y="52" width="52" height="28" rx="6" fill={c("ice")} stroke={N} strokeWidth="1.8" />
+      <text x="138" y="70" textAnchor="middle" fontSize="10" fontWeight="900" fill={N} fontFamily={MONO}>
+        R
+      </text>
+      <path d="M88 66 H112" stroke={c("gold")} strokeWidth="3" strokeLinecap="round" />
+      <path d="M106 60 L112 66 L106 72" fill="none" stroke={c("gold")} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M94 60 L88 66 L94 72" fill="none" stroke={c("gold")} strokeWidth="2.4" strokeLinejoin="round" />
+      <Football x={62} y={104} rx={12} rot={-18} />
+      <Football x={138} y={104} rx={12} rot={18} />
+      <Sparkle x={100} y={96} r={4} fill={c("gold")} />
+    </g>
+  );
+}
+
+/** Red Zone Look — a field with the red zone lit and a TD flag. */
+function RedZoneLook() {
+  return (
+    <g>
+      <Shadow y={138} rx={70} />
+      <rect x="16" y="28" width="168" height="96" rx="8" fill={c("turf-dim")} stroke={N} strokeWidth="2.4" />
+      <rect x="120" y="28" width="64" height="96" fill={c("gold", 0.22)} />
+      <path d="M120 28 V124" stroke={c("gold")} strokeWidth="2.5" />
+      {[48, 68, 88, 108].map((y) => (
+        <path key={y} d={`M24 ${y} H112`} stroke={c("ink", 0.2)} strokeWidth="1.2" />
+      ))}
+      <Football x={148} y={76} rx={14} rot={-30} />
+      <path d="M158 40 V70" stroke={N} strokeWidth="2.4" />
+      <path d="M158 40 H178 L172 50 L178 60 H158 Z" fill={c("gold")} stroke={N} strokeWidth="1.8" strokeLinejoin="round" />
+      <text x="40" y="118" fontSize="8" fontWeight="900" fill={c("ink")} fontFamily={MONO} letterSpacing="1">
+        RED ZONE
+      </text>
+      <Sparkle x={176} y={84} r={5} />
+    </g>
+  );
+}
+
 const SCENES: Record<string, { tone: Tone; Scene: () => JSX.Element }> = {
   "my-league-scorecard": { tone: "gold", Scene: LeagueScorecard },
   "nflverse-dbt-warehouse": { tone: "turf", Scene: Warehouse },
@@ -448,6 +543,9 @@ const SCENES: Record<string, { tone: Tone; Scene: () => JSX.Element }> = {
   "form-guide": { tone: "turf", Scene: FormGuide },
   "positional-ranks": { tone: "gold", Scene: DraftBoard },
   "retention-report": { tone: "ice", Scene: RetentionLock },
+  "bye-week-gaps": { tone: "ice", Scene: ByeWeekGaps },
+  "trade-ledger": { tone: "gold", Scene: TradeLedger },
+  "red-zone-look": { tone: "turf", Scene: RedZoneLook },
 };
 
 export default function ProjectArt({

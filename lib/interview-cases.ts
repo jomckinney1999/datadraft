@@ -499,6 +499,247 @@ INSERT INTO lineup_locks VALUES
       },
     ],
   },
+
+  // ── Easy 3 ─────────────────────────────────────────────────────
+  {
+    id: "bye-week-gaps",
+    title: "Bye Week Gaps on the Depth Chart",
+    org: "Roster Stack",
+    difficulty: "easy",
+    skills: ["LEFT JOIN", "NULLs", "Filtering"],
+    blurb:
+      "Product wants every rostered player listed with week-5 points — including the ones who were on bye.",
+    role: "You are a Data Analyst at Roster Stack. The depth-chart view is blank for bye weeks, and managers think their players disappeared.",
+    schema: [
+      {
+        table: "roster",
+        columns: ["player_id", "player_name", "position", "team"],
+      },
+      {
+        table: "week5_scores",
+        columns: ["player_id", "points"],
+      },
+    ],
+    seedSql: `
+CREATE TABLE roster (
+  player_id INTEGER PRIMARY KEY,
+  player_name TEXT NOT NULL,
+  position TEXT NOT NULL,
+  team TEXT NOT NULL
+);
+CREATE TABLE week5_scores (
+  player_id INTEGER PRIMARY KEY,
+  points REAL NOT NULL
+);
+INSERT INTO roster VALUES
+  (1, 'Josh Allen', 'QB', 'BUF'),
+  (2, 'Saquon Barkley', 'RB', 'PHI'),
+  (3, 'CeeDee Lamb', 'WR', 'DAL'),
+  (4, 'Travis Kelce', 'TE', 'KC'),
+  (5, 'Tyreek Hill', 'WR', 'MIA'),
+  (6, 'Justin Jefferson', 'WR', 'MIN');
+INSERT INTO week5_scores VALUES
+  (1, 22.4),
+  (2, 18.1),
+  (3, 14.6),
+  (5, 9.2);
+`,
+    questions: [
+      {
+        id: "q1",
+        prompt:
+          "Return every rostered player with week_5_points. Players with no week-5 row should show NULL. Columns: player_name, position, week_5_points. Order by player_name.",
+        hint: "LEFT JOIN roster to week5_scores on player_id.",
+        expected:
+          "SELECT r.player_name, r.position, s.points AS week_5_points FROM roster r LEFT JOIN week5_scores s ON r.player_id = s.player_id ORDER BY r.player_name;",
+        orderMatters: true,
+        explain:
+          "Kelce and Jefferson are NULL — bye or inactive. An INNER JOIN would have dropped them.",
+      },
+      {
+        id: "q2",
+        prompt:
+          "Which rostered players have no week-5 score? Return player_name and team, ordered by player_name.",
+        hint: "LEFT JOIN, then WHERE s.player_id IS NULL (or points IS NULL).",
+        expected:
+          "SELECT r.player_name, r.team FROM roster r LEFT JOIN week5_scores s ON r.player_id = s.player_id WHERE s.player_id IS NULL ORDER BY r.player_name;",
+        orderMatters: true,
+        explain: "Justin Jefferson (MIN) and Travis Kelce (KC).",
+      },
+      {
+        id: "q3",
+        prompt:
+          "Among players who did score in week 5, return player_name and points, highest points first.",
+        hint: "INNER JOIN (or LEFT JOIN with WHERE s.points IS NOT NULL), ORDER BY points DESC.",
+        expected:
+          "SELECT r.player_name, s.points FROM roster r JOIN week5_scores s ON r.player_id = s.player_id ORDER BY s.points DESC;",
+        orderMatters: true,
+        explain: "Allen 22.4, Barkley 18.1, Lamb 14.6, Hill 9.2.",
+      },
+    ],
+  },
+
+  // ── Medium 3 ───────────────────────────────────────────────────
+  {
+    id: "trade-ledger",
+    title: "Trade Ledger — Who Got the Points?",
+    org: "Commissioner OS",
+    difficulty: "medium",
+    skills: ["JOINs", "CASE", "Aggregation"],
+    blurb:
+      "Commissioners want a post-trade report: points each side scored after the deal, from the players they received.",
+    role: "You are an Analyst at Commissioner OS. A heated trade just went through, and both managers swear they won.",
+    schema: [
+      {
+        table: "trades",
+        columns: ["trade_id", "from_manager", "to_manager", "player_name"],
+      },
+      {
+        table: "post_trade_scores",
+        columns: ["player_name", "week", "points"],
+      },
+    ],
+    seedSql: `
+CREATE TABLE trades (
+  trade_id INTEGER NOT NULL,
+  from_manager TEXT NOT NULL,
+  to_manager TEXT NOT NULL,
+  player_name TEXT NOT NULL
+);
+CREATE TABLE post_trade_scores (
+  player_name TEXT NOT NULL,
+  week INTEGER NOT NULL,
+  points REAL NOT NULL
+);
+INSERT INTO trades VALUES
+  (1, 'Jordan', 'Riley', 'Puka Nacua'),
+  (1, 'Jordan', 'Riley', 'Rachaad White'),
+  (1, 'Riley', 'Jordan', 'A.J. Brown'),
+  (1, 'Riley', 'Jordan', 'Isiah Pacheco');
+INSERT INTO post_trade_scores VALUES
+  ('Puka Nacua', 8, 21.4),
+  ('Puka Nacua', 9, 16.2),
+  ('Rachaad White', 8, 8.1),
+  ('Rachaad White', 9, 6.4),
+  ('A.J. Brown', 8, 18.7),
+  ('A.J. Brown', 9, 12.3),
+  ('Isiah Pacheco', 8, 14.0),
+  ('Isiah Pacheco', 9, 11.5);
+`,
+    questions: [
+      {
+        id: "q1",
+        prompt:
+          "For each manager who received players, return manager and points_received (sum of post-trade points for players they got, 1 decimal). Highest first.",
+        hint: "JOIN trades to post_trade_scores on player_name; GROUP BY to_manager.",
+        expected:
+          "SELECT t.to_manager AS manager, ROUND(SUM(s.points), 1) AS points_received FROM trades t JOIN post_trade_scores s ON t.player_name = s.player_name GROUP BY t.to_manager ORDER BY points_received DESC;",
+        orderMatters: true,
+        explain: "Riley 52.1 from Nacua+White; Jordan 56.5 from Brown+Pacheco.",
+      },
+      {
+        id: "q2",
+        prompt:
+          "List each traded player with to_manager and total_points after the trade (1 decimal), highest total first.",
+        hint: "JOIN and GROUP BY player_name, to_manager.",
+        expected:
+          "SELECT t.player_name, t.to_manager, ROUND(SUM(s.points), 1) AS total_points FROM trades t JOIN post_trade_scores s ON t.player_name = s.player_name GROUP BY t.player_name, t.to_manager ORDER BY total_points DESC;",
+        orderMatters: true,
+        explain: "Puka 37.6 leads; then A.J. 31.0, Pacheco 25.5, White 14.5.",
+      },
+      {
+        id: "q3",
+        prompt:
+          "Return one row: jordan_points and riley_points (each side's total from players received, 1 decimal) so the commissioner can paste a verdict.",
+        hint: "Conditional SUM(CASE WHEN to_manager = …) in one SELECT, or two subqueries.",
+        expected:
+          "SELECT ROUND(SUM(CASE WHEN t.to_manager = 'Jordan' THEN s.points ELSE 0 END), 1) AS jordan_points, ROUND(SUM(CASE WHEN t.to_manager = 'Riley' THEN s.points ELSE 0 END), 1) AS riley_points FROM trades t JOIN post_trade_scores s ON t.player_name = s.player_name;",
+        orderMatters: false,
+        explain: "Jordan 56.5, Riley 52.1 — Jordan's side edged it on the scores so far.",
+      },
+    ],
+  },
+
+  // ── Hard 2 ─────────────────────────────────────────────────────
+  {
+    id: "red-zone-look",
+    title: "Red Zone Look — Who Finishes Drives?",
+    org: "SnapCount Labs",
+    difficulty: "hard",
+    skills: ["CASE", "GROUP BY", "HAVING", "Sorting"],
+    blurb:
+      "The recap desk wants red-zone conversion rates by player for the Sunday mailer — touches that became TDs.",
+    role: "You are a Sports Data Analyst at SnapCount Labs. Editors want a conversion table, not a raw dump of every play.",
+    schema: [
+      {
+        table: "red_zone_touches",
+        columns: ["touch_id", "player_name", "position", "week", "is_td"],
+      },
+    ],
+    seedSql: `
+CREATE TABLE red_zone_touches (
+  touch_id INTEGER PRIMARY KEY,
+  player_name TEXT NOT NULL,
+  position TEXT NOT NULL,
+  week INTEGER NOT NULL,
+  is_td INTEGER NOT NULL
+);
+INSERT INTO red_zone_touches VALUES
+  (1, 'Christian McCaffrey', 'RB', 1, 1),
+  (2, 'Christian McCaffrey', 'RB', 1, 0),
+  (3, 'Christian McCaffrey', 'RB', 2, 1),
+  (4, 'Christian McCaffrey', 'RB', 2, 1),
+  (5, 'Christian McCaffrey', 'RB', 3, 0),
+  (6, 'Amon-Ra St. Brown', 'WR', 1, 1),
+  (7, 'Amon-Ra St. Brown', 'WR', 1, 0),
+  (8, 'Amon-Ra St. Brown', 'WR', 2, 0),
+  (9, 'Amon-Ra St. Brown', 'WR', 3, 1),
+  (10, 'Amon-Ra St. Brown', 'WR', 3, 0),
+  (11, 'Mark Andrews', 'TE', 1, 1),
+  (12, 'Mark Andrews', 'TE', 2, 0),
+  (13, 'Mark Andrews', 'TE', 3, 1),
+  (14, 'Jahmyr Gibbs', 'RB', 1, 0),
+  (15, 'Jahmyr Gibbs', 'RB', 2, 1),
+  (16, 'Jahmyr Gibbs', 'RB', 2, 0),
+  (17, 'Jahmyr Gibbs', 'RB', 3, 1),
+  (18, 'Jahmyr Gibbs', 'RB', 3, 1),
+  (19, 'Drake London', 'WR', 1, 0),
+  (20, 'Drake London', 'WR', 2, 0);
+`,
+    questions: [
+      {
+        id: "q1",
+        prompt:
+          "For each player with at least 3 red-zone touches, return player_name, touches, tds, and conv_rate (tds/touches as a percent rounded to 1 decimal). Highest conv_rate first, then player_name.",
+        hint: "GROUP BY player_name HAVING COUNT(*) >= 3. conv_rate = ROUND(100.0 * SUM(is_td) / COUNT(*), 1).",
+        expected:
+          "SELECT player_name, COUNT(*) AS touches, SUM(is_td) AS tds, ROUND(100.0 * SUM(is_td) / COUNT(*), 1) AS conv_rate FROM red_zone_touches GROUP BY player_name HAVING COUNT(*) >= 3 ORDER BY conv_rate DESC, player_name;",
+        orderMatters: true,
+        explain:
+          "McCaffrey 60.0%, Gibbs 60.0%, Andrews 66.7%, St. Brown 40.0%. London is out (only 2 touches).",
+      },
+      {
+        id: "q2",
+        prompt:
+          "By position, return position, touches, and td_rate (percent, 1 decimal). Order by td_rate DESC.",
+        hint: "GROUP BY position — same rate formula.",
+        expected:
+          "SELECT position, COUNT(*) AS touches, ROUND(100.0 * SUM(is_td) / COUNT(*), 1) AS td_rate FROM red_zone_touches GROUP BY position ORDER BY td_rate DESC;",
+        orderMatters: true,
+        explain: "TE 66.7, RB 60.0, WR 28.6 — sample sizes differ; say so in a real write-up.",
+      },
+      {
+        id: "q3",
+        prompt:
+          "Label each touch as 'score' or 'stop' with a CASE on is_td. Return player_name, week, and result for Christian McCaffrey only, ordered by week then touch_id.",
+        hint: "CASE WHEN is_td = 1 THEN 'score' ELSE 'stop' END. Filter player_name.",
+        expected:
+          "SELECT player_name, week, CASE WHEN is_td = 1 THEN 'score' ELSE 'stop' END AS result FROM red_zone_touches WHERE player_name = 'Christian McCaffrey' ORDER BY week, touch_id;",
+        orderMatters: true,
+        explain: "Five rows for CMC: score, stop, score, score, stop.",
+      },
+    ],
+  },
 ];
 
 export function getInterviewCase(id: string): InterviewCase | undefined {

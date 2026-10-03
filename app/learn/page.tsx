@@ -18,7 +18,6 @@ import Link from "next/link";
 import { COURSES, type Course } from "@/lib/courses";
 import { liveLessons, ALL_MODULE, getLesson } from "@/lib/curriculum";
 import { loadProgress, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
-import TrophyCase from "@/components/trophy-case";
 import CourseArt from "@/components/course-art";
 import AppNav from "@/components/app-nav";
 
@@ -203,12 +202,12 @@ export default function CourseCatalogPage() {
         {hydrated && (
           <p className="mt-6 text-center font-mono text-[11px] uppercase tracking-wider text-ink-muted">
             {allDone}/{allLessons.length} lessons cleared across every course
+            {" · "}
+            <Link href="/achievements" className="text-gold hover:underline">
+              Hall of Fame →
+            </Link>
           </p>
         )}
-
-        <div id="trophies" className="mt-10">
-          <TrophyCase />
-        </div>
       </main>
     </>
   );

@@ -31,7 +31,19 @@ export type NavSection = {
 };
 
 export const NAV: NavSection[] = [
-  { href: "/dashboard", label: "Dashboard", groups: [] },
+  {
+    href: "/dashboard",
+    label: "Dashboard",
+    groups: [
+      {
+        title: "Your locker",
+        items: [
+          { href: "/dashboard", label: "Home", blurb: "What's next — today's question and the next lesson" },
+          { href: "/achievements", label: "Hall of Fame", blurb: "Trophies you've earned, and the next enshrinement" },
+        ],
+      },
+    ],
+  },
   {
     href: "/questions",
     label: "Questions",
@@ -64,7 +76,6 @@ export const NAV: NavSection[] = [
         title: "Learn",
         items: [
           { href: "/learn", label: "All courses", blurb: "SQL, Python, Excel, R and more, one short lesson at a time" },
-          { href: "/learn#trophies", label: "Hall of Fame", blurb: "Your trophies, and the next one within reach" },
         ],
       },
       {

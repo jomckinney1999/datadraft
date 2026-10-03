@@ -176,7 +176,7 @@ export default function WelcomePage() {
               browser; <Link href="/account" className="text-turf hover:underline">sign in</Link> and it follows you to
               other devices.
             </p>
-            <Link href="/learn#trophies" className="mt-3 inline-block font-mono text-[11px] font-bold uppercase tracking-wider text-gold hover:underline">
+            <Link href="/achievements" className="mt-3 inline-block font-mono text-[11px] font-bold uppercase tracking-wider text-gold hover:underline">
               See the Hall of Fame →
             </Link>
           </div>

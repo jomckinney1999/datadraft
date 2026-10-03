@@ -1,17 +1,14 @@
 /**
  * /pricing — the Season Pass offer (docs/OFFER.md, approved 2026-10-03).
  *
- * A 404 on the live site until the paywall is switched on: Vercel's Hobby
- * plan doesn't allow advertising something for sale, and nothing is for sale
- * before the launch gates clear (HR first). Local and preview builds show it,
- * marked as a preview, so it can be reviewed before launch day.
- *
- * Every claim here is the approved copy: no job promises, no learner counts,
- * no testimonials until real ones exist with permission, no betting words.
+ * Live as a pitch: prices and the Free / Pass line are public so the offer
+ * can convert waitlist interest. Checkout still 403s until PAYWALL_LIVE.
+ * Vercel Pro remains a launch gate before treating this as a storefront
+ * (Hobby is non-commercial). Every claim is the approved copy: no job
+ * promises, no learner counts, no betting words.
  */
 
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import AppNav from "@/components/app-nav";
 import PricingPlans from "@/components/pricing-plans";
 import { leagueDay } from "@/lib/questions";
@@ -24,7 +21,6 @@ export const metadata: Metadata = {
   title: "Season Pass — DataDraft",
   description:
     "The SQL interview, rehearsed on the stats you already argue about. Every question, the Query Doctor, timed mock screens and every course.",
-  ...(PAYWALL_LIVE ? {} : { robots: { index: false, follow: false } }),
 };
 
 const COMPARE: [string, string, string][] = [
@@ -65,8 +61,6 @@ const FAQ: [string, string][] = [
 ];
 
 export default async function PricingPage() {
-  if (!PAYWALL_LIVE && process.env.VERCEL_ENV === "production") notFound();
-
   const taken = await foundingTaken();
   const open = foundingOpen(leagueDay(), taken);
 
@@ -76,7 +70,7 @@ export default async function PricingPage() {
       <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-8 sm:px-6">
         {!PAYWALL_LIVE && (
           <p className="mx-auto mb-6 max-w-3xl rounded-lg border border-ice/40 bg-ice/10 px-4 py-2 text-center font-mono text-[11px] uppercase tracking-wider text-ice">
-            Preview · not on sale yet · hidden on the live site until launch
+            Founding price opens soon · join the waitlist · every Pass feature is free in early access
           </p>
         )}
 

@@ -31,7 +31,10 @@ export default function DuelCard({ day, compact = false }: { day: string; compac
         <QuestionArt art="scale" className="h-full w-full" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="label-broadcast text-gold">warm-up · stat duel</span>
+        <span className="flex flex-wrap items-center gap-2">
+          <span className="label-broadcast text-gold">warm-up · stat duel</span>
+          {!result && <span className="live-dot">Live</span>}
+        </span>
         <span className="mt-0.5 block font-display text-base font-bold text-ink sm:text-lg">
           Who had more? Five head-to-heads.
         </span>

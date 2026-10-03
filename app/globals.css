@@ -1475,7 +1475,7 @@ body {
     rgb(var(--c-turf-dim)),
     rgb(var(--c-turf))
   );
-  transition: width 0.4s ease;
+  transition: width 0.6s cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 
 .quest-chest {
@@ -1516,29 +1516,13 @@ body {
   transition: none !important;
 }
 
-/* Circular reveal from the theme toggle (components/theme-toggle.tsx).
-   Default cross-fade is killed so the new theme wipes over the old one. */
-::view-transition-image-pair(root) {
-  isolation: auto;
-}
+/* Theme toggle used to drive a View Transitions circular wipe. That path
+   captured two full-page snapshots and felt lagged on this UI; the toggle
+   now flips instantly via .theme-switching. Leave VT hooks inert if some
+   other feature starts a transition later. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
-  mix-blend-mode: normal;
-  display: block;
-}
-::view-transition-old(root) {
-  z-index: 1;
-}
-::view-transition-new(root) {
-  z-index: 2;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation: none !important;
-  }
 }
 
 /* ── Code editor ──────────────────────────────────────────── */
@@ -1815,6 +1799,33 @@ body {
     0 0 0 0 rgb(var(--c-night)),
     0 8px 20px -10px rgb(var(--sticker-fill) / calc(0.5 * var(--glow-strength)));
   transition-duration: 0.06s;
+}
+/* Light mode remaps --c-night to the paper canvas, so the hard "thickness"
+   shadow (and outline) would wash out to white. Keep dark mode as above;
+   in light, ink is the charcoal the sticker needs. Soft drop replaces the
+   coloured glow (glow-strength is 0 on paper). */
+:root[data-theme="light"] .btn-sticker {
+  border-color: rgb(var(--c-ink));
+  color: rgb(var(--c-ink));
+  box-shadow:
+    inset 0 -5px 0 0 rgb(var(--sticker-shade)),
+    0 6px 0 0 rgb(var(--c-ink)),
+    0 14px 28px -12px rgb(var(--c-ink) / 0.22);
+}
+:root[data-theme="light"] .btn-sticker:hover {
+  box-shadow:
+    inset 0 -5px 0 0 rgb(var(--sticker-shade)),
+    0 9px 0 0 rgb(var(--c-ink)),
+    0 20px 36px -12px rgb(var(--c-ink) / 0.28);
+}
+:root[data-theme="light"] .btn-sticker:active {
+  box-shadow:
+    inset 0 -3px 0 0 rgb(var(--sticker-shade)),
+    0 0 0 0 rgb(var(--c-ink)),
+    0 6px 16px -8px rgb(var(--c-ink) / 0.18);
+}
+:root[data-theme="light"] .sticker-icon {
+  filter: drop-shadow(0 2px 0 rgb(var(--c-ink) / 0.55));
 }
 /* The icon sits a little crooked, as a stuck-on sticker does, and wiggles
    when the button is hovered or focused. */
@@ -3962,5 +3973,134 @@ html[data-gate-opened] .gate-pop {
   .cutscene-pop,
   .cutscene-caret {
     animation: none;
+  }
+}
+
+/* ── Immersion: broadcast cuts, live pulse, locker stagger ─────────
+ *
+ * In-app flavour that matches the landing page's game energy without
+ * changing layout height (roadmap sticky offsets stay at top-14).
+ */
+
+.broadcast-cut {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgb(var(--c-turf) / 0.22), transparent 70%),
+    rgb(var(--c-night) / 0.35);
+  animation: broadcast-cut 0.42s ease-out both;
+}
+@keyframes broadcast-cut {
+  0% { opacity: 0.85; }
+  40% { opacity: 0.45; }
+  100% { opacity: 0; }
+}
+
+.live-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(var(--c-turf));
+}
+.live-dot::before {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: rgb(var(--c-turf));
+  box-shadow: 0 0 10px rgb(var(--c-turf) / 0.9);
+  animation: live-pulse 1.4s ease-in-out infinite;
+}
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.85); }
+}
+
+.scorebug-digits {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+}
+
+/* Dashboard locker: children pop in like a kickoff intro. */
+.locker-stagger > * {
+  animation: locker-in 0.48s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+@keyframes locker-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.locker-yard {
+  position: relative;
+  overflow: hidden;
+}
+.locker-yard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 47px,
+      rgb(var(--c-ink) / 0.06) 47px 48px
+    );
+  mask-image: linear-gradient(90deg, transparent, black 20%, black 80%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 20%, black 80%, transparent);
+}
+
+.secret-play {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 70;
+  display: flex;
+  max-width: min(22rem, calc(100vw - 2rem));
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 1rem;
+  border: 3px solid rgb(var(--c-night));
+  background: rgb(var(--c-panel));
+  padding: 0.85rem 1rem;
+  box-shadow:
+    0 8px 0 0 rgb(var(--c-night)),
+    0 18px 40px -12px rgb(var(--c-gold) / 0.45);
+  animation: secret-play-in 0.4s cubic-bezier(0.2, 1.2, 0.4, 1) both;
+}
+@keyframes secret-play-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .broadcast-cut,
+  .live-dot::before,
+  .locker-stagger > *,
+  .secret-play {
+    animation: none;
+  }
+  .broadcast-cut {
+    display: none;
   }
 }

@@ -2,7 +2,7 @@
 
 The sales side of `docs/PLAN.md`: what we sell, at what price, the words we sell it with, and the order we do it in. PLAN.md holds the decisions and the reasoning; this holds the copy and the playbook. Change a price there first, then here.
 
-**Status (2026-10-03): approved by Jo; nothing is for sale yet.** Every Season Pass feature is open and labelled "free in early access" (`PAYWALL_LIVE = false` in `lib/season-pass.ts`). Charging waits on the launch gates at the bottom of this doc, and HR's sign-off is the first of them.
+**Status (2026-10-03): approved by Jo; nothing is for sale yet.** Every Season Pass feature is open and labelled "free in early access" (`PAYWALL_LIVE = false` in `lib/season-pass.ts`). The pricing page and a home `#pricing` section are **live as a pitch** (waitlist CTAs); checkout still 403s. Charging waits on the launch gates at the bottom of this doc — **Vercel Pro before treating prices as a storefront** (Hobby is non-commercial), and HR's sign-off is still first.
 
 ---
 

@@ -36,7 +36,11 @@ import LearnStatusChips from "@/components/learn-status-chips";
 import { NavDrawerSections, NavDropdown } from "@/components/nav-menu";
 import SiteSearch from "@/components/site-search";
 import ThemeToggle from "@/components/theme-toggle";
+import SfxMuteButton from "@/components/sfx-mute-button";
+import BroadcastCut from "@/components/broadcast-cut";
+import SecretPlay from "@/components/secret-play";
 import { NAV, currentSection } from "@/lib/nav";
+import { playSfx } from "@/lib/sfx";
 
 // Four sections, in the order someone moves through them: where am I, what
 // can I solve, what can I learn, what can I build. Each of the last three
@@ -98,6 +102,8 @@ export default function AppNav({
     <Suspense fallback={null}>
       <WelcomePrompt />
     </Suspense>
+    <BroadcastCut />
+    <SecretPlay />
     <header className="glass sticky top-0 z-30 border-b border-panel-border/80">
       <div className="relative mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6">
         <div className="flex min-w-0 shrink-0 items-baseline gap-3">
@@ -131,6 +137,7 @@ export default function AppNav({
                 href={section.href}
                 aria-current={current === section.href ? "page" : undefined}
                 className={TAB(current === section.href)}
+                onClick={() => playSfx("ui")}
               >
                 {section.label}
               </Link>
@@ -143,6 +150,9 @@ export default function AppNav({
             <LearnStatusChips progress={progress} />
           </div>
           <SiteSearch compact />
+          <span className="hidden sm:inline-flex">
+            <SfxMuteButton />
+          </span>
           <ThemeToggle />
           <Link
             href="/account"

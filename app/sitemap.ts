@@ -29,8 +29,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     at("/learn", 0.8),
     at("/projects", 0.8),
     at("/welcome", 0.6, "monthly"),
-    // /pricing is a 404 on the live site until the Season Pass is on sale.
-    ...(PAYWALL_LIVE ? [at("/pricing", 0.7, "monthly")] : []),
+    at("/dashboard", 0.7, "daily"),
+    at("/achievements", 0.6, "monthly"),
+    at("/pricing", PAYWALL_LIVE ? 0.8 : 0.6, "monthly"),
     at("/data", 0.5, "monthly"),
     at("/field", 0.5, "monthly"),
     at("/excel", 0.5, "monthly"),

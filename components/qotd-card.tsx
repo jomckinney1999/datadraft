@@ -24,6 +24,7 @@ import { teamAccent } from "@/lib/team-colors";
 import Headshot from "@/components/headshot";
 import QuestionArt from "@/components/question-art";
 import DifficultyChip from "@/components/difficulty-chip";
+import DailyCountdown from "@/components/daily-countdown";
 
 function FlameIcon({ lit }: { lit: boolean }) {
   return (
@@ -124,6 +125,7 @@ export default function QotdCard({
                 Question of the day
               </span>
               <DifficultyChip difficulty={question.difficulty} />
+              {hydrated && !done && <span className="live-dot">Live</span>}
               {hydrated && done && (
                 <span className="font-mono text-[10px] uppercase tracking-widest text-turf">
                   ✓ Done
@@ -143,6 +145,7 @@ export default function QotdCard({
                 {streak} day{streak === 1 ? "" : "s"} running
               </p>
             )}
+            <DailyCountdown className="mt-1 block font-mono text-[10px] uppercase tracking-widest text-ink-muted" />
             <Link href={href} className="press btn-gold mt-2 inline-flex">
               {done ? "Replay" : `Solve · +${xp} XP`}
             </Link>
@@ -170,6 +173,7 @@ export default function QotdCard({
               {LANG_LABEL[question.lang]} question of the day
             </span>
             <DifficultyChip difficulty={question.difficulty} />
+            {hydrated && !done && <span className="live-dot">Live</span>}
             <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
               +{xp} XP
             </span>
@@ -192,6 +196,7 @@ export default function QotdCard({
                 {streak} day{streak === 1 ? "" : "s"} running
               </span>
             )}
+            <DailyCountdown className="font-mono text-[11px] uppercase tracking-wider text-ink-muted" />
             {hydrated && done && (
               <span className="font-mono text-[11px] uppercase tracking-wider text-turf">
                 ✓ Today&apos;s is done

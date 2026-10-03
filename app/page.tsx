@@ -21,6 +21,7 @@ import TrophyStrip from "@/components/trophy-strip";
 import ProjectsShowcase from "@/components/projects-showcase";
 import DataPeek from "@/components/data-peek";
 import Faq from "@/components/faq";
+import PricingSection from "@/components/pricing-section";
 import FinalCta from "@/components/final-cta";
 import {
   LANG_LABEL,
@@ -478,6 +479,8 @@ export default async function Home() {
         <DataPeek />
 
         <SuccessStories />
+
+        <PricingSection />
 
         <Faq />
 

@@ -14,7 +14,9 @@ export type SfxKind =
   | "miss"
   | "sack"
   | "turnover"
-  | "complete";
+  | "complete"
+  | "ui"
+  | "unlock";
 
 const MUTE_KEY = "sqlsports-sfx-muted";
 const MUTE_EVENT = "sqlsports:sfx-mute";
@@ -187,6 +189,18 @@ export function playSfx(kind: SfxKind): void {
         { freq: 659.25, at: 0.12, dur: 0.14, gain: 0.2 },
         { freq: 783.99, at: 0.24, dur: 0.14, gain: 0.22 },
         { freq: 1046.5, at: 0.36, dur: 0.32, gain: 0.24 },
+      ]);
+      break;
+    case "ui":
+      // Soft tick for nav / chip presses — barely there.
+      sequence([{ freq: 740, at: 0, dur: 0.05, type: "sine", gain: 0.06 }]);
+      break;
+    case "unlock":
+      // Hall of Fame / badge cabinet open.
+      sequence([
+        { freq: 392, at: 0, dur: 0.1, type: "triangle", gain: 0.12 },
+        { freq: 523.25, at: 0.08, dur: 0.12, type: "triangle", gain: 0.16 },
+        { freq: 784, at: 0.18, dur: 0.28, type: "triangle", gain: 0.2 },
       ]);
       break;
   }

@@ -1,6 +1,6 @@
 /**
  * The Hall of Fame's front window — six of the trophies, lit, on one shelf of
- * the same glass case /learn shows in full.
+ * the same glass case /achievements shows in full.
  *
  * Nothing personalised, so it renders on the server and looks the same to
  * everyone. The trophies are shown lit on purpose: this is the case as it
@@ -69,7 +69,7 @@ export default function TrophyStrip() {
 
         <div className="reveal mt-8 text-center">
           <Link
-            href="/learn#trophies"
+            href="/achievements"
             className="font-mono text-[11px] font-bold uppercase tracking-wider text-gold hover:underline"
           >
             Walk the Hall →

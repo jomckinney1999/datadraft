@@ -80,6 +80,33 @@ export const CASE_SCENES: Record<string, CaseScene> = {
     ],
     close: "Two weeks, one set of users. Think hard about what \"both\" means in SQL.",
   },
+  "bye-week-gaps": {
+    caller: { name: "Casey", title: "Product · Roster Stack", tone: "ice" },
+    open: "Roster Stack on the line. Their depth chart went blank.",
+    lines: [
+      "Managers swear their players vanished in week 5. They didn't — they were on bye.",
+      "I need every rostered name listed with week-5 points, including the ones with no score row.",
+    ],
+    close: "Watch for the join that drops people. Bye weeks are NULLs, not zeros.",
+  },
+  "trade-ledger": {
+    caller: { name: "Morgan", title: "Commissioner tools · Commissioner OS", tone: "gold" },
+    open: "Commissioner OS. A trade just blew up the group chat.",
+    lines: [
+      "Both managers swear they won the deal. I need the points each side scored after the trade.",
+      "From the players they received — not what they gave away.",
+    ],
+    close: "Three questions. Join the ledger to the scores, then total each side.",
+  },
+  "red-zone-look": {
+    caller: { name: "Reese", title: "Recap editor · SnapCount Labs", tone: "turf" },
+    open: "SnapCount again — Sunday mailer this time.",
+    lines: [
+      "I don't want a dump of every red-zone touch. I want conversion rates.",
+      "Who finishes drives? Give me rates I can put in a headline.",
+    ],
+    close: "Group, count, rate. Skip anyone too thin for a fair percent.",
+  },
 };
 
 /** The scene as beats for the cutscene, or null for a case without one. */

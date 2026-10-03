@@ -127,7 +127,7 @@ const STOPS: Stop[] = [
         <HofTrophy tier="silver" earned className="h-24 w-auto" />
       </div>
     ),
-    href: "/learn#trophies",
+    href: "/achievements",
     cta: "See the Hall",
   },
 ];

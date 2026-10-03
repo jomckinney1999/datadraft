@@ -55,6 +55,8 @@ export const SEARCH_INDEX: SearchHit[] = (() => {
     hit("page", "/questions/prep", "Hiring prep", "Online assessment, SQL screen, take-home", "interview analyst oa funnel"),
     hit("page", "/questions/screen", "Analyst Screen", "Timed online assessment: SQL plus multiple choice", "oa assessment stats a/b"),
     hit("page", "/projects/challenge", "Data Challenge", "A take-home on messy data with a rubric", "take-home market pulse dq"),
+    hit("page", "/pricing", "Season Pass", "Free vs Season Pass — pricing and the founding offer"),
+    hit("page", "/achievements", "Hall of Fame", "Trophies and achievements you've earned", "hof badges enshrined"),
   ];
 
   for (const section of NAV) {

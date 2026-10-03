@@ -19,6 +19,7 @@ const COLUMNS = [
       { href: "/learn", label: "Courses" },
       { href: "/projects", label: "Projects" },
       { href: "/dashboard", label: "Dashboard" },
+      { href: "/pricing", label: "Season Pass" },
       { href: "/account", label: "Account" },
     ],
   },
