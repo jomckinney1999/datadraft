@@ -174,6 +174,43 @@ export function displayName(p: Progress): string {
   return name && name.length > 0 ? name : "Free Agent";
 }
 
+/**
+ * One line for share sheets — only when they've named themselves, so we
+ * never paste "Free Agent" into a group chat.
+ */
+export function shareIdentity(p: Progress): string | null {
+  const name = p.username?.trim();
+  if (!name) return null;
+  const t = tenureFrom(p);
+  return `— ${name} · Lv ${t.level} ${t.rank.name}`;
+}
+
+const RANK_SEEN_KEY = "sqlsports.rank.v1";
+
+/**
+ * If the learner just crossed into a higher tenure rank, return it once.
+ * First visit seeds the key without celebrating Undrafted.
+ */
+export function consumeRankUp(p: Progress): Rank | null {
+  if (typeof window === "undefined") return null;
+  const t = tenureFrom(p);
+  try {
+    const prev = window.localStorage.getItem(RANK_SEEN_KEY);
+    if (!prev) {
+      window.localStorage.setItem(RANK_SEEN_KEY, t.rank.id);
+      return null;
+    }
+    if (prev === t.rank.id) return null;
+    const prevIdx = RANKS.findIndex((r) => r.id === prev);
+    const nextIdx = RANKS.findIndex((r) => r.id === t.rank.id);
+    window.localStorage.setItem(RANK_SEEN_KEY, t.rank.id);
+    if (nextIdx > prevIdx) return t.rank;
+  } catch {
+    /* storage blocked */
+  }
+  return null;
+}
+
 export function kitAccentHex(accent: KitAccent): string {
   if (accent === "gold") return "#FFC800";
   if (accent === "turf") return "#58CC02";

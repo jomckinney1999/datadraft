@@ -9,6 +9,7 @@
  */
 
 import type { Metadata } from "next";
+import Link from "next/link";
 import AppNav from "@/components/app-nav";
 import PricingPlans from "@/components/pricing-plans";
 import { leagueDay } from "@/lib/questions";
@@ -32,6 +33,8 @@ const COMPARE: [string, string, string][] = [
   ["Query Doctor", "1 diagnosis a day", "Every miss, plus Ask Coach"],
   ["Film Room replays", "On the free questions", "Every query, every question"],
   ["Mock SQL screens", "1 phone screen to try", "Unlimited, phone and technical"],
+  ["Analyst Screen (timed OA)", "Quick screen to try", "Full online assessment, unlimited"],
+  ["Data Challenge (take-home)", "", "Included, with the rubric"],
   ["Interview patterns", "See them", "Track all nine"],
   ["Cases", "The first one", "All of them"],
   ["Draft Room", "This season", "Every season"],
@@ -108,6 +111,18 @@ export default async function PricingPage() {
               ))}
             </tbody>
           </table>
+        </section>
+
+        <section className="surface mx-auto mt-12 max-w-3xl rounded-2xl border border-panel-border bg-panel p-5 sm:p-6">
+          <p className="label-broadcast text-turf">practise the funnel first</p>
+          <h2 className="mt-1 font-display text-xl font-bold text-ink">Hiring prep is free to start</h2>
+          <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+            Drill the nine SQL patterns, then try a screen and a take-home. The Pass unlocks the rest
+            when you&apos;re going for the job.
+          </p>
+          <Link href="/questions/prep" className="press btn-turf mt-4 inline-block">
+            Open hiring prep →
+          </Link>
         </section>
 
         <section className="mx-auto mt-12 max-w-3xl">

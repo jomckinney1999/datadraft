@@ -1,20 +1,15 @@
 "use client";
 
 /**
- * Placeholder league board on the dashboard. Shows your character on top and
- * ghost rows for friends / league — the real board lands with accounts sync.
+ * Placeholder league board on the dashboard. Shows your character only —
+ * no invented rivals (PLAN.md: honest trust). Friends and league boards
+ * land with accounts sync.
  */
 
 import Link from "next/link";
-import SidelineCast from "@/components/sideline-cast";
+import PlayerMark from "@/components/player-mark";
 import type { Progress } from "@/lib/progress";
 import { displayName, tenureFrom } from "@/lib/tenure";
-
-const GHOSTS = [
-  { name: "League mate", rank: "Starter", level: 28, tone: 1 as const, accent: "turf" as const },
-  { name: "Rival GM", rank: "Rookie", level: 14, tone: 2 as const, accent: "ice" as const },
-  { name: "Waivers shark", rank: "Depth Chart", level: 19, tone: 3 as const, accent: "gold" as const },
-];
 
 export default function LeaderboardTeaser({ progress }: { progress: Progress }) {
   const tenure = tenureFrom(progress);
@@ -30,7 +25,7 @@ export default function LeaderboardTeaser({ progress }: { progress: Progress }) 
           <p className="label-broadcast text-gold">locker room</p>
           <h2 className="mt-1 font-display text-xl font-bold text-ink">Leaderboard</h2>
           <p className="mt-1 text-sm text-ink-soft">
-            Show your level and tenure. Friends and league boards come next.
+            Your standing today. League and friend boards open when accounts sync ranks.
           </p>
         </div>
         <span className="rounded-full border border-gold/40 bg-gold/10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-gold">
@@ -41,16 +36,14 @@ export default function LeaderboardTeaser({ progress }: { progress: Progress }) 
       <ol className="divide-y divide-panel-border">
         <li className="flex items-center gap-3 bg-gold/5 px-5 py-3.5 sm:px-6">
           <span className="w-6 font-mono text-sm font-bold text-gold">1</span>
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-gold/40 bg-night/50">
-            <SidelineCast
-              kind="rookie"
-              tone={progress.kitTone}
-              accent={progress.kitAccent}
-              jersey={progress.jersey}
-              size={48}
-              animated={false}
-            />
-          </span>
+          <PlayerMark
+            jersey={progress.jersey}
+            kitTone={progress.kitTone}
+            kitAccent={progress.kitAccent}
+            rankTone={tenure.rank.tone}
+            size={44}
+            className="shrink-0"
+          />
           <span className="min-w-0 flex-1">
             <span className="flex flex-wrap items-baseline gap-x-2">
               <span className="font-display text-base font-bold text-ink">{name}</span>
@@ -59,7 +52,8 @@ export default function LeaderboardTeaser({ progress }: { progress: Progress }) 
               </span>
             </span>
             <span className="font-mono text-[11px] text-ink-muted">
-              Lv {tenure.level} · {tenure.rank.name} · {progress.xp} XP
+              Lv {tenure.level} · {tenure.rank.name} · {progress.xp} XP · {progress.daysActive}{" "}
+              day{progress.daysActive === 1 ? "" : "s"}
             </span>
           </span>
           <Link
@@ -70,28 +64,17 @@ export default function LeaderboardTeaser({ progress }: { progress: Progress }) 
           </Link>
         </li>
 
-        {GHOSTS.map((g, i) => (
+        {[2, 3, 4].map((n) => (
           <li
-            key={g.name}
-            className="flex items-center gap-3 px-5 py-3 opacity-45 sm:px-6"
+            key={n}
+            className="flex items-center gap-3 px-5 py-3 sm:px-6"
             aria-hidden
           >
-            <span className="w-6 font-mono text-sm text-ink-muted">{i + 2}</span>
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-panel-border bg-night/40 grayscale">
-              <SidelineCast
-                kind="rookie"
-                tone={g.tone}
-                accent={g.accent}
-                jersey={(i + 1) * 11}
-                size={48}
-                animated={false}
-              />
-            </span>
+            <span className="w-6 font-mono text-sm text-ink-muted">{n}</span>
+            <span className="h-11 w-11 shrink-0 rounded-xl border border-dashed border-panel-border bg-night/20" />
             <span className="min-w-0 flex-1">
-              <span className="block font-display text-base font-bold text-ink-muted">{g.name}</span>
-              <span className="font-mono text-[11px] text-ink-muted">
-                Lv {g.level} · {g.rank}
-              </span>
+              <span className="block h-3 w-28 rounded bg-panel-border/60" />
+              <span className="mt-1.5 block h-2.5 w-40 rounded bg-panel-border/40" />
             </span>
             <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">—</span>
           </li>
@@ -99,8 +82,8 @@ export default function LeaderboardTeaser({ progress }: { progress: Progress }) 
       </ol>
 
       <p className="border-t border-panel-border px-5 py-3 text-xs leading-relaxed text-ink-muted sm:px-6">
-        Sign in when accounts sync the board — until then this is your private standing.
-        Level up by clearing lessons, solving questions and keeping a streak.
+        Level up by clearing lessons, solving questions and keeping a streak. Name your player so
+        shares carry your callsign — then challenge your league when the board opens.
       </p>
     </section>
   );

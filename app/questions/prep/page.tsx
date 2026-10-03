@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import AppNav from "@/components/app-nav";
 import PassTag from "@/components/pass-tag";
+import PrepPassBridge from "@/components/prep-pass-bridge";
 import PrepArt, { hasPrepArt, type PrepArtId } from "@/components/prep-art";
 import { ANALYST_FORMATS, ANALYST_MC } from "@/lib/analyst-screen";
 import { challengeTasks } from "@/lib/data-challenge";
@@ -292,6 +293,8 @@ export default function HiringPrepPage() {
             </li>
           ))}
         </ol>
+
+        <PrepPassBridge />
 
         <p className="mt-10 text-center text-sm text-ink-muted">
           Lost?{" "}

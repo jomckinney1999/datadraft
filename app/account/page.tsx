@@ -12,6 +12,7 @@ import { PASS_PLANS, PAYWALL_LIVE } from "@/lib/season-pass";
 import Coach from "@/components/coach";
 import AppNav from "@/components/app-nav";
 import LockerCard from "@/components/locker-card";
+import WaitlistForm from "@/components/waitlist-form";
 
 type State = "loading" | "signed-out" | "sending" | "sent" | "signed-in";
 
@@ -145,6 +146,35 @@ export default function AccountPage() {
           <LockerCard progress={progress} onChange={setProgress} />
         </div>
 
+        {!PAYWALL_LIVE && (
+          <section className="surface mb-6 rounded-2xl border border-gold/40 bg-gold/5 p-5">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-gold">
+              ★ Season Pass · early access
+            </p>
+            <h2 className="mt-1 font-display text-lg font-bold text-ink">
+              Every Pass feature is open right now
+            </h2>
+            <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">
+              Founding members pay {PASS_PLANS.founding.price}/yr locked in. Get on the list for the
+              head start when it opens — early-access users hear first.
+            </p>
+            <div className="mt-3 max-w-md">
+              <WaitlistForm
+                interest="season-pass"
+                source={state === "signed-in" ? "account-signed-in" : "account"}
+                label="Notify me"
+                compact
+              />
+            </div>
+            <Link
+              href="/pricing"
+              className="mt-3 inline-block font-mono text-[11px] font-bold uppercase tracking-wider text-gold hover:underline"
+            >
+              See the full offer →
+            </Link>
+          </section>
+        )}
+
         <section className="surface border border-panel-border bg-panel/80 p-6">
           {state === "loading" && (
             <p className="font-mono text-xs text-ink-muted">Checking your account…</p>
@@ -157,14 +187,13 @@ export default function AccountPage() {
                   <Coach mood="idle" size={96} />
                 </div>
                 <div>
-                  <p className="label-broadcast text-gold">free beta</p>
+                  <p className="label-broadcast text-gold">your locker, everywhere</p>
                   <h1 className="mt-1 font-display text-2xl font-bold text-ink">
-                    Create your free account.
+                    Take your rank with you.
                   </h1>
                   <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-                    Your lessons, XP, and streak should follow you, not one
-                    browser. We email a link. You click it. That&apos;s the
-                    sign-in.
+                    Sign in so your callsign, XP, streak and lessons follow you — not one
+                    browser. We email a link. You click it. That&apos;s the sign-in.
                   </p>
                 </div>
               </div>

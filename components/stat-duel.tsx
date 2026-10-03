@@ -38,7 +38,10 @@ import {
   shareText,
   squares,
   type DuelResult,
+  withIdentity,
 } from "@/lib/daily-share";
+import { loadProgress } from "@/lib/progress";
+import { shareIdentity } from "@/lib/tenure";
 
 const DAY_KEY = "sqlsports.duel.v1";
 const HISTORY_KEY = "sqlsports.duel.history.v1";
@@ -534,7 +537,10 @@ function Summary({
   const total = duel.rounds.length;
   const grid = duel.rounds.map((r, i) => picks[i] === winnerOf(r));
   const link = `${SITE_URL}/questions/duel?r=${encodeDuelResult(duel.number, grid)}`;
-  const text = `DataDraft Stat Duel #${duel.number} 🏈 ${score}/${total}\n${squares(grid)}\nWho had more? Beat me:\n${link}`;
+  const text = withIdentity(
+    `DataDraft Stat Duel #${duel.number} 🏈 ${score}/${total}\n${squares(grid)}\nWho had more? Beat me:\n${link}`,
+    shareIdentity(loadProgress()),
+  );
   const stats = statsOf(history, duel.day, total);
   const peak = Math.max(1, ...stats.dist);
 

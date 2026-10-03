@@ -38,8 +38,12 @@ import {
   encodeDailyResult,
   shareText,
   triesSquares,
+  withIdentity,
   type DailyResult,
 } from "@/lib/daily-share";
+import { PAYWALL_LIVE } from "@/lib/season-pass";
+import { waitlistJoined } from "@/lib/waitlist-memory";
+import { consumeRankUp, shareIdentity, tenureFrom, type Rank } from "@/lib/tenure";
 import type { CellValue } from "@/lib/excel-data";
 import type { Question } from "@/lib/questions";
 import {
@@ -49,7 +53,7 @@ import {
   schemaFor,
 } from "@/lib/questions";
 import { resultsMatch } from "@/lib/sql-grade";
-import { solveQuestion, loadProgress } from "@/lib/progress";
+import { solveQuestion, loadProgress, setCallSign } from "@/lib/progress";
 import { SHORT_CREDIT } from "@/lib/data-source";
 import { playSfx } from "@/lib/sfx";
 import CodeEditor from "@/components/code-editor";
@@ -224,6 +228,9 @@ export default function QuestionWorkspace({
   const locked = pass === false && !free;
   const [offer, setOffer] = useState(false);
   const [afterDailyOffer, setAfterDailyOffer] = useState(false);
+  const [rankUp, setRankUp] = useState<Rank | null>(null);
+  const [nameDraft, setNameDraft] = useState("");
+  const [needsName, setNeedsName] = useState(false);
   const [shareNote, setShareNote] = useState<string | null>(null);
   /** SQL only: the query behind the result on screen, for the Film Room. */
   const [ranSql, setRanSql] = useState<string | null>(null);
@@ -379,8 +386,20 @@ export default function QuestionWorkspace({
           tickets: (firstSolve ? 5 : 1) + (isQotd ? 10 : 0),
         });
         setAlreadySolved(true);
-        // The soft offer, once a day, after the daily, never before it.
-        if (isQotd && pass === false) {
+        const progress = loadProgress();
+        const promoted = consumeRankUp(progress);
+        if (promoted) {
+          setRankUp(promoted);
+          playSfx("unlock");
+        }
+        if (!progress.username?.trim()) setNeedsName(true);
+        // Soft offer after the daily: waitlist while the paywall is off,
+        // Pass checkout once it's on. Never before or during the solve.
+        const soft =
+          isQotd &&
+          (pass === false || !PAYWALL_LIVE) &&
+          !( !PAYWALL_LIVE && waitlistJoined() );
+        if (soft) {
           let seen = false;
           try {
             seen = localStorage.getItem(AFTER_DAILY_KEY) === day;
@@ -730,7 +749,67 @@ export default function QuestionWorkspace({
                           {reward.xp > 0
                             ? `+${reward.xp} XP · +${reward.tickets} tickets`
                             : `+${reward.tickets} ticket${reward.tickets === 1 ? "" : "s"} · already banked the XP for this one`}
+                          {(() => {
+                            const t = tenureFrom(loadProgress());
+                            return t.next
+                              ? ` · ${t.need} to ${t.next.name}`
+                              : "";
+                          })()}
                         </p>
+                      )}
+                      {rankUp && (
+                        <div className="mt-3 rounded-xl border border-gold/50 bg-gold/10 px-3 py-2.5">
+                          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-gold">
+                            Promoted
+                          </p>
+                          <p className="mt-0.5 font-display text-lg font-bold text-ink">
+                            You&apos;re a {rankUp.name}
+                          </p>
+                          <p className="text-xs text-ink-soft">{rankUp.blurb}</p>
+                          <Link
+                            href="/account#locker"
+                            className="mt-1 inline-block font-mono text-[11px] font-bold uppercase tracking-wider text-gold hover:underline"
+                          >
+                            See your locker →
+                          </Link>
+                        </div>
+                      )}
+                      {needsName && (
+                        <div className="mt-3 rounded-xl border border-ice/40 bg-ice/10 px-3 py-2.5">
+                          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ice">
+                            Name your player
+                          </p>
+                          <p className="mt-0.5 text-xs text-ink-soft">
+                            Your callsign shows on shares and the leaderboard.
+                          </p>
+                          <div className="mt-2 flex gap-2">
+                            <input
+                              value={nameDraft}
+                              onChange={(e) => setNameDraft(e.target.value.slice(0, 24))}
+                              placeholder="Callsign"
+                              maxLength={24}
+                              className="min-w-0 flex-1 rounded-lg border border-panel-border bg-night px-2.5 py-1.5 font-display text-sm font-bold text-ink outline-none focus:border-ice"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (!nameDraft.trim()) return;
+                                setCallSign(nameDraft);
+                                setNeedsName(false);
+                              }}
+                              className="rounded-lg border border-ice/50 bg-ice/15 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-ice"
+                            >
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setNeedsName(false)}
+                              className="font-mono text-[10px] uppercase tracking-wider text-ink-muted hover:text-ink"
+                            >
+                              Later
+                            </button>
+                          </div>
+                        </div>
                       )}
                       {challenge && tries > 0 && (
                         <p className="mt-3 rounded-lg border border-panel-border bg-night/40 px-3 py-2 text-sm text-ink">
@@ -774,10 +853,13 @@ export default function QuestionWorkspace({
                               // opens it lands on the question with the score
                               // to beat.
                               const how = await shareText(
-                                `DataDraft Daily ${LANG_LABEL[question.lang]} #${dailyNumber(day)} · solved in ${tries} ${tries === 1 ? "try" : "tries"}
+                                withIdentity(
+                                  `DataDraft Daily ${LANG_LABEL[question.lang]} #${dailyNumber(day)} · solved in ${tries} ${tries === 1 ? "try" : "tries"}
 ${triesSquares(tries)}
 Same question for everyone today:
 ${SITE_URL}/questions/${question.id}/vs/${encodeDailyResult(dailyNumber(day), tries)}`,
+                                  shareIdentity(loadProgress()),
+                                ),
                               );
                               setShareNote(how === "copied" ? "Copied" : how === "failed" ? "Couldn't copy" : null);
                             }}

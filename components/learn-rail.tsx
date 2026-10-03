@@ -25,7 +25,7 @@ import {
   type BadgeStats,
 } from "@/lib/achievements";
 import { type Progress } from "@/lib/progress";
-import SidelineCast from "@/components/sideline-cast";
+import PlayerMark from "@/components/player-mark";
 import { displayName, tenureFrom } from "@/lib/tenure";
 import { FREE_DAILY_TIMEOUTS } from "@/lib/economy";
 
@@ -204,16 +204,14 @@ export default function LearnRail({
       <div className="section-card">
         <p className="label-broadcast text-gold">your standing</p>
         <div className="mt-2 flex items-center gap-3">
-          <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-panel-border bg-night/50">
-            <SidelineCast
-              kind="rookie"
-              tone={progress.kitTone}
-              accent={progress.kitAccent}
-              jersey={progress.jersey}
-              size={56}
-              animated={false}
-            />
-          </span>
+          <PlayerMark
+            jersey={progress.jersey}
+            kitTone={progress.kitTone}
+            kitAccent={progress.kitAccent}
+            rankTone={tenure.rank.tone}
+            size={56}
+            className="shrink-0"
+          />
           <div className="min-w-0 flex-1">
             <p className="truncate font-display text-base font-bold text-ink">{displayName(progress)}</p>
             <p className="font-display text-lg font-bold text-gold">

@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from "react";
-import SidelineCast from "@/components/sideline-cast";
+import PlayerMark from "@/components/player-mark";
 import { setCallSign, setKit, type KitAccent, type Progress } from "@/lib/progress";
 import { displayName, RANKS, tenureFrom } from "@/lib/tenure";
 
@@ -76,14 +76,13 @@ export default function LockerCard({
 
       <div className="grid gap-6 p-5 sm:grid-cols-[9rem_1fr] sm:p-6">
         <div className="flex flex-col items-center">
-          <div className="relative flex h-36 w-36 items-center justify-center overflow-hidden rounded-2xl border border-panel-border bg-night/50">
-            <SidelineCast
-              kind="rookie"
-              tone={progress.kitTone}
-              accent={progress.kitAccent}
+          <div className="relative flex h-40 w-40 items-center justify-center rounded-full bg-[radial-gradient(circle_at_50%_40%,rgb(var(--c-gold)/0.2),transparent_65%)]">
+            <PlayerMark
               jersey={progress.jersey}
-              size={140}
-              animated
+              kitTone={progress.kitTone}
+              kitAccent={progress.kitAccent}
+              rankTone={tenure.rank.tone}
+              size={148}
             />
           </div>
           <p className="mt-3 font-display text-lg font-bold text-ink">{shown}</p>
@@ -196,17 +195,15 @@ export default function LockerCard({
                   onClick={() => patchKit({ kitTone: t })}
                   aria-pressed={progress.kitTone === t}
                   aria-label={`Look ${t + 1}`}
-                  className={`flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl border bg-night/50 ${
-                    progress.kitTone === t ? "border-turf ring-1 ring-turf/40" : "border-panel-border"
+                  className={`flex h-14 w-14 items-center justify-center rounded-full border bg-night/50 ${
+                    progress.kitTone === t ? "border-turf ring-2 ring-turf/40" : "border-panel-border"
                   }`}
                 >
-                  <SidelineCast
-                    kind="rookie"
-                    tone={t}
-                    accent={progress.kitAccent}
+                  <PlayerMark
+                    kitTone={t}
+                    kitAccent={progress.kitAccent}
                     jersey={progress.jersey}
                     size={52}
-                    animated={false}
                   />
                 </button>
               ))}

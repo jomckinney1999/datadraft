@@ -39,7 +39,7 @@ export const NAV: NavSection[] = [
         title: "Your locker",
         items: [
           { href: "/dashboard", label: "Home", blurb: "What's next — today's question and the next lesson" },
-          { href: "/achievements", label: "Hall of Fame", blurb: "Trophies you've earned, and the next enshrinement" },
+          { href: "/achievements", label: "Hall of Fame", blurb: "Trophies you've earned, and the next enshrinement", badge: "Trophies" },
         ],
       },
     ],
@@ -52,18 +52,18 @@ export const NAV: NavSection[] = [
         title: "Practice",
         items: [
           { href: "/questions", label: "Question bank", blurb: "Today's question, and the whole bank in SQL, Python, R and Excel", badge: "Daily" },
-          { href: "/questions#interview", label: "Interview patterns", blurb: "The nine SQL patterns analyst screens test" },
-          { href: "/questions/prep", label: "Hiring prep", blurb: "Drill the nine patterns, then OA → SQL screen → take-home" },
-          { href: "/questions/screen", label: "Analyst Screen", blurb: "A timed online assessment: SQL plus stats, wrangling and A/B" },
-          { href: "/questions/mock", label: "Mock SQL screens", blurb: "A timed phone or technical screen, then a report" },
+          { href: "/questions#interview", label: "Interview patterns", blurb: "The nine SQL patterns analyst screens test", badge: "Prep" },
+          { href: "/questions/prep", label: "Hiring prep", blurb: "Drill the nine patterns, then OA → SQL screen → take-home", badge: "Pass" },
+          { href: "/questions/screen", label: "Analyst Screen", blurb: "A timed online assessment: SQL plus stats, wrangling and A/B", badge: "Pass" },
+          { href: "/questions/mock", label: "Mock SQL screens", blurb: "A timed phone or technical screen, then a report", badge: "Pass" },
         ],
       },
       {
         title: "Play",
         items: [
           { href: "/questions/duel", label: "Stat Duel", blurb: "Five head-to-heads on real numbers", badge: "Daily" },
-          { href: "/draft", label: "Draft Room", blurb: "Draft a real season, scouting with SQL" },
-          { href: "/learn/rapid", label: "Rapid Fire", blurb: "Twelve seconds a question, no typing" },
+          { href: "/draft", label: "Draft Room", blurb: "Draft a real season, scouting with SQL", badge: "Play" },
+          { href: "/learn/rapid", label: "Rapid Fire", blurb: "Twelve seconds a question, no typing", badge: "Play" },
           { href: "/learn/arcade", label: "Arcade", blurb: "Pattern Call, Foul Call, Film Room Match — prep between drives", badge: "Prep" },
         ],
       },
@@ -82,8 +82,8 @@ export const NAV: NavSection[] = [
       {
         title: "Sandboxes",
         items: [
-          { href: "/field", label: "Practice Field", blurb: "Free-play SQL on this season's real stats" },
-          { href: "/excel", label: "Spreadsheet", blurb: "Real formulas on a real workbook" },
+          { href: "/field", label: "Practice Field", blurb: "Free-play SQL on this season's real stats", badge: "Free" },
+          { href: "/excel", label: "Spreadsheet", blurb: "Real formulas on a real workbook", badge: "Free" },
           { href: "/data", label: "The data", blurb: "Where every row comes from, with free downloads" },
         ],
       },
@@ -96,7 +96,7 @@ export const NAV: NavSection[] = [
       {
         title: "Builds",
         items: [
-          { href: "/projects/my-league-scorecard", label: "Your League Scorecard", blurb: "Chart your own fantasy league" },
+          { href: "/projects/my-league-scorecard", label: "Your League Scorecard", blurb: "Chart your own fantasy league", badge: "Free" },
           { href: "/projects/nflverse-dbt-warehouse", label: "Build the Warehouse", blurb: "A real dbt project on NFL data" },
           { href: "/projects/fantasy-points-model", label: "Prediction Model", blurb: "Beat a baseline, honestly" },
         ],
@@ -104,8 +104,8 @@ export const NAV: NavSection[] = [
       {
         title: "Cases",
         items: [
-          { href: "/projects#cases", label: "Data cases", blurb: "Half an hour, a schema you've never seen, a right answer" },
-          { href: "/projects/challenge", label: "Data Challenge", blurb: "A take-home on messy data: clean, join, recommend" },
+          { href: "/projects#cases", label: "Data cases", blurb: "Half an hour, a schema you've never seen, a right answer", badge: "Prep" },
+          { href: "/projects/challenge", label: "Data Challenge", blurb: "A take-home on messy data: clean, join, recommend", badge: "Pass" },
         ],
       },
     ],

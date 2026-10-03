@@ -15,9 +15,11 @@
  * sells.
  */
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import WaitlistForm from "@/components/waitlist-form";
 import { PASS_PLANS, PAYWALL_LIVE } from "@/lib/season-pass";
+import { waitlistJoined } from "@/lib/waitlist-memory";
 
 export type OfferMoment =
   | "lessons"
@@ -64,6 +66,11 @@ export default function PassOffer({
   onDismiss?: () => void;
   className?: string;
 }) {
+  const [onList, setOnList] = useState(false);
+  useEffect(() => {
+    setOnList(waitlistJoined());
+  }, []);
+
   return (
     <div className={`rounded-xl border border-gold/50 bg-gold/10 p-4 text-left ${className}`}>
       <div className="flex items-start justify-between gap-3">
@@ -88,10 +95,22 @@ export default function PassOffer({
             {PASS_PLANS.annual.price} a year · or {PASS_PLANS.monthly.price} a month
           </span>
         </div>
+      ) : onList ? (
+        <p className="mt-3 font-mono text-[11px] text-turf" role="status">
+          ✓ You&apos;re on the founding list. We&apos;ll email you when it opens.
+        </p>
       ) : (
         <div className="mt-3">
-          <p className="mb-2 text-[12px] text-ink-soft">It opens soon. Get on the list for when it does.</p>
-          <WaitlistForm interest="practice" source={`pass-${moment}`} label="Join waitlist" compact />
+          <p className="mb-2 text-[12px] text-ink-soft">
+            Founding price opens soon — get on the list for the head start.
+          </p>
+          <WaitlistForm
+            interest="season-pass"
+            source={`pass-${moment}`}
+            label="Join waitlist"
+            compact
+            onJoined={() => setOnList(true)}
+          />
         </div>
       )}
     </div>

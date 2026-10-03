@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { markWaitlistJoined, waitlistJoined } from "@/lib/waitlist-memory";
 
 /**
  * Email capture, used anywhere the product can't deliver yet: the paid tiers,
@@ -15,17 +16,27 @@ export default function WaitlistForm({
   source,
   label = "Get notified",
   compact = false,
+  onJoined,
 }: {
   interest: string;
   source: string;
   label?: string;
   compact?: boolean;
+  /** Fires after a successful signup (or already-on). */
+  onJoined?: () => void;
 }) {
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">(
     "idle",
   );
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (waitlistJoined()) {
+      setState("done");
+      setMessage("You're already on the list — we'll be in touch.");
+    }
+  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -51,6 +62,8 @@ export default function WaitlistForm({
         setMessage(data.error ?? "Couldn't save that. Try again in a moment.");
         return;
       }
+      markWaitlistJoined();
+      onJoined?.();
       setState("done");
       setMessage(
         data.alreadyOn

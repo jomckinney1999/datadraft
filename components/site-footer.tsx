@@ -16,11 +16,12 @@ const COLUMNS = [
     links: [
       { href: "/welcome", label: "Start here" },
       { href: "/questions", label: "Questions" },
+      { href: "/questions/prep", label: "Hiring prep" },
       { href: "/learn", label: "Courses" },
       { href: "/projects", label: "Projects" },
       { href: "/dashboard", label: "Dashboard" },
+      { href: "/account#locker", label: "Your locker" },
       { href: "/pricing", label: "Season Pass" },
-      { href: "/account", label: "Account" },
     ],
   },
   {
@@ -29,6 +30,8 @@ const COLUMNS = [
       { href: "/data", label: "Where it comes from" },
       { href: "/field", label: "Practice Field (free SQL)" },
       { href: "/excel", label: "Spreadsheet (free Excel)" },
+      { href: "/questions/duel", label: "Stat Duel" },
+      { href: "/draft", label: "Draft Room" },
       { href: "/learn/rapid", label: "Rapid Fire" },
     ],
   },

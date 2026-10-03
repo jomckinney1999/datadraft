@@ -27,7 +27,9 @@ import PassOffer from "@/components/pass-offer";
 import { usePass } from "@/lib/use-pass";
 import Headshot from "@/components/headshot";
 import { NFLVERSE_CREDIT } from "@/lib/chart";
-import { shareText } from "@/lib/daily-share";
+import { shareText, withIdentity } from "@/lib/daily-share";
+import { loadProgress } from "@/lib/progress";
+import { shareIdentity } from "@/lib/tenure";
 import { DRAFT_SEASONS } from "@/lib/draft-seasons.generated";
 import { SITE_URL } from "@/lib/site";
 import {
@@ -1282,14 +1284,17 @@ function ResultsScreen({
   const code = encodeResult({ season: league.season, seed: league.seed, slot: league.slot, w: me.w, l: me.l, pf: me.pf, finish: me.finish });
   const link = `${SITE_URL}/draft?r=${code}`;
   const grid = me.marks.map((m) => (m === "W" ? "🟩" : m === "L" ? "🟥" : "⬜")).join("");
-  const text = [
-    `DataDraft Draft Room · ${league.season} season`,
-    `${FINISH_ICON[me.finish]} ${FINISH_LABEL[me.finish]} · ${me.w}–${me.l} · ${fmt(Math.round(me.pf))} pts`,
-    edge >= 0 ? `Scouting with SQL: +${edge} pts over the autodraft` : `The autodraft beat me by ${-edge} pts`,
-    grid,
-    "Same slot, same bots. Beat my draft:",
-    link,
-  ].join("\n");
+  const text = withIdentity(
+    [
+      `DataDraft Draft Room · ${league.season} season`,
+      `${FINISH_ICON[me.finish]} ${FINISH_LABEL[me.finish]} · ${me.w}–${me.l} · ${fmt(Math.round(me.pf))} pts`,
+      edge >= 0 ? `Scouting with SQL: +${edge} pts over the autodraft` : `The autodraft beat me by ${-edge} pts`,
+      grid,
+      "Same slot, same bots. Beat my draft:",
+      link,
+    ].join("\n"),
+    shareIdentity(loadProgress()),
+  );
 
   return (
     <div className="mx-auto max-w-5xl">

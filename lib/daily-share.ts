@@ -74,6 +74,12 @@ export function parseDailyResult(code: string | null | undefined): DailyResult |
 /** 🟨 per miss, 🟩 for the solve; the misses cap at nine so a line stays a line. */
 export const triesSquares = (tries: number) => `${"🟨".repeat(Math.min(9, tries - 1))}🟩`;
 
+/** Append a callsign line when the learner named themselves. */
+export function withIdentity(text: string, identity: string | null | undefined): string {
+  const line = identity?.trim();
+  return line ? `${text}\n${line}` : text;
+}
+
 /**
  * Share text the way people actually share: the phone's share sheet where
  * there is one, the clipboard where there isn't.

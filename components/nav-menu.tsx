@@ -21,10 +21,31 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type FocusEvent } from "react";
 import type { NavSection } from "@/lib/nav";
+import { badgeTone, NavIcon } from "@/components/nav-icons";
+import type { Tone } from "@/components/art-kit";
+
+const BADGE_STYLE: Record<Tone, string> = {
+  gold: "border-gold/60 bg-gold/15 text-gold",
+  ice: "border-ice/60 bg-ice/15 text-ice",
+  turf: "border-turf/60 bg-turf/15 text-turf",
+};
+
+const GROUP_TONE: Record<string, string> = {
+  "Your locker": "text-gold",
+  Practice: "text-turf",
+  Play: "text-ice",
+  Learn: "text-turf",
+  Sandboxes: "text-ice",
+  Builds: "text-gold",
+  Cases: "text-gold",
+};
 
 function Badge({ text }: { text: string }) {
+  const tone = badgeTone(text);
   return (
-    <span className="rounded-full border border-gold/50 bg-gold/10 px-1.5 py-px font-mono text-[9px] font-bold uppercase tracking-widest text-gold">
+    <span
+      className={`rounded-full border px-1.5 py-px font-mono text-[9px] font-bold uppercase tracking-widest ${BADGE_STYLE[tone]}`}
+    >
       {text}
     </span>
   );
@@ -114,31 +135,44 @@ export function NavDropdown({
       {open && (
         <div
           id={panelId}
-          className={`absolute top-full z-40 w-[34rem] max-w-[calc(100vw-2rem)] pt-1 ${anchor === "left" ? "left-4 sm:left-6" : "right-4 sm:right-6"}`}
+          className={`absolute top-full z-40 w-[38rem] max-w-[calc(100vw-2rem)] pt-1 ${anchor === "left" ? "left-4 sm:left-6" : "right-4 sm:right-6"}`}
         >
-          <div className="surface grid gap-4 rounded-2xl border border-panel-border bg-panel p-4 sm:grid-cols-2">
-            {section.groups.map((g) => (
-              <div key={g.title}>
-                <p className="px-2 font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted">{g.title}</p>
-                <ul className="mt-1.5 space-y-0.5">
-                  {g.items.map((item) => (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        onClick={() => setOpen(false)}
-                        className="block rounded-lg px-2 py-1.5 transition-colors hover:bg-night/50 focus-visible:bg-night/50"
-                      >
-                        <span className="flex items-center gap-2 text-sm font-semibold text-ink">
-                          {item.label}
-                          {item.badge && <Badge text={item.badge} />}
-                        </span>
-                        <span className="block text-xs leading-snug text-ink-muted">{item.blurb}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+          <div className="surface relative overflow-hidden rounded-2xl border border-panel-border bg-panel p-3 sm:p-4">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_80%_at_0%_0%,rgb(var(--c-turf)/0.12),transparent_50%),radial-gradient(ellipse_60%_70%_at_100%_100%,rgb(var(--c-gold)/0.10),transparent_45%),radial-gradient(ellipse_50%_60%_at_80%_0%,rgb(var(--c-ice)/0.10),transparent_40%)]"
+            />
+            <div className={`relative grid gap-4 ${section.groups.length > 1 ? "sm:grid-cols-2" : ""}`}>
+              {section.groups.map((g) => (
+                <div key={g.title}>
+                  <p
+                    className={`px-2 font-mono text-[10px] font-bold uppercase tracking-widest ${GROUP_TONE[g.title] ?? "text-ink-muted"}`}
+                  >
+                    {g.title}
+                  </p>
+                  <ul className="mt-1.5 space-y-1">
+                    {g.items.map((item) => (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          onClick={() => setOpen(false)}
+                          className="group flex items-start gap-2.5 rounded-xl border border-transparent px-2 py-2 transition-colors hover:border-panel-border hover:bg-night/40 focus-visible:border-turf/40 focus-visible:bg-night/40"
+                        >
+                          <NavIcon href={item.href} />
+                          <span className="min-w-0 flex-1">
+                            <span className="flex flex-wrap items-center gap-1.5 text-sm font-semibold text-ink group-hover:text-turf">
+                              {item.label}
+                              {item.badge && <Badge text={item.badge} />}
+                            </span>
+                            <span className="mt-0.5 block text-xs leading-snug text-ink-muted">{item.blurb}</span>
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -171,7 +205,7 @@ export function NavDrawerSections({
             {s.label}
           </Link>
           {s.groups.length > 0 && (
-            <ul className="ml-3 mt-0.5 border-l border-panel-border/70 pl-2">
+            <ul className="ml-2 mt-1 space-y-0.5 border-l border-panel-border/70 pl-2">
               {s.groups
                 .flatMap((g) => g.items)
                 .filter((i) => i.href !== s.href)
@@ -180,10 +214,15 @@ export function NavDrawerSections({
                     <Link
                       href={i.href}
                       onClick={onNavigate}
-                      className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-ink-soft transition-colors hover:bg-panel hover:text-ink"
+                      className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-ink-soft transition-colors hover:bg-panel hover:text-ink"
                     >
-                      {i.label}
-                      {i.badge && <Badge text={i.badge} />}
+                      <NavIcon href={i.href} />
+                      <span className="min-w-0 flex-1">
+                        <span className="flex flex-wrap items-center gap-1.5 font-semibold text-ink">
+                          {i.label}
+                          {i.badge && <Badge text={i.badge} />}
+                        </span>
+                      </span>
                     </Link>
                   </li>
                 ))}

@@ -35,7 +35,7 @@ import DraftCard from "@/components/draft-card";
 import { TourButton } from "@/components/welcome-tour";
 import PlayStrip from "@/components/play-strip";
 import LeaderboardTeaser from "@/components/leaderboard-teaser";
-import SidelineCast from "@/components/sideline-cast";
+import PlayerMark from "@/components/player-mark";
 import { displayName, tenureFrom } from "@/lib/tenure";
 import { useCountUp } from "@/lib/use-count-up";
 import { playSfx } from "@/lib/sfx";
@@ -202,16 +202,13 @@ export default function Dashboard({
               </p>
             </div>
             <div className="hidden shrink-0 items-end gap-2 sm:flex">
-              <span className="flex h-[4.5rem] w-[4.5rem] items-center justify-center overflow-hidden rounded-2xl border border-panel-border bg-night/50">
-                <SidelineCast
-                  kind="rookie"
-                  tone={progress.kitTone}
-                  accent={progress.kitAccent}
-                  jersey={progress.jersey}
-                  size={72}
-                  animated={false}
-                />
-              </span>
+              <PlayerMark
+                jersey={progress.jersey}
+                kitTone={progress.kitTone}
+                kitAccent={progress.kitAccent}
+                rankTone={tenure.rank.tone}
+                size={76}
+              />
               <Coach mood={coachMood} size={64} />
             </div>
           </div>
@@ -305,14 +302,16 @@ export default function Dashboard({
           href="/questions/prep"
           onClick={() => playSfx("ui")}
           style={{ ["--i" as string]: 5 }}
-          className="lift surface mt-3 flex items-center gap-3 overflow-hidden rounded-2xl border border-panel-border bg-panel p-3 pr-4 transition-colors hover:border-gold/50"
+          className="lift surface mt-3 flex items-center gap-3 overflow-hidden rounded-2xl border border-gold/40 bg-panel p-3 pr-4 transition-colors hover:border-gold/70"
         >
           <span className="h-14 w-20 shrink-0 overflow-hidden rounded-lg border border-panel-border bg-night/50">
             <PrepArt id="online" className="h-full w-full" />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="label-broadcast text-gold">hiring prep</span>
-            <span className="mt-0.5 block font-display text-base font-bold text-ink">OA → SQL screen → take-home</span>
+            <span className="label-broadcast text-gold">hiring prep · ★ pass path</span>
+            <span className="mt-0.5 block font-display text-base font-bold text-ink">
+              Patterns → OA → SQL screen → take-home
+            </span>
           </span>
           <span className="shrink-0 font-mono text-[11px] font-bold uppercase tracking-wider text-gold">Open →</span>
         </Link>
