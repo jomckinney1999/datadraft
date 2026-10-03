@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Top-right locker chip — your callsign, level, tenure rank, and logo mark.
+ * Top-right locker chip — your callsign, level, tenure rank, and owl mark.
  * Links to /account where you name and kit the character.
  */
 

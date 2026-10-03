@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Own your character — callsign, jersey, kit. Lives on /account and feeds
- * the nav chip + dashboard leaderboard placeholder.
+ * Own your character — callsign, shirt number, kit colour. Lives on
+ * /account and feeds the nav chip + dashboard leaderboard placeholder.
  */
 
 import { useEffect, useState } from "react";
@@ -73,7 +73,7 @@ export default function LockerCard({
           Own the roster spot
         </h2>
         <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">
-          Name your player, pick a kit, and level up by solving, learning and
+          Name your owl, pick a kit, and level up by solving, learning and
           showing up. Tenure ranks reward commitment — not a one-day grind.
         </p>
       </div>
@@ -145,7 +145,7 @@ export default function LockerCard({
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
               <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted">
-                Jersey #
+                Shirt #
               </span>
               <input
                 inputMode="numeric"

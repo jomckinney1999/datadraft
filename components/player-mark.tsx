@@ -1,59 +1,63 @@
 /**
- * Logo-style profile mark — flat, non-realistic cartoon (ape-NFT energy)
- * on a football kit.
+ * Logo-style profile mark — flat ape-NFT cartoon energy, but an owl.
  *
- * Solid pastel field, thick night outlines, flat fills, one shade block,
- * big goggle-visor, and a soft status veil. One fixed cartoon skin — no
- * tone picker. Gradient ids are sanitized so status text can't break fills.
+ * Owls read as the smart animal; big round glasses do the rest. Solid pastel
+ * field, thick night outlines, flat fills, one shade block, gold halo, soft
+ * status veil. Shirt colour + number are the kit customisation — no football
+ * gear. One fixed feather palette (not a race menu). Gradient ids sanitized.
  */
 
-import { c, Football, N, type Tone } from "@/components/art-kit";
+import { c, N, type Tone } from "@/components/art-kit";
 import type { KitAccent } from "@/lib/progress";
 
-/** One warm cartoon skin — same family as the Ref. Not a race menu. */
-const SKIN = {
-  base: "rgb(214 168 122)",
-  shade: "rgb(176 128 88)",
+/** Fixed cartoon feather / face — illustration hexes, like the cast. */
+const OWL = {
+  feather: "rgb(92 72 58)",
+  featherShade: "rgb(62 48 38)",
+  face: "rgb(232 198 158)",
+  faceShade: "rgb(198 158 118)",
+  beak: "rgb(255 180 60)",
+  beakShade: "rgb(212 140 30)",
 } as const;
 
 /**
- * Jersey = kit accent. Sky = a flat complementary pastel so the subject
- * pops the way a cream field pops a dark ape.
+ * Shirt = kit accent. Sky = flat complementary pastel so the dark owl
+ * pops the way a cream field pops a Bored Ape.
  */
 const KIT: Record<
   KitAccent,
   {
     primary: Tone;
-    jersey: string;
-    jerseyShade: string;
-    helmet: string;
+    shirt: string;
+    shirtShade: string;
     number: string;
     sky: string;
+    frames: string;
   }
 > = {
   ice: {
     primary: "ice",
-    jersey: c("ice"),
-    jerseyShade: c("ice-dim"),
-    helmet: c("gold"),
+    shirt: c("ice"),
+    shirtShade: c("ice-dim"),
     number: c("ink"),
     sky: c("gold"),
+    frames: c("night"),
   },
   turf: {
     primary: "turf",
-    jersey: c("turf"),
-    jerseyShade: c("turf-dim"),
-    helmet: c("ice"),
+    shirt: c("turf"),
+    shirtShade: c("turf-dim"),
     number: c("night"),
     sky: c("gold"),
+    frames: c("night"),
   },
   gold: {
     primary: "gold",
-    jersey: c("gold"),
-    jerseyShade: c("gold-dim"),
-    helmet: c("ice"),
+    shirt: c("gold"),
+    shirtShade: c("gold-dim"),
     number: c("night"),
     sky: c("ice"),
+    frames: c("night"),
   },
 };
 
@@ -97,13 +101,13 @@ export default function PlayerMark({
       className={`player-mark-glow ${className}`}
       data-tone={ring}
       role="img"
-      aria-label={banner ? `Player ${num}, ${status}` : `Player ${num}`}
+      aria-label={banner ? `Owl ${num}, ${status}` : `Owl ${num}`}
     >
       <defs>
         <linearGradient id={`${gid}-veil`} x1="40" y1="54" x2="40" y2="78" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor={N} stopOpacity="0" />
           <stop offset="40%" stopColor={N} stopOpacity="0.28" />
-          <stop offset="100%" stopColor={kit.jerseyShade} stopOpacity="0.82" />
+          <stop offset="100%" stopColor={kit.shirtShade} stopOpacity="0.82" />
         </linearGradient>
         <clipPath id={`${gid}-clip`}>
           <circle cx="40" cy="40" r="36" />
@@ -113,48 +117,30 @@ export default function PlayerMark({
       {/* Fat sticker ring */}
       <circle cx="40" cy="40" r="39.5" fill={kit.sky} />
       <circle cx="40" cy="40" r="38" fill="none" stroke={N} strokeWidth="3.5" />
-      <circle cx="40" cy="40" r="36.2" fill="none" stroke={kit.jersey} strokeWidth="2.2" />
+      <circle cx="40" cy="40" r="36.2" fill="none" stroke={kit.shirt} strokeWidth="2.2" />
 
       <g clipPath={`url(#${gid}-clip)`}>
-        {/* Flat pastel field — no gradients, no night */}
+        {/* Flat pastel field */}
         <rect width="80" height="80" fill={kit.sky} />
 
-        {/* Gold halo ring — ape energy, football glory */}
-        <ellipse
-          cx="40"
-          cy="14"
-          rx="18"
-          ry="5.5"
-          fill="none"
-          stroke={c("gold")}
-          strokeWidth="3.2"
-        />
-        <ellipse
-          cx="40"
-          cy="14"
-          rx="18"
-          ry="5.5"
-          fill="none"
-          stroke={N}
-          strokeWidth="1.2"
-          opacity="0.35"
-        />
+        {/* Gold halo — ape energy */}
+        <ellipse cx="40" cy="13" rx="17" ry="5" fill="none" stroke={c("gold")} strokeWidth="3.2" />
+        <ellipse cx="40" cy="13" rx="17" ry="5" fill="none" stroke={N} strokeWidth="1.2" opacity="0.35" />
 
-        {/* Jersey — flat slab, one shade block */}
+        {/* Shirt — flat, kit colour, number like an ape tee graphic */}
         <path
-          d="M6 80 V50 Q8 42 22 40 L58 40 Q72 42 74 50 V80 Z"
-          fill={kit.jersey}
+          d="M8 80 V52 Q10 44 24 42 L56 42 Q70 44 72 52 V80 Z"
+          fill={kit.shirt}
           stroke={N}
           strokeWidth="3.2"
           strokeLinejoin="round"
         />
-        <path d="M54 42 Q68 46 72 80 H58 Q56 54 54 44 Z" fill={kit.jerseyShade} />
-        {/* Collar */}
+        <path d="M54 44 Q68 48 70 80 H58 Q56 56 54 46 Z" fill={kit.shirtShade} />
         <path
-          d="M26 40 L32 48 L40 44 L48 48 L54 40"
-          fill={kit.jerseyShade}
+          d="M28 42 L33 50 L40 46 L47 50 L52 42"
+          fill={kit.shirtShade}
           stroke={N}
-          strokeWidth="2.4"
+          strokeWidth="2.2"
           strokeLinejoin="round"
         />
         <text
@@ -172,82 +158,77 @@ export default function PlayerMark({
           {num}
         </text>
 
-        {/* Neck — flat */}
-        <rect
-          x="32"
-          y="40"
-          width="16"
-          height="10"
-          rx="3"
-          fill={SKIN.base}
+        {/* Oversized owl ears / head tufts */}
+        <path
+          d="M18 28 Q14 10 28 18 Z"
+          fill={OWL.feather}
+          stroke={N}
+          strokeWidth="3"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M62 28 Q66 10 52 18 Z"
+          fill={OWL.feather}
+          stroke={N}
+          strokeWidth="3"
+          strokeLinejoin="round"
+        />
+        <path d="M20 26 Q18 16 26 20 Z" fill={OWL.featherShade} />
+        <path d="M60 26 Q62 16 54 20 Z" fill={OWL.featherShade} />
+
+        {/* Round cartoon head */}
+        <ellipse
+          cx="40"
+          cy="32"
+          rx="22"
+          ry="20"
+          fill={OWL.feather}
+          stroke={N}
+          strokeWidth="3.4"
+        />
+        {/* One flat shade cheek */}
+        <ellipse cx="52" cy="36" rx="7" ry="11" fill={OWL.featherShade} />
+
+        {/* Pale face disc */}
+        <ellipse
+          cx="40"
+          cy="34"
+          rx="14"
+          ry="13"
+          fill={OWL.face}
           stroke={N}
           strokeWidth="2.6"
         />
-        <rect x="40" y="42" width="8" height="8" rx="2" fill={SKIN.shade} />
-
-        {/* Big cartoon head */}
-        <ellipse
-          cx="40"
-          cy="30"
-          rx="16"
-          ry="15.5"
-          fill={SKIN.base}
-          stroke={N}
-          strokeWidth="3.2"
-        />
-        {/* One flat shade on the cheek — cel, not realistic */}
-        <ellipse cx="48" cy="32" rx="5" ry="8" fill={SKIN.shade} />
-
-        {/* Cap / helmet shell — simple dome */}
-        <path
-          d="M24 28 Q24 12 40 11 Q56 12 56 28 L56 30 Q52 28 48 26 L32 26 Q28 28 24 30 Z"
-          fill={kit.helmet}
-          stroke={N}
-          strokeWidth="3.2"
-          strokeLinejoin="round"
-        />
-        {/* Centre stripe */}
-        <path d="M37 12 L37 27 L43 27 L43 12 Z" fill={N} />
-        <path d="M38.2 13 L38.2 26 L41.8 26 L41.8 13 Z" fill={kit.jersey} />
+        <ellipse cx="46" cy="36" rx="5" ry="8" fill={OWL.faceShade} />
 
         {/*
-          Big rectangular goggles — the non-realistic beat. Dark lenses,
-          thick frame, three white slash reflections like the ape reference.
+          Big round glasses — the smart beat. Thick frames, tinted lenses,
+          white slash reflections (ape goggle energy).
         */}
-        <rect
-          x="24"
-          y="26"
-          width="32"
-          height="12"
-          rx="3"
-          fill={N}
-          stroke={N}
-          strokeWidth="3"
-        />
-        <rect x="26" y="28" width="13" height="8" rx="1.5" fill={c("night-50")} />
-        <rect x="41" y="28" width="13" height="8" rx="1.5" fill={c("night-50")} />
-        <path d="M28 29.5 L35 34.5" stroke={c("ink")} strokeWidth="1.6" strokeLinecap="round" opacity="0.85" />
-        <path d="M30.5 29.5 L37 34.5" stroke={c("ink")} strokeWidth="1.2" strokeLinecap="round" opacity="0.55" />
-        <path d="M43 29.5 L50 34.5" stroke={c("ink")} strokeWidth="1.6" strokeLinecap="round" opacity="0.85" />
-        <path d="M45.5 29.5 L52 34.5" stroke={c("ink")} strokeWidth="1.2" strokeLinecap="round" opacity="0.55" />
-        {/* Bridge */}
-        <rect x="38" y="29" width="4" height="6" fill={N} />
+        <circle cx="31" cy="30" r="9.5" fill={c("night-50")} stroke={kit.frames} strokeWidth="3.4" />
+        <circle cx="49" cy="30" r="9.5" fill={c("night-50")} stroke={kit.frames} strokeWidth="3.4" />
+        <path d="M40 30 H40.01" stroke={kit.frames} strokeWidth="3.4" strokeLinecap="round" />
+        <path d="M25.5 27 L34 34" stroke={c("ink")} strokeWidth="1.8" strokeLinecap="round" opacity="0.9" />
+        <path d="M27.5 26.5 L35.5 33.5" stroke={c("ink")} strokeWidth="1.2" strokeLinecap="round" opacity="0.5" />
+        <path d="M43.5 27 L52 34" stroke={c("ink")} strokeWidth="1.8" strokeLinecap="round" opacity="0.9" />
+        <path d="M45.5 26.5 L53.5 33.5" stroke={c("ink")} strokeWidth="1.2" strokeLinecap="round" opacity="0.5" />
+        {/* Tiny pupils peeking through */}
+        <circle cx="31" cy="31" r="2.2" fill={N} />
+        <circle cx="49" cy="31" r="2.2" fill={N} />
+        <circle cx="31.7" cy="30.3" r="0.7" fill={c("ink")} />
+        <circle cx="49.7" cy="30.3" r="0.7" fill={c("ink")} />
 
-        {/* Wide cartoon mouth */}
+        {/* Triangle beak */}
         <path
-          d="M30 40 Q40 46 50 40"
-          fill="none"
+          d="M36 38 L40 46 L44 38 Z"
+          fill={OWL.beak}
           stroke={N}
-          strokeWidth="2.8"
-          strokeLinecap="round"
+          strokeWidth="2.4"
+          strokeLinejoin="round"
         />
+        <path d="M40 39.5 L40 44.5" stroke={OWL.beakShade} strokeWidth="1.6" strokeLinecap="round" />
 
-        {/* Tiny football sticker */}
-        <g transform="translate(62 50) rotate(-25) scale(0.42)">
-          <Football x={0} y={0} rx={14} fill={c("gold")} />
-        </g>
-
-        {/* Soft status veil — hugs the circle via clip */}
+        {/* Soft status veil */}
         {banner && (
           <g>
             <path d="M2 56 Q40 50 78 56 L80 80 L0 80 Z" fill={`url(#${gid}-veil)`} />
