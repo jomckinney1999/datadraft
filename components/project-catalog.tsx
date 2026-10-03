@@ -19,7 +19,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { PROJECTS } from "@/lib/projects";
+import { buildingProjects, liveProjects } from "@/lib/projects";
 import { INTERVIEW_CASES } from "@/lib/interview-cases";
 import { loadInterviewProgress, type InterviewProgress } from "@/lib/interview-progress";
 import { loadChecklist } from "@/lib/project-progress";
@@ -40,19 +40,18 @@ export default function ProjectCatalog() {
   useEffect(() => {
     setCaseProgress(loadInterviewProgress());
     const counts: Record<string, number> = {};
-    for (const p of PROJECTS) {
+    for (const p of liveProjects()) {
       counts[p.id] = Object.values(loadChecklist(p.id)).filter(Boolean).length;
     }
     setBuildDone(counts);
   }, []);
 
-  const builds = useMemo(
-    () => PROJECTS.filter((p) => p.status === "live"),
-    [],
-  );
+  const builds = useMemo(() => liveProjects(), []);
+  const upcoming = useMemo(() => buildingProjects(), []);
 
   const showBuilds = kind !== "cases";
   const showCases = kind !== "builds";
+  const buildCount = builds.length + upcoming.length;
 
   return (
     <>
@@ -75,8 +74,8 @@ export default function ProjectCatalog() {
         <div className="mt-6 flex flex-wrap items-center gap-2">
           {(
             [
-              { id: "all", label: `All ${builds.length + INTERVIEW_CASES.length}` },
-              { id: "builds", label: `Builds ${builds.length}` },
+              { id: "all", label: `All ${buildCount + INTERVIEW_CASES.length}` },
+              { id: "builds", label: `Builds ${buildCount}` },
               { id: "cases", label: `Cases ${INTERVIEW_CASES.length}` },
             ] as { id: Kind; label: string }[]
           ).map((f) => (
@@ -148,6 +147,42 @@ export default function ProjectCatalog() {
                   </Link>
                 );
               })}
+              {upcoming.map((p) => (
+                <div
+                  key={p.id}
+                  className="surface flex flex-col overflow-hidden rounded-2xl border border-dashed border-panel-border bg-panel/70 p-5"
+                >
+                  <div className="-mx-5 -mt-5 mb-4 h-40 overflow-hidden border-b border-panel-border bg-night/60 opacity-90">
+                    <ProjectArt id={p.id} className="h-full w-full" />
+                  </div>
+                  <div className="flex items-start justify-between gap-3">
+                    <p
+                      className={`font-display text-lg font-bold ${
+                        p.accent === "gold" ? "text-gold" : "text-turf"
+                      }`}
+                    >
+                      {p.title}
+                    </p>
+                    <span className="shrink-0 rounded-full border border-ice/40 bg-ice/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-ice">
+                      In build
+                    </span>
+                  </div>
+                  <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-soft">{p.blurb}</p>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {p.skills.map((s) => (
+                      <span
+                        key={s}
+                        className="rounded-md border border-panel-border px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-muted"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="mt-3 border-t border-panel-border pt-3 font-mono text-[11px] text-ink-muted">
+                    Coming next · {p.hours} · {p.artifact}
+                  </p>
+                </div>
+              ))}
             </div>
           </section>
         )}

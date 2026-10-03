@@ -1,10 +1,12 @@
 /**
  * Rapid Fire — non-linear practice snaps by language.
- * Pulls real multiple-choice drills from the live curriculum, shuffles them,
- * and pays scouting tickets. No timeouts, no path order.
+ * Pulls real multiple-choice drills from the live curriculum, merges the
+ * extra bank in lib/rapid-bank.ts, shuffles them, and pays scouting tickets.
+ * No timeouts, no path order.
  */
 
 import { liveLessons, type MCExercise } from "./curriculum";
+import { rapidBankFor } from "./rapid-bank";
 import { loadProgress, saveProgress, type Progress } from "./progress";
 
 export type RapidLangId =
@@ -89,7 +91,7 @@ export function getRapidLang(id: string): RapidLang | undefined {
   return RAPID_LANGS.find((l) => l.id === id);
 }
 
-/** Build the MC bank for a language from live curriculum lessons. */
+/** Build the MC bank for a language from live curriculum + rapid-bank extras. */
 export function buildRapidBank(langId: RapidLangId): RapidQuestion[] {
   const lang = getRapidLang(langId);
   if (!lang) return [];
@@ -112,6 +114,18 @@ export function buildRapidBank(langId: RapidLangId): RapidQuestion[] {
         });
       });
     }
+  }
+  for (const snap of rapidBankFor(langId)) {
+    out.push({
+      id: snap.id,
+      lang: langId,
+      prompt: snap.prompt,
+      code: snap.code,
+      choices: snap.choices,
+      answer: snap.answer,
+      explain: snap.explain,
+      lessonId: "rapid-bank",
+    });
   }
   return out;
 }

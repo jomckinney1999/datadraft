@@ -546,7 +546,85 @@ const SCENES: Record<string, { tone: Tone; Scene: () => JSX.Element }> = {
   "bye-week-gaps": { tone: "ice", Scene: ByeWeekGaps },
   "trade-ledger": { tone: "gold", Scene: TradeLedger },
   "red-zone-look": { tone: "turf", Scene: RedZoneLook },
+  "waiver-edge": { tone: "turf", Scene: WaiverEdge },
+  "adp-vs-outcome": { tone: "gold", Scene: AdpVsOutcome },
+  "start-sit-backtest": { tone: "turf", Scene: StartSitBacktest },
 };
+
+/** Waiver Edge — a wire list with a rising edge and a #1 chip. */
+function WaiverEdge() {
+  return (
+    <g>
+      <Shadow y={138} rx={64} />
+      <rect x="22" y="20" width="120" height="108" rx="8" fill={c("panel")} stroke={N} strokeWidth="2.2" />
+      <text x="82" y="38" textAnchor="middle" fontSize="9" fontWeight="900" fill={c("turf")} fontFamily={MONO} letterSpacing="1">
+        WAIVER
+      </text>
+      {[48, 68, 88, 108].map((y, i) => (
+        <g key={y}>
+          <rect x="34" y={y} width={88 - i * 8} height="12" rx="3" fill={i === 0 ? c("turf") : c("night-100")} stroke={N} strokeWidth="1.4" />
+          {i === 0 && (
+            <text x="40" y={y + 9} fontSize="8" fontWeight="900" fill={N} fontFamily={MONO}>
+              #1
+            </text>
+          )}
+        </g>
+      ))}
+      <path d="M150 110 L168 48 L178 48 L160 110 Z" fill={c("gold")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <path d="M156 96 L172 58" stroke={N} strokeWidth="2" strokeLinecap="round" />
+      <Sparkle x={176} y={40} r={5} fill={c("gold")} />
+    </g>
+  );
+}
+
+/** ADP vs Outcome — a draft ladder vs a points bar tipping the other way. */
+function AdpVsOutcome() {
+  return (
+    <g>
+      <Shadow y={138} rx={66} />
+      <text x="56" y={32} textAnchor="middle" fontSize="8" fontWeight="900" fill={c("ink-muted")} fontFamily={MONO}>
+        ADP
+      </text>
+      <text x="144" y={32} textAnchor="middle" fontSize="8" fontWeight="900" fill={c("ink-muted")} fontFamily={MONO}>
+        PTS
+      </text>
+      {[0, 1, 2, 3].map((i) => {
+        const y = 44 + i * 22;
+        const adpW = 50 - i * 6;
+        const ptsW = 28 + i * 12;
+        return (
+          <g key={i}>
+            <rect x={56 - adpW / 2} y={y} width={adpW} height="12" rx="3" fill={c("ice")} stroke={N} strokeWidth="1.4" />
+            <rect x={144 - ptsW / 2} y={y} width={ptsW} height="12" rx="3" fill={c("gold")} stroke={N} strokeWidth="1.4" />
+            <path d={`M${56 + adpW / 2 + 4} ${y + 6} H${144 - ptsW / 2 - 4}`} stroke={c("ink", 0.25)} strokeWidth="1.2" strokeDasharray="3 2" />
+          </g>
+        );
+      })}
+      <Sparkle x={100} y={20} r={4} fill={c("gold")} />
+    </g>
+  );
+}
+
+/** Start/Sit Backtest — two jersey slots, START lit and SIT dim, with a check. */
+function StartSitBacktest() {
+  return (
+    <g>
+      <Shadow y={138} rx={62} />
+      <rect x="28" y="36" width="64" height="80" rx="10" fill={c("turf")} stroke={N} strokeWidth="2.4" />
+      <text x="60" y="58" textAnchor="middle" fontSize="9" fontWeight="900" fill={N} fontFamily={MONO}>
+        START
+      </text>
+      <Football x={60} y={88} rx={14} rot={-12} />
+      <rect x="108" y="36" width="64" height="80" rx="10" fill={c("night-100")} stroke={N} strokeWidth="2.4" strokeDasharray="5 3" />
+      <text x="140" y="58" textAnchor="middle" fontSize="9" fontWeight="900" fill={c("ink-muted")} fontFamily={MONO}>
+        SIT
+      </text>
+      <circle cx="140" cy="88" r="14" fill="none" stroke={c("ink-muted")} strokeWidth="2.2" />
+      <path d="M48 24 L56 32 L72 14" fill="none" stroke={c("gold")} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+      <Sparkle x={176} y={48} r={5} />
+    </g>
+  );
+}
 
 export default function ProjectArt({
   id,

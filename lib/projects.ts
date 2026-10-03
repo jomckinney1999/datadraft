@@ -7,11 +7,11 @@
  * and a right answer. A build takes an afternoon and ends in a repo.
  *
  * The bar for adding one: it has to be something a learner could not have
- * done on any other SQL site. All three live ones clear it — one pulls the
- * learner's own fantasy league through a public API, one models raw nflverse
- * releases into a tested dbt warehouse, one forecasts next week's points and
- * grades itself against the obvious guess. None exists elsewhere because none
- * works without football data someone actually cares about.
+ * done on any other SQL site. The live ones clear it — your own fantasy
+ * league through a public API, raw nflverse into a tested dbt warehouse,
+ * next week's points graded against the obvious guess. Builds with
+ * status "building" show in the catalogue as coming soon (art + brief ready,
+ * notebook/repo not shipped yet).
  */
 
 import { REPO } from "@/lib/site";
@@ -342,6 +342,162 @@ export const PROJECTS: Project[] = [
       "A README with the result — and the leak you avoided",
     ],
   },
+
+  {
+    id: "waiver-edge",
+    title: "Waiver Edge",
+    blurb:
+      "Rank the wire with a documented SQL score — trend, opportunity, and who is actually free — then ship a top-15 you could argue for in league chat.",
+    pitch: "A waiver priority list with receipts, not vibes.",
+    hours: "2–3h",
+    level: "After SQL Fundamentals",
+    accent: "turf",
+    status: "building",
+    pairsWith: "SQL Fundamentals",
+    artifact: "A notebook: ranked free agents + the scoring SQL",
+    skills: ["CTEs", "Anti-joins", "Window functions", "nflverse / Sleeper"],
+    steps: [
+      {
+        id: "define",
+        title: "Write the score before you write SQL",
+        body: "Pick three ingredients you can defend (recent points trend, target or carry share, rostered %). Write the formula in plain English first — a black-box rank isn't a portfolio piece.",
+      },
+      {
+        id: "data",
+        title: "Load the wire and the games",
+        body: "Pull Sleeper research (or the lesson waiver_wire) and weekly scores. Keep free agents as an anti-join against your league's rosters so you never recommend someone already owned.",
+      },
+      {
+        id: "rank",
+        title: "Build the ranked list in SQL",
+        body: "CTEs for each ingredient, one final SELECT with the composite score, ORDER BY that score. Cap at fifteen. Document ties.",
+      },
+      {
+        id: "ship",
+        title: "Ship the list + the definition",
+        body: "README: question, data week, formula, top five names. Screenshot the query. That's the artifact.",
+      },
+    ],
+    questions: [
+      {
+        id: "q1",
+        prompt: "Who is #1 on your wire this week, and which ingredient drove it?",
+      },
+      {
+        id: "q2",
+        prompt: "Name one player your score ranks high who Sleeper % rostered would bury — why keep him?",
+      },
+    ],
+    deliverables: [
+      "Documented composite waiver score",
+      "Top-15 free-agent table from SQL",
+      "README with the week and the formula",
+    ],
+  },
+
+  {
+    id: "adp-vs-outcome",
+    title: "ADP vs Outcome",
+    blurb:
+      "Compare preseason fantasy ADP to end-of-season points: steals, busts, and hit rates by round — on a real draft board, not a toy table.",
+    pitch: "Prove whether your draft room beat the market.",
+    hours: "2–3h",
+    level: "After SQL Fundamentals",
+    accent: "gold",
+    status: "building",
+    pairsWith: "SQL Fundamentals",
+    artifact: "A notebook: steals/busts table + round hit-rate chart",
+    skills: ["Joins", "Percentiles", "Sleeper ADP", "nflverse"],
+    steps: [
+      {
+        id: "board",
+        title: "Freeze a draft board",
+        body: "Use a real preseason ADP (Sleeper PPR) and a finished season of points. Pick one season so the story doesn't smear across rule changes.",
+      },
+      {
+        id: "join",
+        title: "Join ADP to outcomes",
+        body: "Match players carefully (suffixes, team changes). One row per drafted name with adp_rank and season_points.",
+      },
+      {
+        id: "labels",
+        title: "Define steal and bust",
+        body: "Write the rules down — e.g. finished 24+ spots above ADP = steal. No mystery thresholds.",
+      },
+      {
+        id: "ship",
+        title: "Round hit rates + the hall of shame/fame",
+        body: "Hit rate by draft round, top steals, top busts. Chart it. README with the season and the definitions.",
+      },
+    ],
+    questions: [
+      {
+        id: "q1",
+        prompt: "Which round had the highest hit rate under your definition?",
+      },
+      {
+        id: "q2",
+        prompt: "Who was the biggest steal — and was it skill or injury luck on the board around them?",
+      },
+    ],
+    deliverables: [
+      "ADP-to-points join with clear player matching",
+      "Steal/bust table and round hit rates",
+      "Chart + short README",
+    ],
+  },
+
+  {
+    id: "start-sit-backtest",
+    title: "Start/Sit Backtest",
+    blurb:
+      "Encode transparent start/sit rules in SQL or pandas, replay a season of choices, and measure how often the rules beat a naive \"start your studs\" baseline.",
+    pitch: "Advice you can grade — not a hot take.",
+    hours: "3–4h",
+    level: "After SQL + a bit of Python",
+    accent: "turf",
+    status: "building",
+    pairsWith: "Python & pandas",
+    artifact: "A notebook: rules, backtest table, win rate vs baseline",
+    skills: ["Rules engines", "Backtesting", "SQL or pandas", "Evaluation"],
+    steps: [
+      {
+        id: "rules",
+        title: "Write rules a human can audit",
+        body: "Example: start the RB with more rush attempts over the last three games, ties to projected points. No black-box model required — clarity is the point.",
+      },
+      {
+        id: "replay",
+        title: "Replay every decision week",
+        body: "For each week, apply only information available before kickoff. Record the chosen starter and the points they actually scored.",
+      },
+      {
+        id: "baseline",
+        title: "Beat a dumb baseline",
+        body: "Compare to \"always start higher ADP\" or \"always start last week's points.\" Report win rate and total points.",
+      },
+      {
+        id: "ship",
+        title: "Ship the ledger",
+        body: "Table of decisions, season score vs baseline, and three weeks you'd change the rule after seeing the tape.",
+      },
+    ],
+    questions: [
+      {
+        id: "q1",
+        prompt: "Did your rules beat the baseline on total points? By how much?",
+      },
+      {
+        id: "q2",
+        prompt: "Which rule fired the most — and which one you'd delete?",
+      },
+    ],
+    deliverables: [
+      "Written start/sit rules",
+      "Week-by-week decision ledger",
+      "Score vs baseline in a README",
+    ],
+  },
 ];
 
 export function getProject(id: string): Project | undefined {
@@ -350,4 +506,8 @@ export function getProject(id: string): Project | undefined {
 
 export function liveProjects(): Project[] {
   return PROJECTS.filter((p) => p.status === "live");
+}
+
+export function buildingProjects(): Project[] {
+  return PROJECTS.filter((p) => p.status === "building");
 }
