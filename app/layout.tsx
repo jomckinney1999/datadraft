@@ -3,6 +3,7 @@ import { Space_Grotesk, Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { SITE_URL } from "@/lib/site";
 import SiteAnalytics from "@/components/site-analytics";
+import CoachEyes from "@/components/coach-eyes";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -60,12 +61,17 @@ export const viewport: Viewport = {
   themeColor: "#131F24",
 };
 
-// Force dark — clear any leftover light preference from before dark-only.
+// Paint the saved (or system) theme before first paint so there's no flash.
+// Keep in sync with components/theme-toggle.tsx.
 const THEME_SCRIPT = `
 (function(){try{
-localStorage.removeItem("sqlsports-theme");
-document.documentElement.setAttribute("data-theme","dark");
-}catch(e){}})();
+var k="sqlsports-theme";
+var t=localStorage.getItem(k);
+if(t!=="light"&&t!=="dark"){
+  t=window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";
+}
+document.documentElement.setAttribute("data-theme",t);
+}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();
 `;
 
 export default function RootLayout({
@@ -86,6 +92,7 @@ export default function RootLayout({
       <body className="font-sans antialiased bg-stadium">
         {children}
         <SiteAnalytics />
+        <CoachEyes />
       </body>
     </html>
   );

@@ -6,19 +6,19 @@
    Theme tokens
 
    Values are "r g b" channel triplets so Tailwind can compose them with
-   alpha modifiers (bg-turf/10, border-panel-border/60). Dark charcoal only —
-   light mode was removed; any leftover data-theme="light" resolves to the
-   same tokens.
+   alpha modifiers (bg-turf/10, border-panel-border/60). Dark is the default
+   — a document with no data-theme attribute renders dark. Light is a cool
+   paper canvas with the same turf / ice / gold family, darkened enough that
+   accent-as-text clears WCAG AA on white.
    ──────────────────────────────────────────────────────────── */
 
 :root,
 :root[data-theme="dark"],
-:root[data-theme="light"],
 .theme-dark {
   color-scheme: dark;
 
   /* Duolingo-neutral charcoal with DataDraft accents:
-     green (turf) · blue (ice) · gold — dark only, no light mode. */
+     green (turf) · blue (ice) · gold. */
   --c-night: 19 31 36;
   --c-night-50: 55 70 79;
   --c-night-100: 26 40 47;
@@ -79,6 +79,68 @@
   --c-syn-table: 45 212 191;
   --c-syn-comment: 140 155 165;
   --c-syn-punct: 200 210 216;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Cool paper canvas (not cream). Accents darkened so text on the page
+     clears AA; fills and chips still read as turf / ice / gold. */
+  --c-night: 244 247 249;
+  --c-night-50: 180 190 198;
+  --c-night-100: 232 237 241;
+  --c-night-200: 238 242 245;
+  --c-night-300: 244 247 249;
+
+  --c-turf: 36 112 0;
+  --c-turf-dim: 28 90 0;
+  --c-gold: 130 88 0;
+  --c-gold-dim: 105 70 0;
+  --c-ice: 6 100 158;
+  --c-ice-dim: 5 82 130;
+
+  --c-bronze: 145 80 28;
+  --c-bronze-hi: 180 120 70;
+  --c-bronze-dim: 110 60 22;
+
+  --c-ink: 19 31 36;
+  --c-ink-soft: 55 70 79;
+  --c-ink-muted: 90 105 115;
+
+  --c-panel: 255 255 255;
+  --c-panel-border: 210 218 224;
+  --c-panel-hover: 238 242 245;
+
+  --pop-text: 19 31 36;
+  --pop-shadow: none;
+  --glow-strength: 0;
+  --shadow-float: 0 18px 48px rgba(19, 31, 36, 0.1);
+  --shadow-hero-panel: 0 22px 56px rgba(19, 31, 36, 0.12);
+
+  --atmo-turf: 0.05;
+  --atmo-gold: 0.025;
+  --atmo-ice: 0.03;
+  --grain-opacity: 0.015;
+
+  --surface-grad: 0;
+  --surface-specular: 0;
+  --shadow-surface:
+    0 1px 2px rgb(19 31 36 / 0.04),
+    0 14px 32px -14px rgb(19 31 36 / 0.12);
+
+  --selection-bg: rgb(48 140 0 / 0.22);
+  --selection-fg: 19 31 36;
+  --scrollbar-thumb: 190 200 208;
+  --scrollbar-thumb-hover: 150 162 172;
+
+  /* Syntax on white editors. */
+  --c-syn-keyword: 36 112 0;
+  --c-syn-string: 130 88 0;
+  --c-syn-number: 6 100 158;
+  --c-syn-func: 80 50 160;
+  --c-syn-table: 6 115 100;
+  --c-syn-comment: 90 102 112;
+  --c-syn-punct: 55 70 79;
 }
 
 html {
@@ -1439,7 +1501,8 @@ body {
 
 /* ── Theme switching ──────────────────────────────────────── */
 
-/* Applied for one frame while data-theme changes.
+/* Applied for one frame while data-theme changes (fallback path when the
+   View Transitions API isn't available).
    Two reasons this is required, not cosmetic:
    1. Chrome does not re-resolve a var()-derived color on an element with an
       active color transition — the specified value is textually unchanged, so
@@ -1451,6 +1514,31 @@ body {
 .theme-switching *::before,
 .theme-switching *::after {
   transition: none !important;
+}
+
+/* Circular reveal from the theme toggle (components/theme-toggle.tsx).
+   Default cross-fade is killed so the new theme wipes over the old one. */
+::view-transition-image-pair(root) {
+  isolation: auto;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+  display: block;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
 }
 
 /* ── Code editor ──────────────────────────────────────────── */

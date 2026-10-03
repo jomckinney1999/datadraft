@@ -155,14 +155,14 @@ export default async function Home() {
 
       <main>
         {/* ── Hero ───────────────────────────────────────── */}
-        {/* Exactly one screen tall (less the 57px sticky nav), content
-            centred, so the first thing anyone sees is the headline on a
-            moving field and nothing else. svh rather than vh so a phone's
-            collapsing address bar doesn't push the buttons off the bottom.
-            The numbers and the ticker start where the scroll starts. */}
+        {/* Exactly one screen tall. The nav floats over the hero and only
+            becomes a full bar after scroll, so we don't reserve a sticky
+            strip here — the first composition is the headline alone.
+            svh rather than vh so a phone's collapsing address bar doesn't
+            push the buttons off the bottom. */}
         <section
           data-reveal-section
-          className="field-stage edge-fade-y flex min-h-[calc(100svh-3.5rem-1px)] flex-col justify-center border-b border-panel-border"
+          className="field-stage edge-fade-y flex min-h-[100svh] flex-col justify-center border-b border-panel-border"
         >
           <FieldBackdrop />
           <div aria-hidden className="field-layer dot-field" />

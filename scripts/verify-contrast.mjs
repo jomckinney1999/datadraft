@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Measure the shipped palette against WCAG AA (dark-only).
+ * Measure the shipped palette against WCAG AA (dark and light).
  *
  *   node scripts/verify-contrast.mjs
  */
@@ -81,7 +81,9 @@ function check(label, marker) {
   return failed.length;
 }
 
-const bad = check("dark", ':root,\n:root[data-theme="dark"]');
+const bad =
+  check("dark", ':root,\n:root[data-theme="dark"]') +
+  check("light", ':root[data-theme="light"]');
 
 if (bad) {
   console.error(`\n${bad} pairing(s) below WCAG AA 4.5:1.`);

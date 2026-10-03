@@ -34,6 +34,8 @@ import { EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
 import { PAYWALL_LIVE } from "@/lib/season-pass";
 import LearnStatusChips from "@/components/learn-status-chips";
 import { NavDrawerSections, NavDropdown } from "@/components/nav-menu";
+import SiteSearch from "@/components/site-search";
+import ThemeToggle from "@/components/theme-toggle";
 import { NAV, currentSection } from "@/lib/nav";
 
 // Four sections, in the order someone moves through them: where am I, what
@@ -140,6 +142,8 @@ export default function AppNav({
           <div className="hidden lg:block">
             <LearnStatusChips progress={progress} />
           </div>
+          <SiteSearch compact />
+          <ThemeToggle />
           <Link
             href="/account"
             aria-current={pathname === "/account" ? "page" : undefined}
@@ -197,7 +201,12 @@ export default function AppNav({
                 ← {backLabel ?? "back"}
               </Link>
             )}
-            <div className="mt-2 border-t border-panel-border/70 pt-3">
+            <div className="mt-2 space-y-2 border-t border-panel-border/70 pt-3">
+              <SiteSearch className="w-full" />
+              <div className="flex items-center gap-2 px-1">
+                <ThemeToggle />
+                <span className="font-mono text-[11px] uppercase tracking-wider text-ink-muted">Theme</span>
+              </div>
               <LearnStatusChips progress={progress} />
             </div>
           </div>
