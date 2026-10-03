@@ -50,14 +50,8 @@
   --pop-text: 255 255 255;
   --pop-shadow: 0 1px 2px rgba(0, 0, 0, 0.55), 0 0 32px rgba(19, 31, 36, 0.9);
   --glow-strength: 0.75;
-  --hero-photo-opacity: 1;
-  --hero-scrim-strong: 0.9;
   --shadow-float: 0 22px 56px rgba(0, 0, 0, 0.45);
   --shadow-hero-panel: 0 28px 80px rgba(0, 0, 0, 0.5);
-  --photo-scrim: 0.4;
-  --course-photo-opacity: 1;
-  --course-scrim-top: 0.62;
-  --course-scrim-bottom: 0.88;
 
   --atmo-turf: 0.07;
   --atmo-gold: 0.035;
@@ -719,28 +713,6 @@ body {
   text-shadow: var(--pop-shadow);
 }
 
-/* ── Hero media ───────────────────────────────────────────── */
-
-.hero-photo {
-  opacity: var(--hero-photo-opacity);
-}
-
-.hero-media-scrim {
-  background:
-    linear-gradient(
-      90deg,
-      rgb(var(--c-night) / var(--hero-scrim-strong)) 0%,
-      rgb(var(--c-night) / 0.72) 42%,
-      rgb(var(--c-night) / 0.55) 70%,
-      rgb(var(--c-night) / 0.78) 100%
-    ),
-    linear-gradient(
-      180deg,
-      rgb(var(--c-night) / 0.55) 0%,
-      rgb(var(--c-night) / 0.35) 45%,
-      rgb(var(--c-night) / 0.95) 100%
-    );
-}
 
 .hero-floodlight {
   background-image:
@@ -806,23 +778,6 @@ body {
 
 .shadow-fab {
   box-shadow: 0 8px 24px rgb(var(--c-turf) / 0.35);
-}
-
-/* mix-blend-mode: color takes the overlay's hue and saturation wholesale, so a
-   fully opaque accent turns a photograph into a poster. Holding the tint back
-   lets some of the original colour through and reads as a graded frame rather
-   than a fill — and it matters more now that both accents carry more chroma
-   than the ones this treatment was first tuned against. */
-.photo-duotone-turf {
-  background-color: rgb(var(--c-turf) / 0.58);
-}
-
-.photo-duotone-gold {
-  background-color: rgb(var(--c-gold) / 0.58);
-}
-
-.photo-scrim {
-  background-color: rgb(var(--c-night) / var(--photo-scrim));
 }
 
 /* Faint yard lines behind the winding lesson path on /learn */
@@ -1496,38 +1451,6 @@ body {
 .theme-switching *::before,
 .theme-switching *::after {
   transition: none !important;
-}
-
-/* Broadcast band behind the gallery headline. Fades out top and bottom so the
-   photos still read at the edges, and sits inside a `.theme-dark` subtree so
-   it stays dark indigo in light mode too — the duotone photos are dark in both
-   themes, so the headline over them is always light-on-dark. */
-.gallery-band {
-  background: linear-gradient(
-    180deg,
-    rgb(var(--c-night) / 0) 0%,
-    rgb(var(--c-night) / 0.86) 26%,
-    rgb(var(--c-night) / 0.93) 50%,
-    rgb(var(--c-night) / 0.86) 74%,
-    rgb(var(--c-night) / 0) 100%
-  );
-}
-
-/* Course card thumbnails reuse the homepage gallery recipe — a grayscale photo,
-   a duotone blend into the brand palette, then a scrim — but push the scrim
-   harder because line art and a title sit on top. In light mode the photo also
-   drops to ~a third opacity and the scrim resolves near-white, so dark art
-   reads on a pale ghost of the image rather than fighting a mid-tone photo. */
-.course-photo {
-  opacity: var(--course-photo-opacity);
-}
-
-.course-scrim {
-  background: linear-gradient(
-    180deg,
-    rgb(var(--c-night) / var(--course-scrim-top)) 0%,
-    rgb(var(--c-night) / var(--course-scrim-bottom)) 100%
-  );
 }
 
 /* ── Code editor ──────────────────────────────────────────── */
