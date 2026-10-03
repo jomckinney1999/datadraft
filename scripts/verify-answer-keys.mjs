@@ -200,9 +200,36 @@ for (const unit of curriculum.COURSE.units) {
   const art = fs.readFileSync(path.join(root, "components/prep-art.tsx"), "utf8");
   const patterns = await loadProjectTs(path.join(root, "lib/interview-patterns.ts"), root);
   const mocks = await loadProjectTs(path.join(root, "lib/mock-interview.ts"), root);
-  for (const id of [...patterns.PATTERNS.map((p) => p.id), ...mocks.MOCK_FORMATS.map((f) => f.id)]) {
+  const screens = await loadProjectTs(path.join(root, "lib/analyst-screen.ts"), root);
+  const ids = [
+    ...patterns.PATTERNS.map((p) => p.id),
+    ...mocks.MOCK_FORMATS.map((f) => f.id),
+    ...screens.ANALYST_FORMATS.map((f) => f.id),
+    "challenge",
+  ];
+  for (const id of ids) {
     if (!new RegExp(`(^|\\s)"?${id}"?: \\{ tone:`, "m").test(art)) problems.push(`prep art: no scene for "${id}" in components/prep-art.tsx`);
   }
+}
+
+// The Data Challenge (lib/data-challenge.ts) ships its own seed, like the
+// cases. Every graded key has to run on it and return rows, and the dirty
+// data the tasks are about has to actually be in the seed.
+{
+  const ch = await loadProjectTs(path.join(root, "lib/data-challenge.ts"), root);
+  const cdb = new SQL.Database();
+  cdb.run(ch.DATA_CHALLENGE.seedSql);
+  for (const t of ch.challengeTasks()) {
+    if (t.kind !== "sql") continue;
+    try {
+      const res = cdb.exec(t.expected)[0];
+      if (!res || !res.values.length) problems.push(`data challenge: "${t.id}" key returns no rows`);
+    } catch (e) {
+      problems.push(`data challenge: "${t.id}" key errors: ${e.message}`);
+    }
+  }
+  const dup = cdb.exec("SELECT COUNT(*) FROM (SELECT market_id FROM market_profiles GROUP BY market_id HAVING COUNT(*) > 1)")[0].values[0][0];
+  if (dup < 1) problems.push("data challenge: the seed has no duplicate market to find");
 }
 
 // Every case opens on a briefing cutscene (lib/case-scenes.ts); a case
@@ -229,7 +256,7 @@ for (const unit of curriculum.COURSE.units) {
     const [p, hash] = item.href.split("#");
     const build = /^\/projects\/([^/]+)$/.exec(p);
     const real = build
-      ? projects.PROJECTS.some((x) => x.id === build[1])
+      ? projects.PROJECTS.some((x) => x.id === build[1]) || fs.existsSync(path.join(root, "app", p, "page.tsx"))
       : fs.existsSync(path.join(root, "app", p, "page.tsx"));
     if (!real) problems.push(`nav: ${item.href} isn't a page`);
     if (hash && !sources.some((src) => src.includes(`id="${hash}"`))) problems.push(`nav: ${item.href} points at #${hash}, which no page has`);

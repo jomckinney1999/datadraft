@@ -29,6 +29,8 @@ export type PassFeature =
   | "film-room"
   | "ai-coach"
   | "mock-interviews"
+  | "analyst-screen"
+  | "data-challenge"
   | "interview-paths"
   | "question-bank"
   | "unlimited-lessons"
@@ -51,6 +53,14 @@ export const PASS_FEATURES: Record<PassFeature, { name: string; blurb: string }>
   "mock-interviews": {
     name: "Mock SQL screens",
     blurb: "Timed phone and technical screens graded like the real thing, with a report after.",
+  },
+  "analyst-screen": {
+    name: "Analyst Screen",
+    blurb: "A timed online assessment: SQL plus multiple choice on stats, wrangling, types and A/B, with a report after.",
+  },
+  "data-challenge": {
+    name: "Data Challenge",
+    blurb: "A take-home on messy data: clean it, join it, recommend, and check your work against a rubric.",
   },
   "interview-paths": {
     name: "Interview patterns",
@@ -100,6 +110,8 @@ export const FREE_ALLOWANCE = {
   doctorPerDay: 1,
   /** Mock screens, ever: enough to try one. */
   mockScreens: 1,
+  /** Analyst Screens, ever: one quick screen, to try it. */
+  screenSprints: 1,
   /** Cases: the first one in the list. */
   cases: 1,
 } as const;

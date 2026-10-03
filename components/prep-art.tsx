@@ -19,6 +19,12 @@
  *   phone        — a phone with SQL on the screen and a 20-minute timer.
  *   technical    — a monitor with a query and its result, a 45-minute timer,
  *                  and three questions ticked off easy to hard.
+ *   online       — a monitor with SQL and multiple-choice bubbles, a 70-minute
+ *                  stopwatch.
+ *   sprint       — a big 35-minute stopwatch beside one SQL block and four
+ *                  ticked MC rows.
+ *   challenge    — a messy sheet with a NULL hole, an arrow to a rubric card
+ *                  ticked build / data / biz.
  *
  * Gradient ids are namespaced `ip-`.
  */
@@ -314,6 +320,88 @@ function Technical() {
   );
 }
 
+/** A multiple-choice row: a bubble (ticked or empty) and a text bar. */
+function Choice({ x, y, on, w = 40 }: { x: number; y: number; on?: boolean; w?: number }) {
+  return (
+    <g>
+      <circle cx={x} cy={y} r="4" fill={on ? c("turf") : c("ink", 0.9)} {...OUT} strokeWidth="1.2" />
+      <rect x={x + 8} y={y - 1.5} width={w} height="3" rx="1.5" fill={c("ink", 0.55)} />
+    </g>
+  );
+}
+
+function Online() {
+  return (
+    <g>
+      <Shadow x={92} y={138} rx={68} />
+      <Monitor x={16} y={18} w={118} h={88}>
+        <CodeLines x={28} y={30} widths={[48, 36, 54]} />
+        <Choice x={32} y={64} on />
+        <Choice x={32} y={76} />
+        <Choice x={32} y={88} />
+        <rect x="88" y="62" width="34" height="28" rx="3" fill={c("ink", 0.9)} {...OUT} strokeWidth="1" />
+        <path d="M88 71 H122 M88 80 H122 M105 62 V90" stroke={c("night", 0.25)} strokeWidth="1" />
+      </Monitor>
+      <Stopwatch x={166} y={52} r={21} label="70 MIN" />
+      <Chip x={166} y={102} text="SQL + MC" fill={c("gold")} size={7} />
+      <Sparkle x={36} y={12} r={4} fill={c("gold")} />
+    </g>
+  );
+}
+
+function Sprint() {
+  return (
+    <g>
+      <Shadow x={100} y={136} rx={64} />
+      {/* a big stopwatch, a short run */}
+      <Stopwatch x={70} y={74} r={42} label="35 MIN" />
+      {/* one SQL block and four MC ticks */}
+      <rect x="128" y="30" width="56" height="30" rx="4" fill={c("night-100")} {...OUT} strokeWidth="1.4" />
+      <CodeLines x={134} y={37} widths={[36, 28, 40]} gap={7} />
+      {[72, 88, 104, 120].map((y) => (
+        <g key={y}>
+          <rect x="128" y={y - 6} width="56" height="12" rx="3" fill={c("ink", 0.9)} {...OUT} strokeWidth="1.2" />
+          <Check x={136} y={y} r={5} fill={c("turf")} />
+          <rect x="146" y={y - 1.5} width="30" height="3" rx="1.5" fill={c("ink", 0.5)} />
+        </g>
+      ))}
+      <Sparkle x={26} y={24} r={4} fill={c("gold")} />
+    </g>
+  );
+}
+
+function Challenge() {
+  return (
+    <g>
+      <Shadow x={100} y={136} rx={78} />
+      {/* the messy sheet, with a hole in it */}
+      <Sheet x={14} y={30} w={74} h={84} rows={4} cols={3} label="SESSIONS" head={c("ice")} />
+      <rect x="22" y="64" width="30" height="14" rx="2" fill={c("night-100")} stroke={c("gold")} strokeWidth="1.4" strokeDasharray="3 2" />
+      <text x="37" y="74" textAnchor="middle" fontSize="7" fontWeight="900" fill={c("gold")} fontFamily={MONO}>
+        NULL
+      </text>
+      <Arrow x1={92} y1={72} x2={116} y2={72} color={c("turf")} w={3.5} />
+      {/* the rubric card: three ticks */}
+      <rect x="120" y="26" width="68" height="92" rx="6" fill={c("ink", 0.95)} {...OUT} strokeWidth="2" />
+      <rect x="146" y="20" width="16" height="9" rx="3" fill={c("gold")} {...OUT} strokeWidth="1.4" />
+      {[
+        [48, "BUILD", c("turf")],
+        [72, "DATA", c("ice")],
+        [96, "BIZ", c("gold")],
+      ].map(([y, label, fill]) => (
+        <g key={label as string}>
+          <Check x={134} y={y as number} r={6} fill={fill as string} />
+          <text x="144" y={(y as number) + 3} fontSize="8" fontWeight="900" fill={N} fontFamily={MONO}>
+            {label as string}
+          </text>
+        </g>
+      ))}
+      <Chip x={52} y={22} text="TAKE-HOME" fill={c("gold")} size={7} />
+      <Sparkle x={184} y={10} r={4} fill={c("gold")} />
+    </g>
+  );
+}
+
 const SCENES = {
   "filter-sort": { tone: "ice", Scene: FilterSort },
   aggregate: { tone: "gold", Scene: Aggregate },
@@ -326,6 +414,9 @@ const SCENES = {
   nulls: { tone: "gold", Scene: Nulls },
   phone: { tone: "turf", Scene: Phone },
   technical: { tone: "ice", Scene: Technical },
+  online: { tone: "ice", Scene: Online },
+  sprint: { tone: "gold", Scene: Sprint },
+  challenge: { tone: "turf", Scene: Challenge },
 } as const satisfies Record<string, { tone: Tone; Scene: () => JSX.Element }>;
 
 export type PrepArtId = keyof typeof SCENES;

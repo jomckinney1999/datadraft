@@ -70,7 +70,8 @@ function write(key: string, value: unknown) {
   }
 }
 
-function useLessonDb(): Database | null {
+/** The pinned lesson database, booted in the tab (shared with the Analyst Screen). */
+export function useLessonDb(): Database | null {
   const [db, setDb] = useState<Database | null>(null);
   useEffect(() => {
     let made: Database | null = null;

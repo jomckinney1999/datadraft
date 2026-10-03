@@ -27,6 +27,8 @@ export type OfferMoment =
   | "coach"
   | "mock"
   | "mock-technical"
+  | "screen"
+  | "challenge"
   | "case"
   | "draft-season"
   | "after-daily"
@@ -43,6 +45,8 @@ const COPY: Record<OfferMoment, string> = {
   mock: "You've tried the phone screen. The Season Pass has unlimited screens, including the technical round.",
   "mock-technical":
     "The phone screen is free to try. The technical round, and as many screens as you want, are in the Season Pass.",
+  screen: "The quick screen is free to try. The seventy-minute online assessment, and as many screens as you want, are in the Season Pass.",
+  challenge: "The Data Challenge is a take-home with a rubric. It's in the Season Pass, along with every case.",
   case: "The first case is free. Every case is in the Season Pass.",
   "draft-season": "This season is free to draft. Every season on file is in the Season Pass.",
   "after-daily":

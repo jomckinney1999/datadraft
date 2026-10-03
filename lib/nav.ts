@@ -41,6 +41,8 @@ export const NAV: NavSection[] = [
         items: [
           { href: "/questions", label: "Question bank", blurb: "Today's question, and the whole bank in SQL, Python, R and Excel", badge: "Daily" },
           { href: "/questions#interview", label: "Interview patterns", blurb: "The nine SQL patterns analyst screens test" },
+          { href: "/questions/prep", label: "Hiring prep", blurb: "The funnel in order: online assessment, SQL screen, take-home" },
+          { href: "/questions/screen", label: "Analyst Screen", blurb: "A timed online assessment: SQL plus stats, wrangling and A/B" },
           { href: "/questions/mock", label: "Mock SQL screens", blurb: "A timed phone or technical screen, then a report" },
         ],
       },
@@ -89,7 +91,10 @@ export const NAV: NavSection[] = [
       },
       {
         title: "Cases",
-        items: [{ href: "/projects#cases", label: "Data cases", blurb: "Half an hour, a schema you've never seen, a right answer" }],
+        items: [
+          { href: "/projects#cases", label: "Data cases", blurb: "Half an hour, a schema you've never seen, a right answer" },
+          { href: "/projects/challenge", label: "Data Challenge", blurb: "A take-home on messy data: clean, join, recommend" },
+        ],
       },
     ],
   },
