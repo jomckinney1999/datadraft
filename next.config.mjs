@@ -18,7 +18,8 @@ const nextConfig = {
       },
       // The career surfaces are gone entirely, so these land on the nearest
       // thing that still exists rather than pretending they moved.
-      { source: "/resources", destination: "/projects", permanent: false },
+      // /resources is a real hub again (orientation / data / account) — not
+      // the retired career kit.
       { source: "/learn/path", destination: "/learn", permanent: false },
       { source: "/learn/path/:roleId", destination: "/learn", permanent: false },
       { source: "/learn/start", destination: "/learn", permanent: false },

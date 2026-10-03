@@ -29,6 +29,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     at("/learn", 0.8),
     at("/projects", 0.8),
     at("/welcome", 0.6, "monthly"),
+    at("/resources", 0.5, "monthly"),
     at("/dashboard", 0.7, "daily"),
     at("/achievements", 0.6, "monthly"),
     at("/pricing", PAYWALL_LIVE ? 0.8 : 0.6, "monthly"),

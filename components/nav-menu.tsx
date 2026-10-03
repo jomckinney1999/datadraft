@@ -38,6 +38,9 @@ const GROUP_TONE: Record<string, string> = {
   Sandboxes: "text-ice",
   Builds: "text-gold",
   Cases: "text-gold",
+  "Find your way": "text-ice",
+  "Your stuff": "text-gold",
+  "Season Pass": "text-gold",
 };
 
 function Badge({ text }: { text: string }) {

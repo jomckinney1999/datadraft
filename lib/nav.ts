@@ -1,14 +1,11 @@
 /**
- * The site's map: four sections, and what sits under each (decided
- * 2026-10-03). Both headers read it, the in-product AppNav and the landing
- * page's SiteNav, so crossing between them doesn't re-arrange the world.
+ * The site's map. Both headers read it — the in-product AppNav and the
+ * landing page's SiteNav — so crossing between them doesn't re-arrange
+ * the world.
  *
- * Four sections is still the rule; a fifth tab means taking one out. What
- * changed is that the games and the sandboxes were two clicks deep (the
- * Stat Duel and the Draft Room were deliberately kept out of the nav, and
- * reachable only from the questions page, the dashboard and the home page).
- * They're the things people come back for daily, so each section now opens
- * a menu of its own pages instead of growing the row.
+ * Product sections first (Dashboard · Questions · Courses · Projects),
+ * then Resources (orientation / data / account) and Pricing (Season Pass).
+ * Each section opens a menu of its own pages.
  *
  * Every href here has to be a real page or a real anchor on one.
  */
@@ -106,6 +103,39 @@ export const NAV: NavSection[] = [
         items: [
           { href: "/projects#cases", label: "Data cases", blurb: "Half an hour, a schema you've never seen, a right answer", badge: "Prep" },
           { href: "/projects/challenge", label: "Data Challenge", blurb: "A take-home on messy data: clean, join, recommend", badge: "Pass" },
+        ],
+      },
+    ],
+  },
+  {
+    href: "/resources",
+    label: "Resources",
+    groups: [
+      {
+        title: "Find your way",
+        items: [
+          { href: "/resources", label: "Resource hub", blurb: "Start here, the data, your account — the map of the site" },
+          { href: "/welcome", label: "Start here", blurb: "A full map of Questions, Courses, Projects and Play" },
+          { href: "/data", label: "The data", blurb: "Where every row comes from, with free downloads" },
+        ],
+      },
+      {
+        title: "Your stuff",
+        items: [
+          { href: "/account", label: "Account", blurb: "Sign in, sync progress, manage your Season Pass" },
+        ],
+      },
+    ],
+  },
+  {
+    href: "/pricing",
+    label: "Pricing",
+    groups: [
+      {
+        title: "Season Pass",
+        items: [
+          { href: "/pricing", label: "Season Pass", blurb: "Every question, Query Doctor, mocks and every course", badge: "Pass" },
+          { href: "/account", label: "Manage billing", blurb: "Sign in to join the waitlist or open the billing portal" },
         ],
       },
     ],

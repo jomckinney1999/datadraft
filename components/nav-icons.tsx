@@ -239,6 +239,44 @@ const ICONS: Record<string, { tone: Tone; Scene: () => ReactNode }> = {
       </>
     ),
   },
+  "/resources": {
+    tone: "ice",
+    Scene: () => (
+      <>
+        <rect x="10" y="9" width="20" height="22" rx="2" fill={c("panel")} stroke={N} strokeWidth="1.4" />
+        <path d="M14 15 H26 M14 20 H24 M14 25 H20" stroke={c("ice")} strokeWidth="1.8" strokeLinecap="round" />
+      </>
+    ),
+  },
+  "/welcome": {
+    tone: "turf",
+    Scene: () => (
+      <>
+        <circle cx="20" cy="20" r="11" fill={c("panel")} stroke={N} strokeWidth="1.6" />
+        <path d="M14 20 H26 M20 14 V26" stroke={c("turf")} strokeWidth="2.2" strokeLinecap="round" />
+      </>
+    ),
+  },
+  "/account": {
+    tone: "gold",
+    Scene: () => (
+      <>
+        <circle cx="20" cy="15" r="5" fill={c("gold")} stroke={N} strokeWidth="1.3" />
+        <path d="M10 28 Q20 22 30 28" fill={c("panel")} stroke={N} strokeWidth="1.3" />
+      </>
+    ),
+  },
+  "/pricing": {
+    tone: "gold",
+    Scene: () => (
+      <>
+        <rect x="11" y="10" width="18" height="20" rx="3" fill={c("panel")} stroke={N} strokeWidth="1.4" />
+        <text x="20" y="24" textAnchor="middle" fontSize="12" fontWeight="900" fill={c("gold")}>
+          $
+        </text>
+      </>
+    ),
+  },
 };
 
 const FALLBACK: { tone: Tone; Scene: () => ReactNode } = {

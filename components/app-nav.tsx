@@ -8,9 +8,9 @@
  * answer to "where am I and where can I go" changed from page to page, and the
  * only reliable way to reach /interview was to already be on /interview.
  *
- * Four sections, one line, always the same, with the current one marked;
- * three of them open a menu of their own pages (lib/nav.ts).
- * The wordmark goes home, which CLAUDE.md requires of every route.
+ * Product sections plus Resources and Pricing, one line, always the same,
+ * with the current one marked; each opens a menu of its own pages
+ * (lib/nav.ts). The wordmark goes home, which CLAUDE.md requires of every route.
  *
  * It is `h-14` at every width on purpose, matching the marketing header. A
  * header that changed height when the links wrapped would drag every other
@@ -43,12 +43,11 @@ import SecretPlay from "@/components/secret-play";
 import { NAV, currentSection } from "@/lib/nav";
 import { playSfx } from "@/lib/sfx";
 
-// Four sections, in the order someone moves through them: where am I, what
-// can I solve, what can I learn, what can I build. Each of the last three
-// opens a menu of its own pages (lib/nav.ts); adding a fifth tab still means
-// taking one out.
+// Sections in the order someone moves through them: where am I, what can I
+// solve, what can I learn, what can I build, then Resources and Pricing.
+// Each opens a menu of its own pages (lib/nav.ts).
 const TAB = (on: boolean) =>
-  `whitespace-nowrap rounded-lg px-2.5 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors ${
+  `whitespace-nowrap rounded-lg px-1.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition-colors lg:px-2.5 lg:text-[11px] ${
     on ? "bg-turf/15 text-turf" : "text-ink-muted hover:bg-panel hover:text-ink"
   }`;
 
