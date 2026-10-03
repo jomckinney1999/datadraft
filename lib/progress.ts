@@ -18,7 +18,10 @@ export type Progress = {
   daysActive: number;
   /** Jersey number on your sideline avatar (0–99). */
   jersey: number;
-  /** Skin tone index for SidelineCast (0–3). */
+  /**
+   * Legacy field — kept so old localStorage still parses. The profile mark
+   * no longer varies skin; kitAccent + jersey are the customisation.
+   */
   kitTone: number;
   /** Jersey / helmet accent on your avatar. */
   kitAccent: KitAccent;

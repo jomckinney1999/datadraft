@@ -206,7 +206,6 @@ export default function LearnRail({
         <div className="mt-2 flex items-center gap-3">
           <PlayerMark
             jersey={progress.jersey}
-            kitTone={progress.kitTone}
             kitAccent={progress.kitAccent}
             rankTone={tenure.rank.tone}
             status={tenure.rank.name}

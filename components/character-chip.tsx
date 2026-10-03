@@ -38,7 +38,6 @@ export default function CharacterChip({
     >
       <PlayerMark
         jersey={progress.jersey}
-        kitTone={progress.kitTone}
         kitAccent={progress.kitAccent}
         rankTone={tenure.rank.tone}
         status={tenure.rank.name}

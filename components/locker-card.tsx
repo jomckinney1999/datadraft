@@ -51,7 +51,7 @@ export default function LockerCard({
     onChange?.(next);
   }
 
-  function patchKit(patch: { kitTone?: number; kitAccent?: KitAccent; jersey?: number }) {
+  function patchKit(patch: { kitAccent?: KitAccent; jersey?: number }) {
     const next = setKit(patch);
     setProgress(next);
     if (typeof patch.jersey === "number") setJerseyDraft(String(next.jersey));
@@ -83,7 +83,6 @@ export default function LockerCard({
           <div className="relative flex h-40 w-40 items-center justify-center rounded-full bg-[radial-gradient(circle_at_50%_40%,rgb(var(--c-gold)/0.2),transparent_65%)]">
             <PlayerMark
               jersey={progress.jersey}
-              kitTone={progress.kitTone}
               kitAccent={progress.kitAccent}
               rankTone={tenure.rank.tone}
               status={tenure.rank.name}
@@ -185,35 +184,6 @@ export default function LockerCard({
                   </button>
                 ))}
               </div>
-            </div>
-          </div>
-
-          <div>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted">
-              Look
-            </span>
-            <div className="mt-1.5 flex gap-2">
-              {[0, 1, 2, 3].map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => patchKit({ kitTone: t })}
-                  aria-pressed={progress.kitTone === t}
-                  aria-label={`Look ${t + 1}`}
-                  className={`flex h-14 w-14 items-center justify-center rounded-full border bg-night/50 ${
-                    progress.kitTone === t ? "border-turf ring-2 ring-turf/40" : "border-panel-border"
-                  }`}
-                >
-                  <PlayerMark
-                    kitTone={t}
-                    kitAccent={progress.kitAccent}
-                    jersey={progress.jersey}
-                    rankTone={tenure.rank.tone}
-                    status={tenure.rank.name}
-                    size={52}
-                  />
-                </button>
-              ))}
             </div>
           </div>
 

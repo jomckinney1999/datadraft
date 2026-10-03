@@ -204,7 +204,6 @@ export default function Dashboard({
             <div className="hidden shrink-0 items-end gap-2 sm:flex">
               <PlayerMark
                 jersey={progress.jersey}
-                kitTone={progress.kitTone}
                 kitAccent={progress.kitAccent}
                 rankTone={tenure.rank.tone}
                 status={tenure.rank.name}

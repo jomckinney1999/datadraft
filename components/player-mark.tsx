@@ -10,12 +10,16 @@
 import { c, Football, N, Sparkle, type Tone } from "@/components/art-kit";
 import type { KitAccent } from "@/lib/progress";
 
-const SKIN = [
-  { base: "rgb(232 184 148)", shade: "rgb(186 128 92)", lite: "rgb(248 214 188)" },
-  { base: "rgb(224 168 130)", shade: "rgb(168 108 72)", lite: "rgb(242 200 168)" },
-  { base: "rgb(140 90 60)", shade: "rgb(92 54 34)", lite: "rgb(176 120 84)" },
-  { base: "rgb(198 139 99)", shade: "rgb(140 88 56)", lite: "rgb(220 170 128)" },
-] as const;
+/**
+ * One fixed cartoon skin — same warm tone as the Ref. No tone picker: a
+ * menu of skin colours turns the locker into a race choice, and that is
+ * not a game we are in.
+ */
+const SKIN = {
+  base: "rgb(198 139 99)",
+  shade: "rgb(168 108 72)",
+  lite: "rgb(232 184 148)",
+} as const;
 
 /**
  * Jersey owns the kit accent. The sky is always a *different* bright accent
@@ -80,7 +84,6 @@ function safeId(parts: (string | number)[]) {
 
 export default function PlayerMark({
   jersey = 7,
-  kitTone = 0,
   kitAccent = "ice",
   size = 40,
   className = "",
@@ -88,7 +91,6 @@ export default function PlayerMark({
   status,
 }: {
   jersey?: number;
-  kitTone?: number;
   kitAccent?: KitAccent;
   size?: number;
   className?: string;
@@ -98,10 +100,10 @@ export default function PlayerMark({
   status?: string;
 }) {
   const kit = KIT[kitAccent] ?? KIT.ice;
-  const skin = SKIN[((kitTone % SKIN.length) + SKIN.length) % SKIN.length]!;
+  const skin = SKIN;
   const ring = rankTone ?? kit.primary;
   const num = String(Math.max(0, Math.min(99, Math.round(jersey))));
-  const gid = safeId(["pm", kitAccent, kitTone, num, status ?? "x"]);
+  const gid = safeId(["pm", kitAccent, num, status ?? "x"]);
   const banner = Boolean(status?.trim());
   const label = (status ?? "").trim().toUpperCase();
   const showLabel = banner && size >= 44;
@@ -138,10 +140,16 @@ export default function PlayerMark({
           <stop offset="40%" stopColor={c("night-50")} />
           <stop offset="100%" stopColor={N} />
         </linearGradient>
-        <linearGradient id={`${gid}-banner`} x1="40" y1="58" x2="40" y2="78" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor={c("ink")} />
-          <stop offset="40%" stopColor={kit.jersey} />
-          <stop offset="100%" stopColor={kit.jerseyShade} />
+        {/* Soft veil that follows the circle — fades in, never a hard plate */}
+        <linearGradient id={`${gid}-veil`} x1="40" y1="52" x2="40" y2="76" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor={N} stopOpacity="0" />
+          <stop offset="35%" stopColor={N} stopOpacity="0.35" />
+          <stop offset="70%" stopColor={kit.jerseyShade} stopOpacity="0.72" />
+          <stop offset="100%" stopColor={kit.jersey} stopOpacity="0.88" />
+        </linearGradient>
+        <linearGradient id={`${gid}-veil-shine`} x1="40" y1="54" x2="40" y2="68" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor={c("ink")} stopOpacity="0.35" />
+          <stop offset="100%" stopColor={c("ink")} stopOpacity="0" />
         </linearGradient>
         <clipPath id={`${gid}-clip`}>
           <circle cx="40" cy="40" r="36" />
@@ -187,9 +195,9 @@ export default function PlayerMark({
         />
         <text
           x="40"
-          y={banner ? 55 : 70}
+          y={banner ? 52.5 : 70}
           textAnchor="middle"
-          fontSize={num.length > 1 ? (banner ? 13 : 15) : banner ? 15 : 17}
+          fontSize={num.length > 1 ? (banner ? 12 : 15) : banner ? 14 : 17}
           fontWeight="900"
           fontFamily="Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif"
           fill={kit.number}
@@ -271,31 +279,47 @@ export default function PlayerMark({
           strokeLinecap="round"
         />
 
-        <g transform="translate(60 48) rotate(-28) scale(0.5)">
+        <g transform="translate(61 46) rotate(-28) scale(0.48)">
           <Football x={0} y={0} rx={14} fill={c("gold")} />
         </g>
         <Sparkle x={16} y={16} r={4.5} fill={c("ink")} />
         <Sparkle x={64} y={20} r={3.4} fill={c("gold")} />
 
-        {/* Bright kit banner — no black plate underneath */}
+        {/*
+          Status veil — soft gradient overlay under a bowed top edge.
+          The parent circle clip trims it to the portrait, so it hugs the
+          rim instead of reading as a square plate across the jersey.
+        */}
         {banner && (
           <g>
-            <path d="M0 59 H80 V80 H0 Z" fill={kit.jersey} />
-            <path d="M0 59 H80 V78 H0 Z" fill={`url(#${gid}-banner)`} />
-            <path d="M0 59 H80" stroke={c("ink")} strokeWidth="2" opacity="0.65" />
-            <path d="M0 78 H80" stroke={N} strokeWidth="2.4" />
+            <path
+              d="M2 56 Q40 49 78 56 L80 80 L0 80 Z"
+              fill={`url(#${gid}-veil)`}
+            />
+            <path
+              d="M6 57 Q40 50.5 74 57"
+              fill="none"
+              stroke={c("ink")}
+              strokeWidth="1.5"
+              opacity="0.45"
+              strokeLinecap="round"
+            />
+            <path
+              d="M8 58.5 Q40 52.5 72 58.5 L70 64.5 Q40 60 10 64.5 Z"
+              fill={`url(#${gid}-veil-shine)`}
+            />
             {showLabel && (
               <text
                 x="40"
-                y="72"
+                y="69.5"
                 textAnchor="middle"
                 fontSize={bannerSize}
                 fontWeight="900"
                 fontFamily="Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif"
-                letterSpacing="0.08em"
+                letterSpacing="0.1em"
                 fill={c("ink")}
                 stroke={N}
-                strokeWidth="0.75"
+                strokeWidth="0.7"
                 paintOrder="stroke fill"
               >
                 {label}

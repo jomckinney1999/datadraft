@@ -42,7 +42,6 @@ export default function LeaderboardTeaser({ progress }: { progress: Progress }) 
           <span className="w-6 font-mono text-sm font-bold text-gold">1</span>
           <PlayerMark
             jersey={progress.jersey}
-            kitTone={progress.kitTone}
             kitAccent={progress.kitAccent}
             rankTone={tenure.rank.tone}
             status={tenure.rank.name}
