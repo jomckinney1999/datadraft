@@ -16,6 +16,11 @@ const SKIN = [
   { base: "rgb(198 139 99)", shade: "rgb(140 88 56)", lite: "rgb(220 170 128)" },
 ] as const;
 
+/**
+ * Jersey owns the kit accent. The portrait field is always a *contrasting*
+ * accent so blue-on-blue / green-on-green never flattens against the black
+ * canvas — same trick as GTA loading screens (warm sky behind a cool kit).
+ */
 const KIT: Record<
   KitAccent,
   {
@@ -26,7 +31,9 @@ const KIT: Record<
     helmetShade: string;
     brim: string;
     number: string;
+    /** Portrait field — complementary to the jersey. */
     bg: string;
+    bgMid: string;
     bgDeep: string;
   }
 > = {
@@ -34,12 +41,14 @@ const KIT: Record<
     primary: "ice",
     jersey: c("ice"),
     jerseyShade: c("ice-dim"),
-    helmet: c("turf"),
-    helmetShade: c("turf-dim"),
-    brim: c("turf-dim"),
+    helmet: c("gold"),
+    helmetShade: c("gold-dim"),
+    brim: c("gold-dim"),
     number: c("ink"),
-    bg: c("ice"),
-    bgDeep: c("ice-dim"),
+    // Warm gold sky behind a cool blue kit
+    bg: c("gold"),
+    bgMid: c("gold"),
+    bgDeep: c("gold-dim"),
   },
   turf: {
     primary: "turf",
@@ -49,19 +58,23 @@ const KIT: Record<
     helmetShade: c("ice-dim"),
     brim: c("ice-dim"),
     number: c("night"),
-    bg: c("turf"),
-    bgDeep: c("turf-dim"),
+    // Hot gold / ice wash behind green so turf reads as the subject
+    bg: c("gold"),
+    bgMid: c("ice"),
+    bgDeep: c("ice-dim"),
   },
   gold: {
     primary: "gold",
     jersey: c("gold"),
     jerseyShade: c("gold-dim"),
-    helmet: c("turf"),
-    helmetShade: c("turf-dim"),
-    brim: c("turf-dim"),
+    helmet: c("ice"),
+    helmetShade: c("ice-dim"),
+    brim: c("ice-dim"),
     number: c("night"),
-    bg: c("gold"),
-    bgDeep: c("gold-dim"),
+    // Cool ice sky behind a gold kit
+    bg: c("ice"),
+    bgMid: c("ice"),
+    bgDeep: c("ice-dim"),
   },
 };
 
@@ -107,58 +120,74 @@ export default function PlayerMark({
       aria-label={banner ? `Player ${num}, ${status}` : `Player ${num}`}
     >
       <defs>
-        <linearGradient id={`${gid}-sky`} x1="20" y1="0" x2="60" y2="80" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor={kit.bg} />
-          <stop offset="55%" stopColor={kit.bg} stopOpacity="0.92" />
+        {/* Bright complementary sky — lit from top-left like a cover key light */}
+        <linearGradient id={`${gid}-sky`} x1="12" y1="0" x2="70" y2="90" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor={c("ink")} stopOpacity="0.55" />
+          <stop offset="22%" stopColor={kit.bg} />
+          <stop offset="62%" stopColor={kit.bgMid} />
           <stop offset="100%" stopColor={kit.bgDeep} />
         </linearGradient>
-        <linearGradient id={`${gid}-jersey`} x1="20" y1="44" x2="62" y2="78" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor={c("ink")} stopOpacity="0.35" />
-          <stop offset="28%" stopColor={kit.jersey} />
+        <radialGradient id={`${gid}-bloom`} cx="28" cy="18" r="38" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor={c("ink")} stopOpacity="0.55" />
+          <stop offset="45%" stopColor={kit.bg} stopOpacity="0.35" />
+          <stop offset="100%" stopColor={kit.bg} stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id={`${gid}-jersey`} x1="18" y1="42" x2="64" y2="80" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor={c("ink")} stopOpacity="0.65" />
+          <stop offset="22%" stopColor={kit.jersey} />
+          <stop offset="70%" stopColor={kit.jersey} />
           <stop offset="100%" stopColor={kit.jerseyShade} />
         </linearGradient>
-        <linearGradient id={`${gid}-helm`} x1="28" y1="10" x2="54" y2="36" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor={c("ink")} stopOpacity="0.4" />
-          <stop offset="32%" stopColor={kit.helmet} />
+        <linearGradient id={`${gid}-helm`} x1="26" y1="8" x2="56" y2="38" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor={c("ink")} stopOpacity="0.7" />
+          <stop offset="28%" stopColor={kit.helmet} />
           <stop offset="100%" stopColor={kit.helmetShade} />
         </linearGradient>
         <linearGradient id={`${gid}-visor`} x1="30" y1="26" x2="52" y2="36" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor={c("ink")} stopOpacity="0.15" />
+          <stop offset="0%" stopColor={c("ink")} stopOpacity="0.35" />
           <stop offset="35%" stopColor={N} />
-          <stop offset="70%" stopColor={c("ink-soft")} stopOpacity="0.85" />
+          <stop offset="70%" stopColor={c("ink-soft")} stopOpacity="0.9" />
           <stop offset="100%" stopColor={N} />
         </linearGradient>
         <linearGradient id={`${gid}-banner`} x1="40" y1="58" x2="40" y2="78" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor={c(ring)} />
-          <stop offset="100%" stopColor={c(ring === "gold" ? "gold-dim" : ring === "turf" ? "turf-dim" : "ice-dim")} />
+          <stop offset="0%" stopColor={c("ink")} stopOpacity="0.25" />
+          <stop offset="35%" stopColor={c(kit.primary)} />
+          <stop offset="100%" stopColor={c(kit.primary === "gold" ? "gold-dim" : kit.primary === "turf" ? "turf-dim" : "ice-dim")} />
         </linearGradient>
         <clipPath id={`${gid}-clip`}>
           <circle cx="40" cy="40" r="36" />
         </clipPath>
       </defs>
 
-      {/* Thick logo ring — sticker / cover-art edge */}
+      {/* Thick logo ring — bright kit stroke so it lifts off black */}
       <circle cx="40" cy="40" r="39.5" fill={N} />
-      <circle cx="40" cy="40" r="37.8" fill="none" stroke={c(ring)} strokeWidth="2.8" />
+      <circle cx="40" cy="40" r="38" fill="none" stroke={c(kit.primary)} strokeWidth="3.2" />
+      <circle cx="40" cy="40" r="36.2" fill="none" stroke={c("ink")} strokeWidth="1.1" opacity="0.35" />
       <circle cx="40" cy="40" r="35.2" fill={N} />
 
       <g clipPath={`url(#${gid}-clip)`}>
-        {/* Saturated GTA portrait field */}
+        {/* Saturated complementary portrait field */}
         <rect width="80" height="80" fill={`url(#${gid}-sky)`} />
-        {/* Soft vignette so the bust pops */}
-        <ellipse cx="40" cy="78" rx="42" ry="22" fill={N} opacity="0.28" />
-        <ellipse cx="14" cy="18" rx="18" ry="14" fill={c("ink")} opacity="0.12" />
+        <rect width="80" height="80" fill={`url(#${gid}-bloom)`} />
+        {/* Light bottom hold — keep the jersey edge crisp, don't muddy the sky */}
+        <ellipse cx="40" cy="82" rx="40" ry="16" fill={N} opacity="0.18" />
 
-        {/* Shoulders / jersey — hard shade plane on the right */}
+        {/* Shoulders / jersey — brighter fill, hard shade only on the far side */}
         <path
           d="M4 80 Q8 46 26 44 L54 44 Q72 46 76 80 Z"
           fill={`url(#${gid}-jersey)`}
           stroke={N}
-          strokeWidth="2.6"
+          strokeWidth="2.8"
           strokeLinejoin="round"
         />
-        <path d="M48 46 Q62 48 70 80 L54 80 Q52 56 48 48 Z" fill={kit.jerseyShade} opacity="0.55" />
-        <path d="M26 46 Q40 51 54 46" fill="none" stroke={N} strokeWidth="2" strokeLinecap="round" />
+        <path d="M50 46 Q64 48 72 80 L56 80 Q54 56 50 48 Z" fill={kit.jerseyShade} opacity="0.4" />
+        {/* Specular stripe down the lit shoulder */}
+        <path
+          d="M14 56 Q22 48 28 47 L26 80 L10 80 Z"
+          fill={c("ink")}
+          opacity="0.22"
+        />
+        <path d="M26 46 Q40 51 54 46" fill="none" stroke={N} strokeWidth="2.2" strokeLinecap="round" />
         {/* Collar / yoke */}
         <path
           d="M30 46 L34 52 L40 49 L46 52 L50 46"
@@ -176,7 +205,7 @@ export default function PlayerMark({
           fontFamily="Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif"
           fill={kit.number}
           stroke={N}
-          strokeWidth="1.4"
+          strokeWidth="1.6"
           paintOrder="stroke fill"
         >
           {num}
@@ -221,20 +250,20 @@ export default function PlayerMark({
           fill={kit.helmetShade}
           opacity="0.55"
         />
-        {/* Specular blade */}
+        {/* Specular blade — brighter chrome catch */}
         <path
           d="M28 16 Q34 13 40 13.5 Q36 20 29 24 Q26 20 28 16 Z"
           fill={c("ink")}
-          opacity="0.18"
+          opacity="0.45"
         />
         <path
           d="M29 17 Q34 14.5 39 15 Q35.5 19.5 30 22.5 Q28 20 29 17 Z"
           fill={c("ink")}
-          opacity="0.12"
+          opacity="0.28"
         />
         {/* Stripe */}
         <path d="M37 11.2 Q39.5 10.6 42.2 11.2 L41.6 26 Q39.5 25.4 37.4 26 Z" fill={N} />
-        <path d="M38.2 11.5 Q39.5 11.1 41 11.5 L40.6 25.2 Q39.5 24.9 38.4 25.2 Z" fill={c(ring)} opacity="0.85" />
+        <path d="M38.2 11.5 Q39.5 11.1 41 11.5 L40.6 25.2 Q39.5 24.9 38.4 25.2 Z" fill={kit.jersey} />
         {/* Ear hole / brim */}
         <path d="M51 25 Q56 18 51 13.5 Q58 17 58 33 L58 37 Q53.5 37.5 51 33 Z" fill={kit.brim} stroke={N} strokeWidth="1.2" />
         <ellipse cx="29.5" cy="20" rx="3.2" ry="2.4" fill={N} opacity="0.35" transform="rotate(-24 29.5 20)" />
@@ -276,15 +305,14 @@ export default function PlayerMark({
         <Sparkle x={16} y={16} r={4.5} fill={c("gold")} />
         <Sparkle x={64} y={20} r={3.2} fill={c("ink")} />
 
-        {/* Status nameplate — GTA cover banner */}
+        {/* Status nameplate — jersey-accent banner (matches kit, not the sky) */}
         {banner && (
           <g>
-            <path d="M0 58 H80 V80 H0 Z" fill={N} opacity="0.55" />
+            <path d="M0 58 H80 V80 H0 Z" fill={N} opacity="0.4" />
             <path d="M0 60 H80 V78 H0 Z" fill={`url(#${gid}-banner)`} />
-            {/* Cel band + hard bottom edge */}
-            <path d="M0 60 H80" stroke={c("ink")} strokeWidth="1.2" opacity="0.35" />
-            <path d="M0 62 H80" stroke={c("ink")} strokeWidth="2.2" opacity="0.2" />
-            <path d="M0 78 H80" stroke={N} strokeWidth="2.4" />
+            <path d="M0 60 H80" stroke={c("ink")} strokeWidth="1.6" opacity="0.55" />
+            <path d="M0 62.5 H80" stroke={c("ink")} strokeWidth="2" opacity="0.18" />
+            <path d="M0 78 H80" stroke={N} strokeWidth="2.6" />
             {showLabel && (
               <text
                 x="40"
@@ -296,7 +324,7 @@ export default function PlayerMark({
                 letterSpacing="0.08em"
                 fill={c("ink")}
                 stroke={N}
-                strokeWidth="0.55"
+                strokeWidth="0.7"
                 paintOrder="stroke fill"
               >
                 {label}
@@ -307,13 +335,13 @@ export default function PlayerMark({
       </g>
 
       {/* Inner rim catch-light */}
-      <circle cx="40" cy="40" r="35" fill="none" stroke={c("ink")} strokeWidth="1.2" opacity="0.18" />
+      <circle cx="40" cy="40" r="35" fill="none" stroke={c("ink")} strokeWidth="1.4" opacity="0.28" />
       <path
         d="M18 22 A24 24 0 0 1 52 14"
         fill="none"
         stroke={c("ink")}
-        strokeWidth="1.4"
-        opacity="0.22"
+        strokeWidth="1.6"
+        opacity="0.4"
         strokeLinecap="round"
       />
     </svg>
