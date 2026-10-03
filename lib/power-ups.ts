@@ -107,7 +107,7 @@ export function isQuestClaimed(p: Progress, questId: string): boolean {
   return (p.dailyQuestsClaimed ?? []).includes(questId);
 }
 
-export type ArcadeKind = "match" | "speed" | "kick";
+export type ArcadeKind = "match" | "speed" | "kick" | "pattern" | "foul";
 
 export function awardArcadeWin(opts: {
   kind: ArcadeKind;

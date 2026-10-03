@@ -33,6 +33,7 @@ import QotdCard from "@/components/qotd-card";
 import DuelCard from "@/components/duel-card";
 import DraftCard from "@/components/draft-card";
 import { TourButton } from "@/components/welcome-tour";
+import PlayStrip from "@/components/play-strip";
 import { useCountUp } from "@/lib/use-count-up";
 import { playSfx } from "@/lib/sfx";
 
@@ -220,7 +221,11 @@ export default function Dashboard({
           <DraftCard compact />
         </div>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-3" style={{ ["--i" as string]: 3 }}>
+        <div className="mt-4" style={{ ["--i" as string]: 3 }}>
+          <PlayStrip title="play · prep" />
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-3" style={{ ["--i" as string]: 4 }}>
           {ACTIONS.map((a) => (
             <Link
               key={a.href}
@@ -249,7 +254,7 @@ export default function Dashboard({
         <Link
           href="/questions/prep"
           onClick={() => playSfx("ui")}
-          style={{ ["--i" as string]: 4 }}
+          style={{ ["--i" as string]: 5 }}
           className="lift surface mt-3 flex items-center gap-3 overflow-hidden rounded-2xl border border-panel-border bg-panel p-3 pr-4 transition-colors hover:border-gold/50"
         >
           <span className="h-14 w-20 shrink-0 overflow-hidden rounded-lg border border-panel-border bg-night/50">

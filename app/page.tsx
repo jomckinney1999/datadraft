@@ -37,6 +37,7 @@ import { liveProjects } from "@/lib/projects";
 import { getLiveWeek } from "@/lib/live-nfl";
 import { FACTS } from "@/lib/lesson-facts.generated";
 import DraftCard from "@/components/draft-card";
+import PlayStrip from "@/components/play-strip";
 
 /**
  * The landing page.
@@ -129,22 +130,60 @@ export default async function Home() {
   // Never throws: null when nflverse is unreachable, and the strip hides.
   const live = await getLiveWeek();
 
-  const liveCourses = COURSES.filter((c) => c.status === "live").length;
-  // Lessons that exist, not the planned total across all ten courses.
-  // Counting the plan puts a number on the front page nobody can go and find.
+  // Count only what a visitor can open today — never the course-catalog plan totals.
+  const liveCourses = COURSES.filter((c) => c.status === "live" && c.moduleId).length;
   const lessonCount = liveLessons(ALL_MODULE).length;
-  const projectCount = liveProjects().length + INTERVIEW_CASES.length;
+  const buildCount = liveProjects().length;
+  const caseCount = INTERVIEW_CASES.length;
+  const projectCount = buildCount + caseCount;
+  const sqlCount = questionsIn("sql").length;
   const langs = ["sql", "python", "r", "excel"] as const;
 
   // Each number is also a door: hover lights it, a click goes to the thing
   // it counts. Tones rotate so no two neighbours glow the same colour.
   const PROOF: { value: number; label: string; note: string; href: string; tone: "turf" | "ice" | "gold" }[] = [
-    { value: QUESTIONS.length, label: "Questions", note: "Four languages, graded on what your code produces.", href: "/questions", tone: "gold" },
-    { value: lessonCount, label: "Lessons", note: "One idea each, with the scoreboard on screen.", href: "/learn", tone: "turf" },
-    { value: liveCourses, label: "Courses live", note: "From your first SELECT to window functions.", href: "/learn", tone: "ice" },
-    { value: projectCount, label: "Builds & cases", note: "Ending in a repo, a notebook, or a right answer.", href: "/projects", tone: "gold" },
-    { value: FACTS.seasons.length, label: "Real seasons", note: `${FACTS.seasons[0]} through week ${FACTS.latest.week} of ${FACTS.latest.season}, pinned so the answers hold still.`, href: "/data", tone: "turf" },
-    { value: FACTS.rows, label: "Stat lines", note: "One per game a player actually played.", href: "/data", tone: "ice" },
+    {
+      value: QUESTIONS.length,
+      label: "Questions",
+      note: `${sqlCount} SQL · ${questionsIn("python").length} Python · ${questionsIn("r").length} R · ${questionsIn("excel").length} Excel — graded on what your code produces.`,
+      href: "/questions",
+      tone: "gold",
+    },
+    {
+      value: lessonCount,
+      label: "Lessons",
+      note: "Live drives across every course — one idea each, scoreboard on screen.",
+      href: "/learn",
+      tone: "turf",
+    },
+    {
+      value: liveCourses,
+      label: "Courses live",
+      note: "SQL through Excel, plus stats, Git, viz and more — with lessons you can play.",
+      href: "/learn",
+      tone: "ice",
+    },
+    {
+      value: projectCount,
+      label: "Builds & cases",
+      note: `${buildCount} afternoon builds · ${caseCount} half-hour cases.`,
+      href: "/projects",
+      tone: "gold",
+    },
+    {
+      value: FACTS.seasons.length,
+      label: "Real seasons",
+      note: `${FACTS.seasons[0]} through week ${FACTS.latest.week} of ${FACTS.latest.season}, pinned so the answers hold still.`,
+      href: "/data",
+      tone: "turf",
+    },
+    {
+      value: FACTS.rows,
+      label: "Stat lines",
+      note: "One per game a player actually played.",
+      href: "/data",
+      tone: "ice",
+    },
   ];
 
   return (
@@ -307,6 +346,9 @@ export default async function Home() {
             </p>
             <div className="reveal mx-auto mt-5 max-w-2xl">
               <DraftCard />
+            </div>
+            <div className="reveal mx-auto mt-8 max-w-4xl">
+              <PlayStrip title="more ways to play · prep" />
             </div>
           </div>
         </section>

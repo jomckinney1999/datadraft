@@ -8,10 +8,12 @@
  * extra point.
  *
  *   Film Room Match — pair a SQL idea with the plain-English picture of it.
- *   Speed Snap      — six situation questions against a clock.
+ *   Two-Minute Drill — situation questions against a clock.
+ *   Pattern Call    — name the interview pattern a prompt is testing.
+ *   Foul Call       — spot what's wrong with a query (prep for screens).
  *   Extra Point     — a timing kick for bonus XP.
  *
- * All three are free: no timeouts, no lesson order, and every one pays
+ * All are free: no timeouts, no lesson order, and every one pays
  * scouting tickets through awardArcadeWin so the sideline shop stays fed.
  *
  * The boards are seeded per day (pickDailyPairs / pickDailySnaps), so everyone
@@ -24,27 +26,38 @@ import Link from "next/link";
 import Coach from "@/components/coach";
 import AppNav from "@/components/app-nav";
 import {
+  ARCADE_FOUL_SIZE,
   ARCADE_KICK_ATTEMPTS,
   ARCADE_MATCH_SIZE,
+  ARCADE_PATTERN_SIZE,
   ARCADE_SPEED_SIZE,
+  PATTERN_CALL_CHOICES,
+  TICKET_FOUL_BASE,
+  TICKET_FOUL_PERFECT,
   TICKET_KICK_PER_MAKE,
   TICKET_KICK_PERFECT,
   TICKET_MATCH_BASE,
   TICKET_MATCH_PERFECT,
+  TICKET_PATTERN_BASE,
+  TICKET_PATTERN_PERFECT,
   TICKET_SPEED_BASE,
   TICKET_SPEED_PERFECT,
+  pickDailyFouls,
   pickDailyPairs,
+  pickDailyPatterns,
   pickDailySnaps,
   shuffleIds,
+  type FoulCall,
   type MatchPair,
+  type PatternCall,
   type SpeedSnap,
 } from "@/lib/arcade";
 import { awardArcadeWin, type ArcadeKind } from "@/lib/power-ups";
 import { playSfx } from "@/lib/sfx";
 
-type GameId = "match" | "speed" | "kick";
+type GameId = "match" | "speed" | "pattern" | "foul" | "kick";
 
-const GAMES: { id: GameId; name: string; blurb: string; badge: string }[] = [
+const GAMES: { id: GameId; name: string; blurb: string; badge: string; prep?: boolean }[] = [
   {
     id: "match",
     name: "Film Room Match",
@@ -56,6 +69,21 @@ const GAMES: { id: GameId; name: string; blurb: string; badge: string }[] = [
     name: "Two-Minute Drill",
     blurb: "Six situations, one clock. Read it and call it.",
     badge: `${ARCADE_SPEED_SIZE} snaps`,
+    prep: true,
+  },
+  {
+    id: "pattern",
+    name: "Pattern Call",
+    blurb: "Hear a screen-style ask. Name which SQL pattern it is testing.",
+    badge: `${ARCADE_PATTERN_SIZE} calls`,
+    prep: true,
+  },
+  {
+    id: "foul",
+    name: "Foul Call",
+    blurb: "Spot what's wrong with a query — the same shape mistakes screens catch.",
+    badge: `${ARCADE_FOUL_SIZE} fouls`,
+    prep: true,
   },
   {
     id: "kick",
@@ -79,17 +107,17 @@ export default function ArcadeGames() {
 
   return (
     <>
-      <AppNav back="/learn" backLabel="all courses" />
+      <AppNav back="/questions" backLabel="questions" />
       <main className="mx-auto min-h-screen w-full max-w-2xl px-5 pb-10 pt-8">
         <header className="flex items-start justify-between gap-4">
           <div>
-            <p className="label-broadcast text-gold">between drives</p>
+            <p className="label-broadcast text-gold">play · prep</p>
             <h1 className="mt-1 font-display text-3xl font-bold text-ink sm:text-4xl">
               The Arcade
             </h1>
             <p className="mt-2 max-w-md text-sm leading-relaxed text-ink-soft">
-              Short games that cost no timeouts and pay scouting tickets. Good for
-              the days you don&rsquo;t have a full drive in you.
+              Short games that cost no timeouts and pay scouting tickets. Pattern Call
+              and Foul Call rehearse what screens ask — without burning a mock.
             </p>
           </div>
           <Coach mood={payout ? "flex" : "idle"} size={78} className="hidden sm:block" />
@@ -131,19 +159,34 @@ export default function ArcadeGames() {
                   <h2 className="font-display text-xl font-bold text-ink">
                     {g.name}
                   </h2>
-                  <span className="shrink-0 rounded-full border border-panel-border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-                    {g.badge}
+                  <span className="flex shrink-0 items-center gap-1.5">
+                    {g.prep && (
+                      <span className="rounded-full border border-gold/40 bg-gold/10 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-gold">
+                        Prep
+                      </span>
+                    )}
+                    <span className="rounded-full border border-panel-border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+                      {g.badge}
+                    </span>
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-ink-soft">{g.blurb}</p>
               </button>
             ))}
             <p className="pt-2 text-xs leading-relaxed text-ink-muted">
-              Want the language-by-language version instead?{" "}
+              Language-by-language?{" "}
               <Link href="/learn/rapid" className="text-turf hover:underline">
                 Rapid Fire
-              </Link>{" "}
-              pulls real drills from the courses.
+              </Link>
+              . Timed screen?{" "}
+              <Link href="/questions/mock" className="text-turf hover:underline">
+                Mock SQL
+              </Link>
+              {" · "}
+              <Link href="/questions/screen" className="text-turf hover:underline">
+                Analyst Screen
+              </Link>
+              .
             </p>
           </div>
         )}
@@ -153,6 +196,12 @@ export default function ArcadeGames() {
         )}
         {game === "speed" && !payout && (
           <TwoMinuteDrill onDone={(t, p) => finish("speed", t, p)} />
+        )}
+        {game === "pattern" && !payout && (
+          <PatternCallGame onDone={(t, p) => finish("pattern", t, p)} />
+        )}
+        {game === "foul" && !payout && (
+          <FoulCallGame onDone={(t, p) => finish("foul", t, p)} />
         )}
         {game === "kick" && !payout && (
           <ExtraPoint onDone={(t, p) => finish("kick", t, p)} />
@@ -362,6 +411,166 @@ function TwoMinuteDrill({
       {picked !== null && (
         <p className="animate-fade-up mt-3 text-sm leading-relaxed text-ink-soft">
           {snap.explain}
+        </p>
+      )}
+    </section>
+  );
+}
+
+/* ── Pattern Call ─────────────────────────────────────────── */
+
+function PatternCallGame({
+  onDone,
+}: {
+  onDone: (tickets: number, perfect: boolean) => void;
+}) {
+  const [rounds] = useState<PatternCall[]>(() => pickDailyPatterns());
+  const [idx, setIdx] = useState(0);
+  const [right, setRight] = useState(0);
+  const [picked, setPicked] = useState<number | null>(null);
+
+  const done = idx >= rounds.length;
+  useEffect(() => {
+    if (!done) return;
+    const perfect = right === rounds.length;
+    onDone(TICKET_PATTERN_BASE + (perfect ? TICKET_PATTERN_PERFECT : 0), perfect);
+  }, [done, onDone, right, rounds.length]);
+
+  if (done) return null;
+  const round = rounds[idx];
+
+  function choose(i: number) {
+    if (picked !== null) return;
+    setPicked(i);
+    const ok = i === round.answer;
+    if (ok) setRight((r) => r + 1);
+    playSfx(ok ? "correct" : "miss");
+    window.setTimeout(() => {
+      setPicked(null);
+      setIdx((n) => n + 1);
+    }, 1100);
+  }
+
+  return (
+    <section className="mt-8">
+      <p className="font-mono text-[11px] uppercase tracking-wider text-ink-muted">
+        Call {idx + 1}/{rounds.length} · interview patterns
+      </p>
+      <h2 className="mt-3 font-display text-xl font-bold leading-snug text-ink">
+        {round.prompt}
+      </h2>
+      <p className="mt-2 text-sm text-ink-soft">Which pattern is this testing?</p>
+      <div className="mt-4 grid gap-2">
+        {PATTERN_CALL_CHOICES.map((label, i) => {
+          const state =
+            picked === null
+              ? "idle"
+              : i === round.answer
+                ? "right"
+                : i === picked
+                  ? "wrong"
+                  : "idle";
+          return (
+            <button
+              key={label}
+              type="button"
+              onClick={() => choose(i)}
+              className={`rounded-xl border px-3 py-2.5 text-left text-[14px] transition-colors ${
+                state === "right"
+                  ? "border-turf bg-turf/15 text-turf"
+                  : state === "wrong"
+                    ? "border-gold bg-gold/10 text-gold"
+                    : "border-panel-border bg-panel text-ink hover:border-turf/50"
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+      {picked !== null && (
+        <p className="animate-fade-up mt-3 text-sm leading-relaxed text-ink-soft">
+          {round.explain}
+        </p>
+      )}
+    </section>
+  );
+}
+
+/* ── Foul Call ────────────────────────────────────────────── */
+
+function FoulCallGame({
+  onDone,
+}: {
+  onDone: (tickets: number, perfect: boolean) => void;
+}) {
+  const [rounds] = useState<FoulCall[]>(() => pickDailyFouls());
+  const [idx, setIdx] = useState(0);
+  const [right, setRight] = useState(0);
+  const [picked, setPicked] = useState<number | null>(null);
+
+  const done = idx >= rounds.length;
+  useEffect(() => {
+    if (!done) return;
+    const perfect = right === rounds.length;
+    onDone(TICKET_FOUL_BASE + (perfect ? TICKET_FOUL_PERFECT : 0), perfect);
+  }, [done, onDone, right, rounds.length]);
+
+  if (done) return null;
+  const round = rounds[idx];
+
+  function choose(i: number) {
+    if (picked !== null) return;
+    setPicked(i);
+    const ok = i === round.answer;
+    if (ok) setRight((r) => r + 1);
+    playSfx(ok ? "correct" : "miss");
+    window.setTimeout(() => {
+      setPicked(null);
+      setIdx((n) => n + 1);
+    }, 1200);
+  }
+
+  return (
+    <section className="mt-8">
+      <p className="font-mono text-[11px] uppercase tracking-wider text-ink-muted">
+        Foul {idx + 1}/{rounds.length} · throw the flag
+      </p>
+      <p className="mt-3 text-sm leading-relaxed text-ink-soft">{round.setup}</p>
+      <pre className="mt-3 overflow-x-auto rounded-xl border border-panel-border bg-night/60 p-3 font-mono text-[12px] leading-relaxed text-turf">
+        {round.code}
+      </pre>
+      <div className="mt-4 grid gap-2">
+        {round.choices.map((c, i) => {
+          const state =
+            picked === null
+              ? "idle"
+              : i === round.answer
+                ? "right"
+                : i === picked
+                  ? "wrong"
+                  : "idle";
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => choose(i)}
+              className={`rounded-xl border px-3 py-2.5 text-left text-[14px] transition-colors ${
+                state === "right"
+                  ? "border-turf bg-turf/15 text-turf"
+                  : state === "wrong"
+                    ? "border-gold bg-gold/10 text-gold"
+                    : "border-panel-border bg-panel text-ink hover:border-turf/50"
+              }`}
+            >
+              {c}
+            </button>
+          );
+        })}
+      </div>
+      {picked !== null && (
+        <p className="animate-fade-up mt-3 text-sm leading-relaxed text-ink-soft">
+          {round.explain}
         </p>
       )}
     </section>

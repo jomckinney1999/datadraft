@@ -36,6 +36,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     at("/field", 0.5, "monthly"),
     at("/excel", 0.5, "monthly"),
     at("/learn/rapid", 0.4, "monthly"),
+    at("/learn/arcade", 0.5, "monthly"),
     ...COURSES.filter((c) => c.moduleId).map((c) => at(`/learn/track/${c.moduleId}`, 0.6, "monthly")),
     ...liveProjects().map((p) => at(`/projects/${p.id}`, 0.6, "monthly")),
     ...INTERVIEW_CASES.map((c) => at(`/projects/case/${c.id}`, 0.5, "monthly")),

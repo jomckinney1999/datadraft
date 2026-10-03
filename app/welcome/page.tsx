@@ -49,6 +49,7 @@ export default function WelcomePage() {
       bullets: [
         { name: "Question of the Day", href: "/questions", note: "One per language, the same for everyone. Solve one a day to build a streak." },
         { name: "Stat Duel", href: "/questions/duel", note: "Five head-to-heads a day on real numbers. No code; every answer shows the SQL that proves it." },
+        { name: "Arcade", href: "/learn/arcade", note: "Pattern Call and Foul Call rehearse screen instincts. Film Room Match and the Two-Minute Drill keep you sharp." },
         { name: "Query Doctor", href: "/questions", note: "Get a question wrong and it tells you why — the column, the clause, the kind of mistake — without giving the answer away." },
       ],
     },
