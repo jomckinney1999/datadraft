@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from "react";
 import PlayerMark from "@/components/player-mark";
-import TeamOwlAvatar from "@/components/team-owl-avatar";
+import TeamLogo from "@/components/team-logo";
 import { setCallSign, type Progress } from "@/lib/progress";
 import { displayName, RANKS, tenureFrom } from "@/lib/tenure";
 import { nflTeam } from "@/lib/nfl-team-avatars";
@@ -148,11 +148,9 @@ export default function LockerCard({
           <div className="flex items-center justify-between gap-3 rounded-2xl border border-ice/30 bg-gradient-to-r from-ice/10 via-night/45 to-night/45 p-4 shadow-[inset_0_1px_0_rgb(var(--c-ink)/0.05)]">
             <div className="flex min-w-0 items-center gap-3">
               {team ? (
-                <TeamOwlAvatar
-                  team={team.abbr}
-                  labelled
-                  className="h-12 w-12 shrink-0 rounded-xl border-2 border-ice/45 shadow-[0_0_18px_rgb(var(--c-ice)/0.22)]"
-                />
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-ice/35 bg-ink/95 shadow-[0_0_18px_rgb(var(--c-ice)/0.22)]">
+                  <TeamLogo abbr={team.abbr} size={38} showCode={false} />
+                </span>
               ) : (
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-ice/35 bg-ice/10 font-display text-sm font-black text-ice">
                   —
