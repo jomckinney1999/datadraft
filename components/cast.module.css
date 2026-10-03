@@ -303,6 +303,553 @@
   }
 }
 
+/* ── Coach: interaction (2026-10-03) ──────────────────────── */
+
+/* Hover: a hop on top of whatever the mood is doing. */
+.react {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+.animated:hover .react {
+  animation: boing 0.6s cubic-bezier(0.3, 0.7, 0.4, 1.3) 1;
+}
+
+@keyframes boing {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  20% {
+    transform: translateY(0) scale(1.08, 0.9);
+  }
+  45% {
+    transform: translateY(-9px) scale(0.95, 1.07);
+  }
+  72% {
+    transform: translateY(0) scale(1.05, 0.94);
+  }
+}
+
+/* The pupils follow the pointer: components/coach-eyes.tsx sets the vars. */
+.track {
+  transform: translate(var(--lx, 0px), var(--ly, 0px));
+  transition: transform 0.18s ease-out;
+}
+
+/* Talking: an uneven open-and-shut, like speech rather than a metronome. */
+.talk {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+  animation: talk 0.85s linear infinite;
+}
+
+@keyframes talk {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  12% {
+    transform: scaleY(1);
+  }
+  26% {
+    transform: scaleY(0.5);
+  }
+  40% {
+    transform: scaleY(0.95);
+  }
+  55% {
+    transform: scaleY(0.25);
+  }
+  70% {
+    transform: scaleY(0.8);
+  }
+  85% {
+    transform: scaleY(0.45);
+  }
+}
+
+/* ── Coach: more moods (2026-10-03) ───────────────────────── */
+
+/* clap: the gloves swing in from the shoulders and meet; a spark on contact. */
+.bounceQuick {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: bounceQuick 0.5s ease-in-out infinite;
+}
+
+@keyframes bounceQuick {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  45% {
+    transform: translateY(-1.6px);
+  }
+}
+
+.clapL {
+  transform-box: view-box;
+  transform-origin: 28px 72px;
+  animation: clapL 0.5s ease-in-out infinite;
+}
+
+.clapR {
+  transform-box: view-box;
+  transform-origin: 92px 72px;
+  animation: clapR 0.5s ease-in-out infinite;
+}
+
+@keyframes clapL {
+  0%,
+  100% {
+    transform: rotate(5deg);
+  }
+  42%,
+  52% {
+    transform: rotate(-9deg);
+  }
+}
+
+@keyframes clapR {
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+  42%,
+  52% {
+    transform: rotate(9deg);
+  }
+}
+
+.spark {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: spark 0.5s ease-out infinite;
+}
+
+@keyframes spark {
+  0%,
+  38% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  48% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  72%,
+  100% {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+}
+
+/* dance: raise the roof, side to side, a cleat up on each beat. */
+.dance {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: dance 0.9s ease-in-out infinite;
+}
+
+@keyframes dance {
+  0%,
+  100% {
+    transform: translateX(-3px) rotate(-5deg);
+  }
+  25%,
+  75% {
+    transform: translateX(0) translateY(-4px) rotate(0deg);
+  }
+  50% {
+    transform: translateX(3px) rotate(5deg);
+  }
+}
+
+.shadowDance {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: shadowDance 0.9s ease-in-out infinite;
+}
+
+@keyframes shadowDance {
+  0%,
+  100% {
+    transform: translateX(-3px) scale(1);
+  }
+  25%,
+  75% {
+    transform: translateX(0) scale(0.85);
+  }
+  50% {
+    transform: translateX(3px) scale(1);
+  }
+}
+
+.roofL,
+.roofR {
+  animation: roof 0.45s ease-in-out infinite;
+}
+
+.roofR {
+  animation-delay: -0.225s;
+}
+
+@keyframes roof {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.stepL,
+.stepR {
+  animation: step 0.9s ease-in-out infinite;
+}
+
+.stepR {
+  animation-delay: -0.45s;
+}
+
+@keyframes step {
+  0%,
+  45%,
+  100% {
+    transform: translateY(0);
+  }
+  20% {
+    transform: translateY(-2.5px);
+  }
+}
+
+.note1,
+.note2 {
+  animation: noteFloat 1.8s ease-out infinite backwards;
+}
+
+.note2 {
+  animation-delay: 0.9s;
+}
+
+@keyframes noteFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) rotate(-8deg);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px) rotate(8deg);
+  }
+}
+
+/* flex: the arm pumps, the bicep with it, and a star at the fist. */
+.flexBody {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: flexBody 1.4s ease-in-out infinite;
+}
+
+@keyframes flexBody {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1.02, 0.985);
+  }
+}
+
+.flexR {
+  transform-box: view-box;
+  transform-origin: 91px 70px;
+  animation: flexR 1.4s ease-in-out infinite;
+}
+
+@keyframes flexR {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  45%,
+  60% {
+    transform: rotate(-9deg);
+  }
+}
+
+.twinkle {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: twinkle 1.4s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%,
+  30%,
+  100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1) rotate(45deg);
+  }
+  72% {
+    opacity: 0.9;
+    transform: scale(0.8) rotate(90deg);
+  }
+}
+
+/* point: leans toward it and jabs the finger, twice a beat. */
+.lean {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: lean 2.4s ease-in-out infinite;
+}
+
+@keyframes lean {
+  0%,
+  100% {
+    transform: rotate(1.5deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+.jab {
+  transform-box: view-box;
+  transform-origin: 91px 66px;
+  animation: jab 1.2s ease-in-out infinite;
+}
+
+@keyframes jab {
+  0%,
+  60%,
+  100% {
+    transform: translate(0, 0);
+  }
+  20%,
+  35% {
+    transform: translate(2.4px, -2px);
+  }
+}
+
+/* clipboard: the pencil hand scribbles, a line writes itself on the page. */
+.scribble {
+  animation: scribble 0.6s linear infinite;
+}
+
+@keyframes scribble {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-1.5px, 0.8px);
+  }
+  50% {
+    transform: translate(0.6px, -0.4px);
+  }
+  75% {
+    transform: translate(-1px, 1px);
+  }
+}
+
+.write {
+  stroke-dasharray: 1;
+  animation: write 2.4s ease-in-out infinite;
+}
+
+@keyframes write {
+  0% {
+    stroke-dashoffset: 1;
+  }
+  70%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* surprised: jolts back, then settles; a "!" pops over his head. */
+.jolt {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: jolt 2.8s cubic-bezier(0.3, 0.7, 0.4, 1) infinite;
+}
+
+@keyframes jolt {
+  0%,
+  20%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  6% {
+    transform: translateY(-7px) scale(0.95, 1.07);
+  }
+  13% {
+    transform: translateY(0) scale(1.05, 0.95);
+  }
+}
+
+.pop {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: pop 2.8s ease-out infinite;
+}
+
+@keyframes pop {
+  0%,
+  3% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  9% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+  16%,
+  70% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  85%,
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+/* shrug: shoulders up, palms up, hold, down. */
+.shrug {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: shrug 2s ease-in-out infinite;
+}
+
+@keyframes shrug {
+  0%,
+  15%,
+  70%,
+  100% {
+    transform: translateY(0);
+  }
+  30%,
+  55% {
+    transform: translateY(-1.8px);
+  }
+}
+
+.shrugArm {
+  animation: shrugArm 2s ease-in-out infinite;
+}
+
+@keyframes shrugArm {
+  0%,
+  15%,
+  70%,
+  100% {
+    transform: translateY(0);
+  }
+  30%,
+  55% {
+    transform: translateY(-4px);
+  }
+}
+
+/* facepalm: a slow, disappointed shake of the head. */
+.headShake {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: headShake 2.6s ease-in-out infinite;
+}
+
+@keyframes headShake {
+  0%,
+  40%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-2.5deg);
+  }
+  60% {
+    transform: rotate(2.5deg);
+  }
+  70% {
+    transform: rotate(-2deg);
+  }
+  80% {
+    transform: rotate(1.5deg);
+  }
+}
+
+/* sleep: slumped, slow deep breaths, Z's drifting up. */
+.snooze {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: snooze 4s ease-in-out infinite;
+}
+
+@keyframes snooze {
+  0%,
+  100% {
+    transform: rotate(-3deg) scaleY(1);
+  }
+  50% {
+    transform: rotate(-3deg) translateY(-1px) scaleY(1.03);
+  }
+}
+
+.snore {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: snore 4s ease-in-out infinite;
+}
+
+@keyframes snore {
+  0%,
+  100% {
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+.z1,
+.z2,
+.z3 {
+  animation: zFloat 3s ease-out infinite backwards;
+}
+
+.z2 {
+  animation-delay: 1s;
+}
+
+.z3 {
+  animation-delay: 2s;
+}
+
+@keyframes zFloat {
+  0% {
+    opacity: 0;
+    transform: translate(0, 4px);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(4px, -8px);
+  }
+}
+
 /* ── Rookie: tosses the ball up and watches it come down ─── */
 
 .toss {

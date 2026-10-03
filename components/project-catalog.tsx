@@ -69,7 +69,7 @@ export default function ProjectCatalog() {
               take about half an hour.
             </p>
           </div>
-          <Coach mood="think" size={80} className="hidden shrink-0 sm:block" />
+          <Coach mood="clipboard" size={80} className="hidden shrink-0 sm:block" />
         </header>
 
         <div className="mt-6 flex flex-wrap items-center gap-2">

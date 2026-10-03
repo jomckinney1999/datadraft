@@ -30,7 +30,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Coach, { type CoachMood } from "@/components/coach";
+import Coach, { celebrationFor, type CoachMood } from "@/components/coach";
 import SidelineCast, { type CastKind } from "@/components/sideline-cast";
 import { displayStreak, loadProgress, type Progress } from "@/lib/progress";
 import styles from "./cast.module.css";
@@ -50,7 +50,7 @@ type Spot = { x: number; y: number; side: 1 | -1 };
 type Decor = Spot & { key: string; kind: CastKind; tone: number; delay: number; w: number };
 
 /** Lines are picked by a counter, never Math.random — a re-render must not re-roll what he is saying mid-read. */
-const LINES: Record<"angry" | "cheer" | "happy" | "fresh" | "idle", string[]> = {
+const LINES: Record<"angry" | "cheer" | "happy" | "fresh" | "idle" | "sleep", string[]> = {
   angry: [
     "Streak's on the line. Snap the ball.",
     "I didn't drive to practice to watch you scroll.",
@@ -65,6 +65,11 @@ const LINES: Record<"angry" | "cheer" | "happy" | "fresh" | "idle", string[]> = 
   ],
   fresh: ["First snap's yours, rookie.", "Helmet on. Let's see what you've got."],
   idle: ["Let's get a rep in.", "Ball's on the tee.", "Warmups are over. Let's play."],
+  sleep: [
+    "Zzz… tap me when you're ready.",
+    "I've been waiting. Wake me up.",
+    "Practice starts when you do.",
+  ],
 };
 
 function todayUTC() {
@@ -72,10 +77,20 @@ function todayUTC() {
   return new Date().toISOString().slice(0, 10);
 }
 
+/** Whole UTC days since `yyyy-mm-dd`, or null when the day is missing. */
+function daysSince(day: string | undefined | null): number | null {
+  if (!day) return null;
+  const then = Date.parse(`${day}T00:00:00.000Z`);
+  if (Number.isNaN(then)) return null;
+  return Math.floor((Date.now() - then) / 86_400_000);
+}
+
 function moodFor(p: Progress | null): { mood: CoachMood; lines: keyof typeof LINES } {
   if (!p || p.completedLessons.length === 0) return { mood: "whistle", lines: "fresh" };
   if (p.lastActiveDay === todayUTC()) return { mood: "happy", lines: "happy" };
   if (displayStreak(p) > 0) return { mood: "angry", lines: "angry" };
+  const away = daysSince(p.lastActiveDay);
+  if (away !== null && away >= 3) return { mood: "sleep", lines: "sleep" };
   return { mood: "idle", lines: "idle" };
 }
 
@@ -323,15 +338,19 @@ export default function PathCast({
     return () => window.clearTimeout(t);
   }, [bubbleOn, celebrate, base.mood, lineIdx]);
 
-  // A tap gets a reaction: a jump, or — if he's already angry — the whistle.
+  // A tap gets a reaction of its own, or — if he's already angry — the whistle.
+  // Celebrations rotate by board + line so he isn't always the same jump.
+  const party = celebrationFor(`${boardKey}-${lineIdx}`);
   const mood: CoachMood = hopping
-    ? "cheer"
+    ? party
     : poke
       ? base.mood === "angry"
         ? "whistle"
-        : "cheer"
+        : base.mood === "sleep"
+          ? "surprised"
+          : party
       : celebrate
-        ? "cheer"
+        ? party
         : base.mood;
   const bank = LINES[celebrate ? "cheer" : base.lines];
   const line = bank[lineIdx % bank.length];

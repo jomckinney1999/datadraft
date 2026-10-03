@@ -90,6 +90,6 @@ export function caseBeats(caseId: string): Beat[] | null {
   return [
     { who: { kind: "coach", mood: "whistle" }, text: s.open },
     ...s.lines.map((text) => ({ who: caller, text })),
-    { who: { kind: "coach", mood: "think" }, text: s.close },
+    { who: { kind: "coach", mood: "clipboard" }, text: s.close },
   ];
 }

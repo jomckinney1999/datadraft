@@ -26,7 +26,7 @@ import type { Duel, DuelRound, DuelSide } from "@/lib/stat-duel";
 import { PLAYER_HEADSHOTS } from "@/lib/player-headshots.generated";
 import Headshot from "@/components/headshot";
 import TeamLogo from "@/components/team-logo";
-import Coach from "@/components/coach";
+import Coach, { celebrationFor } from "@/components/coach";
 import CodeEditor from "@/components/code-editor";
 import ChartIt from "@/components/chart-it";
 import { NFLVERSE_CREDIT } from "@/lib/chart";
@@ -284,7 +284,7 @@ function Round({
       {revealed && (
         <div className="mt-6">
           <div className="flex items-center justify-center gap-3">
-            <Coach mood={right ? "cheer" : "sad"} size={56} />
+            <Coach mood={right ? celebrationFor(`duel-${round.n}-${round.prompt}`) : "sad"} size={56} />
             <p className={`font-display text-lg font-bold ${right ? "text-turf" : "text-gold"}`}>
               {right ? "Called it." : "Not this time."}{" "}
               <span className="font-sans text-sm font-normal text-ink-soft">
@@ -564,7 +564,11 @@ function Summary({
   return (
     <section className="mt-6 text-center" aria-live="polite">
       <div className="surface mx-auto max-w-md rounded-2xl border border-panel-border bg-panel p-6">
-        <Coach mood={score >= total - 1 ? "cheer" : score >= total / 2 ? "happy" : "think"} size={88} className="mx-auto" />
+        <Coach
+          mood={score >= total - 1 ? "dance" : score >= total / 2 ? celebrationFor(`duel-score-${score}`) : "shrug"}
+          size={88}
+          className="mx-auto"
+        />
         <p className="mt-3 font-display text-5xl font-bold text-ink">
           {score}
           <span className="text-ink-muted">/{total}</span>

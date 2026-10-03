@@ -81,7 +81,7 @@ const STOPS: Stop[] = [
   },
   {
     label: "learn",
-    mood: "cheer",
+    mood: "point",
     title: "Courses that play like a drive",
     body: "Ten courses, from SQL to Python, Excel, R and statistics. Every lesson is a possession: get it right and you gain yards, miss and you burn a down. Score before fourth down.",
     art: <CourseArt id="sql-fundamentals" className={ART} />,
@@ -90,7 +90,7 @@ const STOPS: Stop[] = [
   },
   {
     label: "get hired",
-    mood: "think",
+    mood: "clipboard",
     title: "Practise for the interview",
     body: "The nine SQL patterns analyst screens actually test, timed mock screens with a report, and Query Doctor — it tells you why a query is wrong without handing you the answer.",
     art: <PrepArt id="technical" className={ART} />,
@@ -99,7 +99,7 @@ const STOPS: Stop[] = [
   },
   {
     label: "build",
-    mood: "happy",
+    mood: "flex",
     title: "Projects you can show someone",
     body: "Chart your own fantasy league, build a real data warehouse, train a prediction model. Each ends in something with your name on it. Cases take half an hour against a schema you've never seen.",
     art: <ProjectArt id="my-league-scorecard" className={ART} />,
@@ -108,7 +108,7 @@ const STOPS: Stop[] = [
   },
   {
     label: "play",
-    mood: "cheer",
+    mood: "clap",
     title: "Games, with a point",
     body: "The Draft Room: draft a real season, scouting with SQL, then watch it play out. The Stat Duel: a daily five-round quiz on real numbers. Both share like Wordle, so challenge your league.",
     art: <ProjectArt id="positional-ranks" className={ART} />,
@@ -117,7 +117,7 @@ const STOPS: Stop[] = [
   },
   {
     label: "trophies",
-    mood: "cheer",
+    mood: "dance",
     title: "Your Hall of Fame",
     body: "Twelve trophies for lessons cleared, perfect drives and days in a row. No committee, no vote — every one is earned on the field.",
     art: (
@@ -265,7 +265,7 @@ export function WelcomeTour({ onClose }: { onClose: () => void }) {
 
             <div key={`line-${at}`} className="cutscene-pop mx-auto flex w-full max-w-3xl items-end gap-3 sm:gap-4">
               <div className="flex shrink-0 flex-col items-center">
-                <Coach mood={stop.mood} size={88} />
+                <Coach mood={stop.mood} size={88} talking={typing} />
                 <span className="mt-1 rounded-full border border-turf/60 bg-turf/15 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-turf">
                   Coach
                 </span>
@@ -293,7 +293,7 @@ export function WelcomeTour({ onClose }: { onClose: () => void }) {
         ) : (
           <div key="menu" className="cutscene-title flex flex-1 flex-col justify-center py-4">
             <div className="flex items-center justify-center gap-3">
-              <Coach mood="cheer" size={72} />
+              <Coach mood="point" size={72} />
               <h2 className="font-display text-3xl font-bold text-ink sm:text-5xl">Choose your start</h2>
             </div>
             <ul className="mx-auto mt-6 grid w-full max-w-3xl gap-3 sm:grid-cols-2">

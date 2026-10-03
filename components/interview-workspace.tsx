@@ -17,7 +17,7 @@ import {
 import { resultsMatch } from "@/lib/sql-grade";
 import { playSfx } from "@/lib/sfx";
 import CodeEditor from "@/components/code-editor";
-import Coach from "@/components/coach";
+import Coach, { celebrationFor } from "@/components/coach";
 import HomeLink from "@/components/home-link";
 import ProjectArt from "@/components/project-art";
 import Cutscene, { useSceneOnce } from "@/components/cutscene";
@@ -202,7 +202,7 @@ export default function InterviewWorkspace({
       <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col px-4 py-10">
         <HomeLink label="case" back="/projects" backLabel="all projects" />
         <div className="mt-10 flex flex-col items-center text-center">
-          <Coach mood="cheer" size={120} />
+          <Coach mood={celebrationFor(interviewCase.id)} size={120} />
           <p className="mt-4 label-broadcast text-turf">case cleared</p>
           <h1 className="mt-2 font-display text-3xl font-bold text-ink">
             Nice work
@@ -314,7 +314,7 @@ export default function InterviewWorkspace({
         {/* Left: interviewer */}
         <aside className="flex flex-col rounded-2xl border border-panel-border bg-panel/40 p-5 sm:p-6">
           <div className="flex items-start gap-3">
-            <Coach mood="think" size={64} className="shrink-0" />
+            <Coach mood="clipboard" size={64} className="shrink-0" />
             <div>
               <p className="font-mono text-[10px] font-semibold uppercase tracking-widest text-turf">
                 Coach Blitz · interviewer

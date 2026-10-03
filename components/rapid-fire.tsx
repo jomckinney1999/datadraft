@@ -218,7 +218,7 @@ export default function RapidFire({
   if (phase === "done" && lang) {
     return (
       <div className="mx-auto max-w-lg text-center">
-        <Coach mood={perfect ? "cheer" : "happy"} size={120} />
+        <Coach mood={perfect ? "dance" : "clap"} size={120} />
         <p className={`mt-4 label-broadcast ${accentText(lang.accent)}`}>
           round complete
         </p>

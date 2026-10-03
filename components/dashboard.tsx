@@ -22,7 +22,7 @@ import TeamLogo from "@/components/team-logo";
 import Headshot from "@/components/headshot";
 import { COURSES } from "@/lib/courses";
 import { liveLessons, getLesson } from "@/lib/curriculum";
-import { EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
+import { displayStreak, EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
 import { BADGES, isEarned, statsFrom } from "@/lib/achievements";
 import { SHORT_CREDIT } from "@/lib/data-source";
 import { weekCaveat, type LiveBoard, type LivePerformer, type LiveWeek } from "@/lib/live-nfl";
@@ -124,6 +124,22 @@ export default function Dashboard({
   ];
   const fresh = stats.lessonsDone === 0;
   const qotdDone = progress.qotdLastDay === day;
+  const today = new Date().toISOString().slice(0, 10);
+  const daysAway = progress.lastActiveDay
+    ? Math.floor(
+        (Date.parse(`${today}T00:00:00.000Z`) - Date.parse(`${progress.lastActiveDay}T00:00:00.000Z`)) /
+          86_400_000,
+      )
+    : 0;
+  const coachMood = fresh
+    ? "whistle"
+    : progress.lastActiveDay === today
+      ? "happy"
+      : displayStreak(progress) > 0
+        ? "angry"
+        : daysAway >= 3
+          ? "sleep"
+          : "idle";
 
   return (
     <>
@@ -154,7 +170,7 @@ export default function Dashboard({
               </p>
             </div>
             <Coach
-              mood={fresh ? "whistle" : "happy"}
+              mood={coachMood}
               size={72}
               className="hidden shrink-0 sm:block"
             />

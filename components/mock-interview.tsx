@@ -221,13 +221,13 @@ function mockBeats(f: MockFormat): Beat[] {
         { who: { kind: "coach", mood: "whistle" }, text: "Your interviewer's dialing in. Deep breath." },
         { who: riley, text: "Hi, thanks for making the time. I'll keep this to twenty minutes." },
         { who: riley, text: "Two SQL questions on our data. Run your query as often as you like, and submit when you're sure." },
-        { who: { kind: "coach", mood: "think" }, text: "The clock starts when you press the button. You've got this." },
+        { who: { kind: "coach", mood: "point" }, text: "The clock starts when you press the button. You've got this." },
       ]
     : [
         { who: { kind: "coach", mood: "whistle" }, text: "This is the round that decides it. Interviewer's on." },
         { who: riley, text: "Welcome back. Three questions today, easy to hard, forty-five minutes." },
         { who: riley, text: "I care more about a correct answer than a clever one." },
-        { who: { kind: "coach", mood: "think" }, text: "Bank the easy one first, then go after the hard one." },
+        { who: { kind: "coach", mood: "point" }, text: "Bank the easy one first, then go after the hard one." },
       ];
 }
 

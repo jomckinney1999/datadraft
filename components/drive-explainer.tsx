@@ -87,7 +87,7 @@ export default function DriveExplainer() {
                 burst={{ id: 1, label: "+13 YDS", explosive: true, kind: "gain" }}
               />
               <div className="mt-4 flex items-start gap-3 rounded-xl border border-turf/30 bg-turf/5 p-3">
-                <Coach mood="cheer" size={44} className="shrink-0" />
+                <Coach mood="clap" size={44} className="shrink-0" />
                 <p className="text-sm leading-relaxed text-ink-soft">
                   <span className="font-display font-bold text-turf">
                     Chains are moving.

@@ -73,9 +73,9 @@ function narrate(ran: Ran[], at: number): string {
 }
 
 function moodFor(step: SqlStep, last: boolean): CoachMood {
-  if (last) return "cheer";
-  if (step.kind === "where" || step.kind === "having" || step.kind === "limit") return "whistle";
-  if (step.kind === "group" || step.kind === "combine") return "happy";
+  if (last) return "dance";
+  if (step.kind === "where" || step.kind === "having" || step.kind === "limit") return "point";
+  if (step.kind === "group" || step.kind === "combine" || step.kind === "order") return "clipboard";
   return "think";
 }
 

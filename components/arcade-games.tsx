@@ -92,7 +92,7 @@ export default function ArcadeGames() {
               the days you don&rsquo;t have a full drive in you.
             </p>
           </div>
-          <Coach mood={payout ? "cheer" : "idle"} size={78} className="hidden sm:block" />
+          <Coach mood={payout ? "flex" : "idle"} size={78} className="hidden sm:block" />
         </header>
 
         {payout && (

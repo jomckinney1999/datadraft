@@ -58,7 +58,7 @@ import { Objective, SceneLine } from "@/components/scene-line";
 import AppNav from "@/components/app-nav";
 import { FaceCluster } from "@/components/qotd-card";
 import { featuredPlayers } from "@/lib/question-players";
-import Coach from "@/components/coach";
+import Coach, { celebrationFor } from "@/components/coach";
 import ExcelGrid from "@/components/excel-grid";
 import DifficultyChip from "@/components/difficulty-chip";
 import QueryDoctorPanel from "@/components/query-doctor-panel";
@@ -472,7 +472,10 @@ export default function QuestionWorkspace({
                 </h1>
                 {/* The situation, delivered like a scene; the task, as an
                     objective that ticks when it's solved. */}
-                <SceneLine mood={alreadySolved || verdict === "right" ? "happy" : "think"} className="mt-3">
+                <SceneLine
+                  mood={alreadySolved || verdict === "right" ? celebrationFor(question.id) : "think"}
+                  className="mt-3"
+                >
                   {question.prompt}
                 </SceneLine>
 
@@ -665,36 +668,39 @@ export default function QuestionWorkspace({
               )}
 
               {outcome?.error && (
-                <p
-                  role="alert"
-                  className="mt-3 rounded-xl border border-gold/50 bg-gold/10 px-4 py-3 font-mono text-[12px] leading-relaxed text-gold"
-                >
-                  {outcome.error}
-                </p>
+                <div className="mt-3 flex items-start gap-3 rounded-xl border border-gold/50 bg-gold/10 p-4">
+                  <Coach mood="facepalm" size={48} className="hidden shrink-0 sm:block" />
+                  <p role="alert" className="min-w-0 font-mono text-[12px] leading-relaxed text-gold">
+                    {outcome.error}
+                  </p>
+                </div>
               )}
               {outcome?.error && isSql && findings && (
                 <QueryDoctorPanel findings={findings} sql={code} prompt={question.prompt} returns={question.returns} />
               )}
 
               {verdict === "wrong" && (
-                <div className="mt-3 rounded-xl border border-ice/40 bg-ice/5 p-4">
-                  <p className="font-display text-base font-bold text-ice">
-                    Not quite what we&apos;re after.
-                  </p>
-                  <p className="mt-1 text-sm leading-relaxed text-ink-soft">
-                    It ran fine — it just produced something different. Compare
-                    your output against what the question asks for:{" "}
-                    <span className="text-ink">{question.returns}</span>
-                  </p>
-                  {isSql && findings?.length ? (
-                    <QueryDoctorPanel findings={findings} sql={code} prompt={question.prompt} returns={question.returns} />
-                  ) : (
-                    diag && (
-                      <p className="mt-2 rounded-lg border border-ice/30 bg-night/40 px-3 py-2 font-mono text-[12px] leading-relaxed text-ice">
-                        {diag}
-                      </p>
-                    )
-                  )}
+                <div className="mt-3 flex items-start gap-3 rounded-xl border border-ice/40 bg-ice/5 p-4">
+                  <Coach mood="shrug" size={48} className="hidden shrink-0 sm:block" />
+                  <div className="min-w-0">
+                    <p className="font-display text-base font-bold text-ice">
+                      Not quite what we&apos;re after.
+                    </p>
+                    <p className="mt-1 text-sm leading-relaxed text-ink-soft">
+                      It ran fine — it just produced something different. Compare
+                      your output against what the question asks for:{" "}
+                      <span className="text-ink">{question.returns}</span>
+                    </p>
+                    {isSql && findings?.length ? (
+                      <QueryDoctorPanel findings={findings} sql={code} prompt={question.prompt} returns={question.returns} />
+                    ) : (
+                      diag && (
+                        <p className="mt-2 rounded-lg border border-ice/30 bg-night/40 px-3 py-2 font-mono text-[12px] leading-relaxed text-ice">
+                          {diag}
+                        </p>
+                      )
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -702,7 +708,7 @@ export default function QuestionWorkspace({
                 <div className="mt-3 rounded-xl border border-turf/50 bg-turf/10 p-4">
                   <div className="flex items-start gap-3">
                     <Coach
-                      mood="cheer"
+                      mood={celebrationFor(question.id)}
                       size={54}
                       className="hidden shrink-0 sm:block"
                     />

@@ -56,7 +56,7 @@ import {
   COST_INSTANT_REPLAY,
   COST_CHALLENGE_FLAG,
 } from "@/lib/economy";
-import Coach from "@/components/coach";
+import Coach, { celebrationFor } from "@/components/coach";
 import TablePeek from "@/components/table-peek";
 import TeamChip, { isTeamColumn } from "@/components/team-chip";
 import { tablesMentioned } from "@/lib/table-mentions";
@@ -1259,7 +1259,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
         <div className="animate-fade-up flex flex-1 flex-col justify-center gap-6 py-6">
           <div className="flex items-start gap-4">
             <div className="hidden shrink-0 sm:block">
-              <Coach mood="happy" size={104} />
+              <Coach mood="clipboard" size={104} />
             </div>
             <div className="min-w-0 flex-1">
               <p className="label-broadcast text-turf">
@@ -1551,11 +1551,13 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                 <div className="mt-4 hidden sm:block">
                   <Coach
                     mood={
-                      feedback
-                        ? feedback.correct
-                          ? "cheer"
-                          : "sad"
-                        : "think"
+                      softError || codeError || runError || formulaError
+                        ? "facepalm"
+                        : feedback
+                          ? feedback.correct
+                            ? celebrationFor(`${lessonId}-${currentIdx}`)
+                            : "sad"
+                          : "think"
                     }
                     size={88}
                   />
@@ -2139,7 +2141,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       {phase === "complete" && (
         <div className="animate-fade-up flex flex-1 flex-col items-center justify-center gap-6 pb-10 pt-8 text-center">
           <div className="animate-trophy-in">
-            <Coach mood="cheer" size={150} />
+            <Coach mood={perfect ? "dance" : celebrationFor(lessonId)} size={150} />
           </div>
           <div>
             <p className="inline-flex rounded-full border border-turf/40 bg-turf/15 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-wider text-turf">

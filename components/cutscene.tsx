@@ -115,7 +115,13 @@ export function useTypewriter(text: string, active: boolean, restartKey: unknown
 
 function Portrait({ who, talking }: { who: Speaker; talking: boolean }) {
   if (who.kind === "coach") {
-    return <Coach mood={who.mood ?? (talking ? "happy" : "idle")} size={104} />;
+    return (
+      <Coach
+        mood={who.mood ?? (talking ? "happy" : "idle")}
+        size={104}
+        talking={talking}
+      />
+    );
   }
   return <CallerPortrait tone={who.tone ?? "ice"} size={92} />;
 }
