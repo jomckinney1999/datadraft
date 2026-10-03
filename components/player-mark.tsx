@@ -1,29 +1,24 @@
 /**
- * Logo-style profile mark — GTA loading-screen energy on a football kit.
+ * Logo-style profile mark — flat, non-realistic cartoon (ape-NFT energy)
+ * on a football kit.
  *
- * Bright complementary sky (never night/black), thick night outlines, hard
- * cel-shade, reflective visor, and a nameplate banner for tenure status.
- * Gradient ids are sanitized — a status like "Practice Squad" must never
- * break `url(#…)` fills or the portrait falls back to black.
+ * Solid pastel field, thick night outlines, flat fills, one shade block,
+ * big goggle-visor, and a soft status veil. One fixed cartoon skin — no
+ * tone picker. Gradient ids are sanitized so status text can't break fills.
  */
 
-import { c, Football, N, Sparkle, type Tone } from "@/components/art-kit";
+import { c, Football, N, type Tone } from "@/components/art-kit";
 import type { KitAccent } from "@/lib/progress";
 
-/**
- * One fixed cartoon skin — same warm tone as the Ref. No tone picker: a
- * menu of skin colours turns the locker into a race choice, and that is
- * not a game we are in.
- */
+/** One warm cartoon skin — same family as the Ref. Not a race menu. */
 const SKIN = {
-  base: "rgb(198 139 99)",
-  shade: "rgb(168 108 72)",
-  lite: "rgb(232 184 148)",
+  base: "rgb(214 168 122)",
+  shade: "rgb(176 128 88)",
 } as const;
 
 /**
- * Jersey owns the kit accent. The sky is always a *different* bright accent
- * so the subject lifts off the field (warm gold behind ice/turf, ice behind gold).
+ * Jersey = kit accent. Sky = a flat complementary pastel so the subject
+ * pops the way a cream field pops a dark ape.
  */
 const KIT: Record<
   KitAccent,
@@ -32,11 +27,8 @@ const KIT: Record<
     jersey: string;
     jerseyShade: string;
     helmet: string;
-    helmetShade: string;
-    brim: string;
     number: string;
     sky: string;
-    skyDeep: string;
   }
 > = {
   ice: {
@@ -44,33 +36,24 @@ const KIT: Record<
     jersey: c("ice"),
     jerseyShade: c("ice-dim"),
     helmet: c("gold"),
-    helmetShade: c("gold-dim"),
-    brim: c("gold-dim"),
     number: c("ink"),
     sky: c("gold"),
-    skyDeep: c("gold-dim"),
   },
   turf: {
     primary: "turf",
     jersey: c("turf"),
     jerseyShade: c("turf-dim"),
     helmet: c("ice"),
-    helmetShade: c("ice-dim"),
-    brim: c("ice-dim"),
     number: c("night"),
     sky: c("gold"),
-    skyDeep: c("gold-dim"),
   },
   gold: {
     primary: "gold",
     jersey: c("gold"),
     jerseyShade: c("gold-dim"),
     helmet: c("ice"),
-    helmetShade: c("ice-dim"),
-    brim: c("ice-dim"),
     number: c("night"),
     sky: c("ice"),
-    skyDeep: c("ice-dim"),
   },
 };
 
@@ -94,20 +77,17 @@ export default function PlayerMark({
   kitAccent?: KitAccent;
   size?: number;
   className?: string;
-  /** Outer ring follows tenure accent when set. */
   rankTone?: Tone;
-  /** Tenure rank (or short status) painted on the bottom banner. */
   status?: string;
 }) {
   const kit = KIT[kitAccent] ?? KIT.ice;
-  const skin = SKIN;
   const ring = rankTone ?? kit.primary;
   const num = String(Math.max(0, Math.min(99, Math.round(jersey))));
   const gid = safeId(["pm", kitAccent, num, status ?? "x"]);
   const banner = Boolean(status?.trim());
   const label = (status ?? "").trim().toUpperCase();
   const showLabel = banner && size >= 44;
-  const bannerSize = label.length > 12 ? 6.2 : label.length > 8 ? 7.2 : 8.4;
+  const bannerSize = label.length > 12 ? 6 : label.length > 8 ? 7 : 8;
 
   return (
     <svg
@@ -120,198 +100,169 @@ export default function PlayerMark({
       aria-label={banner ? `Player ${num}, ${status}` : `Player ${num}`}
     >
       <defs>
-        <linearGradient id={`${gid}-sky`} x1="10" y1="0" x2="70" y2="90" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor={c("ink")} />
-          <stop offset="28%" stopColor={kit.sky} />
-          <stop offset="100%" stopColor={kit.skyDeep} />
-        </linearGradient>
-        <linearGradient id={`${gid}-jersey`} x1="16" y1="42" x2="66" y2="82" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor={c("ink")} />
-          <stop offset="30%" stopColor={kit.jersey} />
-          <stop offset="100%" stopColor={kit.jerseyShade} />
-        </linearGradient>
-        <linearGradient id={`${gid}-helm`} x1="24" y1="8" x2="58" y2="38" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor={c("ink")} />
-          <stop offset="32%" stopColor={kit.helmet} />
-          <stop offset="100%" stopColor={kit.helmetShade} />
-        </linearGradient>
-        <linearGradient id={`${gid}-visor`} x1="30" y1="26" x2="52" y2="36" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor={c("ink")} stopOpacity="0.5" />
-          <stop offset="40%" stopColor={c("night-50")} />
-          <stop offset="100%" stopColor={N} />
-        </linearGradient>
-        {/* Soft veil that follows the circle — fades in, never a hard plate */}
-        <linearGradient id={`${gid}-veil`} x1="40" y1="52" x2="40" y2="76" gradientUnits="userSpaceOnUse">
+        <linearGradient id={`${gid}-veil`} x1="40" y1="54" x2="40" y2="78" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor={N} stopOpacity="0" />
-          <stop offset="35%" stopColor={N} stopOpacity="0.35" />
-          <stop offset="70%" stopColor={kit.jerseyShade} stopOpacity="0.72" />
-          <stop offset="100%" stopColor={kit.jersey} stopOpacity="0.88" />
-        </linearGradient>
-        <linearGradient id={`${gid}-veil-shine`} x1="40" y1="54" x2="40" y2="68" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor={c("ink")} stopOpacity="0.35" />
-          <stop offset="100%" stopColor={c("ink")} stopOpacity="0" />
+          <stop offset="40%" stopColor={N} stopOpacity="0.28" />
+          <stop offset="100%" stopColor={kit.jerseyShade} stopOpacity="0.82" />
         </linearGradient>
         <clipPath id={`${gid}-clip`}>
           <circle cx="40" cy="40" r="36" />
         </clipPath>
       </defs>
 
-      {/* Outer ring — kit colour, no night disc eating the portrait */}
+      {/* Fat sticker ring */}
       <circle cx="40" cy="40" r="39.5" fill={kit.sky} />
-      <circle cx="40" cy="40" r="38" fill="none" stroke={kit.jersey} strokeWidth="3.4" />
-      <circle cx="40" cy="40" r="36.1" fill="none" stroke={c("ink")} strokeWidth="1.2" opacity="0.45" />
+      <circle cx="40" cy="40" r="38" fill="none" stroke={N} strokeWidth="3.5" />
+      <circle cx="40" cy="40" r="36.2" fill="none" stroke={kit.jersey} strokeWidth="2.2" />
 
       <g clipPath={`url(#${gid}-clip)`}>
-        {/* Solid sky first (fallback), then the lit gradient — never night */}
+        {/* Flat pastel field — no gradients, no night */}
         <rect width="80" height="80" fill={kit.sky} />
-        <rect width="80" height="80" fill={`url(#${gid}-sky)`} />
-        {/* Soft sun bloom */}
-        <circle cx="24" cy="16" r="28" fill={c("ink")} opacity="0.35" />
 
-        {/* Jersey — full kit colour, bright */}
+        {/* Gold halo ring — ape energy, football glory */}
+        <ellipse
+          cx="40"
+          cy="14"
+          rx="18"
+          ry="5.5"
+          fill="none"
+          stroke={c("gold")}
+          strokeWidth="3.2"
+        />
+        <ellipse
+          cx="40"
+          cy="14"
+          rx="18"
+          ry="5.5"
+          fill="none"
+          stroke={N}
+          strokeWidth="1.2"
+          opacity="0.35"
+        />
+
+        {/* Jersey — flat slab, one shade block */}
         <path
-          d="M2 80 Q6 44 24 42 L56 42 Q74 44 78 80 Z"
+          d="M6 80 V50 Q8 42 22 40 L58 40 Q72 42 74 50 V80 Z"
           fill={kit.jersey}
           stroke={N}
-          strokeWidth="2.8"
+          strokeWidth="3.2"
           strokeLinejoin="round"
         />
+        <path d="M54 42 Q68 46 72 80 H58 Q56 54 54 44 Z" fill={kit.jerseyShade} />
+        {/* Collar */}
         <path
-          d="M2 80 Q6 44 24 42 L56 42 Q74 44 78 80 Z"
-          fill={`url(#${gid}-jersey)`}
-          stroke={N}
-          strokeWidth="2.8"
-          strokeLinejoin="round"
-        />
-        <path d="M52 44 Q66 46 74 80 L58 80 Q56 56 52 46 Z" fill={kit.jerseyShade} opacity="0.35" />
-        <path d="M10 52 Q20 44 26 43 L24 80 L6 80 Z" fill={c("ink")} opacity="0.28" />
-        <path d="M24 44 Q40 50 56 44" fill="none" stroke={N} strokeWidth="2.2" strokeLinecap="round" />
-        <path
-          d="M28 44 L33 51 L40 48 L47 51 L52 44"
+          d="M26 40 L32 48 L40 44 L48 48 L54 40"
           fill={kit.jerseyShade}
           stroke={N}
-          strokeWidth="1.6"
+          strokeWidth="2.4"
           strokeLinejoin="round"
         />
         <text
           x="40"
-          y={banner ? 52.5 : 70}
+          y={banner ? 54 : 66}
           textAnchor="middle"
-          fontSize={num.length > 1 ? (banner ? 12 : 15) : banner ? 14 : 17}
+          fontSize={num.length > 1 ? (banner ? 13 : 16) : banner ? 15 : 18}
           fontWeight="900"
           fontFamily="Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif"
           fill={kit.number}
           stroke={N}
-          strokeWidth="1.6"
+          strokeWidth="2"
           paintOrder="stroke fill"
         >
           {num}
         </text>
 
-        {/* Neck + face */}
-        <path
-          d="M33 40 Q34 48 40 49 Q46 48 47 40 Z"
-          fill={skin.base}
+        {/* Neck — flat */}
+        <rect
+          x="32"
+          y="40"
+          width="16"
+          height="10"
+          rx="3"
+          fill={SKIN.base}
           stroke={N}
-          strokeWidth="1.8"
-          strokeLinejoin="round"
+          strokeWidth="2.6"
         />
-        <path d="M42 41 Q45 46 44 49 L40 49 Q42 45 42 41 Z" fill={skin.shade} opacity="0.65" />
-        <ellipse cx="39" cy="30" rx="13" ry="13.5" fill={skin.base} stroke={N} strokeWidth="2.2" />
-        <path d="M42 20 Q50 26 49 36 Q48 40 40 41 L42 20 Z" fill={skin.shade} opacity="0.5" />
-        <ellipse cx="33" cy="26" rx="4.5" ry="3.2" fill={skin.lite} opacity="0.6" />
-        <path d="M30 28.5 Q34 27 37 28.5" fill="none" stroke={N} strokeWidth="1.7" strokeLinecap="round" />
-        <path d="M41 28.5 Q44.5 27.2 48 29" fill="none" stroke={N} strokeWidth="1.7" strokeLinecap="round" />
-        <circle cx="33.5" cy="30.5" r="1.5" fill={N} />
-        <circle cx="44.5" cy="30.8" r="1.5" fill={N} />
-        <circle cx="33.9" cy="30.1" r="0.45" fill={skin.lite} />
-        <circle cx="44.9" cy="30.4" r="0.45" fill={skin.lite} />
-        <path d="M34.5 35.5 Q39.5 37.8 45 35.2" fill="none" stroke={N} strokeWidth="1.8" strokeLinecap="round" />
+        <rect x="40" y="42" width="8" height="8" rx="2" fill={SKIN.shade} />
 
-        {/* Helmet — solid colour first, then lit gradient */}
+        {/* Big cartoon head */}
+        <ellipse
+          cx="40"
+          cy="30"
+          rx="16"
+          ry="15.5"
+          fill={SKIN.base}
+          stroke={N}
+          strokeWidth="3.2"
+        />
+        {/* One flat shade on the cheek — cel, not realistic */}
+        <ellipse cx="48" cy="32" rx="5" ry="8" fill={SKIN.shade} />
+
+        {/* Cap / helmet shell — simple dome */}
         <path
-          d="M22 33 Q21 12 39 10.5 Q57 12 58 33 L58 37 Q53.5 37.5 51 33 L51 25 Q39 20.5 27 25 L27 33 Q24.5 37.5 22 37 Z"
+          d="M24 28 Q24 12 40 11 Q56 12 56 28 L56 30 Q52 28 48 26 L32 26 Q28 28 24 30 Z"
           fill={kit.helmet}
           stroke={N}
-          strokeWidth="2.4"
+          strokeWidth="3.2"
           strokeLinejoin="round"
         />
-        <path
-          d="M22 33 Q21 12 39 10.5 Q57 12 58 33 L58 37 Q53.5 37.5 51 33 L51 25 Q39 20.5 27 25 L27 33 Q24.5 37.5 22 37 Z"
-          fill={`url(#${gid}-helm)`}
-          stroke={N}
-          strokeWidth="2.4"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M48 14 Q57 16 58 33 L58 37 Q53.5 37.5 51 33 L51 25 Q48 22 44 21 Z"
-          fill={kit.helmetShade}
-          opacity="0.4"
-        />
-        <path d="M28 16 Q34 13 40 13.5 Q36 20 29 24 Q26 20 28 16 Z" fill={c("ink")} opacity="0.5" />
-        <path d="M37 11.2 Q39.5 10.6 42.2 11.2 L41.6 26 Q39.5 25.4 37.4 26 Z" fill={N} />
-        <path d="M38.2 11.5 Q39.5 11.1 41 11.5 L40.6 25.2 Q39.5 24.9 38.4 25.2 Z" fill={kit.jersey} />
-        <path
-          d="M51 25 Q56 18 51 13.5 Q58 17 58 33 L58 37 Q53.5 37.5 51 33 Z"
-          fill={kit.brim}
-          stroke={N}
-          strokeWidth="1.2"
-        />
-        <ellipse cx="29.5" cy="20" rx="3.2" ry="2.4" fill={N} opacity="0.3" transform="rotate(-24 29.5 20)" />
+        {/* Centre stripe */}
+        <path d="M37 12 L37 27 L43 27 L43 12 Z" fill={N} />
+        <path d="M38.2 13 L38.2 26 L41.8 26 L41.8 13 Z" fill={kit.jersey} />
 
-        {/* Visor */}
-        <path
-          d="M27 31.5 Q39 36.5 53 31.5 L53 36 Q39 42 27 36 Z"
-          fill={`url(#${gid}-visor)`}
+        {/*
+          Big rectangular goggles — the non-realistic beat. Dark lenses,
+          thick frame, three white slash reflections like the ape reference.
+        */}
+        <rect
+          x="24"
+          y="26"
+          width="32"
+          height="12"
+          rx="3"
+          fill={N}
           stroke={N}
-          strokeWidth="1.8"
-          strokeLinejoin="round"
+          strokeWidth="3"
         />
-        <path d="M30 33.2 Q39 36.8 50 33.5" fill="none" stroke={c("ink")} strokeWidth="1.2" opacity="0.65" />
-        <path d="M31 34.5 Q36 36.2 40 36.4" fill="none" stroke={c("ink")} strokeWidth="1.2" opacity="0.7" strokeLinecap="round" />
+        <rect x="26" y="28" width="13" height="8" rx="1.5" fill={c("night-50")} />
+        <rect x="41" y="28" width="13" height="8" rx="1.5" fill={c("night-50")} />
+        <path d="M28 29.5 L35 34.5" stroke={c("ink")} strokeWidth="1.6" strokeLinecap="round" opacity="0.85" />
+        <path d="M30.5 29.5 L37 34.5" stroke={c("ink")} strokeWidth="1.2" strokeLinecap="round" opacity="0.55" />
+        <path d="M43 29.5 L50 34.5" stroke={c("ink")} strokeWidth="1.6" strokeLinecap="round" opacity="0.85" />
+        <path d="M45.5 29.5 L52 34.5" stroke={c("ink")} strokeWidth="1.2" strokeLinecap="round" opacity="0.55" />
+        {/* Bridge */}
+        <rect x="38" y="29" width="4" height="6" fill={N} />
 
-        {/* Facemask */}
+        {/* Wide cartoon mouth */}
         <path
-          d="M28.5 36.5 V42.5 M39.5 38.5 V44 M50.5 36.5 V42.5 M29 41.5 Q39.5 46.5 51 41.5"
+          d="M30 40 Q40 46 50 40"
           fill="none"
-          stroke={c("ink-soft")}
-          strokeWidth="2.1"
+          stroke={N}
+          strokeWidth="2.8"
           strokeLinecap="round"
         />
 
-        <g transform="translate(61 46) rotate(-28) scale(0.48)">
+        {/* Tiny football sticker */}
+        <g transform="translate(62 50) rotate(-25) scale(0.42)">
           <Football x={0} y={0} rx={14} fill={c("gold")} />
         </g>
-        <Sparkle x={16} y={16} r={4.5} fill={c("ink")} />
-        <Sparkle x={64} y={20} r={3.4} fill={c("gold")} />
 
-        {/*
-          Status veil — soft gradient overlay under a bowed top edge.
-          The parent circle clip trims it to the portrait, so it hugs the
-          rim instead of reading as a square plate across the jersey.
-        */}
+        {/* Soft status veil — hugs the circle via clip */}
         {banner && (
           <g>
+            <path d="M2 56 Q40 50 78 56 L80 80 L0 80 Z" fill={`url(#${gid}-veil)`} />
             <path
-              d="M2 56 Q40 49 78 56 L80 80 L0 80 Z"
-              fill={`url(#${gid}-veil)`}
-            />
-            <path
-              d="M6 57 Q40 50.5 74 57"
+              d="M8 57 Q40 51.5 72 57"
               fill="none"
               stroke={c("ink")}
-              strokeWidth="1.5"
-              opacity="0.45"
+              strokeWidth="1.6"
+              opacity="0.4"
               strokeLinecap="round"
-            />
-            <path
-              d="M8 58.5 Q40 52.5 72 58.5 L70 64.5 Q40 60 10 64.5 Z"
-              fill={`url(#${gid}-veil-shine)`}
             />
             {showLabel && (
               <text
                 x="40"
-                y="69.5"
+                y="70"
                 textAnchor="middle"
                 fontSize={bannerSize}
                 fontWeight="900"
@@ -319,7 +270,7 @@ export default function PlayerMark({
                 letterSpacing="0.1em"
                 fill={c("ink")}
                 stroke={N}
-                strokeWidth="0.7"
+                strokeWidth="0.8"
                 paintOrder="stroke fill"
               >
                 {label}
@@ -328,16 +279,6 @@ export default function PlayerMark({
           </g>
         )}
       </g>
-
-      <circle cx="40" cy="40" r="35" fill="none" stroke={c("ink")} strokeWidth="1.5" opacity="0.35" />
-      <path
-        d="M18 22 A24 24 0 0 1 52 14"
-        fill="none"
-        stroke={c("ink")}
-        strokeWidth="1.8"
-        opacity="0.5"
-        strokeLinecap="round"
-      />
     </svg>
   );
 }
