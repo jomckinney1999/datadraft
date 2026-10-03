@@ -21,7 +21,7 @@ import Link from "next/link";
 import TeamChip from "@/components/team-chip";
 import TeamLogo from "@/components/team-logo";
 import Headshot from "@/components/headshot";
-import type { LiveWeek } from "@/lib/live-nfl";
+import { weekCaveat, type LiveWeek } from "@/lib/live-nfl";
 import { SHORT_CREDIT } from "@/lib/data-source";
 
 export default function LiveWeekStrip({ live }: { live: LiveWeek | null }) {
@@ -36,6 +36,9 @@ export default function LiveWeekStrip({ live }: { live: LiveWeek | null }) {
   };
   const rows = board.rows.slice(0, 5);
   if (games.length === 0 && rows.length === 0) return null;
+  // On a Friday the week is Thursday night alone, so its "leaders" come from
+  // two teams. Say so in plain words rather than let it read as the week.
+  const caveat = weekCaveat(live);
 
   return (
     <section
@@ -47,6 +50,7 @@ export default function LiveWeekStrip({ live }: { live: LiveWeek | null }) {
           <p className="reveal label-broadcast text-ice">
             <span className="mr-2 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-ice align-middle" />
             live · week {live.week}, {live.season}
+            {caveat ? " · in progress" : ""}
           </p>
           <h2 className="reveal mt-2 font-display text-2xl font-bold text-ink sm:text-4xl">
             This week, around the league
@@ -56,6 +60,11 @@ export default function LiveWeekStrip({ live }: { live: LiveWeek | null }) {
             carried it, refreshed hourly. You can query every row of it
             yourself.
           </p>
+          {caveat && (
+            <p className="reveal mx-auto mt-4 max-w-lg rounded-xl border border-gold/40 bg-gold/10 px-4 py-2.5 text-sm leading-relaxed text-ink">
+              {caveat}
+            </p>
+          )}
         </div>
 
         <div className="mt-10 grid gap-4 lg:grid-cols-5">
@@ -92,6 +101,7 @@ export default function LiveWeekStrip({ live }: { live: LiveWeek | null }) {
             <div className="reveal surface rounded-2xl border border-panel-border bg-panel p-5 lg:col-span-2">
               <p className="font-mono text-[10px] uppercase tracking-widest text-gold">
                 {board.label}
+                {caveat ? " so far" : ""}
               </p>
               <ol className="sequence mt-3 space-y-2.5">
                 {rows.map((p, i) => (

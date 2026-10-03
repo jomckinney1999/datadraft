@@ -25,7 +25,7 @@ import { liveLessons, getLesson } from "@/lib/curriculum";
 import { EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
 import { BADGES, isEarned, statsFrom } from "@/lib/achievements";
 import { SHORT_CREDIT } from "@/lib/data-source";
-import type { LiveBoard, LivePerformer, LiveWeek } from "@/lib/live-nfl";
+import { weekCaveat, type LiveBoard, type LivePerformer, type LiveWeek } from "@/lib/live-nfl";
 import type { Question } from "@/lib/questions";
 import { DIFFICULTY_XP } from "@/lib/questions";
 import QotdCard from "@/components/qotd-card";
@@ -296,13 +296,21 @@ export default function Dashboard({
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <p className="label-broadcast text-gold">
                 around the league · week {live.week}, {live.season}
+                {live.progress?.partial ? " · in progress" : ""}
               </p>
               <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
                 live from nflverse
               </span>
             </div>
 
-            {live.boards.length > 0 && <LeagueBoards boards={live.boards} />}
+            {/* On a Friday the week is Thursday night alone; say so. */}
+            {live.progress && weekCaveat(live) && (
+              <p className="mt-3 rounded-lg border border-gold/40 bg-gold/10 px-3 py-2 text-sm leading-relaxed text-ink">
+                {weekCaveat(live)}
+              </p>
+            )}
+
+            {live.boards.length > 0 && <LeagueBoards boards={live.boards} partial={Boolean(live.progress?.partial)} />}
 
             {live.games.length > 0 && (
               <>
@@ -356,7 +364,7 @@ export default function Dashboard({
   );
 }
 
-function LeagueBoards({ boards }: { boards: LiveBoard[] }) {
+function LeagueBoards({ boards, partial }: { boards: LiveBoard[]; partial: boolean }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -385,6 +393,7 @@ function LeagueBoards({ boards }: { boards: LiveBoard[] }) {
           className="animate-ticker-in font-mono text-[10px] uppercase tracking-widest text-turf"
         >
           {board.label}
+          {partial ? " so far" : ""}
         </p>
         <div className="flex items-center gap-1.5" role="tablist" aria-label="Stat boards">
           {boards.map((b, i) => (

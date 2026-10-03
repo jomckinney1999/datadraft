@@ -69,8 +69,50 @@ export type LiveWeek = {
   performers: LivePerformer[];
   /** Ranked lists the dashboard cycles through. */
   boards: LiveBoard[];
+  /**
+   * How much of the week has been played. The week shown is the newest one
+   * with any final score, so on a Friday it's Thursday night alone: one game,
+   * and leaders drawn from two teams. Say so wherever the week is shown.
+   */
+  progress: WeekProgress;
   fetchedAt: string;
 };
+
+export type WeekProgress = {
+  played: number;
+  total: number;
+  /** Days with a final score, in calendar order ("Thursday"). */
+  playedDays: string[];
+  /** Days still to come ("Sunday", "Monday"). */
+  pendingDays: string[];
+  partial: boolean;
+};
+
+const DAY_ORDER = ["Thursday", "Friday", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday"];
+const byDay = (a: string, b: string) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b);
+
+function progressOf(games: LiveGame[]): WeekProgress {
+  const played = games.filter((g) => g.final);
+  const playedDays = Array.from(new Set(played.map((g) => g.day).filter(Boolean))).sort(byDay);
+  const pendingDays = Array.from(new Set(games.filter((g) => !g.final).map((g) => g.day).filter(Boolean))).sort(byDay);
+  return { played: played.length, total: games.length, playedDays, pendingDays, partial: played.length < games.length };
+}
+
+const listOf = (days: string[]) =>
+  days.length <= 1 ? days.join("") : `${days.slice(0, -1).join(", ")} and ${days[days.length - 1]}`;
+
+/**
+ * The plain-English caveat for a week still being played, or null once every
+ * game is in: "Week 4 so far is Thursday only: 1 of 16 games. Leaders will
+ * change once Sunday and Monday are played."
+ */
+export function weekCaveat(live: Pick<LiveWeek, "week" | "progress">): string | null {
+  const p = live.progress;
+  if (!p.partial) return null;
+  const so = p.playedDays.length ? `Week ${live.week} so far is ${listOf(p.playedDays)} only` : `Week ${live.week} is under way`;
+  const pending = p.pendingDays.length ? ` once ${listOf(p.pendingDays)} ${p.pendingDays.length === 1 ? "is" : "are"} played` : " as the rest of the week is played";
+  return `${so}: ${p.played} of ${p.total} games. These leaders will change${pending}.`;
+}
 
 async function getCsv(url: string): Promise<Record<string, string>[]> {
   const res = await fetch(url, { cache: "no-store" });
@@ -233,6 +275,7 @@ export async function getLiveWeek(): Promise<LiveWeek | null> {
       games,
       performers: boards[0]?.rows ?? [],
       boards,
+      progress: progressOf(games),
       fetchedAt: new Date().toISOString(),
     };
   } catch {
