@@ -3798,6 +3798,12 @@ html[data-gate-opened] .gate-pop {
    pops in like a game's dialogue box, and the caret blinks while a line types
    and at its end. All of it is off under reduced motion: the bars are simply
    there and the words simply appear. */
+/* The tour's start menu shows focus as its own gold highlight and arrow, so
+   the global ring would only double it. */
+.tour-pick:focus-visible {
+  outline: none;
+}
+
 /* The dialog takes focus when it opens so keys reach it; that's not a
    keyboard user's focus, so no ring round the whole scene. Its buttons keep
    theirs. */

@@ -83,6 +83,36 @@ function reducedMotion(): boolean {
   return typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 }
 
+/**
+ * A line typing itself out, two characters a tick; all at once under reduced
+ * motion. Restarts whenever `text` or `restartKey` changes. `finish()` shows
+ * the whole line (a press while it types). Shared by the cutscene and the
+ * tour so both type at the same speed.
+ */
+export function useTypewriter(text: string, active: boolean, restartKey: unknown = text) {
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    if (!active) return;
+    if (reducedMotion()) {
+      setShown(text.length);
+      return;
+    }
+    setShown(0);
+    const id = window.setInterval(() => {
+      setShown((n) => {
+        if (n >= text.length) {
+          window.clearInterval(id);
+          return n;
+        }
+        return Math.min(text.length, n + 2);
+      });
+    }, 24);
+    return () => window.clearInterval(id);
+  }, [text, active, restartKey]);
+  const finish = useCallback(() => setShown(text.length), [text.length]);
+  return { shown, typing: active && shown < text.length, finish };
+}
+
 function Portrait({ who, talking }: { who: Speaker; talking: boolean }) {
   if (who.kind === "coach") {
     return <Coach mood={who.mood ?? (talking ? "happy" : "idle")} size={104} />;
@@ -124,20 +154,18 @@ export default function Cutscene({
 }) {
   const [phase, setPhase] = useState<"title" | "beats" | "objectives">("title");
   const [beat, setBeat] = useState(0);
-  const [shown, setShown] = useState(0);
   const dialogRef = useRef<HTMLDivElement>(null);
   const startRef = useRef<HTMLButtonElement>(null);
   const returnTo = useRef<HTMLElement | null>(null);
 
   const text = beats[beat]?.text ?? "";
-  const typing = phase === "beats" && shown < text.length;
+  const { shown, typing, finish } = useTypewriter(text, open && phase === "beats", beat);
 
   // Open: reset, lock the page behind, remember where focus was.
   useEffect(() => {
     if (!open) return;
     setPhase("title");
     setBeat(0);
-    setShown(0);
     returnTo.current = document.activeElement as HTMLElement | null;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -155,26 +183,6 @@ export default function Cutscene({
     return () => window.clearTimeout(t);
   }, [open, phase]);
 
-  // Type the line out, two characters a tick. Reduced motion: all at once.
-  useEffect(() => {
-    if (!open || phase !== "beats") return;
-    if (reducedMotion()) {
-      setShown(text.length);
-      return;
-    }
-    setShown(0);
-    const id = window.setInterval(() => {
-      setShown((n) => {
-        if (n >= text.length) {
-          window.clearInterval(id);
-          return n;
-        }
-        return Math.min(text.length, n + 2);
-      });
-    }, 24);
-    return () => window.clearInterval(id);
-  }, [open, phase, beat, text]);
-
   useEffect(() => {
     if (phase === "objectives") startRef.current?.focus();
   }, [phase]);
@@ -182,11 +190,11 @@ export default function Cutscene({
   const advance = useCallback(() => {
     if (phase === "title") return setPhase("beats");
     if (phase === "beats") {
-      if (shown < text.length) return setShown(text.length);
+      if (typing) return finish();
       if (beat < beats.length - 1) return setBeat((b) => b + 1);
       return setPhase("objectives");
     }
-  }, [phase, shown, text.length, beat, beats.length]);
+  }, [phase, typing, finish, beat, beats.length]);
 
   const skip = useCallback(() => {
     if (phase === "objectives") (onClose ?? onStart)();
