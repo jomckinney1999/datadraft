@@ -2,7 +2,7 @@
 
 This is the source of truth for product structure, pricing, and positioning decisions. Update it whenever the business model changes, *before* or alongside code changes — this is what future Claude/Cursor sessions read to understand why the landing page is shaped the way it is.
 
-Last updated: 2026-10-02 (**target user and messaging** — one avatar, written for directly; see Target user and Messaging).
+Last updated: 2026-10-03 (**pricing and the offer**: two tiers plus a founding offer, Roadmap and Career Track retired, launch gates; see Product ladder and `docs/OFFER.md`). Before that, 2026-10-02: target user and messaging.
 
 > **Read this first.** On 2026-09-30 the product narrowed (CLAUDE.md, "What this is"): four sections, football only, and no career kit, coaching playbooks or sport picker. Where this doc still describes those — the multi-sport vision, Career Track playbooks, `/resources` — it is history, kept for the reasoning, not the plan. The price ranges in the ladder are still the working assumption. Nothing is for sale yet.
 
@@ -43,15 +43,9 @@ The mechanisms this plan leans on to make the product feel essential rather than
 5. **Founding-cohort pricing.** Decided 2026-07-15: current prices across the ladder are framed on-site as founding/early pricing that will rise once DataDraft is out of early access. This is a real commitment, not just copy — whoever signs up now keeps their price; new sign-ups later pay more. Before raising prices, make sure existing members are actually grandfathered as promised.
 6. **Production quality signals competence.** For a product whose whole pitch is "we'll make you good at working with data," the site itself has to look like it was built by people who are good at their craft — polished dark UI, considered motion, working mobile nav, real OG/share metadata. Sloppy production on the marketing site undercuts the pitch before a visitor ever reads a word of copy.
 
-### Illustrative path to $100k/month (not a forecast)
+### Illustrative path to $100k/month (history)
 
-A rough, illustrative mix showing which tier does the heavy lifting — useful for prioritizing where to spend growth effort, not a commitment:
-
-- ~3,000 active **Practice** subscribers @ ~$20/mo ≈ $60k/mo — the volume tier; growth here is mostly top-of-funnel/conversion work.
-- ~100 active **Career Track** members @ ~$3k/yr (~$250/mo equivalent) ≈ $25k/mo — low volume, high leverage; a handful of members moves this number meaningfully.
-- ~40 **Roadmap** purchases/mo @ ~$350 ≈ $14k/mo — the one-time-purchase middle rung.
-
-Total ≈ $99k/mo. Takeaway: Practice-tier volume is the main lever at this scale, but Career Track's per-unit economics mean it's worth disproportionate product investment (see must-buy mechanisms above) even though it'll never be the biggest tier by headcount.
+An earlier mix leaned on Career Track (~100 members at ~$3k/yr) and Roadmap (~40 a month at ~$350). Both tiers were retired with coaching (see Product ladder), so that path is gone. The current math is in Market size below and in `docs/OFFER.md` §3: at ~$13 a member a month, $20k is ~1,500 Season Pass members.
 
 ## Business structure
 
@@ -92,7 +86,7 @@ Rules: talk to one person, not four audiences. The two asks everywhere are **Sol
 
 Yes — at $20k a month the avatar is not the limit; reaching it is. Illustrative, with assumptions stated, not a forecast:
 
-- **Payers:** ~$15/month or ~$99/year, many on annual → roughly $10/month blended → **about 2,000 paying members.**
+- **Payers:** at the prices proposed 2026-10-03 ($19.99/month or $119/year, about two-thirds on annual), a member averages ~$13 a month → **about 1,500 paying members.** (This line first assumed ~$15/$99 and ~2,000 members.)
 - **Free base:** freemium learning products convert low single-digit percent of engaged users → **about 40,000–65,000 engaged free users** over time.
 - **Steady state:** at ~5% monthly churn, ~100 payers to replace each month → **about 2,500 new free signups a month (~80 a day).**
 - **Pool:** tens of millions of Americans play fantasy football. If even 1% work near spreadsheets and want a data career, that is hundreds of thousands of people, of whom 2,000 need to pay.
@@ -120,18 +114,24 @@ Each playbook follows the same arc a first-job seeker needs — skills foundatio
 
 Most drills are honest `placeholder` stubs; Data Analyst foundation drills that already exist in `/learn` are marked `live`. Expanding a playbook means filling those placeholders, not inventing a second product.
 
-## Product ladder
+## Product ladder (proposed 2026-10-03; nothing is for sale)
+
+**Two tiers and a launch offer.** The copy, the exact free/Pass line, the paywall moments, the launch emails, the calendar and the launch gates are in [`docs/OFFER.md`](OFFER.md).
 
 | Tier | What's included | Price | Who it's for |
 |---|---|---|---|
-| **Free** | Free content, limited graded drives (**5 timeouts/day**), scouting tickets + bye weeks (streak freezes), unlimited Practice Field | $0 | Top-of-funnel, everyone |
-| **Practice** (**Season Pass** in-product) | The career tier — see "Season Pass: the career tier" below | **$19.99/mo or $119/yr** (proposed 2026-10-02, not live) | The numbers person who wants the job |
-| **Roadmap** | Full Beginner → Advanced course pathway, portfolio capstone, completion credential | $200–500 one-time | Serious learners, not yet job-hunting |
-| **Career Track** | Everything in Roadmap + role-specific playbook (DA / DS / AI Eng / SWE / AE / FDE) + resume/portfolio review + mock interview practice + application strategy support | $1,000–5,000/yr | Andy, once he's decided this is a career move, not a hobby |
+| **Free** | The daily question in every language, the Stat Duel, the Draft Room (current season), Chart it, your own league, the sandboxes, the first unit of every course (5 graded lessons a day), any question for 7 days after it was a daily | $0, forever | Everyone; the daily habit |
+| **Season Pass** | The career tier: the whole question bank with solutions, every lesson with no limit, Query Doctor on every miss plus Ask Coach, unlimited mock screens, interview pattern tracking, all cases, every Draft Room season, and proof for employers when accounts land | **$19.99/mo or $119/yr** | The numbers person going for the job |
+| **Founding Season Pass** (launch only) | Season Pass | **$79/yr, kept for as long as the membership is active**. First 500 members or Jan 31, whichever comes first; early-access users get a 7-day head start | The first believers |
+
+- **Why two tiers:** one decision for the buyer (free or Pass), one thing to build and support. Monthly is priced at twice the annual rate per month so annual reads as half off, because annual survives the fantasy season ending and monthly doesn't.
+- **Later, tested after launch:** Gift a Pass (December), a League Pass for commissioners (~$49 a season, everyone in the league gets the weekly charts), student pricing if students ask. Not at launch.
+- **Retired (2026-10-03):** **Roadmap** ($200–500 one-time) and **Career Track** ($1–5k/yr, resume review, mock interviews with a human, application strategy). Coaching was cut on 2026-09-30, and a human reading your resume was the only thing that justified Career Track's price. The interview practice it promised now lives in the Season Pass as software (mock screens, Query Doctor). Don't bring either back without a conversation.
+- **New launch gate found 2026-10-03:** Vercel's Hobby plan is non-commercial, and that covers advertising a product for sale, not just taking payment. The project moves to Pro (~$20/month) before prices appear on the site. Full gate list in `docs/OFFER.md` §9.
 
 ### Season Pass: the career tier (decided 2026-10-02)
 
-The paid tier is about getting the job, not the hobby — hobbyists stay happy on free, and the career-minded minority is who pays. Proposed price **$19.99/month or $119/year** (about $10/month; sell the annual plan at the draft in August, because monthly-only churns when the fantasy season ends). Nothing is for sale until the four gates in "Before we can charge money" clear; until then every feature below is built, labelled "Season Pass · free in early access", and open (`PAYWALL_LIVE` in `lib/season-pass.ts`).
+The paid tier is about getting the job, not the hobby — hobbyists stay happy on free, and the career-minded minority is who pays. Proposed price **$19.99/month or $119/year** (about $10/month; sell the annual plan at the draft in August, because monthly-only churns when the fantasy season ends). Nothing is for sale until the launch gates in `docs/OFFER.md` §9 clear (HR sign-off first, and now Vercel Pro too); until then every feature below is built, labelled "Season Pass · free in early access", and open (`PAYWALL_LIVE` in `lib/season-pass.ts`).
 
 | Feature | Status |
 |---|---|

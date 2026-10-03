@@ -8,22 +8,15 @@ This policy is issued by Jojo Lee McKinney, doing business as DataDraft (a sole 
 
 ---
 
-## Practice (monthly subscription)
+## Season Pass (monthly or annual subscription)
 
-- Cancel anytime from your account's billing portal. Cancellation stops future renewals; you keep access through the end of the period you already paid for.
-- We don't offer prorated refunds for partial months. If you cancel partway through a billing period, you retain access until that period ends rather than being refunded the unused portion.
-- Exception: if you're charged due to a clear billing error on our end (e.g., charged after you'd already canceled), contact us and we'll refund it in full.
+[Redrafted 2026-10-03 to match the offer in `docs/OFFER.md`. Roadmap and Career Track were retired, so their sections are gone.]
 
-## Roadmap (one-time purchase)
-
-- **Because the full 12-week curriculum may still be rolling out week-by-week during the beta/build-out period** (see `docs/LAUNCH-PLAN.md`), Roadmap purchases made before all 12 weeks are live come with an explicit right to a full refund, on request, at any point before you've completed the weeks that *are* available, if you feel the pace of remaining content doesn't match what you expected at purchase. [This is a placeholder policy reflecting the current honest state of the product — revisit and likely simplify this section once the full 12-week curriculum is actually complete (LAUNCH-PLAN.md Phase 4), since the ongoing-rollout caveat won't apply anymore.]
-- Once the full curriculum is complete and delivered as advertised: refund requests within **30 days** of purchase, no questions asked, become the standard rather than the beta-specific exception above. [30 days is a reasonable, generous-but-common default — tighten to 14 if you'd rather, this is a real business call, not a fixed legal requirement.]
-- No refunds for capstone review/certification once a capstone has actually been reviewed and a certificate issued.
-
-## Career Track
-
-- Given the human-delivered, 1:1 nature of this tier (see `docs/PLAN.md`'s "intentionally small, doesn't scale" positioning), refund terms should be **confirmed individually as part of the application/acceptance process**, not a generic blanket policy — the right structure (deposit vs. full payment, refundable up to which point, whether partial delivery is prorated) is a real business decision that hasn't been made yet per the open questions in `docs/LAUNCH-PLAN.md` Phase 7.
-- Until that's decided, do not publish a specific Career Track refund term here — leave it as "confirmed at acceptance" rather than guessing at numbers.
+- **14-day guarantee.** If the Season Pass isn't for you, ask within 14 days of your first payment, on either plan, and we'll refund it in full. No questions asked.
+- **Annual renewals.** Ask within 14 days of an annual renewal charge and we'll refund that renewal in full.
+- **Otherwise, cancel anytime** from your account's billing page in two clicks. Cancelling stops future renewals, and you keep access through the end of the period you already paid for. We don't give prorated refunds for the rest of a month or year.
+- **Founding pricing.** Founding members get the same terms. A refunded or lapsed founding membership gives up the founding price; rejoining is at the price then current.
+- **Billing errors.** If we charge you by mistake (for example, after you cancelled), contact us and we'll refund it in full.
 
 ## How to request a refund
 

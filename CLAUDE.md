@@ -291,7 +291,7 @@ Duolingo-style lesson player + DataCamp-style course roadmap, fully client-side 
 
 ## Before changing pricing, tiers, or positioning
 
-Read [docs/PLAN.md](docs/PLAN.md) first. It's the source of truth for the product ladder (Free / Practice / Roadmap / Career Track), the target-user reasoning behind each tier's price, and open questions still unresolved. The landing page pricing section (`PLANS` array in `app/page.tsx`) is implemented from that doc — they should stay in sync. If a request conflicts with something decided there, say so instead of silently overriding it, and update the doc alongside the code when the plan itself changes.
+Read [docs/PLAN.md](docs/PLAN.md) first, then [docs/OFFER.md](docs/OFFER.md) (2026-10-03: the offer, the free/Season Pass line, paywall copy, launch emails, the selling calendar and the launch gates, including Vercel Pro, since the Hobby plan is non-commercial). PLAN.md is the source of truth for the product ladder (Free / Practice / Roadmap / Career Track), the target-user reasoning behind each tier's price, and open questions still unresolved. The landing page pricing section (`PLANS` array in `app/page.tsx`) is implemented from that doc — they should stay in sync. If a request conflicts with something decided there, say so instead of silently overriding it, and update the doc alongside the code when the plan itself changes.
 
 ## Curriculum and launch plan
 
