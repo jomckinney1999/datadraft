@@ -436,15 +436,21 @@ body {
     filter: drop-shadow(0 0 12px rgb(var(--c-gold) / 0.65));
   }
 
-  /* Circular logo mark — soft pulse of the kit colour. */
+  /* Circular logo mark — hard GTA cover-art glow. */
   .player-mark-glow {
-    filter: drop-shadow(0 0 10px rgb(var(--c-ice) / 0.35));
+    filter:
+      drop-shadow(0 2px 0 rgb(var(--c-night) / 0.85))
+      drop-shadow(0 0 14px rgb(var(--c-ice) / 0.45));
   }
   .player-mark-glow[data-tone="turf"] {
-    filter: drop-shadow(0 0 12px rgb(var(--c-turf) / 0.45));
+    filter:
+      drop-shadow(0 2px 0 rgb(var(--c-night) / 0.85))
+      drop-shadow(0 0 16px rgb(var(--c-turf) / 0.55));
   }
   .player-mark-glow[data-tone="gold"] {
-    filter: drop-shadow(0 0 14px rgb(var(--c-gold) / 0.5));
+    filter:
+      drop-shadow(0 2px 0 rgb(var(--c-night) / 0.85))
+      drop-shadow(0 0 18px rgb(var(--c-gold) / 0.6));
   }
 
   /* Hero-level panels. A hairline that shifts turf → ice → gold along its length,

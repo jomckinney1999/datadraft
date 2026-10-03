@@ -41,6 +41,7 @@ export default function CharacterChip({
         kitTone={progress.kitTone}
         kitAccent={progress.kitAccent}
         rankTone={tenure.rank.tone}
+        status={tenure.rank.name}
         size={compact ? 40 : 34}
         className={`player-mark-glow shrink-0`}
       />

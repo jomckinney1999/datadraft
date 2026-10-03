@@ -86,6 +86,7 @@ export default function LockerCard({
               kitTone={progress.kitTone}
               kitAccent={progress.kitAccent}
               rankTone={tenure.rank.tone}
+              status={tenure.rank.name}
               size={148}
             />
           </div>
@@ -207,6 +208,8 @@ export default function LockerCard({
                     kitTone={t}
                     kitAccent={progress.kitAccent}
                     jersey={progress.jersey}
+                    rankTone={tenure.rank.tone}
+                    status={tenure.rank.name}
                     size={52}
                   />
                 </button>

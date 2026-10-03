@@ -207,6 +207,7 @@ export default function Dashboard({
                 kitTone={progress.kitTone}
                 kitAccent={progress.kitAccent}
                 rankTone={tenure.rank.tone}
+                status={tenure.rank.name}
                 size={76}
               />
               <Coach mood={coachMood} size={64} />
