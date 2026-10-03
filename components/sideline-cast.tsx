@@ -20,12 +20,22 @@ const CLEAT = "#1B262C";
 
 export type CastKind = "rookie" | "ref";
 
+const ACCENT = {
+  turf: { jersey: "#58CC02", helmet: "#1CB0F6", helmetShade: "#0E8BC4", number: "#131F24" },
+  ice: { jersey: "#1CB0F6", helmet: "#58CC02", helmetShade: "#3F9A00", number: "#FFFFFF" },
+  gold: { jersey: "#FFC800", helmet: "#58CC02", helmetShade: "#3F9A00", number: "#131F24" },
+} as const;
+
+export type CastAccent = keyof typeof ACCENT;
+
 export default function SidelineCast({
   kind,
   tone = 0,
   size = 64,
   delay = 0,
   animated = true,
+  jersey,
+  accent = "ice",
 }: {
   kind: CastKind;
   tone?: number;
@@ -33,8 +43,15 @@ export default function SidelineCast({
   /** Seconds; offsets this instance's loops from its neighbours. */
   delay?: number;
   animated?: boolean;
+  /** Jersey number (0–99). Defaults to 1 for path rookies. */
+  jersey?: number;
+  /** Kit colours for the learner's own avatar. */
+  accent?: CastAccent;
 }) {
   const skin = SKIN[((tone % SKIN.length) + SKIN.length) % SKIN.length];
+  const kit = ACCENT[accent] ?? ACCENT.ice;
+  const number =
+    typeof jersey === "number" ? String(Math.max(0, Math.min(99, Math.round(jersey)))) : "1";
   return (
     <svg
       viewBox="0 0 120 120"
@@ -47,7 +64,7 @@ export default function SidelineCast({
       aria-label={kind === "rookie" ? "A rookie tossing a football" : "A referee"}
     >
       {kind === "rookie" ? (
-        <Rookie skin={skin} animated={animated} />
+        <Rookie skin={skin} animated={animated} kit={kit} number={number} />
       ) : (
         <Ref skin={skin} animated={animated} />
       )}
@@ -59,11 +76,21 @@ function Shadow() {
   return <ellipse cx="60" cy="113" rx="24" ry="4" fill="#000" opacity="0.3" />;
 }
 
-function Rookie({ skin, animated }: { skin: string; animated: boolean }) {
+function Rookie({
+  skin,
+  animated,
+  kit,
+  number,
+}: {
+  skin: string;
+  animated: boolean;
+  kit: (typeof ACCENT)[CastAccent];
+  number: string;
+}) {
   const a = (cls: string) => (animated ? cls : undefined);
-  const jersey = "#1CB0F6";
-  const helmet = "#58CC02";
-  const helmetShade = "#3F9A00";
+  const jersey = kit.jersey;
+  const helmet = kit.helmet;
+  const helmetShade = kit.helmetShade;
   const pants = "#EEF2F4";
   const mask = "#D7DEE2";
 
@@ -85,12 +112,12 @@ function Rookie({ skin, animated }: { skin: string; animated: boolean }) {
           x="60"
           y="81"
           textAnchor="middle"
-          fontSize="17"
+          fontSize={number.length > 1 ? 14 : 17}
           fontWeight="900"
           fontFamily="system-ui, sans-serif"
-          fill="#FFFFFF"
+          fill={kit.number}
         >
-          1
+          {number}
         </text>
 
         {/* neck and head */}

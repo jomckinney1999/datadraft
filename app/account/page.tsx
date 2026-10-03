@@ -6,11 +6,12 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { loadProgress, type Progress } from "@/lib/progress";
+import { EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
 import { readPass, syncProgress, type PassStatus } from "@/lib/progress-sync";
 import { PASS_PLANS, PAYWALL_LIVE } from "@/lib/season-pass";
 import Coach from "@/components/coach";
 import AppNav from "@/components/app-nav";
+import LockerCard from "@/components/locker-card";
 
 type State = "loading" | "signed-out" | "sending" | "sent" | "signed-in";
 
@@ -34,7 +35,7 @@ export default function AccountPage() {
   const [state, setState] = useState<State>("loading");
   const [email, setEmail] = useState("");
   const [who, setWho] = useState<string | null>(null);
-  const [progress, setProgress] = useState<Progress | null>(null);
+  const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
   const [error, setError] = useState<string | null>(null);
   const [synced, setSynced] = useState(false);
   const [pass, setPass] = useState<PassStatus | null>(null);
@@ -140,9 +141,13 @@ export default function AccountPage() {
           </p>
         )}
 
+        <div className="mb-6">
+          <LockerCard progress={progress} onChange={setProgress} />
+        </div>
+
         <section className="surface border border-panel-border bg-panel/80 p-6">
           {state === "loading" && (
-            <p className="font-mono text-xs text-ink-muted">Checking your locker…</p>
+            <p className="font-mono text-xs text-ink-muted">Checking your account…</p>
           )}
 
           {(state === "signed-out" || state === "sending") && (
@@ -223,24 +228,22 @@ export default function AccountPage() {
                   : "Syncing your progress…"}
               </p>
 
-              {progress && (
-                <div className="mt-5 grid grid-cols-3 gap-px border border-panel-border bg-panel-border">
-                  <div className="bg-panel px-4 py-3">
-                    <p className="label-broadcast text-[10px]">XP</p>
-                    <p className="stat-number-turf mt-1 text-xl">{progress.xp}</p>
-                  </div>
-                  <div className="bg-panel px-4 py-3">
-                    <p className="label-broadcast text-[10px]">Lessons</p>
-                    <p className="stat-number-turf mt-1 text-xl">
-                      {progress.completedLessons.length}
-                    </p>
-                  </div>
-                  <div className="bg-panel px-4 py-3">
-                    <p className="label-broadcast text-[10px]">Streak</p>
-                    <p className="stat-number mt-1 text-xl">{progress.streak}</p>
-                  </div>
+              <div className="mt-5 grid grid-cols-3 gap-px border border-panel-border bg-panel-border">
+                <div className="bg-panel px-4 py-3">
+                  <p className="label-broadcast text-[10px]">XP</p>
+                  <p className="stat-number-turf mt-1 text-xl">{progress.xp}</p>
                 </div>
-              )}
+                <div className="bg-panel px-4 py-3">
+                  <p className="label-broadcast text-[10px]">Lessons</p>
+                  <p className="stat-number-turf mt-1 text-xl">
+                    {progress.completedLessons.length}
+                  </p>
+                </div>
+                <div className="bg-panel px-4 py-3">
+                  <p className="label-broadcast text-[10px]">Streak</p>
+                  <p className="stat-number mt-1 text-xl">{progress.streak}</p>
+                </div>
+              </div>
 
               {PAYWALL_LIVE && pass && (
                 <div className="mt-5 rounded-xl border border-gold/40 bg-gold/10 px-4 py-3">

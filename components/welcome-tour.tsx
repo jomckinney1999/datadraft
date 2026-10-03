@@ -92,10 +92,10 @@ const STOPS: Stop[] = [
     label: "get hired",
     mood: "clipboard",
     title: "Practise for the interview",
-    body: "The nine SQL patterns analyst screens actually test, timed mock screens with a report, and Query Doctor — it tells you why a query is wrong without handing you the answer.",
+    body: "Follow the funnel: drill the nine SQL patterns, then an online assessment, a live SQL screen and a take-home. Query Doctor tells you why a query is wrong without handing you the answer.",
     art: <PrepArt id="technical" className={ART} />,
-    href: "/questions#interview",
-    cta: "See the patterns",
+    href: "/questions/prep",
+    cta: "Open hiring prep",
   },
   {
     label: "build",
@@ -135,7 +135,7 @@ const STOPS: Stop[] = [
 const FIRST_MOVES: { href: string; label: string; note: string; art: ReactNode }[] = [
   { href: "/learn/track/sql-fundamentals", label: "I'm new to SQL", note: "SQL Fundamentals, lesson one", art: <CourseArt id="sql-fundamentals" className={ART} /> },
   { href: "/questions", label: "I know some SQL", note: "Today's question", art: <QuestionArt art="chalkboard" className={ART} /> },
-  { href: "/questions/mock", label: "I'm prepping for interviews", note: "A mock SQL screen", art: <PrepArt id="phone" className={ART} /> },
+  { href: "/questions/prep", label: "I'm prepping for interviews", note: "Patterns → OA → screen → take-home", art: <PrepArt id="phone" className={ART} /> },
   { href: "/questions/duel", label: "I just want to play", note: "Today's Stat Duel, no code", art: <QuestionArt art="scale" className={ART} /> },
 ];
 

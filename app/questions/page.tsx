@@ -14,7 +14,9 @@ export const metadata: Metadata = {
 // without rendering this per request.
 export const revalidate = 3600;
 
-export default function QuestionsPage() {
+type Props = { searchParams: { pattern?: string } };
+
+export default function QuestionsPage({ searchParams }: Props) {
   const day = leagueDay();
-  return <QuestionBank day={day} />;
+  return <QuestionBank day={day} initialPattern={searchParams.pattern ?? null} />;
 }

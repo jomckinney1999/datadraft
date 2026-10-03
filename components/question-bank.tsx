@@ -76,15 +76,24 @@ function FlameIcon({ lit }: { lit: boolean }) {
   );
 }
 
-export default function QuestionBank({ day }: { day: string }) {
+export default function QuestionBank({
+  day,
+  initialPattern = null,
+}: {
+  day: string;
+  /** Deep link from hiring prep: `/questions?pattern=joins#interview`. */
+  initialPattern?: string | null;
+}) {
+  const seedPattern =
+    initialPattern && PATTERNS.some((p) => p.id === initialPattern) ? initialPattern : null;
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
   const [hydrated, setHydrated] = useState(false);
-  const [lang, setLang] = useState<LangFilter>("all");
+  const [lang, setLang] = useState<LangFilter>(seedPattern ? "sql" : "all");
   const [diff, setDiff] = useState<DiffFilter>("all");
   const [unsolvedOnly, setUnsolvedOnly] = useState(false);
   const [query, setQuery] = useState("");
   /** An interview pattern to narrow the list to (SQL only). */
-  const [pattern, setPattern] = useState<string | null>(null);
+  const [pattern, setPattern] = useState<string | null>(seedPattern);
   const patternIds = useMemo(() => {
     const p = PATTERNS.find((x) => x.id === pattern);
     return p ? new Set(questionsFor(p).map((q) => q.id)) : null;
@@ -94,12 +103,17 @@ export default function QuestionBank({ day }: { day: string }) {
     setProgress(loadProgress());
     setHydrated(true);
     try {
-      const saved = window.localStorage.getItem(LANG_KEY);
-      if (saved && LANG_VALUES.includes(saved)) setLang(saved as QuestionLang);
+      // A deep-linked pattern wins over the remembered language filter.
+      if (seedPattern) {
+        window.localStorage.setItem(LANG_KEY, "sql");
+      } else {
+        const saved = window.localStorage.getItem(LANG_KEY);
+        if (saved && LANG_VALUES.includes(saved)) setLang(saved as QuestionLang);
+      }
     } catch {
       /* storage blocked — the default is fine */
     }
-  }, []);
+  }, [seedPattern]);
 
   function pickLang(next: LangFilter) {
     setLang(next);

@@ -25,7 +25,8 @@ import {
   type BadgeStats,
 } from "@/lib/achievements";
 import { type Progress } from "@/lib/progress";
-import { leagueLabel } from "@/components/learn-status-chips";
+import SidelineCast from "@/components/sideline-cast";
+import { displayName, tenureFrom } from "@/lib/tenure";
 import { FREE_DAILY_TIMEOUTS } from "@/lib/economy";
 
 type Quest = {
@@ -103,7 +104,7 @@ export default function LearnRail({
 }) {
   const stats = statsFrom(progress);
   const drills = buildDrills(progress, stats);
-  const league = leagueLabel(stats.lessonsDone);
+  const tenure = tenureFrom(progress);
   const nextBadge = nextEnshrinement(stats);
 
   return (
@@ -202,11 +203,29 @@ export default function LearnRail({
       )}
       <div className="section-card">
         <p className="label-broadcast text-gold">your standing</p>
-        <div className="mt-2 flex items-baseline justify-between gap-3">
-          <p className="font-display text-xl font-bold text-gold">{league}</p>
-          <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-            {stats.lessonsDone} done
+        <div className="mt-2 flex items-center gap-3">
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-panel-border bg-night/50">
+            <SidelineCast
+              kind="rookie"
+              tone={progress.kitTone}
+              accent={progress.kitAccent}
+              jersey={progress.jersey}
+              size={56}
+              animated={false}
+            />
           </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-display text-base font-bold text-ink">{displayName(progress)}</p>
+            <p className="font-display text-lg font-bold text-gold">
+              Lv {tenure.level} · {tenure.rank.name}
+            </p>
+            <div className="quest-bar mt-1">
+              <span style={{ width: `${Math.round(tenure.progress * 100)}%` }} />
+            </div>
+            <p className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+              {tenure.next ? `${tenure.need} to ${tenure.next.name}` : "Hall of Famer"}
+            </p>
+          </div>
         </div>
 
         {nextBadge && (

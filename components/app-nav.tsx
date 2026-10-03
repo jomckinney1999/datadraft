@@ -30,9 +30,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { WelcomePrompt } from "@/components/welcome-tour";
-import { EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
+import { EMPTY_PROGRESS, loadProgress, PROGRESS_EVENT, type Progress } from "@/lib/progress";
 import { PAYWALL_LIVE } from "@/lib/season-pass";
 import LearnStatusChips from "@/components/learn-status-chips";
+import CharacterChip from "@/components/character-chip";
 import { NavDrawerSections, NavDropdown } from "@/components/nav-menu";
 import SiteSearch from "@/components/site-search";
 import ThemeToggle from "@/components/theme-toggle";
@@ -93,6 +94,12 @@ export default function AppNav({
 
   useEffect(() => {
     setProgress(loadProgress());
+    const onProgress = (e: Event) => {
+      const detail = (e as CustomEvent<Progress>).detail;
+      setProgress(detail ?? loadProgress());
+    };
+    window.addEventListener(PROGRESS_EVENT, onProgress);
+    return () => window.removeEventListener(PROGRESS_EVENT, onProgress);
   }, []);
 
   return (
@@ -154,17 +161,9 @@ export default function AppNav({
             <SfxMuteButton />
           </span>
           <ThemeToggle />
-          <Link
-            href="/account"
-            aria-current={pathname === "/account" ? "page" : undefined}
-            className={`hidden max-w-[10rem] truncate whitespace-nowrap rounded-lg px-2.5 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors md:inline ${
-              pathname === "/account"
-                ? "bg-turf/15 text-turf"
-                : "text-ink-muted hover:bg-panel hover:text-ink"
-            }`}
-          >
-            {progress.username || "Account"}
-          </Link>
+          <div className="hidden md:block">
+            <CharacterChip progress={progress} />
+          </div>
 
           <button
             type="button"
@@ -192,16 +191,9 @@ export default function AppNav({
         >
           <div className="mx-auto flex max-h-[calc(100svh-4rem)] max-w-6xl flex-col gap-0.5 overflow-y-auto">
             <NavDrawerSections sections={NAV} current={current} onNavigate={() => setOpen(false)} />
-            <Link
-              href="/account"
-              onClick={() => setOpen(false)}
-              aria-current={pathname === "/account" ? "page" : undefined}
-              className={`mt-2 rounded-lg px-3 py-2.5 font-mono text-xs font-bold uppercase tracking-wider transition-colors ${
-                pathname === "/account" ? "bg-turf/15 text-turf" : "text-ink-soft hover:bg-panel"
-              }`}
-            >
-              Account
-            </Link>
+            <div className="mt-2" onClick={() => setOpen(false)}>
+              <CharacterChip progress={progress} compact />
+            </div>
             {back && (
               <Link
                 href={back}

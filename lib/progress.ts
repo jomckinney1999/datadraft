@@ -1,6 +1,9 @@
 // localStorage-backed learner progress for the /learn MVP.
 // Deliberately no backend yet — swaps for Supabase `progress` later.
 
+/** Jersey / helmet accent on the learner avatar (kept here to avoid a cycle with tenure). */
+export type KitAccent = "turf" | "ice" | "gold";
+
 export type Progress = {
   xp: number;
   completedLessons: string[];
@@ -8,6 +11,17 @@ export type Progress = {
   lastActiveDay: string; // YYYY-MM-DD
   username: string | null;
   draftedTrack: string | null;
+  /**
+   * Distinct calendar days with activity. Bumped when `lastActiveDay` moves
+   * to a new day — the tenure ladder uses it so showing up beats one grind.
+   */
+  daysActive: number;
+  /** Jersey number on your sideline avatar (0–99). */
+  jersey: number;
+  /** Skin tone index for SidelineCast (0–3). */
+  kitTone: number;
+  /** Jersey / helmet accent on your avatar. */
+  kitAccent: KitAccent;
   // ── game state (lib/achievements.ts reads these) ──
   /** Badge ids already celebrated, so an unlock only pops once. */
   badges: string[];
@@ -68,6 +82,14 @@ const KEY = "sqlsports.progress.v1";
  * useState before localStorage is readable — three hand-written copies of
  * this literal is three places to forget a field when Progress grows.
  */
+const KIT_ACCENTS: readonly KitAccent[] = ["turf", "ice", "gold"];
+
+function parseKitAccent(v: unknown): KitAccent {
+  return typeof v === "string" && (KIT_ACCENTS as readonly string[]).includes(v)
+    ? (v as KitAccent)
+    : "ice";
+}
+
 export const EMPTY_PROGRESS: Progress = {
   xp: 0,
   completedLessons: [],
@@ -75,6 +97,10 @@ export const EMPTY_PROGRESS: Progress = {
   lastActiveDay: "",
   username: null,
   draftedTrack: null,
+  daysActive: 0,
+  jersey: 7,
+  kitTone: 0,
+  kitAccent: "ice",
   badges: [],
   bestCombo: 0,
   perfectLessons: 0,
@@ -127,6 +153,22 @@ export function loadProgress(): Progress {
           : null,
       draftedTrack:
         typeof parsed.draftedTrack === "string" ? parsed.draftedTrack : null,
+      // Older saves had no daysActive — if they were ever active, count at least one.
+      daysActive:
+        typeof parsed.daysActive === "number"
+          ? parsed.daysActive
+          : typeof parsed.lastActiveDay === "string" && parsed.lastActiveDay
+            ? 1
+            : 0,
+      jersey:
+        typeof parsed.jersey === "number"
+          ? Math.max(0, Math.min(99, Math.round(parsed.jersey)))
+          : 7,
+      kitTone:
+        typeof parsed.kitTone === "number"
+          ? ((Math.round(parsed.kitTone) % 4) + 4) % 4
+          : 0,
+      kitAccent: parseKitAccent(parsed.kitAccent),
       // Defaulted rather than required: progress saved before these existed
       // must keep loading, not blow up or reset someone's XP.
       badges: Array.isArray(parsed.badges)
@@ -181,17 +223,67 @@ export function setDraftPick(username: string, trackId: string): Progress {
   return next;
 }
 
+/** Name the character on your locker (nav chip, leaderboard, dashboard). */
+export function setCallSign(username: string): Progress {
+  const trimmed = username.trim().slice(0, 24);
+  const next = { ...loadProgress(), username: trimmed.length ? trimmed : null };
+  save(next);
+  return next;
+}
+
+/** Jersey number, skin tone, and kit accent — ownership without accounts. */
+export function setKit(patch: {
+  jersey?: number;
+  kitTone?: number;
+  kitAccent?: KitAccent;
+}): Progress {
+  const p = loadProgress();
+  const next: Progress = {
+    ...p,
+    jersey:
+      typeof patch.jersey === "number"
+        ? Math.max(0, Math.min(99, Math.round(patch.jersey)))
+        : p.jersey,
+    kitTone:
+      typeof patch.kitTone === "number"
+        ? ((Math.round(patch.kitTone) % 4) + 4) % 4
+        : p.kitTone,
+    kitAccent: patch.kitAccent ?? p.kitAccent,
+  };
+  save(next);
+  return next;
+}
+
 /** Exported so progress-sync can write a merged remote+local state back. */
 export function saveProgress(progress: Progress) {
   save(progress);
 }
 
+/** Fired after every local write so the nav chip can stay live. */
+export const PROGRESS_EVENT = "sqlsports:progress";
+
 function save(progress: Progress) {
   try {
     window.localStorage.setItem(KEY, JSON.stringify(progress));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent(PROGRESS_EVENT, { detail: progress }));
+    }
   } catch {
     // storage full or blocked — progress just won't persist
   }
+}
+
+/** Count a new active day when the calendar day of activity advances. */
+function withActiveDay(p: Progress, t: string): Pick<Progress, "daysActive" | "lastActiveDay"> {
+  if (p.lastActiveDay === t) {
+    return { daysActive: p.daysActive, lastActiveDay: t };
+  }
+  // First-ever activity, or a new calendar day.
+  const bump = p.lastActiveDay === "" || p.lastActiveDay !== t;
+  return {
+    daysActive: bump ? p.daysActive + 1 : p.daysActive,
+    lastActiveDay: t,
+  };
 }
 
 /** Current streak for display: broken if last activity was before yesterday. */
@@ -228,6 +320,7 @@ export function completeLesson(
   else if (p.lastActiveDay === yesterday()) streak = p.streak + 1;
   else streak = 1;
 
+  const day = withActiveDay(p, t);
   const next: Progress = {
     ...p,
     xp: p.xp + earnedXp,
@@ -235,7 +328,7 @@ export function completeLesson(
       ? p.completedLessons
       : [...p.completedLessons, lessonId],
     streak,
-    lastActiveDay: t,
+    ...day,
     bestCombo: Math.max(p.bestCombo, drive?.bestCombo ?? 0),
     perfectLessons:
       p.perfectLessons + (drive?.perfect && firstClear ? 1 : 0),
@@ -291,6 +384,7 @@ export function solveQuestion(
     qotdStreak = p.qotdLastDay === prevDay ? p.qotdStreak + 1 : 1;
   }
 
+  const active = withActiveDay(p, t);
   const next: Progress = {
     ...p,
     xp: p.xp + (firstSolve ? earnedXp : 0),
@@ -298,7 +392,7 @@ export function solveQuestion(
       ? [...p.solvedQuestions, questionId]
       : p.solvedQuestions,
     streak,
-    lastActiveDay: t,
+    ...active,
     qotdStreak,
     qotdLastDay: isQotd ? day : p.qotdLastDay,
     // Tickets are the small, repeatable reward. A solved question pays less

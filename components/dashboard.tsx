@@ -34,6 +34,9 @@ import DuelCard from "@/components/duel-card";
 import DraftCard from "@/components/draft-card";
 import { TourButton } from "@/components/welcome-tour";
 import PlayStrip from "@/components/play-strip";
+import LeaderboardTeaser from "@/components/leaderboard-teaser";
+import SidelineCast from "@/components/sideline-cast";
+import { displayName, tenureFrom } from "@/lib/tenure";
 import { useCountUp } from "@/lib/use-count-up";
 import { playSfx } from "@/lib/sfx";
 
@@ -140,6 +143,8 @@ export default function Dashboard({
         : daysAway >= 3
           ? "sleep"
           : "idle";
+  const tenure = tenureFrom(progress);
+  const callsign = displayName(progress);
 
   return (
     <>
@@ -155,15 +160,36 @@ export default function Dashboard({
               <h1 className="mt-1 font-display text-2xl font-bold text-ink sm:text-3xl">
                 {fresh && hydrated
                   ? "Welcome to DataDraft"
-                  : progress.username
-                    ? `Welcome back, ${progress.username}`
-                    : "Welcome back"}
+                  : `Welcome back, ${callsign}`}
               </h1>
               <p className="mt-1.5 text-sm text-ink-soft">
-                {fresh ? "Solve today's question, or take the first snap of a course." : "Pick up today's question or the next lesson."}
+                {hydrated ? (
+                  <>
+                    <span
+                      className={
+                        tenure.rank.tone === "gold"
+                          ? "text-gold"
+                          : tenure.rank.tone === "turf"
+                            ? "text-turf"
+                            : "text-ice"
+                      }
+                    >
+                      Lv {tenure.level} · {tenure.rank.name}
+                    </span>
+                    {" · "}
+                    {fresh
+                      ? "Solve today's question, or take the first snap of a course."
+                      : "Pick up today's question or the next lesson."}
+                  </>
+                ) : (
+                  "Pick up today's question or the next lesson."
+                )}
               </p>
               <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink-muted">
                 <TourButton className="font-semibold text-gold hover:underline" />
+                <Link href="/account#locker" className="font-semibold text-gold hover:underline">
+                  Edit your kit
+                </Link>
                 <Link href="/welcome" className="font-semibold text-ice hover:underline">
                   Map of the site
                 </Link>
@@ -175,7 +201,19 @@ export default function Dashboard({
                 </Link>
               </p>
             </div>
-            <Coach mood={coachMood} size={72} className="hidden shrink-0 sm:block" />
+            <div className="hidden shrink-0 items-end gap-2 sm:flex">
+              <span className="flex h-[4.5rem] w-[4.5rem] items-center justify-center overflow-hidden rounded-2xl border border-panel-border bg-night/50">
+                <SidelineCast
+                  kind="rookie"
+                  tone={progress.kitTone}
+                  accent={progress.kitAccent}
+                  jersey={progress.jersey}
+                  size={72}
+                  animated={false}
+                />
+              </span>
+              <Coach mood={coachMood} size={64} />
+            </div>
           </div>
 
           {hydrated && upNextLesson && upNext && (
@@ -201,6 +239,7 @@ export default function Dashboard({
 
           <div className="relative mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-panel-border pt-3">
             <Stat label="XP" value={stats.xp} animate={hydrated} />
+            <Stat label="Level" value={tenure.level} animate={hydrated} />
             <Stat label="Streak" value={progress.streak} animate={hydrated} />
             <Stat label="Lessons" value={stats.lessonsDone} animate={hydrated} />
             <Stat
@@ -211,6 +250,17 @@ export default function Dashboard({
               onNavigate={() => playSfx("ui")}
             />
           </div>
+          {hydrated && tenure.next && (
+            <div className="relative mt-3">
+              <div className="flex items-baseline justify-between gap-2 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+                <span>Next: {tenure.next.name}</span>
+                <span>{tenure.need} pts</span>
+              </div>
+              <div className="quest-bar mt-1">
+                <span style={{ width: `${Math.round(tenure.progress * 100)}%` }} />
+              </div>
+            </div>
+          )}
         </section>
 
         <div className="mt-4" style={{ ["--i" as string]: 1 }}>
@@ -266,6 +316,10 @@ export default function Dashboard({
           </span>
           <span className="shrink-0 font-mono text-[11px] font-bold uppercase tracking-wider text-gold">Open →</span>
         </Link>
+
+        <div className="mt-4" style={{ ["--i" as string]: 5 }}>
+          <LeaderboardTeaser progress={progress} />
+        </div>
 
         <Link
           href="/achievements"

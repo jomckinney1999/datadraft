@@ -68,11 +68,11 @@ export default function WelcomePage() {
       label: "get hired",
       title: "Interview prep",
       art: <WhyArt id="before-finished" className="h-full w-full" />,
-      what: "The SQL that analyst screens actually test, and a way to rehearse against the clock.",
+      what: "Follow one path: drill the nine SQL patterns, then practise the OA, the live SQL screen and the take-home — same funnel most analyst hiring uses.",
       bullets: [
-        { name: "Interview patterns", href: "/questions#interview", note: "Nine patterns — joins, CTEs, ranking within groups, running totals, dates, NULLs — with your progress on each." },
+        { name: "Hiring prep (start here)", href: "/questions/prep", note: "Patterns first, then online assessment → SQL screen → take-home, in order." },
+        { name: "Interview patterns", href: "/questions#interview", note: "Nine patterns — joins, CTEs, ranking, running totals, dates, NULLs — with your progress on each." },
         { name: "Mock SQL screens", href: "/questions/mock", note: "A 20-minute phone screen or a 45-minute technical screen. No hints until the report." },
-        { name: "Cases", href: "/projects", note: `${cases} half-hour cases against a schema you've never seen.` },
       ],
     },
     {
@@ -124,7 +124,7 @@ export default function WelcomePage() {
           {[
             { q: "I'm new to SQL", a: "SQL Fundamentals, lesson one", href: "/learn/track/sql-fundamentals" },
             { q: "I know some SQL", a: "Today's question, then the interview patterns", href: "/questions" },
-            { q: "I'm prepping for interviews", a: "A mock SQL screen", href: "/questions/mock" },
+            { q: "I'm prepping for interviews", a: "Hiring prep: patterns → OA → screen → take-home", href: "/questions/prep" },
             { q: "I just want to play", a: "Today's Stat Duel or a Draft Room draft", href: "/questions/duel" },
           ].map((m) => (
             <Link

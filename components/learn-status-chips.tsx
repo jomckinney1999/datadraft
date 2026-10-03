@@ -5,6 +5,9 @@
 
 import { displayStreak, type Progress } from "@/lib/progress";
 import { FREE_DAILY_TIMEOUTS } from "@/lib/economy";
+import { leagueLabel } from "@/lib/tenure";
+
+export { leagueLabel };
 
 function FlameIcon({ active }: { active: boolean }) {
   return (
@@ -52,15 +55,6 @@ function ClockIcon() {
       />
     </svg>
   );
-}
-
-/** Depth-chart rank from lesson count — personal, not multiplayer. */
-export function leagueLabel(lessonsDone: number): string {
-  if (lessonsDone >= 40) return "Pro Bowl";
-  if (lessonsDone >= 15) return "Starter";
-  if (lessonsDone >= 5) return "Depth Chart";
-  if (lessonsDone >= 1) return "Practice Squad";
-  return "Walk-on";
 }
 
 export default function LearnStatusChips({
