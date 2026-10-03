@@ -147,7 +147,7 @@ export default function FieldBackdrop() {
       {/* Two passes spiralling across the field on long, staggered loops.
           The outer span carries the ball across; the inner one carries the
           arc and the tilt, so each moves on its own timing curve. */}
-      <div aria-hidden className="field-layer overflow-hidden">
+      <div aria-hidden className="field-layer ball-lane overflow-hidden">
         <span className="ball-x ball-one">
           <span className="ball-y">
             <svg viewBox="-20 -14 40 28" className="h-7 w-10 sm:h-9 sm:w-12">

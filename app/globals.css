@@ -2249,6 +2249,30 @@ body {
   }
 }
 
+/* Where the passes are allowed to show. They used to arc straight through
+   the headline and peek out between its letters, which read as a stray
+   glyph. The headline is at most 848px wide and centred, so the balls fade
+   out over a fixed 880px column in the middle and fly fully visible outside
+   it, as if they passed behind the words. On a screen narrower than the
+   column that hides them entirely, which is right: there's no room beside
+   the text on a phone. */
+.ball-lane {
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    #000 calc(50% - 520px),
+    transparent calc(50% - 440px),
+    transparent calc(50% + 440px),
+    #000 calc(50% + 520px)
+  );
+  mask-image: linear-gradient(
+    90deg,
+    #000 calc(50% - 520px),
+    transparent calc(50% - 440px),
+    transparent calc(50% + 440px),
+    #000 calc(50% + 520px)
+  );
+}
+
 /* "Scroll" under the hero: a nudge that the page keeps going. */
 .scroll-cue {
   animation: scroll-cue 2.2s ease-in-out infinite;

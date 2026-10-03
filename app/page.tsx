@@ -179,12 +179,17 @@ export default async function Home() {
             {/* One person, in their own words: the fantasy league's numbers
                 person, who wants it to be their job (docs/PLAN.md, Target
                 user). Not "everyone who might learn SQL". */}
-            <h1 className="reveal mt-6 font-display font-bold leading-[1.04] tracking-tight text-pop">
-              <span className="mx-auto block max-w-3xl text-[1.85rem] sm:text-5xl lg:text-[3.4rem]">
+            {/* A setup and a punchline, so the two lines are sized apart on
+                purpose (about 1.5x at every width) and sit close together.
+                Line 1 balances its break, so a phone never leaves "league."
+                alone on a line. Line 2 never wraps — the tile belongs to the
+                phrase — so on phones it's sized to the screen: the line runs
+                about 9x its font size, hence (100vw - the gutters) / 9.1. */}
+            <h1 className="reveal mt-6 font-display font-bold tracking-tight text-pop">
+              <span className="mx-auto block max-w-3xl text-[1.6rem] leading-[1.12] [text-wrap:balance] sm:text-[2.4rem] md:text-[2.6rem] lg:text-[3.1rem]">
                 You&apos;re already the numbers person in your league.
               </span>
-              {/* One row at every width: the tile belongs to the phrase. */}
-              <span className="mt-3 block whitespace-nowrap text-[2.1rem] sm:text-[3.3rem] md:text-6xl lg:text-7xl">
+              <span className="mt-2 block whitespace-nowrap text-[length:min(calc((100vw_-_2rem)/9.1),2.75rem)] leading-[1.05] sm:mt-3 sm:text-[3.6rem] md:text-6xl lg:text-7xl">
                 <span className="title-glow-turf text-turf">Make it your job</span> <HeadlineTile />
               </span>
             </h1>
