@@ -5,6 +5,9 @@
  *   (no params)                          the site card
  *   ?kind=question&t=…&d=easy&l=sql&s=…  a question: title, level, language,
  *                                        the start of the prompt
+ *   ?kind=daily&n=7&k=2&t=…&d=…&l=sql    a daily result: "Daily SQL #7 ·
+ *                                        solved in 2 tries", the squares,
+ *                                        "Can you do it in fewer?"
  *
  * The question's text comes in the query string rather than from
  * lib/questions, so this edge function doesn't bundle the question bank and
@@ -55,6 +58,55 @@ export async function GET(req: Request) {
             {prompt && (
               <span style={{ fontSize: 32, color: OG.muted, marginTop: 22, lineHeight: 1.35, maxWidth: 1040 }}>
                 {prompt.length === 150 ? `${prompt}…` : prompt}
+              </span>
+            )}
+          </div>
+        </OgFrame>
+      ),
+      { ...OG_SIZE, fonts, headers },
+    );
+  }
+
+  if (p.get("kind") === "daily") {
+    const number = Math.max(1, Number(p.get("n")) || 1);
+    const tries = Math.min(99, Math.max(1, Number(p.get("k")) || 1));
+    const title = (p.get("t") ?? "").slice(0, 60);
+    const level = (p.get("d") ?? "").toLowerCase();
+    const lang = LANG_LABEL[(p.get("l") ?? "sql").toLowerCase()] ?? "SQL";
+    const misses = Math.min(9, tries - 1);
+    // Drawn, not emoji: the image renderer has no emoji font. A miss is gold
+    // and the solve is turf, as the 🟨🟩 in the share text are.
+    const square = (solve: boolean, i: number) => (
+      <div
+        key={i}
+        style={{
+          display: "flex",
+          width: 80,
+          height: 80,
+          borderRadius: 16,
+          background: solve ? OG.turf : OG.gold,
+          border: `6px solid ${OG.night}`,
+          boxShadow: `0 7px 0 0 ${OG.night}`,
+        }}
+      />
+    );
+    return new ImageResponse(
+      (
+        <OgFrame glow={OG.gold} tagline="Same question for everyone today">
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontSize: 30, color: OG.gold, letterSpacing: 4 }}>
+              DAILY {lang} #{number}
+            </span>
+            <span style={{ fontSize: 104, fontWeight: 700, lineHeight: 1.02, marginTop: 10 }}>
+              {`Solved in ${tries} ${tries === 1 ? "try" : "tries"}.`}
+            </span>
+            <div style={{ display: "flex", gap: 14, marginTop: 26 }}>
+              {[...Array.from({ length: misses }, (_, i) => square(false, i)), square(true, misses)]}
+            </div>
+            <span style={{ fontSize: 40, fontWeight: 700, marginTop: 30 }}>Can you do it in fewer?</span>
+            {title && (
+              <span style={{ fontSize: 30, color: OG.muted, marginTop: 8 }}>
+                {level ? `${title} · ${level}` : title}
               </span>
             )}
           </div>

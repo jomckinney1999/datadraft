@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { SITE_URL } from "@/lib/site";
+import SiteAnalytics from "@/components/site-analytics";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -82,7 +83,10 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
-      <body className="font-sans antialiased bg-stadium">{children}</body>
+      <body className="font-sans antialiased bg-stadium">
+        {children}
+        <SiteAnalytics />
+      </body>
     </html>
   );
 }

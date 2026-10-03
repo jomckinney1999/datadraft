@@ -55,6 +55,25 @@ export function parseDuelResult(code: string | null | undefined): DuelResult | n
 
 export const squares = (grid: boolean[]) => grid.map((ok) => (ok ? "🟩" : "🟥")).join("");
 
+/** A daily SQL result: which daily, and how many graded tries it took. */
+export type DailyResult = { number: number; tries: number };
+
+/** "7-2": Daily SQL #7, solved in 2 tries. Nothing about the answer. */
+export function encodeDailyResult(number: number, tries: number): string {
+  return `${number}-${tries}`;
+}
+
+export function parseDailyResult(code: string | null | undefined): DailyResult | null {
+  const m = /^(\d{1,4})-(\d{1,2})$/.exec(code ?? "");
+  if (!m) return null;
+  const number = Number(m[1]);
+  const tries = Number(m[2]);
+  return number >= 1 && tries >= 1 ? { number, tries } : null;
+}
+
+/** 🟨 per miss, 🟩 for the solve; the misses cap at nine so a line stays a line. */
+export const triesSquares = (tries: number) => `${"🟨".repeat(Math.min(9, tries - 1))}🟩`;
+
 /**
  * Share text the way people actually share: the phone's share sheet where
  * there is one, the clipboard where there isn't.

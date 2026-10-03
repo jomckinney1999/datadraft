@@ -33,7 +33,13 @@ import type { Database, QueryExecResult } from "sql.js";
 import ChartIt from "@/components/chart-it";
 import { NFLVERSE_CREDIT } from "@/lib/chart";
 import { SITE_URL } from "@/lib/site";
-import { dailyNumber, shareText } from "@/lib/daily-share";
+import {
+  dailyNumber,
+  encodeDailyResult,
+  shareText,
+  triesSquares,
+  type DailyResult,
+} from "@/lib/daily-share";
 import type { CellValue } from "@/lib/excel-data";
 import type { Question } from "@/lib/questions";
 import {
@@ -164,9 +170,12 @@ export default function QuestionWorkspace({
   prevId,
   position,
   total,
+  challenge = null,
 }: {
   question: Question;
   isQotd: boolean;
+  /** A friend's daily result, from a /questions/<id>/vs/<n>-<tries> link. */
+  challenge?: DailyResult | null;
   /** League-timezone day, resolved on the server so it can't drift. */
   day: string;
   prevDay: string;
@@ -354,6 +363,8 @@ export default function QuestionWorkspace({
 
   const tables = schemaFor(question);
   const weight = LANG_WEIGHT[question.lang];
+  // A friend's link from an earlier day still works; it just isn't today's.
+  const challengeIsToday = !!challenge && isQotd && challenge.number === dailyNumber(day);
   const players = featuredPlayers(question, 3);
   const canPress = isSql || isExcel ? ready : !booting;
 
@@ -361,6 +372,26 @@ export default function QuestionWorkspace({
     <>
       <AppNav back="/questions" backLabel="all questions" />
       <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-24 pt-5 sm:px-6">
+        {challenge && (
+          <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-gold/40 bg-gold/10 px-4 py-3">
+            <span className="font-mono text-base tracking-[0.12em]" aria-hidden>
+              {triesSquares(challenge.tries)}
+            </span>
+            <p className="text-sm text-ink">
+              A friend solved this in{" "}
+              <strong>
+                {challenge.tries} {challenge.tries === 1 ? "try" : "tries"}
+              </strong>{" "}
+              as Daily {LANG_LABEL[question.lang]} #{challenge.number}.{" "}
+              {challengeIsToday ? "Your turn." : "Beat their score, then try today's."}
+            </p>
+            {!challengeIsToday && (
+              <Link href="/questions" className="ml-auto font-mono text-[11px] font-bold uppercase tracking-wider text-gold hover:underline">
+                Today&apos;s is #{dailyNumber(day)} →
+              </Link>
+            )}
+          </div>
+        )}
         {/* On a phone this is a column in reading order: the problem, then
             the editor, then the tables and hints. On a desktop it is two
             columns, with the editor spanning both rows on the right. Putting
@@ -648,10 +679,22 @@ export default function QuestionWorkspace({
                             : `+${reward.tickets} ticket${reward.tickets === 1 ? "" : "s"} · already banked the XP for this one`}
                         </p>
                       )}
+                      {challenge && tries > 0 && (
+                        <p className="mt-3 rounded-lg border border-panel-border bg-night/40 px-3 py-2 text-sm text-ink">
+                          You: <strong>{tries}</strong> · Your friend: <strong>{challenge.tries}</strong>.{" "}
+                          <span className={tries < challenge.tries ? "text-turf" : tries === challenge.tries ? "text-ice" : "text-gold"}>
+                            {tries < challenge.tries
+                              ? "You win."
+                              : tries === challenge.tries
+                                ? "Dead heat."
+                                : "They take this one."}
+                          </span>
+                        </p>
+                      )}
                       {isQotd && tries > 0 && (
                         <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-gold/40 bg-gold/10 px-3 py-2">
                           <span className="font-mono text-base tracking-[0.12em]" aria-hidden>
-                            {"🟨".repeat(Math.min(9, tries - 1))}🟩
+                            {triesSquares(tries)}
                           </span>
                           <span className="text-xs text-ink-soft">
                             Today&apos;s question in {tries} {tries === 1 ? "try" : "tries"}.
@@ -659,11 +702,15 @@ export default function QuestionWorkspace({
                           <button
                             type="button"
                             onClick={async () => {
+                              // The link is a challenge page: its preview shows
+                              // this score and the squares, and a friend who
+                              // opens it lands on the question with the score
+                              // to beat.
                               const how = await shareText(
-                                `DataDraft Daily SQL #${dailyNumber(day)} · solved in ${tries} ${tries === 1 ? "try" : "tries"}
-${"🟨".repeat(Math.min(9, tries - 1))}🟩
+                                `DataDraft Daily ${LANG_LABEL[question.lang]} #${dailyNumber(day)} · solved in ${tries} ${tries === 1 ? "try" : "tries"}
+${triesSquares(tries)}
 Same question for everyone today:
-${SITE_URL}/questions?ref=share`,
+${SITE_URL}/questions/${question.id}/vs/${encodeDailyResult(dailyNumber(day), tries)}`,
                               );
                               setShareNote(how === "copied" ? "Copied" : how === "failed" ? "Couldn't copy" : null);
                             }}

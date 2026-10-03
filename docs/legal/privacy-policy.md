@@ -20,7 +20,9 @@ Last updated: July 18, 2026
 
 **Fantasy platform data (if you connect one):** if you link a Sleeper, ESPN, or Yahoo fantasy account (see Phase 5 of `docs/LAUNCH-PLAN.md`), we access the roster/league data associated with that connection to power personalized features. This may include **league-mates' names or team names who never signed up for DataDraft themselves** — we only use this data to power the connected user's own experience (e.g., "beat your league's average"), not to build profiles on or contact people who haven't created an account. [This needs real scrutiny once Phase 5 is actually built — flag any additional handling decisions here as they're made.]
 
-**Cookies:** session cookies for authentication (via Supabase Auth), and analytics cookies if/when analytics tooling is added (see `docs/LAUNCH-PLAN.md` Phase 9).
+**Page analytics:** we use **Vercel Web Analytics**, which counts page views without cookies and without identifying you across sites. For each page view it records the page's path (with any query string removed, plus a short marker when you arrived through one of our own share links, such as a posted chart or a Stat Duel challenge), the referring site, and your country, browser, operating system and device type, as Vercel derives them from the request.
+
+**Cookies:** session cookies for authentication (via Supabase Auth), only if you sign in. Our analytics set no cookies.
 
 ## 3. How we use it
 
@@ -33,6 +35,7 @@ Last updated: July 18, 2026
 
 Only the service providers necessary to run DataDraft, each bound by their own privacy/security commitments:
 
+- **Vercel** — hosting and cookieless page analytics
 - **Supabase** — database, authentication
 - **Stripe** — payment processing (Stripe Tax for sales tax calculation)
 - [Email provider, e.g. Resend/Postmark] — transactional email
