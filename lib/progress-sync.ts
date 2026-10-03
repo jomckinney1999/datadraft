@@ -17,6 +17,7 @@ import { loadProgress, saveProgress, type Progress } from "@/lib/progress";
 import { readStoredModule, MODULE_STORAGE_KEY } from "@/lib/use-module";
 import { PAYWALL_LIVE, type PassPlan } from "@/lib/season-pass";
 import { PASS_EVENT } from "@/lib/use-pass";
+import { isNflTeam } from "@/lib/nfl-team-avatars";
 
 type Supabase = ReturnType<typeof createClient>;
 
@@ -103,6 +104,7 @@ type Row = {
   best_combo: number | null;
   perfect_lessons: number | null;
   total_yards: number | null;
+  favorite_team: string | null;
 };
 
 function merge(local: Progress, remote: Row | null): Progress {
@@ -127,6 +129,11 @@ function merge(local: Progress, remote: Row | null): Progress {
     username: newer?.username ?? remote.username ?? local.username ?? null,
     draftedTrack:
       newer?.draftedTrack ?? remote.drafted_track ?? local.draftedTrack ?? null,
+    // A choice on this device is intentional and wins; a fresh device has
+    // null locally and receives the server's team.
+    favoriteTeam:
+      local.favoriteTeam ??
+      (isNflTeam(remote.favorite_team) ? remote.favorite_team : null),
     // Same rule as the counters above: union the badges, max the totals. A
     // badge earned on a phone must not disappear because the laptop's row is
     // older, and that is exactly what last-write-wins would do.
@@ -218,6 +225,7 @@ export async function pushProgress(progress?: Progress): Promise<void> {
       best_combo: p.bestCombo,
       perfect_lessons: p.perfectLessons,
       total_yards: p.totalYards,
+      favorite_team: p.favoriteTeam,
     },
     { onConflict: "user_id" },
   );

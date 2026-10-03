@@ -169,6 +169,34 @@ for (const unit of curriculum.COURSE.units) {
   }
 }
 
+// The account team draft slices one supplied 8×4 sprite. Every active NFL
+// team must own exactly one in-bounds cell or a profile can show another
+// team's owl without throwing an error.
+{
+  const fs = await import("node:fs");
+  const avatars = await loadProjectTs(path.join(root, "lib/nfl-team-avatars.ts"), root);
+  const order = avatars.NFL_TEAM_ORDER;
+  const teams = avatars.NFL_TEAM_AVATARS;
+  if (!fs.existsSync(path.join(root, "public/avatars/nfl-team-owls.jpg"))) {
+    problems.push("team avatars: public/avatars/nfl-team-owls.jpg is missing");
+  }
+  if (order.length !== 32 || new Set(order).size !== 32) {
+    problems.push(`team avatars: expected 32 unique abbreviations, found ${order.length} entries / ${new Set(order).size} unique`);
+  }
+  const cells = new Set();
+  for (const team of teams) {
+    if (team.col < 0 || team.col > 7 || team.row < 0 || team.row > 3) {
+      problems.push(`team avatars: ${team.abbr} maps outside the 8×4 sprite (${team.col}, ${team.row})`);
+    }
+    const cell = `${team.col},${team.row}`;
+    if (cells.has(cell)) problems.push(`team avatars: sprite cell ${cell} is assigned more than once`);
+    cells.add(cell);
+  }
+  if (teams.length !== 32 || cells.size !== 32) {
+    problems.push(`team avatars: expected all 32 sprite cells, found ${teams.length} teams / ${cells.size} cells`);
+  }
+}
+
 // The Season Pass (docs/OFFER.md). The free starter set has to be real easy
 // SQL questions, and the prices in the code have to be the prices the Stripe
 // setup script creates, or the page would advertise one number and charge

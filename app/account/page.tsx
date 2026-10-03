@@ -6,13 +6,25 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
-import { readPass, syncProgress, type PassStatus } from "@/lib/progress-sync";
+import {
+  EMPTY_PROGRESS,
+  loadProgress,
+  setFavoriteTeam,
+  type Progress,
+} from "@/lib/progress";
+import {
+  pushProgress,
+  readPass,
+  syncProgress,
+  type PassStatus,
+} from "@/lib/progress-sync";
 import { PASS_PLANS, PAYWALL_LIVE } from "@/lib/season-pass";
 import Coach from "@/components/coach";
 import AppNav from "@/components/app-nav";
 import LockerCard from "@/components/locker-card";
 import WaitlistForm from "@/components/waitlist-form";
+import TeamDraftScene from "@/components/team-draft-scene";
+import type { NflTeamAbbr } from "@/lib/nfl-team-avatars";
 
 type State = "loading" | "signed-out" | "sending" | "sent" | "signed-in";
 
@@ -42,6 +54,8 @@ export default function AccountPage() {
   const [pass, setPass] = useState<PassStatus | null>(null);
   const [justBought, setJustBought] = useState(false);
   const [portalBusy, setPortalBusy] = useState(false);
+  const [teamDraftOpen, setTeamDraftOpen] = useState(false);
+  const [teamDraftRequired, setTeamDraftRequired] = useState(false);
 
   const boot = useCallback(async () => {
     const params = new URLSearchParams(window.location.search);
@@ -62,8 +76,13 @@ export default function AccountPage() {
     setWho(user.email ?? null);
     setState("signed-in");
     const merged = await syncProgress();
-    setProgress(merged ?? loadProgress());
+    const current = merged ?? loadProgress();
+    setProgress(current);
     setSynced(true);
+    if (params.get("onboard") === "1" || !current.favoriteTeam) {
+      setTeamDraftRequired(true);
+      setTeamDraftOpen(true);
+    }
 
     if (!PAYWALL_LIVE) return;
     // Back from Stripe: the webhook that grants the Pass can land a few
@@ -129,9 +148,30 @@ export default function AccountPage() {
     window.location.href = "/account";
   }
 
+  async function confirmTeam(team: NflTeamAbbr) {
+    const next = setFavoriteTeam(team);
+    setProgress(next);
+    await pushProgress(next);
+    setTeamDraftOpen(false);
+    setTeamDraftRequired(false);
+
+    const params = new URLSearchParams(window.location.search);
+    const requested = params.get("next");
+    if (params.get("onboard") === "1" && requested && /^\/(?!\/)/.test(requested)) {
+      window.location.href = requested;
+    }
+  }
+
   return (
     <>
       <AppNav />
+      <TeamDraftScene
+        open={teamDraftOpen}
+        initialTeam={progress.favoriteTeam}
+        required={teamDraftRequired}
+        onConfirm={confirmTeam}
+        onClose={teamDraftRequired ? undefined : () => setTeamDraftOpen(false)}
+      />
       <main className="mx-auto min-h-screen w-full max-w-2xl px-4 pb-24 pt-6 sm:px-6">
         {error && (
           <p
@@ -143,7 +183,14 @@ export default function AccountPage() {
         )}
 
         <div className="mb-6">
-          <LockerCard progress={progress} onChange={setProgress} />
+          <LockerCard
+            progress={progress}
+            onChange={setProgress}
+            onChooseTeam={() => {
+              setTeamDraftRequired(false);
+              setTeamDraftOpen(true);
+            }}
+          />
         </div>
 
         {!PAYWALL_LIVE && (

@@ -1,6 +1,8 @@
 // localStorage-backed learner progress for the /learn MVP.
 // Deliberately no backend yet — swaps for Supabase `progress` later.
 
+import { isNflTeam, type NflTeamAbbr } from "@/lib/nfl-team-avatars";
+
 /** Jersey / helmet accent on the learner avatar (kept here to avoid a cycle with tenure). */
 export type KitAccent = "turf" | "ice" | "gold";
 
@@ -25,6 +27,8 @@ export type Progress = {
   kitTone: number;
   /** Jersey / helmet accent on your avatar. */
   kitAccent: KitAccent;
+  /** NFL team drafted during account orientation; null before that scene. */
+  favoriteTeam: NflTeamAbbr | null;
   // ── game state (lib/achievements.ts reads these) ──
   /** Badge ids already celebrated, so an unlock only pops once. */
   badges: string[];
@@ -104,6 +108,7 @@ export const EMPTY_PROGRESS: Progress = {
   jersey: 7,
   kitTone: 0,
   kitAccent: "ice",
+  favoriteTeam: null,
   badges: [],
   bestCombo: 0,
   perfectLessons: 0,
@@ -172,6 +177,7 @@ export function loadProgress(): Progress {
           ? ((Math.round(parsed.kitTone) % 4) + 4) % 4
           : 0,
       kitAccent: parseKitAccent(parsed.kitAccent),
+      favoriteTeam: isNflTeam(parsed.favoriteTeam) ? parsed.favoriteTeam : null,
       // Defaulted rather than required: progress saved before these existed
       // must keep loading, not blow up or reset someone's XP.
       badges: Array.isArray(parsed.badges)
@@ -230,6 +236,13 @@ export function setDraftPick(username: string, trackId: string): Progress {
 export function setCallSign(username: string): Progress {
   const trimmed = username.trim().slice(0, 24);
   const next = { ...loadProgress(), username: trimmed.length ? trimmed : null };
+  save(next);
+  return next;
+}
+
+/** Draft (or change) the NFL team that supplies the learner's owl avatar. */
+export function setFavoriteTeam(team: NflTeamAbbr): Progress {
+  const next = { ...loadProgress(), favoriteTeam: team };
   save(next);
   return next;
 }

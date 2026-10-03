@@ -1,60 +1,40 @@
 "use client";
 
 /**
- * Own your character — callsign, shirt number, kit colour. Lives on
- * /account and feeds the nav chip + dashboard leaderboard placeholder.
+ * Own your character — callsign, drafted team and tenure. Lives on /account
+ * and feeds the nav chip + dashboard leaderboard placeholder.
  */
 
 import { useEffect, useState } from "react";
 import PlayerMark from "@/components/player-mark";
-import { setCallSign, setKit, type KitAccent, type Progress } from "@/lib/progress";
+import { setCallSign, type Progress } from "@/lib/progress";
 import { displayName, RANKS, tenureFrom } from "@/lib/tenure";
-
-const ACCENTS: { id: KitAccent; label: string }[] = [
-  { id: "ice", label: "Ice" },
-  { id: "turf", label: "Turf" },
-  { id: "gold", label: "Gold" },
-];
+import { nflTeam } from "@/lib/nfl-team-avatars";
 
 export default function LockerCard({
   progress: initial,
   onChange,
+  onChooseTeam,
 }: {
   progress: Progress;
   onChange?: (p: Progress) => void;
+  onChooseTeam?: () => void;
 }) {
   const [progress, setProgress] = useState(initial);
   const [name, setName] = useState(initial.username ?? "");
-  const [jerseyDraft, setJerseyDraft] = useState(String(initial.jersey));
 
   useEffect(() => {
     setProgress(initial);
     setName(initial.username ?? "");
-    setJerseyDraft(String(initial.jersey));
   }, [initial]);
 
   const tenure = tenureFrom(progress);
   const shown = displayName({ ...progress, username: name.trim() || null });
+  const team = nflTeam(progress.favoriteTeam);
 
   function commitName() {
     const next = setCallSign(name);
     setProgress(next);
-    onChange?.(next);
-  }
-
-  function commitJersey() {
-    const n = Number.parseInt(jerseyDraft, 10);
-    const jersey = Number.isFinite(n) ? n : progress.jersey;
-    const next = setKit({ jersey });
-    setJerseyDraft(String(next.jersey));
-    setProgress(next);
-    onChange?.(next);
-  }
-
-  function patchKit(patch: { kitAccent?: KitAccent; jersey?: number }) {
-    const next = setKit(patch);
-    setProgress(next);
-    if (typeof patch.jersey === "number") setJerseyDraft(String(next.jersey));
     onChange?.(next);
   }
 
@@ -73,7 +53,7 @@ export default function LockerCard({
           Own the roster spot
         </h2>
         <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">
-          Name your owl, pick a kit, and level up by solving, learning and
+          Name your owl, draft your team, and level up by solving, learning and
           showing up. Tenure ranks reward commitment — not a one-day grind.
         </p>
       </div>
@@ -86,6 +66,7 @@ export default function LockerCard({
               kitAccent={progress.kitAccent}
               rankTone={tenure.rank.tone}
               status={tenure.rank.name}
+              favoriteTeam={progress.favoriteTeam}
               size={148}
             />
           </div>
@@ -142,49 +123,22 @@ export default function LockerCard({
             </div>
           </label>
 
-          <div className="grid grid-cols-2 gap-3">
-            <label className="block">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted">
-                Shirt #
-              </span>
-              <input
-                inputMode="numeric"
-                value={jerseyDraft}
-                onChange={(e) => setJerseyDraft(e.target.value.replace(/\D/g, "").slice(0, 2))}
-                onBlur={commitJersey}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") e.currentTarget.blur();
-                }}
-                className="mt-1.5 w-full rounded-xl border border-panel-border bg-night px-3 py-2.5 font-mono text-sm font-bold text-ink outline-none focus:border-gold"
-              />
-            </label>
-            <div>
-              <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted">
-                Kit colour
-              </span>
-              <div className="mt-1.5 flex gap-1.5">
-                {ACCENTS.map((a) => (
-                  <button
-                    key={a.id}
-                    type="button"
-                    onClick={() => patchKit({ kitAccent: a.id })}
-                    aria-pressed={progress.kitAccent === a.id}
-                    title={a.label}
-                    className={`h-10 flex-1 rounded-xl border font-mono text-[10px] font-bold uppercase tracking-wider ${
-                      progress.kitAccent === a.id
-                        ? a.id === "gold"
-                          ? "border-gold bg-gold/20 text-gold"
-                          : a.id === "turf"
-                            ? "border-turf bg-turf/20 text-turf"
-                            : "border-ice bg-ice/20 text-ice"
-                        : "border-panel-border text-ink-muted hover:border-ink-muted"
-                    }`}
-                  >
-                    {a.label}
-                  </button>
-                ))}
-              </div>
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-panel-border bg-night/30 px-3 py-3">
+            <div className="min-w-0">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted">
+                Your team
+              </p>
+              <p className="mt-0.5 truncate font-display text-sm font-bold text-ink">
+                {team?.name ?? "No team drafted"}
+              </p>
             </div>
+            <button
+              type="button"
+              onClick={onChooseTeam}
+              className="shrink-0 rounded-xl border border-ice/50 bg-ice/10 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-ice hover:bg-ice/20"
+            >
+              {team ? "Change team" : "Draft a team"}
+            </button>
           </div>
 
           <div className="rounded-xl border border-panel-border bg-night/30 px-3 py-2.5">

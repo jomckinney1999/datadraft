@@ -209,6 +209,7 @@ export default function LearnRail({
             kitAccent={progress.kitAccent}
             rankTone={tenure.rank.tone}
             status={tenure.rank.name}
+            favoriteTeam={progress.favoriteTeam}
             size={56}
             className="shrink-0"
           />

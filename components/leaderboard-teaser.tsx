@@ -45,6 +45,7 @@ export default function LeaderboardTeaser({ progress }: { progress: Progress }) 
             kitAccent={progress.kitAccent}
             rankTone={tenure.rank.tone}
             status={tenure.rank.name}
+            favoriteTeam={progress.favoriteTeam}
             size={44}
             className="shrink-0"
           />

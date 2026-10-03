@@ -1,64 +1,66 @@
 /**
- * Logo-style profile mark — flat ape-NFT cartoon energy, but an owl.
+ * An original stats-nerd owl in a flat collectible-avatar style.
  *
- * Owls read as the smart animal; big round glasses do the rest. Solid pastel
- * field, thick night outlines, flat fills, one shade block, gold halo, soft
- * status veil. Shirt colour + number are the kit customisation — no football
- * gear. One fixed feather palette (not a race menu). Gradient ids sanitized.
+ * The visual language comes from the reference set's broad traits: a solid
+ * colour field, chest-up 3/4 portrait, elongated face, expressive eyes,
+ * thick ink contours, sparse flat shading, and one loud accessory. This is
+ * intentionally character art rather than theme-token UI.
  */
 
-import { c, N, type Tone } from "@/components/art-kit";
 import type { KitAccent } from "@/lib/progress";
+import type { Tone } from "@/components/art-kit";
+import TeamOwlAvatar from "@/components/team-owl-avatar";
+import { nflTeam, type NflTeamAbbr } from "@/lib/nfl-team-avatars";
 
-/** Fixed cartoon feather / face — illustration hexes, like the cast. */
-const OWL = {
-  feather: "rgb(92 72 58)",
-  featherShade: "rgb(62 48 38)",
-  face: "rgb(232 198 158)",
-  faceShade: "rgb(198 158 118)",
-  beak: "rgb(255 180 60)",
-  beakShade: "rgb(212 140 30)",
+const P = {
+  ink: "#171717",
+  feather: "#51443D",
+  featherDark: "#352C28",
+  featherLight: "#705E53",
+  face: "#DDBB8E",
+  faceShade: "#B88C62",
+  beak: "#DF9135",
+  beakShade: "#A85D21",
+  lens: "#D7F0EE",
+  lensShade: "#93C6C8",
+  paper: "#FFF9E4",
+  cream: "#EEEFAE",
+  gold: "#F0CA45",
 } as const;
 
-/**
- * Shirt = kit accent. Sky = flat complementary pastel so the dark owl
- * pops the way a cream field pops a Bored Ape.
- */
 const KIT: Record<
   KitAccent,
   {
-    primary: Tone;
     shirt: string;
     shirtShade: string;
-    number: string;
-    sky: string;
-    frames: string;
+    field: string;
+    accent: string;
   }
 > = {
   ice: {
-    primary: "ice",
-    shirt: c("ice"),
-    shirtShade: c("ice-dim"),
-    number: c("ink"),
-    sky: c("gold"),
-    frames: c("night"),
+    shirt: "#277FA9",
+    shirtShade: "#175470",
+    field: "#F3A12E",
+    accent: "#45C8E8",
   },
   turf: {
-    primary: "turf",
-    shirt: c("turf"),
-    shirtShade: c("turf-dim"),
-    number: c("night"),
-    sky: c("gold"),
-    frames: c("night"),
+    shirt: "#5C9D45",
+    shirtShade: "#376B2B",
+    field: "#78D7E7",
+    accent: "#77D64F",
   },
   gold: {
-    primary: "gold",
-    shirt: c("gold"),
-    shirtShade: c("gold-dim"),
-    number: c("night"),
-    sky: c("ice"),
-    frames: c("night"),
+    shirt: "#D8A329",
+    shirtShade: "#946A18",
+    field: "#52D2AF",
+    accent: "#F0C948",
   },
+};
+
+const RING: Record<Tone, string> = {
+  ice: "#45C8E8",
+  turf: "#77D64F",
+  gold: "#F0C948",
 };
 
 function safeId(parts: (string | number)[]) {
@@ -76,6 +78,7 @@ export default function PlayerMark({
   className = "",
   rankTone,
   status,
+  favoriteTeam,
 }: {
   jersey?: number;
   kitAccent?: KitAccent;
@@ -83,179 +86,265 @@ export default function PlayerMark({
   className?: string;
   rankTone?: Tone;
   status?: string;
+  favoriteTeam?: NflTeamAbbr | null;
 }) {
   const kit = KIT[kitAccent] ?? KIT.ice;
-  const ring = rankTone ?? kit.primary;
-  const num = String(Math.max(0, Math.min(99, Math.round(jersey))));
-  const gid = safeId(["pm", kitAccent, num, status ?? "x"]);
-  const banner = Boolean(status?.trim());
+  const tone = rankTone ?? kitAccent;
+  const number = String(Math.max(0, Math.min(99, Math.round(jersey))));
   const label = (status ?? "").trim().toUpperCase();
-  const showLabel = banner && size >= 44;
-  const bannerSize = label.length > 12 ? 6 : label.length > 8 ? 7 : 8;
+  const hasBadge = Boolean(label);
+  const showText = hasBadge && size >= 44;
+  const labelSize = label.length > 12 ? 8 : label.length > 8 ? 9.5 : 11;
+  const gid = safeId(["owl", kitAccent, number, label || "none"]);
+  const draftedTeam = nflTeam(favoriteTeam);
+
+  if (draftedTeam) {
+    return (
+      <span
+        className={`player-mark-glow relative inline-block shrink-0 overflow-hidden rounded-full border-[3px] border-night bg-night ${className}`}
+        data-tone={tone}
+        style={{ width: size, height: size }}
+        role="img"
+        aria-label={`${draftedTeam.name} owl avatar${hasBadge ? `, ${status}` : ""}`}
+      >
+        <TeamOwlAvatar team={draftedTeam.abbr} className="absolute inset-0 h-full w-full" />
+        {hasBadge && (
+          <span
+            aria-hidden
+            className="absolute inset-x-0 bottom-0 flex h-[31%] items-center justify-center border-t border-white/25 bg-gradient-to-b from-night/10 via-night/55 to-night/90 px-1"
+          >
+            {showText && (
+              <span
+                className="truncate font-display font-black uppercase tracking-[0.08em] text-white [text-shadow:0_1px_1px_rgb(0_0_0/0.9)]"
+                style={{ fontSize: Math.max(5, size * 0.075) }}
+              >
+                {label}
+              </span>
+            )}
+          </span>
+        )}
+      </span>
+    );
+  }
 
   return (
     <svg
-      viewBox="0 0 80 80"
+      viewBox="0 0 120 120"
       width={size}
       height={size}
       className={`player-mark-glow ${className}`}
-      data-tone={ring}
+      data-tone={tone}
       role="img"
-      aria-label={banner ? `Owl ${num}, ${status}` : `Owl ${num}`}
+      aria-label={hasBadge ? `Stats owl ${number}, ${status}` : `Stats owl ${number}`}
     >
       <defs>
-        <linearGradient id={`${gid}-veil`} x1="40" y1="54" x2="40" y2="78" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor={N} stopOpacity="0" />
-          <stop offset="40%" stopColor={N} stopOpacity="0.28" />
-          <stop offset="100%" stopColor={kit.shirtShade} stopOpacity="0.82" />
+        <linearGradient id={`${gid}-badge`} x1="60" y1="86" x2="60" y2="118" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor={P.ink} stopOpacity="0.04" />
+          <stop offset="35%" stopColor={P.ink} stopOpacity="0.44" />
+          <stop offset="100%" stopColor={P.ink} stopOpacity="0.82" />
         </linearGradient>
         <clipPath id={`${gid}-clip`}>
-          <circle cx="40" cy="40" r="36" />
+          <circle cx="60" cy="60" r="54" />
         </clipPath>
       </defs>
 
-      {/* Fat sticker ring */}
-      <circle cx="40" cy="40" r="39.5" fill={kit.sky} />
-      <circle cx="40" cy="40" r="38" fill="none" stroke={N} strokeWidth="3.5" />
-      <circle cx="40" cy="40" r="36.2" fill="none" stroke={kit.shirt} strokeWidth="2.2" />
+      {/* Collectible-avatar frame. */}
+      <circle cx="60" cy="60" r="59" fill={kit.field} />
+      <circle cx="60" cy="60" r="57.2" fill="none" stroke={P.ink} strokeWidth="5.2" />
+      <circle cx="60" cy="60" r="54.2" fill="none" stroke={RING[tone]} strokeWidth="2.8" />
 
       <g clipPath={`url(#${gid}-clip)`}>
-        {/* Flat pastel field */}
-        <rect width="80" height="80" fill={kit.sky} />
+        {/* Flat background, exactly one colour. */}
+        <rect width="120" height="120" fill={kit.field} />
 
-        {/* Gold halo — ape energy */}
-        <ellipse cx="40" cy="13" rx="17" ry="5" fill="none" stroke={c("gold")} strokeWidth="3.2" />
-        <ellipse cx="40" cy="13" rx="17" ry="5" fill="none" stroke={N} strokeWidth="1.2" opacity="0.35" />
+        {/* Thin halo: small accessory, not a logo element. */}
+        <ellipse cx="57" cy="14" rx="23" ry="6" fill="none" stroke={P.gold} strokeWidth="3.4" />
+        <ellipse cx="57" cy="14" rx="23" ry="6" fill="none" stroke={P.ink} strokeWidth="1.2" opacity="0.42" />
 
-        {/* Shirt — flat, kit colour, number like an ape tee graphic */}
+        {/* Shirt and sweater vest sit low, leaving a full portrait above. */}
         <path
-          d="M8 80 V52 Q10 44 24 42 L56 42 Q70 44 72 52 V80 Z"
+          d="M7 124 L13 101 Q17 88 38 84 L74 84 Q96 89 104 104 L111 124 Z"
+          fill={P.paper}
+          stroke={P.ink}
+          strokeWidth="4.2"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M24 93 L40 85 L58 102 L76 84 L92 92 L102 124 H13 Z"
           fill={kit.shirt}
-          stroke={N}
-          strokeWidth="3.2"
-          strokeLinejoin="round"
-        />
-        <path d="M54 44 Q68 48 70 80 H58 Q56 56 54 46 Z" fill={kit.shirtShade} />
-        <path
-          d="M28 42 L33 50 L40 46 L47 50 L52 42"
-          fill={kit.shirtShade}
-          stroke={N}
-          strokeWidth="2.2"
-          strokeLinejoin="round"
-        />
-        <text
-          x="40"
-          y={banner ? 54 : 66}
-          textAnchor="middle"
-          fontSize={num.length > 1 ? (banner ? 13 : 16) : banner ? 15 : 18}
-          fontWeight="900"
-          fontFamily="Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif"
-          fill={kit.number}
-          stroke={N}
-          strokeWidth="2"
-          paintOrder="stroke fill"
-        >
-          {num}
-        </text>
-
-        {/* Oversized owl ears / head tufts */}
-        <path
-          d="M18 28 Q14 10 28 18 Z"
-          fill={OWL.feather}
-          stroke={N}
-          strokeWidth="3"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M62 28 Q66 10 52 18 Z"
-          fill={OWL.feather}
-          stroke={N}
-          strokeWidth="3"
-          strokeLinejoin="round"
-        />
-        <path d="M20 26 Q18 16 26 20 Z" fill={OWL.featherShade} />
-        <path d="M60 26 Q62 16 54 20 Z" fill={OWL.featherShade} />
-
-        {/* Round cartoon head */}
-        <ellipse
-          cx="40"
-          cy="32"
-          rx="22"
-          ry="20"
-          fill={OWL.feather}
-          stroke={N}
+          stroke={P.ink}
           strokeWidth="3.4"
+          strokeLinejoin="round"
         />
-        {/* One flat shade cheek */}
-        <ellipse cx="52" cy="36" rx="7" ry="11" fill={OWL.featherShade} />
+        <path d="M77 86 Q95 94 101 124 H84 Q84 101 74 89 Z" fill={kit.shirtShade} />
+        {/* Crisp shirt collar. */}
+        <path d="M39 84 L58 101 L47 107 L32 89 Z" fill={P.paper} stroke={P.ink} strokeWidth="2.5" />
+        <path d="M76 84 L58 101 L68 107 L83 89 Z" fill={P.paper} stroke={P.ink} strokeWidth="2.5" />
+        {/* Bow tie. */}
+        <path
+          d="M54 99 L45 95 L45 106 L54 103 Z M62 99 L71 95 L71 106 L62 103 Z"
+          fill="#D66D38"
+          stroke={P.ink}
+          strokeWidth="2"
+        />
+        <circle cx="58" cy="101" r="3.2" fill={P.gold} stroke={P.ink} strokeWidth="1.8" />
 
-        {/* Pale face disc */}
-        <ellipse
-          cx="40"
-          cy="34"
-          rx="14"
-          ry="13"
-          fill={OWL.face}
-          stroke={N}
-          strokeWidth="2.6"
+        {/* Long tapered neck creates the reference's recognisable silhouette. */}
+        <path
+          d="M44 59 L41 88 Q53 96 70 87 L68 56 Z"
+          fill={P.feather}
+          stroke={P.ink}
+          strokeWidth="4.4"
+          strokeLinejoin="round"
         />
-        <ellipse cx="46" cy="36" rx="5" ry="8" fill={OWL.faceShade} />
+        <path d="M60 59 L68 57 L70 87 Q64 92 59 92 Z" fill={P.featherDark} />
+        <path d="M45 73 Q50 76 55 76" fill="none" stroke={P.featherLight} strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M44 80 Q49 83 54 82" fill="none" stroke={P.featherLight} strokeWidth="1.5" strokeLinecap="round" />
 
         {/*
-          Big round glasses — the smart beat. Thick frames, tinted lenses,
-          white slash reflections (ape goggle energy).
+          Asymmetrical 3/4 head. It is deliberately taller than it is wide,
+          with cheek mass and a beak projecting right—the key difference
+          between a portrait and the previous centred mascot icon.
         */}
-        <circle cx="31" cy="30" r="9.5" fill={c("night-50")} stroke={kit.frames} strokeWidth="3.4" />
-        <circle cx="49" cy="30" r="9.5" fill={c("night-50")} stroke={kit.frames} strokeWidth="3.4" />
-        <path d="M40 30 H40.01" stroke={kit.frames} strokeWidth="3.4" strokeLinecap="round" />
-        <path d="M25.5 27 L34 34" stroke={c("ink")} strokeWidth="1.8" strokeLinecap="round" opacity="0.9" />
-        <path d="M27.5 26.5 L35.5 33.5" stroke={c("ink")} strokeWidth="1.2" strokeLinecap="round" opacity="0.5" />
-        <path d="M43.5 27 L52 34" stroke={c("ink")} strokeWidth="1.8" strokeLinecap="round" opacity="0.9" />
-        <path d="M45.5 26.5 L53.5 33.5" stroke={c("ink")} strokeWidth="1.2" strokeLinecap="round" opacity="0.5" />
-        {/* Tiny pupils peeking through */}
-        <circle cx="31" cy="31" r="2.2" fill={N} />
-        <circle cx="49" cy="31" r="2.2" fill={N} />
-        <circle cx="31.7" cy="30.3" r="0.7" fill={c("ink")} />
-        <circle cx="49.7" cy="30.3" r="0.7" fill={c("ink")} />
-
-        {/* Triangle beak */}
         <path
-          d="M36 38 L40 46 L44 38 Z"
-          fill={OWL.beak}
-          stroke={N}
-          strokeWidth="2.4"
+          d="M33 46
+             Q29 28 40 20
+             Q52 11 69 18
+             Q80 22 82 35
+             Q91 37 96 46
+             Q100 56 94 65
+             Q89 72 78 71
+             Q74 81 63 84
+             Q48 87 37 77
+             Q31 71 31 61
+             Q21 58 20 49
+             Q20 40 27 37
+             Q30 38 33 46 Z"
+          fill={P.feather}
+          stroke={P.ink}
+          strokeWidth="4.5"
           strokeLinejoin="round"
         />
-        <path d="M40 39.5 L40 44.5" stroke={OWL.beakShade} strokeWidth="1.6" strokeLinecap="round" />
+        {/* Ear tufts / side feathers. */}
+        <path d="M34 42 Q24 24 43 28 Z" fill={P.feather} stroke={P.ink} strokeWidth="3.2" strokeLinejoin="round" />
+        <path d="M78 39 Q88 23 82 47 Z" fill={P.featherDark} stroke={P.ink} strokeWidth="3.2" strokeLinejoin="round" />
+        <path d="M29 45 Q25 39 31 35 Q36 40 34 50 Z" fill={P.featherLight} stroke={P.ink} strokeWidth="2" />
+        <path d="M83 43 Q89 38 92 45 Q92 52 85 57 Z" fill={P.featherLight} stroke={P.ink} strokeWidth="2" />
+        {/* Sparse hard shadow on the far side. */}
+        <path
+          d="M68 19 Q83 24 82 37 Q94 40 96 50 Q97 63 84 69 Q76 76 65 82 L66 58 Z"
+          fill={P.featherDark}
+          opacity="0.78"
+        />
 
-        {/* Soft status veil */}
-        {banner && (
+        {/* Cream facial disc, weighted right for the 3/4 turn. */}
+        <path
+          d="M35 37
+             Q42 25 55 33
+             Q67 23 78 35
+             Q84 44 79 57
+             Q76 69 61 77
+             Q47 71 38 60
+             Q31 49 35 37 Z"
+          fill={P.face}
+          stroke={P.ink}
+          strokeWidth="3.3"
+          strokeLinejoin="round"
+        />
+        <path d="M63 32 Q77 27 81 40 Q84 55 70 68 L61 75 L60 43 Z" fill={P.faceShade} />
+
+        {/* Heavy expressive brows above the glasses. */}
+        <path d="M37 37 Q46 30 54 37" fill="none" stroke={P.ink} strokeWidth="3.2" strokeLinecap="round" />
+        <path d="M60 36 Q70 28 78 36" fill="none" stroke={P.ink} strokeWidth="3.2" strokeLinecap="round" />
+
+        {/*
+          Stats-nerd glasses: clear square lenses, visible sleepy eyes,
+          taped bridge, and a tiny rising chart reflected on the right.
+        */}
+        <g transform="rotate(-2 58 47)">
+          <rect x="32" y="38" width="25" height="21" rx="5" fill={P.lens} stroke={P.ink} strokeWidth="4.2" />
+          <rect x="59" y="37" width="27" height="22" rx="5" fill={P.lens} stroke={P.ink} strokeWidth="4.2" />
+          <path d="M57 45 Q58 42 60 45" fill="none" stroke={P.ink} strokeWidth="4" strokeLinecap="round" />
+          <path d="M32 43 L24 40" fill="none" stroke={P.ink} strokeWidth="3.2" strokeLinecap="round" />
+          <path d="M86 42 L91 39" fill="none" stroke={P.ink} strokeWidth="3.2" strokeLinecap="round" />
+          {/* Droopy white eyes. */}
+          <path d="M37 49 Q44 43 51 49 Q44 55 37 49 Z" fill={P.paper} stroke={P.ink} strokeWidth="1.6" />
+          <path d="M64 48 Q72 41 80 48 Q72 55 64 48 Z" fill={P.paper} stroke={P.ink} strokeWidth="1.6" />
+          <circle cx="46" cy="49" r="2.2" fill={P.ink} />
+          <circle cx="75" cy="48" r="2.2" fill={P.ink} />
+          {/* Lens shine. */}
+          <path d="M36 42 L43 49" stroke={P.paper} strokeWidth="2" strokeLinecap="round" opacity="0.7" />
+          <path d="M64 41 L70 47" stroke={P.paper} strokeWidth="2" strokeLinecap="round" opacity="0.7" />
+          {/* Tape on the bridge. */}
+          <path d="M55 39 L61 51" stroke={P.paper} strokeWidth="3.3" strokeLinecap="round" />
+          <path d="M56 42 L60 40 M57 46 L62 44 M58 49 L62 47" stroke={P.lensShade} strokeWidth="0.9" />
+          {/* Rising chart reflection. */}
+          <path d="M66 54 V51 M71 54 V48 M76 54 V44 M81 54 V41" stroke="#2D9CA0" strokeWidth="1.4" strokeLinecap="round" opacity="0.8" />
+        </g>
+
+        {/* Long hooked beak supplies the ape references' projecting muzzle. */}
+        <path
+          d="M55 57
+             Q68 52 80 55
+             Q92 57 98 62
+             Q90 66 81 67
+             Q75 76 62 76
+             Q54 72 55 57 Z"
+          fill={P.beak}
+          stroke={P.ink}
+          strokeWidth="3.5"
+          strokeLinejoin="round"
+        />
+        <path d="M78 57 Q90 58 98 62 Q90 66 80 66 Z" fill={P.beakShade} />
+        <path d="M59 68 Q71 72 82 67" fill="none" stroke={P.ink} strokeWidth="2.2" strokeLinecap="round" />
+        <path d="M63 58 Q67 55 71 58" fill="none" stroke={P.ink} strokeWidth="1.8" strokeLinecap="round" />
+        {/* A few ink feather marks keep it hand-drawn. */}
+        <path d="M42 65 L45 68 M48 69 L50 72 M73 72 L70 75" stroke={P.ink} strokeWidth="1.2" strokeLinecap="round" opacity="0.7" />
+
+        {/* Curved translucent rank badge, clipped cleanly by the circle. */}
+        {hasBadge && (
           <g>
-            <path d="M2 56 Q40 50 78 56 L80 80 L0 80 Z" fill={`url(#${gid}-veil)`} />
+            <path d="M4 89 Q60 79 116 89 L121 122 H-1 Z" fill={`url(#${gid}-badge)`} />
             <path
-              d="M8 57 Q40 51.5 72 57"
+              d="M13 91 Q60 82.5 107 91"
               fill="none"
-              stroke={c("ink")}
-              strokeWidth="1.6"
-              opacity="0.4"
+              stroke={P.paper}
+              strokeWidth="1.5"
+              opacity="0.38"
               strokeLinecap="round"
             />
-            {showLabel && (
-              <text
-                x="40"
-                y="70"
-                textAnchor="middle"
-                fontSize={bannerSize}
-                fontWeight="900"
-                fontFamily="Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif"
-                letterSpacing="0.1em"
-                fill={c("ink")}
-                stroke={N}
-                strokeWidth="0.8"
-                paintOrder="stroke fill"
-              >
-                {label}
-              </text>
+            <path d="M25 114 Q60 119 95 114" fill="none" stroke={P.gold} strokeWidth="1.4" opacity="0.5" />
+            {showText && (
+              <>
+                <text
+                  x="60"
+                  y="96"
+                  textAnchor="middle"
+                  fontSize="5.5"
+                  fontWeight="800"
+                  fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace"
+                  letterSpacing="0.14em"
+                  fill={P.paper}
+                  opacity="0.72"
+                >
+                  NO. {number}
+                </text>
+                <text
+                  x="60"
+                  y="108.5"
+                  textAnchor="middle"
+                  fontSize={labelSize}
+                  fontWeight="900"
+                  fontFamily="Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif"
+                  letterSpacing="0.1em"
+                  fill={P.paper}
+                  stroke={P.ink}
+                  strokeWidth="0.75"
+                  paintOrder="stroke fill"
+                >
+                  {label}
+                </text>
+              </>
             )}
           </g>
         )}

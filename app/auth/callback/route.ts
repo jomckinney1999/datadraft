@@ -42,9 +42,26 @@ export async function GET(request: Request) {
     },
   });
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const { data: session, error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
     return NextResponse.redirect(new URL("/account?error=link_expired", url.origin));
+  }
+
+  // A missing team means this member has never completed the account draft.
+  // Route through /account for the cutscene, then return to the page they
+  // originally asked for. Existing members with a team skip it entirely.
+  if (session.user) {
+    const { data: progress, error: progressError } = await supabase
+      .from("learner_progress")
+      .select("favorite_team")
+      .eq("user_id", session.user.id)
+      .maybeSingle();
+    if (!progressError && !progress?.favorite_team) {
+      const onboarding = new URL("/account", url.origin);
+      onboarding.searchParams.set("onboard", "1");
+      onboarding.searchParams.set("next", next);
+      return NextResponse.redirect(onboarding);
+    }
   }
 
   return NextResponse.redirect(new URL(next, url.origin));
