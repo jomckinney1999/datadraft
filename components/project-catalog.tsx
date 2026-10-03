@@ -97,7 +97,7 @@ export default function ProjectCatalog() {
         </div>
 
         {showBuilds && (
-          <section className="mt-6">
+          <section id="builds" className="mt-6 scroll-mt-20">
             <p className="label-broadcast text-gold">builds</p>
             <div className="mt-3 grid gap-4 sm:grid-cols-2">
               {builds.map((p) => {
@@ -153,7 +153,7 @@ export default function ProjectCatalog() {
         )}
 
         {showCases && (
-          <section className="mt-8">
+          <section id="cases" className="mt-8 scroll-mt-20">
             <p className="label-broadcast text-ice">cases</p>
             <p className="mt-1 text-sm leading-relaxed text-ink-muted">
               A brief, a schema you have never seen, and questions someone

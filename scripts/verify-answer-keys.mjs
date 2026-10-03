@@ -193,6 +193,39 @@ for (const unit of curriculum.COURSE.units) {
   }
 }
 
+// Interview prep's pictures (components/prep-art.tsx): every pattern and
+// every mock format needs its own scene, or its card shows an empty frame.
+{
+  const fs = await import("node:fs");
+  const art = fs.readFileSync(path.join(root, "components/prep-art.tsx"), "utf8");
+  const patterns = await loadProjectTs(path.join(root, "lib/interview-patterns.ts"), root);
+  const mocks = await loadProjectTs(path.join(root, "lib/mock-interview.ts"), root);
+  for (const id of [...patterns.PATTERNS.map((p) => p.id), ...mocks.MOCK_FORMATS.map((f) => f.id)]) {
+    if (!new RegExp(`(^|\\s)"?${id}"?: \\{ tone:`, "m").test(art)) problems.push(`prep art: no scene for "${id}" in components/prep-art.tsx`);
+  }
+}
+
+// The nav menus (lib/nav.ts): every link must be a real page, and every
+// #anchor a real id on it, or a menu item quietly lands on a 404 or the top
+// of the page.
+{
+  const nav = await loadProjectTs(path.join(root, "lib/nav.ts"), root);
+  const projects = await loadProjectTs(path.join(root, "lib/projects.ts"), root);
+  const fs = await import("node:fs");
+  const sources = ["components", "app"].flatMap((d) =>
+    fs.readdirSync(path.join(root, d), { recursive: true }).filter((f) => /\.tsx$/.test(f)).map((f) => fs.readFileSync(path.join(root, d, f), "utf8")),
+  );
+  for (const item of nav.NAV.flatMap((s) => [{ href: s.href }, ...s.groups.flatMap((g) => g.items)])) {
+    const [p, hash] = item.href.split("#");
+    const build = /^\/projects\/([^/]+)$/.exec(p);
+    const real = build
+      ? projects.PROJECTS.some((x) => x.id === build[1])
+      : fs.existsSync(path.join(root, "app", p, "page.tsx"));
+    if (!real) problems.push(`nav: ${item.href} isn't a page`);
+    if (hash && !sources.some((src) => src.includes(`id="${hash}"`))) problems.push(`nav: ${item.href} points at #${hash}, which no page has`);
+  }
+}
+
 const questions = await loadProjectTs(path.join(root, "lib/questions.ts"), root);
 let questionChecked = 0;
 let questionPy = 0;

@@ -37,7 +37,7 @@ import QotdCard from "@/components/qotd-card";
 import DuelCard from "@/components/duel-card";
 import DraftCard from "@/components/draft-card";
 import PassTag from "@/components/pass-tag";
-import WhyArt from "@/components/why-art";
+import PrepArt, { hasPrepArt } from "@/components/prep-art";
 import { PATTERNS, questionsFor } from "@/lib/interview-patterns";
 import { FACTS } from "@/lib/lesson-facts.generated";
 
@@ -238,20 +238,25 @@ export default function QuestionBank({ day }: { day: string }) {
                       document.getElementById("bank-filters")?.scrollIntoView({ behavior: "smooth", block: "start" });
                     }
                   }}
-                  className={`surface rounded-xl border bg-panel px-4 py-3 text-left transition-colors ${
+                  className={`surface flex items-center gap-3 rounded-xl border bg-panel p-2.5 pr-4 text-left transition-colors ${
                     on ? "border-turf/70" : "border-panel-border hover:border-turf/40"
                   }`}
                 >
-                  <div className="flex items-baseline justify-between gap-2">
-                    <span className="font-display text-sm font-bold text-ink">{p.name}</span>
-                    <span className="font-mono text-[11px] text-ink-muted">
-                      {hydrated ? `${done}/${qs.length}` : qs.length}
+                  <span className="h-16 w-20 shrink-0 overflow-hidden rounded-lg border border-panel-border bg-night/60">
+                    {hasPrepArt(p.id) && <PrepArt id={p.id} className="h-full w-full" />}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-baseline justify-between gap-2">
+                      <span className="font-display text-sm font-bold text-ink">{p.name}</span>
+                      <span className="font-mono text-[11px] text-ink-muted">
+                        {hydrated ? `${done}/${qs.length}` : qs.length}
+                      </span>
                     </span>
-                  </div>
-                  <p className="mt-0.5 text-xs leading-snug text-ink-soft">{p.asks}</p>
-                  <div className="quest-bar mt-2">
-                    <span style={{ width: `${hydrated && qs.length ? (done / qs.length) * 100 : 0}%` }} />
-                  </div>
+                    <span className="mt-0.5 block text-xs leading-snug text-ink-soft">{p.asks}</span>
+                    <span className="quest-bar mt-2 block">
+                      <span style={{ width: `${hydrated && qs.length ? (done / qs.length) * 100 : 0}%` }} />
+                    </span>
+                  </span>
                 </button>
               );
             })}
@@ -261,7 +266,7 @@ export default function QuestionBank({ day }: { day: string }) {
             className="lift surface group mt-3 flex items-center gap-4 overflow-hidden rounded-2xl border border-panel-border bg-panel p-3 pr-5 transition-colors hover:border-turf/50"
           >
             <span className="h-16 w-24 shrink-0 overflow-hidden rounded-xl border border-panel-border bg-night/60">
-              <WhyArt id="before-finished" className="h-full w-full" />
+              <PrepArt id="technical" className="h-full w-full" />
             </span>
             <span className="min-w-0 flex-1">
               <span className="label-broadcast text-turf">mock sql screens</span>

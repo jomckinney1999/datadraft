@@ -18,6 +18,7 @@ import CodeEditor from "@/components/code-editor";
 import DifficultyChip from "@/components/difficulty-chip";
 import PassTag from "@/components/pass-tag";
 import PassOffer from "@/components/pass-offer";
+import PrepArt, { hasPrepArt } from "@/components/prep-art";
 import { usePass } from "@/lib/use-pass";
 import { FREE_ALLOWANCE } from "@/lib/season-pass";
 import QueryDoctorPanel from "@/components/query-doctor-panel";
@@ -200,8 +201,11 @@ function Lobby({ onStart, history }: { onStart: (f: MockFormat) => void; history
             key={f.id}
             type="button"
             onClick={() => (locked(f) ? document.getElementById("mock-offer")?.scrollIntoView({ behavior: "smooth", block: "center" }) : onStart(f))}
-            className={`${CARD} lift group p-5 text-left transition-colors hover:border-turf/60 ${locked(f) ? "opacity-70" : ""}`}
+            className={`${CARD} lift group overflow-hidden p-5 text-left transition-colors hover:border-turf/60 ${locked(f) ? "opacity-70" : ""}`}
           >
+            <span className="-mx-5 -mt-5 mb-4 block h-32 border-b border-panel-border bg-night/40">
+              {hasPrepArt(f.id) && <PrepArt id={f.id} className="h-full w-full" />}
+            </span>
             <p className="label-broadcast text-turf">{f.minutes} minutes</p>
             <p className="mt-1 font-display text-2xl font-bold text-ink">{f.name}</p>
             <p className="mt-2 text-sm leading-relaxed text-ink-soft">{f.blurb}</p>

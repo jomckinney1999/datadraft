@@ -8,7 +8,8 @@
  * answer to "where am I and where can I go" changed from page to page, and the
  * only reliable way to reach /interview was to already be on /interview.
  *
- * Five destinations, one line, always the same, with the current one marked.
+ * Four sections, one line, always the same, with the current one marked;
+ * three of them open a menu of their own pages (lib/nav.ts).
  * The wordmark goes home, which CLAUDE.md requires of every route.
  *
  * It is `h-14` at every width on purpose, matching the marketing header. A
@@ -32,22 +33,17 @@ import { WelcomePrompt } from "@/components/welcome-tour";
 import { EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
 import { PAYWALL_LIVE } from "@/lib/season-pass";
 import LearnStatusChips from "@/components/learn-status-chips";
+import { NavDrawerSections, NavDropdown } from "@/components/nav-menu";
+import { NAV, currentSection } from "@/lib/nav";
 
 // Four sections, in the order someone moves through them: where am I, what
-// can I solve, what can I learn, what can I build. Adding a fifth means
+// can I solve, what can I learn, what can I build. Each of the last three
+// opens a menu of its own pages (lib/nav.ts); adding a fifth tab still means
 // taking one out.
-const LINKS = [
-  { href: "/dashboard", label: "Dashboard", exact: true },
-  { href: "/questions", label: "Questions", exact: false },
-  { href: "/learn", label: "Courses", exact: false },
-  { href: "/projects", label: "Projects", exact: false },
-];
-
-function isCurrent(pathname: string, href: string, exact: boolean): boolean {
-  return exact
-    ? pathname === href
-    : pathname === href || pathname.startsWith(`${href}/`);
-}
+const TAB = (on: boolean) =>
+  `whitespace-nowrap rounded-lg px-2.5 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors ${
+    on ? "bg-turf/15 text-turf" : "text-ink-muted hover:bg-panel hover:text-ink"
+  }`;
 
 export default function AppNav({
   back,
@@ -59,6 +55,7 @@ export default function AppNav({
 } = {}) {
   const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
+  const current = currentSection(pathname);
 
   // Keep the Season Pass flag in step with the server (at most twice a day).
   // Loaded only once the paywall is live, so the Supabase client isn't in
@@ -100,7 +97,7 @@ export default function AppNav({
       <WelcomePrompt />
     </Suspense>
     <header className="glass sticky top-0 z-30 border-b border-panel-border/80">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6">
+      <div className="relative mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6">
         <div className="flex min-w-0 shrink-0 items-baseline gap-3">
           <Link
             href="/"
@@ -123,23 +120,20 @@ export default function AppNav({
           aria-label="Main"
           className="hidden min-w-0 flex-1 items-center gap-1 md:flex"
         >
-          {LINKS.map((l) => {
-            const on = isCurrent(pathname, l.href, l.exact);
-            return (
+          {NAV.map((section) =>
+            section.groups.length ? (
+              <NavDropdown key={section.href} section={section} active={current === section.href} linkClassName={TAB} />
+            ) : (
               <Link
-                key={l.href}
-                href={l.href}
-                aria-current={on ? "page" : undefined}
-                className={`whitespace-nowrap rounded-lg px-2.5 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors ${
-                  on
-                    ? "bg-turf/15 text-turf"
-                    : "text-ink-muted hover:bg-panel hover:text-ink"
-                }`}
+                key={section.href}
+                href={section.href}
+                aria-current={current === section.href ? "page" : undefined}
+                className={TAB(current === section.href)}
               >
-                {l.label}
+                {section.label}
               </Link>
-            );
-          })}
+            ),
+          )}
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
@@ -182,25 +176,18 @@ export default function AppNav({
           aria-label="Main"
           className="border-t border-panel-border/80 bg-night/95 px-4 py-3 backdrop-blur-sm md:hidden"
         >
-          <div className="mx-auto flex max-w-6xl flex-col gap-0.5">
-            {[...LINKS, { href: "/account", label: "Account", exact: true }].map(
-              (l) => {
-                const on = isCurrent(pathname, l.href, l.exact);
-                return (
-                  <Link
-                    key={l.href}
-                    href={l.href}
-                    onClick={() => setOpen(false)}
-                    aria-current={on ? "page" : undefined}
-                    className={`rounded-lg px-3 py-2.5 font-mono text-xs font-bold uppercase tracking-wider transition-colors ${
-                      on ? "bg-turf/15 text-turf" : "text-ink-soft hover:bg-panel"
-                    }`}
-                  >
-                    {l.label}
-                  </Link>
-                );
-              },
-            )}
+          <div className="mx-auto flex max-h-[calc(100svh-4rem)] max-w-6xl flex-col gap-0.5 overflow-y-auto">
+            <NavDrawerSections sections={NAV} current={current} onNavigate={() => setOpen(false)} />
+            <Link
+              href="/account"
+              onClick={() => setOpen(false)}
+              aria-current={pathname === "/account" ? "page" : undefined}
+              className={`mt-2 rounded-lg px-3 py-2.5 font-mono text-xs font-bold uppercase tracking-wider transition-colors ${
+                pathname === "/account" ? "bg-turf/15 text-turf" : "text-ink-soft hover:bg-panel"
+              }`}
+            >
+              Account
+            </Link>
             {back && (
               <Link
                 href={back}

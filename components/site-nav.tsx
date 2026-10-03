@@ -2,18 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { NavDrawerSections, NavDropdown } from "@/components/nav-menu";
+import { NAV } from "@/lib/nav";
 
 /*
- * Deliberately short, and the same four sections as the in-product AppNav so
- * crossing from the landing page into the app does not re-arrange the world.
- * Marketing sections stay on the page; they are not in the bar.
+ * Deliberately short, and the same sections and menus as the in-product
+ * AppNav (lib/nav.ts) so crossing from the landing page into the app does not
+ * re-arrange the world. A visitor has no dashboard yet, so it's left out
+ * here. Marketing sections stay on the page; they are not in the bar.
  */
-const ROUTE_LINKS = [
-  { href: "/questions", label: "Questions" },
-  { href: "/learn", label: "Courses" },
-  { href: "/projects", label: "Projects" },
-  { href: "/account", label: "Account" },
-];
+const SECTIONS = NAV.filter((s) => s.href !== "/dashboard");
 
 const LINK =
   "whitespace-nowrap font-mono text-[11px] uppercase tracking-wider text-ink-muted transition-colors duration-150 hover:text-turf";
@@ -23,7 +21,7 @@ export default function SiteNav() {
 
   return (
     <header className="glass sticky top-0 z-30 border-b border-panel-border/80">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-6 px-4 sm:px-6">
+      <div className="relative mx-auto flex h-14 max-w-6xl items-center justify-between gap-6 px-4 sm:px-6">
         <Link href="/" aria-label="DataDraft home" className="flex shrink-0 items-baseline gap-2">
           <span className="font-display text-lg font-bold tracking-tight text-pop">
             Data<span className="text-turf">Draft</span>
@@ -34,11 +32,12 @@ export default function SiteNav() {
         </Link>
 
         <nav className="hidden items-center gap-5 sm:flex">
-          {ROUTE_LINKS.map((link) => (
-            <Link key={link.href} href={link.href} className={LINK}>
-              {link.label}
-            </Link>
+          {SECTIONS.map((section) => (
+            <NavDropdown key={section.href} section={section} active={false} linkClassName={() => LINK} anchor="right" />
           ))}
+          <Link href="/account" className={LINK}>
+            Account
+          </Link>
 
           <Link
             href="/account"
@@ -79,17 +78,15 @@ export default function SiteNav() {
 
       {open && (
         <nav className="border-t border-panel-border/80 bg-night/95 px-4 py-4 backdrop-blur-sm sm:hidden">
-          <div className="mx-auto flex max-w-6xl flex-col gap-1">
-            {ROUTE_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="px-2 py-2.5 font-mono text-xs uppercase tracking-wider text-ink-muted transition-colors duration-150 hover:text-turf"
-              >
-                {link.label}
-              </Link>
-            ))}
+          <div className="mx-auto flex max-h-[calc(100svh-4rem)] max-w-6xl flex-col gap-1 overflow-y-auto">
+            <NavDrawerSections sections={SECTIONS} current={null} onNavigate={() => setOpen(false)} />
+            <Link
+              href="/account"
+              onClick={() => setOpen(false)}
+              className="px-3 py-2.5 font-mono text-xs uppercase tracking-wider text-ink-muted transition-colors duration-150 hover:text-turf"
+            >
+              Account
+            </Link>
 
             <Link
               href="/account"
