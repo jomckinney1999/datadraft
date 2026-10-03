@@ -1272,14 +1272,26 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                   ? briefSteps[briefStep].title
                   : lesson.brief.goal}
               </h2>
-              <p
+              {/* Coach says the beat: the same dialogue bubble as the
+                  cutscenes and the question pages, popping in per beat. */}
+              <div
                 key={briefStep}
-                className="animate-fade-up mt-4 max-w-prose text-base leading-relaxed text-ink-soft"
+                className="cutscene-pop cutscene-bubble relative mt-4 max-w-prose rounded-2xl border-[3px] border-night bg-ink px-4 py-3 text-night"
               >
-                {briefSteps.length > 0
-                  ? briefSteps[briefStep].body
-                  : lesson.brief.setup}
-              </p>
+                <span
+                  aria-hidden
+                  className="absolute -left-[11px] top-5 hidden h-0 w-0 border-y-[8px] border-r-[10px] border-y-transparent border-r-night sm:block"
+                />
+                <span
+                  aria-hidden
+                  className="absolute -left-[6px] top-[22px] hidden h-0 w-0 border-y-[6px] border-r-[7px] border-y-transparent border-r-ink sm:block"
+                />
+                <p className="text-base leading-relaxed">
+                  {briefSteps.length > 0
+                    ? briefSteps[briefStep].body
+                    : lesson.brief.setup}
+                </p>
+              </div>
               {briefSteps[briefStep]?.code && (
                 <pre
                   key={`c-${briefStep}`}

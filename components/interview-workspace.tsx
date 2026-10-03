@@ -5,7 +5,7 @@
  * left = brief + question + hint/reveal; right = schema + SQL terminal.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { Database, QueryExecResult } from "sql.js";
 import type { InterviewCase } from "@/lib/interview-cases";
@@ -20,6 +20,8 @@ import CodeEditor from "@/components/code-editor";
 import Coach from "@/components/coach";
 import HomeLink from "@/components/home-link";
 import ProjectArt from "@/components/project-art";
+import Cutscene, { useSceneOnce } from "@/components/cutscene";
+import { caseBeats } from "@/lib/case-scenes";
 
 function formatMs(totalSec: number): string {
   const m = Math.floor(totalSec / 60);
@@ -62,6 +64,9 @@ export default function InterviewWorkspace({
   interviewCase: InterviewCase;
 }) {
   const dbRef = useRef<Database | null>(null);
+  // The briefing cutscene: plays on a first visit, then on request.
+  const scene = useSceneOnce(`case:${interviewCase.id}`);
+  const beats = useMemo(() => caseBeats(interviewCase.id), [interviewCase.id]);
   const [engineReady, setEngineReady] = useState(false);
   const [qIndex, setQIndex] = useState(0);
   const [sql, setSql] = useState("SELECT ");
@@ -281,7 +286,29 @@ export default function InterviewWorkspace({
             {DIFFICULTY_LABEL[interviewCase.difficulty]}
           </span>
         </p>
+        {beats && (
+          <button
+            type="button"
+            onClick={scene.play}
+            className="mt-2 font-mono text-[11px] font-bold uppercase tracking-wider text-gold hover:underline"
+          >
+            ▶ Replay briefing
+          </button>
+        )}
       </div>
+
+      {beats && (
+        <Cutscene
+          open={scene.open}
+          kicker={`Case file · ${interviewCase.org}`}
+          title={interviewCase.title}
+          beats={beats}
+          objectives={interviewCase.questions.map((q) => q.prompt)}
+          objectivesNote="No clock on a case. Hints are there if you want them."
+          startLabel="Take the case"
+          onStart={scene.close}
+        />
+      )}
 
       <div className="mt-6 grid flex-1 gap-4 lg:grid-cols-2 lg:items-stretch">
         {/* Left: interviewer */}

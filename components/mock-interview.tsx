@@ -18,6 +18,7 @@ import CodeEditor from "@/components/code-editor";
 import DifficultyChip from "@/components/difficulty-chip";
 import PassTag from "@/components/pass-tag";
 import PassOffer from "@/components/pass-offer";
+import Cutscene, { markSceneSeen, sceneSeen, type Beat } from "@/components/cutscene";
 import PrepArt, { hasPrepArt } from "@/components/prep-art";
 import { usePass } from "@/lib/use-pass";
 import { FREE_ALLOWANCE } from "@/lib/season-pass";
@@ -101,6 +102,8 @@ export default function MockInterview() {
   const liveRef = useRef<Live | null>(null);
   liveRef.current = live;
   const recorded = useRef<string | null>(null);
+  // The interviewer's intro, once per format; the clock starts on its button.
+  const [briefing, setBriefing] = useState<MockFormat | null>(null);
 
   useEffect(() => {
     const saved = read<Live>(LIVE_KEY);
@@ -168,13 +171,74 @@ export default function MockInterview() {
     setLive(null);
   }
 
-  if (!live) return <Lobby onStart={start} history={history} />;
+  if (!live) {
+    return (
+      <>
+        <Lobby
+          onStart={(f) => (sceneSeen(`mock:${f.id}`) ? start(f) : setBriefing(f))}
+          onBrief={setBriefing}
+          history={history}
+        />
+        {briefing && (
+          <Cutscene
+            open
+            kicker={`Mock SQL screen · ${briefing.minutes} minutes`}
+            title={briefing.name}
+            beats={mockBeats(briefing)}
+            objectives={[
+              `${briefing.mix.length} questions, ${briefing.mix[0]} to ${briefing.mix[briefing.mix.length - 1]}`,
+              `${briefing.minutes} minutes on the clock, and it doesn't pause`,
+              "No hints and no answer button. Run your query as often as you like",
+              "A report at the end: what went wrong, and the answers",
+            ]}
+            startLabel="Start the clock"
+            onClose={() => {
+              markSceneSeen(`mock:${briefing.id}`);
+              setBriefing(null);
+            }}
+            onStart={() => {
+              const f = briefing;
+              markSceneSeen(`mock:${f.id}`);
+              setBriefing(null);
+              start(f);
+            }}
+          />
+        )}
+      </>
+    );
+  }
   if (live.finishedAt) return <Report live={live} db={db} onAgain={leave} />;
   return <Screen live={live} setLive={setLive} db={db} now={now} onFinish={finish} />;
 }
 
 // ── Lobby ─────────────────────────────────────────────────────────────
-function Lobby({ onStart, history }: { onStart: (f: MockFormat) => void; history: HistoryRow[] }) {
+/** The interviewer's intro to each screen (components/cutscene.tsx). */
+function mockBeats(f: MockFormat): Beat[] {
+  const riley = { kind: "caller" as const, name: "Riley", title: "Analytics lead · the hiring team", tone: "ice" as const };
+  return f.id === "phone"
+    ? [
+        { who: { kind: "coach", mood: "whistle" }, text: "Your interviewer's dialing in. Deep breath." },
+        { who: riley, text: "Hi, thanks for making the time. I'll keep this to twenty minutes." },
+        { who: riley, text: "Two SQL questions on our data. Run your query as often as you like, and submit when you're sure." },
+        { who: { kind: "coach", mood: "think" }, text: "The clock starts when you press the button. You've got this." },
+      ]
+    : [
+        { who: { kind: "coach", mood: "whistle" }, text: "This is the round that decides it. Interviewer's on." },
+        { who: riley, text: "Welcome back. Three questions today, easy to hard, forty-five minutes." },
+        { who: riley, text: "I care more about a correct answer than a clever one." },
+        { who: { kind: "coach", mood: "think" }, text: "Bank the easy one first, then go after the hard one." },
+      ];
+}
+
+function Lobby({
+  onStart,
+  onBrief,
+  history,
+}: {
+  onStart: (f: MockFormat) => void;
+  onBrief: (f: MockFormat) => void;
+  history: HistoryRow[];
+}) {
   // Free: one phone screen, to try it. Everything else is the Season Pass
   // (a no-op until the paywall is on).
   const pass = usePass();
@@ -224,6 +288,18 @@ function Lobby({ onStart, history }: { onStart: (f: MockFormat) => void; history
           </button>
         ))}
       </div>
+
+      <p className="mt-3 text-center font-mono text-[11px] uppercase tracking-wider text-ink-muted">
+        ▶ Replay the intro:{" "}
+        {MOCK_FORMATS.map((f, i) => (
+          <span key={f.id}>
+            {i > 0 && " · "}
+            <button type="button" onClick={() => onBrief(f)} className="font-bold text-gold hover:underline">
+              {f.name}
+            </button>
+          </span>
+        ))}
+      </p>
 
       {anyLocked && (
         <div id="mock-offer" className="mt-4">

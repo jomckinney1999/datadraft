@@ -180,6 +180,15 @@ Lesson copy lives mostly in `lib/curriculum.ts` (briefs, film cards, intros, pro
 - **`components/home-link.tsx` survives for the flows that are not "in the product":** the beta bench and the guest invite. Those are one-way flows where a nav row would be an invitation to abandon them.
 - **The lesson player and the interview workspace are the deliberate exceptions.** Their top bar stays the task and a way out (quit / downs-and-distance field), and the quit `X` goes to `/learn`, not home: mid-drive the course list is the right destination, and a nav row where the X is would make it easy to lose a drive by accident. `/learn` carries the wordmark, so home is one further click.
 
+## Scenes: the scenarios play like a game (decided 2026-10-03)
+
+The scenarios are delivered the way a game delivers a mission: a character in a dialogue bubble, then objectives.
+
+- **Cutscenes where setup is welcome** (`components/cutscene.tsx`): letterbox bars, a title card, the cast speaking one beat at a time (the line types out; a press finishes it, the next moves on), then an **Objectives** checklist and a start button. A **case** opens on a briefing: Coach takes the call, the client explains the problem, Coach sends you in (scripts in `lib/case-scenes.ts`, one per case; the verifier fails a case without one). A **mock screen** opens on the interviewer's intro, and the clock starts only on "Start the clock"; "Not now" leaves without starting it (`onClose`).
+- **Always skippable, once by default:** Esc or "Skip" jumps to the objectives; `useSceneOnce` plays a scene on a first visit and remembers it (`sqlsports.scenes.v1`), with "Replay briefing" / "Replay the intro" on the page. → / Enter / Space advance; a focused button handles its own Enter. Reduced motion: no typing, no sliding bars, no pops. Screen readers get each line whole.
+- **The look without the wait where speed matters:** a daily question is ninety seconds, so it gets no blocking scene. Its situation is Coach's dialogue bubble and its Return line is an **Objective** that ticks and reads "Objective complete" once solved (`components/scene-line.tsx`). Lesson walk-ins use the same bubble per beat.
+- **The other speakers are silhouettes in a headset** (`components/caller-portrait.tsx`), a video-call tile with a live dot, never a face: invented clients at invented companies, and an interviewer called Riley. One bubble style everywhere (`.cutscene-bubble`: ink fill, night outline, hard night shadow), so a case, a question and a lesson read as one game.
+
 ## Orientation: the 60-second tour and /welcome (decided 2026-10-02)
 
 There is a lot on the site — questions, courses, interview prep, projects, two games, a Hall of Fame — and a first-time visitor shouldn't have to find it by clicking around.

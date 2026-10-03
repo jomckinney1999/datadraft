@@ -54,6 +54,7 @@ import { SHORT_CREDIT } from "@/lib/data-source";
 import { playSfx } from "@/lib/sfx";
 import CodeEditor from "@/components/code-editor";
 import QuestionArt from "@/components/question-art";
+import { Objective, SceneLine } from "@/components/scene-line";
 import AppNav from "@/components/app-nav";
 import { FaceCluster } from "@/components/qotd-card";
 import { featuredPlayers } from "@/lib/question-players";
@@ -464,18 +465,16 @@ export default function QuestionWorkspace({
                 <h1 className="mt-2 font-display text-2xl font-bold text-ink">
                   {question.title}
                 </h1>
-                <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
+                {/* The situation, delivered like a scene; the task, as an
+                    objective that ticks when it's solved. */}
+                <SceneLine mood={alreadySolved || verdict === "right" ? "happy" : "think"} className="mt-3">
                   {question.prompt}
-                </p>
+                </SceneLine>
 
-                <div className="mt-4 rounded-xl border border-ice/30 bg-ice/5 p-3">
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-ice">
-                    Return
-                  </p>
-                  <p className="mt-1 text-sm leading-relaxed text-ink-soft">
-                    {question.returns}
-                  </p>
-                </div>
+                <Objective done={alreadySolved || verdict === "right"} className="mt-4">
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">Return </span>
+                  {question.returns}
+                </Objective>
 
                 <div className="mt-4 flex flex-wrap gap-1.5">
                   {question.tags.map((t) => (

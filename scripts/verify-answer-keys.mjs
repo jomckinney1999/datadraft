@@ -205,6 +205,16 @@ for (const unit of curriculum.COURSE.units) {
   }
 }
 
+// Every case opens on a briefing cutscene (lib/case-scenes.ts); a case
+// without one would open straight onto the workspace, the odd one out.
+{
+  const scenes = await loadProjectTs(path.join(root, "lib/case-scenes.ts"), root);
+  const cases = await loadProjectTs(path.join(root, "lib/interview-cases.ts"), root);
+  for (const c of cases.INTERVIEW_CASES) {
+    if (!scenes.CASE_SCENES[c.id]) problems.push(`case ${c.id} has no briefing in lib/case-scenes.ts`);
+  }
+}
+
 // The nav menus (lib/nav.ts): every link must be a real page, and every
 // #anchor a real id on it, or a menu item quietly lands on a 404 or the top
 // of the page.
