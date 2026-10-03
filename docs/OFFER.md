@@ -2,7 +2,7 @@
 
 The sales side of `docs/PLAN.md`: what we sell, at what price, the words we sell it with, and the order we do it in. PLAN.md holds the decisions and the reasoning; this holds the copy and the playbook. Change a price there first, then here.
 
-**Status (2026-10-03): proposed, nothing is for sale.** Every Season Pass feature is open and labelled "free in early access" (`PAYWALL_LIVE = false` in `lib/season-pass.ts`). Charging waits on the launch gates at the bottom of this doc, and HR's sign-off is the first of them.
+**Status (2026-10-03): approved by Jo; nothing is for sale yet.** Every Season Pass feature is open and labelled "free in early access" (`PAYWALL_LIVE = false` in `lib/season-pass.ts`). Charging waits on the launch gates at the bottom of this doc, and HR's sign-off is the first of them.
 
 ---
 
@@ -144,4 +144,4 @@ If conversion is under 1% after a month, the problem is the free-to-Pass moment,
 7. **Sales tax:** decide with an accountant whether to register anywhere; Stripe Tax can collect it.
 8. **Flip `PAYWALL_LIVE`**, and the "free in early access" tags become the offer.
 
-Claude can build the pricing page, the paywall moments and the checkout behind the flag at any point, so that launch day is a switch, not a sprint.
+**Built 2026-10-03, behind the switch:** the pricing page, every paywall moment above with its copy, checkout for all three plans with the founding cap enforced on the server, the billing portal, the webhook and server-side entitlement. Launch day is gates 1–7, then the switch. The steps are in CLAUDE.md under the Season Pass. The switch-on paths haven't run end to end yet; test them locally with Stripe in test mode first.

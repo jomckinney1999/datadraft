@@ -8,9 +8,13 @@
  * when the coach isn't switched on rather than failing quietly.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PassTag from "@/components/pass-tag";
+import PassOffer from "@/components/pass-offer";
 import type { Finding } from "@/lib/query-doctor";
+import { usePass } from "@/lib/use-pass";
+import { spendDoctor } from "@/lib/pass-meter";
+import { leagueDay } from "@/lib/questions";
 
 export default function QueryDoctorPanel({
   findings,
@@ -23,9 +27,30 @@ export default function QueryDoctorPanel({
   prompt: string;
   returns: string;
 }) {
-  const [coach, setCoach] = useState<{ state: "idle" | "loading" | "done" | "off" | "limited"; text?: string }>({ state: "idle" });
+  const [coach, setCoach] = useState<{ state: "idle" | "loading" | "done" | "off" | "limited" | "offer"; text?: string }>({ state: "idle" });
 
-  if (!findings.length) return null;
+  // Without the Season Pass (once the paywall is on): one diagnosis a day,
+  // and Ask Coach is a Pass feature. Always allowed while the paywall is off.
+  const pass = usePass();
+  const signature = [sql, ...findings.map((f) => f.title)].join(" | ");
+  const [allowed, setAllowed] = useState<boolean | null>(pass === true ? true : null);
+  useEffect(() => {
+    if (pass === null || !findings.length) return;
+    setAllowed(pass ? true : spendDoctor(leagueDay(), signature));
+  }, [pass, signature, findings.length]);
+
+  if (!findings.length || allowed === null) return null;
+
+  if (!allowed) {
+    return (
+      <div className="mt-3 rounded-xl border border-ice/40 bg-night/40 p-3.5">
+        <p className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-widest text-ice">
+          <span aria-hidden>🩺</span> Query Doctor
+        </p>
+        <PassOffer moment="doctor" className="mt-2" />
+      </div>
+    );
+  }
 
   async function ask() {
     setCoach({ state: "loading" });
@@ -69,12 +94,13 @@ export default function QueryDoctorPanel({
         {coach.state === "idle" && (
           <button
             type="button"
-            onClick={ask}
+            onClick={pass === false ? () => setCoach({ state: "offer" }) : ask}
             className="font-mono text-[11px] font-bold uppercase tracking-wider text-gold hover:underline"
           >
             Still stuck? Ask Coach →
           </button>
         )}
+        {coach.state === "offer" && <PassOffer moment="coach" />}
         {coach.state === "loading" && <p className="font-mono text-[11px] text-ink-muted">Coach is reading your query…</p>}
         {coach.state === "done" && <p className="text-sm leading-relaxed text-ink">{coach.text}</p>}
         {coach.state === "limited" && (

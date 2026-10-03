@@ -22,6 +22,7 @@ import {
 } from "@/lib/progress";
 import { liveLessons } from "@/lib/curriculum";
 import { MODULE_STORAGE_KEY } from "@/lib/use-module";
+import { PAYWALL_LIVE } from "@/lib/season-pass";
 import {
   FREE_DAILY_TIMEOUTS,
   grantSeasonPassDemo,
@@ -148,8 +149,14 @@ export default function TestingTools({
         <ToolBtn onClick={jumpToCourse}>Open course</ToolBtn>
         <ToolBtn onClick={restartCourse}>Restart course</ToolBtn>
         <ToolBtn onClick={completeCourse}>Complete course</ToolBtn>
-        <ToolBtn onClick={refillTimeouts}>Refill timeouts + 50 tickets</ToolBtn>
-        <ToolBtn onClick={seasonPass}>Grant Season Pass</ToolBtn>
+        {/* Free unlocks. /demo is public, so once the paywall is live these
+            exist only in development; a real Pass comes from the server. */}
+        {(!PAYWALL_LIVE || process.env.NODE_ENV !== "production") && (
+          <>
+            <ToolBtn onClick={refillTimeouts}>Refill timeouts + 50 tickets</ToolBtn>
+            <ToolBtn onClick={seasonPass}>Grant Season Pass</ToolBtn>
+          </>
+        )}
         <ToolBtn onClick={wipeAll} danger>
           Wipe all progress
         </ToolBtn>

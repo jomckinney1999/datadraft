@@ -4,6 +4,7 @@ import { INTERVIEW_CASES } from "@/lib/interview-cases";
 import { liveProjects } from "@/lib/projects";
 import { QUESTIONS } from "@/lib/questions";
 import { SITE_URL } from "@/lib/site";
+import { PAYWALL_LIVE } from "@/lib/season-pass";
 
 /**
  * Every public page, so search engines find the question bank rather than
@@ -25,6 +26,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     at("/learn", 0.8),
     at("/projects", 0.8),
     at("/welcome", 0.6, "monthly"),
+    // /pricing is a 404 on the live site until the Season Pass is on sale.
+    ...(PAYWALL_LIVE ? [at("/pricing", 0.7, "monthly")] : []),
     at("/data", 0.5, "monthly"),
     at("/field", 0.5, "monthly"),
     at("/excel", 0.5, "monthly"),

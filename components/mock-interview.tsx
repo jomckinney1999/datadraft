@@ -17,6 +17,9 @@ import type { Database, QueryExecResult } from "sql.js";
 import CodeEditor from "@/components/code-editor";
 import DifficultyChip from "@/components/difficulty-chip";
 import PassTag from "@/components/pass-tag";
+import PassOffer from "@/components/pass-offer";
+import { usePass } from "@/lib/use-pass";
+import { FREE_ALLOWANCE } from "@/lib/season-pass";
 import QueryDoctorPanel from "@/components/query-doctor-panel";
 import { loadProgress, solveQuestion } from "@/lib/progress";
 import { DIFFICULTY_XP, getQuestion, schemaFor, type Question } from "@/lib/questions";
@@ -171,6 +174,12 @@ export default function MockInterview() {
 
 // ── Lobby ─────────────────────────────────────────────────────────────
 function Lobby({ onStart, history }: { onStart: (f: MockFormat) => void; history: HistoryRow[] }) {
+  // Free: one phone screen, to try it. Everything else is the Season Pass
+  // (a no-op until the paywall is on).
+  const pass = usePass();
+  const locked = (f: MockFormat) =>
+    pass === false && (f.id !== "phone" || history.length >= FREE_ALLOWANCE.mockScreens);
+  const anyLocked = MOCK_FORMATS.some(locked);
   return (
     <div className="mx-auto max-w-3xl">
       <div className="text-center">
@@ -190,8 +199,8 @@ function Lobby({ onStart, history }: { onStart: (f: MockFormat) => void; history
           <button
             key={f.id}
             type="button"
-            onClick={() => onStart(f)}
-            className={`${CARD} lift group p-5 text-left transition-colors hover:border-turf/60`}
+            onClick={() => (locked(f) ? document.getElementById("mock-offer")?.scrollIntoView({ behavior: "smooth", block: "center" }) : onStart(f))}
+            className={`${CARD} lift group p-5 text-left transition-colors hover:border-turf/60 ${locked(f) ? "opacity-70" : ""}`}
           >
             <p className="label-broadcast text-turf">{f.minutes} minutes</p>
             <p className="mt-1 font-display text-2xl font-bold text-ink">{f.name}</p>
@@ -201,12 +210,22 @@ function Lobby({ onStart, history }: { onStart: (f: MockFormat) => void; history
                 <DifficultyChip key={i} difficulty={d} />
               ))}
             </div>
-            <span className="mt-4 inline-block font-mono text-[11px] font-bold uppercase tracking-wider text-turf group-hover:underline">
-              Start the clock →
+            <span
+              className={`mt-4 inline-block font-mono text-[11px] font-bold uppercase tracking-wider group-hover:underline ${
+                locked(f) ? "text-gold" : "text-turf"
+              }`}
+            >
+              {locked(f) ? "★ Season Pass" : "Start the clock →"}
             </span>
           </button>
         ))}
       </div>
+
+      {anyLocked && (
+        <div id="mock-offer" className="mt-4">
+          <PassOffer moment={history.length ? "mock" : "mock-technical"} />
+        </div>
+      )}
 
       <ul className="mt-6 grid gap-2 text-sm text-ink-soft sm:grid-cols-3">
         <li className={`${CARD} p-3`}>

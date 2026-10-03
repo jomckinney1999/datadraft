@@ -23,6 +23,8 @@ import Link from "next/link";
 import type { Database, QueryExecResult, SqlJsStatic } from "sql.js";
 import CodeEditor from "@/components/code-editor";
 import ChartIt from "@/components/chart-it";
+import PassOffer from "@/components/pass-offer";
+import { usePass } from "@/lib/use-pass";
 import Headshot from "@/components/headshot";
 import { NFLVERSE_CREDIT } from "@/lib/chart";
 import { shareText } from "@/lib/daily-share";
@@ -332,6 +334,11 @@ function Setup(props: {
   const { season, challenge } = props;
   const meta = DRAFT_SEASONS.find((s) => s.season === season)!;
   const lockedToChallenge = challenge !== null && challenge.season === season;
+  // The newest season is free; older ones are the Season Pass, except the
+  // season a friend's challenge is in, which always opens.
+  const pass = usePass();
+  const isPast = (s: number) => s !== props.seasons[0];
+  const needsPass = pass === false && isPast(season) && !lockedToChallenge;
   const best = props.history
     .filter((h) => h.season === season)
     .sort((a, b) => b.w - a.w || b.pf - a.pf)[0];
@@ -400,6 +407,9 @@ function Setup(props: {
                   }`}
                 >
                   {s}
+                  {pass === false && isPast(s) && !(challenge && challenge.season === s) ? (
+                    <span className="ml-1 text-sm text-gold" aria-label="Season Pass">★</span>
+                  ) : null}
                 </button>
               ))}
             </div>
@@ -459,9 +469,13 @@ function Setup(props: {
         </ul>
 
         <div className="mt-6 flex flex-col items-center gap-2">
-          <button type="button" onClick={props.onStart} disabled={!!props.loading} className="press btn-gold px-8 py-3 text-base disabled:opacity-60">
-            {props.loading ? props.loading : challenge && lockedToChallenge ? "Take the challenge →" : `Start the ${season} draft →`}
-          </button>
+          {needsPass ? (
+            <PassOffer moment="draft-season" className="w-full max-w-md" />
+          ) : (
+            <button type="button" onClick={props.onStart} disabled={!!props.loading} className="press btn-gold px-8 py-3 text-base disabled:opacity-60">
+              {props.loading ? props.loading : challenge && lockedToChallenge ? "Take the challenge →" : `Start the ${season} draft →`}
+            </button>
+          )}
           <p className="font-mono text-[10px] text-ink-muted">
             Loads about {Math.round(meta.kb / 4)} KB · runs in your browser · no account
           </p>

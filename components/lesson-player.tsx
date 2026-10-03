@@ -62,6 +62,9 @@ import TeamChip, { isTeamColumn } from "@/components/team-chip";
 import { tablesMentioned } from "@/lib/table-mentions";
 import CoachAssist from "@/components/coach-assist";
 import TimeoutGate from "@/components/timeout-gate";
+import { PassGateScreen } from "@/components/pass-gate";
+import { PAYWALL_LIVE } from "@/lib/season-pass";
+import { unitIsFree } from "@/lib/pass-units";
 import CodeEditor from "@/components/code-editor";
 import ExcelGrid, { type CellCoord } from "@/components/excel-grid";
 import SchemaReference from "@/components/schema-reference";
@@ -184,6 +187,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
 
   const [phase, setPhase] = useState<Phase>("loading");
   const [timeoutBlocked, setTimeoutBlocked] = useState(false);
+  /** Past a course's first unit without the Season Pass (paywall on only). */
+  const [passBlocked, setPassBlocked] = useState(false);
   const [economy, setEconomy] = useState<Progress | null>(null);
   const timeoutSpentRef = useRef(false);
   /** Drive snapshot taken right before a hard miss — Instant Replay restores it. */
@@ -371,6 +376,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   useEffect(() => {
     const p = loadEconomy();
     setEconomy(p);
+    setPassBlocked(false);
 
     const day = new Date().toISOString().slice(0, 10);
     const spendKey = `sqlsports.timeout-spend.${lessonId}.${day}`;
@@ -384,6 +390,13 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     if (p.seasonPass || alreadySpent) {
       timeoutSpentRef.current = true;
       setTimeoutBlocked(false);
+      return;
+    }
+
+    // Past a course's first unit is the Season Pass. Checked before a
+    // timeout is spent, so the offer never costs a free lesson.
+    if (PAYWALL_LIVE && entry && !unitIsFree(entry.unit.id)) {
+      setPassBlocked(true);
       return;
     }
 
@@ -406,7 +419,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     }
     setEconomy(spent);
     setTimeoutBlocked(false);
-  }, [lessonId]);
+  }, [lessonId, entry]);
 
   // Once timeouts are settled, deal the queue and open the brief.
   useEffect(() => {
@@ -563,6 +576,17 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
+
+  if (passBlocked) {
+    return (
+      <PassGateScreen
+        moment="course-unit"
+        backHref="/learn"
+        backLabel="Back to courses"
+        title="The rest of this course is in the Season Pass"
+      />
+    );
+  }
 
   if (timeoutBlocked && economy) {
     return (

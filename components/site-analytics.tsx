@@ -24,8 +24,16 @@ function report(event: BeforeSendEvent): BeforeSendEvent | null {
   if (/^\/(demo|brand)(\/|$)/.test(url.pathname)) return null;
 
   const ref = url.searchParams.get("ref");
+  // /pricing?from=doctor: which Season Pass offer sent them (components/pass-offer.tsx).
+  const from = url.searchParams.get("from");
   const marker =
-    ref === "chart" || ref === "share" ? ref : url.searchParams.has("r") ? "challenge" : null;
+    ref === "chart" || ref === "share"
+      ? ref
+      : url.searchParams.has("r")
+        ? "challenge"
+        : from && /^[a-z-]{1,24}$/.test(from)
+          ? `from-${from}`
+          : null;
 
   url.search = "";
   url.hash = "";

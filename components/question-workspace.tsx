@@ -61,7 +61,13 @@ import Coach from "@/components/coach";
 import ExcelGrid from "@/components/excel-grid";
 import DifficultyChip from "@/components/difficulty-chip";
 import QueryDoctorPanel from "@/components/query-doctor-panel";
+import PassOffer from "@/components/pass-offer";
+import PassTag from "@/components/pass-tag";
+import { usePass } from "@/lib/use-pass";
 import { diagnoseSql, type Finding } from "@/lib/query-doctor";
+
+/** The day the after-daily Season Pass offer was last dismissed. */
+const AFTER_DAILY_KEY = "sqlsports.pass.afterDaily";
 
 type Outcome = {
   /** Rendered output: a grid for SQL, text for everything else. */
@@ -171,11 +177,14 @@ export default function QuestionWorkspace({
   position,
   total,
   challenge = null,
+  free = true,
 }: {
   question: Question;
   isQotd: boolean;
   /** A friend's daily result, from a /questions/<id>/vs/<n>-<tries> link. */
   challenge?: DailyResult | null;
+  /** Solvable without the Season Pass (lib/pass-gates.ts). */
+  free?: boolean;
   /** League-timezone day, resolved on the server so it can't drift. */
   day: string;
   prevDay: string;
@@ -207,6 +216,12 @@ export default function QuestionWorkspace({
   );
   // Graded submissions this visit, for the daily question's share line.
   const [tries, setTries] = useState(0);
+  // The Season Pass gate (a no-op until the paywall is on): a Pass question
+  // can be read and Run, but Submit and the solution open the offer.
+  const pass = usePass();
+  const locked = pass === false && !free;
+  const [offer, setOffer] = useState(false);
+  const [afterDailyOffer, setAfterDailyOffer] = useState(false);
   const [shareNote, setShareNote] = useState<string | null>(null);
 
   useEffect(() => {
@@ -260,6 +275,10 @@ export default function QuestionWorkspace({
   /** Run the learner's work, and optionally grade it. */
   const attempt = useCallback(
     async (grade: boolean) => {
+      if (grade && locked) {
+        setOffer(true);
+        return;
+      }
       setVerdict(null);
       setFindings(null);
       if (grade) setTries((t) => t + 1);
@@ -354,11 +373,21 @@ export default function QuestionWorkspace({
           tickets: (firstSolve ? 5 : 1) + (isQotd ? 10 : 0),
         });
         setAlreadySolved(true);
+        // The soft offer, once a day, after the daily, never before it.
+        if (isQotd && pass === false) {
+          let seen = false;
+          try {
+            seen = localStorage.getItem(AFTER_DAILY_KEY) === day;
+          } catch {
+            /* show it */
+          }
+          setAfterDailyOffer(!seen);
+        }
       }
     },
     // `finish` is declared inside so it closes over the current solve state.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [code, question, isSql, isExcel, alreadySolved, isQotd, day, prevDay],
+    [code, question, isSql, isExcel, alreadySolved, isQotd, day, prevDay, locked, pass],
   );
 
   const tables = schemaFor(question);
@@ -525,7 +554,7 @@ export default function QuestionWorkspace({
               )}
               <button
                 type="button"
-                onClick={() => setSolutionOpen((v) => !v)}
+                onClick={() => (locked ? setOffer(true) : setSolutionOpen((v) => !v))}
                 className="w-full rounded-xl border border-panel-border px-4 py-2.5 text-left font-mono text-[11px] font-bold uppercase tracking-wider text-ink-muted transition-colors hover:border-gold/40 hover:text-gold"
               >
                 {solutionOpen ? "Hide solution" : "Show solution"}
@@ -598,6 +627,7 @@ export default function QuestionWorkspace({
                 <span className="hidden font-mono text-[10px] text-ink-muted md:inline">
                   ⌘ / Ctrl + Enter submits
                 </span>
+                {locked && <PassTag />}
                 <button
                   type="button"
                   onClick={() => {
@@ -615,6 +645,8 @@ export default function QuestionWorkspace({
                   Reset
                 </button>
               </div>
+
+              {offer && locked && <PassOffer moment="question" className="mt-3" />}
 
               {weight && !ready && !booting && (
                 <p className="mt-2 font-mono text-[10px] leading-relaxed text-ink-muted">
@@ -690,6 +722,20 @@ export default function QuestionWorkspace({
                                 : "They take this one."}
                           </span>
                         </p>
+                      )}
+                      {afterDailyOffer && (
+                        <PassOffer
+                          moment="after-daily"
+                          className="mt-3"
+                          onDismiss={() => {
+                            setAfterDailyOffer(false);
+                            try {
+                              localStorage.setItem(AFTER_DAILY_KEY, day);
+                            } catch {
+                              /* fine: it just shows again tomorrow */
+                            }
+                          }}
+                        />
                       )}
                       {isQotd && tries > 0 && (
                         <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-gold/40 bg-gold/10 px-3 py-2">

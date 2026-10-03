@@ -6,7 +6,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import WaitlistForm from "@/components/waitlist-form";
+import PassOffer from "@/components/pass-offer";
 import {
   buyShopItem,
   COST_TIMEOUT_REFILL_FULL,
@@ -45,8 +45,8 @@ export default function TimeoutGate({
       </h1>
       <p className="mt-3 max-w-md text-sm leading-relaxed text-ink-soft">
         Free players get {FREE_DAILY_TIMEOUTS} timeouts a day — each one starts a
-        graded drive. You&apos;re empty. Refill with scouting tickets, or join
-        the Season Pass waitlist for unlimited snaps.
+        graded drive. You&apos;re empty, and your streak&apos;s safe. Refill with
+        scouting tickets, or come back tomorrow.
       </p>
 
       <div className="mt-2 font-mono text-[12px] text-gold">
@@ -76,23 +76,7 @@ export default function TimeoutGate({
         </p>
       )}
 
-      <div className="mt-8 w-full max-w-sm rounded-xl border border-ice/30 bg-ice/5 p-4 text-left">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ice">
-          Season Pass
-        </p>
-        <p className="mt-1 text-[12px] text-ink-soft">
-          Unlimited timeouts + Practice-tier weekly data. Get on the list for
-          when it opens.
-        </p>
-        <div className="mt-3">
-          <WaitlistForm
-            interest="practice"
-            source="timeout-gate"
-            label="Join waitlist"
-            compact
-          />
-        </div>
-      </div>
+      <PassOffer moment="lessons" className="mt-8 w-full max-w-sm" />
 
       <div className="mt-6 flex flex-wrap justify-center gap-3">
         <Link

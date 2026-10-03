@@ -6,6 +6,7 @@
  */
 
 import { isDailyQuestion, leagueDay, questionsIn, type Question } from "@/lib/questions";
+import { questionIsFree } from "@/lib/pass-gates";
 
 /** The day before `day`, for the streak check. */
 function previousDay(day: string): string {
@@ -32,5 +33,8 @@ export function workspaceProps(question: Question) {
     prevId: prev.id === question.id ? null : prev.id,
     position: index + 1,
     total: pool.length,
+    // Free without the Season Pass: the daily, a week after it, the starter
+    // set (lib/pass-gates.ts). Only matters once the paywall is on.
+    free: questionIsFree(question, day),
   };
 }

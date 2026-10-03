@@ -15,6 +15,78 @@
 import { createClient } from "@/lib/supabase/client";
 import { loadProgress, saveProgress, type Progress } from "@/lib/progress";
 import { readStoredModule, MODULE_STORAGE_KEY } from "@/lib/use-module";
+import { PAYWALL_LIVE, type PassPlan } from "@/lib/season-pass";
+import { PASS_EVENT } from "@/lib/use-pass";
+
+type Supabase = ReturnType<typeof createClient>;
+
+/** The member's Season Pass, as the server knows it. */
+export type PassStatus = {
+  active: boolean;
+  plan: PassPlan | null;
+  /** When the current period ends: the renewal date, or the last day of access. */
+  periodEnd: string | null;
+  /** True once there's any subscription, so the account page can offer billing. */
+  hasBilling: boolean;
+};
+
+/**
+ * Read the signed-in member's subscription row (RLS lets them read their
+ * own). Active means Stripe says active and the paid period hasn't run out;
+ * the period check covers a webhook that never arrived.
+ */
+export async function readPass(supabase: Supabase, userId: string): Promise<PassStatus> {
+  const { data } = await supabase
+    .from("subscriptions")
+    .select("status, plan, current_period_end, stripe_customer_id")
+    .eq("user_id", userId)
+    .eq("tier", "practice")
+    .maybeSingle();
+  if (!data) return { active: false, plan: null, periodEnd: null, hasBilling: false };
+  const periodEnd = (data.current_period_end as string | null) ?? null;
+  const inPeriod = !periodEnd || Date.parse(periodEnd) > Date.now();
+  return {
+    active: data.status === "active" && inPeriod,
+    plan: (data.plan as PassPlan | null) ?? null,
+    periodEnd,
+    hasBilling: Boolean(data.stripe_customer_id),
+  };
+}
+
+function setPassFlag(on: boolean) {
+  const p = loadProgress();
+  if (p.seasonPass === on) return;
+  saveProgress({ ...p, seasonPass: on });
+  window.dispatchEvent(new Event(PASS_EVENT));
+}
+
+const PASS_CHECKED_KEY = "sqlsports.pass.checked";
+const PASS_RECHECK_MS = 12 * 60 * 60 * 1000;
+
+/**
+ * Keep this browser's Season Pass flag in step with the server, at most
+ * twice a day. Signed out means no Pass: a purchase belongs to an account,
+ * so a flag in a signed-out browser (a test toggle, a lapsed member, a
+ * hand-edited localStorage) is cleared. Does nothing while the paywall is
+ * off, and never throws: a failed check leaves the flag as it was.
+ */
+export async function refreshPass(force = false): Promise<PassStatus | null> {
+  if (!PAYWALL_LIVE) return null;
+  try {
+    const last = Number(localStorage.getItem(PASS_CHECKED_KEY) ?? 0);
+    if (!force && Date.now() - last < PASS_RECHECK_MS) return null;
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const status = user ? await readPass(supabase, user.id) : null;
+    setPassFlag(Boolean(status?.active));
+    localStorage.setItem(PASS_CHECKED_KEY, String(Date.now()));
+    return status;
+  } catch {
+    return null;
+  }
+}
 
 type Row = {
   user_id: string;
@@ -94,9 +166,20 @@ export async function syncProgress(): Promise<Progress | null> {
     .maybeSingle();
 
   const merged = merge(local, (remote as Row | null) ?? null);
+  // The Season Pass comes from the server's subscription row, never from
+  // what this browser happened to have stored.
+  if (PAYWALL_LIVE) {
+    merged.seasonPass = (await readPass(supabase, user.id)).active;
+    try {
+      localStorage.setItem(PASS_CHECKED_KEY, String(Date.now()));
+    } catch {
+      /* storage blocked — not fatal */
+    }
+  }
 
   // Local first, so the learner sees the merged state even if the write fails.
   saveProgress(merged);
+  if (PAYWALL_LIVE) window.dispatchEvent(new Event(PASS_EVENT));
   if (remote?.module_id) {
     try {
       window.localStorage.setItem(MODULE_STORAGE_KEY, remote.module_id);

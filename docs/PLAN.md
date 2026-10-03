@@ -114,7 +114,7 @@ Each playbook follows the same arc a first-job seeker needs — skills foundatio
 
 Most drills are honest `placeholder` stubs; Data Analyst foundation drills that already exist in `/learn` are marked `live`. Expanding a playbook means filling those placeholders, not inventing a second product.
 
-## Product ladder (proposed 2026-10-03; nothing is for sale)
+## Product ladder (approved 2026-10-03; nothing is for sale yet)
 
 **Two tiers and a launch offer.** The copy, the exact free/Pass line, the paywall moments, the launch emails, the calendar and the launch gates are in [`docs/OFFER.md`](OFFER.md).
 

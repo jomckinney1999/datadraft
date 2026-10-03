@@ -169,6 +169,30 @@ for (const unit of curriculum.COURSE.units) {
   }
 }
 
+// The Season Pass (docs/OFFER.md). The free starter set has to be real easy
+// SQL questions, and the prices in the code have to be the prices the Stripe
+// setup script creates, or the page would advertise one number and charge
+// another.
+{
+  const gates = await loadProjectTs(path.join(root, "lib/pass-gates.ts"), root);
+  const bank = await loadProjectTs(path.join(root, "lib/questions.ts"), root);
+  for (const id of gates.STARTER_QUESTIONS) {
+    const q = bank.QUESTIONS.find((x) => x.id === id);
+    if (!q) problems.push(`season pass: starter question "${id}" doesn't exist`);
+    else if (q.lang !== "sql" || q.difficulty !== "easy") problems.push(`season pass: starter question "${id}" isn't easy SQL`);
+  }
+  const pass = await loadProjectTs(path.join(root, "lib/season-pass.ts"), root);
+  const fs = await import("node:fs");
+  const script = fs.readFileSync(path.join(root, "scripts/setup-stripe-products.mjs"), "utf8");
+  for (const [plan, env] of [["monthly", "STRIPE_PRICE_MONTHLY"], ["annual", "STRIPE_PRICE_ANNUAL"], ["founding", "STRIPE_PRICE_FOUNDING"]]) {
+    const m = new RegExp(`env: "${env}"[^}]*cents: (\\d+)`).exec(script);
+    if (!m) problems.push(`season pass: setup-stripe-products.mjs has no ${env} price`);
+    else if (Number(m[1]) !== pass.PASS_PLANS[plan].cents) {
+      problems.push(`season pass: ${plan} is ${pass.PASS_PLANS[plan].cents}¢ in lib/season-pass.ts but ${m[1]}¢ in the Stripe setup script`);
+    }
+  }
+}
+
 const questions = await loadProjectTs(path.join(root, "lib/questions.ts"), root);
 let questionChecked = 0;
 let questionPy = 0;

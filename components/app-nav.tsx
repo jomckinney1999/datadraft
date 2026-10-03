@@ -30,6 +30,7 @@ import { usePathname } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { WelcomePrompt } from "@/components/welcome-tour";
 import { EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
+import { PAYWALL_LIVE } from "@/lib/season-pass";
 import LearnStatusChips from "@/components/learn-status-chips";
 
 // Four sections, in the order someone moves through them: where am I, what
@@ -58,6 +59,14 @@ export default function AppNav({
 } = {}) {
   const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
+
+  // Keep the Season Pass flag in step with the server (at most twice a day).
+  // Loaded only once the paywall is live, so the Supabase client isn't in
+  // every page's bundle before there's anything to check.
+  useEffect(() => {
+    if (!PAYWALL_LIVE) return;
+    void import("@/lib/progress-sync").then((m) => m.refreshPass());
+  }, []);
 
   // Escape closes the drawer, as it does every other overlay on the web.
   useEffect(() => {

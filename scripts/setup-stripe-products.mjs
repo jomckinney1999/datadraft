@@ -1,12 +1,18 @@
-// One-time setup script: creates the Practice tier subscription product in
-// Stripe (test mode by default — uses whatever key is in .env.local).
+// One-time setup: creates the Season Pass product and its three prices in
+// Stripe (docs/OFFER.md): $19.99 a month, $119 a year, and the founding
+// $79 a year. Test mode or live mode depends on the key in .env.local.
 //
 // Usage:
-//   1. Add your real STRIPE_SECRET_KEY to .env.local first.
+//   1. Put STRIPE_SECRET_KEY in .env.local.
 //   2. node --env-file=.env.local scripts/setup-stripe-products.mjs
+//   3. Copy the three STRIPE_PRICE_* lines it prints into .env.local and the
+//      Vercel project's environment variables.
 //
-// Prints the price ID to paste into NEXT_PUBLIC_STRIPE_PRACTICE_PRICE_ID.
-// Safe to re-run — checks for an existing product by name before creating.
+// Safe to re-run: it finds the product and prices by lookup key instead of
+// making duplicates. Founding members are on their own price, so when list
+// prices rise they keep theirs by construction (that's the promise).
+//
+// Keep the amounts in step with PASS_PLANS in lib/season-pass.ts.
 
 import Stripe from "stripe";
 
@@ -18,41 +24,52 @@ if (!key) {
 
 const stripe = new Stripe(key, { apiVersion: "2026-06-24.dahlia" });
 
-async function main() {
-  const existing = await stripe.products.search({
-    query: `name:"DataDraft — Practice" AND active:"true"`,
-  });
+const PRICES = [
+  { env: "STRIPE_PRICE_MONTHLY", lookup: "season_pass_monthly", cents: 1999, interval: "month", nickname: "Season Pass, monthly" },
+  { env: "STRIPE_PRICE_ANNUAL", lookup: "season_pass_annual", cents: 11900, interval: "year", nickname: "Season Pass, yearly" },
+  { env: "STRIPE_PRICE_FOUNDING", lookup: "season_pass_founding", cents: 7900, interval: "year", nickname: "Season Pass, founding (yearly)" },
+];
 
-  let product = existing.data[0];
+async function main() {
+  const found = await stripe.products.search({ query: `metadata["datadraft"]:"season-pass" AND active:"true"` });
+  let product = found.data[0];
   if (!product) {
     product = await stripe.products.create({
-      name: "DataDraft — Practice",
+      name: "DataDraft Season Pass",
       description:
-        "Unlimited sandbox access, ongoing weekly problem sets, live season datasets.",
+        "The whole question bank with solutions, Query Doctor on every miss, timed mock SQL screens, and every course with no daily limit.",
+      metadata: { datadraft: "season-pass" },
     });
     console.log(`Created product: ${product.id}`);
   } else {
-    console.log(`Found existing product: ${product.id}`);
+    console.log(`Found product: ${product.id}`);
   }
 
-  const prices = await stripe.prices.list({ product: product.id, active: true });
-  let price = prices.data.find(
-    (p) => p.recurring?.interval === "month" && p.unit_amount === 2000,
-  );
-
-  if (!price) {
-    price = await stripe.prices.create({
-      product: product.id,
-      unit_amount: 2000, // $20.00 — midpoint of the $15-30/mo range in docs/PLAN.md
-      currency: "usd",
-      recurring: { interval: "month" },
-    });
-    console.log(`Created price: ${price.id}`);
-  } else {
-    console.log(`Found existing price: ${price.id}`);
+  const lines = [];
+  for (const p of PRICES) {
+    const existing = await stripe.prices.list({ lookup_keys: [p.lookup], active: true });
+    let price = existing.data[0];
+    if (price && (price.unit_amount !== p.cents || price.recurring?.interval !== p.interval)) {
+      console.error(`${p.lookup} exists at a different amount; archive it in Stripe before re-running.`);
+      process.exit(1);
+    }
+    if (!price) {
+      price = await stripe.prices.create({
+        product: product.id,
+        unit_amount: p.cents,
+        currency: "usd",
+        recurring: { interval: p.interval },
+        lookup_key: p.lookup,
+        nickname: p.nickname,
+      });
+      console.log(`Created ${p.nickname}: ${price.id}`);
+    } else {
+      console.log(`Found ${p.nickname}: ${price.id}`);
+    }
+    lines.push(`${p.env}=${price.id}`);
   }
 
-  console.log(`\nSet this in .env.local:\nNEXT_PUBLIC_STRIPE_PRACTICE_PRICE_ID=${price.id}`);
+  console.log(`\nAdd to .env.local and to Vercel:\n${lines.join("\n")}`);
 }
 
 main().catch((err) => {

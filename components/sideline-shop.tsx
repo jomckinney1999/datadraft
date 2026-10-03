@@ -6,7 +6,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import WaitlistForm from "@/components/waitlist-form";
+import PassOffer from "@/components/pass-offer";
 import {
   buyShopItem,
   COST_BYE_WEEK,
@@ -116,27 +116,13 @@ export default function SidelineShop({
         </p>
       )}
 
-      <div className="mt-5 rounded-xl border border-ice/30 bg-ice/5 p-3">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ice">
-          Season Pass · Practice tier
-        </p>
-        <p className="mt-1 text-[12px] leading-relaxed text-ink-soft">
-          Unlimited timeouts, live weekly datasets, and the appointment habit
-          that rides the NFL calendar — join the waitlist for when it opens.
-        </p>
+      <div className="mt-5">
         {progress.seasonPass ? (
-          <p className="mt-2 font-mono text-[11px] text-turf">
-            Demo Season Pass on — unlimited timeouts.
+          <p className="rounded-xl border border-turf/40 bg-turf/10 p-3 font-mono text-[11px] text-turf">
+            ★ Season Pass on: unlimited lessons.
           </p>
         ) : (
-          <div className="mt-3">
-            <WaitlistForm
-              interest="practice"
-              source="sideline-shop"
-              label="Join Season Pass waitlist"
-              compact
-            />
-          </div>
+          <PassOffer moment="shop" />
         )}
         <Link
           href="/learn"

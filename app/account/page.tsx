@@ -7,7 +7,8 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { loadProgress, type Progress } from "@/lib/progress";
-import { syncProgress } from "@/lib/progress-sync";
+import { readPass, syncProgress, type PassStatus } from "@/lib/progress-sync";
+import { PASS_PLANS, PAYWALL_LIVE } from "@/lib/season-pass";
 import Coach from "@/components/coach";
 import AppNav from "@/components/app-nav";
 
@@ -19,6 +20,16 @@ const ERRORS: Record<string, string> = {
   not_configured: "Accounts aren't switched on yet.",
 };
 
+/**
+ * Where signing in returns you: the dashboard, or a page that sent you here
+ * mid-task (?next=/pricing, from a checkout that needed an account). Only a
+ * path on this site, so the link can't be used to bounce someone elsewhere.
+ */
+function nextPath(): string {
+  const next = new URLSearchParams(window.location.search).get("next") ?? "";
+  return /^\/(?!\/)[\w\-/]*$/.test(next) ? next : "/dashboard";
+}
+
 export default function AccountPage() {
   const [state, setState] = useState<State>("loading");
   const [email, setEmail] = useState("");
@@ -26,6 +37,9 @@ export default function AccountPage() {
   const [progress, setProgress] = useState<Progress | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [synced, setSynced] = useState(false);
+  const [pass, setPass] = useState<PassStatus | null>(null);
+  const [justBought, setJustBought] = useState(false);
+  const [portalBusy, setPortalBusy] = useState(false);
 
   const boot = useCallback(async () => {
     const params = new URLSearchParams(window.location.search);
@@ -48,7 +62,39 @@ export default function AccountPage() {
     const merged = await syncProgress();
     setProgress(merged ?? loadProgress());
     setSynced(true);
+
+    if (!PAYWALL_LIVE) return;
+    // Back from Stripe: the webhook that grants the Pass can land a few
+    // seconds after the redirect, so wait for it briefly before saying so.
+    const bought = params.get("checkout") === "success";
+    setJustBought(bought);
+    let status = await readPass(supabase, user.id);
+    for (let i = 0; bought && !status.active && i < 6; i++) {
+      await new Promise((r) => setTimeout(r, 2000));
+      status = await readPass(supabase, user.id);
+    }
+    setPass(status);
+    if (bought && status.active) {
+      const again = await syncProgress();
+      if (again) setProgress(again);
+    }
   }, []);
+
+  async function openBilling() {
+    setPortalBusy(true);
+    try {
+      const res = await fetch("/api/billing-portal", { method: "POST" });
+      const body = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (body.url) {
+        window.location.href = body.url;
+        return;
+      }
+      setError(body.error ?? "Billing didn't open. Try again in a moment.");
+    } catch {
+      setError("Billing didn't open. Check your connection and try again.");
+    }
+    setPortalBusy(false);
+  }
 
   useEffect(() => {
     boot();
@@ -64,7 +110,7 @@ export default function AccountPage() {
       options: {
         // Signing in lands on the dashboard, not the account page: the reason to
         // log in is to get back to learning, not to look at settings.
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath())}`,
       },
     });
     if (signInError) {
@@ -193,6 +239,44 @@ export default function AccountPage() {
                     <p className="label-broadcast text-[10px]">Streak</p>
                     <p className="stat-number mt-1 text-xl">{progress.streak}</p>
                   </div>
+                </div>
+              )}
+
+              {PAYWALL_LIVE && pass && (
+                <div className="mt-5 rounded-xl border border-gold/40 bg-gold/10 px-4 py-3">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-gold">★ Season Pass</p>
+                  {pass.active ? (
+                    <p className="mt-1 text-sm text-ink">
+                      {justBought ? "You're in. Welcome to the Season Pass. " : ""}
+                      {pass.plan === "founding"
+                        ? `Founding member, ${PASS_PLANS.founding.price} a year for as long as you stay.`
+                        : pass.plan
+                          ? `${PASS_PLANS[pass.plan].price} a ${PASS_PLANS[pass.plan].per}.`
+                          : "Active."}
+                      {pass.periodEnd ? ` Renews or ends ${new Date(pass.periodEnd).toLocaleDateString()}.` : ""}
+                    </p>
+                  ) : justBought ? (
+                    <p className="mt-1 text-sm text-ink">
+                      Payment received. Your Pass is still switching on; refresh this page in a minute.
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-sm text-ink-soft">
+                      Not a member.{" "}
+                      <Link href="/pricing" className="text-gold hover:underline">
+                        See the Season Pass
+                      </Link>
+                    </p>
+                  )}
+                  {pass.hasBilling && (
+                    <button
+                      type="button"
+                      onClick={openBilling}
+                      disabled={portalBusy}
+                      className="mt-2 font-mono text-[11px] font-bold uppercase tracking-wider text-gold hover:underline disabled:opacity-60"
+                    >
+                      {portalBusy ? "Opening…" : "Manage or cancel →"}
+                    </button>
+                  )}
                 </div>
               )}
 
