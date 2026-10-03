@@ -20,6 +20,7 @@
 
 import { isTeamColumn } from "@/components/team-chip";
 import { TEAM_COLORS } from "@/lib/team-colors.generated";
+import { isKnownPlayer, playerTeam } from "@/lib/player-team";
 
 export type Cell = string | number | Uint8Array | null;
 export type Grid = { columns: string[]; values: Cell[][] };
@@ -40,7 +41,12 @@ export type ChartSpec = {
   label: number | null;
   /** A column of team abbreviations, to colour marks in team colours. */
   team: number | null;
-  /** With a team column: draw each team's crest (as the dot, beside the bar, at the line's end). */
+  /**
+   * With no team column, a column of lesson players' names: each name's team
+   * (lib/player-team.ts) stands in for one while `logos` is on.
+   */
+  players: number | null;
+  /** Draw each team's crest (as the dot, beside the bar, at the line's end). */
   logos: boolean;
   /** Scatter only: captions for the four corners the averages make. */
   quadrants: Quadrants | null;
@@ -57,6 +63,8 @@ export type ColumnInfo = {
   /** A week or season — the natural x axis for a line. */
   timeLike: boolean;
   team: boolean;
+  /** Names of lesson (or waiver-wire) players, whose teams we know. */
+  player: boolean;
   distinct: number;
 };
 
@@ -76,6 +84,7 @@ export function describeColumns(grid: Grid): ColumnInfo[] {
       !numeric &&
       vals.length > 0 &&
       (isTeamColumn(lower) || vals.every((v) => TEAM_ABBRS.has(String(v))));
+    const player = !numeric && !team && vals.length > 0 && vals.every((v) => isKnownPlayer(String(v)));
     return {
       index,
       name,
@@ -83,6 +92,7 @@ export function describeColumns(grid: Grid): ColumnInfo[] {
       idLike,
       timeLike,
       team,
+      player,
       distinct: new Set(vals.map(String)).size,
     };
   });
@@ -137,6 +147,7 @@ export function suggestSpec(
   const text = columns.filter((c) => !c.numeric);
   const label = (text.find((c) => !c.team) ?? text[0])?.index ?? null;
   const team = columns.find((c) => c.team)?.index ?? null;
+  const players = team === null ? (columns.find((c) => c.player)?.index ?? null) : null;
   const time = columns.find((c) => c.timeLike);
   const spec = {
     title: base.title,
@@ -144,7 +155,8 @@ export function suggestSpec(
     credit: base.credit,
     label,
     team,
-    logos: team !== null,
+    players,
+    logos: team !== null || players !== null,
     quadrants: null,
   };
 
@@ -213,6 +225,19 @@ export function marksFor(grid: Grid, spec: ChartSpec): Mark[] {
   const cols = describeColumns(grid);
   const time = cols.filter((c) => c.timeLike);
   const labelCol = spec.label;
+  // A player's team for this row: that week of that season if the result has
+  // them, else the season's last, else his current team.
+  const seasonCol = time.find((c) => /(^|_)(season|year)$/.test(c.name.toLowerCase()))?.index ?? null;
+  const weekCol = time.find((c) => /(^|_)(week|wk)$/.test(c.name.toLowerCase()))?.index ?? null;
+  const teamOf = (r: Cell[]): string | null => {
+    if (spec.team !== null) return str(r[spec.team]) || null;
+    if (spec.players === null || !spec.logos) return null;
+    return playerTeam(
+      str(r[spec.players]),
+      seasonCol !== null ? num(r[seasonCol]) : null,
+      weekCol !== null ? num(r[weekCol]) : null,
+    );
+  };
   const counts = new Map<string, number>();
   if (labelCol !== null) {
     for (const r of grid.values) counts.set(str(r[labelCol]), (counts.get(str(r[labelCol])) ?? 0) + 1);
@@ -236,7 +261,7 @@ export function marksFor(grid: Grid, spec: ChartSpec): Mark[] {
       label,
       x,
       y,
-      team: spec.team !== null ? str(r[spec.team]) || null : null,
+      team: teamOf(r),
       series: spec.kind === "line" && labelCol !== null ? str(r[labelCol]) : null,
     });
   });

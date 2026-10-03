@@ -77,6 +77,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add lib/lesson-data.generated.ts lib/lesson-facts.generated.ts public/data public/field-data.json
+          git add lib/lesson-data.generated.ts lib/lesson-facts.generated.ts lib/player-teams.generated.ts public/data public/field-data.json
           git commit -m "Weekly data: ${{ steps.after.outputs.season }} through week ${{ steps.after.outputs.week }}"
           git push

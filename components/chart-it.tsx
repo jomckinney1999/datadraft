@@ -13,6 +13,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   chartOptions,
+  marksFor,
   prettyName,
   respec,
   slug,
@@ -91,17 +92,14 @@ export default function ChartIt({
   // and Copy throw. The chart draws straight away with dots and redraws as
   // crests land, one redraw per frame however many arrive in it. A crest that
   // fails stays a dot.
-  const teamCol = spec?.team ?? null;
+  // Teams come from the marks, so a player chart's looked-up teams count.
   const logosOn = spec?.logos ?? false;
   const teams = useMemo(() => {
-    if (teamCol === null) return "";
+    if (!spec || !spec.logos) return "";
     const seen = new Set<string>();
-    for (const r of grid.values) {
-      const v = r[teamCol];
-      if (typeof v === "string" && v) seen.add(v);
-    }
+    for (const m of marksFor(grid, spec)) if (m.team) seen.add(m.team);
     return Array.from(seen).sort().join(",");
-  }, [grid, teamCol]);
+  }, [grid, spec]);
 
   useEffect(() => {
     if (!open || !logosOn || !teams) return;
@@ -315,7 +313,7 @@ export default function ChartIt({
                   />
                 </div>
 
-                {spec.team !== null && (
+                {(spec.team !== null || spec.players !== null) && (
                   <button
                     type="button"
                     aria-pressed={spec.logos}

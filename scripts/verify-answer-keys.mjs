@@ -150,6 +150,25 @@ for (const unit of curriculum.COURSE.units) {
 // tie at a LIMIT cutoff is: it is the contract the learner is graded against,
 // and if the key's column count does not match what the prompt promised, the
 // prompt is the thing that is wrong.
+// Chart it puts team logos on a player chart by looking each player up in
+// player-teams.generated.ts. A cast player missing from it, or a team code
+// with no colours or logo, would quietly draw a plain dot instead.
+{
+  const pt = await loadProjectTs(path.join(root, "lib/player-teams.generated.ts"), root);
+  const tc = await loadProjectTs(path.join(root, "lib/team-colors.generated.ts"), root);
+  const known = new Set(tc.TEAM_COLORS.map((t) => t.abbr));
+  for (const p of data.PLAYERS) {
+    if (!pt.PLAYER_TEAMS[p]) problems.push(`player-teams: no team on file for ${p}`);
+  }
+  const codes = [
+    ...Object.values(pt.PLAYER_TEAMS).flatMap((s) => Object.values(s).flatMap((spans) => spans.map(([, t]) => t))),
+    ...Object.values(pt.WIRE_TEAMS),
+  ];
+  for (const t of new Set(codes)) {
+    if (!known.has(t)) problems.push(`player-teams: team code ${t} has no colours or logo`);
+  }
+}
+
 const questions = await loadProjectTs(path.join(root, "lib/questions.ts"), root);
 let questionChecked = 0;
 let questionPy = 0;
