@@ -126,13 +126,9 @@ async function fetchGames() {
     relax_column_count: true,
   });
   const keep = rows
-    .filter(
-      (g) =>
-        SEASONS.includes(num(g.season)) &&
-        g.game_type === "REG" &&
-        String(g.result ?? "").trim() !== "",
-    )
+    .filter((g) => SEASONS.includes(num(g.season)) && g.game_type === "REG")
     .map((g) => ({
+      done: String(g.result ?? "").trim() !== "",
       game_id: g.game_id,
       season: num(g.season),
       week: num(g.week),
@@ -150,22 +146,48 @@ async function fetchGames() {
       (a, b) =>
         a.season - b.season || a.week - b.week || a.gameday.localeCompare(b.gameday),
     );
-  console.log(`${keep.length} completed regular-season games`);
+  console.log(`${keep.filter((g) => g.done).length} completed regular-season games`);
   return keep;
 }
 
-const gameRows = await fetchGames();
+const scheduled = await fetchGames();
+
+// The season in progress counts only through its last FINISHED week. Run on
+// a Friday, a week with only Thursday night in it would otherwise land as a
+// whole week: a "week 4" of two teams, and every per-week average dragged
+// toward them. This runs every day from a GitHub Action
+// (.github/workflows/weekly-data.yml), so it has to be right on any day.
+// A game with no score more than a week after its date was cancelled, not
+// pending (Bills–Bengals, 2022), and doesn't hold its week back.
+const NEWEST = Math.max(...SEASONS);
+const today = new Date().toISOString().slice(0, 10);
+const daysAgo = (d) => (Date.parse(today) - Date.parse(d)) / 86_400_000;
+const newestWeeks = [...new Set(scheduled.filter((g) => g.season === NEWEST).map((g) => g.week))].sort((a, b) => a - b);
+let throughWeek = 0;
+for (const w of newestWeeks) {
+  const games = scheduled.filter((g) => g.season === NEWEST && g.week === w);
+  if (!games.every((g) => g.done || daysAgo(g.gameday) > 7)) break;
+  throughWeek = w;
+}
+console.log(`${NEWEST}: complete through week ${throughWeek}`);
 
 const wanted = new Set(CAST);
-const weekRows = [];
+let weekRows = [];
 /** Every player's rows for the league season — the wire needs their teams. */
 let leagueSeasonRows = [];
+/** Which teams the newest season's stats file has, per week. */
+const statTeams = new Map();
 
 for (const season of SEASONS) {
   const rows = await fetchSeason(season);
   if (season === LEAGUE_SEASON) leagueSeasonRows = rows;
   for (const r of rows) {
     if (r.season_type !== "REG") continue;
+    if (season === NEWEST) {
+      const w = num(r.week);
+      if (!statTeams.has(w)) statTeams.set(w, new Set());
+      statTeams.get(w).add(r.team);
+    }
     const name = r.player_display_name || r.player_name;
     if (!wanted.has(name)) continue;
     // A row exists for every week a player was on a roster; skip games they
@@ -183,6 +205,23 @@ for (const season of SEASONS) {
     });
   }
 }
+
+// The schedule can know Monday night's score before the stats file has its
+// box score. A week whose games aren't all in the stats yet waits for the
+// next run rather than going out missing a game.
+while (throughWeek > 0) {
+  const teams = scheduled
+    .filter((g) => g.season === NEWEST && g.week === throughWeek && g.done)
+    .flatMap((g) => [g.home_team, g.away_team]);
+  const have = statTeams.get(throughWeek) ?? new Set();
+  const missingTeams = teams.filter((t) => !have.has(t));
+  if (!missingTeams.length) break;
+  console.log(`${NEWEST} week ${throughWeek}: no stats yet for ${missingTeams.join(", ")}; holding it back`);
+  throughWeek -= 1;
+}
+const counts = (season, week) => season < NEWEST || week <= throughWeek;
+const gameRows = scheduled.filter((g) => g.done && counts(g.season, g.week)).map(({ done, ...g }) => g);
+weekRows = weekRows.filter((r) => counts(r.season, r.week));
 
 // Sort by season, week, then points — so `SELECT * FROM week_results LIMIT 5`
 // shows five DIFFERENT players from one week, not the same player five times.

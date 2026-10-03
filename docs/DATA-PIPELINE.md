@@ -11,7 +11,26 @@ means. Dependency-ordered, no calendar dates.
 
 ## 1. The one rule: pinned data and live data are different tiers
 
-**Lesson data must never auto-update. Everything else should.**
+> **Changed 2026-10-02: lesson data now refreshes itself weekly, behind a
+> gate.** The rule below was written when a refresh broke lessons *silently*.
+> Since then, prose interpolates `FACTS` instead of typing numbers, and
+> `scripts/verify-answer-keys.mjs` re-derives every one of those facts with
+> SQL, runs every answer key, and fails on a tie at a `LIMIT` cutoff. That is
+> the audit this section asked for, automated. So
+> `.github/workflows/weekly-data.yml` runs the rebuild every morning and, on
+> the day a week of the season in progress is complete (every game final
+> *and* in the stats file), rebuilds the Practice Field, runs the verifier
+> and the type-check, and commits to `main` only if all of it passes. A
+> failure commits nothing and GitHub emails it. Partial weeks never land:
+> the builder counts the newest season only through its last finished week.
+> Earlier seasons are re-fetched too, so an nflverse stat correction rides in
+> with the next week. Bumping `SEASONS` for a new year is still by hand.
+>
+> What the original rule protects against still applies to anything the
+> verifier can't see: a number typed into prose instead of read from
+> `FACTS` will go stale weekly. Don't type them.
+
+**Lesson data must never auto-update without the verifier as its gate. Everything else should.**
 
 This is the single most important decision in the document, and it is not
 theoretical. When the lesson dataset was swapped from synthetic to real

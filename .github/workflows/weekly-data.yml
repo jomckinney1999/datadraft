@@ -1,0 +1,82 @@
+name: Weekly data
+
+# Keeps the lesson database and the Practice Field current through the season
+# in progress. Every morning it rebuilds the lesson data from nflverse; on the
+# day a new week is complete (every game final and in the stats file, usually
+# Tuesday or Wednesday after Monday night) it also rebuilds the Practice
+# Field, re-runs every answer key and re-derives every number the prose
+# quotes, and commits only if all of that passes. Pushing to main deploys.
+#
+# Any other day it changes nothing. A failed check commits nothing and
+# GitHub emails the failure, so a bad week is loud instead of live.
+# See docs/DATA-PIPELINE.md §1.
+
+on:
+  schedule:
+    - cron: "0 9 * * *" # 09:00 UTC, 5am Eastern: before most people play the day's duel
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weekly-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # LATEST in the generated file, as "2026,3".
+      - name: Week on file
+        id: before
+        run: echo "latest=$(grep -o '"season":[0-9]*,"week":[0-9]*' lib/lesson-data.generated.ts | tr -dc '0-9,')" >> "$GITHUB_OUTPUT"
+
+      - name: Rebuild the lesson data
+        run: node scripts/build-lesson-dataset.mjs
+
+      - name: Is there a new complete week?
+        id: after
+        env:
+          BEFORE: ${{ steps.before.outputs.latest }}
+        run: |
+          latest=$(grep -o '"season":[0-9]*,"week":[0-9]*' lib/lesson-data.generated.ts | tr -dc '0-9,')
+          echo "on file: $BEFORE · rebuilt: $latest"
+          if [ "$latest" = "$BEFORE" ]; then
+            echo "new=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+            echo "season=${latest%,*}" >> "$GITHUB_OUTPUT"
+            echo "week=${latest#*,}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Rebuild the Practice Field
+        if: steps.after.outputs.new == 'true'
+        run: node scripts/build-field-dataset.mjs
+
+      - name: Check every answer key and every quoted number
+        if: steps.after.outputs.new == 'true'
+        run: node scripts/verify-answer-keys.mjs
+
+      - name: Type-check
+        if: steps.after.outputs.new == 'true'
+        run: npx tsc --noEmit -p .
+
+      - name: Commit and push
+        if: steps.after.outputs.new == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/lesson-data.generated.ts lib/lesson-facts.generated.ts public/data public/field-data.json
+          git commit -m "Weekly data: ${{ steps.after.outputs.season }} through week ${{ steps.after.outputs.week }}"
+          git push

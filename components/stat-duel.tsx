@@ -43,7 +43,16 @@ import {
 const DAY_KEY = "sqlsports.duel.v1";
 const HISTORY_KEY = "sqlsports.duel.history.v1";
 
-type Saved = { day: string; picks: (0 | 1)[] };
+/**
+ * `rounds` fingerprints the matchups the picks answered. The lesson data
+ * refreshes on its own once a week (.github/workflows/weekly-data.yml), and
+ * a refresh that lands mid-day can change today's rounds; saved picks are
+ * only left/right, so without this a reload would score them against
+ * matchups nobody saw. A mismatch starts the new duel fresh.
+ */
+type Saved = { day: string; picks: (0 | 1)[]; rounds?: string };
+const fingerprint = (rounds: DuelRound[]) =>
+  rounds.map((r) => `${r.prompt}|${r.a.name}=${r.a.value}|${r.b.name}=${r.b.value}`).join(";");
 /** Score by day, for every duel finished in this browser. */
 type History = Record<string, number>;
 
@@ -94,7 +103,7 @@ export default function StatDuel({
   useEffect(() => {
     const saved = read<Saved>(DAY_KEY);
     const h = read<History>(HISTORY_KEY) ?? {};
-    if (saved && saved.day === duel.day) {
+    if (saved && saved.day === duel.day && (saved.rounds === undefined || saved.rounds === fingerprint(duel.rounds))) {
       setPicks(saved.picks);
       // Finished earlier today: open on the score, not on round five.
       setCurrent(saved.picks.length >= total ? total : saved.picks.length);
@@ -112,7 +121,7 @@ export default function StatDuel({
     if (picks.length !== current || finished) return;
     const next = [...picks, side];
     setPicks(next);
-    write(DAY_KEY, { day: duel.day, picks: next } satisfies Saved);
+    write(DAY_KEY, { day: duel.day, picks: next, rounds: fingerprint(duel.rounds) } satisfies Saved);
     if (next.length === total) {
       const h = { ...(read<History>(HISTORY_KEY) ?? {}), [duel.day]: scoreOf(next) };
       write(HISTORY_KEY, h);
