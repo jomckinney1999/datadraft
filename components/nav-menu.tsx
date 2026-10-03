@@ -21,7 +21,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type FocusEvent } from "react";
 import type { NavSection } from "@/lib/nav";
-import { badgeTone, NavIcon } from "@/components/nav-icons";
+import { badgeTone, NavIcon, navTone } from "@/components/nav-icons";
 import type { Tone } from "@/components/art-kit";
 
 const BADGE_STYLE: Record<Tone, string> = {
@@ -137,10 +137,10 @@ export function NavDropdown({
           id={panelId}
           className={`absolute top-full z-40 w-[38rem] max-w-[calc(100vw-2rem)] pt-1 ${anchor === "left" ? "left-4 sm:left-6" : "right-4 sm:right-6"}`}
         >
-          <div className="surface relative overflow-hidden rounded-2xl border border-panel-border bg-panel p-3 sm:p-4">
+          <div className="surface relative overflow-hidden rounded-2xl border border-panel-border bg-panel p-3 sm:p-4 shadow-[0_0_48px_-12px_rgb(var(--c-gold)/0.25)]">
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_80%_at_0%_0%,rgb(var(--c-turf)/0.12),transparent_50%),radial-gradient(ellipse_60%_70%_at_100%_100%,rgb(var(--c-gold)/0.10),transparent_45%),radial-gradient(ellipse_50%_60%_at_80%_0%,rgb(var(--c-ice)/0.10),transparent_40%)]"
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_80%_at_0%_0%,rgb(var(--c-turf)/0.18),transparent_50%),radial-gradient(ellipse_60%_70%_at_100%_100%,rgb(var(--c-gold)/0.16),transparent_45%),radial-gradient(ellipse_50%_60%_at_80%_0%,rgb(var(--c-ice)/0.14),transparent_40%)]"
             />
             <div className={`relative grid gap-4 ${section.groups.length > 1 ? "sm:grid-cols-2" : ""}`}>
               {section.groups.map((g) => (
@@ -150,17 +150,18 @@ export function NavDropdown({
                   >
                     {g.title}
                   </p>
-                  <ul className="mt-1.5 space-y-1">
+                  <ul className="mt-1.5 space-y-1.5">
                     {g.items.map((item) => (
                       <li key={item.href}>
                         <Link
                           href={item.href}
                           onClick={() => setOpen(false)}
-                          className="group flex items-start gap-2.5 rounded-xl border border-transparent px-2 py-2 transition-colors hover:border-panel-border hover:bg-night/40 focus-visible:border-turf/40 focus-visible:bg-night/40"
+                          data-tone={navTone(item.href)}
+                          className="pop-tile group flex items-start gap-2.5 rounded-xl border border-panel-border/80 bg-panel/60 px-2 py-2"
                         >
                           <NavIcon href={item.href} />
                           <span className="min-w-0 flex-1">
-                            <span className="flex flex-wrap items-center gap-1.5 text-sm font-semibold text-ink group-hover:text-turf">
+                            <span className="flex flex-wrap items-center gap-1.5 text-sm font-semibold text-ink">
                               {item.label}
                               {item.badge && <Badge text={item.badge} />}
                             </span>
@@ -214,7 +215,8 @@ export function NavDrawerSections({
                     <Link
                       href={i.href}
                       onClick={onNavigate}
-                      className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-ink-soft transition-colors hover:bg-panel hover:text-ink"
+                      data-tone={navTone(i.href)}
+                      className="pop-tile group flex items-center gap-2 rounded-xl border border-panel-border/70 bg-panel/50 px-2 py-1.5 text-sm"
                     >
                       <NavIcon href={i.href} />
                       <span className="min-w-0 flex-1">

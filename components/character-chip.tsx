@@ -42,7 +42,7 @@ export default function CharacterChip({
         kitAccent={progress.kitAccent}
         rankTone={tenure.rank.tone}
         size={compact ? 40 : 34}
-        className="shrink-0"
+        className={`player-mark-glow shrink-0`}
       />
       <span className="min-w-0 flex-1">
         <span className="block truncate font-display text-[13px] font-bold leading-tight text-ink group-hover:text-inherit">

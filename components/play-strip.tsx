@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NavIcon, badgeTone } from "@/components/nav-icons";
 
 /**
  * The Play menu as a strip — daily games plus prep arcade — for the home
@@ -17,12 +18,14 @@ const GAMES = [
     href: "/draft",
     name: "Draft Room",
     blurb: "Scout with SQL, then watch the season.",
+    badge: "Play",
     tone: "turf" as const,
   },
   {
     href: "/learn/rapid",
     name: "Rapid Fire",
     blurb: "Twelve seconds a snap.",
+    badge: "Play",
     tone: "ice" as const,
   },
   {
@@ -43,15 +46,15 @@ const GAMES = [
     href: "/questions/screen",
     name: "Analyst Screen",
     blurb: "Timed OA: SQL plus MC.",
-    badge: "Prep",
+    badge: "Pass",
     tone: "turf" as const,
   },
 ];
 
-const TONE: Record<(typeof GAMES)[number]["tone"], string> = {
-  gold: "hover:border-gold/50 text-gold",
-  turf: "hover:border-turf/50 text-turf",
-  ice: "hover:border-ice/50 text-ice",
+const BADGE: Record<string, string> = {
+  gold: "border-gold/50 bg-gold/15 text-gold",
+  ice: "border-ice/50 bg-ice/15 text-ice",
+  turf: "border-turf/50 bg-turf/15 text-turf",
 };
 
 export default function PlayStrip({
@@ -77,17 +80,29 @@ export default function PlayStrip({
           <Link
             key={g.href}
             href={g.href}
-            className={`lift surface flex flex-col rounded-xl border border-panel-border bg-panel p-3.5 transition-colors ${TONE[g.tone]}`}
+            data-tone={g.tone}
+            className="pop-tile surface group flex items-start gap-3 rounded-xl border border-panel-border bg-panel p-3.5"
           >
-            <span className="flex items-center justify-between gap-2">
-              <span className="font-display text-base font-bold text-ink">{g.name}</span>
-              {g.badge && (
-                <span className="rounded-full border border-current/30 px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider opacity-90">
-                  {g.badge}
+            <NavIcon href={g.href} />
+            <span className="min-w-0 flex-1">
+              <span className="flex flex-wrap items-center gap-1.5">
+                <span
+                  className={`font-display text-base font-bold ${
+                    g.tone === "gold" ? "text-gold" : g.tone === "ice" ? "text-ice" : "text-turf"
+                  }`}
+                >
+                  {g.name}
                 </span>
-              )}
+                {g.badge && (
+                  <span
+                    className={`rounded-full border px-1.5 py-px font-mono text-[9px] font-bold uppercase tracking-wider ${BADGE[badgeTone(g.badge)]}`}
+                  >
+                    {g.badge}
+                  </span>
+                )}
+              </span>
+              <span className="mt-1 block text-sm leading-snug text-ink-soft">{g.blurb}</span>
             </span>
-            <span className="mt-1 text-sm leading-snug text-ink-soft">{g.blurb}</span>
           </Link>
         ))}
       </div>

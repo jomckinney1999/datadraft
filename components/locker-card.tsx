@@ -61,9 +61,13 @@ export default function LockerCard({
   return (
     <section
       id="locker"
-      className="surface scroll-mt-20 overflow-hidden rounded-2xl border border-panel-border bg-panel"
+      className="surface relative scroll-mt-20 overflow-hidden rounded-2xl border border-gold/35 bg-panel shadow-[0_0_48px_-16px_rgb(var(--c-gold)/0.4)]"
     >
-      <div className="border-b border-panel-border bg-gold/5 px-5 py-4 sm:px-6">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_10%_0%,rgb(var(--c-gold)/0.16),transparent_55%),radial-gradient(ellipse_55%_45%_at_100%_30%,rgb(var(--c-ice)/0.12),transparent_50%),radial-gradient(ellipse_50%_40%_at_50%_100%,rgb(var(--c-turf)/0.10),transparent_50%)]"
+      />
+      <div className="relative border-b border-panel-border bg-gold/5 px-5 py-4 sm:px-6">
         <p className="label-broadcast text-gold">your locker</p>
         <h2 className="mt-1 font-display text-xl font-bold text-ink sm:text-2xl">
           Own the roster spot
@@ -74,7 +78,7 @@ export default function LockerCard({
         </p>
       </div>
 
-      <div className="grid gap-6 p-5 sm:grid-cols-[9rem_1fr] sm:p-6">
+      <div className="relative grid gap-6 p-5 sm:grid-cols-[9rem_1fr] sm:p-6">
         <div className="flex flex-col items-center">
           <div className="relative flex h-40 w-40 items-center justify-center rounded-full bg-[radial-gradient(circle_at_50%_40%,rgb(var(--c-gold)/0.2),transparent_65%)]">
             <PlayerMark

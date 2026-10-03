@@ -14,9 +14,25 @@ function Frame({
   children: ReactNode;
 }) {
   return (
-    <svg viewBox="0 0 40 40" className="h-9 w-9 shrink-0" aria-hidden>
-      <rect x="1" y="1" width="38" height="38" rx="10" fill={c("night")} stroke={N} strokeWidth="1.6" />
-      <rect x="1" y="1" width="38" height="38" rx="10" fill={c(tone)} opacity="0.14" />
+    <svg
+      viewBox="0 0 40 40"
+      className="nav-icon h-10 w-10 shrink-0"
+      data-tone={tone}
+      aria-hidden
+    >
+      <rect x="1" y="1" width="38" height="38" rx="11" fill={c("night")} stroke={N} strokeWidth="1.8" />
+      <rect x="1" y="1" width="38" height="38" rx="11" fill={c(tone)} opacity="0.28" />
+      <rect
+        x="2.5"
+        y="2.5"
+        width="35"
+        height="35"
+        rx="9.5"
+        fill="none"
+        stroke={c(tone)}
+        strokeWidth="1.2"
+        opacity="0.55"
+      />
       {children}
     </svg>
   );
@@ -229,6 +245,10 @@ const FALLBACK: { tone: Tone; Scene: () => ReactNode } = {
   tone: "turf",
   Scene: () => <Football x={20} y={20} rx={10} />,
 };
+
+export function navTone(href: string): Tone {
+  return (ICONS[href] ?? FALLBACK).tone;
+}
 
 export function NavIcon({ href }: { href: string }) {
   const { tone, Scene } = ICONS[href] ?? FALLBACK;

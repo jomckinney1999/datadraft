@@ -278,7 +278,8 @@ export default function Dashboard({
               key={a.href}
               href={a.href}
               onClick={() => playSfx("ui")}
-              className="lift surface group overflow-hidden rounded-2xl border border-panel-border bg-panel transition-colors hover:border-turf/40"
+              data-tone={a.accent}
+              className="pop-tile surface group overflow-hidden rounded-2xl border border-panel-border bg-panel"
             >
               <span className="block h-28 border-b border-panel-border bg-night/50">{a.art}</span>
               <span className="block p-4">
@@ -290,7 +291,11 @@ export default function Dashboard({
                   {a.name}
                 </p>
                 <p className="mt-1 text-sm leading-relaxed text-ink-soft">{a.blurb}</p>
-                <p className="mt-2 font-mono text-[11px] uppercase tracking-wider text-ink-muted group-hover:text-turf">
+                <p
+                  className={`mt-2 font-mono text-[11px] uppercase tracking-wider ${
+                    a.accent === "turf" ? "text-turf" : a.accent === "ice" ? "text-ice" : "text-gold"
+                  }`}
+                >
                   {a.cta} →
                 </p>
               </span>

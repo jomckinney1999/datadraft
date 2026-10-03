@@ -69,7 +69,8 @@ export default function PlayerMark({
       viewBox="0 0 80 80"
       width={size}
       height={size}
-      className={className}
+      className={`player-mark-glow ${className}`}
+      data-tone={ring}
       role="img"
       aria-label={`Player ${num}`}
     >

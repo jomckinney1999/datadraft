@@ -354,6 +354,99 @@ body {
     filter: drop-shadow(0 0 14px rgb(var(--glow) / 0.65)) brightness(1.12);
   }
 
+  /* ── Pop tile ─────────────────────────────────────────────────
+     Smaller cousin of .glow-card for nav rows, Play strip cards and
+     dashboard links. Always carries a soft accent wash; hover lifts it
+     and spills coloured light underneath. data-tone: turf | ice | gold. */
+  .pop-tile {
+    --pop: var(--c-turf);
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    transition:
+      transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 220ms ease,
+      border-color 220ms ease;
+  }
+  .pop-tile[data-tone="ice"] {
+    --pop: var(--c-ice);
+  }
+  .pop-tile[data-tone="gold"] {
+    --pop: var(--c-gold);
+  }
+  .pop-tile::before {
+    content: "";
+    position: absolute;
+    inset: -50% -30% auto;
+    height: 85%;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse 80% 70% at 30% 0%,
+      rgb(var(--pop) / 0.32),
+      transparent 70%
+    );
+    opacity: 0.7;
+    transition: opacity 220ms ease;
+  }
+  .pop-tile > * {
+    position: relative;
+    z-index: 1;
+  }
+  @media (hover: hover) {
+    .pop-tile:hover,
+    .pop-tile:focus-visible {
+      transform: translate3d(0, -4px, 0);
+      border-color: rgb(var(--pop) / 0.55);
+      box-shadow:
+        inset 0 1px 0 0 rgb(255 255 255 / var(--surface-specular)),
+        0 18px 36px -16px rgb(var(--pop) / 0.55),
+        0 0 48px -14px rgb(var(--pop) / 0.4);
+    }
+    .pop-tile:hover::before,
+    .pop-tile:focus-visible::before {
+      opacity: 1;
+    }
+  }
+
+  /* Nav sticker icons — idle glow, brighter on the parent hover. */
+  .nav-icon {
+    filter: drop-shadow(0 0 6px rgb(var(--c-turf) / 0.25));
+    transition:
+      filter 200ms ease,
+      transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .nav-icon[data-tone="ice"] {
+    filter: drop-shadow(0 0 6px rgb(var(--c-ice) / 0.3));
+  }
+  .nav-icon[data-tone="gold"] {
+    filter: drop-shadow(0 0 6px rgb(var(--c-gold) / 0.35));
+  }
+  .group:hover .nav-icon,
+  .group:focus-visible .nav-icon {
+    transform: scale(1.06);
+    filter: drop-shadow(0 0 12px rgb(var(--c-turf) / 0.55));
+  }
+  .group:hover .nav-icon[data-tone="ice"],
+  .group:focus-visible .nav-icon[data-tone="ice"] {
+    filter: drop-shadow(0 0 12px rgb(var(--c-ice) / 0.6));
+  }
+  .group:hover .nav-icon[data-tone="gold"],
+  .group:focus-visible .nav-icon[data-tone="gold"] {
+    filter: drop-shadow(0 0 12px rgb(var(--c-gold) / 0.65));
+  }
+
+  /* Circular logo mark — soft pulse of the kit colour. */
+  .player-mark-glow {
+    filter: drop-shadow(0 0 10px rgb(var(--c-ice) / 0.35));
+  }
+  .player-mark-glow[data-tone="turf"] {
+    filter: drop-shadow(0 0 12px rgb(var(--c-turf) / 0.45));
+  }
+  .player-mark-glow[data-tone="gold"] {
+    filter: drop-shadow(0 0 14px rgb(var(--c-gold) / 0.5));
+  }
+
   /* Hero-level panels. A hairline that shifts turf → ice → gold along its length,
      done as a masked gradient border rather than four elements. */
   .chrome {
@@ -1445,11 +1538,17 @@ body {
   border: 2px solid rgb(var(--c-panel-border));
   border-bottom-width: 3px;
   background-color: rgb(var(--c-panel) / 0.9);
+  background-image: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.06) 0%,
+    transparent 55%
+  );
   padding: 0.35rem 0.7rem;
   font-family: var(--font-ibm-plex-mono), monospace;
   font-size: 0.75rem;
   font-weight: 600;
   color: rgb(var(--c-ink-soft));
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.05);
 }
 
 .quest-row {
@@ -1472,9 +1571,11 @@ body {
   border-radius: 9999px;
   background: linear-gradient(
     90deg,
-    rgb(var(--c-turf-dim)),
-    rgb(var(--c-turf))
+    rgb(var(--c-turf)),
+    rgb(var(--c-ice)),
+    rgb(var(--c-gold))
   );
+  box-shadow: 0 0 12px rgb(var(--c-turf) / 0.4);
   transition: width 0.6s cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 
@@ -2697,6 +2798,10 @@ html[data-reveal-armed] [data-revealed="true"] .reveal {
   .btn-sticker:active,
   .btn-sticker:hover .sticker-arrow,
   .lift:hover,
+  .pop-tile:hover,
+  .pop-tile:focus-visible,
+  .group:hover .nav-icon,
+  .group:focus-visible .nav-icon,
   a:hover .path-node:not(.path-node-locked),
   a:active .path-node:not(.path-node-locked) {
     transform: none;
@@ -4062,6 +4167,16 @@ html[data-gate-opened] .gate-pop {
     );
   mask-image: linear-gradient(90deg, transparent, black 20%, black 80%, transparent);
   -webkit-mask-image: linear-gradient(90deg, transparent, black 20%, black 80%, transparent);
+}
+.locker-yard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 50% at 0% 0%, rgb(var(--c-turf) / 0.18), transparent 55%),
+    radial-gradient(ellipse 50% 45% at 100% 0%, rgb(var(--c-gold) / 0.16), transparent 50%),
+    radial-gradient(ellipse 45% 40% at 100% 100%, rgb(var(--c-ice) / 0.12), transparent 50%);
 }
 
 .secret-play {

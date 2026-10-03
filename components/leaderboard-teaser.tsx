@@ -18,9 +18,13 @@ export default function LeaderboardTeaser({ progress }: { progress: Progress }) 
   return (
     <section
       id="leaderboard"
-      className="surface scroll-mt-20 overflow-hidden rounded-2xl border border-panel-border bg-panel"
+      className="surface relative scroll-mt-20 overflow-hidden rounded-2xl border border-gold/30 bg-panel shadow-[0_0_40px_-14px_rgb(var(--c-gold)/0.35)]"
     >
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-panel-border px-5 py-4 sm:px-6">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_0%_0%,rgb(var(--c-gold)/0.14),transparent_55%),radial-gradient(ellipse_50%_40%_at_100%_100%,rgb(var(--c-turf)/0.10),transparent_50%)]"
+      />
+      <div className="relative flex flex-wrap items-end justify-between gap-3 border-b border-panel-border px-5 py-4 sm:px-6">
         <div>
           <p className="label-broadcast text-gold">locker room</p>
           <h2 className="mt-1 font-display text-xl font-bold text-ink">Leaderboard</h2>
@@ -33,8 +37,8 @@ export default function LeaderboardTeaser({ progress }: { progress: Progress }) 
         </span>
       </div>
 
-      <ol className="divide-y divide-panel-border">
-        <li className="flex items-center gap-3 bg-gold/5 px-5 py-3.5 sm:px-6">
+      <ol className="relative divide-y divide-panel-border">
+        <li className="flex items-center gap-3 bg-gold/10 px-5 py-3.5 sm:px-6">
           <span className="w-6 font-mono text-sm font-bold text-gold">1</span>
           <PlayerMark
             jersey={progress.jersey}
