@@ -19,14 +19,49 @@ const TONE: Record<string, string> = {
 export default function CharacterChip({
   progress,
   compact = false,
+  icon = false,
 }: {
   progress: Progress;
   /** Nav drawer: full width row. */
   compact?: boolean;
+  /**
+   * The desktop nav: just the mark, with the level on a badge. Six sections,
+   * the status chips and the name chip didn't fit one row, and the tabs
+   * ended up underneath the chips. The name and rank are in the tooltip and
+   * the label, and on the drawer row and /account.
+   */
+  icon?: boolean;
 }) {
   const tenure = tenureFrom(progress);
   const name = displayName(progress);
   const tone = TONE[tenure.rank.tone] ?? TONE.ice;
+
+  if (icon) {
+    return (
+      <Link
+        href="/account#locker"
+        title={`${name} · Lv ${tenure.level} · ${tenure.rank.name}`}
+        aria-label={`${name}, level ${tenure.level}, ${tenure.rank.name}. Your locker`}
+        className={`relative flex rounded-full border p-0.5 transition-colors hover:brightness-110 ${tone}`}
+      >
+        <PlayerMark
+          jersey={progress.jersey}
+          kitAccent={progress.kitAccent}
+          rankTone={tenure.rank.tone}
+          status={tenure.rank.name}
+          favoriteTeam={progress.favoriteTeam}
+          size={32}
+          className="player-mark-glow shrink-0"
+        />
+        <span
+          aria-hidden
+          className="absolute -bottom-1 -right-1.5 min-w-[1.15rem] rounded-full border border-current bg-night px-1 text-center font-mono text-[9px] font-bold leading-[1rem]"
+        >
+          {tenure.level}
+        </span>
+      </Link>
+    );
+  }
 
   return (
     <Link

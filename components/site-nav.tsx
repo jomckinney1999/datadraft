@@ -109,7 +109,7 @@ export default function SiteNav() {
               </span>
             </Link>
 
-            <nav className="hidden items-center gap-4 md:flex">
+            <nav className="hidden items-center gap-4 lg:flex">
               {SECTIONS.map((section) => (
                 <NavDropdown
                   key={section.href}
@@ -134,7 +134,7 @@ export default function SiteNav() {
               </div>
             </nav>
 
-            <div className="flex items-center gap-1 md:hidden">
+            <div className="flex items-center gap-1 lg:hidden">
               <SiteSearch compact />
               <ThemeToggle />
               <button

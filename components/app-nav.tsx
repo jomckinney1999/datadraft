@@ -47,7 +47,7 @@ import { playSfx } from "@/lib/sfx";
 // solve, what can I learn, what can I build, then Resources and Pricing.
 // Each opens a menu of its own pages (lib/nav.ts).
 const TAB = (on: boolean) =>
-  `whitespace-nowrap rounded-lg px-1.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition-colors lg:px-2.5 lg:text-[11px] ${
+  `whitespace-nowrap rounded-lg px-1.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition-colors xl:px-2 xl:text-[11px] ${
     on ? "bg-turf/15 text-turf" : "text-ink-muted hover:bg-panel hover:text-ink"
   }`;
 
@@ -62,6 +62,10 @@ export default function AppNav({
   const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
   const current = currentSection(pathname);
+  // A back link to the section whose tab is already lit says the same thing
+  // twice, and the bar has no room for it ("← all questions" beside a lit
+  // Questions tab). It stays in the drawer either way.
+  const showBack = Boolean(back) && back !== current;
 
   // Keep the Season Pass flag in step with the server (at most twice a day).
   // Loaded only once the paywall is live, so the Supabase client isn't in
@@ -120,19 +124,24 @@ export default function AppNav({
           >
             Data<span className="text-turf">Draft</span>
           </Link>
-          {back && (
+          {showBack && (
             <Link
-              href={back}
-              className="hidden truncate font-mono text-[10px] uppercase tracking-[0.18em] text-ink-muted transition-colors hover:text-turf lg:inline"
+              href={back!}
+              title={`Back to ${backLabel ?? "the last page"}`}
+              aria-label={`Back to ${backLabel ?? "the last page"}`}
+              className="hidden h-8 w-8 items-center justify-center self-center rounded-lg border border-panel-border font-mono text-sm text-ink-muted transition-colors hover:border-turf/50 hover:text-turf lg:flex"
             >
-              ← {backLabel ?? "back"}
+              ←
             </Link>
           )}
         </div>
 
+        {/* The tabs never shrink: when they could, the row ran out of room and
+            they slid underneath the status chips. Below lg they're in the
+            drawer; if room still runs short, the status chips give way. */}
         <nav
           aria-label="Main"
-          className="hidden min-w-0 flex-1 items-center gap-1 md:flex"
+          className="hidden shrink-0 items-center gap-0.5 lg:flex xl:gap-1"
         >
           {NAV.map((section) =>
             section.groups.length ? (
@@ -151,17 +160,20 @@ export default function AppNav({
           )}
         </nav>
 
-        <div className="ml-auto flex shrink-0 items-center gap-2">
-          <div className="hidden lg:block">
-            <LearnStatusChips progress={progress} />
+        <div className="ml-auto flex min-w-0 items-center gap-2">
+          <div className="hidden min-w-0 md:block">
+            <LearnStatusChips progress={progress} dense />
           </div>
           <SiteSearch compact />
           <span className="hidden sm:inline-flex">
             <SfxMuteButton />
           </span>
           <ThemeToggle />
-          <div className="hidden md:block">
+          <div className="hidden shrink-0 md:block lg:hidden">
             <CharacterChip progress={progress} />
+          </div>
+          <div className="hidden shrink-0 lg:block">
+            <CharacterChip progress={progress} icon />
           </div>
 
           <button
@@ -169,7 +181,7 @@ export default function AppNav({
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
-            className="flex h-11 w-11 items-center justify-center text-ink transition-colors hover:text-turf md:hidden"
+            className="flex h-11 w-11 shrink-0 items-center justify-center text-ink transition-colors hover:text-turf lg:hidden"
           >
             <svg aria-hidden viewBox="0 0 24 24" fill="none" className="h-5 w-5">
               <path
@@ -186,7 +198,7 @@ export default function AppNav({
       {open && (
         <nav
           aria-label="Main"
-          className="border-t border-panel-border/80 bg-night/95 px-4 py-3 backdrop-blur-sm md:hidden"
+          className="border-t border-panel-border/80 bg-night/95 px-4 py-3 backdrop-blur-sm lg:hidden"
         >
           <div className="mx-auto flex max-h-[calc(100svh-4rem)] max-w-6xl flex-col gap-0.5 overflow-y-auto">
             <NavDrawerSections sections={NAV} current={current} onNavigate={() => setOpen(false)} />

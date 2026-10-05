@@ -59,8 +59,14 @@ function ClockIcon() {
 
 export default function LearnStatusChips({
   progress,
+  dense = false,
 }: {
   progress: Progress;
+  /**
+   * The desktop bar: between lg and xl the six tabs leave room for two
+   * chips, not three, so tickets (the least urgent) wait for xl.
+   */
+  dense?: boolean;
 }) {
   const streak = displayStreak(progress);
   const timeoutsLabel = progress.seasonPass
@@ -92,7 +98,10 @@ export default function LearnStatusChips({
         <ClockIcon />
         {timeoutsLabel}
       </span>
-      <span className="status-chip shrink-0 !px-2 !py-1 text-gold" title="Scouting tickets">
+      <span
+        className={`status-chip shrink-0 !px-2 !py-1 text-gold ${dense ? "lg:!hidden xl:!inline-flex" : ""}`}
+        title="Scouting tickets"
+      >
         <TicketIcon />
         {progress.tickets}
       </span>
