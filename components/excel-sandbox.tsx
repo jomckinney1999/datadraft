@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import ExcelGrid, { type CellCoord } from "@/components/excel-grid";
 import {
   IMPORT_SHEET,
+  WEEKS_SHEET,
   MAIN_SHEET,
   PRACTICE_SHEET,
   WORKBOOK,
@@ -27,11 +28,12 @@ import {
 import { EXCEL_DRILLS, type ExcelDrill } from "@/lib/excel-drills";
 import Coach from "@/components/coach";
 
-type SheetId = typeof MAIN_SHEET | typeof IMPORT_SHEET | typeof PRACTICE_SHEET;
+type SheetId = typeof MAIN_SHEET | typeof IMPORT_SHEET | typeof WEEKS_SHEET | typeof PRACTICE_SHEET;
 
 const TABS: { id: SheetId; label: string }[] = [
   { id: MAIN_SHEET, label: "Roster" },
   { id: IMPORT_SHEET, label: "Import" },
+  { id: WEEKS_SHEET, label: "Weeks" },
   { id: PRACTICE_SHEET, label: "Practice" },
 ];
 

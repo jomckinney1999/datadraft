@@ -14,6 +14,7 @@
 import { useState } from "react";
 import {
   IMPORT_SHEET,
+  WEEKS_SHEET,
   MAIN_SHEET,
   PRACTICE_SHEET,
   WORKBOOK,
@@ -38,6 +39,7 @@ function alignFor(value: CellValue): string {
 function sheetLabel(sheet: string): string {
   if (sheet === IMPORT_SHEET) return "Import (raw export)";
   if (sheet === PRACTICE_SHEET) return "Practice";
+  if (sheet === WEEKS_SHEET) return "Weeks (2024, by week)";
   return "Roster";
 }
 

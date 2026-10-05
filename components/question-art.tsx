@@ -162,6 +162,40 @@ export const ART_TONE: Record<QuestionArt, Tone> = {
   halfway: "gold",
   "desk-fan": "ice",
   "empty-seats": "turf",
+  "first-look": "ice",
+  "game-of-the-year": "gold",
+  "ten-big-weeks": "gold",
+  "hands-in": "turf",
+  "form-line": "ice",
+  "moving-box": "gold",
+  "qb-grid": "ice",
+  "steady-hands": "turf",
+  "where-was": "ice",
+  "race-to-200": "turf",
+  "four-spots": "gold",
+  "name-tags": "ice",
+  "tally-marks": "turf",
+  "per-game": "ice",
+  "tall-bar": "gold",
+  "steady-streaky": "turf",
+  "game-tags": "gold",
+  "stacked-blocks": "turf",
+  leap: "ice",
+  pennants: "gold",
+  "above-line": "turf",
+  "adding-machine": "ice",
+  "middle-ball": "gold",
+  stamp: "turf",
+  "silver-medal": "ice",
+  backfield: "turf",
+  "crowned-receiver": "gold",
+  "rank-board": "ice",
+  "blank-cell": "turf",
+  "empty-weeks": "ice",
+  "twenty-cells": "turf",
+  crosshairs: "gold",
+  "which-week": "ice",
+  "not-on-sheet": "gold",
 };
 
 // ── Scenes, one per title idea ───────────────────────────────────
@@ -3399,6 +3433,664 @@ function EmptySeats() {
   );
 }
 
+// ── Python, R and Excel, the long table (2026-10-05) ─────────────
+
+/** A small grid of spreadsheet cells, for the table-shaped scenes. */
+function CellGrid({ x, y, cols, rows, w = 22, h = 14, fill = c("ink"), head = c("gold") }: { x: number; y: number; cols: number; rows: number; w?: number; h?: number; fill?: string; head?: string }) {
+  return (
+    <g>
+      <rect x={x} y={y} width={cols * w} height={rows * h} rx="3" fill={fill} stroke={N} strokeWidth="2.2" />
+      <rect x={x} y={y} width={cols * w} height={h} rx="3" fill={head} stroke={N} strokeWidth="2" />
+      {Array.from({ length: cols - 1 }, (_, i) => (
+        <path key={`c${i}`} d={`M${x + (i + 1) * w} ${y} V${y + rows * h}`} stroke={N} strokeWidth="1.2" opacity="0.5" />
+      ))}
+      {Array.from({ length: rows - 1 }, (_, i) => (
+        <path key={`r${i}`} d={`M${x} ${y + (i + 1) * h} H${x + cols * w}`} stroke={N} strokeWidth="1.2" opacity="0.5" />
+      ))}
+    </g>
+  );
+}
+
+/** First Look — a table being measured: rows down the side, columns across the top. */
+function FirstLook() {
+  return (
+    <g>
+      <Shadow y={134} rx={58} />
+      <CellGrid x={58} y={44} cols={5} rows={6} />
+      <path d="M44 44 V128 M38 52 L44 44 L50 52 M38 120 L44 128 L50 120" fill="none" stroke={c("ice")} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M58 30 H168 M66 24 L58 30 L66 36 M160 24 L168 30 L160 36" fill="none" stroke={c("ice")} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+      <ellipse cx="172" cy="104" rx="16" ry="10" fill={c("ink")} stroke={N} strokeWidth="2" />
+      <circle cx="172" cy="104" r="6" fill={c("ice")} stroke={N} strokeWidth="1.6" />
+      <circle cx="172" cy="104" r="2.6" fill={N} />
+    </g>
+  );
+}
+
+/** Game of the Year — a gold plaque with a football and a star. */
+function GameOfTheYear() {
+  return (
+    <g>
+      <Shadow y={136} rx={52} />
+      <path d="M62 30 H138 V94 Q138 120 100 132 Q62 120 62 94 Z" fill={c("gold-dim")} stroke={N} strokeWidth="2.6" strokeLinejoin="round" />
+      <path d="M72 40 H128 V92 Q128 112 100 122 Q72 112 72 92 Z" fill={c("gold")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <Football x={100} y={90} rx={20} rot={-12} />
+      <path d={starPath(100, 58, 5, 14, 6, -90)} fill={c("ink")} stroke={N} strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M46 52 L62 56 L62 70 L46 74 L52 63 Z M154 52 L138 56 L138 70 L154 74 L148 63 Z" fill={c("turf")} stroke={N} strokeWidth="1.8" strokeLinejoin="round" />
+      <Sparkle x={160} y={30} r={6} />
+      <Sparkle x={40} y={110} r={5} />
+    </g>
+  );
+}
+
+/** Ten Big Weeks — an 18-week calendar, ten of the boxes on fire. */
+function TenBigWeeks() {
+  const lit = [0, 2, 3, 5, 7, 9, 10, 12, 15, 17];
+  return (
+    <g>
+      <Shadow y={134} rx={70} />
+      <rect x="28" y="30" width="144" height="100" rx="6" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <rect x="28" y="30" width="144" height="16" rx="6" fill={c("gold")} stroke={N} strokeWidth="2" />
+      {Array.from({ length: 18 }, (_, i) => {
+        const x = 36 + (i % 6) * 22;
+        const y = 52 + Math.floor(i / 6) * 25;
+        return (
+          <g key={i}>
+            <rect x={x} y={y} width="18" height="20" rx="2" fill={lit.includes(i) ? c("gold", 0.25) : c("night-100", 0.25)} stroke={N} strokeWidth="1.4" />
+            {lit.includes(i) && <Flame x={x + 9} y={y + 16} s={0.3} outer={c("gold")} inner={c("ink")} />}
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
+/** Team Effort — three arms in a huddle, hands stacked over the ball. */
+function HandsIn() {
+  return (
+    <g>
+      <Shadow y={134} rx={64} />
+      <path d="M28 128 L84 80" stroke={N} strokeWidth="20" strokeLinecap="round" />
+      <path d="M28 128 L84 80" stroke={c("turf")} strokeWidth="14" strokeLinecap="round" />
+      <path d="M172 128 L116 80" stroke={N} strokeWidth="20" strokeLinecap="round" />
+      <path d="M172 128 L116 80" stroke={c("ice")} strokeWidth="14" strokeLinecap="round" />
+      <path d="M100 140 V86" stroke={N} strokeWidth="20" strokeLinecap="round" />
+      <path d="M100 140 V86" stroke={c("gold")} strokeWidth="14" strokeLinecap="round" />
+      <circle cx="88" cy="76" r="12" fill={c("ink")} stroke={N} strokeWidth="2" />
+      <circle cx="112" cy="76" r="12" fill={c("ink")} stroke={N} strokeWidth="2" />
+      <circle cx="100" cy="82" r="12" fill={c("ink")} stroke={N} strokeWidth="2" />
+      <Football x={100} y={50} rx={18} rot={-8} />
+      <path d="M70 34 L64 26 M130 34 L136 26 M100 22 V14" stroke={c("ink-muted")} strokeWidth="2.6" strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** Three-Game Form — a season of bars with the three-game average running over them. */
+function FormLine() {
+  const bars = [52, 34, 60, 44, 70, 40, 66, 58, 76];
+  return (
+    <g>
+      <path d="M22 126 H182" stroke={c("ink-muted")} strokeWidth="2.4" />
+      {bars.map((hgt, i) => (
+        <rect key={i} x={30 + i * 17} y={126 - hgt} width="12" height={hgt} rx="2" fill={i >= 6 ? c("ice") : c("ink-soft")} stroke={N} strokeWidth="1.6" />
+      ))}
+      <path d="M36 92 Q70 82 96 80 T148 70 T176 62" fill="none" stroke={c("gold")} strokeWidth="4" strokeLinecap="round" />
+      <path d="M130 40 H182 M130 40 V46 M182 40 V46" fill="none" stroke={c("ice")} strokeWidth="2.4" strokeLinecap="round" />
+      <text x="156" y="34" textAnchor="middle" fontSize="13" fontWeight="900" fill={c("ice")} fontFamily={MONO}>
+        3
+      </text>
+      <circle cx="176" cy="62" r="4" fill={c("gold")} stroke={N} strokeWidth="1.6" />
+    </g>
+  );
+}
+
+/** Change of Address — a moving box with the ball packed in, an arrow to the new place. */
+function MovingBox() {
+  return (
+    <g>
+      <Shadow y={134} rx={60} />
+      <path d="M40 70 H124 V128 H40 Z" fill={c("gold-dim")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M40 70 L28 52 H94 L104 70 M124 70 L134 54 H104" fill={c("gold-dim")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <rect x="74" y="70" width="16" height="58" fill={c("ink-soft")} opacity="0.7" />
+      <Football x={70} y={60} rx={16} rot={-24} />
+      <path d="M142 96 H176 M168 88 L176 96 L168 104" fill="none" stroke={c("ice")} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M158 56 L170 44 L182 56 V72 H158 Z" fill={c("ink")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <rect x="166" y="60" width="8" height="12" fill={c("turf")} stroke={N} strokeWidth="1.4" />
+    </g>
+  );
+}
+
+/** Quarterback Grid — a quarterback beside a players-by-weeks grid. */
+function QbGrid() {
+  return (
+    <g>
+      <Shadow y={132} rx={74} />
+      <Player x={46} y={130} s={0.92} pose="throw" jersey="ice" label="QB" />
+      <CellGrid x={92} y={36} cols={4} rows={5} w={20} h={17} />
+      {[0, 1, 2, 3].flatMap((r) =>
+        [0, 1, 2, 3].map((col) => (
+          <rect key={`${r}-${col}`} x={95 + col * 20} y={56 + r * 17} width="14" height="11" rx="2" fill={(r + col) % 3 === 0 ? c("ice") : c("ink-soft")} opacity="0.85" />
+        )),
+      )}
+    </g>
+  );
+}
+
+/** Steady Hands — two gloves holding the ball dead level. */
+function SteadyHands() {
+  return (
+    <g>
+      <Shadow y={132} rx={56} />
+      <path d="M30 116 H170" stroke={c("turf")} strokeWidth="3" strokeDasharray="6 5" />
+      <Football x={100} y={78} rx={30} />
+      <path d="M52 92 Q48 70 60 64 L74 66 Q80 74 76 92 Q66 104 52 92 Z" fill={c("ink")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M148 92 Q152 70 140 64 L126 66 Q120 74 124 92 Q134 104 148 92 Z" fill={c("ink")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M60 72 H72 M60 79 H73 M128 72 H140 M127 79 H140" stroke={N} strokeWidth="1.4" opacity="0.5" />
+      <path d="M86 32 H114 V44 H86 Z" fill={c("turf", 0.5)} stroke={N} strokeWidth="1.8" />
+      <ellipse cx="100" cy="38" rx="5" ry="3.4" fill={c("ink")} />
+    </g>
+  );
+}
+
+/** Where Was A.J.? — a map pin with a question mark over an empty spot on the field. */
+function WhereWas() {
+  return (
+    <g>
+      <path d="M0 108 L200 108 L200 150 L0 150 Z" fill={c("turf", 0.35)} />
+      <path d="M30 108 L20 150 M80 108 L76 150 M130 108 L134 150 M180 108 L190 150" stroke={c("ink", 0.5)} strokeWidth="2" />
+      <ellipse cx="100" cy="124" rx="30" ry="9" fill="none" stroke={c("ice")} strokeWidth="2.4" strokeDasharray="5 4" />
+      <path d="M100 116 C72 84 72 72 72 62 A28 28 0 0 1 128 62 C128 72 128 84 100 116 Z" fill={c("ice")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <circle cx="100" cy="62" r="16" fill={c("ink")} stroke={N} strokeWidth="2" />
+      <text x="100" y="70" textAnchor="middle" fontSize="22" fontWeight="900" fill={N} fontFamily={SANS}>
+        ?
+      </text>
+    </g>
+  );
+}
+
+/** Race to 200 — a football at full speed for a finish banner that says 200. */
+function RaceTo200() {
+  return (
+    <g>
+      <Shadow y={134} rx={70} />
+      <path d="M128 132 V36 M182 132 V36" stroke={N} strokeWidth="3.4" strokeLinecap="round" />
+      <path d="M126 38 H184 V64 H126 Z" fill={c("turf")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <text x="155" y="58" textAnchor="middle" fontSize="18" fontWeight="900" fill={N} fontFamily={SANS}>
+        200
+      </text>
+      <path d="M128 70 H182" stroke={c("ink")} strokeWidth="3" strokeDasharray="6 4" />
+      <Football x={86} y={100} rx={20} rot={-6} />
+      <path d="M18 92 H56 M10 104 H58 M22 116 H54" stroke={c("ink-muted")} strokeWidth="3" strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** Best at Each Spot — four podiums, one per position, a star on each. */
+function FourSpots() {
+  const spots = ["QB", "RB", "WR", "TE"];
+  const heights = [62, 48, 56, 40];
+  return (
+    <g>
+      <Shadow y={132} rx={80} />
+      {spots.map((s, i) => {
+        const x = 22 + i * 40;
+        const h = heights[i];
+        return (
+          <g key={s}>
+            <rect x={x} y={130 - h} width="36" height={h} rx="3" fill={i % 2 ? c("ink-soft") : c("gold-dim")} stroke={N} strokeWidth="2.2" />
+            <text x={x + 18} y={130 - h + 20} textAnchor="middle" fontSize="12" fontWeight="900" fill={N} fontFamily={MONO}>
+              {s}
+            </text>
+            <path d={starPath(x + 18, 130 - h - 14, 5, 10, 4.2, -90)} fill={c("gold")} stroke={N} strokeWidth="1.6" strokeLinejoin="round" />
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
+/** Same Last Name — two name tags, both saying BROWN. */
+function NameTags() {
+  const tag = (x: number, y: number, rot: number, tone: string) => (
+    <g transform={`rotate(${rot} ${x + 40} ${y + 30})`}>
+      <rect x={x} y={y} width="80" height="58" rx="6" fill={c("ink")} stroke={N} strokeWidth="2.2" />
+      <rect x={x} y={y} width="80" height="18" rx="6" fill={tone} stroke={N} strokeWidth="2" />
+      <text x={x + 40} y={y + 13} textAnchor="middle" fontSize="8" fontWeight="900" fill={N} fontFamily={MONO}>
+        MY NAME IS
+      </text>
+      <text x={x + 40} y={y + 44} textAnchor="middle" fontSize="15" fontWeight="900" fill={N} fontFamily={SANS}>
+        BROWN
+      </text>
+    </g>
+  );
+  return (
+    <g>
+      <Shadow y={132} rx={70} />
+      {tag(26, 46, -8, c("ice"))}
+      {tag(96, 60, 7, c("turf"))}
+      <path d="M96 28 L104 36 M110 22 V34 M124 28 L116 36" stroke={c("gold")} strokeWidth="2.6" strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** Position Count — a chalkboard of tally marks by position. */
+function TallyMarks() {
+  const rows: [string, number][] = [["QB", 4], ["RB", 5], ["TE", 3], ["WR", 8]];
+  return (
+    <g>
+      <Shadow y={136} rx={70} />
+      <rect x="22" y="22" width="156" height="108" rx="6" fill={c("night-100")} stroke={N} strokeWidth="2.6" />
+      <rect x="28" y="28" width="144" height="96" rx="3" fill="none" stroke={c("gold-dim")} strokeWidth="2" />
+      {rows.map(([label, n], r) => {
+        const y = 48 + r * 22;
+        return (
+          <g key={label}>
+            <text x="40" y={y + 5} fontSize="12" fontWeight="900" fill={c("turf")} fontFamily={MONO}>
+              {label}
+            </text>
+            {Array.from({ length: n }, (_, i) => {
+              const group = Math.floor(i / 5);
+              const inGroup = i % 5;
+              const x = 72 + group * 44 + inGroup * 7;
+              return inGroup === 4 ? (
+                <path key={i} d={`M${x - 30} ${y + 4} L${x + 2} ${y - 8}`} stroke={c("ink")} strokeWidth="2.4" strokeLinecap="round" />
+              ) : (
+                <path key={i} d={`M${x} ${y - 8} V${y + 6}`} stroke={c("ink")} strokeWidth="2.4" strokeLinecap="round" />
+              );
+            })}
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
+/** Rate, Not Total — a football over a calendar: points divided by games. */
+function PerGame() {
+  return (
+    <g>
+      <Shadow y={136} rx={46} />
+      <Football x={100} y={36} rx={22} />
+      <path d="M58 66 H142" stroke={c("ink")} strokeWidth="5" strokeLinecap="round" />
+      <rect x="74" y="80" width="52" height="46" rx="4" fill={c("ink")} stroke={N} strokeWidth="2.2" />
+      <rect x="74" y="80" width="52" height="12" rx="4" fill={c("ice")} stroke={N} strokeWidth="2" />
+      <path d="M82 102 H118 M82 112 H118 M94 92 V126 M106 92 V126" stroke={N} strokeWidth="1.2" opacity="0.5" />
+      <path d="M86 76 V84 M114 76 V84" stroke={N} strokeWidth="2.4" strokeLinecap="round" />
+      <circle cx="160" cy="58" r="3.6" fill={c("ice")} />
+      <circle cx="160" cy="74" r="3.6" fill={c("ice")} />
+      <path d="M150 66 H170" stroke={c("ice")} strokeWidth="3" strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** Single-Game High — a row of short bars and one towering one with a star. */
+function TallBar() {
+  const bars = [28, 36, 22, 104, 32, 40, 26];
+  return (
+    <g>
+      <path d="M20 128 H180" stroke={c("ink-muted")} strokeWidth="2.4" />
+      {bars.map((h, i) => (
+        <rect key={i} x={28 + i * 22} y={128 - h} width="16" height={h} rx="2" fill={i === 3 ? c("gold") : c("ink-soft")} stroke={N} strokeWidth="1.8" />
+      ))}
+      <path d={starPath(102, 12, 5, 10, 4.2, -90)} fill={c("gold")} stroke={N} strokeWidth="1.6" strokeLinejoin="round" />
+      <Football x={102} y={36} rx={10} rot={-16} />
+    </g>
+  );
+}
+
+/** Steady or Streaky — a flat line and a zigzag, side by side. */
+function SteadyStreaky() {
+  return (
+    <g>
+      <path d="M18 54 H182" stroke={c("turf")} strokeWidth="4" strokeLinecap="round" />
+      <Football x={100} y={44} rx={13} />
+      <path d="M18 112 L38 84 L56 126 L76 80 L96 120 L116 76 L136 128 L156 86 L182 118" fill="none" stroke={c("ice")} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="18" cy="54" r="4" fill={c("turf")} stroke={N} strokeWidth="1.6" />
+      <circle cx="182" cy="54" r="4" fill={c("turf")} stroke={N} strokeWidth="1.6" />
+      <circle cx="18" cy="112" r="4" fill={c("ice")} stroke={N} strokeWidth="1.6" />
+      <circle cx="182" cy="118" r="4" fill={c("ice")} stroke={N} strokeWidth="1.6" />
+    </g>
+  );
+}
+
+/** Label Every Game — three footballs, each with a tag hanging off it. */
+function GameTags() {
+  const balls: [number, string][] = [[46, c("turf")], [100, c("gold")], [154, c("ink-muted")]];
+  return (
+    <g>
+      <Shadow y={134} rx={74} />
+      {balls.map(([x, tone], i) => (
+        <g key={i}>
+          <Football x={x} y={60} rx={20} rot={i === 1 ? -6 : 8} />
+          <path d={`M${x + 10} ${68} Q${x + 14} ${84} ${x + 6} ${96}`} fill="none" stroke={c("ink")} strokeWidth="1.6" />
+          <path d={`M${x - 10} ${96} H${x + 22} V${122} H${x - 10} L${x - 18} ${109} Z`} fill={tone} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+          <circle cx={x - 8} cy={109} r="2.4" fill={N} />
+          <path d={`M${x - 2} ${104} H${x + 16} M${x - 2} ${112} H${x + 10}`} stroke={N} strokeWidth="1.8" />
+        </g>
+      ))}
+    </g>
+  );
+}
+
+/** First to 300 — blocks stacking up a staircase to a flag marked 300. */
+function StackedBlocks() {
+  return (
+    <g>
+      <Shadow y={134} rx={74} />
+      {[0, 1, 2, 3, 4].flatMap((i) =>
+        Array.from({ length: i + 1 }, (_, j) => (
+          <rect key={`${i}-${j}`} x={30 + i * 26} y={110 - j * 20} width="24" height="18" rx="2" fill={j === i ? c("turf") : c("ink-soft")} stroke={N} strokeWidth="1.8" />
+        )),
+      )}
+      <path d="M154 30 V130" stroke={N} strokeWidth="3" strokeLinecap="round" />
+      <path d="M154 32 H194 L186 44 L194 56 H154 Z" fill={c("gold")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <text x="168" y="49" textAnchor="middle" fontSize="11" fontWeight="900" fill={N} fontFamily={SANS}>
+        300
+      </text>
+      <Football x={138} y={20} rx={11} rot={-20} />
+    </g>
+  );
+}
+
+/** Biggest Jump — a football leaping from a low block to a high one. */
+function Leap() {
+  return (
+    <g>
+      <Shadow y={134} rx={74} />
+      <rect x="22" y="104" width="40" height="28" rx="3" fill={c("ink-soft")} stroke={N} strokeWidth="2.2" />
+      <rect x="140" y="56" width="40" height="76" rx="3" fill={c("ice")} stroke={N} strokeWidth="2.2" />
+      <path d="M44 100 Q86 8 158 50" fill="none" stroke={c("ink-muted")} strokeWidth="2.6" strokeDasharray="6 5" strokeLinecap="round" />
+      <Football x={112} y={30} rx={17} rot={22} />
+      <path d="M150 44 L158 50 L148 54" fill="none" stroke={c("ink-muted")} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M168 66 V48 M162 54 L168 46 L174 54" fill="none" stroke={c("gold")} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** Team Totals — three pennants on poles of different heights. */
+function Pennants() {
+  const flags: [number, number, string][] = [[52, 66, c("ice")], [100, 30, c("gold")], [148, 50, c("turf")]];
+  return (
+    <g>
+      <Shadow y={134} rx={74} />
+      {flags.map(([x, top, tone], i) => (
+        <g key={i}>
+          <path d={`M${x} ${top} V132`} stroke={N} strokeWidth="3.4" strokeLinecap="round" />
+          <path d={`M${x} ${top + 2} L${x + 40} ${top + 14} L${x} ${top + 26} Z`} fill={tone} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+          <path d={`M${x + 6} ${top + 14} H${x + 22}`} stroke={N} strokeWidth="1.8" opacity="0.5" />
+        </g>
+      ))}
+      <path d="M30 132 H170" stroke={c("ink-muted")} strokeWidth="2.4" />
+    </g>
+  );
+}
+
+/** Above His Average — dots over a dashed average line, the ball bouncing above it. */
+function AboveLine() {
+  const dots: [number, number][] = [[30, 70], [48, 96], [66, 60], [84, 104], [102, 64], [120, 58], [138, 100], [156, 66], [174, 62]];
+  return (
+    <g>
+      <path d="M18 84 H182" stroke={c("ink-muted")} strokeWidth="2.4" strokeDasharray="7 5" />
+      {dots.map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r="6" fill={y < 84 ? c("turf") : c("ink-soft")} stroke={N} strokeWidth="1.8" />
+      ))}
+      <path d="M60 128 Q82 92 100 30 Q118 92 140 128" fill="none" stroke={c("ink-muted")} strokeWidth="2" strokeDasharray="3 5" />
+      <Football x={100} y={26} rx={14} rot={-10} />
+      <path d="M188 64 V44 M182 50 L188 42 L194 50" fill="none" stroke={c("turf")} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** Add It Up — an adding machine, its paper tape curling up with a total. */
+function AddingMachine() {
+  return (
+    <g>
+      <Shadow y={134} rx={60} />
+      <path d="M86 56 V18 Q86 10 96 12 L120 16 Q128 18 126 26 L122 56" fill={c("ink")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <path d="M94 24 H116 M94 32 H114 M94 40 H116" stroke={N} strokeWidth="1.6" opacity="0.5" />
+      <path d="M92 48 H118" stroke={N} strokeWidth="2.4" />
+      <rect x="48" y="54" width="104" height="76" rx="8" fill={c("ink-soft")} stroke={N} strokeWidth="2.4" />
+      <rect x="58" y="62" width="84" height="16" rx="3" fill={c("night")} stroke={N} strokeWidth="1.8" />
+      <text x="136" y="75" textAnchor="end" fontSize="12" fontWeight="900" fill={c("ice")} fontFamily={MONO}>
+        Σ
+      </text>
+      {[0, 1, 2].flatMap((r) =>
+        [0, 1, 2, 3].map((col) => (
+          <rect key={`${r}-${col}`} x={60 + col * 21} y={86 + r * 14} width="16" height="10" rx="2" fill={col === 3 ? c("ice") : c("ink")} stroke={N} strokeWidth="1.4" />
+        )),
+      )}
+    </g>
+  );
+}
+
+/** Middle of the Pack — five footballs in a row, the middle one lit. */
+function MiddleBall() {
+  const xs = [28, 64, 100, 136, 172];
+  return (
+    <g>
+      <Shadow y={116} rx={86} />
+      {xs.map((x, i) => (
+        <Football key={x} x={x} y={92} rx={i === 2 ? 20 : 15} fill={i === 2 ? c("gold") : c("gold-dim")} rot={i === 2 ? 0 : i < 2 ? -10 : 10} />
+      ))}
+      <path d="M100 30 V58 M92 50 L100 60 L108 50" fill="none" stroke={c("ice")} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M28 124 V130 H172 V124 M100 130 V136" fill="none" stroke={c("ink-muted")} strokeWidth="2" />
+    </g>
+  );
+}
+
+/** Elite or Not — a rubber stamp, and the card it just stamped ELITE. */
+function Stamp() {
+  return (
+    <g>
+      <Shadow y={136} rx={64} />
+      <rect x="34" y="72" width="104" height="58" rx="4" fill={c("ink")} stroke={N} strokeWidth="2.2" transform="rotate(-4 86 101)" />
+      <g transform="rotate(-10 86 102)">
+        <rect x="46" y="88" width="80" height="28" rx="4" fill="none" stroke={c("turf")} strokeWidth="3" />
+        <text x="86" y="109" textAnchor="middle" fontSize="17" fontWeight="900" fill={c("turf")} fontFamily={SANS}>
+          ELITE
+        </text>
+      </g>
+      <rect x="132" y="56" width="44" height="14" rx="3" fill={c("ink-muted")} stroke={N} strokeWidth="2" transform="rotate(18 154 63)" />
+      <path d="M150 50 L160 24" stroke={N} strokeWidth="10" strokeLinecap="round" />
+      <path d="M150 50 L160 24" stroke={c("gold-dim")} strokeWidth="6" strokeLinecap="round" />
+      <circle cx="162" cy="18" r="10" fill={c("gold")} stroke={N} strokeWidth="2" />
+    </g>
+  );
+}
+
+/** Silver Medal — a medal on a ribbon with a 2 on it. */
+function SilverMedal() {
+  return (
+    <g>
+      <Shadow y={136} rx={40} />
+      <path d="M72 14 L92 70 H108 L128 14 H108 L100 40 L92 14 Z" fill={c("ice")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <circle cx="100" cy="96" r="32" fill={c("ink-soft")} stroke={N} strokeWidth="2.6" />
+      <circle cx="100" cy="96" r="24" fill={c("ink")} stroke={N} strokeWidth="1.8" />
+      <text x="100" y="106" textAnchor="middle" fontSize="28" fontWeight="900" fill={N} fontFamily={SANS}>
+        2
+      </text>
+      <Sparkle x={138} y={74} r={6} />
+    </g>
+  );
+}
+
+/** Riley's Backfield — a running back in front of the play drawn on the board. */
+function Backfield() {
+  return (
+    <g>
+      <Shadow y={132} rx={70} />
+      <rect x="84" y="20" width="98" height="78" rx="5" fill={c("night-100")} stroke={N} strokeWidth="2.4" />
+      <path d="M100 76 L108 84 M108 76 L100 84 M150 40 L158 48 M158 40 L150 48" stroke={c("ink")} strokeWidth="2.4" strokeLinecap="round" />
+      <circle cx="128" cy="80" r="6" fill="none" stroke={c("turf")} strokeWidth="2.6" />
+      <path d="M128 72 Q126 52 146 50 Q160 48 170 34" fill="none" stroke={c("turf")} strokeWidth="2.6" strokeLinecap="round" />
+      <path d="M164 34 L171 32 L170 40" fill="none" stroke={c("turf")} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+      <Player x={52} y={130} s={0.92} pose="stand" jersey="turf" label="RB" />
+      <Football x={72} y={92} rx={10} rot={30} />
+    </g>
+  );
+}
+
+/** Top Receiver — a receiver making the catch, wearing a crown. */
+function CrownedReceiver() {
+  return (
+    <g>
+      <Shadow y={132} rx={52} />
+      <Player x={100} y={130} s={1} pose="catch" jersey="gold" label="WR" />
+      <path d="M86 18 L90 6 L96 14 L100 2 L104 14 L110 6 L114 18 Z" fill={c("gold")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <Football x={146} y={40} rx={13} rot={-30} />
+      <path d="M160 26 L170 18 M164 36 L176 34" stroke={c("ink-muted")} strokeWidth="2.4" strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** Where He Ranks — a leaderboard with one row pointed out. */
+function RankBoard() {
+  return (
+    <g>
+      <Shadow y={136} rx={60} />
+      <rect x="42" y="18" width="116" height="116" rx="6" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      {[0, 1, 2, 3, 4].map((i) => {
+        const y = 28 + i * 21;
+        const hit = i === 3;
+        return (
+          <g key={i}>
+            <rect x="50" y={y} width="100" height="16" rx="3" fill={hit ? c("ice") : c("ink-soft")} stroke={N} strokeWidth="1.6" />
+            <circle cx="60" cy={y + 8} r="5.5" fill={hit ? c("gold") : c("ink")} stroke={N} strokeWidth="1.4" />
+            <path d={`M72 ${y + 8} H${hit ? 132 : 118 - i * 6}`} stroke={N} strokeWidth="2.4" strokeLinecap="round" opacity="0.6" />
+          </g>
+        );
+      })}
+      <path d="M182 99 H162 M170 92 L160 99 L170 106" fill="none" stroke={c("gold")} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** Blanks Aren't Zeros — a row of cells with one left blank, and a zero crossed out. */
+function BlankCell() {
+  return (
+    <g>
+      <Shadow y={128} rx={80} />
+      {[0, 1, 2, 3, 4].map((i) => (
+        <rect key={i} x={20 + i * 33} y="84" width="30" height="26" rx="2" fill={i === 2 ? "none" : c("ink")} stroke={i === 2 ? c("turf") : N} strokeWidth={i === 2 ? 2.6 : 2} strokeDasharray={i === 2 ? "4 3" : undefined} />
+      ))}
+      {[0, 1, 3, 4].map((i) => (
+        <path key={i} d={`M${27 + i * 33} 97 H${43 + i * 33}`} stroke={N} strokeWidth="2.6" strokeLinecap="round" opacity="0.6" />
+      ))}
+      <circle cx="102" cy="44" r="22" fill={c("night-100")} stroke={N} strokeWidth="2.2" />
+      <text x="102" y="53" textAnchor="middle" fontSize="26" fontWeight="900" fill={c("ink")} fontFamily={MONO}>
+        0
+      </text>
+      <path d="M86 28 L118 60" stroke={c("gold")} strokeWidth="4" strokeLinecap="round" />
+      <path d="M102 66 V80" stroke={c("ink-muted")} strokeWidth="2" strokeDasharray="3 3" />
+    </g>
+  );
+}
+
+/** Empty Weeks — a strip of weeks with a ball in most, a few left empty. */
+function EmptyWeeks() {
+  const empty = [3, 4, 5];
+  return (
+    <g>
+      <Shadow y={128} rx={84} />
+      {Array.from({ length: 9 }, (_, i) => {
+        const x = 12 + i * 20;
+        return (
+          <g key={i}>
+            <rect x={x} y="60" width="18" height="44" rx="3" fill={empty.includes(i) ? "none" : c("ink")} stroke={empty.includes(i) ? c("ice") : N} strokeWidth="2" strokeDasharray={empty.includes(i) ? "4 3" : undefined} />
+            {!empty.includes(i) && <Football x={x + 9} y={82} rx={7} rot={90} />}
+          </g>
+        );
+      })}
+      <path d="M72 46 Q100 30 128 46" fill="none" stroke={c("ice")} strokeWidth="2.4" strokeLinecap="round" />
+      <text x="100" y="36" textAnchor="middle" fontSize="16" fontWeight="900" fill={c("ice")} fontFamily={SANS}>
+        ?
+      </text>
+    </g>
+  );
+}
+
+/** Twenty-Point Weeks — a row of cells, the big ones lit with a 20+ sticker. */
+function TwentyCells() {
+  const lit = [1, 2, 4, 6];
+  return (
+    <g>
+      <Shadow y={124} rx={84} />
+      {Array.from({ length: 8 }, (_, i) => (
+        <rect key={i} x={14 + i * 22} y="80" width="20" height="28" rx="2" fill={lit.includes(i) ? c("turf") : c("ink")} stroke={N} strokeWidth="1.8" />
+      ))}
+      {lit.map((i) => (
+        <path key={i} d={`M${18 + i * 22} 94 H${30 + i * 22}`} stroke={N} strokeWidth="2.4" strokeLinecap="round" />
+      ))}
+      <g transform="rotate(-10 100 44)">
+        <circle cx="100" cy="44" r="24" fill={c("gold")} stroke={N} strokeWidth="2.4" />
+        <text x="100" y="51" textAnchor="middle" fontSize="18" fontWeight="900" fill={N} fontFamily={SANS}>
+          20+
+        </text>
+      </g>
+      <path d="M80 64 L62 78 M120 64 L138 78" stroke={c("ink-muted")} strokeWidth="2" strokeDasharray="3 3" />
+    </g>
+  );
+}
+
+/** Crosshairs — a grid with one row and one column lit, a target where they cross. */
+function Crosshairs() {
+  return (
+    <g>
+      <Shadow y={136} rx={64} />
+      <rect x="36" y="20" width="128" height="112" rx="4" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <rect x="36" y="64" width="128" height="16" fill={c("gold", 0.45)} />
+      <rect x="100" y="20" width="16" height="112" fill={c("gold", 0.45)} />
+      {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+        <path key={`v${i}`} d={`M${36 + i * 16} 20 V132`} stroke={N} strokeWidth="1" opacity="0.4" />
+      ))}
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <path key={`h${i}`} d={`M36 ${20 + i * 16} H164`} stroke={N} strokeWidth="1" opacity="0.4" />
+      ))}
+      <circle cx="108" cy="72" r="15" fill="none" stroke={c("gold")} strokeWidth="3" />
+      <path d="M108 50 V62 M108 82 V94 M86 72 H98 M118 72 H130" stroke={c("gold")} strokeWidth="3" strokeLinecap="round" />
+      <circle cx="108" cy="72" r="3" fill={c("gold")} />
+    </g>
+  );
+}
+
+/** Which Week? — a calendar page with one day starred and a question in a bubble. */
+function WhichWeek() {
+  return (
+    <g>
+      <Shadow y={136} rx={56} />
+      <rect x="34" y="40" width="104" height="92" rx="5" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <rect x="34" y="40" width="104" height="18" rx="5" fill={c("ice")} stroke={N} strokeWidth="2" />
+      {Array.from({ length: 12 }, (_, i) => (
+        <rect key={i} x={42 + (i % 4) * 23} y={66 + Math.floor(i / 4) * 20} width="18" height="15" rx="2" fill={i === 9 ? c("gold") : c("ink-soft")} stroke={N} strokeWidth="1.2" />
+      ))}
+      <path d={starPath(97, 113, 5, 6, 2.6, -90)} fill={N} />
+      <path d="M140 18 H184 Q190 18 190 24 V52 Q190 58 184 58 H158 L150 68 L150 58 H146 Q140 58 140 52 V24 Q140 18 146 18 Z" fill={c("gold")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <text x="165" y="50" textAnchor="middle" fontSize="28" fontWeight="900" fill={N} fontFamily={SANS}>
+        ?
+      </text>
+    </g>
+  );
+}
+
+/** Not on the Sheet — a magnifier over the list, and an empty, dashed slot where the name would be. */
+function NotOnSheet() {
+  return (
+    <g>
+      <Shadow y={136} rx={60} />
+      <rect x="30" y="20" width="96" height="112" rx="4" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      {[0, 1, 2, 4].map((i) => (
+        <path key={i} d={`M42 ${38 + i * 18} H${108 - (i % 2) * 12}`} stroke={N} strokeWidth="3" strokeLinecap="round" opacity="0.55" />
+      ))}
+      <rect x="40" y="86" width="76" height="14" rx="2" fill="none" stroke={c("gold")} strokeWidth="2.2" strokeDasharray="4 3" />
+      <circle cx="140" cy="88" r="24" fill={c("ice", 0.25)} stroke={N} strokeWidth="3" />
+      <path d="M157 105 L180 128" stroke={N} strokeWidth="10" strokeLinecap="round" />
+      <path d="M157 105 L180 128" stroke={c("gold-dim")} strokeWidth="6" strokeLinecap="round" />
+      <text x="140" y="97" textAnchor="middle" fontSize="24" fontWeight="900" fill={c("ink")} fontFamily={SANS}>
+        ?
+      </text>
+    </g>
+  );
+}
+
 const SCENES: Record<QuestionArt, () => JSX.Element> = {
   hammer: Hammer,
   quarterback: Quarterback,
@@ -3514,6 +4206,40 @@ const SCENES: Record<QuestionArt, () => JSX.Element> = {
   halfway: Halfway,
   "desk-fan": DeskFan,
   "empty-seats": EmptySeats,
+  "first-look": FirstLook,
+  "game-of-the-year": GameOfTheYear,
+  "ten-big-weeks": TenBigWeeks,
+  "hands-in": HandsIn,
+  "form-line": FormLine,
+  "moving-box": MovingBox,
+  "qb-grid": QbGrid,
+  "steady-hands": SteadyHands,
+  "where-was": WhereWas,
+  "race-to-200": RaceTo200,
+  "four-spots": FourSpots,
+  "name-tags": NameTags,
+  "tally-marks": TallyMarks,
+  "per-game": PerGame,
+  "tall-bar": TallBar,
+  "steady-streaky": SteadyStreaky,
+  "game-tags": GameTags,
+  "stacked-blocks": StackedBlocks,
+  leap: Leap,
+  pennants: Pennants,
+  "above-line": AboveLine,
+  "adding-machine": AddingMachine,
+  "middle-ball": MiddleBall,
+  stamp: Stamp,
+  "silver-medal": SilverMedal,
+  backfield: Backfield,
+  "crowned-receiver": CrownedReceiver,
+  "rank-board": RankBoard,
+  "blank-cell": BlankCell,
+  "empty-weeks": EmptyWeeks,
+  "twenty-cells": TwentyCells,
+  crosshairs: Crosshairs,
+  "which-week": WhichWeek,
+  "not-on-sheet": NotOnSheet,
 };
 
 export default function QuestionArt({

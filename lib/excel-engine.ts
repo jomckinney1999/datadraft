@@ -138,13 +138,42 @@ function matchingIndexes(pairs: unknown[]): number[] {
   return keep;
 }
 
+/** The library's own error values, so IFERROR and ISERROR recognise ours. */
+type Errors = { NA: unknown; NUM: unknown; VALUE: unknown; DIV0: unknown; REF: unknown };
+
+/** A range argument as rows of cells (a lone value becomes a 1×1 grid). */
+function grid(input: unknown): (CellValue | boolean)[][] {
+  const v = input && typeof input === "object" && "value" in input ? (input as { value: unknown }).value : input;
+  if (Array.isArray(v)) return v.map((row) => (Array.isArray(row) ? flatten(row) : [row as CellValue]));
+  return [[v as CellValue]];
+}
+
 /**
- * Functions fast-formula-parser does not implement. Verified missing by
- * probing the library directly — see scripts/verify-answer-keys.mjs, which
- * re-checks every one of these on each run so an upstream addition that
- * changes behaviour can't slip past silently.
+ * Functions fast-formula-parser does not implement, or implements differently
+ * from Excel. Verified by probing the library directly — see
+ * scripts/verify-answer-keys.mjs, which re-checks every one of these on each
+ * run so an upstream addition that changes behaviour can't slip past
+ * silently.
+ *
+ * Errors are the library's own values (`E.NA`, …), not plain objects:
+ * IFERROR only recognises those, so `IFERROR(XLOOKUP(…), "none")` used to
+ * come back #VALUE! instead of "none" (2026-10-05).
  */
-function customFunctions(): Record<string, (...args: unknown[]) => unknown> {
+function customFunctions(E: Errors): Record<string, (...args: unknown[]) => unknown> {
+  const rank = (...args: unknown[]) => {
+    const v = Number(scalar(args[0]));
+    const pool = numbers(args[1]);
+    const ascending = args.length > 2 && Number(scalar(args[2])) !== 0;
+    if (!pool.includes(v)) return E.NA;
+    return 1 + pool.filter((x) => (ascending ? x < v : x > v)).length;
+  };
+  const ifs = (pick: (hits: number[]) => number) => (...args: unknown[]) => {
+    const values = flatten(args[0]);
+    const hits = matchingIndexes(args.slice(1))
+      .map((i) => values[i])
+      .filter((v): v is number => typeof v === "number");
+    return hits.length ? pick(hits) : 0;
+  };
   return {
     MAX: (...args) => {
       const n = numbers(args);
@@ -169,12 +198,12 @@ function customFunctions(): Record<string, (...args: unknown[]) => unknown> {
     LARGE: (...args) => {
       const n = numbers(args[0]).sort((a, b) => b - a);
       const k = Number(scalar(args[1]));
-      return n[k - 1] ?? { error: "#NUM!" };
+      return n[k - 1] ?? E.NUM;
     },
     SMALL: (...args) => {
       const n = numbers(args[0]).sort((a, b) => a - b);
       const k = Number(scalar(args[1]));
-      return n[k - 1] ?? { error: "#NUM!" };
+      return n[k - 1] ?? E.NUM;
     },
     SUMIFS: (...args) => {
       const sumRange: (CellValue | boolean)[] = flatten(args[0]);
@@ -189,7 +218,7 @@ function customFunctions(): Record<string, (...args: unknown[]) => unknown> {
       const hits = matchingIndexes(args.slice(1))
         .map((i) => avgRange[i])
         .filter((v): v is number => typeof v === "number");
-      if (!hits.length) return { error: "#DIV/0!" };
+      if (!hits.length) return E.DIV0;
       return hits.reduce((a, b) => a + b, 0) / hits.length;
     },
     MATCH: (...args) => {
@@ -202,7 +231,7 @@ function customFunctions(): Record<string, (...args: unknown[]) => unknown> {
           ? v.toLowerCase() === probe
           : v === probe,
       );
-      return idx === -1 ? { error: "#N/A" } : idx + 1;
+      return idx === -1 ? E.NA : idx + 1;
     },
     XLOOKUP: (...args) => {
       const needle = scalar(args[0]);
@@ -216,8 +245,8 @@ function customFunctions(): Record<string, (...args: unknown[]) => unknown> {
           ? v.toLowerCase() === probe
           : v === probe,
       );
-      if (idx === -1) return fallback === null ? { error: "#N/A" } : fallback;
-      return ret[idx] ?? { error: "#N/A" };
+      if (idx === -1) return fallback === null ? E.NA : fallback;
+      return ret[idx] ?? E.NA;
     },
     UPPER: (...args) => String(scalar(args[0]) ?? "").toUpperCase(),
     LOWER: (...args) => String(scalar(args[0]) ?? "").toLowerCase(),
@@ -239,9 +268,33 @@ function customFunctions(): Record<string, (...args: unknown[]) => unknown> {
       const repl = String(scalar(args[2]) ?? "");
       return find === "" ? text : text.split(find).join(repl);
     },
+    MAXIFS: ifs((hits) => Math.max(...hits)),
+    MINIFS: ifs((hits) => Math.min(...hits)),
+    RANK: rank,
+    "RANK.EQ": rank,
+    // Excel reads INDEX(one_row, n) as the nth column, and the library reads
+    // it as the nth row and answers #REF!. Same for a one-column range. A row
+    // or column of 0 returns the whole column or row. The library calls INDEX
+    // with itself first and the arguments as raw references, so values come
+    // out through its own extractRefValue.
+    INDEX: (context, ...raw) => {
+      const ctx = context as { utils: { extractRefValue: (a: unknown) => { val: unknown } } };
+      const args = raw.map((a) => (a == null ? null : ctx.utils.extractRefValue(a).val));
+      const g = grid(args[0]);
+      let r = args.length > 1 && args[1] !== null ? Number(scalar(args[1])) : 1;
+      let c = args.length > 2 && args[2] !== null ? Number(scalar(args[2])) : NaN;
+      if (Number.isNaN(c)) {
+        if (g.length === 1) [r, c] = [1, r];
+        else c = 1;
+      }
+      if (r === 0) return g.map((row) => [row[c - 1] ?? null]);
+      if (c === 0) return [g[r - 1] ?? []];
+      const v = g[r - 1]?.[c - 1];
+      return v === undefined ? E.REF : v;
+    },
     VALUE: (...args) => {
       const n = Number(String(scalar(args[0]) ?? "").trim());
-      return Number.isNaN(n) ? { error: "#VALUE!" } : n;
+      return Number.isNaN(n) ? E.VALUE : n;
     },
   };
 }
@@ -315,7 +368,7 @@ async function buildParser(book: Workbook): Promise<Parser> {
       }
       return rows;
     },
-    functions: customFunctions(),
+    functions: customFunctions((FormulaParser as unknown as { FormulaError: Errors }).FormulaError),
   });
 }
 

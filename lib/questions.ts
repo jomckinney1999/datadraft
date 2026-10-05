@@ -40,6 +40,7 @@
 
 import { SCHEMA } from "@/lib/fantasy-data";
 import { FACTS } from "@/lib/lesson-facts.generated";
+import { WEEKLY_2024 } from "@/lib/question-frames.generated";
 
 export type QuestionDifficulty = "easy" | "medium" | "hard";
 
@@ -171,7 +172,41 @@ export type QuestionArt =
   | "road-trip"
   | "halfway"
   | "desk-fan"
-  | "empty-seats";
+  | "empty-seats"
+  | "first-look"
+  | "game-of-the-year"
+  | "ten-big-weeks"
+  | "hands-in"
+  | "form-line"
+  | "moving-box"
+  | "qb-grid"
+  | "steady-hands"
+  | "where-was"
+  | "race-to-200"
+  | "four-spots"
+  | "name-tags"
+  | "tally-marks"
+  | "per-game"
+  | "tall-bar"
+  | "steady-streaky"
+  | "game-tags"
+  | "stacked-blocks"
+  | "leap"
+  | "pennants"
+  | "above-line"
+  | "adding-machine"
+  | "middle-ball"
+  | "stamp"
+  | "silver-medal"
+  | "backfield"
+  | "crowned-receiver"
+  | "rank-board"
+  | "blank-cell"
+  | "empty-weeks"
+  | "twenty-cells"
+  | "crosshairs"
+  | "which-week"
+  | "not-on-sheet";
 
 export type Question = {
   id: string;
@@ -320,6 +355,32 @@ df <- data.frame(
   games = ${rVec(GAMES)},
   points = ${rVec(POINTS)},
   best = ${rVec(BEST)},
+  stringsAsFactors = FALSE
+)
+`;
+
+/**
+ * The same preludes plus `weekly`: one row per game of the 2024 season
+ * (player, position, team, week, points), from lib/question-frames.generated.ts.
+ * A season-totals table only supports one-liners; real pandas and dplyr work
+ * happens on the long table, where rolling averages, running totals, pivots
+ * and missing weeks live. The rows are the database's, so `weekly` sums to
+ * `df` to the tenth, and the verifier checks it.
+ */
+const WEEKLY_COLS = ["player", "position", "team", "week", "points"] as const;
+
+export const PY_WEEKLY_SETUP = `${PY_SETUP}
+weekly = pd.DataFrame(
+    [
+${WEEKLY_2024.map((r) => `        [${pyList(r)}],`).join("\n")}
+    ],
+    columns=[${pyList([...WEEKLY_COLS])}],
+)
+`;
+
+export const R_WEEKLY_SETUP = `${R_SETUP}
+weekly <- data.frame(
+${WEEKLY_COLS.map((c, i) => `  ${c} = ${rVec(WEEKLY_2024.map((r) => r[i]))}`).join(",\n")},
   stringsAsFactors = FALSE
 )
 `;
@@ -1166,6 +1227,265 @@ ORDER BY streak_weeks DESC, player;`,
       "The .copy() is not superstition. Assigning a column to a slice of another frame is the SettingWithCopyWarning, and the fix is to decide up front whether you are making a new frame.",
     art: "medkit",
   },
+  // ── Python, the long table (added 2026-10-05) ─────────────────
+  //
+  // These load `weekly` too (PY_WEEKLY_SETUP): one row per 2024 game. Season
+  // totals only support one-liners; rolling averages, running totals,
+  // pivots and missing weeks need the long table.
+  {
+    id: "py-first-look",
+    title: "First Look",
+    difficulty: "easy",
+    lang: "python",
+    added: "2026-10-06",
+    tags: ["shape", "Exploring"],
+    prompt:
+      "Someone hands you a DataFrame called weekly: one row per game of the 2024 season. Before you analyse anything, find out how big it is. Print its number of rows and columns.",
+    returns: "One line: the (rows, columns) tuple pandas gives you.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# weekly has one row per game: player, position, team, week, points\n",
+    expected: "print(weekly.shape)",
+    hint: "Every DataFrame has a .shape attribute. No brackets: it isn't a method.",
+    explain:
+      "Rows, then columns. It's the first thing to check on any new table: divide the rows by twenty players and you already know most of them missed some weeks.",
+    art: "first-look",
+  },
+  {
+    id: "py-game-of-the-year",
+    players: ["Ja'Marr Chase"],
+    title: "Game of the Year",
+    difficulty: "easy",
+    lang: "python",
+    added: "2026-10-06",
+    tags: ["idxmax", "loc"],
+    prompt:
+      "Find the single biggest game of the 2024 season in weekly. Print who had it, which week, and how many points.",
+    returns: "One line: player, week and points separated by spaces, e.g. Name 3 21.4.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# the biggest single game in weekly\n",
+    expected: 'row = weekly.loc[weekly["points"].idxmax()]\nprint(row["player"], row["week"], row["points"])',
+    hint: "idxmax() gives the row label of the biggest value; .loc[label] gives you that whole row.",
+    explain:
+      "One idxmax, then read three fields off the row. Printing several values with print(a, b, c) separates them with spaces, which is why the Return line asks for exactly that.",
+    art: "game-of-the-year",
+  },
+  {
+    id: "py-ten-big-weeks",
+    title: "Ten Big Weeks",
+    difficulty: "medium",
+    lang: "python",
+    added: "2026-10-06",
+    tags: ["Boolean mask", "groupby", "size"],
+    prompt:
+      "A 20-point game wins most weeks on its own. Find the players who had at least ten of them in 2024.",
+    returns: "A list of names, A–Z.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# who had ten or more 20-point games?\n",
+    expected: 'big = weekly[weekly["points"] >= 20].groupby("player").size()\nprint(sorted(big[big >= 10].index.tolist()))',
+    hint: "Filter to the 20-point games first, then groupby player and count with size(). Filter that result again for 10 or more.",
+    explain:
+      "Two filters, one before the groupby and one after it: the pandas version of WHERE and then HAVING. Sorting the names makes the answer the same however you got there.",
+    art: "ten-big-weeks",
+  },
+  {
+    id: "py-team-effort",
+    title: "Team Effort",
+    difficulty: "medium",
+    lang: "python",
+    added: "2026-10-06",
+    tags: ["groupby", "sum", "nlargest"],
+    prompt:
+      "Which NFL teams got the most fantasy points out of the players in weekly? Use the team on each game's row, so a player who moved mid-season counts for both teams.",
+    returns: "A dict of the top three teams to their total points, rounded to one decimal, biggest first.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# total points by team, top three\n",
+    expected: 'print(weekly.groupby("team")["points"].sum().round(1).nlargest(3).to_dict())',
+    hint: "groupby the team, sum the points, round, then nlargest(3) keeps the top three in order.",
+    explain:
+      "nlargest(3) is sort_values(ascending=False).head(3) in one call. Philadelphia tops it with three players in the table, which says more about who's in the table than about the Eagles.",
+    art: "hands-in",
+  },
+  {
+    id: "py-three-game-form",
+    players: ["Lamar Jackson"],
+    title: "Three-Game Form",
+    difficulty: "hard",
+    lang: "python",
+    added: "2026-10-06",
+    tags: ["rolling", "sort_values", "Window"],
+    prompt:
+      "One game is noise; three in a row is form. Work out Lamar Jackson's three-game rolling average through 2024 and print the last five values.",
+    returns: "A list of five numbers, each rounded to one decimal, in week order.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# Lamar's 3-game rolling average, last five values\n",
+    expected: 'lamar = weekly[weekly["player"] == "Lamar Jackson"].sort_values("week")\nprint(lamar["points"].rolling(3).mean().round(1).tail(5).tolist())',
+    hint: "Filter to Lamar and sort by week first: rolling() works down the rows in the order they're in. Then .rolling(3).mean().",
+    explain:
+      "rolling(3) averages each row with the two before it, so it only means 'the last three games' if the rows are in week order. weekly isn't sorted by player, so sort first. That's the bug this question exists to catch.",
+    art: "form-line",
+  },
+  {
+    id: "py-change-of-address",
+    players: ["Davante Adams"],
+    title: "Change of Address",
+    difficulty: "medium",
+    lang: "python",
+    added: "2026-10-06",
+    tags: ["merge", "Boolean mask", "unique"],
+    prompt:
+      "df lists each player's team at the end of the season; weekly has his team on every game. Merge them and find the players who played a game for a team other than their final one.",
+    returns: "A list of names, A–Z.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# merge weekly with df's team, then compare\n",
+    expected: 'm = weekly.merge(df[["player", "team"]], on="player", suffixes=("_game", "_season"))\nprint(sorted(m.loc[m["team_game"] != m["team_season"], "player"].unique()))',
+    hint: 'merge on "player". Both frames have a team column, so pass suffixes=("_game", "_season") to tell them apart.',
+    explain:
+      "When both sides of a merge have a column with the same name, pandas renames them with suffixes. Choosing the suffixes yourself is what keeps the next line readable.",
+    art: "moving-box",
+  },
+  {
+    id: "py-quarterback-grid",
+    title: "Quarterback Grid",
+    difficulty: "hard",
+    lang: "python",
+    added: "2026-10-06",
+    tags: ["pivot", "loc", "Reshaping"],
+    prompt:
+      "Your league wants the quarterbacks side by side, week by week. Reshape weekly so each quarterback is a row and each week a column, then show weeks 1 to 4.",
+    returns: "Print the pivoted DataFrame: one row per QB (A–Z), columns for weeks 1–4, points as values.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# pivot the QBs: rows = player, columns = week\n",
+    expected: 'qbs = weekly[weekly["position"] == "QB"]\nprint(qbs.pivot(index="player", columns="week", values="points").loc[:, 1:4])',
+    hint: "pivot(index=..., columns=..., values=...) turns long rows into a grid. Then .loc[:, 1:4] keeps weeks 1 to 4 (label slices include both ends).",
+    explain:
+      "Long to wide is the reshape every chart and every spreadsheet person asks for. A week a player missed would come back as NaN, which is honest: no game isn't zero points.",
+    art: "qb-grid",
+  },
+  {
+    id: "py-steady-hands",
+    players: ["Patrick Mahomes", "Sam LaPorta", "Lamar Jackson"],
+    title: "Steady Hands",
+    difficulty: "medium",
+    lang: "python",
+    added: "2026-10-06",
+    tags: ["groupby", "std", "Filtering"],
+    prompt:
+      "Some players score about the same every week. Among players with at least 12 games, find the three with the smallest standard deviation of weekly points.",
+    returns: "A dict of player to standard deviation, rounded to one decimal, smallest first.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# smallest spread of weekly points, 12+ games\n",
+    expected: 'g = weekly.groupby("player")["points"]\nsd = g.std()[g.size() >= 12].round(1).sort_values()\nprint(sd.head(3).to_dict())',
+    hint: "One groupby gives you both: .std() for the spread and .size() for the games. Use the second as a mask on the first.",
+    explain:
+      "Standard deviation measures how far a typical week lands from the player's own average. Low isn't the same as good, though: a steady 15 loses to a streaky 22 most Sundays.",
+    art: "steady-hands",
+  },
+  {
+    id: "py-bust-solid-boom",
+    title: "Bust, Solid, Boom (pandas)",
+    difficulty: "medium",
+    lang: "python",
+    added: "2026-10-06",
+    tags: ["pd.cut", "value_counts", "Binning"],
+    prompt:
+      "Sort every game in weekly into three buckets: a bust is under 10 points, solid is 10 up to 20, and a boom is 20 or more. Count each bucket.",
+    returns: "A dict of label to count, most common first, e.g. {'solid': 0, ...}.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# pd.cut into bust / solid / boom, then count\n",
+    expected: 'labels = pd.cut(weekly["points"], bins=[0, 10, 20, float("inf")], right=False, labels=["bust", "solid", "boom"])\nprint(labels.value_counts().to_dict())',
+    hint: "pd.cut takes the edges in bins=. right=False makes each bucket include its left edge, so exactly 20 counts as a boom.",
+    explain:
+      "pd.cut is CASE WHEN for numbers. The right=False detail matters: by default the edges belong to the bucket below, and a 20-point game would quietly land in 'solid'.",
+    art: "buckets",
+  },
+  {
+    id: "py-where-was-aj",
+    players: ["A.J. Brown"],
+    title: "Where Was A.J.?",
+    difficulty: "medium",
+    lang: "python",
+    added: "2026-10-06",
+    tags: ["set", "Missing rows"],
+    prompt:
+      "A.J. Brown missed time in 2024. A missed game isn't a zero in weekly, it's a row that isn't there. Find the weeks from 1 to 18 he has no row for.",
+    returns: "A sorted list of week numbers.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# which weeks 1-18 have no row for A.J. Brown?\n",
+    expected: 'played = set(weekly.loc[weekly["player"] == "A.J. Brown", "week"])\nprint(sorted(set(range(1, 19)) - played))',
+    hint: "Make a set of the weeks he played and a set of every week, range(1, 19). Subtracting sets leaves what's missing.",
+    explain:
+      "You can't filter for rows that don't exist, so you build what should be there and take away what is. The table can't tell you why a week is empty: a bye, an injury and a rest day all look the same.",
+    art: "where-was",
+  },
+  {
+    id: "py-race-to-200",
+    players: ["Josh Allen"],
+    title: "Race to 200",
+    difficulty: "medium",
+    lang: "python",
+    added: "2026-10-06",
+    tags: ["cumsum", "sort_values", "Running total"],
+    prompt:
+      "Follow Josh Allen's 2024 season as a running total. In which week did it first reach 200 points?",
+    returns: "One number: the week.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# Josh Allen's running total; first week at 200+\n",
+    expected: 'allen = weekly[weekly["player"] == "Josh Allen"].sort_values("week").copy()\nallen["total"] = allen["points"].cumsum()\nprint(allen.loc[allen["total"] >= 200, "week"].iloc[0])',
+    hint: "Sort by week, then cumsum() the points. Filter to totals of 200 or more and take the first week with .iloc[0].",
+    explain:
+      "cumsum() is SUM() OVER (ORDER BY week) in one word, and it has the same catch: it adds in whatever order the rows are in. Sort first.",
+    art: "race-to-200",
+  },
+  {
+    id: "py-best-at-each-spot",
+    title: "Best at Each Spot",
+    difficulty: "medium",
+    lang: "python",
+    added: "2026-10-06",
+    tags: ["groupby", "idxmax", "loc"],
+    prompt:
+      "Using df, the season totals, find the top scorer at each position.",
+    returns: "A dict of position to player name, positions A–Z.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# top scorer per position, from df\n",
+    expected: 'best = df.loc[df.groupby("position")["points"].idxmax()]\nprint(best.set_index("position")["player"].to_dict())',
+    hint: "groupby('position')['points'].idxmax() gives the row label of each position's best. Hand those labels to df.loc.",
+    explain:
+      "groupby + idxmax is the pandas answer to 'the top row in each group'. In SQL it takes a window function; here it's one line, because idxmax hands back the row instead of the number.",
+    art: "four-spots",
+  },
+  {
+    id: "py-same-last-name",
+    players: ["A.J. Brown", "Amon-Ra St. Brown"],
+    title: "Same Last Name",
+    difficulty: "easy",
+    lang: "python",
+    added: "2026-10-06",
+    tags: ["str", "duplicated", "Strings"],
+    prompt:
+      "Your league's draft board goes by last names, and two cards got mixed up. Find every last name shared by more than one player in df.",
+    returns: "A list of last names.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# last names that appear more than once\n",
+    expected: 'last = df["player"].str.split().str[-1]\nprint(last[last.duplicated(keep=False)].unique().tolist())',
+    hint: '.str.split() splits each name on spaces, and .str[-1] takes the last piece. duplicated(keep=False) marks every repeat, not just the second.',
+    explain:
+      "The .str accessor runs a string method on every row at once. It's also why joining on names is risky: two different people can share one.",
+    art: "name-tags",
+  },
 
   // ── R ─────────────────────────────────────────────────────────
   //
@@ -1230,6 +1550,196 @@ ORDER BY streak_weeks DESC, player;`,
     explain:
       "group_by() does nothing on its own — it tags the frame, and summarise() is what collapses it. Forgetting the second half is the most common dplyr mistake there is.",
     art: "huddle",
+  },
+  // ── R, the long table (added 2026-10-05) ──────────────────────
+  //
+  // Still no Node build of WebR for the verifier, so each of these keys was
+  // run in R 4.4 with dplyr 1.2 before it shipped (scratch script, output
+  // checked by eye, no ties at a cutoff). They load `weekly` too
+  // (R_WEEKLY_SETUP). Keep new ones short enough to be obviously right.
+  {
+    id: "r-position-count",
+    title: "Position Count",
+    difficulty: "easy",
+    lang: "r",
+    added: "2026-10-06",
+    tags: ["dplyr", "count"],
+    prompt:
+      "Before you analyse a new data frame, see what's in it. Count how many players in df play each position.",
+    returns: "The data frame count() gives you: position and n, positions A–Z.",
+    tables: [],
+    setup: R_WEEKLY_SETUP,
+    starter: "# df (season totals) and weekly (one row per game) are loaded\n",
+    expected: "df %>% count(position) %>% print()",
+    hint: "count(column) is group_by(column) plus summarise(n = n()) in one step.",
+    explain:
+      "count() is the first thing to run on any category column. It's also the fastest way to spot a typo: a stray 'Wr' shows up as its own row.",
+    art: "tally-marks",
+  },
+  {
+    id: "r-rate-not-total",
+    players: ["Lamar Jackson", "Ja'Marr Chase"],
+    title: "Rate, Not Total",
+    difficulty: "medium",
+    lang: "r",
+    added: "2026-10-06",
+    tags: ["dplyr", "mutate", "arrange", "pull"],
+    prompt:
+      "Season totals reward whoever stayed healthy. Add points per game to df and print the five best players by it.",
+    returns: "A character vector of five names, best points per game first.",
+    tables: [],
+    setup: R_WEEKLY_SETUP,
+    starter: "# mutate a ppg column, arrange, take five names\n",
+    expected:
+      "df %>%\n  mutate(ppg = points / games) %>%\n  arrange(desc(ppg)) %>%\n  head(5) %>%\n  pull(player) %>%\n  print()",
+    hint: "mutate() adds the column, arrange(desc(ppg)) sorts it, and pull(player) turns the column into a plain vector.",
+    explain:
+      "pull() is the step people forget. Without it you print a one-column data frame, which is a different output from a vector of names.",
+    art: "per-game",
+  },
+  {
+    id: "r-single-game-high",
+    players: ["Ja'Marr Chase"],
+    title: "Single-Game High",
+    difficulty: "easy",
+    lang: "r",
+    added: "2026-10-06",
+    tags: ["dplyr", "slice_max"],
+    prompt:
+      "weekly has one row per game of 2024. Print the row with the biggest single game.",
+    returns: "The whole row: player, position, team, week, points.",
+    tables: [],
+    setup: R_WEEKLY_SETUP,
+    starter: "# the biggest row in weekly\n",
+    expected: "weekly %>% slice_max(points, n = 1) %>% print()",
+    hint: "slice_max(column, n = 1) keeps the row with the largest value.",
+    explain:
+      "slice_max keeps whole rows, which is usually what you want: the number alone doesn't tell you who or when.",
+    art: "tall-bar",
+  },
+  {
+    id: "r-steady-or-streaky",
+    players: ["Patrick Mahomes", "Sam LaPorta", "Lamar Jackson"],
+    title: "Steady or Streaky",
+    difficulty: "hard",
+    lang: "r",
+    added: "2026-10-06",
+    tags: ["dplyr", "group_by", "filter", "sd"],
+    prompt:
+      "Among players with at least 12 games in weekly, find the three whose weekly points varied least.",
+    returns: "A data frame with player and sd (rounded to one decimal), smallest sd first, three rows.",
+    tables: [],
+    setup: R_WEEKLY_SETUP,
+    starter: "# group, keep 12+ games, summarise sd, take three\n",
+    expected:
+      "weekly %>%\n  group_by(player) %>%\n  filter(n() >= 12) %>%\n  summarise(sd = round(sd(points), 1)) %>%\n  arrange(sd) %>%\n  head(3) %>%\n  as.data.frame() %>%\n  print()",
+    hint: "A filter() after group_by() works per group, so filter(n() >= 12) keeps the players with enough games.",
+    explain:
+      "A grouped filter is dplyr's HAVING: it keeps or drops whole groups. as.data.frame() before print() keeps the output plain, since tibbles print with extra decoration.",
+    art: "steady-streaky",
+  },
+  {
+    id: "r-label-every-game",
+    title: "Label Every Game",
+    difficulty: "medium",
+    lang: "r",
+    added: "2026-10-06",
+    tags: ["dplyr", "case_when", "count"],
+    prompt:
+      "Label every game in weekly: boom for 20 points or more, solid for 10 up to 20, bust for anything under 10. Count each label.",
+    returns: "The data frame count() gives you: label and n, labels A–Z.",
+    tables: [],
+    setup: R_WEEKLY_SETUP,
+    starter: "# case_when inside mutate, then count\n",
+    expected:
+      'weekly %>%\n  mutate(label = case_when(points >= 20 ~ "boom", points >= 10 ~ "solid", TRUE ~ "bust")) %>%\n  count(label) %>%\n  print()',
+    hint: "case_when checks its conditions in order and stops at the first true one, so put the highest bar first.",
+    explain:
+      "Order is the whole trick: a 25-point game also clears 10, and case_when gives it the first label it matches. TRUE at the end is the 'everything else'.",
+    art: "game-tags",
+  },
+  {
+    id: "r-first-to-300",
+    players: ["Lamar Jackson"],
+    title: "First to 300",
+    difficulty: "hard",
+    lang: "r",
+    added: "2026-10-06",
+    tags: ["dplyr", "cumsum", "Running total"],
+    prompt:
+      "Follow Lamar Jackson's 2024 as a running total. In which week did it first reach 300 points?",
+    returns: "One number: the week.",
+    tables: [],
+    setup: R_WEEKLY_SETUP,
+    starter: "# Lamar's running total; first week at 300+\n",
+    expected:
+      'weekly %>%\n  filter(player == "Lamar Jackson") %>%\n  arrange(week) %>%\n  mutate(total = cumsum(points)) %>%\n  filter(total >= 300) %>%\n  head(1) %>%\n  pull(week) %>%\n  print()',
+    hint: "arrange(week) before cumsum(): a running total adds in row order. Then keep the rows at 300 or more and take the first.",
+    explain:
+      "weekly is ordered by week and then by points, so within one player it happens to be in week order already. Sorting anyway is the habit that saves you on the table that isn't.",
+    art: "stacked-blocks",
+  },
+  {
+    id: "r-biggest-jump",
+    players: ["Ja'Marr Chase"],
+    title: "Biggest Jump",
+    difficulty: "hard",
+    lang: "r",
+    added: "2026-10-06",
+    tags: ["dplyr", "lag", "group_by"],
+    prompt:
+      "Find the three biggest jumps in weekly: a player's points in one game minus his points in the game before it.",
+    returns: "A data frame with player, week and jump, biggest jump first, three rows.",
+    tables: [],
+    setup: R_WEEKLY_SETUP,
+    starter: "# lag() within each player, in week order\n",
+    expected:
+      "weekly %>%\n  group_by(player) %>%\n  arrange(week, .by_group = TRUE) %>%\n  mutate(jump = points - lag(points)) %>%\n  ungroup() %>%\n  slice_max(jump, n = 3) %>%\n  select(player, week, jump) %>%\n  as.data.frame() %>%\n  print()",
+    hint: "group_by(player), arrange(week, .by_group = TRUE), then lag(points) is the previous game's points for the same player.",
+    explain:
+      "Without group_by, lag() would compare one player's game with a different player's row. ungroup() before slice_max matters too: grouped, it would keep the top three for every player.",
+    art: "leap",
+  },
+  {
+    id: "r-team-totals",
+    title: "Team Totals",
+    difficulty: "medium",
+    lang: "r",
+    added: "2026-10-06",
+    tags: ["dplyr", "group_by", "summarise"],
+    prompt:
+      "Which NFL teams got the most fantasy points out of the players in weekly? Use the team on each game's row.",
+    returns: "A data frame with team and total (rounded to one decimal), biggest first, three rows.",
+    tables: [],
+    setup: R_WEEKLY_SETUP,
+    starter: "# total points by team, top three\n",
+    expected:
+      "weekly %>%\n  group_by(team) %>%\n  summarise(total = round(sum(points), 1)) %>%\n  arrange(desc(total)) %>%\n  head(3) %>%\n  as.data.frame() %>%\n  print()",
+    hint: "group_by(team), then summarise(total = sum(points)). Round inside summarise, sort, keep three.",
+    explain:
+      "A player who changed teams adds to both, because each row carries the team he played for that week. Grouping by the season-end team would give a different answer.",
+    art: "pennants",
+  },
+  {
+    id: "r-above-his-average",
+    players: ["Bijan Robinson"],
+    title: "Above His Average",
+    difficulty: "hard",
+    lang: "r",
+    added: "2026-10-06",
+    tags: ["dplyr", "left_join", "summarise"],
+    prompt:
+      "How often does a player beat his own season average? Join each game in weekly to the player's points per game from df, and count the games above it.",
+    returns: "A data frame with player and beat, most first, ties by player A–Z, three rows.",
+    tables: [],
+    setup: R_WEEKLY_SETUP,
+    starter: "# join df's points per game onto weekly, then count games above it\n",
+    expected:
+      'weekly %>%\n  left_join(df %>% transmute(player, ppg = points / games), by = "player") %>%\n  group_by(player) %>%\n  summarise(beat = sum(points > ppg)) %>%\n  arrange(desc(beat), player) %>%\n  head(3) %>%\n  as.data.frame() %>%\n  print()',
+    hint: "transmute(player, ppg = points / games) makes a two-column lookup. left_join it on player, then sum(points > ppg) counts the TRUEs.",
+    explain:
+      "sum() of a logical vector counts its TRUEs, the R version of SUM(condition) in SQL. Beating your own average about half the time is normal; the interesting players are the ones far from half.",
+    art: "above-line",
   },
 
   // ── Excel ─────────────────────────────────────────────────────
@@ -1367,6 +1877,269 @@ ORDER BY streak_weeks DESC, player;`,
     explain:
       "SUM over text returns 0 rather than an error, which is the dangerous part — nothing goes red, the number is just wrong. Row 6 is empty too, and VALUE on a blank is an error, so it has to be left out.",
     art: "broom",
+  },
+  // ── Excel, with the Weeks sheet (added 2026-10-05) ────────────
+  //
+  // Weeks is the Roster's players by week, W1–W18 in columns B–S, blank
+  // where there was no game (lib/question-frames.generated.ts). Row 2 is the
+  // same player on both tabs.
+  {
+    id: "xl-add-it-up",
+    title: "Add It Up",
+    difficulty: "easy",
+    lang: "excel",
+    added: "2026-10-06",
+    tags: ["SUM", "Ranges"],
+    prompt:
+      "The Roster sheet has season points in column E, rows 2 to 17. What did the whole sheet score between them?",
+    returns: "A single number.",
+    tables: [],
+    sheet: "Roster",
+    starter: "=",
+    expected: "=SUM(E2:E17)",
+    hint: "SUM takes a range: the first cell, a colon, the last cell.",
+    explain:
+      "E2:E17 is every player and not the header. Start at E1 and SUM quietly skips the word 'Points', which works here and hides the mistake until a header turns out to be a number.",
+    art: "adding-machine",
+  },
+  {
+    id: "xl-middle-of-the-pack",
+    title: "Middle of the Pack",
+    difficulty: "easy",
+    lang: "excel",
+    added: "2026-10-06",
+    tags: ["MEDIAN", "Averages"],
+    prompt:
+      "One huge season drags an average up. Find the middle value of the points column instead (column E, rows 2 to 17).",
+    returns: "A single number.",
+    tables: [],
+    sheet: "Roster",
+    starter: "=",
+    expected: "=MEDIAN(E2:E17)",
+    hint: "MEDIAN sorts the values and takes the middle one, or the average of the middle two when there's an even count.",
+    explain:
+      "With sixteen players there's no single middle, so MEDIAN averages the 8th and 9th. Compare it with AVERAGE on the same range: when the two disagree, a few big numbers are doing the pulling.",
+    art: "middle-ball",
+  },
+  {
+    id: "xl-elite-or-not",
+    players: ["Jahmyr Gibbs"],
+    title: "Elite or Not",
+    difficulty: "easy",
+    lang: "excel",
+    added: "2026-10-06",
+    tags: ["IF", "Logic"],
+    prompt:
+      "Your league calls a 350-point season elite. Jahmyr Gibbs is in row 5 of the Roster sheet, points in column E. Return Elite if he cleared 350, or Starter if he didn't.",
+    returns: "The word Elite or Starter.",
+    tables: [],
+    sheet: "Roster",
+    starter: "=",
+    expected: '=IF(E5>=350,"Elite","Starter")',
+    hint: "IF takes a test, what to return when it's true, and what to return when it's false. Text goes in quotes.",
+    explain:
+      ">= includes exactly 350; > would not. Fill a formula like this down a column and every row gets its own label, which is the spreadsheet version of CASE WHEN.",
+    art: "stamp",
+  },
+  {
+    id: "xl-silver-medal",
+    players: ["Ja'Marr Chase"],
+    title: "Silver Medal",
+    difficulty: "medium",
+    lang: "excel",
+    added: "2026-10-06",
+    tags: ["LARGE", "Top-N"],
+    prompt:
+      "MAX gives you the top season on the Roster sheet. Return the second-highest points total instead (column E).",
+    returns: "A single number.",
+    tables: [],
+    sheet: "Roster",
+    starter: "=",
+    expected: "=LARGE(E2:E17,2)",
+    hint: "LARGE(range, k) returns the k-th biggest value. MAX is LARGE with k = 1.",
+    explain:
+      "LARGE and SMALL turn 'top N' into a formula you can fill down: LARGE(range, 1), LARGE(range, 2), LARGE(range, 3) and you have a podium.",
+    art: "silver-medal",
+  },
+  {
+    id: "xl-rileys-backfield",
+    players: ["Saquon Barkley"],
+    title: "Riley's Backfield",
+    difficulty: "medium",
+    lang: "excel",
+    added: "2026-10-06",
+    tags: ["SUMIFS", "Multiple criteria"],
+    prompt:
+      "Owner is in column G, position in column C and points in column E. Total the points Riley got from running backs.",
+    returns: "A single number.",
+    tables: [],
+    sheet: "Roster",
+    starter: "=",
+    expected: '=SUMIFS(E2:E17,G2:G17,"Riley",C2:C17,"RB")',
+    hint: "SUMIFS takes the range to add first, then as many range-and-test pairs as you like. Every pair has to be true.",
+    explain:
+      "Each extra pair is another AND. It's the formula behind most league spreadsheets: points by owner, by position, by week.",
+    art: "backfield",
+  },
+  {
+    id: "xl-top-receiver",
+    players: ["Ja'Marr Chase"],
+    title: "Top Receiver",
+    difficulty: "medium",
+    lang: "excel",
+    added: "2026-10-06",
+    tags: ["MAXIFS", "Criteria"],
+    prompt:
+      "What's the highest points total among the wide receivers on the Roster sheet? Position is in column C, points in column E.",
+    returns: "A single number.",
+    tables: [],
+    sheet: "Roster",
+    starter: "=",
+    expected: '=MAXIFS(E2:E17,C2:C17,"WR")',
+    hint: "MAXIFS works like SUMIFS: the range to take the max of first, then range-and-test pairs.",
+    explain:
+      "MAXIFS and MINIFS replaced the old array-formula trick of MAX(IF(...)). Same argument order as SUMIFS, so once you know one you know all of them.",
+    art: "crowned-receiver",
+  },
+  {
+    id: "xl-where-he-ranks",
+    players: ["Amon-Ra St. Brown"],
+    title: "Where He Ranks",
+    difficulty: "medium",
+    lang: "excel",
+    added: "2026-10-06",
+    tags: ["RANK", "Ranking"],
+    prompt:
+      "Amon-Ra St. Brown is in row 10 of the Roster sheet. Where does his points total rank among everyone's in column E, highest first?",
+    returns: "A single number: 1 is the top.",
+    tables: [],
+    sheet: "Roster",
+    starter: "=",
+    expected: "=RANK(E10,E2:E17)",
+    hint: "RANK(value, range) counts from the top by default. A third argument of 1 would count from the bottom.",
+    explain:
+      "RANK gives tied values the same rank and then skips, like RANK() in SQL. In a sheet you'd usually lock the range with $ (E$2:E$17) so it stays put when you fill the formula down.",
+    art: "rank-board",
+  },
+  {
+    id: "xl-blanks-arent-zeros",
+    players: ["Lamar Jackson"],
+    title: "Blanks Aren't Zeros",
+    difficulty: "medium",
+    lang: "excel",
+    added: "2026-10-06",
+    tags: ["AVERAGE", "ROUND", "Blank cells"],
+    prompt:
+      "The Weeks sheet has each player's points by week in columns B to S, blank when he had no game. Lamar Jackson is row 2. Find his average per game played, rounded to one decimal.",
+    returns: "A single number to one decimal place.",
+    tables: [],
+    sheet: "Weeks",
+    starter: "=",
+    expected: "=ROUND(AVERAGE(B2:S2),1)",
+    hint: "AVERAGE skips blank cells, so it already divides by the games he played, not by 18.",
+    explain:
+      "That's the behaviour you want here, and the reason blanks must stay blank. Type a 0 into his bye week and his average drops, because now he 'played' a zero-point game.",
+    art: "blank-cell",
+  },
+  {
+    id: "xl-empty-weeks",
+    players: ["Davante Adams"],
+    title: "Empty Weeks",
+    difficulty: "easy",
+    lang: "excel",
+    added: "2026-10-06",
+    tags: ["COUNTBLANK", "Blank cells"],
+    prompt:
+      "On the Weeks sheet, Davante Adams is row 14, weeks in columns B to S. How many weeks did he have no game?",
+    returns: "A single number.",
+    tables: [],
+    sheet: "Weeks",
+    starter: "=",
+    expected: "=COUNTBLANK(B14:S14)",
+    hint: "COUNTBLANK counts the empty cells in a range.",
+    explain:
+      "A blank can be a bye, an injury or a benching. The sheet can tell you how many, not why, which is worth remembering before you call anyone injury-prone.",
+    art: "empty-weeks",
+  },
+  {
+    id: "xl-twenty-point-weeks",
+    players: ["Ja'Marr Chase"],
+    title: "Twenty-Point Weeks",
+    difficulty: "easy",
+    lang: "excel",
+    added: "2026-10-06",
+    tags: ["COUNTIF", "Criteria"],
+    prompt:
+      "On the Weeks sheet, Ja'Marr Chase is row 3, weeks in columns B to S. Count the weeks he scored 20 or more.",
+    returns: "A single number.",
+    tables: [],
+    sheet: "Weeks",
+    starter: "=",
+    expected: '=COUNTIF(B3:S3,">=20")',
+    hint: 'COUNTIF takes a range and a test. A comparison goes in quotes: ">=20".',
+    explain:
+      "The test is text with the operator inside it, which looks odd until you need it: \">=\"&C1 builds it from a cell, so the threshold can live on the sheet instead of in the formula.",
+    art: "twenty-cells",
+  },
+  {
+    id: "xl-crosshairs",
+    players: ["Saquon Barkley"],
+    title: "Crosshairs",
+    difficulty: "hard",
+    lang: "excel",
+    added: "2026-10-06",
+    tags: ["INDEX", "MATCH", "Two-way lookup"],
+    prompt:
+      "On the Weeks sheet, names are in column A and the week headers (W1 to W18) in row 1. Return Saquon Barkley's points in week 10 with a formula that would still work if the rows were in a different order.",
+    returns: "A single number.",
+    tables: [],
+    sheet: "Weeks",
+    starter: "=",
+    expected: '=INDEX(B2:S17,MATCH("Saquon Barkley",A2:A17,0),MATCH("W10",B1:S1,0))',
+    hint: "INDEX(grid, row, column). One MATCH finds his row in column A, another finds W10's column in row 1.",
+    explain:
+      "Two MATCHes aim INDEX at one cell, like crosshairs. Nothing is counted by hand, so sorting the sheet or adding a week column doesn't break it.",
+    art: "crosshairs",
+  },
+  {
+    id: "xl-which-week",
+    players: ["Lamar Jackson"],
+    title: "Which Week?",
+    difficulty: "hard",
+    lang: "excel",
+    added: "2026-10-06",
+    tags: ["INDEX", "MATCH", "MAX"],
+    prompt:
+      "Lamar Jackson is row 2 of the Weeks sheet, with week headers in row 1. Return the header of the week he scored his most points.",
+    returns: "A week header, like W7.",
+    tables: [],
+    sheet: "Weeks",
+    starter: "=",
+    expected: "=INDEX(B1:S1,MATCH(MAX(B2:S2),B2:S2,0))",
+    hint: "MAX finds his best score, MATCH finds which column it's in, and INDEX reads the header from that same column.",
+    explain:
+      "The 'who, not how much' pattern again, turned sideways. MATCH returns the first hit, so if he'd tied his best week you'd get the earlier one.",
+    art: "which-week",
+  },
+  {
+    id: "xl-not-on-the-sheet",
+    players: ["Puka Nacua"],
+    title: "Not on the Sheet",
+    difficulty: "medium",
+    lang: "excel",
+    added: "2026-10-06",
+    tags: ["XLOOKUP", "Errors"],
+    prompt:
+      "Look up Puka Nacua's points on the Roster sheet (names in column A, points in column E). He isn't on it, so return the text Not on the sheet instead of an error.",
+    returns: "The text Not on the sheet.",
+    tables: [],
+    sheet: "Roster",
+    starter: "=",
+    expected: '=XLOOKUP("Puka Nacua",A2:A17,E2:E17,"Not on the sheet")',
+    hint: "XLOOKUP's fourth argument is what to return when nothing matches. IFERROR around a lookup works too.",
+    explain:
+      "#N/A in a report reads as broken; a plain message reads as handled. The fourth argument is better than IFERROR here, because IFERROR would also hide a typo in the formula.",
+    art: "not-on-sheet",
   },
   // ── Interview patterns (added 2026-10-02) ─────────────────────
   // Written to fill the patterns analyst screens test that the bank had

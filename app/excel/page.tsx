@@ -36,7 +36,7 @@ export default function ExcelPage() {
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-ink-soft">
             Feels like Excel: formula bar, sheet tabs, click a cell, press Enter.
-            Roster and Import are the league data (read-only). Practice is your
+            Roster, Import and Weeks are the league data (read-only). Practice is your
             blank sheet — write{" "}
             <code className="font-mono text-turf">=SUM(Roster!E2:E17)</code> and
             watch it calculate. No install, no grade, just reps.

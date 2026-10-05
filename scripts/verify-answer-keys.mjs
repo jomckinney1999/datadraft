@@ -944,6 +944,59 @@ for (const unit of curriculum.COURSE.units) {
 }
 problems.push(...sheetProblems);
 
+// The engine's own functions (customFunctions in lib/excel-engine.ts), each
+// against an answer worked out by hand from the workbook. These are the
+// places it differs from the library, so an upgrade that changes either side
+// shows up here first.
+for (const [sheet, f, want] of [
+  ["Roster", '=MAXIFS(E2:E17,C2:C17,"WR")', 403],
+  ["Roster", '=MINIFS(E2:E17,C2:C17,"QB")', 282.9],
+  ["Roster", "=RANK(E10,E2:E17)", 9],
+  ["Roster", "=RANK.EQ(E2,E2:E17,1)", 16],
+  ["Roster", '=IFERROR(XLOOKUP("Puka Nacua",A2:A17,E2:E17),"none")', "none"],
+  ["Roster", "=IFERROR(MATCH(1,E2:E17,0),0)", 0],
+  ["Roster", "=INDEX(E2:E17,14)", 236.6],
+  ["Roster", "=INDEX(A1:G1,3)", "Pos"],
+  ["Roster", "=INDEX(B2:F17,3,4)", 379.1],
+  ["Roster", "=SUM(INDEX(B2:F17,0,4))", 5016.8],
+  ["Weeks", "=INDEX(B1:S1,MATCH(MAX(B2:S2),B2:S2,0))", "W15"],
+  ["Weeks", "=COUNTBLANK(B14:S14)", 4],
+]) {
+  const res = await excel.evaluateFormula(f, sheet);
+  if (res.error || !excel.valuesMatch(res.value, want)) {
+    problems.push(`excel engine: ${f} on ${sheet} gave ${res.error ?? JSON.stringify(res.value)}, expected ${JSON.stringify(want)}`);
+  }
+}
+
+// The Weeks sheet and the Python/R `weekly` table are the database's rows
+// (scripts/build-question-frames.mjs). Re-derive both, so a rebuild that
+// drifted from week_results can't put a wrong number in front of anyone.
+{
+  const frames = await loadProjectTs(path.join(root, "lib/question-frames.generated.ts"), root);
+  const fromDb = db.exec(
+    "SELECT player, position, team, week, fantasy_pts FROM week_results WHERE season = 2024 ORDER BY player, week",
+  )[0].values;
+  const key = (r) => r.join("|");
+  const mine = [...frames.WEEKLY_2024].sort((a, b) => a[0].localeCompare(b[0]) || a[3] - b[3]);
+  const dbSorted = [...fromDb].sort((a, b) => String(a[0]).localeCompare(String(b[0])) || a[3] - b[3]);
+  if (mine.length !== dbSorted.length || mine.some((r, i) => key(r) !== key(dbSorted[i]))) {
+    problems.push(`weekly frame: lib/question-frames.generated.ts disagrees with week_results 2024 — rerun scripts/build-question-frames.mjs`);
+  }
+  const sheet = excelData.WORKBOOK.Weeks;
+  const roster = excelData.WORKBOOK.Roster.slice(1).map((r) => r[0]);
+  sheet.slice(1).forEach((row, i) => {
+    if (row[0] !== roster[i]) problems.push(`Weeks sheet row ${i + 2} is ${row[0]}, but the Roster sheet's row ${i + 2} is ${roster[i]}`);
+    for (let w = 1; w <= 18; w++) {
+      const hit = fromDb.find((r) => r[0] === row[0] && r[3] === w);
+      const want = hit ? hit[4] : null;
+      if (row[w] !== want) {
+        problems.push(`Weeks sheet: ${row[0]} week ${w} is ${row[w]}, the database says ${want}`);
+        break;
+      }
+    }
+  });
+}
+
 let formulaChecked = 0;
 for (const [label, ex] of formulaExercises) {
   formulaChecked++;

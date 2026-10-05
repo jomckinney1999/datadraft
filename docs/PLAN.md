@@ -139,7 +139,7 @@ The paid tier is about getting the job, not the hobby — hobbyists stay happy o
 | **Ask Coach**: the conversational version, on the doctor's diagnosis | Built; needs Vercel AI Gateway switched on |
 | **Mock SQL screens**: timed phone and technical screens with a report | Live |
 | **Interview patterns**: the nine SQL patterns screens test, with progress | Live; every pattern has at least 4 questions |
-| **Depth**: the SQL bank grown towards ~150, solutions and explanations on each | In progress: 80 SQL of 97 questions (from 29 SQL on Oct 1) |
+| **Depth**: the SQL bank grown towards ~150, solutions and explanations on each | In progress: 100 SQL of 152 questions (from 29 SQL on Oct 1), plus 20 Python, 12 R and 20 Excel |
 | **Proof for employers**: public profile, verifiable certificates, add to LinkedIn | Needs accounts switched on (server-side progress) |
 | **Weekly in-season drop + leaderboard** | Needs accounts and a weekly build of live data |
 | **Interview cases** grown from 6 to ~25 | Not started |

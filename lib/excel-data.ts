@@ -1,12 +1,17 @@
 /**
  * The workbook every Excel lesson runs against.
  *
- * Two sheets, on purpose:
+ * Three sheets with data, on purpose:
  *   Roster — clean, numeric, the sheet formulas are taught on.
  *   Import — the same league exported badly: numbers stored as text, names
  *            with stray spaces, blank cells. The data-cleaning lessons need
  *            genuinely dirty input, and mixing it into Roster would break
  *            every SUM in the rest of the course.
+ *   Weeks  — the Roster's players week by week (W1–W18, real 2024 points),
+ *            blank where he had no game. Row 2 is the same player on both
+ *            tabs. Built by scripts/build-question-frames.mjs (2026-10-05)
+ *            for the Excel questions: averages that skip blanks, COUNTIF
+ *            across a row, two-way lookups.
  *
  * WHAT IS REAL: Player, Team, Pos, Games and Points are real 2024 NFL regular
  * season results (PPR scoring) from nflverse-data — the same source the SQL
@@ -26,12 +31,15 @@
  * what "correct" means.
  */
 
+import { WEEKS_SHEET_2024 } from "@/lib/question-frames.generated";
+
 export type CellValue = string | number | null;
 export type Sheet = CellValue[][];
 export type Workbook = Record<string, Sheet>;
 
 export const MAIN_SHEET = "Roster";
 export const IMPORT_SHEET = "Import";
+export const WEEKS_SHEET = "Weeks";
 /** Empty sheet learners type into — like a blank workbook tab. */
 export const PRACTICE_SHEET = "Practice";
 
@@ -81,6 +89,7 @@ const IMPORT: Sheet = [
 export const WORKBOOK: Workbook = {
   [MAIN_SHEET]: ROSTER,
   [IMPORT_SHEET]: IMPORT,
+  [WEEKS_SHEET]: WEEKS_SHEET_2024,
   [PRACTICE_SHEET]: emptySheet(24, 8),
 };
 

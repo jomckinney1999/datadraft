@@ -20,7 +20,7 @@ The sales side of `docs/PLAN.md`: what we sell, at what price, the words we sell
 | Stat Duel, Draft Room (current season), Chart it, your own league | ✓ | ✓ |
 | Practice Field and Spreadsheet sandboxes | ✓ | ✓ |
 | Courses | The first unit of every course (5 graded lessons a day) | **Every lesson in every course, no daily limit** |
-| Question bank | Today's questions, any question for 7 days after it was a daily, and a starter set | **The whole bank** (80 SQL of 97 today, growing to ~150; plus Python, R, Excel), with solutions |
+| Question bank | Today's questions, any question for 7 days after it was a daily, and a starter set | **The whole bank** (152 today: 100 SQL growing to ~150, plus 20 Python, 12 R, 20 Excel), with solutions |
 | Query Doctor | 1 diagnosis a day | **On every miss**, plus Ask Coach |
 | Film Room (replay a query clause by clause, in the order the database runs it) | On the free questions | **Every query, every question** (added Oct 3) |
 | Mock SQL screens | 1 phone screen, to try it | **Unlimited**, phone and technical, with the report |
