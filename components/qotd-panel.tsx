@@ -29,7 +29,14 @@ import DifficultyChip from "@/components/difficulty-chip";
 import { FaceCluster } from "@/components/qotd-card";
 import { featuredPlayers } from "@/lib/question-players";
 
-export default function QotdPanel({ question }: { question: Question }) {
+export default function QotdPanel({
+  question,
+  isDaily = true,
+}: {
+  question: Question;
+  /** False when the home page shows its easy warm-up instead of the daily (frontDoorQuestion). */
+  isDaily?: boolean;
+}) {
   const dbRef = useRef<Database | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [ready, setReady] = useState(false);
@@ -143,7 +150,7 @@ export default function QotdPanel({ question }: { question: Question }) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-gold/50 bg-gold/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-gold">
-              Question of the day
+              {isDaily ? "Question of the day" : "Today's warm-up"}
             </span>
             <DifficultyChip difficulty={question.difficulty} />
           </div>

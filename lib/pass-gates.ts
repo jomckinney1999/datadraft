@@ -7,10 +7,12 @@
  *   - today's daily, in every language;
  *   - any question for 7 days after it was a daily, so a friend's challenge
  *     link never lands on a paywall;
+ *   - the home page's easy question, for the same 7 days, because the front
+ *     door is a growth surface and never sits behind the Pass;
  *   - the starter set, the bank's original on-ramp.
  */
 
-import { isDailyQuestion, type Question } from "@/lib/questions";
+import { frontDoorQuestion, isDailyQuestion, type Question } from "@/lib/questions";
 
 /** How long a question stays free after its day as the daily. */
 export const DAILY_FREE_DAYS = 7;
@@ -39,7 +41,9 @@ function daysBefore(day: string, n: number): string {
 export function questionIsFree(q: Question, day: string): boolean {
   if (STARTER_QUESTIONS.includes(q.id)) return true;
   for (let i = 0; i < DAILY_FREE_DAYS; i++) {
-    if (isDailyQuestion(daysBefore(day, i), q)) return true;
+    const d = daysBefore(day, i);
+    if (isDailyQuestion(d, q)) return true;
+    if (frontDoorQuestion(d).question.id === q.id) return true;
   }
   return false;
 }

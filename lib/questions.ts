@@ -3324,6 +3324,14 @@ export function questionsIn(lang: QuestionLang): Question[] {
   return QUESTIONS.filter((q) => q.lang === lang);
 }
 
+/** The day's pick from a pool, walked by a co-prime stride (see dailyStride). */
+function pickForDay(pool: Question[], day: string): Question {
+  const dayNumber = Math.floor(Date.parse(`${day}T00:00:00Z`) / MS_PER_DAY);
+  const n = pool.length;
+  const index = (((dayNumber * dailyStride(n)) % n) + n) % n;
+  return pool[index];
+}
+
 export function questionOfTheDay(
   day: string = leagueDay(),
   lang: QuestionLang = "sql",
@@ -3332,10 +3340,26 @@ export function questionOfTheDay(
   // Never throws on an empty pool: a language with no questions yet falls
   // back to SQL rather than crashing a server render.
   if (pool.length === 0) return questionsIn("sql")[0];
-  const dayNumber = Math.floor(Date.parse(`${day}T00:00:00Z`) / MS_PER_DAY);
-  const n = pool.length;
-  const index = (((dayNumber * dailyStride(n)) % n) + n) % n;
-  return pool[index];
+  return pickForDay(pool, day);
+}
+
+/**
+ * The home page's question, which is always an easy SQL one (decided
+ * 2026-10-05). The daily runs easy to hard, and on about three days in four
+ * it was a medium or a hard one: a visitor who clicked "90 seconds, no
+ * signup" from the front page met a CTE with ROW_NUMBER and left.
+ *
+ * When today's SQL daily is easy, it is the daily (`isDaily`), so a visitor
+ * who solves it has done the same question as everyone else that day.
+ * Otherwise it's the day's pick from the easy SQL questions, walked the same
+ * way, so everyone who lands on the home page still gets the same one. It is
+ * free on its day once the Season Pass gate is on (lib/pass-gates.ts).
+ */
+export function frontDoorQuestion(day: string = leagueDay()): { question: Question; isDaily: boolean } {
+  const daily = questionOfTheDay(day, "sql");
+  if (daily.difficulty === "easy") return { question: daily, isDaily: true };
+  const pool = questionsIn("sql").filter((q) => q.difficulty === "easy" && (!q.added || q.added <= day));
+  return { question: pickForDay(pool, day), isDaily: false };
 }
 
 /**

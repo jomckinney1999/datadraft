@@ -209,6 +209,22 @@ for (const unit of curriculum.COURSE.units) {
     if (!q) problems.push(`season pass: starter question "${id}" doesn't exist`);
     else if (q.lang !== "sql" || q.difficulty !== "easy") problems.push(`season pass: starter question "${id}" isn't easy SQL`);
   }
+  // The home page only ever shows an easy SQL question (frontDoorQuestion),
+  // and it has to be free on its day, or the front door would open on a
+  // paywall once the gate is on.
+  const startMs = Date.parse(`${bank.leagueDay()}T00:00:00Z`);
+  for (let i = 0; i < 180; i++) {
+    const day = new Date(startMs + i * 86400000).toISOString().slice(0, 10);
+    const { question: q } = bank.frontDoorQuestion(day);
+    if (q.lang !== "sql" || q.difficulty !== "easy") {
+      problems.push(`home page: ${day} would show "${q.id}", which isn't easy SQL`);
+      break;
+    }
+    if (!gates.questionIsFree(q, day)) {
+      problems.push(`home page: ${day}'s question "${q.id}" isn't free under the Season Pass gate`);
+      break;
+    }
+  }
   const pass = await loadProjectTs(path.join(root, "lib/season-pass.ts"), root);
   const fs = await import("node:fs");
   const script = fs.readFileSync(path.join(root, "scripts/setup-stripe-products.mjs"), "utf8");

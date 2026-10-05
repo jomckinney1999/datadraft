@@ -27,7 +27,7 @@ import {
   LANG_LABEL,
   QUESTIONS,
   leagueDay,
-  questionOfTheDay,
+  frontDoorQuestion,
   questionsIn,
 } from "@/lib/questions";
 import { INTERVIEW_CASES } from "@/lib/interview-cases";
@@ -125,8 +125,9 @@ export default async function Home() {
   const day = leagueDay();
   // SQL on the landing page, always: Python costs ~12 MB of Pyodide and R
   // ~30 MB of WebR on first run, and a front door does not get to spend that
-  // before anyone has asked for anything.
-  const qotd = questionOfTheDay(day, "sql");
+  // before anyone has asked for anything. And always an easy one: the daily
+  // runs easy to hard, and a first visit shouldn't open on a hard one.
+  const { question: qotd, isDaily: qotdIsDaily } = frontDoorQuestion(day);
   // Never throws: null when nflverse is unreachable, and the strip hides.
   const live = await getLiveWeek();
 
@@ -252,7 +253,7 @@ export default async function Home() {
               </StickerLink>
             </div>
             <p className="reveal mt-5 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-muted">
-              Free · no signup · 90 seconds
+              Easy · free · no signup · 90 seconds
             </p>
           </div>
 
@@ -323,19 +324,23 @@ export default async function Home() {
         >
           <div className="sequence relative mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24">
             <div className="reveal mb-6 text-center">
-              <p className="label-broadcast text-gold">today&apos;s question</p>
+              <p className="label-broadcast text-gold">{qotdIsDaily ? "today's question" : "today's warm-up"}</p>
               <h2 className="mt-2 font-display text-3xl font-bold text-ink sm:text-4xl">
                 A new question every morning. Like waivers, but for your
                 career.
               </h2>
               <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-ink-soft">
                 A real database, running in your browser, right here on this
-                page. Everyone gets the same question today and it turns over
-                at midnight Eastern.
+                page. Everyone who lands here gets the same easy one today, and
+                it turns over at midnight Eastern. The harder daily lives in the{" "}
+                <Link href="/questions" className="font-semibold text-gold hover:underline">
+                  question bank
+                </Link>
+                .
               </p>
             </div>
             <div className="reveal">
-              <QotdPanel question={qotd} />
+              <QotdPanel question={qotd} isDaily={qotdIsDaily} />
             </div>
             <p className="reveal mt-5 text-center text-sm text-ink-soft">
               Not ready to write SQL?{" "}
