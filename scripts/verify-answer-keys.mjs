@@ -944,6 +944,59 @@ for (const unit of curriculum.COURSE.units) {
 }
 problems.push(...sheetProblems);
 
+// ── Tableau-style and Power BI-style drills ────────────────────
+// A viz key (lib/viz.ts) is a view; its SQL has to run, return rows, use
+// fields the data pane offers, and not stop a Top N on a tie, or a correct
+// learner view grades wrong. A DAX key (lib/dax.ts) has to evaluate in its
+// visual without an error and show at least one row.
+let vizChecked = 0;
+let daxChecked = 0;
+{
+  const vizLib = await loadProjectTs(path.join(root, "lib/viz.ts"), root);
+  const daxLib = await loadProjectTs(path.join(root, "lib/dax.ts"), root);
+  const daxRows = daxLib.rowsFromResult(db.exec(daxLib.DAX_LOAD_SQL)[0].values);
+  for (const unit of curriculum.COURSE.units) {
+    for (const lesson of unit.lessons ?? []) {
+      for (const [i, ex] of (lesson.exercises ?? []).entries()) {
+        const label = `${lesson.id} ex${i + 1}`;
+        if (ex.type === "viz") {
+          vizChecked++;
+          const spec = ex.expected;
+          const known = new Set(vizLib.VIZ_FIELDS[spec.source].map((f) => f.name));
+          const used = [...spec.columns, ...spec.rows, ...spec.color, ...spec.detail, ...spec.filters].map((p) => p.field);
+          for (const f of used) if (!known.has(f)) problems.push(`${label} viz key uses "${f}", which isn't a field of ${spec.source}`);
+          const sql = vizLib.specToSql(spec, { canonical: true });
+          let res;
+          try {
+            res = db.exec(sql)[0];
+          } catch (e) {
+            problems.push(`${label} viz key FAILED: ${e.message}`);
+            continue;
+          }
+          if (!res || res.values.length === 0) problems.push(`${label} viz key returned no rows`);
+          if (spec.top && res) {
+            const all = db.exec(vizLib.specToSql({ ...spec, top: undefined }, { canonical: true }))[0].values;
+            const m = res.columns.length - 1;
+            if (all.length > spec.top && all[spec.top - 1][m] === all[spec.top][m]) {
+              problems.push(`${label} viz key's Top ${spec.top} stops on a tie (${all[spec.top - 1][m]})`);
+            }
+          }
+        }
+        if (ex.type === "dax") {
+          daxChecked++;
+          const m = daxLib.evaluateMatrix(ex.expected, ex.visual, { rows: daxRows, measures: ex.measures ?? {} });
+          if (m.error) problems.push(`${label} DAX key FAILED: ${m.error}`);
+          else if (m.rows.length === 0) problems.push(`${label} DAX key shows no rows in its visual`);
+          if (ex.starter && !daxLib.evaluateMatrix(ex.starter, ex.visual, { rows: daxRows, measures: ex.measures ?? {} }).error) {
+            const s = daxLib.evaluateMatrix(ex.starter, ex.visual, { rows: daxRows, measures: ex.measures ?? {} });
+            if (daxLib.matricesMatch(s, m)) problems.push(`${label} DAX starter already matches the key`);
+          }
+        }
+      }
+    }
+  }
+}
+
 // The engine's own functions (customFunctions in lib/excel-engine.ts), each
 // against an answer worked out by hand from the workbook. These are the
 // places it differs from the library, so an upgrade that changes either side
@@ -1029,6 +1082,8 @@ console.log(`question bank keys checked: ${questionChecked} (sql ${questionCheck
 if (questionR) console.log(`question R keys skipped (no Node WebR): ${questionR}`);
 console.log(`python answer keys run    : ${pyChecked}`);
 console.log(`excel formula keys checked: ${formulaChecked}`);
+console.log(`viz drills checked       : ${vizChecked} (Tableau-style views, run as SQL)`);
+console.log(`dax drills checked       : ${daxChecked} (Power BI-style measures, every matrix cell)`);
 if (skippedR) console.log(`R keys skipped (no Node WebR): ${skippedR}`);
 console.log(`card art ids checked      : ${artChecked} (courses, builds, cases, units)`);
 console.log(`prose facts checked       : ${factsChecked} (lib/lesson-facts.generated.ts vs the database)`);

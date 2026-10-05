@@ -25,6 +25,8 @@ import {
   type QueryExercise,
   type CodeExercise,
   type FormulaExercise,
+  type VizExercise,
+  type DaxExercise,
   type TheoryCard,
 } from "@/lib/curriculum";
 import {
@@ -67,6 +69,10 @@ import { PAYWALL_LIVE } from "@/lib/season-pass";
 import { unitIsFree } from "@/lib/pass-units";
 import CodeEditor from "@/components/code-editor";
 import ExcelGrid, { type CellCoord } from "@/components/excel-grid";
+import VizBuilder from "@/components/viz-builder";
+import DaxBuilder from "@/components/dax-builder";
+import { describeSpec, emptySpec, sameMark, specToSql, type VizSpec } from "@/lib/viz";
+import { DAX_LOAD_SQL, evaluateMatrix, matricesMatch, rowsFromResult } from "@/lib/dax";
 import SchemaReference from "@/components/schema-reference";
 import {
   ensureFormulaEngine,
@@ -181,6 +187,13 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
 
   const dbRef = useRef<Database | null>(null);
   const [engineReady, setEngineReady] = useState(false);
+  // The Power BI drills' model: week_results as the Results table, read once
+  // the database is up (lib/dax.ts).
+  const daxRows = useMemo(() => {
+    if (!engineReady || !dbRef.current) return null;
+    const r = dbRef.current.exec(DAX_LOAD_SQL)[0];
+    return r ? rowsFromResult(r.values) : [];
+  }, [engineReady]);
   const savedRef = useRef(false);
   const { moduleId } = useModule();
   const router = useRouter();
@@ -292,6 +305,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
 
   // Excel formula exercises (evaluated live against lib/excel-data.ts)
   const [formulaText, setFormulaText] = useState("");
+  const [vizSpec, setVizSpec] = useState<VizSpec>(() => emptySpec());
+  const [daxText, setDaxText] = useState("");
   const [formulaValue, setFormulaValue] = useState<CellValue | boolean>(null);
   const [formulaError, setFormulaError] = useState<string | null>(null);
   const [formulaReady, setFormulaReady] = useState(false);
@@ -473,6 +488,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     setQueryText(exercise.type === "query" ? exercise.starter : "");
     setCodeText(exercise.type === "code" ? exercise.starter : "");
     setFormulaText(exercise.type === "formula" ? exercise.starter : "");
+    setVizSpec(exercise.type === "viz" ? { ...emptySpec(exercise.expected.source), ...exercise.start } : emptySpec());
+    setDaxText(exercise.type === "dax" ? exercise.starter : "");
     setFormulaValue(null);
     setFormulaError(null);
     setFormulaSelected(null);
@@ -788,7 +805,72 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     };
   }
 
-  function grade(): { correct: boolean; solution?: string } | null {
+  type Graded = { correct: boolean; solution?: string; whyWrong?: string };
+
+  function gradeViz(ex: VizExercise): Graded | null {
+    const mine = specToSql(vizSpec, { canonical: true });
+    if (!mine) {
+      setSoftError("Put a field on Columns or Rows first.");
+      return null;
+    }
+    let learner: QueryExecResult | undefined;
+    try {
+      learner = runQuery(mine);
+    } catch (err) {
+      setSoftError(err instanceof Error ? err.message : String(err));
+      return null;
+    }
+    let expected: QueryExecResult | undefined;
+    try {
+      expected = runQuery(specToSql(ex.expected, { canonical: true }) ?? "");
+    } catch {
+      setSoftError("The answer key failed to run — that's our bug, not yours. Skipping the check.");
+      return null;
+    }
+    const ordered = !!ex.expected.sort || !!ex.expected.top;
+    const dataOk = normalizeResult(learner, ordered) === normalizeResult(expected, ordered);
+    const markOk = sameMark(vizSpec, ex.expected);
+    return {
+      correct: dataOk && markOk,
+      solution: describeSpec(ex.expected),
+      whyWrong:
+        dataOk && !markOk
+          ? `Right numbers, wrong picture: this one wants a ${ex.expected.mark} mark.`
+          : !dataOk && ordered && normalizeResult(learner, false) === normalizeResult(expected, false)
+            ? "The marks are right but in the wrong order. Check the sort."
+            : undefined,
+    };
+  }
+
+  function gradeDax(ex: DaxExercise): Graded | null {
+    if (!daxRows) {
+      setSoftError("The model is still loading. Try again in a second.");
+      return null;
+    }
+    const model = { rows: daxRows, measures: ex.measures ?? {} };
+    const mine = evaluateMatrix(daxText, ex.visual, model);
+    if (mine.error) {
+      setSoftError(mine.error);
+      return null;
+    }
+    const key = evaluateMatrix(ex.expected, ex.visual, model);
+    if (key.error) {
+      setSoftError("The answer key failed to run — that's our bug, not yours. Skipping the check.");
+      return null;
+    }
+    const rowsOk = mine.rows.length === key.rows.length && mine.rows.every((r, i) => r.label === key.rows[i].label);
+    const correct = matricesMatch(mine, key);
+    return {
+      correct,
+      solution: ex.expected,
+      whyWrong:
+        !correct && rowsOk && matricesMatch({ ...mine, total: key.total }, key)
+          ? "Every row matches, but the Total doesn't. A total is evaluated in its own filter context, not added up from the rows."
+          : undefined,
+    };
+  }
+
+  function grade(): Graded | null {
     if (!exercise) return null;
     if (exercise.type === "mc") {
       return {
@@ -802,6 +884,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
         fillSlots.every((s, i) => s === exercise.answer[i]);
       return { correct, solution: fillSolution(exercise) };
     }
+    if (exercise.type === "viz") return gradeViz(exercise);
+    if (exercise.type === "dax") return gradeDax(exercise);
     // query
     const ex = exercise as QueryExercise;
     let learner: QueryExecResult | undefined;
@@ -824,7 +908,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   async function handleCheck() {
     if (!exercise || currentIdx === undefined || checking) return;
 
-    let result: { correct: boolean; solution?: string } | null;
+    let result: Graded | null;
     if (exercise.type === "code") {
       // Live runtimes are async (and may still be downloading), so this path
       // can't reuse the synchronous grade() the other exercise types use.
@@ -918,6 +1002,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
         queryText,
         codeText,
         formulaText,
+        vizText: exercise.type === "viz" ? describeSpec(vizSpec) : undefined,
+        daxText,
       });
       const reviewsSoFar = reviewCounts[currentIdx] ?? 0;
       const willReview =
@@ -934,7 +1020,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
         solution: result.solution,
         explain: exercise.explain,
         yourAnswer,
-        whyWrong: whyWrongMessage(exercise, yourAnswer, result.solution),
+        whyWrong: result.whyWrong ?? whyWrongMessage(exercise, yourAnswer, result.solution),
         willReview,
       });
       playForPlayKind(false, kind);
@@ -958,6 +1044,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     if (exercise?.type === "query") setQueryText(exercise.starter);
     if (exercise?.type === "code") setCodeText(exercise.starter);
     if (exercise?.type === "formula") setFormulaText(exercise.starter);
+    if (exercise?.type === "viz") setVizSpec({ ...emptySpec(exercise.expected.source), ...exercise.start });
+    if (exercise?.type === "dax") setDaxText(exercise.starter);
   }
 
   /** Spend tickets to rewind the miss and re-take this snap. */
@@ -1061,7 +1149,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     !!exercise &&
     (exercise.type === "query" ||
       exercise.type === "code" ||
-      exercise.type === "formula");
+      exercise.type === "formula" ||
+      exercise.type === "viz" ||
+      exercise.type === "dax");
   const isReviewPlay =
     currentIdx !== undefined && (reviewCounts[currentIdx] ?? 0) > 0;
   const checkDisabled =
@@ -1071,7 +1161,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     (exercise.type === "query" && !engineReady) ||
     (exercise.type === "code" && (!!runtimeLoading || running || checking)) ||
     (exercise.type === "formula" &&
-      (!formulaText.replace(/^=/, "").trim() || running || checking));
+      (!formulaText.replace(/^=/, "").trim() || running || checking)) ||
+    (exercise.type === "viz" && !engineReady) ||
+    (exercise.type === "dax" && (!daxRows || !daxText.trim()));
 
   keyRef.current = (e: KeyboardEvent) => {
     if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
@@ -1681,7 +1773,11 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                         ? "SQL terminal"
                         : exercise.type === "code"
                           ? `${LANG_LABEL[exercise.lang]} console`
-                          : "Formula bar"}
+                          : exercise.type === "viz"
+                            ? "Viz builder · Tableau-style"
+                            : exercise.type === "dax"
+                              ? "Measure · Power BI-style"
+                              : "Formula bar"}
                     </span>
                   </div>
                   <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
@@ -1693,9 +1789,13 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                         ? runtimeLoading === exercise.lang
                           ? `loading ${LANG_WEIGHT[exercise.lang]}…`
                           : "ready"
-                        : formulaReady
-                          ? "ready"
-                          : "loading…"}
+                        : exercise.type === "viz" || exercise.type === "dax"
+                          ? engineReady
+                            ? "ready"
+                            : "loading…"
+                          : formulaReady
+                            ? "ready"
+                            : "loading…"}
                   </span>
                 </div>
 
@@ -1739,6 +1839,34 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
                           {codeOutput || "(nothing printed)"}
                         </pre>
                       </div>
+                    )}
+                  </>
+                )}
+
+                {exercise.type === "viz" && (
+                  <>
+                    <VizBuilder spec={vizSpec} onChange={setVizSpec} run={runQuery} disabled={!!feedback} />
+                    {softError && (
+                      <p className="border-t border-gold/40 bg-gold/5 px-3 py-2 font-mono text-[12px] text-gold">
+                        ⚠ {softError} — no down. Fix & retry.
+                      </p>
+                    )}
+                  </>
+                )}
+
+                {exercise.type === "dax" && (
+                  <>
+                    <DaxBuilder
+                      measure={daxText}
+                      onChange={setDaxText}
+                      model={daxRows ? { rows: daxRows, measures: exercise.measures ?? {} } : null}
+                      visual={exercise.visual}
+                      disabled={!!feedback}
+                    />
+                    {softError && (
+                      <p className="border-t border-gold/40 bg-gold/5 px-3 py-2 font-mono text-[12px] text-gold">
+                        ⚠ {softError} — no down. Fix & retry.
+                      </p>
                     )}
                   </>
                 )}

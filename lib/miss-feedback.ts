@@ -26,6 +26,9 @@ export function describeLearnerAnswer(
     queryText: string;
     codeText: string;
     formulaText: string;
+    /** The learner's view in words (describeSpec), for viz drills. */
+    vizText?: string;
+    daxText?: string;
   },
 ): string | undefined {
   if (exercise.type === "mc") {
@@ -50,6 +53,8 @@ export function describeLearnerAnswer(
     const t = inputs.formulaText.trim();
     return t || undefined;
   }
+  if (exercise.type === "viz") return inputs.vizText || undefined;
+  if (exercise.type === "dax") return inputs.daxText?.trim() || undefined;
   return undefined;
 }
 

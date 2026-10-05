@@ -32,6 +32,9 @@ import {
   SQL_SHELLS,
 } from "./sql-outline";
 
+import type { VizSpec } from "./viz";
+import type { DaxVisual } from "./dax";
+
 export type MCExercise = {
   type: "mc";
   prompt: string;
@@ -116,12 +119,49 @@ export type FormulaExercise = {
   explain: string;
 };
 
+/**
+ * Build a view in the Tableau-style builder (lib/viz.ts, components/viz-builder.tsx).
+ * Graded on what the view shows: its data (the same normaliser as `query`,
+ * so which shelf a field went on doesn't matter when the numbers are the
+ * same) and its mark. Order matters only when the key sorts or takes a Top N.
+ */
+export type VizExercise = {
+  type: "viz";
+  prompt: string;
+  /** Where the view starts. Usually empty; the source comes from `expected`. */
+  start?: Partial<VizSpec>;
+  expected: VizSpec;
+  hint: string;
+  explain: string;
+};
+
+/**
+ * Write a DAX measure in the Power BI-style builder (lib/dax.ts,
+ * components/dax-builder.tsx). Graded on the matrix visual: the measure runs
+ * once per row of `visual` and once for the Total, and every cell has to
+ * match the key's. That's what makes CALCULATE and ALL drills honest: a
+ * measure that's right on the rows and wrong at the total is wrong.
+ */
+export type DaxExercise = {
+  type: "dax";
+  prompt: string;
+  starter: string;
+  expected: string;
+  visual: DaxVisual;
+  /** Measures already in the model, which the learner can reference as [Name]. */
+  measures?: Record<string, string>;
+  hint: string;
+  explain: string;
+};
+
 export type Exercise =
   | MCExercise
   | FillExercise
   | QueryExercise
   | CodeExercise
-  | FormulaExercise;
+  | FormulaExercise
+  | VizExercise
+  | DaxExercise;
 
 export type TheoryCard = { title: string; text: string; code?: string };
 

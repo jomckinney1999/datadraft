@@ -81,6 +81,8 @@ export const NAV: NavSection[] = [
         items: [
           { href: "/field", label: "Practice Field", blurb: "Free-play SQL on this season's real stats", badge: "Free" },
           { href: "/excel", label: "Spreadsheet", blurb: "Real formulas on a real workbook", badge: "Free" },
+          { href: "/viz", label: "Viz Builder", blurb: "Tableau-style shelves, marks and filters", badge: "Free" },
+          { href: "/dax", label: "DAX Lab", blurb: "Power BI-style measures in a live matrix", badge: "Free" },
           { href: "/data", label: "The data", blurb: "Where every row comes from, with free downloads" },
         ],
       },

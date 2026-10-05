@@ -37,6 +37,8 @@ const BASE_YARDS: Record<Exercise["type"], number> = {
   query: 13,
   code: 13,
   formula: 13,
+  viz: 13,
+  dax: 13,
 };
 
 export function baseYardsFor(type: Exercise["type"]): number {

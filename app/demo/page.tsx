@@ -30,10 +30,12 @@ const TYPE_LABEL: Record<Exercise["type"], string> = {
   query: "SQL",
   code: "Code",
   formula: "Formula",
+  viz: "Viz",
+  dax: "DAX",
 };
 
 /** Live-executed exercise types — the ones that run real code, not checkboxes. */
-const EXECUTED: Exercise["type"][] = ["query", "code", "formula"];
+const EXECUTED: Exercise["type"][] = ["query", "code", "formula", "viz", "dax"];
 
 function countTypes(units: Unit[]): Record<string, number> {
   const out: Record<string, number> = {};

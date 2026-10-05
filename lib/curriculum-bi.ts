@@ -1,12 +1,16 @@
 /**
  * Tableau, Power BI, and AI — same walk-in as SQL.
  *
- * These tools do not run in the browser. Lessons teach the idea, then the
- * learner builds in Tableau Public or Power BI Desktop. AI lessons are
- * judgment drills, not a live model call.
+ * Neither tool runs in a browser, so each Tableau and Power BI lesson teaches
+ * the idea, then ends on a play in a small working copy of the tool: a view
+ * in the Tableau-style builder or a DAX measure in the Power BI-style one,
+ * over the real lesson data (lib/curriculum-bi-drills.ts, appended by
+ * `lesson()` below). The full build still happens in Tableau Public or Power
+ * BI Desktop. AI lessons are judgment drills, not a live model call.
  */
 
 import type { FillExercise, Lesson, MCExercise, Unit } from "./curriculum";
+import { BI_DRILLS } from "./curriculum-bi-drills";
 
 function mc(
   prompt: string,
@@ -30,8 +34,10 @@ function fill(
   return { type: "fill", prompt, parts, bank, answer, explain };
 }
 
+/** A lesson, plus its hands-on drill from lib/curriculum-bi-drills.ts if it has one. */
 function lesson(partial: Lesson): Lesson {
-  return partial;
+  const drills = BI_DRILLS[partial.id];
+  return drills ? { ...partial, exercises: [...partial.exercises, ...drills] } : partial;
 }
 
 export const TABLEAU_UNIT_IDS = [
