@@ -8,7 +8,8 @@
  *     composition (headline + CTAs), not a nav dashboard.
  *   • Menu opens a panel with every section, search, theme and Start free.
  *   • After a short scroll, a floating glass bar slides in with the same
- *     links in a row.
+ *     links in a row, and its wordmark folds down into the DD mark
+ *     (components/brand-mark.tsx).
  *
  * Same sections as AppNav (lib/nav.ts); Dashboard is left out — a visitor
  * has none yet.
@@ -16,6 +17,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import BrandLogo from "@/components/brand-mark";
 import { NavDrawerSections, NavDropdown } from "@/components/nav-menu";
 import SiteSearch from "@/components/site-search";
 import ThemeToggle from "@/components/theme-toggle";
@@ -103,10 +105,9 @@ export default function SiteNav() {
       >
         <div className="mx-auto mt-3 max-w-5xl px-3 sm:px-4">
           <div className="glass relative flex h-14 items-center justify-between gap-4 rounded-2xl border border-panel-border/80 px-3 shadow-float sm:px-4">
-            <Link href="/" aria-label="DataDraft home" className="flex shrink-0 items-baseline gap-2">
-              <span className="font-display text-lg font-bold tracking-tight text-pop">
-                Data<span className="text-turf">Draft</span>
-              </span>
+            {/* The wordmark folds into the DD mark as the bar arrives. */}
+            <Link href="/" aria-label="DataDraft home" className="flex shrink-0 items-center">
+              <BrandLogo compact={scrolled} />
             </Link>
 
             <nav className="hidden items-center gap-4 lg:flex">
