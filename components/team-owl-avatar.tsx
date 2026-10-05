@@ -7,6 +7,38 @@ const COLS = 8;
 const ROWS = 4;
 
 /**
+ * The owl before you've drafted a team (components/player-mark.tsx): one
+ * cell of the sprite, cropped square to the face (below the cap's logo,
+ * above the jersey's number) and shown in greyscale, so it's the same owl
+ * with no team on it. The crop is in source pixels: a 100×100 square from
+ * x 14, y 58 of the cell.
+ */
+const FREE_AGENT = { col: 0, row: 0, x: 14, y: 58, side: 100 };
+
+export function FreeAgentOwl({ className = "" }: { className?: string }) {
+  const cellWidth = SOURCE_WIDTH / COLS;
+  const cellHeight = SOURCE_HEIGHT / ROWS;
+  const { col, row, x, y, side } = FREE_AGENT;
+  return (
+    <span className={`relative block overflow-hidden bg-night ${className}`} aria-hidden>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={SPRITE}
+        alt=""
+        draggable={false}
+        className="pointer-events-none absolute max-w-none select-none grayscale"
+        style={{
+          width: `${(SOURCE_WIDTH / side) * 100}%`,
+          height: `${(SOURCE_HEIGHT / side) * 100}%`,
+          left: `${(-(col * cellWidth + x) / side) * 100}%`,
+          top: `${(-(row * cellHeight + y) / side) * 100}%`,
+        }}
+      />
+    </span>
+  );
+}
+
+/**
  * The supplied source has portrait cells (128×234), not square cells. Fit a
  * complete cell to the square's height, center it, and fill the side gutters
  * with the team's primary colour. That preserves the owl's proportions.
