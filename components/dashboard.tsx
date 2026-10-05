@@ -1,15 +1,20 @@
 "use client";
 
 /**
- * The signed-in home. Answers three questions in order:
+ * The signed-in home. Answers four questions in order, once each:
  *
- *   1. What do I do right now?          → Up next / today's question
- *   2. Where am I?                      → courses in progress / first steps
- *   3. Why is this place for me?        → this week in the league, live
+ *   1. Where am I?               → your locker: rank, up next, a few numbers
+ *   2. What's on today?          → today's question and the Stat Duel
+ *   3. What can I do here?       → the four ways to use DataDraft
+ *   4. How am I doing?           → first steps or courses in progress, the
+ *                                  Hall of Fame, and the league this week
  *
- * Deliberately not a wall of widgets. docs/UX-AUDIT.md measured the homepage
- * at 17 screens on a phone; a dashboard earns its place by being shorter than
- * the thing it replaces.
+ * Deliberately not a wall of widgets (decided 2026-10-05). It had grown to
+ * ten blocks with the same games shown twice, three doors to hiring prep, a
+ * row of five links and a "coming soon" leaderboard of empty rows. Every
+ * destination those offered is still one click away, through the use-case
+ * cards or the nav menus; nothing on this page should say the same thing as
+ * something else on it.
  */
 
 import { useEffect, useState } from "react";
@@ -19,22 +24,17 @@ import AppNav from "@/components/app-nav";
 import TeamLogo from "@/components/team-logo";
 import Headshot from "@/components/headshot";
 import CourseArt from "@/components/course-art";
-import ProjectArt from "@/components/project-art";
-import QuestionArt from "@/components/question-art";
-import PrepArt from "@/components/prep-art";
 import { COURSES } from "@/lib/courses";
 import { liveLessons, getLesson } from "@/lib/curriculum";
 import { displayStreak, EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
 import { BADGES, isEarned, nextEnshrinement, statsFrom } from "@/lib/achievements";
 import { SHORT_CREDIT } from "@/lib/data-source";
 import { weekCaveat, type LiveBoard, type LivePerformer, type LiveWeek } from "@/lib/live-nfl";
-import type { Question } from "@/lib/questions";
+import { QUESTIONS, type Question } from "@/lib/questions";
+import UseCases from "@/components/use-cases";
 import QotdCard from "@/components/qotd-card";
 import DuelCard from "@/components/duel-card";
-import DraftCard from "@/components/draft-card";
 import { TourButton } from "@/components/welcome-tour";
-import PlayStrip from "@/components/play-strip";
-import LeaderboardTeaser from "@/components/leaderboard-teaser";
 import PlayerMark from "@/components/player-mark";
 import { displayName, tenureFrom } from "@/lib/tenure";
 import { useCountUp } from "@/lib/use-count-up";
@@ -49,32 +49,6 @@ type CourseProgress = {
   nextLessonId: string | null;
 };
 
-const ACTIONS = [
-  {
-    href: "/questions",
-    name: "Questions",
-    blurb: "Today's problem on real NFL scoring.",
-    cta: "Open the bank",
-    accent: "gold" as const,
-    art: <QuestionArt art="chalkboard" className="h-full w-full" />,
-  },
-  {
-    href: "/learn",
-    name: "Courses",
-    blurb: "SQL, Python, Excel — short lessons.",
-    cta: "Browse courses",
-    accent: "turf" as const,
-    art: <CourseArt id="sql-fundamentals" className="h-full w-full" />,
-  },
-  {
-    href: "/projects",
-    name: "Projects",
-    blurb: "Your league, a warehouse, a model.",
-    cta: "Pick a build",
-    accent: "ice" as const,
-    art: <ProjectArt id="my-league-scorecard" className="h-full w-full" />,
-  },
-];
 
 export default function Dashboard({
   live,
@@ -185,23 +159,14 @@ export default function Dashboard({
                   "Pick up today's question or the next lesson."
                 )}
               </p>
-              <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink-muted">
-                <TourButton className="font-semibold text-gold hover:underline" />
-                <Link href="/account#locker" className="font-semibold text-gold hover:underline">
-                  Edit your kit
-                </Link>
-                <Link href="/welcome" className="font-semibold text-ice hover:underline">
-                  Map of the site
-                </Link>
-                <Link href="/questions/prep" className="font-semibold text-turf hover:underline">
-                  Hiring prep
-                </Link>
-                <Link href="/pricing" className="font-semibold text-gold hover:underline">
-                  Season Pass
-                </Link>
-              </p>
+              {hydrated && fresh && (
+                <p className="mt-2 text-xs text-ink-muted">
+                  New here? <TourButton className="font-semibold text-gold hover:underline" />
+                </p>
+              )}
             </div>
             <div className="hidden shrink-0 items-end gap-2 sm:flex">
+              <Link href="/account#locker" aria-label="Your locker: edit your kit" className="rounded-xl transition-opacity hover:opacity-90">
               <PlayerMark
                 jersey={progress.jersey}
                 kitAccent={progress.kitAccent}
@@ -210,6 +175,7 @@ export default function Dashboard({
                 favoriteTeam={progress.favoriteTeam}
                 size={76}
               />
+              </Link>
               <Coach mood={coachMood} size={64} />
             </div>
           </div>
@@ -237,7 +203,6 @@ export default function Dashboard({
 
           <div className="relative mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-panel-border pt-3">
             <Stat label="XP" value={stats.xp} animate={hydrated} />
-            <Stat label="Level" value={tenure.level} animate={hydrated} />
             <Stat label="Streak" value={progress.streak} animate={hydrated} />
             <Stat label="Lessons" value={stats.lessonsDone} animate={hydrated} />
             <Stat
@@ -261,166 +226,117 @@ export default function Dashboard({
           )}
         </section>
 
-        <div className="mt-4" style={{ ["--i" as string]: 1 }}>
-          <QotdCard question={qotd} done={qotdDone} streak={progress.qotdStreak} hydrated={hydrated} variant="compact" />
-        </div>
-        <div className="mt-3 grid gap-3 lg:grid-cols-2" style={{ ["--i" as string]: 2 }}>
-          <DuelCard day={day} compact />
-          <DraftCard compact />
-        </div>
+        {/* ── Today ─────────────────────────────────────────── */}
+        <section className="mt-6" style={{ ["--i" as string]: 1 }} aria-labelledby="today-title">
+          <h2 id="today-title" className="font-display text-xl font-bold text-ink">
+            Today
+          </h2>
+          <div className="mt-3 space-y-3">
+            <QotdCard question={qotd} done={qotdDone} streak={progress.qotdStreak} hydrated={hydrated} variant="compact" />
+            <DuelCard day={day} compact />
+          </div>
+        </section>
 
-        <div className="mt-4" style={{ ["--i" as string]: 3 }}>
-          <PlayStrip title="play · prep" />
-        </div>
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-3" style={{ ["--i" as string]: 4 }}>
-          {ACTIONS.map((a) => (
-            <Link
-              key={a.href}
-              href={a.href}
-              onClick={() => playSfx("ui")}
-              data-tone={a.accent}
-              className="pop-tile surface group overflow-hidden rounded-2xl border border-panel-border bg-panel"
-            >
-              <span className="block h-28 border-b border-panel-border bg-night/50">{a.art}</span>
-              <span className="block p-4">
-                <p
-                  className={`font-display text-lg font-bold ${
-                    a.accent === "turf" ? "text-turf" : a.accent === "ice" ? "text-ice" : "text-gold"
-                  }`}
-                >
-                  {a.name}
-                </p>
-                <p className="mt-1 text-sm leading-relaxed text-ink-soft">{a.blurb}</p>
-                <p
-                  className={`mt-2 font-mono text-[11px] uppercase tracking-wider ${
-                    a.accent === "turf" ? "text-turf" : a.accent === "ice" ? "text-ice" : "text-gold"
-                  }`}
-                >
-                  {a.cta} →
-                </p>
-              </span>
-            </Link>
-          ))}
+        {/* ── What you can do here ──────────────────────────── */}
+        <div style={{ ["--i" as string]: 2 }}>
+          <UseCases
+            className="mt-8"
+            questionCount={QUESTIONS.length}
+            qotdId={qotd.id}
+            course={
+              hydrated && upNext?.nextLessonId && stats.lessonsDone > 0
+                ? { href: `/learn/${upNext.nextLessonId}`, label: `Continue ${upNext.title}` }
+                : { href: "/learn/track/sql-fundamentals", label: "Start SQL Fundamentals" }
+            }
+          />
         </div>
 
-        <Link
-          href="/questions/prep"
-          onClick={() => playSfx("ui")}
-          style={{ ["--i" as string]: 5 }}
-          className="lift surface mt-3 flex items-center gap-3 overflow-hidden rounded-2xl border border-gold/40 bg-panel p-3 pr-4 transition-colors hover:border-gold/70"
-        >
-          <span className="h-14 w-20 shrink-0 overflow-hidden rounded-lg border border-panel-border bg-night/50">
-            <PrepArt id="online" className="h-full w-full" />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="label-broadcast text-gold">hiring prep · ★ pass path</span>
-            <span className="mt-0.5 block font-display text-base font-bold text-ink">
-              Patterns → OA → SQL screen → take-home
-            </span>
-          </span>
-          <span className="shrink-0 font-mono text-[11px] font-bold uppercase tracking-wider text-gold">Open →</span>
-        </Link>
-
-        <div className="mt-4" style={{ ["--i" as string]: 5 }}>
-          <LeaderboardTeaser progress={progress} />
-        </div>
-
-        <Link
-          href="/achievements"
-          onClick={() => playSfx("unlock")}
-          style={{ ["--i" as string]: 5 }}
-          className="lift surface mt-3 flex items-center gap-3 overflow-hidden rounded-2xl border border-panel-border bg-panel p-3 pr-4 transition-colors hover:border-gold/50"
-        >
-          <span
-            className="flex h-14 w-20 shrink-0 items-center justify-center rounded-lg border border-gold/40 bg-gold/10 font-display text-2xl font-bold text-gold"
-            aria-hidden
+        {/* ── How you're doing ──────────────────────────────── */}
+        {hydrated && (
+          <section
+            className="surface mt-8 rounded-2xl border border-panel-border bg-panel p-5"
+            style={{ ["--i" as string]: 3 }}
           >
-            ★
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="label-broadcast text-gold">hall of fame</span>
-            <span className="mt-0.5 block font-display text-base font-bold text-ink">
-              {hydrated
-                ? earned === 0
-                  ? "Your trophy case is empty"
-                  : earned === BADGES.length
-                    ? "Every trophy enshrined"
-                    : `${earned} of ${BADGES.length} enshrined`
-                : "Trophies you've earned"}
-            </span>
-            {hydrated && nextBadge && (
-              <span className="mt-0.5 block text-sm text-ink-soft">
-                Next: {nextBadge.name}
-              </span>
-            )}
-          </span>
-          <span className="shrink-0 font-mono text-[11px] font-bold uppercase tracking-wider text-gold">
-            Open →
-          </span>
-        </Link>
-
-        {hydrated &&
-          (fresh ? (
-            <section
-              className="surface mt-4 rounded-2xl border border-panel-border bg-panel p-5"
-              style={{ ["--i" as string]: 6 }}
-            >
-              <p className="label-broadcast text-ice">first steps</p>
-              <ul className="mt-3 space-y-2">
-                {steps.map((s) => (
-                  <li key={s.label} className="flex items-center gap-3">
-                    <span
-                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[11px] ${
-                        s.done ? "border-turf bg-turf/20 text-turf" : "border-panel-border text-ink-muted"
-                      }`}
-                      aria-hidden
-                    >
-                      {s.done ? "✓" : ""}
-                    </span>
-                    <span className={`text-sm ${s.done ? "text-ink-muted line-through" : "text-ink-soft"}`}>{s.label}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : started.length > 0 ? (
-            <section
-              className="surface mt-4 rounded-2xl border border-panel-border bg-panel p-5"
-              style={{ ["--i" as string]: 6 }}
-            >
-              <p className="label-broadcast text-turf">in progress</p>
-              <ul className="mt-3 space-y-3">
-                {started.slice(0, 3).map((c) => {
-                  const pct = Math.round((c.done / c.total) * 100);
-                  return (
-                    <li key={c.id} className="flex items-center gap-3">
-                      <span className="h-12 w-16 shrink-0 overflow-hidden rounded-lg border border-panel-border bg-night/50">
-                        <CourseArt id={c.id} className="h-full w-full" />
+            {fresh ? (
+              <>
+                <p className="label-broadcast text-ice">first steps</p>
+                <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                  {steps.map((s) => (
+                    <li key={s.label} className="flex items-center gap-3">
+                      <span
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[11px] ${
+                          s.done ? "border-turf bg-turf/20 text-turf" : "border-panel-border text-ink-muted"
+                        }`}
+                        aria-hidden
+                      >
+                        {s.done ? "✓" : ""}
                       </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-baseline justify-between gap-3">
-                          <Link href={`/learn/track/${c.moduleId}`} className="font-display text-[15px] font-bold text-ink hover:text-turf">
-                            {c.title}
-                          </Link>
-                          <span className="font-mono text-[11px] text-ink-muted">
-                            {c.done}/{c.total}
+                      <span className={`text-sm ${s.done ? "text-ink-muted line-through" : "text-ink-soft"}`}>{s.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : started.length > 0 ? (
+              <>
+                <p className="label-broadcast text-turf">in progress</p>
+                <ul className="mt-3 space-y-3">
+                  {started.slice(0, 3).map((c) => {
+                    const pct = Math.round((c.done / c.total) * 100);
+                    return (
+                      <li key={c.id} className="flex items-center gap-3">
+                        <span className="h-12 w-16 shrink-0 overflow-hidden rounded-lg border border-panel-border bg-night/50">
+                          <CourseArt id={c.id} className="h-full w-full" />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-baseline justify-between gap-3">
+                            <Link href={`/learn/track/${c.moduleId}`} className="font-display text-[15px] font-bold text-ink hover:text-turf">
+                              {c.title}
+                            </Link>
+                            <span className="font-mono text-[11px] text-ink-muted">
+                              {c.done}/{c.total}
+                            </span>
+                          </span>
+                          <span className="quest-bar mt-1.5 block">
+                            <span style={{ width: `${pct}%` }} />
                           </span>
                         </span>
-                        <span className="quest-bar mt-1.5 block">
-                          <span style={{ width: `${pct}%` }} />
-                        </span>
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          ) : null)}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </>
+            ) : null}
+
+            <Link
+              href="/achievements"
+              onClick={() => playSfx("unlock")}
+              className={`group flex items-center gap-3 ${fresh || started.length > 0 ? "mt-4 border-t border-panel-border pt-4" : ""}`}
+            >
+              <span
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gold/40 bg-gold/10 font-display text-lg font-bold text-gold"
+                aria-hidden
+              >
+                ★
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block font-display text-[15px] font-bold text-ink group-hover:text-gold">
+                  {earned === 0
+                    ? "Hall of Fame: your trophy case is empty"
+                    : earned === BADGES.length
+                      ? "Hall of Fame: every trophy enshrined"
+                      : `Hall of Fame: ${earned} of ${BADGES.length} enshrined`}
+                </span>
+                {nextBadge && <span className="block text-sm text-ink-soft">Next: {nextBadge.name}</span>}
+              </span>
+              <span className="shrink-0 font-mono text-[11px] font-bold uppercase tracking-wider text-gold">Open →</span>
+            </Link>
+          </section>
+        )}
 
         {live && (
           <section
             className="surface mt-4 rounded-2xl border border-panel-border bg-panel p-5"
-            style={{ ["--i" as string]: 7 }}
+            style={{ ["--i" as string]: 4 }}
           >
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <p className="label-broadcast text-gold">

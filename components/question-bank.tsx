@@ -35,7 +35,6 @@ import DifficultyChip from "@/components/difficulty-chip";
 import AppNav from "@/components/app-nav";
 import QotdCard from "@/components/qotd-card";
 import DuelCard from "@/components/duel-card";
-import DraftCard from "@/components/draft-card";
 import PassTag from "@/components/pass-tag";
 import PrepArt, { hasPrepArt } from "@/components/prep-art";
 import { PATTERNS, questionsFor } from "@/lib/interview-patterns";
@@ -178,10 +177,11 @@ export default function QuestionBank({
             Every language has its own daily. Solve any one of them and the
             streak survives.
           </p>
-          {/* The warm-up: no code to guess, every answer with its SQL. */}
-          <div className="mt-4 space-y-3">
-            <DuelCard day={day} />
-            <DraftCard />
+          {/* The warm-up: no code to guess, every answer with its SQL. One
+              row: the Draft Room and the other games are in the Questions
+              menu, and two big cards here pushed the bank off the screen. */}
+          <div className="mt-4">
+            <DuelCard day={day} compact />
           </div>
         </div>
 

@@ -4,7 +4,7 @@
 // with a right-hand gamification rail on desktop.
 // Route: /learn/track/[moduleId]
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   COURSE,
@@ -74,6 +74,19 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
   const [opened, setOpened] = useState<Record<string, boolean>>({});
   const { setModule } = useModule();
+  // One "next lesson" button on screen at a time (2026-10-05): the header's
+  // big button while it's visible, then a slim bar under the nav once it
+  // has scrolled away. Both were on screen at once before, plus a third in a
+  // phone-only strip, all pointing at the same lesson.
+  const headerCtaRef = useRef<HTMLDivElement | null>(null);
+  const [ctaInView, setCtaInView] = useState(true);
+  useEffect(() => {
+    const el = headerCtaRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => setCtaInView(e.isIntersecting), { rootMargin: "-56px 0px 0px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
     setProgress(loadEconomy());
@@ -133,19 +146,36 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
     <>
       <AppNav back="/learn" backLabel="all courses" />
       <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-24 pt-6 sm:px-6">
-        <div className="sticky top-14 z-20 -mx-4 mb-4 flex items-center justify-between gap-3 border-b border-panel-border bg-night/95 px-4 py-2 backdrop-blur lg:hidden">
-          <span className="font-mono text-[11px] uppercase tracking-wider text-ink-muted">
-            {progress.seasonPass ? "Unlimited" : `${progress.timeouts} timeouts`}
-          </span>
-          {gateHref && current && (
-            <Link
-              href={gateHref}
-              className="truncate font-mono text-[11px] font-bold uppercase tracking-wider text-turf"
-            >
-              {current.lesson.title} →
-            </Link>
-          )}
-        </div>
+        {!ctaInView && current && activeUnit && activeIndex >= 0 && pct < 100 && gateHref && (
+          <div className="fixed inset-x-0 top-14 z-20 border-b border-panel-border bg-night/95 backdrop-blur">
+            <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2 sm:px-6">
+              <div className="flex min-w-0 items-center gap-3">
+                {hasUnitArt(activeUnit.id) && (
+                  <span className="hidden h-9 w-12 shrink-0 overflow-hidden rounded-md border border-panel-border bg-night/60 sm:block">
+                    <UnitArt id={activeUnit.id} className="h-full w-full" />
+                  </span>
+                )}
+                <div className="min-w-0">
+                  <p className="truncate font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-turf">
+                    Unit {activeIndex + 1} · {activeUnit.title}
+                  </p>
+                  <p className="truncate font-display text-sm font-bold text-ink">{current.lesson.title}</p>
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center gap-3">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted lg:hidden">
+                  {progress.seasonPass ? "Unlimited" : `${progress.timeouts} timeouts`}
+                </span>
+                <Link
+                  href={gateHref}
+                  className="press btn-turf rounded-xl px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-night"
+                >
+                  Snap
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid gap-8 lg:grid-cols-12 lg:items-start">
           <div className="lg:col-span-8">
@@ -212,12 +242,20 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
               </div>
 
               {gateHref && (
-                <Link
-                  href={gateHref}
-                  className="btn-turf mt-5 flex w-full items-center justify-center rounded-2xl border border-turf/80 px-6 py-3.5 font-display text-base font-bold uppercase tracking-wide text-night"
-                >
-                  {gateLabel}
-                </Link>
+                <div ref={headerCtaRef}>
+                  <Link
+                    href={gateHref}
+                    className="btn-turf mt-5 flex w-full items-center justify-center rounded-2xl border border-turf/80 px-6 py-3.5 font-display text-base font-bold uppercase tracking-wide text-night"
+                  >
+                    {gateLabel}
+                  </Link>
+                  {/* On a phone the rail with the timeouts is far below, so say it here. */}
+                  <p className="mt-2 text-center font-mono text-[10px] uppercase tracking-wider text-ink-muted lg:hidden">
+                    {progress.seasonPass
+                      ? "Season Pass · unlimited lessons"
+                      : `${progress.timeouts} timeouts left today · a graded lesson uses one`}
+                  </p>
+                </div>
               )}
 
               {progress.username && progress.draftedTrack && (
@@ -242,37 +280,6 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
                 hours={courseHours}
                 started={completedCount > 0}
               />
-            )}
-
-            {/* Units */}
-            {current && activeUnit && activeIndex >= 0 && pct < 100 && (
-              <div className="sticky top-[5.75rem] z-10 mt-4 lg:top-[4.25rem]">
-                <div className="unit-banner flex items-center justify-between gap-3 !rounded-2xl !px-3 !py-2">
-                  <div className="flex min-w-0 items-center gap-3">
-                    {hasUnitArt(activeUnit.id) && (
-                      <span className="hidden h-11 w-[60px] shrink-0 overflow-hidden rounded-lg border border-panel-border bg-night/60 sm:block">
-                        <UnitArt id={activeUnit.id} className="h-full w-full" />
-                      </span>
-                    )}
-                    <div className="min-w-0">
-                      <p className="truncate font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-turf">
-                        Unit {activeIndex + 1} · {activeUnit.title}
-                      </p>
-                      <p className="truncate font-display text-base font-bold text-ink">
-                        {current.lesson.title}
-                      </p>
-                    </div>
-                  </div>
-                  {gateHref && (
-                    <Link
-                      href={gateHref}
-                      className="press btn-turf shrink-0 rounded-xl px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-night"
-                    >
-                      Snap
-                    </Link>
-                  )}
-                </div>
-              </div>
             )}
 
             {/* Units */}
@@ -341,14 +348,6 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
                     unlocked={unlocked}
                     isActive={isActive}
                     nodeState={nodeState}
-                    continueHref={
-                      isActive && current
-                        ? `/learn/${current.lesson.id}`
-                        : gateHref && isActive
-                          ? gateHref
-                          : null
-                    }
-                    continueLabel={gateLabel}
                   />
                   {showStop && (
                     <PathStop
@@ -429,8 +428,6 @@ function UnitBlock({
   unlocked,
   isActive,
   nodeState,
-  continueHref,
-  continueLabel,
 }: {
   unit: Unit;
   displayNumber: number;
@@ -440,8 +437,6 @@ function UnitBlock({
   unlocked: boolean;
   isActive: boolean;
   nodeState: (lesson: Lesson) => "completed" | "current" | "locked";
-  continueHref: string | null;
-  continueLabel: string;
 }) {
   const comingSoon = unit.status === "coming-soon";
   const total = unit.lessons.length;
@@ -546,14 +541,6 @@ function UnitBlock({
                   <div className="speech-bubble speech-bubble-coach">
                     {unit.description}
                   </div>
-                  {continueHref && (
-                    <Link
-                      href={continueHref}
-                      className="btn-turf mt-4 flex w-full items-center justify-center rounded-2xl border border-turf/80 px-5 py-3 font-display text-sm font-bold uppercase tracking-wide text-night sm:w-auto"
-                    >
-                      {continueLabel}
-                    </Link>
-                  )}
                 </div>
               </div>
             </div>

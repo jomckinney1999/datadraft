@@ -5,7 +5,6 @@
  */
 
 import { useState } from "react";
-import Link from "next/link";
 import PassOffer from "@/components/pass-offer";
 import {
   buyShopItem,
@@ -66,14 +65,18 @@ export default function SidelineShop({
     onChange?.(result.progress);
   }
 
+  // Folded by default (2026-10-05): the shop and the Pass offer are for when
+  // you want them, not something to read past on the way to the next lesson.
   return (
-    <div className="section-card border-gold/30">
-      <p className="label-broadcast text-gold">sideline shop</p>
-      <p className="mt-1 font-display text-base font-bold text-ink">
-        Spend scouting tickets
-      </p>
-      <p className="mt-1 text-[12px] leading-relaxed text-ink-muted">
-        Earn tickets by clearing drives. Free tier gets {FREE_DAILY_TIMEOUTS}{" "}
+    <details className="section-card group border-gold/30">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-2">
+        <span className="label-broadcast text-gold">sideline shop</span>
+        <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+          {progress.tickets} tickets <span aria-hidden className="inline-block transition-transform group-open:rotate-90">›</span>
+        </span>
+      </summary>
+      <p className="mt-3 text-[12px] leading-relaxed text-ink-muted">
+        Spend the tickets you earn clearing drives. Free tier gets {FREE_DAILY_TIMEOUTS}{" "}
         timeouts a day — Season Pass never runs out.
       </p>
 
@@ -124,13 +127,7 @@ export default function SidelineShop({
         ) : (
           <PassOffer moment="shop" />
         )}
-        <Link
-          href="/learn"
-          className="mt-2 inline-block font-mono text-[10px] uppercase tracking-wider text-ink-muted hover:text-turf"
-        >
-          Back to learning →
-        </Link>
       </div>
-    </div>
+    </details>
   );
 }

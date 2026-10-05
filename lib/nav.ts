@@ -36,7 +36,7 @@ export const NAV: NavSection[] = [
         title: "Your locker",
         items: [
           { href: "/dashboard", label: "Home", blurb: "What's next — today's question and the next lesson" },
-          { href: "/achievements", label: "Hall of Fame", blurb: "Trophies you've earned, and the next enshrinement", badge: "Trophies" },
+          { href: "/achievements", label: "Hall of Fame", blurb: "Trophies you've earned, and the next enshrinement" },
         ],
       },
     ],
@@ -49,7 +49,7 @@ export const NAV: NavSection[] = [
         title: "Practice",
         items: [
           { href: "/questions", label: "Question bank", blurb: "Today's question, and the whole bank in SQL, Python, R and Excel", badge: "Daily" },
-          { href: "/sql-interview-questions", label: "Interview patterns", blurb: "The nine SQL patterns analyst screens test, with a guide to each", badge: "Prep" },
+          { href: "/sql-interview-questions", label: "Interview patterns", blurb: "The nine SQL patterns analyst screens test, with a guide to each" },
           { href: "/questions/prep", label: "Hiring prep", blurb: "Drill the nine patterns, then OA → SQL screen → take-home", badge: "Pass" },
           { href: "/questions/screen", label: "Analyst Screen", blurb: "A timed online assessment: SQL plus stats, wrangling and A/B", badge: "Pass" },
           { href: "/questions/mock", label: "Mock SQL screens", blurb: "A timed phone or technical screen, then a report", badge: "Pass" },
@@ -59,9 +59,9 @@ export const NAV: NavSection[] = [
         title: "Play",
         items: [
           { href: "/questions/duel", label: "Stat Duel", blurb: "Five head-to-heads on real numbers", badge: "Daily" },
-          { href: "/draft", label: "Draft Room", blurb: "Draft a real season, scouting with SQL", badge: "Play" },
-          { href: "/learn/rapid", label: "Rapid Fire", blurb: "Twelve seconds a question, no typing", badge: "Play" },
-          { href: "/learn/arcade", label: "Arcade", blurb: "Pattern Call, Foul Call, Film Room Match — prep between drives", badge: "Prep" },
+          { href: "/draft", label: "Draft Room", blurb: "Draft a real season, scouting with SQL" },
+          { href: "/learn/rapid", label: "Rapid Fire", blurb: "Twelve seconds a question, no typing" },
+          { href: "/learn/arcade", label: "Arcade", blurb: "Pattern Call, Foul Call, Film Room Match — prep between drives" },
         ],
       },
     ],
@@ -101,7 +101,7 @@ export const NAV: NavSection[] = [
       {
         title: "Cases",
         items: [
-          { href: "/projects#cases", label: "Data cases", blurb: "Half an hour, a schema you've never seen, a right answer", badge: "Prep" },
+          { href: "/projects#cases", label: "Data cases", blurb: "Half an hour, a schema you've never seen, a right answer" },
           { href: "/projects/challenge", label: "Data Challenge", blurb: "A take-home on messy data: clean, join, recommend", badge: "Pass" },
         ],
       },
