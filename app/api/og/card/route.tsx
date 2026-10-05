@@ -8,6 +8,9 @@
  *   ?kind=daily&n=7&k=2&t=…&d=…&l=sql    a daily result: "Daily SQL #7 ·
  *                                        solved in 2 tries", the squares,
  *                                        "Can you do it in fewer?"
+ *   ?kind=guide&t=Joins&n=14&s=…         an interview-pattern guide: the
+ *                                        pattern, what it asks, how many
+ *                                        practice questions
  *
  * The question's text comes in the query string rather than from
  * lib/questions, so this edge function doesn't bundle the question bank and
@@ -58,6 +61,29 @@ export async function GET(req: Request) {
             {prompt && (
               <span style={{ fontSize: 32, color: OG.muted, marginTop: 22, lineHeight: 1.35, maxWidth: 1040 }}>
                 {prompt.length === 150 ? `${prompt}…` : prompt}
+              </span>
+            )}
+          </div>
+        </OgFrame>
+      ),
+      { ...OG_SIZE, fonts, headers },
+    );
+  }
+
+  if (p.get("kind") === "guide") {
+    const title = (p.get("t") ?? "SQL interview questions").slice(0, 48);
+    const n = Math.max(0, Number(p.get("n")) || 0);
+    const asks = (p.get("s") ?? "").slice(0, 110);
+    return new ImageResponse(
+      (
+        <OgFrame glow={OG.ice} tagline="With answers · practice on real NFL data">
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontSize: 28, color: OG.gold, letterSpacing: 4 }}>SQL INTERVIEW QUESTIONS</span>
+            <span style={{ fontSize: 96, fontWeight: 700, lineHeight: 1.04, marginTop: 12 }}>{title}</span>
+            {asks && <span style={{ fontSize: 36, color: OG.muted, marginTop: 20, lineHeight: 1.3, maxWidth: 1040 }}>{asks}</span>}
+            {n > 0 && (
+              <span style={{ fontSize: 34, fontWeight: 700, color: OG.turf, marginTop: 26 }}>
+                {`${n} practice questions, run in your browser`}
               </span>
             )}
           </div>

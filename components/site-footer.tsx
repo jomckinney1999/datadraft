@@ -16,6 +16,7 @@ const COLUMNS = [
     links: [
       { href: "/welcome", label: "Start here" },
       { href: "/questions", label: "Questions" },
+      { href: "/sql-interview-questions", label: "SQL interview questions" },
       { href: "/questions/prep", label: "Hiring prep" },
       { href: "/learn", label: "Courses" },
       { href: "/projects", label: "Projects" },

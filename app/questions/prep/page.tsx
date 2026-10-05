@@ -202,8 +202,8 @@ export default function HiringPrepPage() {
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Link href="/questions#interview" className="press btn-turf text-sm">
-                    All patterns →
+                  <Link href="/sql-interview-questions" className="press btn-turf text-sm">
+                    A guide to each →
                   </Link>
                   <Link
                     href="/learn/arcade"

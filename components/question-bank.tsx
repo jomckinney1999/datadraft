@@ -233,7 +233,15 @@ export default function QuestionBank({
                 The SQL patterns analyst screens test
               </h2>
             </div>
-            <PassTag />
+            <div className="flex items-center gap-3">
+              <Link
+                href="/sql-interview-questions"
+                className="font-mono text-[11px] font-bold uppercase tracking-wider text-ice hover:underline"
+              >
+                A guide to each →
+              </Link>
+              <PassTag />
+            </div>
           </div>
           <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {PATTERNS.map((p) => {

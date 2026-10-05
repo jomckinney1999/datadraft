@@ -710,6 +710,34 @@ let doctorChecked = 0;
   }
 }
 
+// ── Pattern guides ────────────────────────────────────────────
+// Every interview pattern has a guide page, slugs are unique, and each
+// guide's worked example is a SQL question in its own pattern (its key is
+// shown in full on the page, so it has to be the right question).
+let guidesChecked = 0;
+{
+  const ip = await loadProjectTs(path.join(root, "lib/interview-patterns.ts"), root);
+  const pg = await loadProjectTs(path.join(root, "lib/pattern-guides.ts"), root);
+  const slugs = new Set();
+  for (const g of pg.PATTERN_GUIDES) {
+    guidesChecked++;
+    if (slugs.has(g.slug)) problems.push(`Pattern guide slug "${g.slug}" is used twice`);
+    slugs.add(g.slug);
+    const p = ip.patternOf(g.pattern);
+    if (!p) {
+      problems.push(`Pattern guide "${g.slug}" names pattern "${g.pattern}", which doesn't exist`);
+      continue;
+    }
+    if (!ip.questionsFor(p).some((q) => q.id === g.example)) {
+      problems.push(`Pattern guide "${g.slug}": worked example "${g.example}" isn't a SQL question in ${p.name}`);
+    }
+    if (g.mistakes.length < 3 || g.faq.length < 2) problems.push(`Pattern guide "${g.slug}" needs 3+ mistakes and 2+ FAQs`);
+  }
+  for (const p of ip.PATTERNS) {
+    if (!pg.guideForPattern(p.id)) problems.push(`Interview pattern "${p.name}" has no guide page (lib/pattern-guides.ts)`);
+  }
+}
+
 // ── Film Room ─────────────────────────────────────────────────
 // Every SQL answer can be replayed clause by clause (lib/sql-steps.ts). Each
 // step has to run on its own, and the last has to land on the key's result,
@@ -905,6 +933,7 @@ console.log(`prose facts checked       : ${factsChecked} (lib/lesson-facts.gener
 console.log(`stat duel rounds checked  : ${duelChecked} (180 days from launch, numbers vs their SQL)`);
 console.log(`draft room checks         : ${draftChecked} (scouting presets per season, drafts from every slot)`);
 console.log(`query doctor cases        : ${doctorChecked} (known wrong answers, the diagnosis a tutor would lead with)`);
+console.log(`pattern guides            : ${guidesChecked} (one per interview pattern, each example in its pattern)`);
 console.log(`film room steps           : ${filmSteps} (every SQL answer replayed clause by clause, each step run)`);
 
 if (problems.length === 0) {

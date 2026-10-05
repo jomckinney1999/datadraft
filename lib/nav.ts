@@ -49,7 +49,7 @@ export const NAV: NavSection[] = [
         title: "Practice",
         items: [
           { href: "/questions", label: "Question bank", blurb: "Today's question, and the whole bank in SQL, Python, R and Excel", badge: "Daily" },
-          { href: "/questions#interview", label: "Interview patterns", blurb: "The nine SQL patterns analyst screens test", badge: "Prep" },
+          { href: "/sql-interview-questions", label: "Interview patterns", blurb: "The nine SQL patterns analyst screens test, with a guide to each", badge: "Prep" },
           { href: "/questions/prep", label: "Hiring prep", blurb: "Drill the nine patterns, then OA → SQL screen → take-home", badge: "Pass" },
           { href: "/questions/screen", label: "Analyst Screen", blurb: "A timed online assessment: SQL plus stats, wrangling and A/B", badge: "Pass" },
           { href: "/questions/mock", label: "Mock SQL screens", blurb: "A timed phone or technical screen, then a report", badge: "Pass" },
@@ -153,6 +153,13 @@ const pathOf = (href: string) => href.split("#")[0];
 export function currentSection(pathname: string): string | null {
   for (const s of NAV) {
     if (s.groups.some((g) => g.items.some((i) => pathOf(i.href) === pathname && pathOf(i.href) !== s.href))) return s.href;
+  }
+  // A page under a menu item's own path (the pattern guides under
+  // /sql-interview-questions) belongs to that item's section, unless the
+  // item is a section's front door, which the prefix match below handles.
+  const roots = new Set(NAV.map((s) => s.href));
+  for (const s of NAV) {
+    if (s.groups.some((g) => g.items.some((i) => !roots.has(pathOf(i.href)) && pathname.startsWith(`${pathOf(i.href)}/`)))) return s.href;
   }
   const hit = NAV.filter((s) => pathname === s.href || pathname.startsWith(`${s.href}/`)).sort(
     (a, b) => b.href.length - a.href.length,
