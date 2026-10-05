@@ -8,6 +8,7 @@
 import Link from "next/link";
 import PlayerMark from "@/components/player-mark";
 import { displayName, tenureFrom } from "@/lib/tenure";
+import Hint from "@/components/hint";
 import type { Progress } from "@/lib/progress";
 
 const TONE: Record<string, string> = {
@@ -37,10 +38,14 @@ export default function CharacterChip({
   const tone = TONE[tenure.rank.tone] ?? TONE.ice;
 
   if (icon) {
+    const title = `Level ${tenure.level} · ${tenure.rank.name}`;
+    const body = `Your level rises with everything you do here: lessons, questions, your streak, perfect drives and badges.${
+      tenure.next ? ` ${tenure.need} more points to ${tenure.next.name}.` : ""
+    } Click for your locker: your callsign, your team's owl and the full ladder.`;
     return (
+      <Hint title={title} body={body} sr={`${title}. ${body}`} toggleOnTap={false}>
       <Link
         href="/account#locker"
-        title={`${name} · Lv ${tenure.level} · ${tenure.rank.name}`}
         aria-label={`${name}, level ${tenure.level}, ${tenure.rank.name}. Your locker`}
         className={`relative flex rounded-full border p-0.5 transition-colors hover:brightness-110 ${tone}`}
       >
@@ -60,6 +65,7 @@ export default function CharacterChip({
           {tenure.level}
         </span>
       </Link>
+      </Hint>
     );
   }
 

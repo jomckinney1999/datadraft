@@ -4,7 +4,15 @@
 // Shared by the course roadmap and the /learn catalog.
 
 import { displayStreak, type Progress } from "@/lib/progress";
-import { FREE_DAILY_TIMEOUTS } from "@/lib/economy";
+import {
+  COST_BYE_WEEK,
+  COST_TIMEOUT_REFILL_FULL,
+  COST_TIMEOUT_REFILL_ONE,
+  FREE_DAILY_TIMEOUTS,
+  TICKET_LESSON,
+  TICKET_PERFECT_BONUS,
+} from "@/lib/economy";
+import Hint from "@/components/hint";
 import { leagueLabel } from "@/lib/tenure";
 
 export { leagueLabel };
@@ -72,39 +80,59 @@ export default function LearnStatusChips({
   const timeoutsLabel = progress.seasonPass
     ? "∞"
     : `${progress.timeouts}/${FREE_DAILY_TIMEOUTS}`;
+  const byes = progress.byeWeeks;
+
+  // What each number means, in the words a hover card can hold (components/hint.tsx).
+  const streakTitle = streak > 0 ? `${streak}-day streak` : "No streak yet";
+  const streakBody =
+    (streak > 0
+      ? "Days in a row you've finished a lesson or solved a question. Miss a day and it starts again."
+      : "Finish a lesson or solve a question today to start one. Come back tomorrow to keep it going.") +
+    (byes > 0
+      ? ` You have ${byes} bye week${byes === 1 ? "" : "s"} saved: each one covers a missed day automatically.`
+      : ` A bye week (${COST_BYE_WEEK} tickets) covers one missed day.`);
+  const timeoutsTitle = progress.seasonPass
+    ? "Unlimited lessons"
+    : `${progress.timeouts} of ${FREE_DAILY_TIMEOUTS} timeouts left today`;
+  const timeoutsBody = progress.seasonPass
+    ? "Your Season Pass means graded lessons never use a timeout."
+    : `Starting a graded lesson uses one, and they refill every morning. Questions, games and the Practice Field never use them. Out early? Refill one for ${COST_TIMEOUT_REFILL_ONE} tickets or all of them for ${COST_TIMEOUT_REFILL_FULL}, in the sideline shop on any course page.`;
+  const ticketsTitle = `${progress.tickets} scouting tickets`;
+  const ticketsBody = `You earn them by playing: ${TICKET_LESSON} for a lesson (${TICKET_PERFECT_BONUS} more for a perfect drive, plus a streak bonus), 5 for a new question, 1 for a repeat, and 10 more for today's question. Spend them on timeout refills, bye weeks and replays.`;
 
   return (
     <div className="flex max-w-full items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      <span
-        className={`status-chip shrink-0 !px-2 !py-1 ${streak > 0 ? "border-gold/40 text-gold" : ""}`}
-        title={
-          progress.byeWeeks > 0
-            ? `Heater · ${progress.byeWeeks} bye week${progress.byeWeeks === 1 ? "" : "s"} ready`
-            : "Day streak (heater)"
-        }
+      <Hint title={streakTitle} body={streakBody} sr={`${streakTitle}. ${streakBody}`}>
+        <button
+          type="button"
+          className={`status-chip shrink-0 cursor-help !px-2 !py-1 ${streak > 0 ? "border-gold/40 text-gold" : ""}`}
+        >
+          <FlameIcon active={streak > 0} />
+          <span aria-hidden>{streak}</span>
+          {byes > 0 && (
+            <span aria-hidden className="text-ice">
+              ·{byes}
+            </span>
+          )}
+        </button>
+      </Hint>
+      <Hint title={timeoutsTitle} body={timeoutsBody} sr={`${timeoutsTitle}. ${timeoutsBody}`}>
+        <button type="button" className="status-chip shrink-0 cursor-help !px-2 !py-1 text-ice">
+          <ClockIcon />
+          <span aria-hidden>{timeoutsLabel}</span>
+        </button>
+      </Hint>
+      <Hint
+        title={ticketsTitle}
+        body={ticketsBody}
+        sr={`${ticketsTitle}. ${ticketsBody}`}
+        className={dense ? "lg:!hidden xl:!inline-flex" : ""}
       >
-        <FlameIcon active={streak > 0} />
-        {streak}
-        {progress.byeWeeks > 0 && (
-          <span className="text-ice" title="Bye weeks">
-            ·{progress.byeWeeks}
-          </span>
-        )}
-      </span>
-      <span
-        className="status-chip shrink-0 !px-2 !py-1 text-ice"
-        title="Timeouts left today — each graded drive costs one"
-      >
-        <ClockIcon />
-        {timeoutsLabel}
-      </span>
-      <span
-        className={`status-chip shrink-0 !px-2 !py-1 text-gold ${dense ? "lg:!hidden xl:!inline-flex" : ""}`}
-        title="Scouting tickets"
-      >
-        <TicketIcon />
-        {progress.tickets}
-      </span>
+        <button type="button" className="status-chip shrink-0 cursor-help !px-2 !py-1 text-gold">
+          <TicketIcon />
+          <span aria-hidden>{progress.tickets}</span>
+        </button>
+      </Hint>
     </div>
   );
 }
