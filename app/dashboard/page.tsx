@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Dashboard from "@/components/dashboard";
 import { getLiveWeek } from "@/lib/live-nfl";
-import { leagueDay, questionOfTheDay } from "@/lib/questions";
+import { QUESTIONS, leagueDay, questionOfTheDay } from "@/lib/questions";
+import { pathCatalog } from "@/lib/analyst-path-catalog";
 
 export const metadata: Metadata = {
   title: "Dashboard — DataDraft",
@@ -23,5 +24,7 @@ export default async function DashboardPage() {
   // The day's question is resolved here rather than in the client component
   // so the server and the browser agree on what "today" is.
   const day = leagueDay();
-  return <Dashboard live={live} qotd={questionOfTheDay(day)} day={day} />;
+  return (
+    <Dashboard live={live} qotd={questionOfTheDay(day)} day={day} questionCount={QUESTIONS.length} catalog={pathCatalog()} />
+  );
 }

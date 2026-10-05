@@ -3,52 +3,21 @@ import Link from "next/link";
 import AppNav from "@/components/app-nav";
 import PassTag from "@/components/pass-tag";
 import PrepPassBridge from "@/components/prep-pass-bridge";
-import PrepArt, { hasPrepArt, type PrepArtId } from "@/components/prep-art";
+import PrepArt, { type PrepArtId } from "@/components/prep-art";
+import AnalystPath from "@/components/analyst-path";
+import { pathCatalog } from "@/lib/analyst-path-catalog";
 import { ANALYST_FORMATS, ANALYST_MC } from "@/lib/analyst-screen";
 import { challengeTasks } from "@/lib/data-challenge";
-import { PATTERNS, questionsFor } from "@/lib/interview-patterns";
 import { MOCK_FORMATS } from "@/lib/mock-interview";
 import { QUESTIONS } from "@/lib/questions";
 
 export const metadata: Metadata = {
-  title: "Hiring prep — DataDraft",
+  title: "The analyst path — DataDraft",
   description:
-    "The analyst hiring funnel in order: drill the nine SQL patterns, then a timed online assessment, a live SQL screen, and a take-home. Practise each stage on real NFL data.",
+    "Four steps from your first query to interview-ready, on real NFL data: SQL foundations, the nine patterns screens test, mock screens against the clock, and a portfolio piece built on your own fantasy league.",
 };
 
 const CARD = "surface rounded-2xl border border-panel-border bg-panel";
-
-/** Where to go — one lane, left to right. */
-const PATH = [
-  {
-    n: "0",
-    label: "Drill patterns",
-    href: "#patterns",
-    note: "The nine SQL moves screens keep testing",
-    tone: "ice" as const,
-  },
-  {
-    n: "1",
-    label: "Online assessment",
-    href: "/questions/screen",
-    note: "Timed OA before a human",
-    tone: "turf" as const,
-  },
-  {
-    n: "2",
-    label: "SQL screen",
-    href: "/questions/mock",
-    note: "Live round, against the clock",
-    tone: "gold" as const,
-  },
-  {
-    n: "3",
-    label: "Take-home",
-    href: "/projects/challenge",
-    note: "Messy data, a recommendation",
-    tone: "ice" as const,
-  },
-];
 
 export default function HiringPrepPage() {
   const sql = QUESTIONS.filter((q) => q.lang === "sql").length;
@@ -107,167 +76,26 @@ export default function HiringPrepPage() {
       <main className="mx-auto min-h-screen w-full max-w-5xl px-4 pb-24 pt-8 sm:px-6">
         <div className="text-center">
           <p className="label-broadcast text-turf">hiring prep</p>
-          <h1 className="mt-2 font-display text-3xl font-bold text-ink sm:text-5xl">
-            The funnel, in order
-          </h1>
+          <h1 className="mt-2 font-display text-3xl font-bold text-ink sm:text-5xl">The analyst path</h1>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-ink-soft sm:text-base">
-            Most analyst hiring runs the same three stages. Drill the patterns first, then practise each stage on the
-            same real NFL data the rest of the site uses. These are our own rubrics, not any company&apos;s tests.
+            Four steps from your first query to interview-ready, all on the same real NFL data. Your progress is
+            ticked as you go. Already past a step? It ticks itself, or skip it.
           </p>
         </div>
 
-        {/* ── Where to go ──────────────────────────────────── */}
-        <nav
-          aria-label="Prep path"
-          className={`${CARD} mt-8 overflow-hidden border-gold/30 bg-gold/5 p-4 sm:p-5`}
-        >
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <p className="label-broadcast text-gold">your path · follow this</p>
-            <Link
-              href="/learn/arcade"
-              className="font-mono text-[10px] uppercase tracking-widest text-ink-muted hover:text-gold"
-            >
-              Warm up in the Arcade →
-            </Link>
-          </div>
-          <ol className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            {PATH.map((p, i) => (
-              <li key={p.label} className="relative">
-                <Link
-                  href={p.href}
-                  className={`lift flex h-full flex-col rounded-xl border border-panel-border bg-panel p-3.5 transition-colors hover:border-gold/50`}
-                >
-                  <span className="flex items-center gap-2">
-                    <span
-                      className={`flex h-7 w-7 items-center justify-center rounded-full font-mono text-[11px] font-bold ${
-                        p.tone === "gold"
-                          ? "bg-gold/20 text-gold"
-                          : p.tone === "turf"
-                            ? "bg-turf/20 text-turf"
-                            : "bg-ice/20 text-ice"
-                      }`}
-                    >
-                      {p.n}
-                    </span>
-                    <span className="font-display text-base font-bold text-ink">{p.label}</span>
-                  </span>
-                  <span className="mt-1.5 text-xs leading-snug text-ink-soft">{p.note}</span>
-                </Link>
-                {i < PATH.length - 1 && (
-                  <span
-                    aria-hidden
-                    className="absolute -right-1 top-1/2 hidden -translate-y-1/2 font-mono text-ink-muted lg:block"
-                  >
-                    →
-                  </span>
-                )}
-              </li>
-            ))}
-          </ol>
-          <p className="mt-4 text-center text-xs leading-relaxed text-ink-muted sm:text-left">
-            New to SQL? Start in{" "}
-            <Link href="/learn" className="font-semibold text-turf hover:underline">
-              Courses
-            </Link>
-            , then come back. Just want a daily habit?{" "}
-            <Link href="/questions" className="font-semibold text-gold hover:underline">
-              Today&apos;s question
-            </Link>
-            {" · "}
-            <Link href="/questions/duel" className="font-semibold text-gold hover:underline">
-              Stat Duel
-            </Link>
-            .
-          </p>
-        </nav>
-
-        {/* ── Patterns (before the funnel) ─────────────────── */}
-        <section id="patterns" className="mt-10 scroll-mt-20">
-          <div className="relative overflow-hidden rounded-3xl border border-ice/40 bg-panel">
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_20%_0%,rgb(var(--c-ice)/0.18),transparent_55%),radial-gradient(ellipse_70%_50%_at_90%_100%,rgb(var(--c-gold)/0.12),transparent_50%)]"
-            />
-            <div className="relative border-b border-panel-border px-5 py-6 sm:px-8 sm:py-8">
-              <div className="flex flex-wrap items-end justify-between gap-4">
-                <div className="max-w-xl">
-                  <p className="label-broadcast text-ice">before you sit any of them</p>
-                  <h2 className="mt-2 font-display text-2xl font-bold text-ink sm:text-4xl">
-                    Drill the patterns underneath
-                  </h2>
-                  <p className="mt-3 text-sm leading-relaxed text-ink-soft sm:text-base">
-                    Screens keep testing the same {PATTERNS.length} SQL patterns. The bank groups its{" "}
-                    <span className="font-semibold text-ink">{sql} SQL questions</span> by pattern, with your
-                    progress on each. Tap a picture to open that set.
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Link href="/sql-interview-questions" className="press btn-turf text-sm">
-                    A guide to each →
-                  </Link>
-                  <Link
-                    href="/learn/arcade"
-                    className="rounded-xl border border-gold/50 bg-gold/10 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-wider text-gold hover:bg-gold/20"
-                  >
-                    Pattern Call game →
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            <ul className="relative grid grid-cols-2 gap-px bg-panel-border sm:grid-cols-3">
-              {PATTERNS.map((p) => {
-                const n = questionsFor(p).length;
-                const artId = hasPrepArt(p.id) ? p.id : null;
-                return (
-                  <li key={p.id} className="bg-panel">
-                    <Link
-                      href={`/questions?pattern=${p.id}#interview`}
-                      className="group flex h-full flex-col outline-none transition-colors hover:bg-ice/5 focus-visible:bg-ice/10"
-                    >
-                      <span className="relative block aspect-[5/3] overflow-hidden border-b border-panel-border bg-night/50">
-                        {artId && (
-                          <PrepArt
-                            id={artId}
-                            className="h-full w-full transition-transform duration-500 group-hover:scale-105"
-                          />
-                        )}
-                        <span className="absolute bottom-2 right-2 rounded-full border border-night/40 bg-night/80 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-gold">
-                          {n} Qs
-                        </span>
-                      </span>
-                      <span className="flex flex-1 flex-col p-3 sm:p-4">
-                        <span className="font-display text-sm font-bold text-ink sm:text-base group-hover:text-ice">
-                          {p.name}
-                        </span>
-                        <span className="mt-1 line-clamp-2 text-xs leading-snug text-ink-soft">{p.asks}</span>
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-
-            <div className="relative flex flex-wrap items-center justify-between gap-3 border-t border-panel-border px-5 py-4 sm:px-8">
-              <p className="text-xs text-ink-muted sm:text-sm">
-                Filtering · grouping · joins · CASE · CTEs · ranking · running totals · dates · NULLs
-              </p>
-              <Link
-                href="/questions"
-                className="font-mono text-[11px] font-bold uppercase tracking-wider text-ice hover:underline"
-              >
-                Full question bank →
-              </Link>
-            </div>
-          </div>
-        </section>
+        <div className="mt-8">
+          <AnalystPath catalog={pathCatalog()} />
+        </div>
 
         {/* ── The three stages ─────────────────────────────── */}
         <div className="mt-12">
-          <p className="label-broadcast text-gold">then sit the funnel</p>
+          <p className="label-broadcast text-gold">what each round is like</p>
           <h2 className="mt-1 font-display text-2xl font-bold text-ink sm:text-3xl">
-            Three stages. Same data. Real clock.
+            Most analyst hiring runs three stages
           </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-soft">
+            Practise each one here. These are our own rubrics, not any company&apos;s tests.
+          </p>
         </div>
 
         <ol className="mt-6 space-y-5">
@@ -296,20 +124,6 @@ export default function HiringPrepPage() {
 
         <PrepPassBridge />
 
-        <p className="mt-10 text-center text-sm text-ink-muted">
-          Lost?{" "}
-          <Link href="/welcome" className="font-semibold text-gold hover:underline">
-            Map of the site
-          </Link>
-          {" · "}
-          <Link href="/dashboard" className="font-semibold text-turf hover:underline">
-            Your locker
-          </Link>
-          {" · "}
-          <Link href="/questions/prep#patterns" className="font-semibold text-ice hover:underline">
-            Back to patterns
-          </Link>
-        </p>
       </main>
     </>
   );

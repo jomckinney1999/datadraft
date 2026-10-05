@@ -30,6 +30,7 @@ import {
   type LeagueData,
 } from "@/lib/league-load";
 import { SITE_URL } from "@/lib/site";
+import { markPath } from "@/lib/analyst-path";
 
 const USER_KEY = "sqlsports.league.sleeper";
 // Every season Sleeper has run (it launched in 2017), newest first. Before
@@ -213,6 +214,8 @@ export default function LeagueLab() {
     dbRef.current = db;
     setData(d);
     run(PRESETS[0].sql, PRESETS[0]);
+    // Ticks "load your league" on the analyst path (lib/analyst-path.ts).
+    markPath({ leagueLoaded: new Date().toISOString().slice(0, 10) });
   }
 
   async function pick(league: SleeperLeague) {

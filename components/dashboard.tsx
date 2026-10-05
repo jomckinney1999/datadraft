@@ -30,8 +30,9 @@ import { displayStreak, EMPTY_PROGRESS, loadProgress, type Progress } from "@/li
 import { BADGES, isEarned, nextEnshrinement, statsFrom } from "@/lib/achievements";
 import { SHORT_CREDIT } from "@/lib/data-source";
 import { weekCaveat, type LiveBoard, type LivePerformer, type LiveWeek } from "@/lib/live-nfl";
-import { QUESTIONS, type Question } from "@/lib/questions";
+import type { Question } from "@/lib/questions";
 import UseCases from "@/components/use-cases";
+import { analystPath, currentStep, readPathInputs, type PathCatalog } from "@/lib/analyst-path";
 import QotdCard from "@/components/qotd-card";
 import DuelCard from "@/components/duel-card";
 import { TourButton } from "@/components/welcome-tour";
@@ -54,17 +55,26 @@ export default function Dashboard({
   live,
   qotd,
   day,
+  questionCount,
+  catalog,
 }: {
   live: LiveWeek | null;
   qotd: Question;
   day: string;
+  /** Counted on the server, so the bank isn't bundled to print one number. */
+  questionCount: number;
+  catalog: PathCatalog;
 }) {
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
   const [hydrated, setHydrated] = useState(false);
+  const [path, setPath] = useState<{ step: number; of: number; title: string } | "done" | null>(null);
 
   useEffect(() => {
     setProgress(loadProgress());
     setHydrated(true);
+    const steps = analystPath(readPathInputs(), catalog);
+    const now = currentStep(steps);
+    setPath(now ? { step: steps.indexOf(now) + 1, of: steps.length, title: now.title } : "done");
   }, []);
 
   const done = new Set(progress.completedLessons);
@@ -241,8 +251,9 @@ export default function Dashboard({
         <div style={{ ["--i" as string]: 2 }}>
           <UseCases
             className="mt-8"
-            questionCount={QUESTIONS.length}
+            questionCount={questionCount}
             qotdId={qotd.id}
+            path={path}
             course={
               hydrated && upNext?.nextLessonId && stats.lessonsDone > 0
                 ? { href: `/learn/${upNext.nextLessonId}`, label: `Continue ${upNext.title}` }

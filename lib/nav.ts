@@ -50,7 +50,7 @@ export const NAV: NavSection[] = [
         items: [
           { href: "/questions", label: "Question bank", blurb: "Today's question, and the whole bank in SQL, Python, R and Excel", badge: "Daily" },
           { href: "/sql-interview-questions", label: "Interview patterns", blurb: "The nine SQL patterns analyst screens test, with a guide to each" },
-          { href: "/questions/prep", label: "Hiring prep", blurb: "Drill the nine patterns, then OA → SQL screen → take-home", badge: "Pass" },
+          { href: "/questions/prep", label: "Analyst path", blurb: "Four steps to interview-ready, with your progress ticked", badge: "Pass" },
           { href: "/questions/screen", label: "Analyst Screen", blurb: "A timed online assessment: SQL plus stats, wrangling and A/B", badge: "Pass" },
           { href: "/questions/mock", label: "Mock SQL screens", blurb: "A timed phone or technical screen, then a report", badge: "Pass" },
         ],

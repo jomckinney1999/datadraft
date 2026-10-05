@@ -48,6 +48,7 @@ export default function UseCases({
   questionCount,
   qotdId,
   course,
+  path = null,
   className = "",
 }: {
   questionCount: number;
@@ -55,6 +56,8 @@ export default function UseCases({
   qotdId: string;
   /** Where "follow a course" should go: your next lesson, or lesson one. */
   course: { href: string; label: string };
+  /** Where you are on the analyst path, when the page knows (lib/analyst-path.ts). */
+  path?: { step: number; of: number; title: string } | "done" | null;
   className?: string;
 }) {
   const cases: UseCase[] = [
@@ -100,9 +103,14 @@ export default function UseCases({
     {
       id: "interview",
       title: "Interview prep",
-      pitch: "The nine SQL patterns analyst screens test, then timed mock screens and real cases, in the order hiring runs.",
+      pitch:
+        path === "done"
+          ? "You've finished the analyst path. Keep sharp with mock screens and the daily question."
+          : path
+            ? `The analyst path, step ${path.step} of ${path.of}: ${path.title.toLowerCase()}. Pick up where you left off.`
+            : "The analyst path: SQL foundations, the nine patterns screens test, mock screens, then a portfolio piece. Four steps, ticked as you go.",
       bestFor: "Best if you're applying for analyst roles.",
-      primary: { href: "/questions/prep", label: "Hiring prep" },
+      primary: { href: "/questions/prep", label: path && path !== "done" ? "Continue the path" : "The analyst path" },
       more: [
         { href: "/sql-interview-questions", label: "Pattern guides" },
         { href: "/questions/mock", label: "Mock screens" },

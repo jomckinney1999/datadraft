@@ -738,6 +738,39 @@ let guidesChecked = 0;
   }
 }
 
+// ── The analyst path ──────────────────────────────────────────
+// Its catalog has lessons and enough questions per pattern to tick, a fresh
+// learner starts on step one, and a learner who has done everything is
+// done (lib/analyst-path.ts).
+let pathChecks = 0;
+{
+  const ap = await loadProjectTs(path.join(root, "lib/analyst-path.ts"), root);
+  const cat = (await loadProjectTs(path.join(root, "lib/analyst-path-catalog.ts"), root)).pathCatalog();
+  pathChecks++;
+  if (!cat.lessons.length) problems.push("Analyst path: SQL Fundamentals has no live lessons");
+  for (const p of cat.patterns) {
+    pathChecks++;
+    if (p.questions.length < ap.PER_PATTERN) {
+      problems.push(`Analyst path: pattern "${p.name}" has ${p.questions.length} questions, fewer than the ${ap.PER_PATTERN} the path asks for`);
+    }
+  }
+  const fresh = ap.analystPath({ completedLessons: [], solvedQuestions: [], mocks: [], screens: [], challengeSolved: 0, marks: {} }, cat);
+  if (ap.currentStep(fresh)?.id !== "foundations") problems.push("Analyst path: a fresh learner doesn't start on Foundations");
+  const all = ap.analystPath(
+    {
+      completedLessons: cat.lessons,
+      solvedQuestions: cat.sqlQuestions,
+      mocks: [{ format: "phone", solved: 2, of: 2 }, { format: "technical", solved: 3, of: 3 }],
+      screens: [],
+      challengeSolved: 0,
+      marks: { leagueLoaded: "2026-10-05", portfolio: true },
+    },
+    cat,
+  );
+  pathChecks++;
+  if (ap.currentStep(all) !== null) problems.push(`Analyst path: everything done still leaves "${ap.currentStep(all)?.title}" open`);
+}
+
 // ── Film Room ─────────────────────────────────────────────────
 // Every SQL answer can be replayed clause by clause (lib/sql-steps.ts). Each
 // step has to run on its own, and the last has to land on the key's result,
@@ -934,6 +967,7 @@ console.log(`stat duel rounds checked  : ${duelChecked} (180 days from launch, n
 console.log(`draft room checks         : ${draftChecked} (scouting presets per season, drafts from every slot)`);
 console.log(`query doctor cases        : ${doctorChecked} (known wrong answers, the diagnosis a tutor would lead with)`);
 console.log(`pattern guides            : ${guidesChecked} (one per interview pattern, each example in its pattern)`);
+console.log(`analyst path checks       : ${pathChecks} (catalog, patterns tickable, fresh and finished learners)`);
 console.log(`film room steps           : ${filmSteps} (every SQL answer replayed clause by clause, each step run)`);
 
 if (problems.length === 0) {
