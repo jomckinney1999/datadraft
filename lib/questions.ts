@@ -151,7 +151,27 @@ export type QuestionArt =
   | "spring"
   | "speedometer"
   | "elevator"
-  | "spirit-level";
+  | "spirit-level"
+  | "trash-can"
+  | "crunch-clock"
+  | "mug"
+  | "draft-board"
+  | "beach-umbrella"
+  | "winged-shoes"
+  | "shelf"
+  | "spare-tire"
+  | "vinyl"
+  | "growth-chart"
+  | "face-off"
+  | "pile"
+  | "pillow"
+  | "u-turn"
+  | "tackle-dummy"
+  | "robin"
+  | "road-trip"
+  | "halfway"
+  | "desk-fan"
+  | "empty-seats";
 
 export type Question = {
   id: string;
@@ -2624,6 +2644,622 @@ LIMIT 5;`,
     explain:
       "That formula is the population variance, and its square root is the standard deviation. A low variance means a player's floor and ceiling are close together — steady, whatever his average.",
     art: "spirit-level",
+  },
+  // ── Batch 3 (2026-10-05): joins across rosters, games and week_results,
+  // date gaps, gaps and islands, and longer CTE chains. ─────────────────
+  {
+    id: "garbage-time",
+    title: "Garbage Time",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["JOIN", "CASE", "Conditional aggregation", "HAVING"],
+    prompt:
+      "Garbage time is the end of a game that's already decided, when the losing team keeps throwing and the stat sheet keeps filling up. For 2025, find the players who averaged more points in their team's losses than in its wins, counting players with at least three of each.",
+    returns: "player, win_ppg, loss_ppg (both rounded to 1 decimal) — biggest gap (loss_ppg minus win_ppg) first, then player A–Z.",
+    tables: ["week_results", "games"],
+    expected: `WITH pg AS (
+  SELECT w.player, w.fantasy_pts,
+         CASE WHEN (w.team = g.home_team AND g.home_score > g.away_score)
+                OR (w.team = g.away_team AND g.away_score > g.home_score)
+              THEN 'win' ELSE 'loss' END AS result
+  FROM week_results w
+  JOIN games g ON g.season = w.season AND g.week = w.week
+              AND w.team IN (g.home_team, g.away_team)
+  WHERE w.season = 2025
+)
+SELECT player,
+       ROUND(AVG(CASE WHEN result = 'win' THEN fantasy_pts END), 1) AS win_ppg,
+       ROUND(AVG(CASE WHEN result = 'loss' THEN fantasy_pts END), 1) AS loss_ppg
+FROM pg
+GROUP BY player
+HAVING SUM(result = 'win') >= 3 AND SUM(result = 'loss') >= 3
+   AND AVG(CASE WHEN result = 'loss' THEN fantasy_pts END) > AVG(CASE WHEN result = 'win' THEN fantasy_pts END)
+ORDER BY loss_ppg - win_ppg DESC, player;`,
+    orderMatters: true,
+    hint: "Join each stat line to its game on season, week and team. His team won if it was home and home_score > away_score, or away and away_score > home_score, so a CASE can label every row 'win' or 'loss'. Average with a CASE inside AVG, and compare the two averages in HAVING.",
+    explain:
+      "A condition on an aggregate belongs in HAVING, because WHERE runs before the groups exist. This one carries three: enough wins, enough losses, and the comparison itself. Sam LaPorta tops it by a distance: his best days came when his team was losing.",
+    art: "trash-can",
+  },
+  {
+    id: "crunch-time",
+    title: "Crunch Time",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["JOIN", "WHERE", "ABS", "HAVING"],
+    prompt:
+      "A one-score game is one decided by eight points or fewer, either way. Who keeps producing when it's tight? For 2025, find each player's points per game in one-score games, counting players with at least four of them.",
+    returns: "player, close_games, close_ppg (rounded to 1 decimal) — best close_ppg first, then player A–Z. Five rows.",
+    tables: ["week_results", "games"],
+    expected: `SELECT w.player,
+       COUNT(*) AS close_games,
+       ROUND(AVG(w.fantasy_pts), 1) AS close_ppg
+FROM week_results w
+JOIN games g ON g.season = w.season AND g.week = w.week
+            AND w.team IN (g.home_team, g.away_team)
+WHERE w.season = 2025 AND ABS(g.home_score - g.away_score) <= 8
+GROUP BY w.player
+HAVING COUNT(*) >= 4
+ORDER BY close_ppg DESC, w.player
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "The margin is home_score - away_score, and it's negative when the away team won. ABS(home_score - away_score) <= 8 keeps the close games whichever side won them.",
+    explain:
+      "ABS turns a signed difference into a size. Filter on home_score - away_score <= 8 without it and every road blowout sneaks in, because those margins are negative.",
+    art: "crunch-clock",
+  },
+  {
+    id: "manager-of-the-week",
+    title: "Manager of the Week",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["JOIN", "CTE", "RANK", "PARTITION BY"],
+    prompt:
+      "Every week the league chat crowns whoever put up the most points. Using the 2024 rosters, total each fantasy team's points for every week, crown the top team each week (a tie would crown both), and count the crowns. A team that never topped a week doesn't appear.",
+    returns: "team_name, weeks_on_top — most first, then team_name A–Z.",
+    tables: ["rosters", "week_results"],
+    expected: `WITH weekly AS (
+  SELECT r.team_name, w.week, SUM(w.fantasy_pts) AS team_pts
+  FROM rosters r
+  JOIN week_results w ON w.player = r.player AND w.season = 2024
+  GROUP BY r.team_name, w.week
+),
+ranked AS (
+  SELECT team_name, week,
+         RANK() OVER (PARTITION BY week ORDER BY team_pts DESC) AS rk
+  FROM weekly
+)
+SELECT team_name, COUNT(*) AS weeks_on_top
+FROM ranked
+WHERE rk = 1
+GROUP BY team_name
+ORDER BY weeks_on_top DESC, team_name;`,
+    orderMatters: true,
+    hint: "Build it in steps. A CTE of weekly team totals, then RANK() OVER (PARTITION BY week ORDER BY team_pts DESC), then count the rows where the rank is 1.",
+    explain:
+      "PARTITION BY restarts the ranking every week, so each week gets its own number one. RANK rather than ROW_NUMBER means a tied week crowns both teams instead of picking one arbitrarily.",
+    art: "mug",
+  },
+  {
+    id: "left-on-the-board",
+    title: "Left on the Board",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["LEFT JOIN", "Anti-join", "GROUP BY"],
+    prompt: `The 2024 league drafted ${FACTS.players - FACTS.league.undrafted} of the ${FACTS.players} players in the table. Which of the ${FACTS.league.undrafted} nobody picked would have been worth a roster spot? List every undrafted player with his 2024 total.`,
+    returns: "player, position, total_pts (rounded to 1 decimal) — most points first, then player A–Z.",
+    tables: ["week_results", "rosters"],
+    expected: `SELECT w.player, w.position, ROUND(SUM(w.fantasy_pts), 1) AS total_pts
+FROM week_results w
+LEFT JOIN rosters r ON r.player = w.player
+WHERE w.season = 2024 AND r.player IS NULL
+GROUP BY w.player, w.position
+ORDER BY total_pts DESC, w.player;`,
+    orderMatters: true,
+    hint: "LEFT JOIN rosters on player and keep the rows where r.player IS NULL: those are the players with no match. Then total 2024 the usual way.",
+    explain:
+      "That's an anti-join: a LEFT JOIN that keeps only the rows that found nothing. NOT IN and NOT EXISTS give the same answer here. Quarterbacks lead the list because the draft spent every pick on running backs and receivers.",
+    art: "draft-board",
+  },
+  {
+    id: "two-weeks-off",
+    title: "Two Weeks Off",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["UNION ALL", "LAG", "Dates", "julianday"],
+    prompt:
+      "A bye usually means 14 days between games: Sunday to Sunday. A few 2025 teams waited longer. Find every gap of 15 days or more between one team's games.",
+    returns: "team, last_game, back_on, days_off — team A–Z.",
+    tables: ["games"],
+    expected: `WITH team_games AS (
+  SELECT home_team AS team, gameday FROM games WHERE season = 2025
+  UNION ALL
+  SELECT away_team, gameday FROM games WHERE season = 2025
+),
+gaps AS (
+  SELECT team,
+         LAG(gameday) OVER (PARTITION BY team ORDER BY gameday) AS last_game,
+         gameday AS back_on
+  FROM team_games
+)
+SELECT team, last_game, back_on,
+       julianday(back_on) - julianday(last_game) AS days_off
+FROM gaps
+WHERE julianday(back_on) - julianday(last_game) >= 15
+ORDER BY team;`,
+    orderMatters: true,
+    hint: "Every game has two teams, so stack them into one list first: SELECT home_team AS team, gameday … UNION ALL SELECT away_team, gameday …. Then LAG(gameday) OVER (PARTITION BY team ORDER BY gameday) gives each game the one before it, and julianday() turns two dates into a number of days.",
+    explain:
+      "Every one of them came back on a Monday night after a Sunday game. julianday() is how SQLite does date arithmetic: it turns a date into a day number, and subtracting two gives the days between them.",
+    art: "beach-umbrella",
+  },
+  {
+    id: "fresh-legs",
+    title: "Fresh Legs",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "LAG", "JOIN", "UNION ALL"],
+    prompt:
+      "Coaches say the bye week recharges a player. Look at 2025. A team's bye is the week it didn't play, so its first game back is two weeks after the game before it. For each player's first game back, compare what he scored with his 2025 average.",
+    returns: "player, week, after_bye_pts, season_ppg, diff (season_ppg and diff rounded to 1 decimal; diff is after_bye_pts minus season_ppg) — biggest diff first, then player A–Z. Five rows.",
+    tables: ["week_results", "games"],
+    expected: `WITH team_games AS (
+  SELECT home_team AS team, week FROM games WHERE season = 2025
+  UNION ALL
+  SELECT away_team, week FROM games WHERE season = 2025
+),
+back AS (
+  SELECT team, week
+  FROM (
+    SELECT team, week,
+           LAG(week) OVER (PARTITION BY team ORDER BY week) AS prev_week
+    FROM team_games
+  )
+  WHERE week - prev_week >= 2
+),
+ppg AS (
+  SELECT player, AVG(fantasy_pts) AS season_ppg
+  FROM week_results
+  WHERE season = 2025
+  GROUP BY player
+)
+SELECT w.player, w.week, w.fantasy_pts AS after_bye_pts,
+       ROUND(p.season_ppg, 1) AS season_ppg,
+       ROUND(w.fantasy_pts - p.season_ppg, 1) AS diff
+FROM week_results w
+JOIN back b ON b.team = w.team AND b.week = w.week
+JOIN ppg p ON p.player = w.player
+WHERE w.season = 2025
+ORDER BY diff DESC, w.player
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "Stack home and away teams into one list of (team, week), then LAG(week) OVER (PARTITION BY team ORDER BY week): where the week jumps by 2, that's a first game back. Join those team-weeks to week_results, and join a CTE of each player's 2025 average.",
+    explain:
+      "Events joined to baselines: one CTE finds the moments, another the normal level, and the join measures the difference. Only half the players beat their average coming off the bye, so these five are a list, not proof.",
+    art: "winged-shoes",
+  },
+  {
+    id: "on-the-shelf",
+    title: "On the Shelf",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["LAG", "Gaps and islands", "WHERE"],
+    prompt:
+      "Missed games aren't zeros in week_results, they're missing rows, so an injury shows up as a gap. Across the full seasons, 2022 to 2025, find the longest gaps between a player's games within one season.",
+    returns: "player, season, last_game_week, back_week, weeks_between (back_week minus last_game_week) — biggest gap first, then player A–Z, then season. Five rows.",
+    tables: ["week_results"],
+    expected: `WITH seq AS (
+  SELECT player, season, week,
+         LAG(week) OVER (PARTITION BY player, season ORDER BY week) AS prev_week
+  FROM week_results
+  WHERE season <= 2025
+)
+SELECT player, season, prev_week AS last_game_week, week AS back_week,
+       week - prev_week AS weeks_between
+FROM seq
+WHERE prev_week IS NOT NULL
+ORDER BY weeks_between DESC, player, season
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "LAG(week) OVER (PARTITION BY player, season ORDER BY week) puts each game next to the player's previous one that season. A season's first game has no previous one, so drop the NULLs.",
+    explain:
+      "This is gaps and islands: a run of rows with holes in it. A gap of 2 is just a bye; the big ones are injuries. A player whose season ended early never came back within it, so he has no gap here at all.",
+    art: "shelf",
+  },
+  {
+    id: "above-replacement",
+    title: "Above Replacement",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "Window", "PARTITION BY", "MIN"],
+    prompt:
+      "A player's value isn't his points, it's his points over whoever you'd start instead. Call the lowest 2025 total at each position in the table replacement level, and work out how far above it every player finished.",
+    returns: "player, position, total_pts, above_replacement (both rounded to 1 decimal) — most above_replacement first, then player A–Z. Five rows.",
+    tables: ["week_results"],
+    expected: `WITH totals AS (
+  SELECT player, position, SUM(fantasy_pts) AS total_pts
+  FROM week_results
+  WHERE season = 2025
+  GROUP BY player, position
+)
+SELECT player, position, ROUND(total_pts, 1) AS total_pts,
+       ROUND(total_pts - MIN(total_pts) OVER (PARTITION BY position), 1) AS above_replacement
+FROM totals
+ORDER BY above_replacement DESC, player
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "Total each player's 2025 points in a CTE. Then MIN(total_pts) OVER (PARTITION BY position) puts his position's lowest total on every row, and you subtract.",
+    explain:
+      "A window function puts a group's figure beside every row without collapsing them, which GROUP BY can't do. Receivers top this list because the lowest receiver total in the table is far below the lowest running back's: the floor you measure from decides the ranking.",
+    art: "spare-tire",
+  },
+  {
+    id: "one-hit-wonder",
+    title: "One-Hit Wonder",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["GROUP BY", "MAX", "SUM", "HAVING"],
+    prompt:
+      "Some season totals lean on one monster game. For 2025 players with at least ten games, what share of the season came from the single best one?",
+    returns: "player, best_game, season_total, best_share (season_total rounded to 1 decimal; best_share is a percentage, rounded to 1 decimal) — highest best_share first, then player A–Z. Five rows.",
+    tables: ["week_results"],
+    expected: `SELECT player,
+       MAX(fantasy_pts) AS best_game,
+       ROUND(SUM(fantasy_pts), 1) AS season_total,
+       ROUND(100.0 * MAX(fantasy_pts) / SUM(fantasy_pts), 1) AS best_share
+FROM week_results
+WHERE season = 2025
+GROUP BY player
+HAVING COUNT(*) >= 10
+ORDER BY best_share DESC, player
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "MAX and SUM can sit in the same SELECT over the same group: 100.0 * MAX(fantasy_pts) / SUM(fantasy_pts) is the share. The ten-game rule goes in HAVING.",
+    explain:
+      "Take Derrick Henry's best game away and his 2025 loses about a sixth of its points. A total that leans on one week is fragile, which is why analysts check medians and floors next to totals.",
+    art: "vinyl",
+  },
+  {
+    id: "growth-chart",
+    title: "Growth Chart",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "LAG", "HAVING"],
+    prompt:
+      "Who's still getting better? Using the full seasons, 2022 to 2025, find the players whose points per game went up every season they played, with at least three seasons to show for it.",
+    returns: "player, seasons, first_ppg, last_ppg (both rounded to 1 decimal: his earliest season's PPG and his latest) — player A–Z.",
+    tables: ["week_results"],
+    expected: `WITH ppg AS (
+  SELECT player, season, AVG(fantasy_pts) AS ppg
+  FROM week_results
+  WHERE season BETWEEN 2022 AND 2025
+  GROUP BY player, season
+),
+steps AS (
+  SELECT player, season, ppg,
+         LAG(ppg) OVER (PARTITION BY player ORDER BY season) AS prev_ppg
+  FROM ppg
+)
+SELECT player, COUNT(*) AS seasons,
+       ROUND(MIN(ppg), 1) AS first_ppg, ROUND(MAX(ppg), 1) AS last_ppg
+FROM steps
+GROUP BY player
+HAVING COUNT(*) >= 3 AND SUM(prev_ppg IS NOT NULL AND ppg <= prev_ppg) = 0
+ORDER BY player;`,
+    orderMatters: true,
+    hint: "PPG per player and season in a CTE, then LAG(ppg) OVER (PARTITION BY player ORDER BY season) puts last season beside this one. A player qualifies when no season fails to beat the one before: count the failures with SUM(...) in HAVING and keep the zeros.",
+    explain:
+      "'Every season' is a claim about all the rows, and SQL proves it by counting exceptions: SUM(condition) = 0. Because these players only went up, the lowest season is the first and the highest is the last, so MIN and MAX give you the endpoints.",
+    art: "growth-chart",
+  },
+  {
+    id: "face-off",
+    title: "Face-Off",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "Self-join", "JOIN"],
+    prompt:
+      "Sometimes two players from the table are in the same 2025 game, on opposite teams. Call each of those pairings a face-off, won by whoever scored more. Count each player's face-offs and how many he won. Two opponents in one game are two face-offs.",
+    returns: "player, faceoffs, won (a tie isn't a win) — most wins first, then fewest faceoffs, then player A–Z. Five rows.",
+    tables: ["week_results", "games"],
+    expected: `WITH pg AS (
+  SELECT w.player, w.fantasy_pts, g.game_id,
+         w.team = g.home_team AS is_home
+  FROM week_results w
+  JOIN games g ON g.season = w.season AND g.week = w.week
+              AND w.team IN (g.home_team, g.away_team)
+  WHERE w.season = 2025
+)
+SELECT a.player, COUNT(*) AS faceoffs,
+       SUM(a.fantasy_pts > b.fantasy_pts) AS won
+FROM pg a
+JOIN pg b ON b.game_id = a.game_id AND b.is_home <> a.is_home
+GROUP BY a.player
+ORDER BY won DESC, faceoffs, a.player
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "Give every player-game its game_id and whether he was the home side, in a CTE. Join that CTE to itself on the same game_id with opposite home flags. SUM(a.fantasy_pts > b.fantasy_pts) counts the wins.",
+    explain:
+      "A self-join pairs a table's rows with each other, and the ON clause is the pairing rule: same game, other side. Four of the top five are quarterbacks, which says more about fantasy scoring than about football. A fair fight would match positions.",
+    art: "face-off",
+  },
+  {
+    id: "pile-up",
+    title: "Pile-Up",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["GROUP BY", "SUM", "ORDER BY", "LIMIT"],
+    prompt:
+      "Which single day of the 2025 season put the most points on the board, counting every game played that day?",
+    returns: "gameday, weekday, games, total_points (both teams' scores, every game that day) — one row.",
+    tables: ["games"],
+    expected: `SELECT gameday, weekday, COUNT(*) AS games,
+       SUM(home_score + away_score) AS total_points
+FROM games
+WHERE season = 2025
+GROUP BY gameday, weekday
+ORDER BY total_points DESC
+LIMIT 1;`,
+    orderMatters: true,
+    hint: "GROUP BY gameday. SUM(home_score + away_score) gives the points and COUNT(*) the games; then ORDER BY the total, biggest first, and LIMIT 1.",
+    explain:
+      "Grouping by a date turns a list of games into a list of days. A Sunday wins easily because that's when most games are played; divide by the number of games if you wanted the best day per game instead.",
+    art: "pile",
+  },
+  {
+    id: "snooze-fest",
+    title: "Snooze Fest",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["ORDER BY", "LIMIT"],
+    prompt:
+      "Not every game is a shootout. Find the three lowest-scoring games of 2025, counting both teams' points together.",
+    returns: "week, away_team, home_team, away_score, home_score, total_points — lowest total first, then week, then home_team A–Z. Three rows.",
+    tables: ["games"],
+    expected: `SELECT week, away_team, home_team, away_score, home_score,
+       away_score + home_score AS total_points
+FROM games
+WHERE season = 2025
+ORDER BY total_points, week, home_team
+LIMIT 3;`,
+    orderMatters: true,
+    hint: "Add the two scores in SELECT and name it total_points. ORDER BY it, smallest first, then by week and home_team for the tie-break, and LIMIT 3.",
+    explain:
+      "Two of these games finished on the same total in the same week, so without a tie-break their order is up to the database. Writing the tie-break into ORDER BY makes the answer the same every time.",
+    art: "pillow",
+  },
+  {
+    id: "turnaround",
+    title: "Turnaround",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["UNION ALL", "CTE", "Self-join"],
+    prompt:
+      "Which offenses got better from 2024 to 2025? Compare each team's points scored per game across the two seasons.",
+    returns: "team, ppg_2024, ppg_2025, change (all rounded to 1 decimal; change is 2025 minus 2024) — biggest change first, then team A–Z. Five rows.",
+    tables: ["games"],
+    expected: `WITH tg AS (
+  SELECT season, home_team AS team, home_score AS pts FROM games WHERE season IN (2024, 2025)
+  UNION ALL
+  SELECT season, away_team, away_score FROM games WHERE season IN (2024, 2025)
+),
+ppg AS (
+  SELECT team, season, AVG(pts) AS ppg FROM tg GROUP BY team, season
+)
+SELECT a.team, ROUND(a.ppg, 1) AS ppg_2024, ROUND(b.ppg, 1) AS ppg_2025,
+       ROUND(b.ppg - a.ppg, 1) AS change
+FROM ppg a
+JOIN ppg b ON b.team = a.team AND b.season = 2025
+WHERE a.season = 2024
+ORDER BY change DESC, a.team
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "A team's points are home_score when it's home and away_score when it's away, so stack them with UNION ALL. Average per team and season, then join the 2024 rows to the 2025 rows on team.",
+    explain:
+      "Stacking is the move whenever a table keeps one thing in two columns. After that, two seasons side by side is a self-join: the same CTE twice, once for each year.",
+    art: "u-turn",
+  },
+  {
+    id: "pushover",
+    title: "Pushover",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["JOIN", "CASE", "GROUP BY", "HAVING"],
+    prompt:
+      "Before you start a running back, you check who he's facing. Which 2025 defenses gave up the most fantasy points to the running backs in the table? A player's opponent is whichever team in his game isn't his own. Only count defenses that faced at least three of these backs' games.",
+    returns: "defense, rb_games, rb_ppg_allowed (rounded to 1 decimal) — most allowed first, then defense A–Z. Five rows.",
+    tables: ["week_results", "games"],
+    expected: `SELECT CASE WHEN w.team = g.home_team THEN g.away_team ELSE g.home_team END AS defense,
+       COUNT(*) AS rb_games,
+       ROUND(AVG(w.fantasy_pts), 1) AS rb_ppg_allowed
+FROM week_results w
+JOIN games g ON g.season = w.season AND g.week = w.week
+            AND w.team IN (g.home_team, g.away_team)
+WHERE w.season = 2025 AND w.position = 'RB'
+GROUP BY defense
+HAVING COUNT(*) >= 3
+ORDER BY rb_ppg_allowed DESC, defense
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "Join each stat line to its game. CASE WHEN w.team = g.home_team THEN g.away_team ELSE g.home_team END is the opponent. Keep the RBs in WHERE and group by that CASE.",
+    explain:
+      "You can group by an expression, not just a column: here, the CASE that names the opponent. That's how a matchup chart is built. With three or four games per defense, treat it as a lead, not a verdict.",
+    art: "tackle-dummy",
+  },
+  {
+    id: "round-robin",
+    title: "Round Robin",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "CROSS JOIN", "LEFT JOIN", "COALESCE", "Self-join"],
+    prompt:
+      "Head-to-head luck decides fantasy leagues. An all-play record takes the luck out: every week, each team plays every other team. Run it on the 2024 league. A team whose players all sat out a week still plays that week, on zero points.",
+    returns: "team_name, wins, losses, ties — most wins first, then team_name A–Z.",
+    tables: ["rosters", "week_results", "games"],
+    expected: `WITH weeks AS (
+  SELECT DISTINCT week FROM games WHERE season = 2024
+),
+teams AS (
+  SELECT DISTINCT team_name FROM rosters
+),
+weekly AS (
+  SELECT t.team_name, k.week, COALESCE(SUM(w.fantasy_pts), 0) AS pts
+  FROM teams t
+  CROSS JOIN weeks k
+  JOIN rosters r ON r.team_name = t.team_name
+  LEFT JOIN week_results w ON w.player = r.player AND w.season = 2024 AND w.week = k.week
+  GROUP BY t.team_name, k.week
+)
+SELECT a.team_name,
+       SUM(a.pts > b.pts) AS wins,
+       SUM(a.pts < b.pts) AS losses,
+       SUM(a.pts = b.pts) AS ties
+FROM weekly a
+JOIN weekly b ON b.week = a.week AND b.team_name <> a.team_name
+GROUP BY a.team_name
+ORDER BY wins DESC, a.team_name;`,
+    orderMatters: true,
+    hint: "Build a grid first: every team CROSS JOIN every 2024 week (from games), then LEFT JOIN the team's players' stat lines and COALESCE the sum to 0. Join that grid to itself on week with a different team_name, and SUM the comparisons.",
+    explain:
+      "Some 2024 weeks a team had nobody play: no rows, so no score. Skip the grid and those weeks vanish instead of counting as losses, and the records come out wrong with no error to warn you. All-play is the 'Who's actually good?' chart in the League Scorecard project.",
+    art: "robin",
+  },
+  {
+    id: "road-trip",
+    title: "Road Trip",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["UNION ALL", "ROW_NUMBER", "Gaps and islands", "CTE"],
+    prompt:
+      "Three road games in a row is a long time living out of a suitcase. Find every run of three or more consecutive road games a team played in 2025. A bye in the middle doesn't break a run: it's games in a row, not weeks.",
+    returns: "team, first_game, last_game, road_games (the gamedays the trip started and ended) — most road_games first, then first_game, then team A–Z.",
+    tables: ["games"],
+    expected: `WITH team_games AS (
+  SELECT home_team AS team, gameday, 'home' AS side FROM games WHERE season = 2025
+  UNION ALL
+  SELECT away_team, gameday, 'away' FROM games WHERE season = 2025
+),
+numbered AS (
+  SELECT team, gameday, side,
+         ROW_NUMBER() OVER (PARTITION BY team ORDER BY gameday)
+       - ROW_NUMBER() OVER (PARTITION BY team, side ORDER BY gameday) AS grp
+  FROM team_games
+)
+SELECT team, MIN(gameday) AS first_game, MAX(gameday) AS last_game, COUNT(*) AS road_games
+FROM numbered
+WHERE side = 'away'
+GROUP BY team, grp
+HAVING COUNT(*) >= 3
+ORDER BY road_games DESC, first_game, team;`,
+    orderMatters: true,
+    hint: "Stack home and away into (team, gameday, side). Then the gaps-and-islands trick: ROW_NUMBER() OVER (PARTITION BY team ORDER BY gameday) minus ROW_NUMBER() OVER (PARTITION BY team, side ORDER BY gameday) stays the same along an unbroken run. Group the road games by team and that difference.",
+    explain:
+      "The difference of two row numbers holds steady while a run continues and jumps when it breaks, so it labels each island. It's the standard way to find streaks in SQL: winning runs, login streaks, anything in a row.",
+    art: "road-trip",
+  },
+  {
+    id: "halfway-there",
+    title: "Halfway There",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["Running total", "Window", "PARTITION BY", "CTE"],
+    prompt:
+      "Some seasons are front-loaded and some arrive late. For each 2025 player with at least ten games, find the week his running total first reached half of his season total.",
+    returns: "player, season_total (rounded to 1 decimal), halfway_week — latest halfway_week first, then player A–Z. Five rows.",
+    tables: ["week_results"],
+    expected: `WITH run AS (
+  SELECT player, week,
+         SUM(fantasy_pts) OVER (PARTITION BY player ORDER BY week) AS so_far,
+         SUM(fantasy_pts) OVER (PARTITION BY player) AS season_total,
+         COUNT(*) OVER (PARTITION BY player) AS games
+  FROM week_results
+  WHERE season = 2025
+)
+SELECT player, ROUND(season_total, 1) AS season_total, MIN(week) AS halfway_week
+FROM run
+WHERE games >= 10 AND so_far >= season_total / 2
+GROUP BY player, season_total
+ORDER BY halfway_week DESC, player
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "Two windows on the same rows. SUM(fantasy_pts) OVER (PARTITION BY player ORDER BY week) is the running total; SUM(fantasy_pts) OVER (PARTITION BY player), with no ORDER BY, is the whole season. Keep the rows where the first is at least half the second, then take MIN(week) per player.",
+    explain:
+      "ORDER BY inside OVER is what makes a sum run; leave it out and the window is the whole partition. A late halfway week means a back-loaded season or games missed early, so check which before you call it a hot finish.",
+    art: "halfway",
+  },
+  {
+    id: "cool-down",
+    title: "Cool Down",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["LEAD", "Window", "Subquery"],
+    prompt:
+      "After a 30-point game, everyone wants to start him again. What does he do next? Across the full seasons, 2022 to 2025, take every 30-point game that has a next game in the same season, and compare it with that next game.",
+    returns: "big_games, avg_big_game, avg_next_game, avg_any_game (the average of every game 2022–2025) — averages rounded to 1 decimal. One row.",
+    tables: ["week_results"],
+    expected: `WITH nxt AS (
+  SELECT fantasy_pts,
+         LEAD(fantasy_pts) OVER (PARTITION BY player, season ORDER BY week) AS next_pts
+  FROM week_results
+  WHERE season BETWEEN 2022 AND 2025
+)
+SELECT COUNT(*) AS big_games,
+       ROUND(AVG(fantasy_pts), 1) AS avg_big_game,
+       ROUND(AVG(next_pts), 1) AS avg_next_game,
+       (SELECT ROUND(AVG(fantasy_pts), 1) FROM week_results WHERE season BETWEEN 2022 AND 2025) AS avg_any_game
+FROM nxt
+WHERE fantasy_pts >= 30 AND next_pts IS NOT NULL;`,
+    orderMatters: true,
+    hint: "LEAD(fantasy_pts) OVER (PARTITION BY player, season ORDER BY week) is the next game's points. Filter to the 30-point games that have one, and get avg_any_game from a subquery in SELECT.",
+    explain:
+      "The game after a big one averages what any game averages. That's regression to the mean: a 30-point week is mostly a good player on a lucky day, and the luck doesn't come with him to the next one.",
+    art: "desk-fan",
+  },
+  {
+    id: "empty-seats",
+    title: "Empty Seats",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CROSS JOIN", "LEFT JOIN", "Anti-join", "NULL"],
+    prompt:
+      "A fantasy roster spot sits empty in any week its player has no game: a bye, an injury, a benching. For the 2024 league, count each team's empty player-weeks across the weeks of the 2024 schedule.",
+    returns: "team_name, empty_weeks (one per player per week with no stat line) — most first, then team_name A–Z.",
+    tables: ["rosters", "week_results", "games"],
+    expected: `WITH weeks AS (
+  SELECT DISTINCT week FROM games WHERE season = 2024
+)
+SELECT r.team_name, COUNT(*) AS empty_weeks
+FROM rosters r
+CROSS JOIN weeks k
+LEFT JOIN week_results w ON w.player = r.player AND w.season = 2024 AND w.week = k.week
+WHERE w.player IS NULL
+GROUP BY r.team_name
+ORDER BY empty_weeks DESC, r.team_name;`,
+    orderMatters: true,
+    hint: "There are no rows to count, so make them: every rostered player CROSS JOIN every 2024 week from games. LEFT JOIN week_results on player, season and week, and count the rows where the stat line IS NULL.",
+    explain:
+      "You can't count missing rows directly, so you build every row that should exist and LEFT JOIN what does. Whatever comes back NULL is what's missing. It's the same move as a calendar of every day with the sales filled in.",
+    art: "empty-seats",
   },
 ];
 
