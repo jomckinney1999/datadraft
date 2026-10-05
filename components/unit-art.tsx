@@ -1775,7 +1775,152 @@ function TheLine() {
 
 // ═══ Registry ═══════════════════════════════════════════════════════
 
+// ── Statistics, Visualization, Git and R: units 2 and 3 (2026-10-05) ──
+
+/** Spread and Shape — a box-and-whisker plot with the ball sitting on the median. */
+function BoxPlot() {
+  return (
+    <>
+      <Shadow y={134} rx={66} />
+      <Card x={22} y={22} w={156} h={102} fill={c("night-100")} />
+      <path d="M40 74 H70 M130 74 H160 M40 62 V86 M160 62 V86" stroke={c("ink")} strokeWidth="3" strokeLinecap="round" />
+      <rect x="70" y="52" width="60" height="44" rx="3" fill={c("ice", 0.55)} {...OUT} />
+      <path d="M96 52 V96" stroke={c("gold")} strokeWidth="4" />
+      <Football x={96} y={40} rx={11} rot={-10} />
+      <circle cx="170" cy="74" r="3.5" fill={c("gold")} {...OUT} />
+      <path d="M70 108 H130" stroke={c("ink-muted")} strokeWidth="2" />
+      <path d="M70 104 V112 M130 104 V112" stroke={c("ink-muted")} strokeWidth="2" />
+    </>
+  );
+}
+
+/** Relationships and Proof — a scatter climbing a line, with a stamp of proof. */
+function ScatterProof() {
+  const dots: [number, number][] = [[46, 104], [58, 98], [66, 90], [78, 92], [88, 80], [98, 76], [108, 70], [118, 64], [128, 66], [138, 52]];
+  return (
+    <>
+      <Shadow y={134} rx={64} />
+      <Card x={24} y={24} w={140} h={100} fill={c("night-100")} />
+      <path d="M38 112 V34 M38 112 H156" stroke={c("ink-muted")} strokeWidth="2" />
+      <Arrow x1={42} y1={110} x2={150} y2={44} color={c("turf")} w={2.6} />
+      {dots.map(([x, y]) => (
+        <circle key={`${x}-${y}`} cx={x} cy={y} r="4" fill={c("ink")} {...OUT} />
+      ))}
+      <Check x={160} y={36} r={13} />
+    </>
+  );
+}
+
+/** Build the Chart — bars laid like bricks, a hard hat on the tallest. */
+function CraneChart() {
+  const bricks = (x: number, n: number, fill: string) =>
+    Array.from({ length: n }, (_, i) => (
+      <rect key={`${x}-${i}`} x={x} y={118 - i * 14} width="26" height="12" rx="2" fill={fill} {...OUT} />
+    ));
+  return (
+    <>
+      <Shadow y={134} rx={70} />
+      <path d="M30 131 H170" stroke={c("ink-muted")} strokeWidth="2.4" />
+      {bricks(40, 3, c("turf"))}
+      {bricks(76, 5, c("ice"))}
+      {bricks(112, 4, c("turf"))}
+      <rect x="148" y="118" width="26" height="12" rx="2" fill={c("gold")} {...OUT} />
+      <rect x="152" y="96" width="26" height="12" rx="2" fill={c("gold", 0.5)} {...OUT} strokeDasharray="3 3" />
+      <path d="M161 86 V92 M157 89 L161 93 L165 89" stroke={c("ink-muted")} strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path d="M72 50 Q89 30 106 50 Z" fill={c("gold")} {...OUT} />
+      <rect x="68" y="48" width="42" height="7" rx="3" fill={c("gold")} {...OUT} />
+      <path d="M89 32 V48" stroke={N} strokeWidth="2" />
+    </>
+  );
+}
+
+/** Make It Read — one bar lit, an arrow on it, and a title banner that says the finding. */
+function TitleBanner() {
+  return (
+    <>
+      <Shadow y={134} rx={66} />
+      <Card x={24} y={20} w={152} h={108} fill={c("night-100")} />
+      <rect x="34" y="28" width="110" height="12" rx="3" fill={c("gold")} {...OUT} />
+      <path d="M150 34 H164" stroke={c("ink-muted")} strokeWidth="3" strokeLinecap="round" />
+      <Bars x={40} y={118} vals={[30, 22, 62, 26, 18]} fills={[c("ink-soft"), c("ink-soft"), c("turf"), c("ink-soft"), c("ink-soft")]} w={16} gap={9} />
+      <Arrow x1={130} y1={60} x2={96} y2={66} color={c("gold")} w={2.6} />
+    </>
+  );
+}
+
+/** History and Mistakes — a row of commits on a timeline, and an arrow looping back to undo. */
+function UndoTimeline() {
+  return (
+    <>
+      <Shadow y={128} rx={72} />
+      <path d="M26 96 H174" stroke={N} strokeWidth="7" strokeLinecap="round" />
+      <path d="M26 96 H174" stroke={c("turf")} strokeWidth="4" strokeLinecap="round" />
+      {[36, 72, 108, 144].map((x) => (
+        <circle key={x} cx={x} cy="96" r="8" fill={c("turf")} {...OUT} />
+      ))}
+      <circle cx="166" cy="96" r="9" fill={c("gold")} {...OUT} />
+      <path d="M166 84 Q156 40 108 40 Q78 40 74 70" fill="none" stroke={N} strokeWidth="6" strokeLinecap="round" />
+      <path d="M166 84 Q156 40 108 40 Q78 40 74 70" fill="none" stroke={c("ice")} strokeWidth="3" strokeLinecap="round" />
+      <path d="M66 62 L74 74 L82 62" fill="none" stroke={c("ice")} strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M166 112 L160 118 M166 112 L172 118" stroke={c("ink-muted")} strokeWidth="2" />
+    </>
+  );
+}
+
+/** Working With Others — a branch merging back into main, with a pull down and a push up. */
+function PushPull() {
+  return (
+    <>
+      <Shadow y={132} rx={70} />
+      <BranchGraph x={40} y={104} w={120} />
+      <Arrow x1={38} y1={30} x2={38} y2={72} color={c("ice")} w={3} />
+      <Arrow x1={162} y1={72} x2={162} y2={30} color={c("gold")} w={3} />
+      <rect x="70" y="20" width="60" height="22" rx="6" fill={c("ink")} {...OUT} />
+      <path d="M80 31 H120" stroke={N} strokeWidth="2.4" strokeLinecap="round" opacity="0.6" />
+    </>
+  );
+}
+
+/** Wrangling in R — a lasso thrown round a table, the R hex beside it. */
+function LassoTable() {
+  return (
+    <>
+      <Shadow y={134} rx={66} />
+      <Sheet x={30} y={52} w={92} h={66} rows={4} cols={3} head={c("ice")} />
+      <ellipse cx="76" cy="86" rx="60" ry="44" fill="none" stroke={N} strokeWidth="6" />
+      <ellipse cx="76" cy="86" rx="60" ry="44" fill="none" stroke={c("gold-dim")} strokeWidth="3" />
+      <path d="M130 64 Q152 46 170 30" fill="none" stroke={N} strokeWidth="6" strokeLinecap="round" />
+      <path d="M130 64 Q152 46 170 30" fill="none" stroke={c("gold-dim")} strokeWidth="3" strokeLinecap="round" />
+      <HexBadge x={160} y={104} r={20} fill={c("ice")} text="R" />
+    </>
+  );
+}
+
+/** From Data to Report — a table, an arrow, and the one-page report it became. */
+function TableToReport() {
+  return (
+    <>
+      <Shadow y={134} rx={72} />
+      <Sheet x={18} y={50} w={64} h={58} rows={4} cols={2} head={c("ice")} />
+      <Arrow x1={88} y1={80} x2={110} y2={80} color={c("turf")} w={3} />
+      <Card x={116} y={24} w={66} h={104} fill={c("ink")} />
+      <rect x="124" y="32" width="50" height="8" rx="2" fill={c("gold")} {...OUT} />
+      <Bars x={128} y={98} vals={[22, 36, 28]} fills={[c("turf"), c("ice"), c("turf")]} w={10} gap={6} />
+      <path d="M126 108 H172 M126 116 H160" stroke={N} strokeWidth="2.4" strokeLinecap="round" opacity="0.5" />
+      <HexBadge x={40} y={30} r={14} fill={c("ice")} text="R" />
+    </>
+  );
+}
+
 const SCENES: Record<string, { tone: Tone; Scene: () => JSX.Element }> = {
+  "st-spread": { tone: "ice", Scene: BoxPlot },
+  "st-relate": { tone: "turf", Scene: ScatterProof },
+  "vz-build": { tone: "gold", Scene: CraneChart },
+  "vz-story": { tone: "turf", Scene: TitleBanner },
+  "gt-history": { tone: "ice", Scene: UndoTimeline },
+  "gt-team": { tone: "gold", Scene: PushPull },
+  "r-wrangle": { tone: "turf", Scene: LassoTable },
+  "r-report": { tone: "ice", Scene: TableToReport },
   // SQL Fundamentals
   u1: { tone: "turf", Scene: StatSheet },
   f2: { tone: "ice", Scene: FirstQueries },

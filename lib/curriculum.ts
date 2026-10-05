@@ -13,6 +13,13 @@
 // or follow the all-in-one pathway.
 
 import { FINAL_UNITS } from "./finals";
+import {
+  GIT_MORE_UNIT_IDS,
+  MORE_UNITS,
+  R_MORE_UNIT_IDS,
+  STATS_MORE_UNIT_IDS,
+  VIZ_MORE_UNIT_IDS,
+} from "./curriculum-more";
 // Numbers the prose quotes come from the data build, never typed in.
 import { FACTS } from "./lesson-facts.generated";
 // Redesigned Foundations modules (docs/SQL-REDESIGN.md). Kept in their own
@@ -7529,6 +7536,7 @@ export const COURSE = {
     ...SQL_NEXT_UNITS,
     ...SQL_MORE_UNITS,
     ...BI_UNITS,
+    ...MORE_UNITS,
     ...FINAL_UNITS,
   ] as Unit[],
 };
@@ -7565,10 +7573,10 @@ export const MODULES: Module[] = [
       ...ANALYTICS_UNIT_IDS,
       "u15", "u16", "u17", "u18", "u26",
       "u7", "u13", "u14", "u25",
-      "u8", "u27", "u9", "u28",
+      "u8", ...STATS_MORE_UNIT_IDS, "u27", "u9", ...VIZ_MORE_UNIT_IDS, "u28",
       ...TABLEAU_UNIT_IDS,
       ...POWERBI_UNIT_IDS,
-      "u10", "u29", "u11", "u30",
+      "u10", ...GIT_MORE_UNIT_IDS, "u29", "u11", ...R_MORE_UNIT_IDS, "u30",
       ...AI_UNIT_IDS,
     ],
   },
@@ -7614,26 +7622,26 @@ export const MODULES: Module[] = [
   {
     id: "stats",
     name: "Statistics",
-    blurb: "Averages, sample size, and regression to the mean.",
-    unitIds: ["u8", "u27"],
+    blurb: "Averages, spread, correlation, and whether a difference is real.",
+    unitIds: ["u8", ...STATS_MORE_UNIT_IDS, "u27"],
   },
   {
     id: "viz",
     name: "Visualization",
-    blurb: "Chart choice, honest axes, and making a point land.",
-    unitIds: ["u9", "u28"],
+    blurb: "Chart choice and honest axes, then build bars, lines and scatters for real.",
+    unitIds: ["u9", ...VIZ_MORE_UNIT_IDS, "u28"],
   },
   {
     id: "git",
     name: "Git & GitHub",
-    blurb: "Commits, branches, pull requests, portfolio READMEs.",
-    unitIds: ["u10", "u29"],
+    blurb: "Commits, branches, undoing mistakes, merge conflicts and a README that gets read.",
+    unitIds: ["u10", ...GIT_MORE_UNIT_IDS, "u29"],
   },
   {
     id: "r",
     name: "R & the tidyverse",
-    blurb: "dplyr and ggplot2, executed live in your browser.",
-    unitIds: ["u11", "u30"],
+    blurb: "dplyr verbs, joins, missing values and your own functions, run live in your browser.",
+    unitIds: ["u11", ...R_MORE_UNIT_IDS, "u30"],
   },
   {
     id: "tableau",

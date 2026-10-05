@@ -1,5 +1,6 @@
-// Runs every R question's answer key in a local R, with its own setup
-// prelude, and prints what it printed.
+// Runs every R answer key, the question bank's and the lessons' `code`
+// drills, in a local R (with its setup prelude where it has one), and prints
+// what it printed.
 //
 //   node scripts/check-r-keys.mjs
 //
@@ -25,7 +26,18 @@ const windowsDefault = "C:/Program Files/R/R-4.4.2/bin/Rscript.exe";
 const rscript = process.env.RSCRIPT ?? (existsSync(windowsDefault) ? windowsDefault : "Rscript");
 const dir = mkdtempSync(path.join(tmpdir(), "r-keys-"));
 
-const keys = q.QUESTIONS.filter((x) => x.lang === "r");
+// Question-bank keys run with their setup prelude; lesson `code` keys are
+// self-contained (the data is in the starter and the key), so they run alone.
+const cur = await loadTs(path.join(root, "lib/curriculum.ts"), root);
+const lessonKeys = cur.COURSE.units.flatMap((u) =>
+  (u.lessons ?? []).flatMap((l) =>
+    (l.exercises ?? [])
+      .map((ex, i) => ({ ex, i }))
+      .filter(({ ex }) => ex.type === "code" && ex.lang === "r")
+      .map(({ ex, i }) => ({ id: `${l.id}-ex${i + 1}`, setup: "", expected: ex.expected })),
+  ),
+);
+const keys = [...q.QUESTIONS.filter((x) => x.lang === "r"), ...lessonKeys];
 let failed = 0;
 for (const x of keys) {
   const file = path.join(dir, `${x.id}.R`);
