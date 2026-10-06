@@ -8,6 +8,8 @@
  *            every lesson uses (lib/fantasy-data.ts).
  *   shop   — Gridiron Goods, an INVENTED online fan store (2026-10-05): the
  *            classic interview schema, so the bank stops being one dataset.
+ *   plays  — REAL nflverse play-by-play, every snap of the 2025 regular
+ *            season (2026-10-05). Rows fetched by lib/plays-dataset.ts.
  */
 
 import type { TableProvenance } from "@/lib/data-source";
@@ -22,13 +24,28 @@ export const SHOP_SCHEMA: { table: string; columns: string[] }[] = [
 ];
 export const SHOP_TABLES = SHOP_SCHEMA.map((t) => t.table);
 
+export const PLAYS_SCHEMA: { table: string; columns: string[] }[] = [
+  {
+    table: "plays",
+    columns: [
+      "game_id", "play_id", "week", "posteam", "defteam", "drive", "qtr",
+      "game_seconds_remaining", "down", "ydstogo", "yardline_100",
+      "score_differential", "play_type", "shotgun", "passer", "rusher",
+      "receiver", "air_yards", "complete_pass", "yards_gained", "first_down",
+      "touchdown", "td_team", "interception", "sack", "fumble_lost",
+      "field_goal_result", "kick_distance", "epa",
+    ],
+  },
+];
+export const PLAYS_TABLES = PLAYS_SCHEMA.map((t) => t.table);
+
 /** Schemas beyond the league, for the question bank's schema panel. */
-export const EXTRA_SCHEMA = [...SHOP_SCHEMA];
+export const EXTRA_SCHEMA = [...SHOP_SCHEMA, ...PLAYS_SCHEMA];
 
 const INVENTED =
   "Invented. Gridiron Goods is a made-up online fan store, built so you can practise on a schema that isn't the league, the way a real screen hands you one.";
 
-export const EXTRA_PROVENANCE: TableProvenance[] = [
+export const SHOP_PROVENANCE: TableProvenance[] = [
   {
     table: "customers",
     kind: "invented",
@@ -55,6 +72,16 @@ export const EXTRA_PROVENANCE: TableProvenance[] = [
   },
 ];
 
+export const PLAYS_PROVENANCE: TableProvenance = {
+  table: "plays",
+  kind: "real",
+  label: "real",
+  note: "Real. nflverse's play-by-play for the 2025 regular season: one row per pass, run, punt and field goal (kickoffs, extra points, kneels, spikes and two-point tries left out). posteam is the offense and defteam the defense; yardline_100 is yards from the opponent's end zone; score_differential is the offense's score minus the defense's before the snap; first_down includes touchdowns; names are written the way the play-by-play writes them (J.Goff). epa is nflverse's expected points model, an estimate rather than a recorded stat. game_id matches the games table.",
+};
+
+/** Every table beyond the league, with its label. */
+export const EXTRA_PROVENANCE: TableProvenance[] = [...SHOP_PROVENANCE, PLAYS_PROVENANCE];
+
 /** The credit line under a store question's tables, in place of the nflverse one. */
 export const SHOP_CREDIT = "Invented data: Gridiron Goods is a made-up store";
 
@@ -66,6 +93,11 @@ export const SHOP_DOWNLOADS = SHOP_SCHEMA.map((t) => ({
 
 export function usesShop(tables: string[]): boolean {
   return tables.some((t) => SHOP_TABLES.includes(t));
+}
+
+/** A question on the play-by-play, which is fetched (~0.8 MB) only for it. */
+export function usesPlays(tables: string[]): boolean {
+  return tables.some((t) => PLAYS_TABLES.includes(t));
 }
 
 /** A question on the league data only (the home page and lessons can run it). */

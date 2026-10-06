@@ -212,6 +212,23 @@ export const ART_TONE: Record<QuestionArt, Tone> = {
   "heart-jersey": "gold",
   "coin-steps": "turf",
   "signup-hourglass": "ice",
+  "fourth-down-sign": "gold",
+  "go-chart": "turf",
+  "third-down-chains": "gold",
+  "red-zone-flag": "gold",
+  "chunk-ruler": "turf",
+  "script-card": "ice",
+  "deep-bomb": "ice",
+  "target-bullseye": "ice",
+  "long-kick": "gold",
+  "ep-gauge": "turf",
+  "turnover-scale": "gold",
+  "comeback-scoreboard": "turf",
+  "hot-hand-flame": "gold",
+  "dome-sun": "ice",
+  "yard-cow": "turf",
+  "sack-qb": "ice",
+  "marathon-chain": "turf",
 };
 
 // ── Scenes, one per title idea ───────────────────────────────────
@@ -4420,6 +4437,382 @@ function SignupHourglass() {
   );
 }
 
+// ── Play by play (2026-10-05) ─────────────────────────────────────
+
+/** Fourth and Short — the down marker flipped to 4, the ball a yard short of the stick. */
+function FourthDownSign() {
+  return (
+    <g>
+      <Shadow y={136} rx={70} />
+      <rect x="20" y="104" width="160" height="26" rx="3" fill={c("turf-dim")} stroke={N} strokeWidth="2" />
+      <path d="M60 104 V130 M140 104 V130" stroke={c("ink")} strokeWidth="2" opacity="0.6" />
+      <path d="M140 104 V130" stroke={c("gold")} strokeWidth="3.4" />
+      <Football x={124} y={116} rx={11} />
+      <path d="M128 98 H140 M134 94 L140 98 L134 102" fill="none" stroke={c("gold")} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+      <text x="134" y="90" textAnchor="middle" fontSize="10" fontWeight="900" fill={c("gold")} fontFamily={MONO}>
+        1 YD
+      </text>
+      <rect x="54" y="22" width="5" height="84" fill={c("ink-soft")} stroke={N} strokeWidth="1.6" />
+      <rect x="34" y="14" width="46" height="40" rx="4" fill={c("gold")} stroke={N} strokeWidth="2.4" />
+      <text x="57" y="46" textAnchor="middle" fontSize="32" fontWeight="900" fill={N} fontFamily={SANS}>
+        4
+      </text>
+    </g>
+  );
+}
+
+/** Go For It — a traffic light on green, and a ball taking off. */
+function GoChart() {
+  return (
+    <g>
+      <Shadow y={136} rx={64} />
+      <rect x="40" y="16" width="44" height="106" rx="10" fill={c("night-100")} stroke={N} strokeWidth="2.4" />
+      <circle cx="62" cy="38" r="12" fill={c("ink-muted")} opacity="0.35" stroke={N} strokeWidth="1.8" />
+      <circle cx="62" cy="69" r="12" fill={c("gold-dim")} opacity="0.4" stroke={N} strokeWidth="1.8" />
+      <circle cx="62" cy="100" r="16" fill={c("turf", 0.3)} />
+      <circle cx="62" cy="100" r="12" fill={c("turf")} stroke={N} strokeWidth="1.8" />
+      <rect x="58" y="122" width="8" height="12" fill={c("ink-soft")} stroke={N} strokeWidth="1.4" />
+      <path d="M100 98 H122 M96 84 H118 M104 112 H120" stroke={c("ink-muted")} strokeWidth="3" strokeLinecap="round" />
+      <Football x={148} y={88} rx={22} rot={-20} />
+      <text x="150" y="44" textAnchor="middle" fontSize="26" fontWeight="900" fill={c("turf")} stroke={N} strokeWidth="1.2" fontFamily={SANS}>
+        GO!
+      </text>
+    </g>
+  );
+}
+
+/** Third Down Kings — a crown on top of the down marker flipped to 3. */
+function ThirdDownChains() {
+  return (
+    <g>
+      <Shadow y={136} rx={50} />
+      <rect x="97" y="62" width="6" height="70" fill={c("ink-soft")} stroke={N} strokeWidth="1.6" />
+      <rect x="72" y="58" width="56" height="48" rx="4" fill={c("ice")} stroke={N} strokeWidth="2.4" />
+      <text x="100" y="96" textAnchor="middle" fontSize="38" fontWeight="900" fill={N} fontFamily={SANS}>
+        3
+      </text>
+      <path d="M70 52 L74 22 L88 36 L100 14 L112 36 L126 22 L130 52 Z" fill={c("gold")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <circle cx="100" cy="14" r="3.6" fill={c("turf")} stroke={N} strokeWidth="1.4" />
+      <path d="M74 46 H126" stroke={N} strokeWidth="1.6" opacity="0.5" />
+      <Sparkle x={42} y={40} r={7} fill={c("gold")} />
+      <Sparkle x={158} y={70} r={6} fill={c("gold")} />
+    </g>
+  );
+}
+
+/** Red Zone Trips — a dashed trip arrow running into the shaded zone inside the 20, with a pennant. */
+function RedZoneFlag() {
+  return (
+    <g>
+      <Shadow y={136} rx={78} />
+      <path d="M14 70 H186 L186 128 H14 Z" fill={c("turf-dim")} stroke={N} strokeWidth="2.2" />
+      <rect x="128" y="70" width="58" height="58" fill={c("gold", 0.35)} />
+      <path d="M128 70 V128" stroke={c("gold")} strokeWidth="3" />
+      <text x="120" y="122" textAnchor="end" fontSize="13" fontWeight="900" fill={c("ink")} fontFamily={MONO}>
+        20
+      </text>
+      <path d="M50 70 V128 M90 70 V128" stroke={c("ink")} strokeWidth="1.6" opacity="0.5" />
+      <path d="M26 112 Q70 60 150 96" fill="none" stroke={c("ice")} strokeWidth="3" strokeDasharray="6 5" strokeLinecap="round" />
+      <path d="M140 88 L152 97 L138 102" fill="none" stroke={c("ice")} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <Football x={158} y={104} rx={11} />
+      <path d="M170 70 V20" stroke={c("ink-soft")} strokeWidth="3" />
+      <path d="M170 22 L196 30 L170 40 Z" fill={c("gold")} stroke={N} strokeWidth="1.8" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** Chunk Plays — a ball leaping over a tape measure that reads 20+. */
+function ChunkRuler() {
+  return (
+    <g>
+      <Shadow y={136} rx={72} />
+      <rect x="18" y="102" width="164" height="24" rx="3" fill={c("gold")} stroke={N} strokeWidth="2.2" />
+      {Array.from({ length: 21 }, (_, i) => (
+        <path key={i} d={`M${26 + i * 7.4} 102 V${i % 5 === 0 ? 114 : 108}`} stroke={N} strokeWidth="1.4" />
+      ))}
+      <text x="100" y="123" textAnchor="middle" fontSize="9" fontWeight="900" fill={N} fontFamily={MONO}>
+        0 · · · · 10 · · · · 20
+      </text>
+      <path d="M30 94 Q100 6 170 94" fill="none" stroke={c("ink-muted")} strokeWidth="2.4" strokeDasharray="4 5" />
+      <Football x={100} y={42} rx={20} rot={-6} />
+      <rect x="140" y="20" width="44" height="26" rx="5" fill={c("turf")} stroke={N} strokeWidth="2.2" />
+      <text x="162" y="39" textAnchor="middle" fontSize="16" fontWeight="900" fill={N} fontFamily={SANS}>
+        20+
+      </text>
+    </g>
+  );
+}
+
+/** Neutral Script — the coach's call sheet with a spirit level sitting dead centre on it. */
+function ScriptCard() {
+  return (
+    <g>
+      <Shadow y={136} rx={56} />
+      <rect x="50" y="14" width="100" height="118" rx="6" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <rect x="50" y="14" width="100" height="18" rx="6" fill={c("ice")} stroke={N} strokeWidth="2" />
+      {[0, 1, 2, 3, 4].map((i) => (
+        <g key={i}>
+          <text x="60" y={50 + i * 12} fontSize="8" fontWeight="900" fill={c("ink-muted")} fontFamily={MONO}>
+            {i + 1}
+          </text>
+          <rect x="70" y={44 + i * 12} width={i % 2 ? 50 : 66} height="6" rx="2" fill={c("ink-soft")} />
+        </g>
+      ))}
+      <rect x="40" y="104" width="120" height="22" rx="5" fill={c("gold")} stroke={N} strokeWidth="2.2" />
+      <rect x="84" y="108" width="32" height="14" rx="7" fill={c("turf", 0.35)} stroke={N} strokeWidth="1.6" />
+      <circle cx="100" cy="115" r="4.6" fill={c("ink")} stroke={N} strokeWidth="1.2" />
+      <path d="M92 108 V122 M108 108 V122" stroke={N} strokeWidth="1.4" />
+    </g>
+  );
+}
+
+/** Deep Shots — a quarterback letting one go on a huge arc downfield. */
+function DeepBomb() {
+  return (
+    <g>
+      <Shadow x={46} y={136} rx={26} />
+      <path d="M40 132 H190" stroke={c("turf-dim")} strokeWidth="6" />
+      {[80, 120, 160].map((x) => (
+        <path key={x} d={`M${x} 126 V138`} stroke={c("ink")} strokeWidth="2" opacity="0.5" />
+      ))}
+      <Player x={44} y={134} s={0.82} pose="throw" jersey="ice" label="QB" />
+      <path d="M58 66 Q118 -8 176 104" fill="none" stroke={c("gold")} strokeWidth="3" strokeDasharray="7 6" strokeLinecap="round" />
+      <path d="M166 100 L177 108 L180 94" fill="none" stroke={c("gold")} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="176" cy="118" r="7" fill="none" stroke={c("ice")} strokeWidth="2.4" />
+      <text x="114" y="76" textAnchor="middle" fontSize="16" fontWeight="900" fill={c("gold")} fontFamily={MONO}>
+        20+
+      </text>
+      <text x="114" y="90" textAnchor="middle" fontSize="8" fontWeight="900" fill={c("ink-muted")} fontFamily={MONO}>
+        AIR YARDS
+      </text>
+    </g>
+  );
+}
+
+/** Target Hogs — a hog with a ball, in front of a bullseye. */
+function TargetBullseye() {
+  return (
+    <g>
+      <Shadow y={136} rx={66} />
+      <circle cx="132" cy="62" r="46" fill={c("ice")} stroke={N} strokeWidth="2.4" />
+      <circle cx="132" cy="62" r="32" fill={c("ink")} stroke={N} strokeWidth="2" />
+      <circle cx="132" cy="62" r="18" fill={c("ice")} stroke={N} strokeWidth="2" />
+      <circle cx="132" cy="62" r="7" fill={c("gold")} stroke={N} strokeWidth="1.6" />
+      <ellipse cx="74" cy="104" rx="44" ry="26" fill={c("ink-soft")} stroke={N} strokeWidth="2.4" />
+      <path d="M44 126 V134 M60 128 V136 M88 128 V136 M104 126 V134" stroke={N} strokeWidth="5" strokeLinecap="round" />
+      <path d="M118 96 Q128 92 124 102 Q120 108 128 108" fill="none" stroke={N} strokeWidth="2" strokeLinecap="round" />
+      <circle cx="48" cy="86" r="22" fill={c("ink-soft")} stroke={N} strokeWidth="2.4" />
+      <path d="M34 68 L30 56 L44 64 Z M58 66 L64 54 L66 70 Z" fill={c("ink-soft")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <ellipse cx="38" cy="94" rx="10" ry="7" fill={c("ink-muted")} stroke={N} strokeWidth="1.8" />
+      <circle cx="35" cy="94" r="1.8" fill={N} />
+      <circle cx="41" cy="94" r="1.8" fill={N} />
+      <circle cx="42" cy="80" r="2.6" fill={N} />
+      <circle cx="56" cy="80" r="2.6" fill={N} />
+      <Football x={84} y={98} rx={14} rot={-30} />
+    </g>
+  );
+}
+
+/** From Way Out — uprights far downfield and a kick sailing toward them from the 50. */
+function LongKick() {
+  return (
+    <g>
+      <Shadow y={136} rx={78} />
+      <path d="M8 132 L192 132 L150 92 L50 92 Z" fill={c("turf-dim")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <path d="M30 118 H170 M42 106 H158" stroke={c("ink")} strokeWidth="1.4" opacity="0.5" />
+      <text x="30" y="128" fontSize="10" fontWeight="900" fill={c("ink")} fontFamily={MONO}>
+        50
+      </text>
+      <path d="M100 92 V64 M84 64 H116 M84 64 V28 M116 64 V28" fill="none" stroke={N} strokeWidth="5" strokeLinecap="round" />
+      <path d="M100 92 V64 M84 64 H116 M84 64 V28 M116 64 V28" fill="none" stroke={c("gold")} strokeWidth="2.6" strokeLinecap="round" />
+      <path d="M36 124 Q60 20 100 46" fill="none" stroke={c("ink-muted")} strokeWidth="2.2" strokeDasharray="4 5" />
+      <Football x={100} y={46} rx={9} rot={40} />
+      <Sparkle x={150} y={30} r={7} fill={c("gold")} />
+    </g>
+  );
+}
+
+/** Expected Points — a gauge labelled EP, needle up in the green. */
+function EpGauge() {
+  return (
+    <g>
+      <Shadow y={136} rx={60} />
+      <path d="M36 112 A64 64 0 0 1 164 112 Z" fill={c("ink")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d={slicePath(100, 112, 54, 270, 330)} fill={c("ink-muted")} opacity="0.7" />
+      <path d={slicePath(100, 112, 54, 330, 390)} fill={c("gold")} opacity="0.85" />
+      <path d={slicePath(100, 112, 54, 390, 450)} fill={c("turf")} />
+      <circle cx="100" cy="112" r="30" fill={c("ink")} />
+      <path d="M100 112 L140 76" stroke={N} strokeWidth="6" strokeLinecap="round" />
+      <path d="M100 112 L140 76" stroke={c("ice")} strokeWidth="3" strokeLinecap="round" />
+      <circle cx="100" cy="112" r="7" fill={c("ice")} stroke={N} strokeWidth="2" />
+      <text x="100" y="104" textAnchor="middle" fontSize="12" fontWeight="900" fill={N} fontFamily={MONO}>
+        EP
+      </text>
+      <rect x="28" y="112" width="144" height="16" rx="3" fill={c("night-100")} stroke={N} strokeWidth="2" />
+      <text x="100" y="124" textAnchor="middle" fontSize="10" fontWeight="900" fill={c("turf")} fontFamily={MONO}>
+        +0.157 / PLAY
+      </text>
+    </g>
+  );
+}
+
+/** Turnover Margin — a balance scale, three balls on one pan outweighing one on the other. */
+function TurnoverScale() {
+  return (
+    <g>
+      <Shadow y={136} rx={56} />
+      <path d="M100 30 V124 M76 128 H124" stroke={N} strokeWidth="6" strokeLinecap="round" />
+      <path d="M100 30 V124 M76 128 H124" stroke={c("gold-dim")} strokeWidth="3" strokeLinecap="round" />
+      <g transform="rotate(14 100 34)">
+        <path d="M40 34 H160" stroke={N} strokeWidth="5" strokeLinecap="round" />
+        <path d="M40 34 H160" stroke={c("gold")} strokeWidth="2.6" strokeLinecap="round" />
+        <path d="M40 34 L26 70 M40 34 L54 70 M160 34 L146 70 M160 34 L174 70" stroke={c("ink-muted")} strokeWidth="1.6" />
+        <path d="M22 70 Q40 84 58 70 Z" fill={c("ice")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+        <path d="M142 70 Q160 84 178 70 Z" fill={c("turf")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+        <Football x={40} y={64} rx={9} />
+        <Football x={152} y={64} rx={9} />
+        <Football x={168} y={64} rx={9} />
+        <Football x={160} y={54} rx={9} />
+      </g>
+      <circle cx="100" cy="32" r="6" fill={c("gold")} stroke={N} strokeWidth="2" />
+    </g>
+  );
+}
+
+/** The Comeback — a scoreboard: the 21-point hole crossed out, the win underneath. */
+function ComebackScoreboard() {
+  return (
+    <g>
+      <Shadow y={136} rx={64} />
+      <path d="M60 128 V112 M140 128 V112" stroke={N} strokeWidth="6" />
+      <rect x="30" y="18" width="140" height="96" rx="6" fill={c("night-100")} stroke={N} strokeWidth="2.6" />
+      <text x="100" y="34" textAnchor="middle" fontSize="9" fontWeight="900" fill={c("ink-muted")} fontFamily={MONO}>
+        HOME · AWAY
+      </text>
+      <text x="100" y="62" textAnchor="middle" fontSize="22" fontWeight="900" fill={c("ink-muted")} fontFamily={MONO}>
+        0 – 21
+      </text>
+      <path d="M62 54 L138 54" stroke={c("gold")} strokeWidth="3.4" strokeLinecap="round" />
+      <text x="100" y="100" textAnchor="middle" fontSize="26" fontWeight="900" fill={c("turf")} fontFamily={MONO}>
+        24 – 21
+      </text>
+      <path d="M176 92 Q192 60 176 30 M170 38 L176 28 L184 36" fill="none" stroke={c("gold")} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** Hot Hand — a glove holding the ball, on fire. */
+function HotHandFlame() {
+  return (
+    <g>
+      <Shadow y={136} rx={52} />
+      <Flame x={100} y={92} s={1.25} outer={c("gold")} inner={c("ink")} />
+      <Football x={100} y={74} rx={20} rot={-16} />
+      <path d="M68 132 L70 96 Q70 86 80 86 L84 86 V70 Q84 62 91 62 Q98 62 98 70 V86 L120 86 Q132 86 132 98 L130 132 Z" fill={c("ink-soft")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M98 98 H124 M98 110 H126 M84 86 V100" stroke={N} strokeWidth="1.6" opacity="0.5" />
+      <path d="M66 120 H132" stroke={c("ice")} strokeWidth="6" />
+    </g>
+  );
+}
+
+/** Inside or Out — a stadium dome on one side, the open sky and sun on the other. */
+function DomeSun() {
+  return (
+    <g>
+      <Shadow y={136} rx={80} />
+      <path d="M100 18 V132" stroke={c("ink-muted")} strokeWidth="2" strokeDasharray="5 5" />
+      <path d="M12 124 Q12 54 88 54 L88 124 Z" fill={c("ink")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M24 124 Q24 66 88 66 M40 124 Q40 80 88 80 M88 54 Q60 70 56 124" fill="none" stroke={c("ink-muted")} strokeWidth="1.6" />
+      <rect x="8" y="122" width="84" height="8" rx="2" fill={c("ice")} stroke={N} strokeWidth="1.8" />
+      <circle cx="150" cy="56" r="20" fill={c("gold")} stroke={N} strokeWidth="2.4" />
+      {Array.from({ length: 8 }, (_, i) => {
+        const a = (i * Math.PI) / 4;
+        return (
+          <path
+            key={i}
+            d={`M${r1(150 + Math.cos(a) * 26)} ${r1(56 + Math.sin(a) * 26)} L${r1(150 + Math.cos(a) * 34)} ${r1(56 + Math.sin(a) * 34)}`}
+            stroke={c("gold")}
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
+        );
+      })}
+      <path d="M108 124 H192 V130 H108 Z" fill={c("turf")} stroke={N} strokeWidth="1.8" />
+      <path d="M118 124 V104 M182 124 V104" stroke={c("ink-soft")} strokeWidth="2.4" />
+    </g>
+  );
+}
+
+/** Bell Cows — a cow with a bell round its neck and a ball tucked under a hoof. */
+function YardCow() {
+  return (
+    <g>
+      <Shadow y={136} rx={66} />
+      <path d="M58 122 V134 M76 124 V136 M128 124 V136 M146 122 V134" stroke={N} strokeWidth="6" strokeLinecap="round" />
+      <path d="M58 122 V134 M76 124 V136 M128 124 V136 M146 122 V134" stroke={c("ink-soft")} strokeWidth="3" strokeLinecap="round" />
+      <rect x="50" y="78" width="104" height="50" rx="22" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <path d="M70 84 Q84 80 86 96 Q80 106 68 100 Z M120 104 Q134 98 140 110 Q130 120 118 114 Z" fill={N} />
+      <path d="M154 96 Q170 92 168 110" fill="none" stroke={N} strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M56 60 L44 50 M80 60 L92 50" stroke={c("gold-dim")} strokeWidth="5" strokeLinecap="round" />
+      <path d="M56 60 L44 50 M80 60 L92 50" stroke={N} strokeWidth="1.4" strokeLinecap="round" opacity="0.5" />
+      <rect x="44" y="56" width="48" height="42" rx="18" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <ellipse cx="68" cy="88" rx="18" ry="11" fill={c("ink-soft")} stroke={N} strokeWidth="2" />
+      <circle cx="62" cy="88" r="2.2" fill={N} />
+      <circle cx="74" cy="88" r="2.2" fill={N} />
+      <circle cx="58" cy="70" r="3" fill={N} />
+      <circle cx="78" cy="70" r="3" fill={N} />
+      <path d="M58 100 Q68 108 78 100" fill="none" stroke={c("gold-dim")} strokeWidth="3" />
+      <path d="M62 104 H74 L76 118 H60 Z" fill={c("gold")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <circle cx="68" cy="120" r="2.4" fill={N} />
+      <Football x={108} y={130} rx={13} rot={-8} />
+    </g>
+  );
+}
+
+/** Sack Watch — a burlap sack with a helmet poking out, and a stopwatch keeping count. */
+function SackQb() {
+  return (
+    <g>
+      <Shadow y={136} rx={64} />
+      <path d="M40 132 Q30 92 52 66 L104 66 Q126 92 116 132 Z" fill={c("gold-dim")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M50 70 Q78 80 106 70" fill="none" stroke={N} strokeWidth="3" />
+      <path d="M58 100 L64 108 M86 92 L92 100 M72 118 L78 126" stroke={N} strokeWidth="1.6" opacity="0.4" />
+      <path d="M56 66 Q56 34 80 34 Q104 34 104 62 L104 66 Z" fill={c("ice")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M78 36 V64" stroke={c("ink", 0.55)} strokeWidth="3" />
+      <path d="M96 52 H112 M96 60 H112 M106 48 V62" stroke={c("ink-soft")} strokeWidth="2.4" strokeLinecap="round" />
+      <circle cx="152" cy="80" r="30" fill={c("ink")} stroke={N} strokeWidth="2.6" />
+      <rect x="146" y="40" width="12" height="10" rx="2" fill={c("gold")} stroke={N} strokeWidth="1.8" />
+      <circle cx="152" cy="80" r="23" fill="none" stroke={c("ink-muted")} strokeWidth="1.4" />
+      <path d="M152 80 V62 M152 80 L164 88" stroke={N} strokeWidth="3" strokeLinecap="round" />
+      <circle cx="152" cy="80" r="3" fill={c("gold")} stroke={N} strokeWidth="1.2" />
+    </g>
+  );
+}
+
+/** Marathon Drives — fifteen play dots winding down the field to a finish-line tape. */
+function MarathonChain() {
+  const dots: [number, number][] = [
+    [22, 118], [36, 106], [48, 118], [62, 106], [74, 94], [86, 104], [98, 92],
+    [110, 80], [122, 90], [132, 76], [142, 64], [150, 76], [160, 62], [168, 50], [176, 38],
+  ];
+  return (
+    <g>
+      <Shadow y={136} rx={80} />
+      <path d={`M${dots.map(([x, y]) => `${x} ${y}`).join(" L")}`} fill="none" stroke={c("ink-muted")} strokeWidth="2" strokeDasharray="3 4" />
+      {dots.map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r="5.4" fill={i === dots.length - 1 ? c("gold") : c("ice")} stroke={N} strokeWidth="1.6" />
+      ))}
+      <path d="M150 18 V54 M196 18 V54" stroke={c("ink-soft")} strokeWidth="3" />
+      <path d="M150 26 Q173 34 196 26" fill="none" stroke={N} strokeWidth="5" />
+      <path d="M150 26 Q173 34 196 26" fill="none" stroke={c("turf")} strokeWidth="3" />
+      <Football x={28} y={92} rx={12} rot={-20} />
+      <text x="70" y="136" textAnchor="middle" fontSize="10" fontWeight="900" fill={c("ink-muted")} fontFamily={MONO}>
+        15 PLAYS
+      </text>
+    </g>
+  );
+}
+
 const SCENES: Record<QuestionArt, () => JSX.Element> = {
   hammer: Hammer,
   quarterback: Quarterback,
@@ -4585,6 +4978,23 @@ const SCENES: Record<QuestionArt, () => JSX.Element> = {
   "heart-jersey": HeartJersey,
   "coin-steps": CoinSteps,
   "signup-hourglass": SignupHourglass,
+  "fourth-down-sign": FourthDownSign,
+  "go-chart": GoChart,
+  "third-down-chains": ThirdDownChains,
+  "red-zone-flag": RedZoneFlag,
+  "chunk-ruler": ChunkRuler,
+  "script-card": ScriptCard,
+  "deep-bomb": DeepBomb,
+  "target-bullseye": TargetBullseye,
+  "long-kick": LongKick,
+  "ep-gauge": EpGauge,
+  "turnover-scale": TurnoverScale,
+  "comeback-scoreboard": ComebackScoreboard,
+  "hot-hand-flame": HotHandFlame,
+  "dome-sun": DomeSun,
+  "yard-cow": YardCow,
+  "sack-qb": SackQb,
+  "marathon-chain": MarathonChain,
 };
 
 export default function QuestionArt({

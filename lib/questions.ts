@@ -223,7 +223,24 @@ export type QuestionArt =
   | "free-truck"
   | "heart-jersey"
   | "coin-steps"
-  | "signup-hourglass";
+  | "signup-hourglass"
+  | "fourth-down-sign"
+  | "go-chart"
+  | "third-down-chains"
+  | "red-zone-flag"
+  | "chunk-ruler"
+  | "script-card"
+  | "deep-bomb"
+  | "target-bullseye"
+  | "long-kick"
+  | "ep-gauge"
+  | "turnover-scale"
+  | "comeback-scoreboard"
+  | "hot-hand-flame"
+  | "dome-sun"
+  | "yard-cow"
+  | "sack-qb"
+  | "marathon-chain";
 
 export type Question = {
   id: string;
@@ -4470,6 +4487,477 @@ ORDER BY avg_days_to_first_order, source;`,
     explain:
       "The inner JOIN quietly drops customers who never ordered, which is what you want here: there's no 'days to first order' for someone with no first order. Say so when you report it.",
     art: "signup-hourglass",
+  },
+  // ── Play by play: the 2025 season, one row per snap (added 2026-10-05) ──
+  //
+  // REAL nflverse play-by-play (lib/plays-dataset.ts): every pass, run, punt
+  // and field goal of the 2025 regular season. Names are as the play-by-play
+  // writes them (J.Goff). first_down includes touchdowns. epa is nflverse's
+  // expected points model, and the questions that use it say so.
+  {
+    id: "fourth-and-short",
+    title: "Fourth and Short",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["Conditional aggregation", "GROUP BY", "WHERE"],
+    prompt:
+      "Your league chat is arguing about which coaches are brave. On every 4th down with 2 yards or less to go, a team either went for it (a pass or a run) or kicked (a punt or a field goal). Find the five teams that went for it on the biggest share of those chances.",
+    returns: "team, chances, went_for_it, go_pct (rounded to 1 decimal) — highest go_pct first, then team A–Z. Five rows.",
+    tables: ["plays"],
+    expected: `SELECT posteam AS team,
+       COUNT(*) AS chances,
+       SUM(play_type IN ('pass', 'run')) AS went_for_it,
+       ROUND(100.0 * SUM(play_type IN ('pass', 'run')) / COUNT(*), 1) AS go_pct
+FROM plays
+WHERE down = 4 AND ydstogo <= 2
+GROUP BY posteam
+ORDER BY go_pct DESC, team
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "Filter to down = 4 AND ydstogo <= 2. Each team's chances are COUNT(*); a comparison like play_type IN ('pass', 'run') is 1 or 0, so SUM it to count the go-for-its.",
+    explain:
+      "Summing a true/false test is conditional aggregation: one pass over the rows gives the total and the subset side by side, without a second query or a join.",
+    art: "fourth-down-sign",
+  },
+  {
+    id: "go-for-it",
+    title: "Go For It",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CASE", "GROUP BY", "Conditional aggregation"],
+    prompt:
+      "A coach wants a 4th-down cheat sheet. Take every 4th-down pass or run of 2025, put the distance to go in a bucket (1, 2-3, 4-6 or 7+ yards), and show how often each bucket was converted. A conversion is a first down, and first_down already counts touchdowns.",
+    returns: "distance (the labels '1', '2-3', '4-6', '7+'), attempts, converted, conv_pct (1 decimal) — shortest distance first. Four rows.",
+    tables: ["plays"],
+    expected: `SELECT CASE
+         WHEN ydstogo = 1 THEN '1'
+         WHEN ydstogo <= 3 THEN '2-3'
+         WHEN ydstogo <= 6 THEN '4-6'
+         ELSE '7+'
+       END AS distance,
+       COUNT(*) AS attempts,
+       SUM(first_down) AS converted,
+       ROUND(100.0 * SUM(first_down) / COUNT(*), 1) AS conv_pct
+FROM plays
+WHERE down = 4 AND play_type IN ('pass', 'run')
+GROUP BY distance
+ORDER BY MIN(ydstogo);`,
+    orderMatters: true,
+    hint: "A CASE expression makes the bucket label; GROUP BY that label. first_down is 1 or 0, so SUM(first_down) counts the conversions.",
+    explain:
+      "CASE turns a number into a category, and grouping by the category builds the table a coach can actually read. Order by MIN(ydstogo) per bucket, because sorting text labels only works when they happen to sort the way the numbers do.",
+    art: "go-chart",
+  },
+  {
+    id: "third-down-kings",
+    title: "Third Down Kings",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["WHERE", "GROUP BY", "SUM"],
+    prompt:
+      "Third down is where drives live or die. On every 3rd-down pass or run of 2025, find the five offenses that picked up a first down most often. first_down is 1 when a play got one, touchdowns included.",
+    returns: "team, third_downs, converted, conv_pct (1 decimal) — highest conv_pct first, then team A–Z. Five rows.",
+    tables: ["plays"],
+    expected: `SELECT posteam AS team,
+       COUNT(*) AS third_downs,
+       SUM(first_down) AS converted,
+       ROUND(100.0 * SUM(first_down) / COUNT(*), 1) AS conv_pct
+FROM plays
+WHERE down = 3 AND play_type IN ('pass', 'run')
+GROUP BY posteam
+ORDER BY conv_pct DESC, team
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "posteam is the offense. Filter to down = 3 and passes or runs, then COUNT(*) and SUM(first_down) per team.",
+    explain:
+      "Multiply by 100.0, not 100, before dividing: two whole numbers divide as whole numbers in SQLite, and every rate would come out 0.",
+    art: "third-down-chains",
+  },
+  {
+    id: "red-zone-trips",
+    title: "Red Zone Trips",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "GROUP BY", "Conditional aggregation"],
+    prompt:
+      "A drive is every play with the same game_id, posteam and drive number. A drive is a red-zone trip if any of its plays started at the opponent's 20 or closer (yardline_100 <= 20). Find the five teams that turned the biggest share of their trips into touchdowns. Only the offense's touchdowns count (td_team = posteam): a pick-six is not a trip that scored.",
+    returns: "team, trips, touchdowns, td_pct (1 decimal) — highest td_pct first, then team A–Z. Five rows.",
+    tables: ["plays"],
+    expected: `WITH drives AS (
+  SELECT game_id, posteam, drive,
+         MIN(yardline_100) AS deepest,
+         MAX(touchdown = 1 AND td_team = posteam) AS scored
+  FROM plays
+  GROUP BY game_id, posteam, drive
+)
+SELECT posteam AS team,
+       COUNT(*) AS trips,
+       SUM(scored) AS touchdowns,
+       ROUND(100.0 * SUM(scored) / COUNT(*), 1) AS td_pct
+FROM drives
+WHERE deepest <= 20
+GROUP BY posteam
+ORDER BY td_pct DESC, team
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "First roll plays up to one row per drive: the deepest yardline_100 it reached and whether it scored (MAX of a true/false test). Then keep drives that reached 20 or closer and group by team.",
+    explain:
+      "The question is about drives, but the table is plays, so the first step is changing the grain. Count plays instead of drives and a team that ran twelve red-zone snaps on one drive gets twelve trips.",
+    art: "red-zone-flag",
+  },
+  {
+    id: "chunk-plays",
+    title: "Chunk Plays",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["WHERE", "GROUP BY", "COUNT", "LIMIT"],
+    prompt:
+      "Big plays win games. Count every pass or run of 2025 that gained 20 yards or more, by offense, and find the five teams with the most.",
+    returns: "team, plays_20_plus — most first, then team A–Z. Five rows.",
+    tables: ["plays"],
+    expected: `SELECT posteam AS team, COUNT(*) AS plays_20_plus
+FROM plays
+WHERE play_type IN ('pass', 'run') AND yards_gained >= 20
+GROUP BY posteam
+ORDER BY plays_20_plus DESC, team
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "WHERE keeps passes and runs of 20+ yards_gained; GROUP BY posteam and COUNT(*).",
+    explain:
+      "Filter first, then count: WHERE throws out the short plays before GROUP BY ever sees them, so COUNT(*) is already counting only the chunk plays.",
+    art: "chunk-ruler",
+  },
+  {
+    id: "neutral-script",
+    title: "Neutral Script",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["WHERE", "GROUP BY", "Conditional aggregation"],
+    prompt:
+      "Pass rate gets skewed by the scoreboard: a team down 20 throws every snap. Analysts strip that out by looking only at neutral plays: 1st and 2nd down, quarters 1 to 3, with the score within 7 either way (score_differential is from the offense's side). On those passes and runs, find the five teams that passed the most. A sack counts as a pass, which it already is here.",
+    returns: "team, plays, pass_pct (1 decimal) — highest pass_pct first, then team A–Z. Five rows.",
+    tables: ["plays"],
+    expected: `SELECT posteam AS team,
+       COUNT(*) AS plays,
+       ROUND(100.0 * SUM(play_type = 'pass') / COUNT(*), 1) AS pass_pct
+FROM plays
+WHERE play_type IN ('pass', 'run')
+  AND down IN (1, 2)
+  AND qtr <= 3
+  AND ABS(score_differential) <= 7
+GROUP BY posteam
+ORDER BY pass_pct DESC, team
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "Four conditions in WHERE: passes or runs, down IN (1, 2), qtr <= 3 and ABS(score_differential) <= 7. Then SUM(play_type = 'pass') over COUNT(*).",
+    explain:
+      "Most of the work in a real analysis is deciding which rows are a fair comparison. The SQL is a GROUP BY; the judgement is the WHERE.",
+    art: "script-card",
+  },
+  {
+    id: "deep-shots",
+    title: "Deep Shots",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["WHERE", "GROUP BY", "HAVING"],
+    prompt:
+      "A deep shot is a pass thrown 20 or more yards in the air (air_yards >= 20). Among passers with at least 40 deep attempts in 2025, who completed the highest share? Names are written the way the play-by-play writes them, like M.Stafford.",
+    returns: "passer, deep_attempts, completions, comp_pct (1 decimal) — highest comp_pct first, then passer A–Z. Five rows.",
+    tables: ["plays"],
+    expected: `SELECT passer,
+       COUNT(*) AS deep_attempts,
+       SUM(complete_pass) AS completions,
+       ROUND(100.0 * SUM(complete_pass) / COUNT(*), 1) AS comp_pct
+FROM plays
+WHERE play_type = 'pass' AND air_yards >= 20
+GROUP BY passer
+HAVING COUNT(*) >= 40
+ORDER BY comp_pct DESC, passer
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "WHERE picks the deep passes, GROUP BY passer, and HAVING COUNT(*) >= 40 drops the passers with too few to judge.",
+    explain:
+      "WHERE filters rows before grouping; HAVING filters groups after. A minimum like 40 attempts is a condition on the group, so it has to be HAVING.",
+    art: "deep-bomb",
+  },
+  {
+    id: "target-hogs",
+    title: "Target Hogs",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["WHERE", "GROUP BY", "COUNT", "LIMIT"],
+    prompt:
+      "In PPR, targets are opportunity. A target is any pass thrown to a receiver (receiver isn't NULL). Find the five most-targeted players of 2025.",
+    returns: "receiver, targets — most first, then receiver A–Z. Five rows.",
+    tables: ["plays"],
+    expected: `SELECT receiver, COUNT(*) AS targets
+FROM plays
+WHERE play_type = 'pass' AND receiver IS NOT NULL
+GROUP BY receiver
+ORDER BY targets DESC, receiver
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "Sacks and throwaways have no receiver, so receiver IS NOT NULL keeps only real targets. Then GROUP BY receiver and COUNT(*).",
+    explain:
+      "Test for a missing value with IS NULL or IS NOT NULL. receiver != NULL is never true, not even for the rows that have one.",
+    art: "target-bullseye",
+  },
+  {
+    id: "from-way-out",
+    title: "From Way Out",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CASE", "GROUP BY", "Conditional aggregation"],
+    prompt:
+      "How automatic are kickers now? Put every field goal attempt of 2025 in a bucket by kick_distance (under 40, 40-49, 50+) and show how many were made. A blocked kick is an attempt that wasn't made.",
+    returns: "distance (the labels 'under 40', '40-49', '50+'), attempts, made, made_pct (1 decimal) — shortest bucket first. Three rows.",
+    tables: ["plays"],
+    expected: `SELECT CASE
+         WHEN kick_distance < 40 THEN 'under 40'
+         WHEN kick_distance < 50 THEN '40-49'
+         ELSE '50+'
+       END AS distance,
+       COUNT(*) AS attempts,
+       SUM(field_goal_result = 'made') AS made,
+       ROUND(100.0 * SUM(field_goal_result = 'made') / COUNT(*), 1) AS made_pct
+FROM plays
+WHERE play_type = 'field_goal'
+GROUP BY distance
+ORDER BY MIN(kick_distance);`,
+    orderMatters: true,
+    hint: "CASE on kick_distance makes the label. field_goal_result is 'made', 'missed' or 'blocked', so SUM(field_goal_result = 'made') counts the good ones.",
+    explain:
+      "These labels don't sort the way the distances do ('under 40' comes last alphabetically), so order by something numeric per group, like MIN(kick_distance).",
+    art: "long-kick",
+  },
+  {
+    id: "expected-points",
+    title: "Expected Points",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["WHERE", "GROUP BY", "AVG"],
+    prompt:
+      "epa is expected points added: nflverse's model of how many points a play was worth, from the down, distance and field position before and after it. It's a model's estimate, not something anyone wrote down, but it's the number analysts rank offenses by. Find the five offenses with the best average EPA per pass or run in 2025.",
+    returns: "team, plays, epa_per_play (rounded to 3 decimals) — best first, then team A–Z. Five rows.",
+    tables: ["plays"],
+    expected: `SELECT posteam AS team,
+       COUNT(*) AS plays,
+       ROUND(AVG(epa), 3) AS epa_per_play
+FROM plays
+WHERE play_type IN ('pass', 'run')
+GROUP BY posteam
+ORDER BY epa_per_play DESC, team
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "Average epa per posteam over passes and runs, rounded to 3 places.",
+    explain:
+      "Yards treat 3rd-and-1 and 3rd-and-15 the same; EPA doesn't. A 4-yard gain on 3rd-and-3 is worth far more than one on 3rd-and-10, which is why per-play EPA ranks offenses better than yards do.",
+    art: "ep-gauge",
+  },
+  {
+    id: "turnover-margin",
+    title: "Turnover Margin",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "JOIN", "GROUP BY"],
+    prompt:
+      "On passes and runs, a turnover is an interception or a lost fumble (interception and fumble_lost are 1 or 0). A team's giveaways are the ones it committed on offense (posteam); its takeaways are the ones it forced on defense (defteam). Find the five best turnover margins, takeaways minus giveaways.",
+    returns: "team, takeaways, giveaways, margin — biggest margin first, then team A–Z. Five rows.",
+    tables: ["plays"],
+    expected: `WITH giveaways AS (
+  SELECT posteam AS team, SUM(interception + fumble_lost) AS n
+  FROM plays
+  WHERE play_type IN ('pass', 'run')
+  GROUP BY posteam
+),
+takeaways AS (
+  SELECT defteam AS team, SUM(interception + fumble_lost) AS n
+  FROM plays
+  WHERE play_type IN ('pass', 'run')
+  GROUP BY defteam
+)
+SELECT g.team, t.n AS takeaways, g.n AS giveaways, t.n - g.n AS margin
+FROM giveaways g
+JOIN takeaways t ON t.team = g.team
+ORDER BY margin DESC, g.team
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "The same plays count twice: once grouped by posteam (giveaways), once by defteam (takeaways). Build each in its own CTE and join them on team.",
+    explain:
+      "When one row means something different to each side (a giveaway for one team is a takeaway for the other), aggregate it once per side and join the results. Grouping by both columns at once would give you team pairs instead.",
+    art: "turnover-scale",
+  },
+  {
+    id: "the-comeback",
+    title: "The Comeback",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "JOIN", "MIN"],
+    prompt:
+      "Find the five biggest comebacks of 2025: games a team won after trailing by the most. score_differential is the offense's score minus the defense's before the snap, so a team's lowest score_differential on its own plays is the deepest hole it was in. The games table has the final score.",
+    returns: "game_id, team, down_by (as a positive number) — biggest first, then game_id. Five rows.",
+    tables: ["plays", "games"],
+    expected: `WITH worst AS (
+  SELECT game_id, posteam AS team, MIN(score_differential) AS low
+  FROM plays
+  GROUP BY game_id, posteam
+)
+SELECT w.game_id, w.team, -w.low AS down_by
+FROM worst w
+JOIN games g ON g.game_id = w.game_id
+WHERE (w.team = g.home_team AND g.home_score > g.away_score)
+   OR (w.team = g.away_team AND g.away_score > g.home_score)
+ORDER BY down_by DESC, w.game_id
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "Step one: MIN(score_differential) per game_id and posteam. Step two: join to games and keep the rows where that team's score beat the other team's.",
+    explain:
+      "plays knows how a game went; games knows how it ended. Neither table can answer this alone, and game_id is the key the two databases share.",
+    art: "comeback-scoreboard",
+  },
+  {
+    id: "hot-hand",
+    title: "Hot Hand",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["Gaps and islands", "ROW_NUMBER", "CTE"],
+    prompt:
+      "Find the three longest runs of consecutive completions by one passer in 2025, counting across games in the order he threw them (game_id, then play_id). Count real pass attempts only, so leave out sacks (sack = 1). An incompletion or an interception ends the run.",
+    returns: "passer, streak — longest first, then passer A–Z. Three rows.",
+    tables: ["plays"],
+    expected: `WITH throws AS (
+  SELECT passer, complete_pass,
+         ROW_NUMBER() OVER (PARTITION BY passer ORDER BY game_id, play_id)
+       - ROW_NUMBER() OVER (PARTITION BY passer, complete_pass ORDER BY game_id, play_id) AS grp
+  FROM plays
+  WHERE play_type = 'pass' AND passer IS NOT NULL AND sack = 0
+)
+SELECT passer, COUNT(*) AS streak
+FROM throws
+WHERE complete_pass = 1
+GROUP BY passer, grp
+ORDER BY streak DESC, passer
+LIMIT 3;`,
+    orderMatters: true,
+    hint: "Gaps and islands: number each passer's throws, and separately number his completions. Within an unbroken run the two numbers rise together, so their difference stays the same. Group by passer and that difference.",
+    explain:
+      "Subtracting two ROW_NUMBERs gives every unbroken run its own label, which turns a question about order into an ordinary GROUP BY.",
+    art: "hot-hand-flame",
+  },
+  {
+    id: "inside-or-out",
+    title: "Inside or Out",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["JOIN", "CASE", "GROUP BY"],
+    prompt:
+      "Do offenses play better under a roof? Join plays to games on game_id. Call a game indoors if its roof is 'dome' or 'closed', and outdoors otherwise, then compare average EPA per pass or run (epa is nflverse's expected points model).",
+    returns: "setting ('indoors' or 'outdoors'), plays, epa_per_play (3 decimals) — indoors first. Two rows.",
+    tables: ["plays", "games"],
+    expected: `SELECT CASE WHEN g.roof IN ('dome', 'closed') THEN 'indoors' ELSE 'outdoors' END AS setting,
+       COUNT(*) AS plays,
+       ROUND(AVG(p.epa), 3) AS epa_per_play
+FROM plays p
+JOIN games g ON g.game_id = p.game_id
+WHERE p.play_type IN ('pass', 'run')
+GROUP BY setting
+ORDER BY setting;`,
+    orderMatters: true,
+    hint: "The roof is on games, not plays. JOIN on game_id, then GROUP BY a CASE on g.roof.",
+    explain:
+      "The answer goes against the hunch (outdoors comes out ahead in 2025), and a hunch is exactly what a query like this is for checking. It's one season, though, so it's evidence, not a law.",
+    art: "dome-sun",
+  },
+  {
+    id: "bell-cows",
+    title: "Bell Cows",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["GROUP BY", "HAVING", "AVG"],
+    prompt:
+      "Yards per carry flatters a back with ten carries. Among rushers with at least 150 carries in 2025, find the five with the best average gain. Quarterback runs count as runs too, but none reach 150.",
+    returns: "rusher, carries, yards_per_carry (2 decimals) — best first, then rusher A–Z. Five rows.",
+    tables: ["plays"],
+    expected: `SELECT rusher,
+       COUNT(*) AS carries,
+       ROUND(AVG(yards_gained), 2) AS yards_per_carry
+FROM plays
+WHERE play_type = 'run' AND rusher IS NOT NULL
+GROUP BY rusher
+HAVING COUNT(*) >= 150
+ORDER BY yards_per_carry DESC, rusher
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "GROUP BY rusher on run plays, keep groups with HAVING COUNT(*) >= 150, and order by AVG(yards_gained).",
+    explain:
+      "An average over a handful of rows is mostly luck. A minimum sample in HAVING is how every leaderboard you've ever trusted was built.",
+    art: "yard-cow",
+  },
+  {
+    id: "sack-watch",
+    title: "Sack Watch",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["WHERE", "GROUP BY", "SUM"],
+    prompt:
+      "Which quarterbacks spent the most time on the turf? On a sack, play_type is 'pass', sack is 1, and passer is the player who went down. Find the five passers sacked most in 2025.",
+    returns: "passer, sacks — most first, then passer A–Z. Five rows.",
+    tables: ["plays"],
+    expected: `SELECT passer, SUM(sack) AS sacks
+FROM plays
+WHERE play_type = 'pass' AND passer IS NOT NULL
+GROUP BY passer
+ORDER BY sacks DESC, passer
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "sack is 1 or 0, so SUM(sack) per passer counts them. (WHERE sack = 1 with COUNT(*) works too.)",
+    explain:
+      "Two players are tied at the top, which is why the tie-break is in the question: without it, two correct queries could list them in either order.",
+    art: "sack-qb",
+  },
+  {
+    id: "marathon-drives",
+    title: "Marathon Drives",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "GROUP BY", "COUNT"],
+    prompt:
+      "A drive is every play with the same game_id, posteam and drive number (punts and field goals count as plays). Count each team's drives of 15 plays or more in 2025, and find the three teams with the most.",
+    returns: "team, long_drives — most first, then team A–Z. Three rows.",
+    tables: ["plays"],
+    expected: `WITH drives AS (
+  SELECT game_id, posteam, drive, COUNT(*) AS plays
+  FROM plays
+  GROUP BY game_id, posteam, drive
+)
+SELECT posteam AS team, COUNT(*) AS long_drives
+FROM drives
+WHERE plays >= 15
+GROUP BY posteam
+ORDER BY long_drives DESC, team
+LIMIT 3;`,
+    orderMatters: true,
+    hint: "Count twice. First COUNT(*) plays per drive, then keep drives of 15+ and COUNT(*) them per team.",
+    explain:
+      "Aggregating an aggregate needs two steps, because GROUP BY can only roll up once. A CTE (or a subquery in FROM) is the first roll-up, and the outer query is the second.",
+    art: "marathon-chain",
   },
 ];
 

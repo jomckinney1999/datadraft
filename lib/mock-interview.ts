@@ -14,6 +14,7 @@
  */
 
 import { QUESTIONS, type Question, type QuestionDifficulty } from "@/lib/questions";
+import { usesPlays } from "@/lib/practice-schemas";
 
 export type MockFormat = {
   id: "phone" | "technical";
@@ -54,7 +55,9 @@ export function pickScreen(format: MockFormat, seed: string, solved: string[]): 
   const done = new Set(solved);
   const taken = new Set<string>();
   return format.mix.map((difficulty, i) => {
-    const pool = QUESTIONS.filter((q) => q.lang === "sql" && q.difficulty === difficulty && !taken.has(q.id));
+    const pool = QUESTIONS.filter(
+      (q) => q.lang === "sql" && q.difficulty === difficulty && !taken.has(q.id) && !usesPlays(q.tables),
+    );
     const fresh = pool.filter((q) => !done.has(q.id));
     const from = fresh.length ? fresh : pool;
     const ranked = from

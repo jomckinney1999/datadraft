@@ -64,6 +64,11 @@ db.run(data.buildSeedSql());
 // The practice store (lib/practice-datasets.ts): question keys on it run
 // here; lesson keys never name its tables, so it changes nothing for them.
 db.run((await loadProjectTs(path.join(root, "lib/practice-datasets.ts"), root)).buildShopSeedSql());
+// The 2025 play-by-play, from the same file the browser fetches.
+(await loadProjectTs(path.join(root, "lib/plays-dataset.ts"), root)).seedPlays(
+  db,
+  JSON.parse((await import("node:fs")).readFileSync(path.join(root, "public/practice/plays-2025.json"), "utf8")),
+);
 const practiceSchemas = await loadProjectTs(path.join(root, "lib/practice-schemas.ts"), root);
 
 const problems = [];

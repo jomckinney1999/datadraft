@@ -62,7 +62,7 @@ import { Objective, SceneLine } from "@/components/scene-line";
 import AppNav from "@/components/app-nav";
 import { FaceCluster } from "@/components/qotd-card";
 import { featuredPlayers } from "@/lib/question-players";
-import { isLeagueOnly, SHOP_CREDIT, usesShop } from "@/lib/practice-schemas";
+import { isLeagueOnly, SHOP_CREDIT, usesPlays, usesShop } from "@/lib/practice-schemas";
 import Coach, { celebrationFor } from "@/components/coach";
 import ExcelGrid from "@/components/excel-grid";
 import DifficultyChip from "@/components/difficulty-chip";
@@ -254,13 +254,22 @@ export default function QuestionWorkspace({
         import("@/lib/fantasy-data"),
         // The practice store, only for a question that uses it.
         usesShop(question.tables) ? import("@/lib/practice-datasets") : null,
+        // The 2025 play-by-play (~0.8 MB), likewise.
+        usesPlays(question.tables) ? import("@/lib/plays-dataset") : null,
       ])
-        .then(([SQL, data, practice]) => {
+        .then(async ([SQL, data, practice, plays]) => {
           if (cancelled) return;
-          db = new SQL.Database();
-          db.run(data.buildSeedSql());
-          if (practice) db.run(practice.buildShopSeedSql());
-          dbRef.current = db;
+          const made = new SQL.Database();
+          made.run(data.buildSeedSql());
+          if (practice) made.run(practice.buildShopSeedSql());
+          if (plays) await plays.loadPlays(made);
+          // The page may have moved on while the plays downloaded.
+          if (cancelled) {
+            made.close();
+            return;
+          }
+          db = made;
+          dbRef.current = made;
           setReady(true);
         })
         .catch(() =>

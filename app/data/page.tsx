@@ -10,7 +10,7 @@ import {
 } from "@/lib/data-source";
 import ThemeToggle from "@/components/theme-toggle";
 import AppNav from "@/components/app-nav";
-import { EXTRA_PROVENANCE, SHOP_DOWNLOADS } from "@/lib/practice-schemas";
+import { PLAYS_PROVENANCE, SHOP_DOWNLOADS, SHOP_PROVENANCE } from "@/lib/practice-schemas";
 
 export const metadata: Metadata = {
   title: "Where the data comes from — DataDraft",
@@ -93,10 +93,12 @@ export default function DataPage() {
             {LEAGUE_META.season}. The rosters are a draft run on real Sleeper ADP.
             The order players went in is real, but the five managers are ours,
             because a real league&apos;s rosters belong to the people in it. We
-            would rather say exactly that than let you assume more.
+            would rather say exactly that than let you assume more. Some
+            questions also use <code className="font-mono text-[12px] text-turf">plays</code>,
+            the real play-by-play of the 2025 season, one row per snap.
           </p>
           <div className="mt-4 space-y-2">
-            {PROVENANCE.map((t) => (
+            {[...PROVENANCE, PLAYS_PROVENANCE].map((t) => (
               <div
                 key={t.table}
                 className="surface flex flex-col gap-1.5 border border-panel-border bg-panel/30 p-4 sm:flex-row sm:items-start sm:gap-4"
@@ -140,7 +142,7 @@ export default function DataPage() {
             year.
           </p>
           <div className="mt-4 space-y-2">
-            {EXTRA_PROVENANCE.map((t) => (
+            {SHOP_PROVENANCE.map((t) => (
               <div
                 key={t.table}
                 className="surface flex flex-col gap-1.5 border border-panel-border bg-panel/30 p-4 sm:flex-row sm:items-start sm:gap-4"

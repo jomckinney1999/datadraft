@@ -10,6 +10,7 @@
  */
 
 import { QUESTIONS, type Question, type QuestionDifficulty } from "@/lib/questions";
+import { usesPlays } from "@/lib/practice-schemas";
 
 export type McSkill = "stats" | "wrangle" | "types" | "insight" | "ab";
 
@@ -304,7 +305,9 @@ export function pickAnalystScreen(format: AnalystFormat, seed: string, solved: s
   const done = new Set(solved);
   const takenSql = new Set<string>();
   const sqlSlots: ScreenSlot[] = format.sqlMix.map((difficulty, i) => {
-    const pool = QUESTIONS.filter((q) => q.lang === "sql" && q.difficulty === difficulty && !takenSql.has(q.id));
+    const pool = QUESTIONS.filter(
+      (q) => q.lang === "sql" && q.difficulty === difficulty && !takenSql.has(q.id) && !usesPlays(q.tables),
+    );
     const fresh = pool.filter((q) => !done.has(q.id));
     const from = fresh.length ? fresh : pool;
     const ranked = from.map((q) => ({ q, k: hash(`${seed}:sql:${i}:${q.id}`) })).sort((a, b) => a.k - b.k);
