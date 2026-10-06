@@ -282,7 +282,12 @@ export type QuestionArt =
   | "box-lines"
   | "two-podium"
   | "fire-chain"
-  | "balance-scale";
+  | "balance-scale"
+  | "coupon-percent"
+  | "home-end-zone"
+  | "order-gaps"
+  | "team-sheet"
+  | "seven-ticks";
 
 export type Question = {
   id: string;
@@ -5918,6 +5923,150 @@ ORDER BY quarter;`,
     explain:
       "Q4 was more than double Q3 as the season and the holidays arrived, and Q2, the offseason, was the quietest. Work the change out from the unrounded totals: rounding first can move a percentage by a tenth.",
     art: "quarter-bars",
+  },
+  {
+    id: "what-the-codes-cost",
+    title: "What the Codes Cost",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["Strings", "CTE", "JOIN", "GROUP BY"],
+    prompt:
+      "Every discount code ends in its percentage: WELCOME5 is 5% off, BLACKFRIDAY20 is 20%. Finance wants to know what each code gave away. For delivered and shipped orders with a code, take the percentage from the code itself and apply it to the order's subtotal (quantity times the price charged), then total it per code.",
+    returns: "code, pct (the number from the code), orders, discount (rounded to 2 decimals) — biggest discount first, then code A–Z.",
+    tables: ["orders", "order_items"],
+    expected: `WITH coded AS (
+  SELECT o.order_id,
+         o.discount_code AS code,
+         CAST(LTRIM(o.discount_code, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') AS INTEGER) AS pct,
+         SUM(i.quantity * i.unit_price) AS subtotal
+  FROM orders o
+  JOIN order_items i ON i.order_id = o.order_id
+  WHERE o.status IN ('delivered', 'shipped')
+    AND o.discount_code IS NOT NULL
+  GROUP BY o.order_id
+)
+SELECT code, pct, COUNT(*) AS orders, ROUND(SUM(subtotal * pct / 100.0), 2) AS discount
+FROM coded
+GROUP BY code
+ORDER BY discount DESC, code;`,
+    orderMatters: true,
+    hint: "LTRIM(text, 'ABC…') strips any of those characters from the left, so LTRIM(code, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') leaves just the digits. CAST that to INTEGER. Work out each order's subtotal in a CTE first, then total per code.",
+    explain:
+      "GIFT15 gave away the most, ahead of BLACKFRIDAY20 even at a smaller percentage, because it was used more than twice as often. Pulling a number out of a code is a string job: here LTRIM with a set of letters does it, where Postgres would reach for REGEXP_REPLACE or SUBSTRING with a pattern.",
+    art: "coupon-percent",
+  },
+  {
+    id: "home-turf-touchdowns",
+    title: "Home Turf Touchdowns",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["Strings", "SUBSTR", "INSTR", "CTE", "GROUP BY", "LIMIT"],
+    prompt:
+      "The plays table has no home or away column, but its game_id does: it reads season_week_away_home, like 2025_01_BAL_BUF. Using plays alone, count each team's 2025 touchdowns (td_team) at home and on the road, and find the five teams that scored the most more at home.",
+    returns: "team, home_tds, road_tds, gap (home_tds minus road_tds) — biggest gap first, then team A–Z. Five rows.",
+    tables: ["plays"],
+    expected: `WITH tds AS (
+  SELECT td_team AS team,
+         SUBSTR(game_id, 9) AS matchup
+  FROM plays
+  WHERE touchdown = 1
+),
+split AS (
+  SELECT team, SUBSTR(matchup, INSTR(matchup, '_') + 1) AS home
+  FROM tds
+)
+SELECT team,
+       SUM(team = home) AS home_tds,
+       SUM(team <> home) AS road_tds,
+       SUM(team = home) - SUM(team <> home) AS gap
+FROM split
+GROUP BY team
+ORDER BY gap DESC, team
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "The first eight characters are the season and week (2025_01_), so SUBSTR(game_id, 9) is AWAY_HOME. Everything after its underscore, SUBSTR(x, INSTR(x, '_') + 1), is the home team.",
+    explain:
+      "Buffalo scored thirteen more at home than away. Team codes are two or three letters (NO, BUF), so a fixed SUBSTR position would cut some of them wrong; finding the underscore with INSTR works for both. In Postgres or Snowflake this is SPLIT_PART(game_id, '_', 4).",
+    art: "home-end-zone",
+  },
+  {
+    id: "days-between-orders",
+    title: "Days Between Orders",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["LAG", "julianday", "Dates", "HAVING", "JOIN", "LIMIT"],
+    prompt:
+      "Who comes back fastest? For customers with at least four orders that weren't cancelled, find the average number of days between one order and their next, and show the four most frequent shoppers.",
+    returns: "customer_id, name, orders, avg_gap_days (rounded to 1 decimal) — shortest gap first, then customer_id. Four rows.",
+    tables: ["orders", "customers"],
+    expected: `WITH o AS (
+  SELECT customer_id,
+         julianday(order_date)
+           - julianday(LAG(order_date) OVER (PARTITION BY customer_id ORDER BY order_date, order_id)) AS gap
+  FROM orders
+  WHERE status <> 'cancelled'
+)
+SELECT c.customer_id, c.name, COUNT(*) AS orders, ROUND(AVG(o.gap), 1) AS avg_gap_days
+FROM o
+JOIN customers c ON c.customer_id = o.customer_id
+GROUP BY c.customer_id
+HAVING COUNT(*) >= 4
+ORDER BY AVG(o.gap), c.customer_id
+LIMIT 4;`,
+    orderMatters: true,
+    hint: "LAG(order_date) OVER (PARTITION BY customer_id ORDER BY order_date) is the order before. julianday() of each, subtracted, is the gap in days. AVG ignores the first order's empty gap, and COUNT(*) still counts every order.",
+    explain:
+      "Rowan Scott's nine orders came about five and a half days apart. The first order has no order before it, so its gap is NULL: AVG skips it, which is right, while COUNT(*) still counts the order. Four orders means three gaps.",
+    art: "order-gaps",
+  },
+  {
+    id: "team-sheets",
+    title: "Team Sheets",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["GROUP_CONCAT", "Strings", "GROUP BY"],
+    prompt:
+      "The league newsletter wants one line per fantasy team with its whole roster on it. Put each team's players into a single comma-separated string, players A–Z.",
+    returns: "team_name, players (like 'A.J. Brown, CeeDee Lamb') — team_name A–Z.",
+    tables: ["rosters"],
+    expected: `SELECT team_name, GROUP_CONCAT(player, ', ' ORDER BY player) AS players
+FROM rosters
+GROUP BY team_name
+ORDER BY team_name;`,
+    orderMatters: true,
+    hint: "GROUP_CONCAT(player, ', ') joins a group's values into one string. Put ORDER BY player inside the parentheses to fix the order within each string.",
+    explain:
+      "Without the ORDER BY inside GROUP_CONCAT, the names come out in whatever order the rows happen to be read, which can change. Postgres and BigQuery call it STRING_AGG(player, ', ' ORDER BY player), Snowflake LISTAGG(player, ', ') WITHIN GROUP (ORDER BY player).",
+    art: "team-sheet",
+  },
+  {
+    id: "every-day-of-the-week",
+    title: "Every Day of the Week",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["Dates", "strftime", "HAVING", "Subquery"],
+    prompt:
+      "The most habitual users open the app whatever the day. How many users had events on all seven days of the week (Sunday through Saturday) during November 2025?",
+    returns: "users. One row.",
+    tables: ["events"],
+    expected: `SELECT COUNT(*) AS users
+FROM (
+  SELECT user_id
+  FROM events
+  WHERE event_time >= '2025-11-01' AND event_time < '2025-12-01'
+  GROUP BY user_id
+  HAVING COUNT(DISTINCT strftime('%w', event_time)) = 7
+);`,
+    orderMatters: true,
+    hint: "strftime('%w', event_time) is the day of the week, 0 for Sunday to 6 for Saturday. Per user, count the distinct ones in November and keep those with all seven.",
+    explain:
+      "Eighteen users. Asking for 'all of a set' is relational division: count the distinct members each person has and compare with the size of the set. Filtering on the event_time range, rather than strftime('%m'), keeps it usable by an index on event_time.",
+    art: "seven-ticks",
   },
   {
     id: "py-biggest-jump",

@@ -270,6 +270,11 @@ export const ART_TONE: Record<QuestionArt, Tone> = {
   "two-podium": "turf",
   "fire-chain": "gold",
   "balance-scale": "ice",
+  "coupon-percent": "gold",
+  "home-end-zone": "turf",
+  "order-gaps": "ice",
+  "team-sheet": "gold",
+  "seven-ticks": "turf",
 };
 
 // ── Scenes, one per title idea ───────────────────────────────────
@@ -5752,6 +5757,118 @@ function BalanceScale() {
   );
 }
 
+/** What the Codes Cost — a coupon with a big percentage and a dashed cut line. */
+function CouponPercent() {
+  return (
+    <g>
+      <Shadow y={134} rx={78} />
+      <g transform="rotate(-6 100 78)">
+        <path d="M24 44 H176 V64 A10 10 0 0 0 176 84 V112 H24 V84 A10 10 0 0 0 24 64 Z" fill={c("gold")} stroke={N} strokeWidth="2.6" strokeLinejoin="round" />
+        <path d="M60 50 V106" stroke={N} strokeWidth="2" strokeDasharray="5 4" />
+        <text x="118" y="88" textAnchor="middle" fontSize="30" fontWeight="900" fill={N} fontFamily={SANS}>
+          20%
+        </text>
+        <text x="42" y="82" textAnchor="middle" fontSize="9" fontWeight="900" fill={N} fontFamily={MONO} transform="rotate(-90 42 78)">
+          CODE
+        </text>
+      </g>
+      <path d="M150 116 L174 132 M150 132 L174 116" stroke={c("ink")} strokeWidth="3" strokeLinecap="round" />
+      <circle cx="148" cy="114" r="5" fill="none" stroke={c("ink")} strokeWidth="2.4" />
+      <circle cx="148" cy="134" r="5" fill="none" stroke={c("ink")} strokeWidth="2.4" />
+    </g>
+  );
+}
+
+/** Home Turf Touchdowns — a house standing in the end zone with a ball crossing the goal line. */
+function HomeEndZone() {
+  return (
+    <g>
+      <Shadow y={134} rx={84} />
+      <rect x="16" y="96" width="168" height="34" rx="3" fill={c("turf", 0.35)} stroke={N} strokeWidth="2" />
+      <path d="M120 96 V130" stroke={c("ink")} strokeWidth="2.6" />
+      <path d="M128 96 L156 74 L184 96 Z" fill={c("gold")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <rect x="134" y="96" width="44" height="30" fill={c("ink")} stroke={N} strokeWidth="2.2" />
+      <rect x="150" y="106" width="12" height="20" rx="1" fill={c("turf")} stroke={N} strokeWidth="1.8" />
+      <path d="M40 66 Q80 30 116 86" fill="none" stroke={c("ice")} strokeWidth="3" strokeDasharray="6 5" strokeLinecap="round" />
+      <Football x={118} y={88} rx={12} rot={40} />
+      <text x="62" y="120" textAnchor="middle" fontSize="13" fontWeight="900" fill={c("ink")} fontFamily={MONO}>
+        TD
+      </text>
+    </g>
+  );
+}
+
+/** Days Between Orders — shopping bags along a timeline, the gaps between them measured. */
+function OrderGaps() {
+  const bag = (x: number, fill: string) => (
+    <g>
+      <rect x={x - 16} y="56" width="32" height="38" rx="3" fill={fill} stroke={N} strokeWidth="2.2" />
+      <path d={`M${x - 8} 56 V48 Q${x} 38 ${x + 8} 48 V56`} fill="none" stroke={N} strokeWidth="2.2" />
+    </g>
+  );
+  return (
+    <g>
+      <Shadow y={132} rx={84} />
+      <path d="M14 104 H186" stroke={c("ink-muted")} strokeWidth="2.4" />
+      {bag(36, c("ice"))}
+      {bag(98, c("gold"))}
+      {bag(164, c("turf"))}
+      {[[52, 82], [114, 148]].map(([a, b]) => (
+        <g key={a}>
+          <path d={`M${a} 116 H${b}`} stroke={c("ink")} strokeWidth="2.2" />
+          <path d={`M${a} 110 V122 M${b} 110 V122`} stroke={c("ink")} strokeWidth="2.2" />
+        </g>
+      ))}
+      <text x="67" y="134" textAnchor="middle" fontSize="9" fontWeight="900" fill={c("ink-soft")} fontFamily={MONO}>
+        DAYS
+      </text>
+      <text x="131" y="134" textAnchor="middle" fontSize="9" fontWeight="900" fill={c("ink-soft")} fontFamily={MONO}>
+        DAYS
+      </text>
+    </g>
+  );
+}
+
+/** Team Sheets — a team's sheet with its players run together on one line. */
+function TeamSheet() {
+  return (
+    <g>
+      <Shadow y={136} rx={64} />
+      <rect x="40" y="22" width="120" height="108" rx="5" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <rect x="40" y="22" width="120" height="24" rx="5" fill={c("gold")} stroke={N} strokeWidth="2.2" />
+      <rect x="54" y="30" width="56" height="8" rx="2" fill={N} />
+      <rect x="52" y="62" width="40" height="10" rx="2" fill={c("ice")} stroke={N} strokeWidth="1.4" />
+      <text x="97" y="72" textAnchor="middle" fontSize="14" fontWeight="900" fill={N} fontFamily={MONO}>
+        ,
+      </text>
+      <rect x="102" y="62" width="46" height="10" rx="2" fill={c("turf")} stroke={N} strokeWidth="1.4" />
+      <rect x="52" y="86" width="96" height="6" rx="2" fill={c("ink-muted", 0.5)} />
+      <rect x="52" y="100" width="80" height="6" rx="2" fill={c("ink-muted", 0.5)} />
+      <rect x="52" y="114" width="88" height="6" rx="2" fill={c("ink-muted", 0.5)} />
+    </g>
+  );
+}
+
+/** Every Day of the Week — seven day tiles, every one ticked. */
+function SevenTicks() {
+  const days = ["S", "M", "T", "W", "T", "F", "S"];
+  return (
+    <g>
+      <Shadow y={128} rx={86} />
+      {days.map((d, i) => (
+        <g key={i}>
+          <rect x={14 + i * 25} y="48" width="21" height="50" rx="3" fill={c("ink")} stroke={N} strokeWidth="2" />
+          <text x={24.5 + i * 25} y="64" textAnchor="middle" fontSize="11" fontWeight="900" fill={c("night-100")} fontFamily={MONO}>
+            {d}
+          </text>
+          <path d={`M${18 + i * 25} 80 L${23 + i * 25} 86 L${31 + i * 25} 74`} fill="none" stroke={c("turf")} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
+      ))}
+      <Sparkle x={182} y={36} r={7} fill={c("gold")} />
+    </g>
+  );
+}
+
 const SCENES: Record<QuestionArt, () => JSX.Element> = {
   hammer: Hammer,
   quarterback: Quarterback,
@@ -5975,6 +6092,11 @@ const SCENES: Record<QuestionArt, () => JSX.Element> = {
   "two-podium": TwoPodium,
   "fire-chain": FireChain,
   "balance-scale": BalanceScale,
+  "coupon-percent": CouponPercent,
+  "home-end-zone": HomeEndZone,
+  "order-gaps": OrderGaps,
+  "team-sheet": TeamSheet,
+  "seven-ticks": SevenTicks,
 };
 
 export default function QuestionArt({
