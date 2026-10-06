@@ -5,7 +5,7 @@ import { liveProjects } from "@/lib/projects";
 import { QUESTIONS } from "@/lib/questions";
 import { SITE_URL } from "@/lib/site";
 import { PAYWALL_LIVE } from "@/lib/season-pass";
-import { GUIDES_BASE, PANDAS_GUIDE, PATTERN_GUIDES, TOPIC_GUIDES } from "@/lib/pattern-guides";
+import { EXCEL_GUIDE, GUIDES_BASE, PANDAS_GUIDE, PATTERN_GUIDES, TOPIC_GUIDES } from "@/lib/pattern-guides";
 
 /**
  * Every public page, so search engines find the question bank rather than
@@ -24,6 +24,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     at(GUIDES_BASE, 0.9),
     ...[...PATTERN_GUIDES, ...TOPIC_GUIDES].map((g) => at(`${GUIDES_BASE}/${g.slug}`, 0.8)),
     at(PANDAS_GUIDE.path, 0.8),
+    at(EXCEL_GUIDE.path, 0.8),
     at("/questions/duel", 0.8, "daily"),
     at("/questions/mock", 0.7),
     at("/questions/prep", 0.7),

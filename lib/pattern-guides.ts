@@ -710,7 +710,7 @@ export type LanguageGuide = Omit<PatternGuide, "pattern" | "slug"> & {
   name: string;
   asks: string;
   label: string;
-  lang: "python";
+  lang: "python" | "excel";
 };
 
 export const PANDAS_GUIDE: LanguageGuide = {
@@ -775,6 +775,67 @@ print(result)`,
     {
       q: "Is the data real?",
       a: "Yes. weekly is one row per game of the 2024 NFL season for twenty players, from nflverse's public data, and df is their season totals. The same rows are behind the SQL questions, so you can solve one in both languages.",
+    },
+  ],
+};
+
+/** The Excel guide (/excel-interview-questions): the same page for the spreadsheet round. */
+export const EXCEL_GUIDE: LanguageGuide = {
+  path: "/excel-interview-questions",
+  name: "Excel interview questions",
+  asks: "SUMIFS, lookups, IF and cleaning messy cells: the spreadsheet round of an analyst screen.",
+  label: "the spreadsheet round",
+  lang: "excel",
+  h1: "Excel interview questions for data analysts",
+  metaTitle: "Excel interview questions for data analysts, with answers",
+  metaDescription:
+    "The Excel an analyst screen asks for: SUMIFS and COUNTIFS, XLOOKUP and INDEX/MATCH, IF and IFERROR, and cleaning messy cells. The mistakes interviewers watch for, a worked example, and practice formulas you run in your browser on real NFL data.",
+  lead: "Plenty of analyst screens still hand you a spreadsheet: total this by that, look this up, clean that column. The functions are few. The marks are lost on ranges, blanks and lookups that quietly return the wrong row.",
+  whyAsked:
+    "Because the people you'll work with live in spreadsheets, and a lot of first analyses start in one. An Excel round checks whether you can answer a question with a formula someone else can read: conditional totals, lookups that survive a missing name, and data that needs cleaning before any of it works.",
+  shape: `=SUMIFS(points, position, "QB")
+=COUNTIFS(team, "KC", points, ">=20")
+=AVERAGEIFS(points, position, "WR")
+=XLOOKUP("Josh Allen", player, points, "not found")
+=INDEX(player, MATCH(MAX(points), points, 0))
+=IFERROR(points / games, 0)`,
+  shapeNote:
+    "The ranges are named here to show the shape; in the sheet they're addresses like E2:E17. SUMIFS, COUNTIFS and AVERAGEIFS take the range to add first and then pairs of range and condition. XLOOKUP is the modern lookup, and INDEX/MATCH is what to reach for when you need the row of a maximum or an older version of Excel.",
+  mistakes: [
+    {
+      title: "Ranges that don't line up",
+      body: "SUMIFS(E2:E17, C2:C16, \"QB\") compares rows that don't belong together. Every range in a *IFS function has to be the same size and start on the same row.",
+    },
+    {
+      title: "Blanks are not zeros",
+      body: "AVERAGE skips an empty cell but counts a 0, so typing zeros into weeks a player didn't play drags his average down. Leave missing data blank, and use COUNTBLANK when you need to know how much is missing.",
+    },
+    {
+      title: "A lookup that fails silently",
+      body: "VLOOKUP's last argument defaults to TRUE, an approximate match, which can return the wrong row with no error. Pass FALSE, or use XLOOKUP or MATCH with 0, and decide what a missing name should show.",
+    },
+    {
+      title: "Hardcoding the answer",
+      body: "A formula like =430.4 is right today and wrong tomorrow. Interviewers want the formula that reads the sheet, and every DataDraft question rejects one that doesn't.",
+    },
+  ],
+  example: "xl-who-scored-most",
+  faq: [
+    {
+      q: "What Excel do data analyst interviews ask?",
+      a: "Conditional totals and counts (SUMIFS, COUNTIFS, AVERAGEIFS), lookups (XLOOKUP, INDEX/MATCH, VLOOKUP), logic (IF, IFERROR), ranking and percentiles (LARGE, RANK, MEDIAN, PERCENTILE), and text cleaning (TRIM, VALUE, SUBSTITUTE). Pivot tables come up too, usually as a talking point or a take-home.",
+    },
+    {
+      q: "XLOOKUP or VLOOKUP?",
+      a: "XLOOKUP if the version you're tested on has it: it looks left as easily as right, matches exactly by default and takes a value to show when nothing matches. Know VLOOKUP's fourth argument anyway, because plenty of workbooks still use it.",
+    },
+    {
+      q: "How is the practice graded?",
+      a: "Your formula is evaluated on the same workbook the answer uses, and the value it produces is compared with the answer's, so any formula that gets there passes. One that doesn't refer to a cell is turned away even when the number is right.",
+    },
+    {
+      q: "Is the data real?",
+      a: "The points and games are real 2024 NFL numbers from nflverse's public data. The Owner and Salary columns are an invented fantasy auction, and the Import sheet is deliberately messy so there's something to clean.",
     },
   ],
 };

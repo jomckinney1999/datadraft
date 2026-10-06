@@ -4,7 +4,7 @@ import AppNav from "@/components/app-nav";
 import SiteFooter from "@/components/site-footer";
 import PrepArt, { hasPrepArt } from "@/components/prep-art";
 import { PATTERNS, questionsFor } from "@/lib/interview-patterns";
-import { GUIDES_BASE, PANDAS_GUIDE, TOPIC_GUIDES, guideForPattern } from "@/lib/pattern-guides";
+import { EXCEL_GUIDE, GUIDES_BASE, PANDAS_GUIDE, TOPIC_GUIDES, guideForPattern } from "@/lib/pattern-guides";
 import QuestionArt from "@/components/question-art";
 import { datasetOf } from "@/lib/practice-schemas";
 import { QUESTIONS, questionOfTheDay, leagueDay } from "@/lib/questions";
@@ -173,11 +173,15 @@ export default function SqlInterviewQuestions() {
         </section>
 
         <p className="mt-6 text-sm leading-relaxed text-ink-soft">
-          Python round too?{" "}
+          A Python or spreadsheet round too? The same guide exists for{" "}
           <Link href={PANDAS_GUIDE.path} className="font-semibold text-turf underline underline-offset-2 hover:text-ink">
-            Pandas interview questions
+            pandas
           </Link>{" "}
-          is the same guide for pandas, with every Python question in the bank to practise on.
+          and for{" "}
+          <Link href={EXCEL_GUIDE.path} className="font-semibold text-turf underline underline-offset-2 hover:text-ink">
+            Excel
+          </Link>
+          , each with every question in that language to practise on.
         </p>
 
         <section className="surface mt-10 rounded-2xl border border-panel-border bg-panel p-5 sm:p-7">
