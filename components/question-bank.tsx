@@ -388,7 +388,7 @@ export default function QuestionBank({
             <p className="text-[12px] leading-relaxed text-ink-muted">
               Invented data: a made-up {data === "store" ? "online store" : "fantasy football app"},
               for practising on the kind of schema a screen hands you.{" "}
-              <Link href={DATASETS.find((d) => d.id === data)!.href} className="text-ice hover:underline">
+              <Link href={DATASETS.find((d) => d.id === data)!.href} className="text-ice underline underline-offset-2 hover:text-ink">
                 What&apos;s in it →
               </Link>
             </p>

@@ -103,7 +103,7 @@ export default function DataPage() {
             would rather say exactly that than let you assume more. Some
             questions also use <code className="font-mono text-[12px] text-turf">plays</code>,
             the real play-by-play of the 2025 season, one row per snap.{" "}
-            <Link href="/questions?data=plays" className="text-turf hover:underline">
+            <Link href="/questions?data=plays" className="text-turf underline underline-offset-2 hover:text-gold">
               Practise on it →
             </Link>
           </p>

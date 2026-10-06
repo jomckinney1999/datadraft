@@ -154,6 +154,7 @@ export default function LearnRail({
                   <div
                     className="quest-bar"
                     role="progressbar"
+                    aria-label={q.label}
                     aria-valuenow={pct}
                     aria-valuemin={0}
                     aria-valuemax={100}

@@ -55,7 +55,8 @@ export default function TrophyCase() {
     <section id="hall" className="scroll-mt-20">
       <div className="text-center">
         <p className="label-broadcast text-gold">achievements · hall of fame</p>
-        <h2 className="mt-1 font-display text-3xl font-bold text-ink sm:text-4xl">
+        {/* The page's only heading at this level: /achievements is the Hall. */}
+        <h1 className="mt-1 font-display text-3xl font-bold text-ink sm:text-4xl">
           {earned === 0 ? (
             "The lights are on"
           ) : (
@@ -63,7 +64,7 @@ export default function TrophyCase() {
               <span className="text-gold">{earned}</span> of {BADGES.length} enshrined
             </>
           )}
-        </h2>
+        </h1>
         <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">
           {earned === 0
             ? "And the case is empty. Finish one lesson and First Snap takes the first spot in the Rookie Wing."

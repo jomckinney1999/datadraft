@@ -105,6 +105,7 @@ export default function LearnStatusChips({
       <Hint title={streakTitle} body={streakBody} sr={`${streakTitle}. ${streakBody}`}>
         <button
           type="button"
+          aria-label={streakTitle}
           className={`status-chip shrink-0 cursor-help !px-2 !py-1 ${streak > 0 ? "border-gold/40 text-gold" : ""}`}
         >
           <FlameIcon active={streak > 0} />
@@ -117,7 +118,7 @@ export default function LearnStatusChips({
         </button>
       </Hint>
       <Hint title={timeoutsTitle} body={timeoutsBody} sr={`${timeoutsTitle}. ${timeoutsBody}`}>
-        <button type="button" className="status-chip shrink-0 cursor-help !px-2 !py-1 text-ice">
+        <button type="button" aria-label={timeoutsTitle} className="status-chip shrink-0 cursor-help !px-2 !py-1 text-ice">
           <ClockIcon />
           <span aria-hidden>{timeoutsLabel}</span>
         </button>
@@ -128,7 +129,7 @@ export default function LearnStatusChips({
         sr={`${ticketsTitle}. ${ticketsBody}`}
         className={dense ? "lg:!hidden xl:!inline-flex" : ""}
       >
-        <button type="button" className="status-chip shrink-0 cursor-help !px-2 !py-1 text-gold">
+        <button type="button" aria-label={ticketsTitle} className="status-chip shrink-0 cursor-help !px-2 !py-1 text-gold">
           <TicketIcon />
           <span aria-hidden>{progress.tickets}</span>
         </button>

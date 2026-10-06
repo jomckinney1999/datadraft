@@ -90,7 +90,13 @@ export default function CourseRail() {
         {COURSES.map((c) => (
           <RailCard key={c.id} course={c} />
         ))}
-        <div aria-hidden className="flex">
+        <div
+          aria-hidden
+          className="flex"
+          // Hidden from screen readers but still focusable meant Tab walked
+          // through ten invisible duplicates. React 18 wants inert as a string.
+          {...({ inert: "" } as unknown as { inert: boolean })}
+        >
           {COURSES.map((c) => (
             <RailCard key={`dup-${c.id}`} course={c} />
           ))}

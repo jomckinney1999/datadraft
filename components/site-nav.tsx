@@ -64,7 +64,9 @@ export default function SiteNav() {
     <>
       {/* ── Top of page: quiet chrome over the hero ─────────────── */}
       {!scrolled && (
-        <div className="fixed inset-x-0 top-0 z-30">
+        // A landmark like the floating bar, so the top-of-page links are in
+        // "banner" for screen readers rather than loose in the page.
+        <header className="fixed inset-x-0 top-0 z-30">
           <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
             <Link href="/" aria-label="DataDraft home" className="flex items-baseline gap-2">
               <span className="font-display text-lg font-bold tracking-tight text-pop drop-shadow-[0_1px_8px_rgb(var(--c-night)/0.8)]">
@@ -93,12 +95,16 @@ export default function SiteNav() {
               </button>
             </div>
           </div>
-        </div>
+        </header>
       )}
 
       {/* ── After scroll: floating glass bar ────────────────────── */}
       <header
         aria-hidden={!scrolled}
+        // Hidden but still in the tab order would let a keyboard land on
+        // links nobody can see; inert takes the whole bar out until it shows.
+        // React 18 only renders inert from a string (its types say boolean).
+        {...(!scrolled ? ({ inert: "" } as unknown as { inert: boolean }) : {})}
         className={`fixed inset-x-0 top-0 z-30 transition-[transform,opacity] duration-300 ease-out ${
           scrolled ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-3 opacity-0"
         }`}

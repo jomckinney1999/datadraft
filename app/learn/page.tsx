@@ -195,6 +195,8 @@ export default function CourseCatalogPage() {
           </section>
         )}
 
+        {/* The cards' titles are h3s; this keeps the outline h1 → h2 → h3. */}
+        <h2 className="sr-only">All courses</h2>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {COURSES.map((course) => (
             <CourseCard key={course.id} course={course} completed={completed} />
@@ -205,7 +207,7 @@ export default function CourseCatalogPage() {
           <p className="mt-6 text-center font-mono text-[11px] uppercase tracking-wider text-ink-muted">
             {allDone}/{allLessons.length} lessons cleared across every course
             {" · "}
-            <Link href="/achievements" className="text-gold hover:underline">
+            <Link href="/achievements" className="text-gold underline underline-offset-2 hover:text-ink">
               Hall of Fame →
             </Link>
           </p>

@@ -1258,13 +1258,16 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
           </div>
         </div>
       )}
-    <div
+    <main
       className={`relative mx-auto flex min-h-screen w-full flex-col px-4 ${
         phase === "exercise" && isHandsOn
           ? "max-w-6xl"
           : "max-w-xl sm:max-w-2xl"
       }`}
     >
+      {/* The finish screens have their own h1 (Touchdown!, Turnover on downs);
+          every other phase is named by the lesson. */}
+      {phase !== "complete" && phase !== "turnover" && <h1 className="sr-only">{lesson.title}</h1>}
       <ConfettiBurst fireKey={fxKey} active={!!feedback?.correct} />
       <XpFloat
         amount={xpFloat?.amount ?? 0}
@@ -2434,7 +2437,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
           </div>
         </div>
       )}
-    </div>
+    </main>
     </div>
   );
 }

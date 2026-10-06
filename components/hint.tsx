@@ -12,11 +12,24 @@
  * would clip anything drawn outside it. It's clamped to the viewport and
  * closes on scroll, Escape or a tap elsewhere.
  *
- * Screen readers get the same words without the card: `sr` is rendered
- * inside the trigger as visually hidden text.
+ * Screen readers get the same words without the card: `sr` is rendered as
+ * visually hidden text and wired to the trigger with aria-describedby. The
+ * trigger still needs a name of its own (an aria-label, when its visible
+ * content is only a number and an icon): a description is not a name, and
+ * axe flagged the three status chips as unnamed buttons (2026-10-05).
  */
 
-import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import {
+  cloneElement,
+  isValidElement,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 import { createPortal } from "react-dom";
 
 const WIDTH = 272;
@@ -87,7 +100,9 @@ export default function Hint({
       onBlur={() => setOpen(false)}
       onClick={toggleOnTap ? () => (open ? setOpen(false) : show()) : undefined}
     >
-      {children}
+      {isValidElement(children)
+        ? cloneElement(children as ReactElement<{ "aria-describedby"?: string }>, { "aria-describedby": id })
+        : children}
       <span className="sr-only" id={id}>
         {sr}
       </span>
