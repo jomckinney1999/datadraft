@@ -3,6 +3,7 @@ import SiteNav from "@/components/site-nav";
 import SiteFooter from "@/components/site-footer";
 import SupportWidget from "@/components/support-widget";
 import QotdPanel from "@/components/qotd-panel";
+import QuestionArt from "@/components/question-art";
 import SuccessStories from "@/components/success-stories";
 import FieldBackdrop from "@/components/field-backdrop";
 import CourseRail from "@/components/course-rail";
@@ -341,7 +342,12 @@ export default async function Home() {
               </p>
             </div>
             <div className="reveal">
-              <QotdPanel question={qotd} tables={schemaFor(qotd)} isDaily={qotdIsDaily} />
+              <QotdPanel
+                question={qotd}
+                tables={schemaFor(qotd)}
+                isDaily={qotdIsDaily}
+                art={<QuestionArt art={qotd.art} className="qotd-hero-art" />}
+              />
             </div>
             <p className="reveal mt-5 text-center text-sm text-ink-soft">
               Not ready to write SQL?{" "}

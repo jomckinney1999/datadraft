@@ -5,8 +5,10 @@
  * why this lives here and not beside them.
  */
 
+import { createElement } from "react";
 import { isDailyQuestion, leagueDay, questionsIn, schemaFor, type Question } from "@/lib/questions";
 import { questionIsFree } from "@/lib/pass-gates";
+import QuestionArt from "@/components/question-art";
 
 /** The day before `day`, for the streak check. */
 function previousDay(day: string): string {
@@ -37,5 +39,9 @@ export function workspaceProps(question: Question) {
     // Free without the Season Pass: the daily, a week after it, the starter
     // set (lib/pass-gates.ts). Only matters once the paywall is on.
     free: questionIsFree(question, day),
+    // The question's drawing, rendered here on the server and handed to the
+    // workspace, so the page doesn't ship every drawing in the bank (~40 kB
+    // gzipped) to show one (2026-10-06).
+    art: createElement(QuestionArt, { art: question.art, align: "left", className: "absolute inset-0 h-full w-full" }),
   };
 }

@@ -27,7 +27,7 @@
  * did is how people debug, and hiding it behind a grade would teach guessing.
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import type { Database, QueryExecResult } from "sql.js";
 import ChartIt from "@/components/chart-it";
@@ -55,10 +55,9 @@ import { solveQuestion, loadProgress, setCallSign } from "@/lib/progress";
 import { SHORT_CREDIT } from "@/lib/data-source";
 import { playSfx } from "@/lib/sfx";
 import CodeEditor from "@/components/code-editor";
-import QuestionArt from "@/components/question-art";
 import { Objective, SceneLine } from "@/components/scene-line";
 import AppNav from "@/components/app-nav";
-import { FaceCluster } from "@/components/qotd-card";
+import { FaceCluster } from "@/components/face-cluster";
 import { featuredPlayers } from "@/lib/question-players";
 import { inventedCredit, usesApp, usesPlays, usesShop } from "@/lib/practice-schemas";
 import Coach, { celebrationFor } from "@/components/coach";
@@ -198,8 +197,11 @@ export default function QuestionWorkspace({
   total,
   challenge = null,
   free = true,
+  art,
 }: {
   question: Question;
+  /** The question's drawing, rendered on the server (lib/question-page.ts). */
+  art: ReactNode;
   /** The question's tables and columns, worked out on the server. */
   tables: { table: string; columns: string[] }[];
   isQotd: boolean;
@@ -499,11 +501,7 @@ export default function QuestionWorkspace({
           <section className="order-1 lg:col-span-5 lg:col-start-1 lg:row-start-1">
             <div className="surface overflow-hidden rounded-2xl border border-panel-border bg-panel">
               <div className="relative h-36 overflow-hidden border-b border-panel-border">
-                <QuestionArt
-                  art={question.art}
-                  align="left"
-                  className="absolute inset-0 h-full w-full"
-                />
+                {art}
                 <div className="absolute inset-y-0 right-4 flex items-center">
                   <FaceCluster players={players} size={72} names={false} />
                 </div>

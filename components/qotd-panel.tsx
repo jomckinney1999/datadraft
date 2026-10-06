@@ -17,23 +17,26 @@
  * correct answer is the only thing asking for anything.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import type { Database, QueryExecResult } from "sql.js";
 import type { Question } from "@/lib/questions";
 import { resultsMatch } from "@/lib/sql-grade";
 import CodeEditor from "@/components/code-editor";
-import QuestionArt from "@/components/question-art";
 import DifficultyChip from "@/components/difficulty-chip";
-import { FaceCluster } from "@/components/qotd-card";
+import { FaceCluster } from "@/components/face-cluster";
 import { featuredPlayers } from "@/lib/question-players";
 
 export default function QotdPanel({
   question,
   tables,
   isDaily = true,
+  art,
 }: {
   question: Question;
+  /** The question's drawing, rendered by the page on the server, so the home
+   * page doesn't ship every drawing in the bank to show one. */
+  art: ReactNode;
   /** The question's tables, worked out on the server: importing schemaFor here
    * would put the whole question bank in the home page's JavaScript. */
   tables: { table: string; columns: string[] }[];
@@ -145,7 +148,7 @@ export default function QotdPanel({
 
   return (
     <div ref={rootRef} onFocusCapture={() => setWanted(true)} onPointerDown={() => setWanted(true)} className="qotd-hero overflow-hidden rounded-2xl">
-      <QuestionArt art={question.art} className="qotd-hero-art" />
+      {art}
       <div className="qotd-sheen" aria-hidden />
       <div className="relative flex flex-wrap items-center gap-5 border-b border-gold/20 px-5 py-5">
         <FaceCluster players={players} size={64} names={false} />
