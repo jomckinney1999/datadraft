@@ -102,7 +102,10 @@ export default function DataPage() {
             because a real league&apos;s rosters belong to the people in it. We
             would rather say exactly that than let you assume more. Some
             questions also use <code className="font-mono text-[12px] text-turf">plays</code>,
-            the real play-by-play of the 2025 season, one row per snap.
+            the real play-by-play of the 2025 season, one row per snap.{" "}
+            <Link href="/questions?data=plays" className="text-turf hover:underline">
+              Practise on it →
+            </Link>
           </p>
           <div className="mt-4 space-y-2">
             {[...PROVENANCE, PLAYS_PROVENANCE].map((t) => (
@@ -139,6 +142,7 @@ export default function DataPage() {
           intro="Some questions in the bank use a second database: Gridiron Goods, an online fan store we made up. Its customers, orders and sales are invented, and every question on it says so. It exists because a real SQL screen hands you a schema you have never seen, usually a shop, and practising only on one league makes the first unfamiliar table harder than it needs to be. It is generated from a fixed seed, so every answer stays put, and it is messy on purpose: missing states, cancelled and returned orders, and a price rise halfway through the year."
           tables={SHOP_PROVENANCE}
           downloads={SHOP_DOWNLOADS}
+          practice="/questions?data=store"
         />
         <InventedDataset
           id="practice-app"
@@ -146,6 +150,7 @@ export default function DataPage() {
           intro="The product-analytics questions use Benchwarmer, a fantasy football app we made up: its users, everything they did in the app, and who paid for Pro. Daily actives, retention, funnels, sessions and recurring revenue are what analyst screens at app companies ask about, and no real app's event log could be published, so this one is invented and labelled that way. It is generated from a fixed seed and shaped like real product data: a draft-season signup rush, Sunday spikes, a funnel that leaks, and duplicate events from a retrying client."
           tables={APP_PROVENANCE}
           downloads={APP_DOWNLOADS}
+          practice="/questions?data=app"
         />
 
         {/* ── downloads ── */}
@@ -229,12 +234,14 @@ function InventedDataset({
   intro,
   tables,
   downloads,
+  practice,
 }: {
   id: string;
   title: string;
   intro: string;
   tables: TableProvenance[];
   downloads: { file: string; label: string }[];
+  practice: string;
 }) {
   return (
     <section id={id} className="mt-10 scroll-mt-20">
@@ -259,7 +266,13 @@ function InventedDataset({
           </div>
         ))}
       </div>
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <Link
+          href={practice}
+          className="border border-turf bg-turf/15 px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-widest text-turf transition-colors hover:bg-turf/25"
+        >
+          Practise on it →
+        </Link>
         {downloads.map((d) => (
           <a
             key={d.file}

@@ -163,6 +163,23 @@ export function usesPlays(tables: string[]): boolean {
   return tables.some((t) => PLAYS_TABLES.includes(t));
 }
 
+/** The databases a question can run on, for the bank's Data filter. */
+export type DatasetId = "league" | "plays" | "store" | "app";
+export const DATASETS: { id: DatasetId; label: string; invented: boolean; href: string }[] = [
+  { id: "league", label: "League", invented: false, href: "/data" },
+  { id: "plays", label: "Play-by-play", invented: false, href: "/data" },
+  { id: "store", label: "Store", invented: true, href: "/data#practice-store" },
+  { id: "app", label: "App", invented: true, href: "/data#practice-app" },
+];
+
+/** Which database a question runs on. Python, R and Excel are all league data. */
+export function datasetOf(tables: string[]): DatasetId {
+  if (usesApp(tables)) return "app";
+  if (usesPlays(tables)) return "plays";
+  if (usesShop(tables)) return "store";
+  return "league";
+}
+
 /** A question on the league data only (the home page and lessons can run it). */
 export function isLeagueOnly(tables: string[]): boolean {
   return tables.every((t) => LEAGUE_TABLES.includes(t));

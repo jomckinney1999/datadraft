@@ -39,6 +39,7 @@ import PassTag from "@/components/pass-tag";
 import PrepArt, { hasPrepArt } from "@/components/prep-art";
 import { PATTERNS, questionsFor } from "@/lib/interview-patterns";
 import { FACTS } from "@/lib/lesson-facts.generated";
+import { DATASETS, datasetOf, type DatasetId } from "@/lib/practice-schemas";
 
 type LangFilter = "all" | QuestionLang;
 
@@ -78,16 +79,24 @@ function FlameIcon({ lit }: { lit: boolean }) {
 export default function QuestionBank({
   day,
   initialPattern = null,
+  initialData = null,
 }: {
   day: string;
   /** Deep link from hiring prep: `/questions?pattern=joins#interview`. */
   initialPattern?: string | null;
+  /** Deep link from /data: `/questions?data=app`. */
+  initialData?: string | null;
 }) {
   const seedPattern =
     initialPattern && PATTERNS.some((p) => p.id === initialPattern) ? initialPattern : null;
+  const seedData = DATASETS.find((d) => d.id === initialData)?.id ?? null;
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
   const [hydrated, setHydrated] = useState(false);
-  const [lang, setLang] = useState<LangFilter>(seedPattern ? "sql" : "all");
+  const [lang, setLang] = useState<LangFilter>(
+    seedPattern || (seedData && seedData !== "league") ? "sql" : "all",
+  );
+  /** Which database (SQL only, apart from the league). */
+  const [data, setData] = useState<"all" | DatasetId>(seedData ?? "all");
   const [diff, setDiff] = useState<DiffFilter>("all");
   const [unsolvedOnly, setUnsolvedOnly] = useState(false);
   const [query, setQuery] = useState("");
@@ -105,6 +114,8 @@ export default function QuestionBank({
       // A deep-linked pattern wins over the remembered language filter.
       if (seedPattern) {
         window.localStorage.setItem(LANG_KEY, "sql");
+      } else if (seedData && seedData !== "league") {
+        /* a dataset deep link is SQL for this visit; leave the memory alone */
       } else {
         const saved = window.localStorage.getItem(LANG_KEY);
         if (saved && LANG_VALUES.includes(saved)) setLang(saved as QuestionLang);
@@ -112,7 +123,13 @@ export default function QuestionBank({
     } catch {
       /* storage blocked — the default is fine */
     }
-  }, [seedPattern]);
+  }, [seedPattern, seedData]);
+
+  function pickData(next: "all" | DatasetId) {
+    setData(next);
+    // Only the league has Python, R and Excel; the other databases are SQL.
+    if (next !== "all" && next !== "league" && lang !== "all" && lang !== "sql") pickLang("sql");
+  }
 
   function pickLang(next: LangFilter) {
     setLang(next);
@@ -139,6 +156,7 @@ export default function QuestionBank({
     if (patternIds && !patternIds.has(q.id)) return false;
     if (lang !== "all" && q.lang !== lang) return false;
     if (diff !== "all" && q.difficulty !== diff) return false;
+    if (data !== "all" && datasetOf(q.tables) !== data) return false;
     if (unsolvedOnly && solved.has(q.id)) return false;
     if (!query.trim()) return true;
     const needle = query.trim().toLowerCase();
@@ -159,9 +177,10 @@ export default function QuestionBank({
           </h1>
           <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">
             SQL, Python, R and Excel on real NFL scoring, {FACTS.seasons[0]}{" "}
-            through week {FACTS.latest.week} of {FACTS.latest.season}. One
-            problem at a time, no lesson around it, nothing to lose for a wrong
-            answer.
+            through week {FACTS.latest.week} of {FACTS.latest.season}, and
+            real 2025 play-by-play, plus an invented store and app for the
+            schemas interviews hand you. One problem at a time, nothing to lose
+            for a wrong answer.
           </p>
         </header>
 
@@ -347,6 +366,36 @@ export default function QuestionBank({
 
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+              Data
+            </span>
+            {(["all", ...DATASETS.map((d) => d.id)] as ("all" | DatasetId)[]).map((d) => (
+              <button
+                key={d}
+                type="button"
+                onClick={() => pickData(d)}
+                aria-pressed={data === d}
+                className={`rounded-lg border px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors ${
+                  data === d
+                    ? "border-turf bg-turf/15 text-turf"
+                    : "border-panel-border text-ink-muted hover:border-turf/40 hover:text-ink"
+                }`}
+              >
+                {d === "all" ? "All" : DATASETS.find((x) => x.id === d)?.label}
+              </button>
+            ))}
+          </div>
+          {DATASETS.find((d) => d.id === data)?.invented && (
+            <p className="text-[12px] leading-relaxed text-ink-muted">
+              Invented data: a made-up {data === "store" ? "online store" : "fantasy football app"},
+              for practising on the kind of schema a screen hands you.{" "}
+              <Link href={DATASETS.find((d) => d.id === data)!.href} className="text-ice hover:underline">
+                What&apos;s in it →
+              </Link>
+            </p>
+          )}
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
               Level
             </span>
             {(["all", "easy", "medium", "hard"] as DiffFilter[]).map((d) => (
@@ -424,6 +473,11 @@ export default function QuestionBank({
                     <span className="hidden font-mono text-[10px] uppercase tracking-widest text-ink-muted lg:inline">
                       +{DIFFICULTY_XP[q.difficulty]} XP
                     </span>
+                    {datasetOf(q.tables) !== "league" && (
+                      <span className="hidden rounded-md border border-ice/40 px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-ice sm:inline">
+                        {DATASETS.find((d) => d.id === datasetOf(q.tables))?.label}
+                      </span>
+                    )}
                     <span className="rounded-md border border-panel-border px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-ink-soft">
                       {LANG_LABEL[q.lang]}
                     </span>
