@@ -279,6 +279,9 @@ export const ART_TONE: Record<QuestionArt, Tone> = {
   "two-minute-clock": "gold",
   "order-ticket": "ice",
   "seven-day-window": "turf",
+  "three-and-out": "gold",
+  "field-marker": "turf",
+  "scoring-drive": "ice",
 };
 
 // ── Scenes, one per title idea ───────────────────────────────────
@@ -5956,6 +5959,70 @@ function SevenDayWindow() {
   );
 }
 
+/** Three and Out — three down markers crossed out, then a punt sailing away. */
+function ThreeAndOut() {
+  return (
+    <g>
+      <Shadow y={134} rx={84} />
+      {[1, 2, 3].map((d, i) => (
+        <g key={d}>
+          <rect x={20 + i * 34} y="70" width="28" height="34" rx="4" fill={c("ink")} stroke={N} strokeWidth="2.2" />
+          <text x={34 + i * 34} y="94" textAnchor="middle" fontSize="18" fontWeight="900" fill={N} fontFamily={MONO}>
+            {d}
+          </text>
+          <path d={`M${24 + i * 34} 74 L${44 + i * 34} 100`} stroke={c("gold")} strokeWidth="3" strokeLinecap="round" />
+        </g>
+      ))}
+      <path d="M128 100 Q156 18 186 70" fill="none" stroke={c("ice")} strokeWidth="3" strokeDasharray="6 5" strokeLinecap="round" />
+      <Football x={176} y={50} rx={11} rot={50} />
+      <text x="150" y="122" textAnchor="middle" fontSize="11" fontWeight="900" fill={c("ink-soft")} fontFamily={MONO}>
+        PUNT
+      </text>
+    </g>
+  );
+}
+
+/** Field Position — a strip of field with yard numbers and a flag where the drive starts. */
+function FieldMarker() {
+  return (
+    <g>
+      <Shadow y={132} rx={88} />
+      <rect x="10" y="66" width="180" height="50" rx="3" fill={c("turf", 0.35)} stroke={N} strokeWidth="2" />
+      {[30, 70, 110, 150].map((x) => (
+        <path key={x} d={`M${x} 66 V116`} stroke={c("ink", 0.6)} strokeWidth="2" />
+      ))}
+      {[["20", 30], ["40", 70], ["40", 110], ["20", 150]].map(([t, x]) => (
+        <text key={`${t}${x}`} x={x as number} y="108" textAnchor="middle" fontSize="10" fontWeight="900" fill={c("ink")} fontFamily={MONO}>
+          {t}
+        </text>
+      ))}
+      <path d="M118 66 V30" stroke={N} strokeWidth="3" />
+      <path d="M118 30 L144 38 L118 46 Z" fill={c("gold")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <path d="M118 84 H178" stroke={c("gold")} strokeWidth="3" strokeLinecap="round" />
+      <path d="M170 78 L180 84 L170 90" fill="none" stroke={c("gold")} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** Drives That Score — drive arrows across a field, most ending at the goalposts. */
+function ScoringDrive() {
+  return (
+    <g>
+      <Shadow y={134} rx={84} />
+      <rect x="10" y="60" width="150" height="60" rx="3" fill={c("turf", 0.3)} stroke={N} strokeWidth="2" />
+      <path d="M160 120 V60" stroke={c("ink")} strokeWidth="2.4" />
+      <path d="M176 120 V84 M168 84 H184 M168 84 V52 M184 84 V52" fill="none" stroke={c("gold")} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      {[[20, 72, 150, true], [40, 90, 150, true], [30, 108, 96, false]].map(([x, y, to, scored], i) => (
+        <g key={i}>
+          <path d={`M${x} ${y} H${to}`} stroke={scored ? c("ice") : c("ink-muted")} strokeWidth="3" strokeLinecap="round" />
+          <path d={`M${(to as number) - 8} ${(y as number) - 6} L${to} ${y} L${(to as number) - 8} ${(y as number) + 6}`} fill="none" stroke={scored ? c("ice") : c("ink-muted")} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
+      ))}
+      <Sparkle x={176} y={36} r={8} fill={c("gold")} />
+    </g>
+  );
+}
+
 const SCENES: Record<QuestionArt, () => JSX.Element> = {
   hammer: Hammer,
   quarterback: Quarterback,
@@ -6188,6 +6255,9 @@ const SCENES: Record<QuestionArt, () => JSX.Element> = {
   "two-minute-clock": TwoMinuteClock,
   "order-ticket": OrderTicket,
   "seven-day-window": SevenDayWindow,
+  "three-and-out": ThreeAndOut,
+  "field-marker": FieldMarker,
+  "scoring-drive": ScoringDrive,
 };
 
 export default function QuestionArt({

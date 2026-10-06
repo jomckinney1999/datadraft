@@ -290,7 +290,10 @@ export type QuestionArt =
   | "perfect-week"
   | "two-minute-clock"
   | "order-ticket"
-  | "seven-day-window";
+  | "seven-day-window"
+  | "three-and-out"
+  | "field-marker"
+  | "scoring-drive";
 
 export type Question = {
   id: string;
@@ -6195,6 +6198,109 @@ ORDER BY day;`,
     explain:
       "ROWS BETWEEN 6 PRECEDING counts the six previous rows, and on a quiet week that reaches back two or three weeks: 1 April comes out at 2,839.62 instead of 1,214.84. RANGE over the day number counts calendar days. Postgres and Snowflake can write RANGE BETWEEN INTERVAL '6 days' PRECEDING on a date directly.",
     art: "seven-day-window",
+  },
+  {
+    id: "three-and-out",
+    title: "Three and Out",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["CTE", "JOIN", "GROUP BY", "Conditional aggregation", "LIMIT"],
+    prompt:
+      "A three-and-out is a drive that ends in a punt without picking up a first down. A drive is every play with the same game_id, posteam and drive number, and its last play is the one with the highest play_id. Which five offenses went three-and-out on the smallest share of their 2025 drives?",
+    returns: "team, drives, three_and_outs, pct (1 decimal) — lowest pct first, then team A–Z. Five rows.",
+    tables: ["plays"],
+    expected: `WITH drives AS (
+  SELECT game_id, posteam, drive,
+         SUM(first_down) AS first_downs,
+         MAX(play_id) AS last_play
+  FROM plays
+  GROUP BY game_id, posteam, drive
+),
+ended AS (
+  SELECT d.posteam, d.first_downs, p.play_type AS last_type
+  FROM drives d
+  JOIN plays p ON p.game_id = d.game_id AND p.play_id = d.last_play
+)
+SELECT posteam AS team,
+       COUNT(*) AS drives,
+       SUM(last_type = 'punt' AND first_downs = 0) AS three_and_outs,
+       ROUND(100.0 * SUM(last_type = 'punt' AND first_downs = 0) / COUNT(*), 1) AS pct
+FROM ended
+GROUP BY posteam
+ORDER BY pct, team
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "In a CTE, group by game_id, posteam and drive to get each drive's first downs and its highest play_id. Join back to plays on game_id and that play_id to read how the drive ended, then count punts with no first down per team.",
+    explain:
+      "Dallas went three-and-out on 15% of its drives. Finding how something ended takes two steps in SQL: the drive's last play_id in a CTE, then a join back to read that play. first_down already counts touchdowns, so a drive that scored can't be mistaken for one that stalled.",
+    art: "three-and-out",
+  },
+  {
+    id: "field-position",
+    title: "Field Position",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["Subquery", "CTE", "GROUP BY", "AVG", "LIMIT"],
+    prompt:
+      "Field position is half the game. A drive starts where its first play does (the lowest play_id among the plays with that game_id, posteam and drive), and yardline_100 is the distance to the opponent's end zone. The table has no kickoffs, so a drive's first snap is its start. Which five offenses started their 2025 drives closest to scoring, on average?",
+    returns: "team, drives, avg_start (1 decimal) — lowest avg_start first, then team A–Z. Five rows.",
+    tables: ["plays"],
+    expected: `WITH starts AS (
+  SELECT p.posteam, p.yardline_100
+  FROM plays p
+  WHERE p.play_id = (
+    SELECT MIN(q.play_id)
+    FROM plays q
+    WHERE q.game_id = p.game_id
+      AND q.posteam = p.posteam
+      AND q.drive = p.drive
+  )
+)
+SELECT posteam AS team, COUNT(*) AS drives, ROUND(AVG(yardline_100), 1) AS avg_start
+FROM starts
+GROUP BY posteam
+ORDER BY avg_start, team
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "Keep each drive's first play: the one whose play_id equals the drive's MIN(play_id), from a correlated subquery or ROW_NUMBER() OVER (PARTITION BY game_id, posteam, drive ORDER BY play_id) = 1. Then average yardline_100 per team.",
+    explain:
+      "Jacksonville began its drives about 67 yards from a touchdown on average, a few yards better than most. A short field is earned by the defence and the return teams as much as the offense, which is why analysts look at points per drive alongside starting position.",
+    art: "field-marker",
+  },
+  {
+    id: "drives-that-score",
+    title: "Drives That Score",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["CTE", "GROUP BY", "Conditional aggregation", "LIMIT"],
+    prompt:
+      "What share of each offense's 2025 drives ended in points? A drive (same game_id, posteam and drive number) scored if one of its plays was a touchdown by the offense (td_team = posteam) or a made field goal (field_goal_result = 'made'). Show the five best.",
+    returns: "team, drives, tds, fgs, scoring_pct (1 decimal) — highest scoring_pct first, then team A–Z. Five rows.",
+    tables: ["plays"],
+    expected: `WITH drives AS (
+  SELECT game_id, posteam, drive,
+         MAX(touchdown = 1 AND td_team = posteam) AS td,
+         MAX(field_goal_result = 'made') AS fg
+  FROM plays
+  GROUP BY game_id, posteam, drive
+)
+SELECT posteam AS team,
+       COUNT(*) AS drives,
+       SUM(td) AS tds,
+       SUM(fg) AS fgs,
+       ROUND(100.0 * SUM(td OR fg) / COUNT(*), 1) AS scoring_pct
+FROM drives
+GROUP BY posteam
+ORDER BY scoring_pct DESC, team
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "Group the plays into drives first. MAX(condition) over a drive is 1 if any play met it. Then per team, SUM those flags and divide the scoring drives by all drives.",
+    explain:
+      "Indianapolis scored on just over half its drives. MAX over a group turns 'did any row do this?' into a 1 or a 0, and checking td_team keeps a pick-six, which is the defence's touchdown, out of the offense's count.",
+    art: "scoring-drive",
   },
   {
     id: "py-biggest-jump",
