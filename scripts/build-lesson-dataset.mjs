@@ -486,23 +486,31 @@ const possibleGames = SEASONS.reduce((sum, s) => {
 const gamesPlayed = {};
 for (const r of weekRows) gamesPlayed[r.player] = (gamesPlayed[r.player] ?? 0) + 1;
 
-// Per-season average, rounded the way SQLite's ROUND(AVG(x), 1) rounds it.
-// Summing floats and Math.round-ing disagrees at exact halves: McCaffrey's
-// four 2024 games average 11.95, which SQLite prints as 11.9 (the double sits
-// just under .95) and Math.round made 12.0. Sum in whole tenths, divide once,
-// and let toFixed round the double's exact value.
-const tenths = new Map(); // "player|season" -> [sum of tenths, games]
-for (const r of weekRows) {
-  const k = `${r.player}|${r.season}`;
-  const cur = tenths.get(k) ?? [0, 0];
-  tenths.set(k, [cur[0] + Math.round(r.fantasy_pts * 10), cur[1] + 1]);
-}
+// Per-season average, exactly as a learner's ROUND(AVG(fantasy_pts), 1)
+// shows it. Rounding it ourselves kept disagreeing with SQLite at exact
+// halves, in both directions: McCaffrey's four 2024 games average 11.95,
+// which SQLite prints as 11.9 (its float sum sits just under .95), and
+// Bijan Robinson's four 2026 games average 26.35, which SQLite prints as
+// 26.3 for the same reason while exact tenths rounded it to 26.4. So ask
+// SQLite: seed the dataset just written, the way the lessons do, and run the
+// very query the verifier checks these numbers with (2026-10-06).
 const seasonPpg = {};
-for (const [k, [sum, n]] of [...tenths].sort((a, b) => a[0].localeCompare(b[0]))) {
-  const [player, season] = k.split("|");
-  (seasonPpg[player] ??= []).push([Number(season), Number((sum / 10 / n).toFixed(1))]);
+{
+  const { resolve } = await import("node:path");
+  const { loadTs } = await import("./load-ts.mjs");
+  const initSqlJs = (await import("sql.js")).default;
+  const fantasy = await loadTs(resolve("lib/fantasy-data.ts"), resolve("."));
+  const SQL = await initSqlJs();
+  const db = new SQL.Database();
+  db.run(fantasy.buildSeedSql());
+  for (const player of [...new Set(weekRows.map((r) => r.player))].sort()) {
+    const res = db.exec(
+      `SELECT season, ROUND(AVG(fantasy_pts), 1) FROM week_results WHERE player = '${player.replace(/'/g, "''")}' GROUP BY season ORDER BY season`,
+    )[0];
+    seasonPpg[player] = res ? res.values.map(([season, ppg]) => [Number(season), Number(ppg)]) : [];
+  }
+  db.close();
 }
-for (const arc of Object.values(seasonPpg)) arc.sort((a, b) => a[0] - b[0]);
 
 const drafted = new Set(rosterRows.map((r) => r.player));
 const leagueTotals = new Map();
