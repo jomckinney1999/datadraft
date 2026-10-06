@@ -818,8 +818,18 @@ let filmSteps = 0;
     for (const step of plan.steps) {
       filmSteps++;
       try {
+        // The count runs the whole step inside SQLite; the preview steps a
+        // prepared statement eight rows, as the browser's Film Room does.
+        // Materialising every step with exec() (a FROM plays step is 36k
+        // rows x 29 columns as JS arrays) crashed Node on Windows about half
+        // the time once the play-by-play and app tables were seeded.
         db.exec(st.stepCountSql(step));
-        db.exec(st.stepSql(step));
+        const preview = db.prepare(st.stepSql(step));
+        try {
+          for (let i = 0; i < 8 && preview.step(); i++) preview.get();
+        } finally {
+          preview.free();
+        }
       } catch (e) {
         problems.push(`Film Room step "${step.label}" of ${q.id} doesn't run: ${e.message}`);
       }

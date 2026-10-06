@@ -18,6 +18,19 @@ export type TablesFile = {
   }[];
 };
 
+/**
+ * Indexes a real event log would have. Per-user lookups (retention, a
+ * user's first join, sessions) are the whole of product analytics, and
+ * without an index a correlated EXISTS rescans all 27k events for every
+ * user: day-seven's key took ~11 million row visits, slow in a browser and,
+ * on Windows, enough to crash Node's WebAssembly about half the time in
+ * the verifier (2026-10-06). Indexes change speed, never results.
+ */
+const INDEXES: Record<string, string[]> = {
+  events: ["CREATE INDEX events_user_time ON events (user_id, event_time);"],
+  subscriptions: ["CREATE INDEX subscriptions_user ON subscriptions (user_id);"],
+};
+
 /** Creates each table and loads its rows, all in one transaction. */
 export function seedTables(db: Database, file: TablesFile): void {
   db.run("BEGIN;");
@@ -30,6 +43,7 @@ export function seedTables(db: Database, file: TablesFile): void {
       } finally {
         stmt.free();
       }
+      for (const ddl of INDEXES[t.table] ?? []) db.run(ddl);
     }
     db.run("COMMIT;");
   } catch (e) {

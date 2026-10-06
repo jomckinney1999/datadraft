@@ -37,6 +37,11 @@ export function seedPlays(db: Database, file: PlaysFile): void {
   db.run("BEGIN;");
   try {
     for (const row of file.rows) stmt.run(row);
+    // A drive is (game_id, posteam, drive), and most questions group or
+    // join on the first two. Without the index a join back to games or a
+    // per-team subquery rescans 36k rows each time (see app-dataset.ts
+    // for what heavy scans did to Node on Windows).
+    db.run("CREATE INDEX plays_game_team ON plays (game_id, posteam, drive);");
     db.run("COMMIT;");
   } catch (e) {
     db.run("ROLLBACK;");
