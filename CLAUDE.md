@@ -32,13 +32,12 @@ The old palette was flat by construction: panels sat a few RGB points above the 
 - **`.chrome`** is the gradient hairline (turf → ice → gold) on the hero sandbox frame, done as a masked border rather than four elements.
 - **Focus rings, selection colour and scrollbars are themed once, globally.** A default scrollbar is a light-grey slab bolted onto a dark page and is one of the loudest tells that a dark theme was applied rather than designed.
 
-### Dark only (no light mode)
+### Dark first, with a light theme (corrected 2026-10-06)
 
-One theme: Duolingo-neutral charcoal (`#131F24`) with green / blue / gold accents. Tokens are `"r g b"` channel triplets in `app/globals.css` under `:root`, wired into Tailwind as `rgb(var(--c-x) / <alpha-value>)` so alpha modifiers (`bg-turf/10`) keep working.
+Dark is the default: Duolingo-neutral charcoal (`#131F24`) with green / blue / gold accents. A light theme came back on 2026-10-03 (commit 839f3b2) and this section wasn't updated then: `THEME_SCRIPT` in `app/layout.tsx` sets `data-theme` before paint from the `sqlsports-theme` choice, or the system's `prefers-color-scheme` when there's none (the server HTML says dark), the nav's `ThemeToggle` switches and stores it, and the light tokens live under `:root[data-theme="light"]` in `app/globals.css`. Drawings and charts use tokens, so they follow the theme; check new art in both. Tokens are `"r g b"` channel triplets in `app/globals.css` under `:root`, wired into Tailwind as `rgb(var(--c-x) / <alpha-value>)` so alpha modifiers (`bg-turf/10`) keep working.
 
 - **Use the tokens.** Never hardcode a hex, `rgba()`, or `text-[#...]` in a component. For glows/scrims/gradients, add a class in `globals.css` (see `.rays-turf`, `.yard-lines`, `.edge-glow-gold`) rather than an inline `style`. The illustrated cast — Coach Blitz (`components/coach.tsx`) and the Rookie and Ref (`components/sideline-cast.tsx`) — is the deliberate exception: illustration hexes stay fixed.
 - **Accents:** turf green `#58CC02`, ice blue `#1CB0F6`, gold `#FFC800`. All text/accent pairings clear WCAG AA — `node scripts/verify-contrast.mjs` after any palette edit.
-- **No theme toggle.** `ThemeToggle` is a no-op; `app/layout.tsx` forces `data-theme="dark"` and clears any leftover `sqlsports-theme` preference.
 - **Testing resets:** `components/testing-tools.tsx` on course roadmaps (`/learn/track/...`) — restart or complete a course, refill timeouts, or wipe all local progress. Also usable from `/demo`. It writes the same localStorage the real player reads, deliberately: a mock mode would let a bug live in the real path while the test surface stayed green.
 
 ## Questions (`/questions`) — the centre of the product
