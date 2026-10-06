@@ -107,8 +107,12 @@ function hashId(id: string): number {
 
 export function featuredPlayers(q: Question, max = 3): FeaturedPlayer[] {
   // 0. A question on a practice schema (the store) isn't about any player,
-  //    so it shows no faces rather than three that mean nothing.
-  if (q.tables.length > 0 && !q.tables.some((t) => LEAGUE_TABLES.includes(t))) return [];
+  //    so it shows no faces rather than three that mean nothing. Nor is one
+  //    on the waiver wire alone: its players aren't in the cast, so a
+  //    fallback slice would put Gibbs beside a line about Khalil Herbert, as
+  //    if he were the one on the wire.
+  const noCast = (t: string) => t === "waiver_wire" || !LEAGUE_TABLES.includes(t);
+  if (q.tables.length > 0 && q.tables.every(noCast)) return [];
 
   // 1. Named by the author.
   if (q.players && q.players.length > 0) {

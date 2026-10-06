@@ -254,6 +254,14 @@ export const ART_TONE: Record<QuestionArt, Tone> = {
   "torn-name": "ice",
   "september-page": "gold",
   "no-shootout": "turf",
+  "week-question": "gold",
+  "monday-strip": "ice",
+  "qb-stack": "turf",
+  "dual-threat": "gold",
+  "full-kit": "ice",
+  "headline-sheet": "turf",
+  "lightbulb-lineup": "gold",
+  "quarter-bars": "ice",
 };
 
 // ── Scenes, one per title idea ───────────────────────────────────
@@ -5402,6 +5410,181 @@ function NoShootout() {
   );
 }
 
+/** What Week Is It? — a calendar page whose week number is a question mark. */
+function WeekQuestion() {
+  return (
+    <g>
+      <Shadow y={136} rx={64} />
+      <rect x="40" y="24" width="120" height="104" rx="6" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <rect x="40" y="24" width="120" height="26" rx="6" fill={c("gold")} stroke={N} strokeWidth="2.2" />
+      <text x="100" y="43" textAnchor="middle" fontSize="14" fontWeight="900" fill={N} fontFamily={MONO}>
+        WEEK
+      </text>
+      <path d="M64 16 V30 M136 16 V30" stroke={N} strokeWidth="4" strokeLinecap="round" />
+      {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+        <rect key={i} x={50 + i * 15} y="58" width="11" height="9" rx="1.5" fill={i === 6 ? c("gold") : c("ink-muted", 0.5)} stroke={N} strokeWidth="1.2" />
+      ))}
+      <text x="100" y="116" textAnchor="middle" fontSize="44" fontWeight="900" fill={c("night-100")} stroke={N} strokeWidth="1.4" fontFamily={SANS}>
+        ?
+      </text>
+      <circle cx="152" cy="118" r="14" fill={c("turf")} stroke={N} strokeWidth="2.2" />
+      <text x="152" y="123" textAnchor="middle" fontSize="12" fontWeight="900" fill={N} fontFamily={MONO}>
+        7
+      </text>
+    </g>
+  );
+}
+
+/** Week Starting Monday — a week strip with Monday circled and an arrow running back to it. */
+function MondayStrip() {
+  const days = ["M", "T", "W", "T", "F", "S", "S"];
+  return (
+    <g>
+      <Shadow y={132} rx={84} />
+      {days.map((d, i) => (
+        <g key={i}>
+          <rect x={18 + i * 24} y="58" width="20" height="34" rx="3" fill={i === 0 ? c("ice") : c("ink")} stroke={N} strokeWidth="2" />
+          <text x={28 + i * 24} y="80" textAnchor="middle" fontSize="12" fontWeight="900" fill={N} fontFamily={MONO}>
+            {d}
+          </text>
+        </g>
+      ))}
+      <circle cx="28" cy="75" r="20" fill="none" stroke={c("gold")} strokeWidth="3" />
+      <path d="M170 104 Q100 128 40 102" fill="none" stroke={c("gold")} strokeWidth="3" strokeLinecap="round" />
+      <path d="M48 96 L38 101 L46 110" fill="none" stroke={c("gold")} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="62" y="22" width="76" height="22" rx="4" fill={c("night-100")} stroke={N} strokeWidth="2" />
+      <text x="100" y="37" textAnchor="middle" fontSize="10" fontWeight="900" fill={c("ice")} fontFamily={MONO}>
+        WEEK OF
+      </text>
+    </g>
+  );
+}
+
+/** The Stack — a QB block with a teammate's block stacked on top, both lit. */
+function QbStack() {
+  const block = (y: number, label: string, fill: string) => (
+    <g>
+      <rect x="56" y={y} width="88" height="34" rx="5" fill={fill} stroke={N} strokeWidth="2.4" />
+      <rect x="56" y={y} width="88" height="8" rx="4" fill={c("ink", 0.35)} />
+      <text x="100" y={y + 25} textAnchor="middle" fontSize="16" fontWeight="900" fill={N} fontFamily={MONO}>
+        {label}
+      </text>
+    </g>
+  );
+  return (
+    <g>
+      <Shadow y={134} rx={66} />
+      {block(92, "QB", c("turf"))}
+      {block(56, "WR", c("ice"))}
+      <Flame x={100} y={56} s={0.55} outer={c("gold")} inner={c("ink")} />
+      <Sparkle x={160} y={60} r={7} fill={c("gold")} />
+      <Sparkle x={42} y={86} r={5} fill={c("gold")} />
+    </g>
+  );
+}
+
+/** Dual Threat — a quarterback with one arrow arcing through the air and one along the ground, both into the end zone. */
+function DualThreat() {
+  return (
+    <g>
+      <Shadow y={134} rx={84} />
+      <rect x="162" y="30" width="28" height="98" fill={c("turf", 0.35)} stroke={N} strokeWidth="2" />
+      <path d="M162 30 V128" stroke={c("ink")} strokeWidth="2.4" />
+      <Player x={52} y={128} s={0.82} pose="throw" jersey="gold" label="QB" />
+      <path d="M70 46 Q120 4 172 52" fill="none" stroke={c("ice")} strokeWidth="3" strokeDasharray="6 5" strokeLinecap="round" />
+      <path d="M164 44 L174 54 L176 40" fill="none" stroke={c("ice")} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M74 118 H170" stroke={c("gold")} strokeWidth="3.4" strokeLinecap="round" />
+      <path d="M162 111 L172 118 L162 125" fill="none" stroke={c("gold")} strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
+      <Football x={176} y={64} rx={9} rot={30} />
+    </g>
+  );
+}
+
+/** Full Kit — a jersey, a hoodie and a cap in one team's colour, with a tick for owning all three. */
+function FullKit() {
+  return (
+    <g>
+      <Shadow y={134} rx={84} />
+      {/* jersey */}
+      <path d="M38 40 L22 50 L12 66 L22 74 L28 68 V122 H76 V68 L82 74 L92 66 L82 50 L66 40 Q52 48 38 40 Z" fill={c("ice")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <rect x="40" y="76" width="24" height="18" rx="2" fill={c("ink")} stroke={N} strokeWidth="1.6" />
+      {/* hoodie */}
+      <path d="M112 56 Q126 40 140 56 L156 64 L164 96 L152 98 L150 84 V124 H102 V84 L100 98 L88 96 L96 64 Z" fill={c("ice")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M116 58 Q126 70 136 58" fill="none" stroke={N} strokeWidth="2" />
+      <rect x="112" y="98" width="28" height="12" rx="3" fill={c("ink", 0.5)} stroke={N} strokeWidth="1.4" />
+      {/* cap */}
+      <path d="M150 40 Q166 16 184 34 L186 42 Z" fill={c("ice")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M150 40 H192 L194 46 H148 Z" fill={c("ink")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <circle cx="172" cy="114" r="14" fill={c("turf")} stroke={N} strokeWidth="2.2" />
+      <path d="M165 114 L170 119 L180 108" fill="none" stroke={N} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** Waiver Headline — a newsletter sheet with a bold headline and a "+32.6" tag. */
+function HeadlineSheet() {
+  return (
+    <g>
+      <Shadow y={136} rx={62} />
+      <rect x="46" y="20" width="108" height="112" rx="4" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <rect x="56" y="30" width="88" height="10" rx="2" fill={c("night-100")} />
+      <rect x="56" y="48" width="70" height="8" rx="2" fill={c("ink-muted")} />
+      <rect x="56" y="62" width="88" height="5" rx="2" fill={c("ink-muted", 0.5)} />
+      <rect x="56" y="72" width="80" height="5" rx="2" fill={c("ink-muted", 0.5)} />
+      <rect x="56" y="82" width="86" height="5" rx="2" fill={c("ink-muted", 0.5)} />
+      <rect x="56" y="98" width="38" height="24" rx="3" fill={c("ice", 0.6)} stroke={N} strokeWidth="1.6" />
+      <rect x="112" y="92" width="62" height="26" rx="5" fill={c("turf")} stroke={N} strokeWidth="2.2" transform="rotate(-8 143 105)" />
+      <text x="143" y="110" textAnchor="middle" fontSize="14" fontWeight="900" fill={N} fontFamily={MONO} transform="rotate(-8 143 105)">
+        +32.6
+      </text>
+    </g>
+  );
+}
+
+/** The Aha Moment — a lit bulb over a lineup card with its slots ticked. */
+function LightbulbLineup() {
+  return (
+    <g>
+      <Shadow y={136} rx={64} />
+      <rect x="58" y="70" width="84" height="60" rx="5" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      {[0, 1, 2].map((i) => (
+        <g key={i}>
+          <rect x="68" y={80 + i * 15} width="46" height="8" rx="2" fill={c("ink-muted", 0.6)} />
+          <path d={`M122 ${85 + i * 15} L126 ${89 + i * 15} L134 ${80 + i * 15}`} fill="none" stroke={c("turf")} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
+      ))}
+      <circle cx="100" cy="36" r="20" fill={c("gold")} stroke={N} strokeWidth="2.4" />
+      <path d="M93 54 H107 V62 H93 Z" fill={c("ink-muted")} stroke={N} strokeWidth="2" />
+      <path d="M94 38 Q100 28 106 38" fill="none" stroke={N} strokeWidth="2" />
+      {[[-34, -6], [34, -6], [-26, -26], [26, -26], [0, -34]].map(([dx, dy], i) => (
+        <path key={i} d={`M${100 + dx * 0.78} ${36 + dy * 0.78} L${100 + dx} ${36 + dy}`} stroke={c("gold")} strokeWidth="3" strokeLinecap="round" />
+      ))}
+    </g>
+  );
+}
+
+/** Quarterly Report — a report sheet with four bars, Q1 to Q4, the last one towering. */
+function QuarterBars() {
+  const bars: [string, number][] = [["Q1", 22], ["Q2", 14], ["Q3", 40], ["Q4", 82]];
+  return (
+    <g>
+      <Shadow y={136} rx={70} />
+      <rect x="34" y="18" width="132" height="114" rx="5" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <rect x="44" y="27" width="56" height="8" rx="2" fill={c("night-100")} />
+      <path d="M46 116 H156" stroke={c("ink-muted")} strokeWidth="2" />
+      {bars.map(([label, h], i) => (
+        <g key={label}>
+          <rect x={52 + i * 26} y={116 - h} width="18" height={h} rx="2" fill={i === 3 ? c("gold") : c("ice")} stroke={N} strokeWidth="1.8" />
+          <text x={61 + i * 26} y="127" textAnchor="middle" fontSize="8" fontWeight="900" fill={c("night-100")} fontFamily={MONO}>
+            {label}
+          </text>
+        </g>
+      ))}
+      <path d="M118 44 L132 30 L146 38" fill="none" stroke={c("turf")} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
 const SCENES: Record<QuestionArt, () => JSX.Element> = {
   hammer: Hammer,
   quarterback: Quarterback,
@@ -5609,6 +5792,14 @@ const SCENES: Record<QuestionArt, () => JSX.Element> = {
   "torn-name": TornName,
   "september-page": SeptemberPage,
   "no-shootout": NoShootout,
+  "week-question": WeekQuestion,
+  "monday-strip": MondayStrip,
+  "qb-stack": QbStack,
+  "dual-threat": DualThreat,
+  "full-kit": FullKit,
+  "headline-sheet": HeadlineSheet,
+  "lightbulb-lineup": LightbulbLineup,
+  "quarter-bars": QuarterBars,
 };
 
 export default function QuestionArt({

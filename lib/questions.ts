@@ -266,7 +266,15 @@ export type QuestionArt =
   | "above-usual"
   | "torn-name"
   | "september-page"
-  | "no-shootout";
+  | "no-shootout"
+  | "week-question"
+  | "monday-strip"
+  | "qb-stack"
+  | "dual-threat"
+  | "full-kit"
+  | "headline-sheet"
+  | "lightbulb-lineup"
+  | "quarter-bars";
 
 export type Question = {
   id: string;
@@ -5655,6 +5663,253 @@ ORDER BY w.player;`,
     explain:
       "Some of these are about the schedule and some about health: Christian McCaffrey played four games in 2024, so he had few chances. A 'never' question is a NOT EXISTS question.",
     art: "no-shootout",
+  },
+  {
+    id: "what-week-is-it",
+    title: "What Week Is It?",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["Dates", "julianday", "CTE", "JOIN"],
+    prompt:
+      "The schedule says which week every game belongs to. The calendar can say it too: a week is seven days counted from the season's first game, so days 0–6 after the opener are week 1, days 7–13 week 2, and so on. In the four complete seasons, 2022 to 2025, find the games where the calendar's week and the week column disagree.",
+    returns: "season, week, calendar_week, gameday, weekday, away_team, home_team — by gameday, then away_team.",
+    tables: ["games"],
+    expected: `WITH openers AS (
+  SELECT season, MIN(gameday) AS opener
+  FROM games
+  WHERE season BETWEEN 2022 AND 2025
+  GROUP BY season
+),
+by_date AS (
+  SELECT g.season, g.week, g.gameday, g.weekday, g.away_team, g.home_team,
+         CAST((julianday(g.gameday) - julianday(o.opener)) / 7 AS INTEGER) + 1 AS calendar_week
+  FROM games g
+  JOIN openers o ON o.season = g.season
+)
+SELECT season, week, calendar_week, gameday, weekday, away_team, home_team
+FROM by_date
+WHERE calendar_week <> week
+ORDER BY gameday, away_team;`,
+    orderMatters: true,
+    hint: "Find each season's first gameday with MIN in a CTE and join it back. julianday(gameday) - julianday(opener) is the days since; divide by 7, CAST to INTEGER and add 1.",
+    explain:
+      "Two games: Christmas 2024 fell on a Wednesday, the last day of week 16's seven, but the league counted both games in week 17. Bucketing dates into weeks works until the calendar meets a holiday, which is why a schedule carries its own week column, and why it's worth checking one against the other.",
+    art: "week-question",
+  },
+  {
+    id: "week-starting-monday",
+    title: "Week Starting Monday",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["Dates", "GROUP BY", "COUNT", "LIMIT"],
+    prompt:
+      "The warehouse staffs by the week, Monday to Sunday, and wants its five busiest weeks of the year. Label every order with the date of the Monday that starts its week, then count the orders that weren't cancelled in each week.",
+    returns: "week_start (the Monday, as YYYY-MM-DD), orders — busiest first, then week_start. Five rows.",
+    tables: ["orders"],
+    expected: `SELECT date(order_date, '-6 days', 'weekday 1') AS week_start,
+       COUNT(*) AS orders
+FROM orders
+WHERE status <> 'cancelled'
+GROUP BY week_start
+ORDER BY orders DESC, week_start
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "In SQLite, date(order_date, '-6 days', 'weekday 1') is the Monday on or before order_date: 'weekday 1' moves forward to the next Monday, so step back six days first. GROUP BY it and COUNT(*).",
+    explain:
+      "December's four weeks are all in the top five, led by the week of December 15. This is SQLite's DATE_TRUNC('week', order_date): Postgres and Snowflake have that function, BigQuery spells it DATE_TRUNC(order_date, WEEK(MONDAY)). Grouping by a week's first day, rather than a week number, keeps a week that crosses New Year in one piece.",
+    art: "monday-strip",
+  },
+  {
+    id: "the-stack",
+    title: "The Stack",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["Subquery", "EXISTS", "Conditional aggregation", "GROUP BY"],
+    prompt:
+      "Fantasy players 'stack' a quarterback with one of his teammates, hoping they go off together. Across the four complete seasons, 2022 to 2025, count each quarterback's 25-point games, and how many of those had a teammate in the table score 20 or more in the same game (same team, season and week).",
+    returns: "qb, big_games, stacked — most stacked first, then qb A–Z.",
+    tables: ["week_results"],
+    expected: `SELECT q.player AS qb,
+       COUNT(*) AS big_games,
+       SUM(CASE WHEN EXISTS (
+             SELECT 1 FROM week_results t
+             WHERE t.team = q.team
+               AND t.season = q.season
+               AND t.week = q.week
+               AND t.player <> q.player
+               AND t.fantasy_pts >= 20
+           ) THEN 1 ELSE 0 END) AS stacked
+FROM week_results q
+WHERE q.position = 'QB'
+  AND q.fantasy_pts >= 25
+  AND q.season BETWEEN 2022 AND 2025
+GROUP BY q.player
+ORDER BY stacked DESC, qb;`,
+    orderMatters: true,
+    hint: "Keep the quarterbacks' 25-point games, GROUP BY player, and count the stacked ones with SUM(CASE WHEN EXISTS (…) THEN 1 ELSE 0 END), where EXISTS looks for another player on the same team, season and week with 20 or more.",
+    explain:
+      "Hurts leads with nine (seven with A.J. Brown, two with Saquon Barkley), then Mahomes with eight, every one with Travis Kelce. Josh Allen's zero isn't about Buffalo: no Bills teammate is among the twenty players in this table. EXISTS asks 'was there at least one?', so a game with two teammates over 20 still counts once, where a JOIN would count it twice.",
+    art: "qb-stack",
+  },
+  {
+    id: "dual-threat",
+    title: "Dual Threat",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["Subquery", "EXISTS", "COUNT", "DISTINCT"],
+    prompt:
+      "A dual-threat quarterback beats you through the air and on the ground. In the 2025 play-by-play, find the quarterbacks with the most games in which they threw a touchdown pass and also ran one in themselves. A touchdown pass is a 'pass' play with touchdown = 1 where td_team is the offense (posteam); a rushing touchdown is the same on a 'run' play where he's the rusher.",
+    returns: "qb (as the play-by-play writes it), games — most first, then qb A–Z. Five rows.",
+    tables: ["plays"],
+    expected: `SELECT p.passer AS qb, COUNT(DISTINCT p.game_id) AS games
+FROM plays p
+WHERE p.play_type = 'pass'
+  AND p.touchdown = 1
+  AND p.td_team = p.posteam
+  AND EXISTS (
+    SELECT 1 FROM plays r
+    WHERE r.game_id = p.game_id
+      AND r.play_type = 'run'
+      AND r.rusher = p.passer
+      AND r.touchdown = 1
+      AND r.td_team = r.posteam
+  )
+GROUP BY p.passer
+ORDER BY games DESC, qb
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "Start from touchdown passes and keep the ones where EXISTS finds a rushing touchdown in the same game_id with rusher = passer. Then COUNT(DISTINCT game_id) per passer.",
+    explain:
+      "Josh Allen did it in seven games, the rookie Jaxson Dart in five. COUNT(DISTINCT game_id) matters: a three-touchdown day has three qualifying passes and would count three times. Checking td_team keeps out the passes the defence returned for a score.",
+    art: "dual-threat",
+  },
+  {
+    id: "full-kit",
+    title: "Full Kit",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["HAVING", "Subquery", "CTE", "JOIN", "GROUP BY"],
+    prompt:
+      "Each team in the store sells a home jersey, a hoodie and a cap. Merchandising wants to know which teams have the most customers who own the whole set. Counting delivered and shipped orders, find the customers who bought every one of a team's products (across any number of orders), then count them per team.",
+    returns: "team, full_kit_customers — most first, then team A–Z.",
+    tables: ["orders", "order_items", "products"],
+    expected: `WITH kits AS (
+  SELECT o.customer_id, p.team
+  FROM orders o
+  JOIN order_items i ON i.order_id = o.order_id
+  JOIN products p ON p.product_id = i.product_id
+  WHERE o.status IN ('delivered', 'shipped')
+    AND p.team IS NOT NULL
+  GROUP BY o.customer_id, p.team
+  HAVING COUNT(DISTINCT p.product_id) = (
+    SELECT COUNT(*) FROM products x WHERE x.team = p.team
+  )
+)
+SELECT team, COUNT(*) AS full_kit_customers
+FROM kits
+GROUP BY team
+ORDER BY full_kit_customers DESC, team;`,
+    orderMatters: true,
+    hint: "Group by customer and team, and keep the groups whose COUNT(DISTINCT product_id) equals the number of products that team has, from a subquery on products. Then count those groups per team.",
+    explain:
+      "Buffalo and Philadelphia lead with twelve each. This is relational division (who has all of a set?), and comparing with the team's own product count rather than typing 3 keeps it right the day a team gets a fourth product. DISTINCT matters too: two caps and a jersey is three items, not the kit.",
+    art: "full-kit",
+  },
+  {
+    id: "waiver-headline",
+    title: "Waiver Headline",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["Strings", "ORDER BY"],
+    prompt:
+      "The newsletter wants the waiver wire as lines it can paste. For each player, build a headline like 'Khalil Herbert (RB, CIN)', the rostered share like '40.8% rostered', and the move like '+32.6', with a plus sign on risers and a minus on fallers.",
+    returns: "headline, rostered, move — biggest trend first, then player A–Z.",
+    tables: ["waiver_wire"],
+    expected: `SELECT player || ' (' || position || ', ' || team || ')' AS headline,
+       printf('%.1f%% rostered', pct_rostered) AS rostered,
+       printf('%+.1f', trend) AS move
+FROM waiver_wire
+ORDER BY trend DESC, player;`,
+    orderMatters: true,
+    hint: "|| joins text together. printf('%.1f', x) prints a number to one decimal, %% prints a percent sign, and %+.1f adds the sign.",
+    explain:
+      "Sort on the number, not the text you built: as text, '+10.3' comes before '+32.6' and every faller sorts by its first digit. Other databases spell it differently: Postgres and Snowflake have || with to_char or format, SQL Server uses + or CONCAT with FORMAT.",
+    art: "headline-sheet",
+  },
+  {
+    id: "the-aha-moment",
+    title: "The Aha Moment",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["Subquery", "EXISTS", "CTE", "Dates", "Conditional aggregation"],
+    prompt:
+      "Growth teams hunt for an 'aha moment': something new users do early that goes with staying and paying. Test one for Benchwarmer. Split users by whether they set a lineup in their first week (a set_lineup event before signup_date plus 7 days) and compare how many in each group upgraded to Pro (have a row in subscriptions). Everyone signed up at least a month before the log ends, so everyone had a full first week.",
+    returns: "lineup_week_one (1 or 0), users, upgraded, upgrade_pct (1 decimal) — 1 first. Two rows.",
+    tables: ["users", "events", "subscriptions"],
+    expected: `WITH first_week AS (
+  SELECT u.user_id,
+         EXISTS (
+           SELECT 1 FROM events e
+           WHERE e.user_id = u.user_id
+             AND e.event_name = 'set_lineup'
+             AND e.event_time < datetime(u.signup_date, '+7 days')
+         ) AS lineup_week_one,
+         EXISTS (
+           SELECT 1 FROM subscriptions s WHERE s.user_id = u.user_id
+         ) AS upgraded
+  FROM users u
+)
+SELECT lineup_week_one,
+       COUNT(*) AS users,
+       SUM(upgraded) AS upgraded,
+       ROUND(100.0 * SUM(upgraded) / COUNT(*), 1) AS upgrade_pct
+FROM first_week
+GROUP BY lineup_week_one
+ORDER BY lineup_week_one DESC;`,
+    orderMatters: true,
+    hint: "Give every user two flags: EXISTS a set_lineup with event_time < datetime(signup_date, '+7 days'), and EXISTS a row in subscriptions. In SQLite an EXISTS is 1 or 0, so SUM counts the upgrades. GROUP BY the first flag.",
+    explain:
+      "About one in five users who set a lineup in week one upgraded, against one in fourteen of the rest. That's a correlation, not proof: the keenest people do both. The next step is an experiment, nudging new users to set a lineup and watching whether upgrades follow.",
+    art: "lightbulb-lineup",
+  },
+  {
+    id: "quarterly-report",
+    title: "Quarterly Report",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["Dates", "strftime", "CTE", "LAG"],
+    prompt:
+      "Finance reports by quarter. For each quarter of 2025 (Q1 is January to March), total the revenue from delivered and shipped orders, quantity times the price charged, and show the change from the quarter before as a percentage.",
+    returns: "quarter (like '2025-Q1'), revenue (2 decimals), change_pct (1 decimal, empty for the first quarter) — quarter order.",
+    tables: ["orders", "order_items"],
+    expected: `WITH q AS (
+  SELECT strftime('%Y', o.order_date) || '-Q' ||
+         ((CAST(strftime('%m', o.order_date) AS INTEGER) + 2) / 3) AS quarter,
+         SUM(i.quantity * i.unit_price) AS revenue
+  FROM orders o
+  JOIN order_items i ON i.order_id = o.order_id
+  WHERE o.status IN ('delivered', 'shipped')
+  GROUP BY quarter
+)
+SELECT quarter,
+       ROUND(revenue, 2) AS revenue,
+       ROUND(100.0 * (revenue - LAG(revenue) OVER (ORDER BY quarter))
+             / LAG(revenue) OVER (ORDER BY quarter), 1) AS change_pct
+FROM q
+ORDER BY quarter;`,
+    orderMatters: true,
+    hint: "(month + 2) / 3 in whole-number division turns months 1–12 into quarters 1–4. Total each quarter in a CTE, then LAG(revenue) OVER (ORDER BY quarter) is the quarter before.",
+    explain:
+      "Q4 was more than double Q3 as the season and the holidays arrived, and Q2, the offseason, was the quietest. Work the change out from the unrounded totals: rounding first can move a percentage by a tenth.",
+    art: "quarter-bars",
   },
 ];
 
