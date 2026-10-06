@@ -286,7 +286,11 @@ export type QuestionArt =
   | "home-end-zone"
   | "order-gaps"
   | "team-sheet"
-  | "seven-ticks";
+  | "seven-ticks"
+  | "perfect-week"
+  | "two-minute-clock"
+  | "order-ticket"
+  | "seven-day-window";
 
 export type Question = {
   id: string;
@@ -6066,6 +6070,131 @@ FROM (
     explain:
       "Eighteen users. Asking for 'all of a set' is relational division: count the distinct members each person has and compare with the size of the set. Filtering on the event_time range, rather than strftime('%m'), keeps it usable by an index on event_time.",
     art: "seven-ticks",
+  },
+  {
+    id: "perfect-week",
+    title: "Perfect Week",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["NOT EXISTS", "Subquery", "CTE", "Conditional aggregation"],
+    prompt:
+      "A perfect week is one where every player on a fantasy team's roster scored 15 or more. Using rosters and the 2024 season, count each team's perfect weeks. A player who didn't play that week didn't score 15, and teams with none still belong in the answer.",
+    returns: "team_name, perfect_weeks — most first, then team_name A–Z. Five rows.",
+    tables: ["rosters", "week_results"],
+    expected: `WITH teams AS (
+  SELECT DISTINCT team_name FROM rosters
+),
+weeks AS (
+  SELECT DISTINCT week FROM week_results WHERE season = 2024
+)
+SELECT t.team_name,
+       SUM(CASE WHEN NOT EXISTS (
+             SELECT 1 FROM rosters p
+             WHERE p.team_name = t.team_name
+               AND NOT EXISTS (
+                 SELECT 1 FROM week_results x
+                 WHERE x.player = p.player
+                   AND x.season = 2024
+                   AND x.week = w.week
+                   AND x.fantasy_pts >= 15
+               )
+           ) THEN 1 ELSE 0 END) AS perfect_weeks
+FROM teams t
+CROSS JOIN weeks w
+GROUP BY t.team_name
+ORDER BY perfect_weeks DESC, t.team_name;`,
+    orderMatters: true,
+    hint: "Build every team × week pair first (CROSS JOIN). A week is perfect when there is no player on that team for whom there's no 15-point game that week: two NOT EXISTS, one inside the other. SUM a CASE over them per team.",
+    explain:
+      "Goal Line Gang and Gridiron Gurus had eight each, Blitz Brothers none. 'Every member of a set' is relational division, and the double NOT EXISTS reads it literally. A missed game has no row to find, so it counts as a miss, and starting from the team × week grid keeps a team with zero in the answer.",
+    art: "perfect-week",
+  },
+  {
+    id: "two-minute-drill",
+    title: "Two-Minute Drill",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["CASE", "Conditional aggregation", "GROUP BY"],
+    prompt:
+      "Offenses throw when the clock is short. In the 2025 play-by-play, compare the pass share of runs and passes in the last two minutes of each half with the rest of the game. game_seconds_remaining counts down the whole game (3,600 at kickoff), so the end of the first half is the second quarter with 1,800 to 1,920 seconds left, and the end of the game is the fourth quarter with 120 or fewer. Overtime counts as the rest of the game.",
+    returns: "situation ('two-minute drill' or 'rest of the game'), plays, pass_pct (1 decimal) — two-minute drill first. Two rows.",
+    tables: ["plays"],
+    expected: `SELECT CASE
+         WHEN (qtr = 2 AND game_seconds_remaining BETWEEN 1800 AND 1920)
+           OR (qtr = 4 AND game_seconds_remaining <= 120)
+         THEN 'two-minute drill'
+         ELSE 'rest of the game'
+       END AS situation,
+       COUNT(*) AS plays,
+       ROUND(100.0 * SUM(play_type = 'pass') / COUNT(*), 1) AS pass_pct
+FROM plays
+WHERE play_type IN ('pass', 'run')
+GROUP BY situation
+ORDER BY situation DESC;`,
+    orderMatters: true,
+    hint: "A CASE with the two windows OR'd together labels each play. Keep only 'pass' and 'run', GROUP BY the label, and the pass share is SUM(play_type = 'pass') over COUNT(*).",
+    explain:
+      "About 72% of two-minute plays are passes against 55% the rest of the time. The trap is the clock: game_seconds_remaining runs down the whole game, so the last two minutes of the first half are 1,800 to 1,920 seconds left, not 0 to 120. Check what a time column counts from before you filter on it.",
+    art: "two-minute-clock",
+  },
+  {
+    id: "order-references",
+    title: "Order References",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["Strings", "ORDER BY", "LIMIT"],
+    prompt:
+      "Customer service quotes orders by a reference like GG-02248-WEB: GG, the order_id padded with zeros to five digits, and the channel in capitals. Build it for the five most recent orders.",
+    returns: "order_id, reference, order_date, status — newest first, and on the same day the higher order_id first. Five rows.",
+    tables: ["orders"],
+    expected: `SELECT order_id,
+       printf('GG-%05d-%s', order_id, UPPER(channel)) AS reference,
+       order_date,
+       status
+FROM orders
+ORDER BY order_date DESC, order_id DESC
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "printf('%05d', n) pads n with zeros to five digits, and %s drops a string in. UPPER(channel) gives WEB or APP. Sort on order_date and order_id, not on the reference.",
+    explain:
+      "printf's %05d is SQLite's LPAD: Postgres, Snowflake and BigQuery write LPAD(CAST(order_id AS TEXT), 5, '0'). Sort on the real columns rather than the string you built: sorting text only agrees with sorting numbers while every id has the same number of digits.",
+    art: "order-ticket",
+  },
+  {
+    id: "seven-calendar-days",
+    title: "Seven Calendar Days",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["Window", "Frame", "Running total", "Dates", "julianday", "CTE"],
+    prompt:
+      "Finance wants a rolling seven-day revenue figure for the first two weeks of April 2025: for each day that had sales, the revenue of that day and the six calendar days before it. Count delivered and shipped orders, quantity times the price charged. April was quiet, and some days had no orders at all.",
+    returns: "day, revenue (that day), last_7_days (both rounded to 2 decimals) — day order, 1 to 14 April. Nine rows.",
+    tables: ["orders", "order_items"],
+    expected: `WITH daily AS (
+  SELECT o.order_date AS day, SUM(i.quantity * i.unit_price) AS revenue
+  FROM orders o
+  JOIN order_items i ON i.order_id = o.order_id
+  WHERE o.status IN ('delivered', 'shipped')
+  GROUP BY o.order_date
+),
+rolling AS (
+  SELECT day, revenue,
+         SUM(revenue) OVER (ORDER BY julianday(day) RANGE BETWEEN 6 PRECEDING AND CURRENT ROW) AS last_7_days
+  FROM daily
+)
+SELECT day, ROUND(revenue, 2) AS revenue, ROUND(last_7_days, 2) AS last_7_days
+FROM rolling
+WHERE day BETWEEN '2025-04-01' AND '2025-04-14'
+ORDER BY day;`,
+    orderMatters: true,
+    hint: "Total each day in a CTE. Then SUM(revenue) OVER (ORDER BY julianday(day) RANGE BETWEEN 6 PRECEDING AND CURRENT ROW): RANGE counts days, ROWS would count rows. Filter to April only after the window, so 1 April can still see the end of March.",
+    explain:
+      "ROWS BETWEEN 6 PRECEDING counts the six previous rows, and on a quiet week that reaches back two or three weeks: 1 April comes out at 2,839.62 instead of 1,214.84. RANGE over the day number counts calendar days. Postgres and Snowflake can write RANGE BETWEEN INTERVAL '6 days' PRECEDING on a date directly.",
+    art: "seven-day-window",
   },
   {
     id: "py-biggest-jump",

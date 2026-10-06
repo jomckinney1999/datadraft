@@ -275,6 +275,10 @@ export const ART_TONE: Record<QuestionArt, Tone> = {
   "order-gaps": "ice",
   "team-sheet": "gold",
   "seven-ticks": "turf",
+  "perfect-week": "turf",
+  "two-minute-clock": "gold",
+  "order-ticket": "ice",
+  "seven-day-window": "turf",
 };
 
 // ── Scenes, one per title idea ───────────────────────────────────
@@ -5869,6 +5873,89 @@ function SevenTicks() {
   );
 }
 
+/** Perfect Week — a roster card where every slot has a 15+ tick. */
+function PerfectWeek() {
+  return (
+    <g>
+      <Shadow y={136} rx={64} />
+      <rect x="44" y="24" width="112" height="104" rx="6" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <rect x="44" y="24" width="112" height="22" rx="6" fill={c("turf")} stroke={N} strokeWidth="2.2" />
+      <rect x="56" y="31" width="48" height="8" rx="2" fill={N} />
+      {[0, 1].map((i) => (
+        <g key={i}>
+          <rect x="56" y={58 + i * 30} width="52" height="18" rx="3" fill={c("ink-muted", 0.5)} />
+          <rect x="114" y={58 + i * 30} width="24" height="18" rx="3" fill={c("gold")} stroke={N} strokeWidth="1.6" />
+          <text x="126" y={71 + i * 30} textAnchor="middle" fontSize="8" fontWeight="900" fill={N} fontFamily={MONO}>
+            15+
+          </text>
+          <path d={`M142 ${66 + i * 30} L146 ${71 + i * 30} L154 ${61 + i * 30}`} fill="none" stroke={c("turf")} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
+      ))}
+      <Sparkle x={168} y={30} r={8} fill={c("gold")} />
+    </g>
+  );
+}
+
+/** Two-Minute Drill — a game clock on 2:00 with a pass arcing out of it. */
+function TwoMinuteClock() {
+  return (
+    <g>
+      <Shadow y={134} rx={70} />
+      <path d="M86 128 V108 M114 128 V108" stroke={N} strokeWidth="6" />
+      <rect x="44" y="50" width="112" height="60" rx="6" fill={c("night-100")} stroke={N} strokeWidth="2.6" />
+      <text x="100" y="94" textAnchor="middle" fontSize="34" fontWeight="900" fill={c("gold")} fontFamily={MONO}>
+        2:00
+      </text>
+      <rect x="66" y="38" width="68" height="14" rx="3" fill={c("ink")} stroke={N} strokeWidth="1.8" />
+      <text x="100" y="49" textAnchor="middle" fontSize="9" fontWeight="900" fill={N} fontFamily={MONO}>
+        4TH QTR
+      </text>
+      <path d="M152 52 Q176 20 188 40" fill="none" stroke={c("ice")} strokeWidth="3" strokeDasharray="5 4" strokeLinecap="round" />
+      <Football x={186} y={44} rx={9} rot={40} />
+    </g>
+  );
+}
+
+/** Order References — a ticket stub with a padded reference and a barcode. */
+function OrderTicket() {
+  return (
+    <g>
+      <Shadow y={134} rx={78} />
+      <path d="M22 50 H178 V70 A8 8 0 0 0 178 86 V106 H22 V86 A8 8 0 0 0 22 70 Z" fill={c("ink")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <text x="88" y="76" textAnchor="middle" fontSize="14" fontWeight="900" fill={N} fontFamily={MONO}>
+        GG-02248
+      </text>
+      <rect x="38" y="84" width="40" height="12" rx="2" fill={c("ice")} stroke={N} strokeWidth="1.4" />
+      <text x="58" y="94" textAnchor="middle" fontSize="8" fontWeight="900" fill={N} fontFamily={MONO}>
+        WEB
+      </text>
+      {[0, 3, 5, 9, 11, 14, 17, 19, 23, 26].map((x, i) => (
+        <rect key={i} x={140 + x} y="58" width={i % 3 ? 2 : 3} height="38" fill={N} />
+      ))}
+    </g>
+  );
+}
+
+/** Seven Calendar Days — a bracket over seven days of a calendar strip, some days empty. */
+function SevenDayWindow() {
+  const sales = [1, 0, 1, 1, 0, 0, 1, 1, 0];
+  return (
+    <g>
+      <Shadow y={132} rx={88} />
+      {sales.map((has, i) => (
+        <g key={i}>
+          <rect x={10 + i * 20} y="62" width="17" height="40" rx="3" fill={has ? c("ink") : c("ink-muted", 0.25)} stroke={N} strokeWidth="1.8" />
+          {has ? <rect x={14 + i * 20} y={98 - 10 - (i % 3) * 6} width="9" height={10 + (i % 3) * 6} fill={c("turf")} stroke={N} strokeWidth="1.2" /> : null}
+        </g>
+      ))}
+      <path d="M48 52 V44 H186 V52" fill="none" stroke={c("gold")} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <text x="117" y="38" textAnchor="middle" fontSize="10" fontWeight="900" fill={c("gold")} fontFamily={MONO}>
+        7 DAYS
+      </text>
+    </g>
+  );
+}
+
 const SCENES: Record<QuestionArt, () => JSX.Element> = {
   hammer: Hammer,
   quarterback: Quarterback,
@@ -6097,6 +6184,10 @@ const SCENES: Record<QuestionArt, () => JSX.Element> = {
   "order-gaps": OrderGaps,
   "team-sheet": TeamSheet,
   "seven-ticks": SevenTicks,
+  "perfect-week": PerfectWeek,
+  "two-minute-clock": TwoMinuteClock,
+  "order-ticket": OrderTicket,
+  "seven-day-window": SevenDayWindow,
 };
 
 export default function QuestionArt({
