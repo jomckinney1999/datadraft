@@ -688,7 +688,7 @@ ORDER BY go_pct DESC, team;`,
       },
       {
         q: "Is the play-by-play real?",
-        a: "Yes. It's nflverse's play-by-play for the 2025 NFL regular season, every pass, run, punt and field goal, used under CC BY 4.0. Names are as the play-by-play writes them, like J.Goff.",
+        a: "Yes. It's nflverse's play-by-play for the 2025 NFL regular season, every pass, run, punt and field goal, used under CC BY 4.0. Names are as the play-by-play writes them, like J.Goff. You can also load all of it into the free Practice Field and query it with no questions attached.",
       },
     ],
   },

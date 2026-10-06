@@ -10,6 +10,8 @@ import {
   buildFieldSeedSql,
   DRILLS,
   FIELD_SCHEMA,
+  PLAY_DRILLS,
+  PLAYS_FIELD_SCHEMA,
   type Drill,
   type FieldData,
 } from "@/lib/field-data";
@@ -50,6 +52,8 @@ export default function FieldSandbox() {
   const [error, setError] = useState<string | null>(null);
   const [ms, setMs] = useState<number | null>(null);
   const [activeDrill, setActiveDrill] = useState<Drill | null>(null);
+  /** The 2025 play-by-play, loaded into the same database on request. */
+  const [plays, setPlays] = useState<"off" | "loading" | "on" | "error">("off");
   const [solutionShown, setSolutionShown] = useState(false);
 
   useEffect(() => {
@@ -106,6 +110,20 @@ export default function FieldSandbox() {
     }
   }
 
+  // ~0.8 MB, so it waits to be asked for rather than loading with the page.
+  async function loadPlaysTable() {
+    const db = dbRef.current;
+    if (!db || plays === "loading" || plays === "on") return;
+    setPlays("loading");
+    try {
+      const { loadPlays } = await import("@/lib/plays-dataset");
+      await loadPlays(db);
+      setPlays("on");
+    } catch {
+      setPlays("error");
+    }
+  }
+
   function pickDrill(drill: Drill) {
     setActiveDrill(drill);
     setSolutionShown(false);
@@ -153,6 +171,15 @@ export default function FieldSandbox() {
               </div>
             ))}
           </div>
+          {plays === "on" && (
+            <div className="mt-4">
+              <p className="font-mono text-[12px] font-semibold text-turf">{PLAYS_FIELD_SCHEMA.table}</p>
+              <p className="mt-0.5 font-mono text-[10px] text-ink-muted">{PLAYS_FIELD_SCHEMA.grain}</p>
+              <p className="mt-1 font-mono text-[10px] leading-relaxed text-ink-soft">
+                {PLAYS_FIELD_SCHEMA.columns.join(" · ")}
+              </p>
+            </div>
+          )}
           {meta && (
             <p className="mt-4 border-t border-panel-border pt-3 font-mono text-[10px] leading-relaxed text-ink-muted">
               {meta.weeklyRows.toLocaleString()} weekly rows (
@@ -160,6 +187,45 @@ export default function FieldSandbox() {
               player-seasons ({meta.summarySeasons[0]}–{meta.summarySeasons[meta.summarySeasons.length - 1]}) · real stats via
               nflverse
             </p>
+          )}
+        </div>
+
+        <div className="surface border border-panel-border bg-panel/70 p-4">
+          <p className="label-broadcast text-gold">play-by-play</p>
+          {plays !== "on" ? (
+            <>
+              <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">
+                Every snap of the 2025 season: who got the ball, where, and what it was worth. Real nflverse data.
+              </p>
+              <button
+                type="button"
+                onClick={loadPlaysTable}
+                disabled={status !== "ready" || plays === "loading"}
+                className="mt-3 w-full border border-turf/50 bg-turf/10 px-2.5 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-turf transition-colors hover:bg-turf/20 disabled:opacity-50"
+              >
+                {plays === "loading" ? "Loading 35k plays…" : "Add the plays table · 0.8 MB"}
+              </button>
+              {plays === "error" && (
+                <p className="mt-2 font-mono text-[10px] text-gold">That didn&apos;t load. Try again.</p>
+              )}
+            </>
+          ) : (
+            <div className="mt-1.5 space-y-1">
+              {PLAY_DRILLS.map((drill) => (
+                <button
+                  key={drill.id}
+                  type="button"
+                  onClick={() => pickDrill(drill)}
+                  className={`block w-full border px-2.5 py-1.5 text-left font-mono text-[11px] transition-colors ${
+                    activeDrill?.id === drill.id
+                      ? "border-turf/50 bg-turf/10 text-turf"
+                      : "border-panel-border text-ink-soft hover:border-turf/40 hover:text-ink"
+                  }`}
+                >
+                  {drill.title}
+                </button>
+              ))}
+            </div>
           )}
         </div>
 

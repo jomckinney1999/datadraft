@@ -1124,6 +1124,22 @@ for (const [label, ex] of formulaExercises) {
 // pattern as a regex literal and use its .source instead.
 let templatesChecked = 0;
 
+// The Practice Field's play-by-play drills run on the same plays table the
+// questions use; each solution must run and return rows.
+let playDrillsChecked = 0;
+{
+  const fd = await loadProjectTs(path.join(root, "lib/field-data.ts"), root);
+  for (const d of fd.PLAY_DRILLS) {
+    playDrillsChecked++;
+    try {
+      const r = db.exec(d.solution)[0];
+      if (!r || r.values.length === 0) problems.push(`Practice Field drill "${d.id}" returns no rows`);
+    } catch (e) {
+      problems.push(`Practice Field drill "${d.id}" doesn't run: ${e.message}`);
+    }
+  }
+}
+
 // lib/lesson-facts.generated.ts repeats three constants from the dataset so
 // the credit line doesn't import it. Both are written by the same builder;
 // fail if anyone edits one and not the other.
@@ -1214,6 +1230,7 @@ console.log(`pattern guides            : ${guidesChecked} (one per interview pat
 console.log(`analyst path checks       : ${pathChecks} (catalog, patterns tickable, fresh and finished learners)`);
 console.log(`film room steps           : ${filmSteps} (every SQL answer replayed clause by clause, each step run)`);
 console.log(`lesson → course map      : ${courseMapChecked} lessons (Hall of Fame course counts, without the curriculum)`);
+console.log(`field play drills         : ${playDrillsChecked} (Practice Field, on the 2025 play-by-play)`);
 console.log(`template literals scanned : ${templatesChecked} (none with an escaped b, which the server minifier mangles)`);
 
 if (problems.length === 0) {

@@ -233,3 +233,59 @@ export const DRILLS: Drill[] = [
     solution: "SELECT player, team, COUNT(*) AS games,\n       ROUND(AVG(fantasy_ppr), 1) AS avg_ppr,\n       MAX(fantasy_ppr) AS ceiling,\n       MIN(fantasy_ppr) AS floor\nFROM player_weeks\nWHERE position = 'RB'\nGROUP BY player, team\nHAVING games >= 8\nORDER BY avg_ppr DESC\nLIMIT 15;",
   },
 ];
+
+/**
+ * Drills on the 2025 play-by-play (lib/plays-dataset.ts), which the field
+ * loads only when someone asks for it (2026-10-06). Fantasy-first: who gets
+ * the ball near the goal line, who's being thrown deep, which plays went
+ * for the most. verify-answer-keys.mjs runs every solution.
+ */
+export const PLAY_DRILLS: Drill[] = [
+  {
+    id: "goal-line-touches",
+    tier: "Game situations",
+    title: "Goal-line touches",
+    prompt: "Touchdowns come from touches near the goal line. Who got the most carries plus targets inside the opponent's 10 (yardline_100 <= 10)?",
+    solution: "SELECT COALESCE(receiver, rusher) AS player,\n       COUNT(*) AS touches_inside_10\nFROM plays\nWHERE yardline_100 <= 10\n  AND play_type IN ('pass', 'run')\n  AND COALESCE(receiver, rusher) IS NOT NULL\nGROUP BY player\nORDER BY touches_inside_10 DESC\nLIMIT 15;",
+  },
+  {
+    id: "air-yards",
+    tier: "Position drills",
+    title: "Air yards leaders",
+    prompt: "Air yards are how far the ball travels past the line on each throw at a player, caught or not. Who was targeted for the most air yards?",
+    solution: "SELECT receiver, COUNT(*) AS targets,\n       SUM(air_yards) AS air_yards\nFROM plays\nWHERE play_type = 'pass' AND receiver IS NOT NULL\nGROUP BY receiver\nORDER BY air_yards DESC\nLIMIT 15;",
+  },
+  {
+    id: "explosive-plays",
+    tier: "Warm-ups",
+    title: "The season's biggest plays",
+    prompt: "List the ten longest gains of 2025: the week, the offense, the passer or rusher, the receiver and the yards.",
+    solution: "SELECT week, posteam AS team,\n       COALESCE(passer, rusher) AS thrown_or_run_by,\n       receiver, yards_gained\nFROM plays\nWHERE play_type IN ('pass', 'run')\nORDER BY yards_gained DESC\nLIMIT 10;",
+  },
+  {
+    id: "fourth-down-calls",
+    tier: "Game situations",
+    title: "Go for it or kick?",
+    prompt: "On 4th down a team passes, runs, punts or kicks. Which offenses went for it (a pass or a run) most often?",
+    solution: "SELECT posteam AS team,\n       COUNT(*) AS fourth_downs,\n       SUM(play_type IN ('pass', 'run')) AS went_for_it\nFROM plays\nWHERE down = 4\nGROUP BY posteam\nORDER BY went_for_it DESC\nLIMIT 10;",
+  },
+  {
+    id: "epa-by-down",
+    tier: "Position drills",
+    title: "Pass or run, by down",
+    prompt: "epa is nflverse's model of the points a play added. Compare passes and runs on each down: how many, and how much each one added on average.",
+    solution: "SELECT down, play_type, COUNT(*) AS plays,\n       ROUND(AVG(epa), 3) AS epa_per_play\nFROM plays\nWHERE play_type IN ('pass', 'run')\nGROUP BY down, play_type\nORDER BY down, play_type;",
+  },
+];
+
+/** What the schema panel shows for the play-by-play once it's loaded. */
+export const PLAYS_FIELD_SCHEMA = {
+  table: "plays",
+  grain: "one row per pass, run, punt or field goal · 2025 regular season",
+  columns: [
+    "game_id", "week", "posteam", "defteam", "drive", "qtr", "down", "ydstogo", "yardline_100",
+    "score_differential", "play_type", "passer", "rusher", "receiver", "air_yards", "complete_pass",
+    "yards_gained", "first_down", "touchdown", "td_team", "interception", "sack", "fumble_lost",
+    "field_goal_result", "kick_distance", "epa",
+  ],
+};
