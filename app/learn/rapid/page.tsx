@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import RapidPageClient from "./client";
+import { rapidBankCounts } from "@/lib/rapid-deck";
 
 export const metadata: Metadata = {
   title: "Rapid Fire — DataDraft",
@@ -8,5 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default function RapidPage() {
-  return <RapidPageClient />;
+  // Counted here so the picker can say how many snaps each language has
+  // without the page bundling the curriculum to count them.
+  return <RapidPageClient counts={rapidBankCounts()} />;
 }

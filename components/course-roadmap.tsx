@@ -6,14 +6,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import {
-  COURSE,
-  liveLessons,
-  moduleUnits,
-  getModule,
-  type Lesson,
-  type Unit,
-} from "@/lib/curriculum";
+import type { Unit } from "@/lib/curriculum";
 import { useModule } from "@/lib/use-module";
 import { type Progress, EMPTY_PROGRESS } from "@/lib/progress";
 import { loadEconomy } from "@/lib/economy";
@@ -70,7 +63,26 @@ function BallIcon() {
   );
 }
 
-export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
+/** What the path draws of a lesson: its id and title, nothing it plays. */
+export type RoadmapLesson = { id: string; title: string };
+/** A unit as the path draws it, built on the server (app/learn/track). */
+export type RoadmapUnit = Omit<Unit, "lessons"> & { lessons: RoadmapLesson[] };
+type Lesson = RoadmapLesson;
+
+// The page passes the course's units with each lesson cut to its id and
+// title, so the roadmap never bundles the curriculum (2026-10-06: 365 kB of
+// first-load JS before, most of it lessons this page never plays).
+export default function CourseRoadmap({
+  moduleId,
+  units,
+  title,
+  blurb,
+}: {
+  moduleId: string;
+  units: RoadmapUnit[];
+  title: string;
+  blurb: string;
+}) {
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
   const [opened, setOpened] = useState<Record<string, boolean>>({});
   const { setModule } = useModule();
@@ -96,10 +108,9 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
     setModule(moduleId);
   }, [moduleId, setModule]);
 
-  const activeModule = getModule(moduleId);
-  const visibleUnits = moduleUnits(moduleId);
+  const visibleUnits = units;
   const liveUnits = visibleUnits.filter((u) => u.status === "live");
-  const all = liveLessons(moduleId);
+  const all = liveUnits.flatMap((unit) => unit.lessons.map((lesson) => ({ lesson, unit })));
   const completed = new Set(progress.completedLessons);
   const current =
     all.find((e) => !completed.has(e.lesson.id)) ?? all[all.length - 1];
@@ -187,10 +198,10 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
                     {moduleId === "all" ? "season roadmap" : "game plan"}
                   </p>
                   <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
-                    {moduleId === "all" ? COURSE.title : activeModule.name}
+                    {title}
                   </h1>
                   <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">
-                    {moduleId === "all" ? COURSE.tagline : activeModule.blurb}
+                    {blurb}
                   </p>
                 </div>
                 {hasCourseArt(moduleId) && (
@@ -276,7 +287,7 @@ export default function CourseRoadmap({ moduleId }: { moduleId: string }) {
             {courseIntro && (
               <CourseIntro
                 intro={courseIntro}
-                courseTitle={moduleId === "all" ? COURSE.title : activeModule.name}
+                courseTitle={title}
                 hours={courseHours}
                 started={completedCount > 0}
               />
@@ -429,7 +440,7 @@ function UnitBlock({
   isActive,
   nodeState,
 }: {
-  unit: Unit;
+  unit: RoadmapUnit;
   displayNumber: number;
   /** Outline number of the live module that has to be finished first. */
   unlockAfter: number | null;
@@ -564,7 +575,7 @@ function LessonPath({
   completedCount,
   unitComplete,
 }: {
-  unit: Unit;
+  unit: RoadmapUnit;
   nodeState: (lesson: Lesson) => "completed" | "current" | "locked";
   completedCount: number;
   unitComplete: boolean;

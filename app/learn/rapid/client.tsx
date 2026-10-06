@@ -10,8 +10,13 @@ import {
   type Progress,
 } from "@/lib/progress";
 import { useEffect } from "react";
+import type { RapidLangId } from "@/lib/rapid-fire";
 
-export default function RapidPageClient() {
+export default function RapidPageClient({
+  counts,
+}: {
+  counts: Record<RapidLangId, number>;
+}) {
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
 
   useEffect(() => {
@@ -31,7 +36,7 @@ export default function RapidPageClient() {
           </Link>
         </div>
 
-        <RapidFire onProgress={setProgress} />
+        <RapidFire onProgress={setProgress} counts={counts} />
       </main>
     </>
   );

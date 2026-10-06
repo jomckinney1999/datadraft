@@ -14,9 +14,6 @@ import {
   RAPID_ROUND_SIZE,
   RAPID_SECONDS,
   awardRapidFire,
-  buildRapidBank,
-  dealCourseRound,
-  dealRapidRound,
   getRapidLang,
   scoreRapidRound,
   type RapidLangId,
@@ -51,8 +48,11 @@ export default function RapidFire({
   roundSize = 5,
   embedded = false,
   onClose,
+  counts,
 }: {
   onProgress?: (p: Progress) => void;
+  /** Snaps per language for the picker, counted on the server. */
+  counts?: Partial<Record<RapidLangId, number>>;
   initialLang?: RapidLangId;
   /** Snap round drawn from this course only — played on the path. */
   courseModuleId?: string;
@@ -67,9 +67,10 @@ export default function RapidFire({
   const [langId, setLangId] = useState<RapidLangId | null>(
     courseModuleId ? "sql" : (initialLang ?? null),
   );
-  const [deck, setDeck] = useState<RapidQuestion[]>(() =>
-    courseModuleId ? dealCourseRound(courseModuleId, roundSize) : [],
-  );
+  const [deck, setDeck] = useState<RapidQuestion[]>([]);
+  // The language being dealt while the deck module loads (first round only;
+  // after that the import is cached).
+  const [dealing, setDealing] = useState<RapidLangId | null>(null);
   const [idx, setIdx] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const [correct, setCorrect] = useState(0);
@@ -83,7 +84,12 @@ export default function RapidFire({
   const lang = langId ? getRapidLang(langId) : null;
   const q = deck[idx] ?? null;
 
-  const start = useCallback((id?: RapidLangId) => {
+  const start = useCallback(async (id?: RapidLangId) => {
+    // Dealing reads every multiple-choice play in the curriculum, so the
+    // deck is imported when a round starts, not with the page.
+    setDealing(id ?? "sql");
+    const { dealCourseRound, dealRapidRound } = await import("@/lib/rapid-deck");
+    setDealing(null);
     const round = courseModuleId
       ? dealCourseRound(courseModuleId, roundSize)
       : id
@@ -109,8 +115,8 @@ export default function RapidFire({
   }, [courseModuleId, roundSize]);
 
   useEffect(() => {
-    if (courseModuleId) return;
-    if (initialLang) start(initialLang);
+    if (courseModuleId) start();
+    else if (initialLang) start(initialLang);
   }, [courseModuleId, initialLang, start]);
 
   // Countdown
@@ -184,19 +190,20 @@ export default function RapidFire({
         </p>
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {RAPID_LANGS.map((l) => {
-            const n = buildRapidBank(l.id).length;
+            const n = counts?.[l.id];
             return (
               <button
                 key={l.id}
                 type="button"
-                disabled={n === 0}
+                disabled={n === 0 || dealing !== null}
+                aria-busy={dealing === l.id}
                 onClick={() => start(l.id)}
                 className={`rounded-2xl border-2 bg-panel p-4 text-left transition-colors lift ${accentBorder(l.accent)} hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-40`}
               >
                 <span
                   className={`inline-flex rounded-md border px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest ${accentBg(l.accent)}`}
                 >
-                  {n} questions
+                  {dealing === l.id ? "Dealing…" : n === undefined ? `${RAPID_ROUND_SIZE} a round` : `${n} questions`}
                 </span>
                 <p className="mt-2 font-display text-lg font-bold text-ink">
                   {l.label} Rapid Fire
