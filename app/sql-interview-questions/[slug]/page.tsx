@@ -206,7 +206,7 @@ export default function PatternGuidePage({ params }: { params: { slug: string } 
         {/* ── Mistakes ────────────────────────────────────── */}
         <section className="mt-10">
           <h2 className="font-display text-2xl font-bold text-ink">The mistakes interviewers watch for</h2>
-          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+          <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {guide.mistakes.map((m) => (
               <li key={m.title} className="surface rounded-xl border border-panel-border bg-panel p-4">
                 <p className="flex items-start gap-2 font-display text-base font-bold text-ink">
@@ -268,7 +268,7 @@ export default function PatternGuidePage({ params }: { params: { slug: string } 
           <h2 className="font-display text-2xl font-bold text-ink">
             Practise it: {practice.length} questions, easiest first
           </h2>
-          <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+          <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {practice.map((q) => (
               <li key={q.id}>
                 <Link
