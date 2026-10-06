@@ -1,47 +1,39 @@
 import { nflTeam, type NflTeamAbbr } from "@/lib/nfl-team-avatars";
 
-const SPRITE = "/avatars/nfl-team-owls.jpg";
-const SOURCE_WIDTH = 1024;
-const SOURCE_HEIGHT = 935;
-const COLS = 8;
-const ROWS = 4;
+/**
+ * One owl per image, cut from the sprite (public/avatars/nfl-team-owls.jpg,
+ * eight teams by four) by scripts/build-owl-avatars.py into
+ * public/avatars/owls/. The sprite is 423 KB and the nav's locker chip shows
+ * one 28px owl on every page; one cell is ~8 KB (2026-10-06).
+ */
+const OWLS = "/avatars/owls";
+/** A cell's width over its height in the source: 128 × 233.75. */
+const CELL_ASPECT = 128 / 233.75;
 
 /**
- * The owl before you've drafted a team (components/player-mark.tsx): one
- * cell of the sprite, cropped square to the face (below the cap's logo,
- * above the jersey's number) and shown in greyscale, so it's the same owl
- * with no team on it. The crop is in source pixels: a 100×100 square from
- * x 14, y 58 of the cell.
+ * The owl before you've drafted a team (components/player-mark.tsx): cell
+ * one's face, cropped square below the cap's logo and above the jersey's
+ * number and turned grey, so it's the same owl with no team on it. The crop
+ * is baked by the build script.
  */
-const FREE_AGENT = { col: 0, row: 0, x: 14, y: 58, side: 100 };
-
 export function FreeAgentOwl({ className = "" }: { className?: string }) {
-  const cellWidth = SOURCE_WIDTH / COLS;
-  const cellHeight = SOURCE_HEIGHT / ROWS;
-  const { col, row, x, y, side } = FREE_AGENT;
   return (
     <span className={`relative block overflow-hidden bg-night ${className}`} aria-hidden>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={SPRITE}
+        src={`${OWLS}/free-agent.webp`}
         alt=""
         draggable={false}
-        className="pointer-events-none absolute max-w-none select-none grayscale"
-        style={{
-          width: `${(SOURCE_WIDTH / side) * 100}%`,
-          height: `${(SOURCE_HEIGHT / side) * 100}%`,
-          left: `${(-(col * cellWidth + x) / side) * 100}%`,
-          top: `${(-(row * cellHeight + y) / side) * 100}%`,
-        }}
+        className="pointer-events-none absolute inset-0 h-full w-full select-none"
       />
     </span>
   );
 }
 
 /**
- * The supplied source has portrait cells (128×234), not square cells. Fit a
- * complete cell to the square's height, center it, and fill the side gutters
- * with the team's primary colour. That preserves the owl's proportions.
+ * The supplied cells are portrait (128×234), not square. Fit a complete cell
+ * to the square's height, center it, and fill the side gutters with the
+ * team's primary colour. That preserves the owl's proportions.
  */
 export default function TeamOwlAvatar({
   team: abbr,
@@ -53,9 +45,6 @@ export default function TeamOwlAvatar({
   labelled?: boolean;
 }) {
   const team = nflTeam(abbr)!;
-  const cellWidth = SOURCE_WIDTH / COLS;
-  const cellHeight = SOURCE_HEIGHT / ROWS;
-  const cellWidthPct = (cellWidth / cellHeight) * 100;
 
   return (
     <span
@@ -67,21 +56,14 @@ export default function TeamOwlAvatar({
     >
       <span
         className="absolute inset-y-0 left-1/2 block -translate-x-1/2 overflow-hidden"
-        style={{ width: `${cellWidthPct}%` }}
+        style={{ width: `${CELL_ASPECT * 100}%` }}
       >
-        {/* A plain img keeps the user-supplied sprite local and deterministic. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={SPRITE}
+          src={`${OWLS}/${abbr.toLowerCase()}.webp`}
           alt=""
           draggable={false}
-          className="pointer-events-none absolute max-w-none select-none"
-          style={{
-            width: `${COLS * 100}%`,
-            height: `${ROWS * 100}%`,
-            left: `${team.col * -100}%`,
-            top: `${team.row * -100}%`,
-          }}
+          className="pointer-events-none absolute inset-0 h-full w-full select-none"
         />
       </span>
     </span>
