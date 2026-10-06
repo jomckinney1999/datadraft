@@ -1179,7 +1179,7 @@ export default function LessonPlayer({
     const t = e.target;
     if (
       t instanceof HTMLElement &&
-      (t.isContentEditable || t.closest("input, textarea, select, [contenteditable='true']"))
+      (t.isContentEditable || t.closest("input, textarea, select, [contenteditable='true'], [data-own-arrows]"))
     ) {
       return;
     }

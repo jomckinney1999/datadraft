@@ -104,11 +104,13 @@ export default function ExcelGrid({
       </div>
 
       {/* Focusable, so a keyboard can scroll a sheet wider than the screen
-          (axe, 2026-10-06). */}
+          (axe, 2026-10-06). data-own-arrows: while it has focus the arrow
+          keys scroll it, and the lesson player leaves them alone. */}
       <div
         tabIndex={0}
         role="region"
         aria-label="Spreadsheet"
+        data-own-arrows
         className={
           expanded && base.length > 12
             ? "max-h-[min(70vh,32rem)] overflow-auto"
