@@ -5484,6 +5484,8 @@ ORDER BY c.player;`,
     explain:
       "T.Hill is Tyreek Hill in Miami and Taysom Hill in New Orleans; B.Robinson is Bijan Robinson in Atlanta and Brian Robinson in San Francisco. Two people, one key, so a join on the name alone would hand Bijan another back's carries. (A trade would show up here too, which is just as worth knowing.)",
     art: "two-jerseys",
+    // The title names him; Bijan, the other collision, is half the answer.
+    players: ["Tyreek Hill"],
   },
   {
     id: "same-name-right-team",
