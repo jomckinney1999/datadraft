@@ -1003,6 +1003,20 @@ print(dict(df["team"].value_counts().head(4)))`);
   }
 }
 
+// The free Spreadsheet's drill book (lib/excel-drills.ts): ungraded, but a
+// suggested formula that errors is a broken promise on a free page.
+let sheetDrillsChecked = 0;
+{
+  const drills = await loadProjectTs(path.join(root, "lib/excel-drills.ts"), root);
+  for (const d of drills.EXCEL_DRILLS) {
+    sheetDrillsChecked++;
+    const res = await excel.evaluateFormula(d.solution, "Practice");
+    if (res.error || res.value === null || res.value === "") {
+      problems.push(`Spreadsheet drill ${d.id}: ${d.solution} gave ${res.error ?? "nothing"}`);
+    }
+  }
+}
+
 stage("Excel formula answer keys");
 // ── Excel formula answer keys ─────────────────────────────────
 // Evaluated by the SHIPPED engine (lib/excel-engine.ts), not a copy of it —
@@ -1332,6 +1346,7 @@ console.log(`analyst path checks       : ${pathChecks} (catalog, patterns tickab
 console.log(`film room steps           : ${filmSteps} (every SQL answer replayed clause by clause, each step run)`);
 console.log(`lesson → course map      : ${courseMapChecked} lessons (Hall of Fame course counts, without the curriculum)`);
 console.log(`field play drills         : ${playDrillsChecked} (Practice Field, on the 2025 play-by-play)`);
+console.log(`spreadsheet drills        : ${sheetDrillsChecked} (the free Spreadsheet's drill book)`);
 console.log(`template literals scanned : ${templatesChecked} (none with an escaped b, which the server minifier mangles)`);
 
 if (problems.length === 0) {
