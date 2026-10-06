@@ -11,7 +11,7 @@
  * fantasy-data.ts stops matching here rather than pointing at nothing.
  */
 
-import { SCHEMA } from "./fantasy-data";
+import { SCHEMA } from "./league-schema";
 
 /** Table names in schema order, longest first so `week_results` wins over any prefix. */
 const NAMES = SCHEMA.map((t) => t.table).sort((a, b) => b.length - a.length);

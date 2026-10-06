@@ -12,22 +12,21 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import HofTrophy from "@/components/hof-trophy";
 import type { Database, QueryExecResult } from "sql.js";
-import { buildSeedSql } from "@/lib/fantasy-data";
-import {
-  getLesson,
-  MODULES,
-  ALL_MODULE,
-  nextLessonId,
-  XP_PER_EXERCISE,
-  XP_RETRY,
-  PERFECT_BONUS,
-  type Exercise,
-  type QueryExercise,
-  type CodeExercise,
-  type FormulaExercise,
-  type VizExercise,
-  type DaxExercise,
-  type TheoryCard,
+// One lesson comes in as props (app/learn/[lessonId]/page.tsx), never the
+// whole curriculum: only types are imported from it, and navigation reads the
+// small generated index (2026-10-06).
+import { PERFECT_BONUS, XP_PER_EXERCISE, XP_RETRY } from "@/lib/xp";
+import { courseModuleOfUnit, nextLessonFor } from "@/lib/lesson-nav";
+import type { OutlineData } from "@/components/lesson-outline";
+import type {
+  Lesson,
+  Exercise,
+  QueryExercise,
+  CodeExercise,
+  FormulaExercise,
+  VizExercise,
+  DaxExercise,
+  TheoryCard,
 } from "@/lib/curriculum";
 import {
   runCode,
@@ -177,13 +176,23 @@ function TheoryCardView({ card }: { card: TheoryCard }) {
   );
 }
 
-export default function LessonPlayer({ lessonId }: { lessonId: string }) {
-  // Memoised because getLesson() rebuilds its {lesson, unit} wrapper on every
-  // call. An unmemoised `entry` is a new object each render, and two effects
-  // below depend on it — the brief-preview one then re-ran forever, setting
-  // state with a fresh result object each pass ("Maximum update depth
-  // exceeded" on every SQL lesson brief).
-  const entry = useMemo(() => getLesson(lessonId), [lessonId]);
+export default function LessonPlayer({
+  lessonId,
+  lesson: lessonProp,
+  unit: unitProp,
+  outline,
+}: {
+  lessonId: string;
+  lesson: Lesson;
+  unit: { id: string; title: string };
+  outline: OutlineData | null;
+}) {
+  // Memoised so `entry` keeps its identity across renders. An unmemoised
+  // wrapper is a new object each render, and two effects below depend on it;
+  // the brief-preview one then re-ran forever, setting state with a fresh
+  // result object each pass ("Maximum update depth exceeded" on every SQL
+  // lesson brief).
+  const entry = useMemo(() => ({ lesson: lessonProp, unit: unitProp }), [lessonProp, unitProp]);
 
   const dbRef = useRef<Database | null>(null);
   const [engineReady, setEngineReady] = useState(false);
@@ -445,12 +454,15 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
 
   useEffect(() => {
     let cancelled = false;
-    import("sql.js")
-      .then((mod) => mod.default({ locateFile: () => "/sql-wasm.wasm" }))
-      .then((SQL) => {
+    // The dataset loads with the engine, so it isn't in the page's bundle.
+    Promise.all([
+      import("sql.js").then((mod) => mod.default({ locateFile: () => "/sql-wasm.wasm" })),
+      import("@/lib/fantasy-data"),
+    ])
+      .then(([SQL, data]) => {
         if (cancelled) return;
         const db = new SQL.Database();
-        db.run(buildSeedSql());
+        db.run(data.buildSeedSql());
         dbRef.current = db;
         setEngineReady(true);
       })
@@ -635,13 +647,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
 
   if (!entry || phase === "loading") return null;
   const { lesson } = entry;
-  const artId =
-    MODULES.find(
-      (m) =>
-        m.id !== ALL_MODULE &&
-        m.id !== "sql-foundations" &&
-        m.unitIds.includes(entry.unit.id),
-    )?.id ?? null;
+  const artId = courseModuleOfUnit(entry.unit.id);
   // A lesson either paces its brief across steps or falls back to one
   // paragraph; the preview and the start button wait for the final beat so
   // the learner isn't reading ahead while still being introduced.
@@ -654,8 +660,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const activePreviewCaption =
     briefSteps[briefStep]?.previewCaption ?? lesson.brief.previewCaption;
   // Advance within whichever module the learner picked on the roadmap, so a
-  // "just Python" learner isn't dropped into a SQL lesson at the end.
-  const nextId = nextLessonId(lesson.id, moduleId);
+  // "just Python" learner isn't dropped into a SQL lesson at the end, unless
+  // this lesson isn't in that module, in which case its own course.
+  const nextId = nextLessonFor(lesson.id, moduleId, entry.unit.id);
   // One sport, so one noun. This used to branch on the learner's picked
   // sport; basketball and baseball never had a dataset behind them.
   const gainNoun = "yards";
@@ -1234,6 +1241,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     <div className="lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
       <aside className="sticky top-0 hidden h-screen overflow-hidden border-r border-panel-border lg:block">
         <LessonOutline
+            outline={outline}
           lessonId={lesson.id}
           unitId={entry.unit.id}
           refreshKey={phase}
@@ -1249,6 +1257,7 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
           />
           <div className="absolute inset-y-0 left-0 w-[min(100%,20rem)] overflow-hidden border-r border-panel-border shadow-scoreboard">
             <LessonOutline
+            outline={outline}
               lessonId={lesson.id}
               unitId={entry.unit.id}
               refreshKey={phase}

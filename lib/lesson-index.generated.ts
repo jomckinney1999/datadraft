@@ -201,3 +201,20 @@ export const LESSON_INFO: Record<string, { title: string; blurb: string }> = {
   "ai-judge-l1": {"title":"What you do not paste","blurb":"Other people's data, keys, and a company rule you did not read."},
   "ai-judge-l2": {"title":"If you cannot explain it","blurb":"The interview failure, and the project that shows your rows."},
 };
+
+// Each course's units in order (MODULES[].unitIds), for lesson navigation.
+export const MODULE_UNIT_IDS: Record<string, string[]> = {
+  "all": ["u1","f2","u2","u3","sf-null","sf-calc","sf-fn","u4","u5","sf-sub","sf-set","sf-dml","sf-ddl","sf-clean","sf-debug","u23","sa-models","u19","u6","sa-agg","sa-joins","sa-sub","sa-dates","sa-kpi","sa-cohort","sa-case","sa-xform","sa-temp","u20","sa-perf","u22","sa-tx","sa-model","sa-wh","sa-json","sa-stack","sa-risk","sa-biz","sa-interview","sa-craft","u24","u21","u15","u16","u17","u18","u26","u7","u13","u14","u25","u8","st-spread","st-relate","u27","u9","vz-build","vz-story","u28","tb-start","tb-marks","tb-calc","tb-filters","tb-dash","tb-job","pb-start","pb-query","pb-model","pb-dax","pb-report","pb-job","u10","gt-history","gt-team","u29","u11","r-wrangle","r-report","u30","ai-how","ai-prompt","ai-analyst","ai-api","ai-judge"],
+  "sql-fundamentals": ["u1","f2","u2","u3","sf-null","sf-calc","sf-fn","u4","u5","sf-sub","sf-set","sf-dml","sf-ddl","sf-clean","sf-debug","u23"],
+  "sql-foundations": ["f2"],
+  "sql-advanced": ["sa-models","u19","u6","sa-agg","sa-joins","sa-sub","sa-dates","sa-kpi","sa-cohort","sa-case","sa-xform","sa-temp","u20","sa-perf","u22","sa-tx","sa-model","sa-wh","sa-json","sa-stack","sa-risk","sa-biz","sa-interview","sa-craft","u24","u21"],
+  "python": ["u7","u13","u14","u25"],
+  "excel": ["u15","u16","u17","u18","u26"],
+  "stats": ["u8","st-spread","st-relate","u27"],
+  "viz": ["u9","vz-build","vz-story","u28"],
+  "git": ["u10","gt-history","gt-team","u29"],
+  "r": ["u11","r-wrangle","r-report","u30"],
+  "tableau": ["tb-start","tb-marks","tb-calc","tb-filters","tb-dash","tb-job"],
+  "powerbi": ["pb-start","pb-query","pb-model","pb-dax","pb-report","pb-job"],
+  "ai": ["ai-how","ai-prompt","ai-analyst","ai-api","ai-judge"],
+};

@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ALL_MODULE, MODULES } from "./curriculum";
+// Course ids from the generated index, not the curriculum: this module is on
+// the lesson player and the account page, and only needs the ids.
+import { ALL_MODULE } from "./all-module";
+import { MODULE_IDS } from "./lesson-nav";
 
 export const MODULE_STORAGE_KEY = "sqlsports-module";
 
@@ -11,7 +14,7 @@ const MODULE_EVENT = "sqlsports:module-change";
 export function readStoredModule(): string {
   try {
     const value = window.localStorage.getItem(MODULE_STORAGE_KEY);
-    return value && MODULES.some((m) => m.id === value) ? value : ALL_MODULE;
+    return value && MODULE_IDS.includes(value) ? value : ALL_MODULE;
   } catch {
     return ALL_MODULE;
   }

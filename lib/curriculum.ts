@@ -14,6 +14,7 @@
 
 import { FINAL_UNITS } from "./finals";
 import { ALL_MODULE } from "./all-module";
+import { PERFECT_BONUS, XP_PER_EXERCISE, XP_RETRY } from "./xp";
 import {
   GIT_MORE_UNIT_IDS,
   MORE_UNITS,
@@ -7542,9 +7543,7 @@ export const COURSE = {
   ] as Unit[],
 };
 
-export const XP_PER_EXERCISE = 10;
-export const XP_RETRY = 5;
-export const PERFECT_BONUS = 20;
+export { PERFECT_BONUS, XP_PER_EXERCISE, XP_RETRY };
 
 /**
  * Modules let a learner take one skill on its own instead of the whole

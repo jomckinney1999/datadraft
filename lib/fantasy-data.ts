@@ -158,34 +158,9 @@ export function buildSeedSql(): string {
   return statements.join("\n");
 }
 
-export const SCHEMA: { table: string; columns: string[] }[] = [
-  {
-    table: "week_results",
-    columns: ["player", "team", "position", "season", "week", "fantasy_pts"],
-  },
-  {
-    table: "games",
-    columns: [
-      "game_id",
-      "season",
-      "week",
-      "gameday",
-      "weekday",
-      "home_team",
-      "away_team",
-      "home_score",
-      "away_score",
-      "roof",
-      "surface",
-      "temp",
-    ],
-  },
-  { table: "rosters", columns: ["team_name", "player"] },
-  {
-    table: "waiver_wire",
-    columns: ["player", "team", "position", "pct_rostered", "trend"],
-  },
-];
+// The shape lives in lib/league-schema.ts so the schema panels can show it
+// without importing the dataset; re-exported here for everything else.
+export { SCHEMA } from "./league-schema";
 
 export const PRESETS: { id: string; label: string; query: string }[] = [
   {

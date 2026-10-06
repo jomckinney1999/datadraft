@@ -71,6 +71,11 @@ ${entries(liveByModule)}
 export const LESSON_INFO: Record<string, { title: string; blurb: string }> = {
 ${entries(info)}
 };
+
+// Each course's units in order (MODULES[].unitIds), for lesson navigation.
+export const MODULE_UNIT_IDS: Record<string, string[]> = {
+${entries(Object.fromEntries(c.MODULES.map((m) => [m.id, m.unitIds])))}
+};
 `,
 );
 console.log(`units ${Object.keys(unitModules).length}, modules ${Object.keys(liveByModule).length}, lessons ${Object.keys(info).length}`);

@@ -16,7 +16,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { SCHEMA } from "@/lib/fantasy-data";
+import { SCHEMA } from "@/lib/league-schema";
 import { PROVENANCE } from "@/lib/data-source";
 
 const PROV = new Map(PROVENANCE.map((p) => [p.table, p]));

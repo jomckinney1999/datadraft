@@ -38,7 +38,7 @@
  * questions here stay deliberately short.
  */
 
-import { SCHEMA } from "@/lib/fantasy-data";
+import { SCHEMA } from "@/lib/league-schema";
 import { FACTS } from "@/lib/lesson-facts.generated";
 import { WEEKLY_2024 } from "@/lib/question-frames.generated";
 import { EXTRA_SCHEMA, isLeagueOnly } from "@/lib/practice-schemas";

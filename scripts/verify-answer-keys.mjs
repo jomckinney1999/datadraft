@@ -1168,6 +1168,36 @@ let courseMapChecked = 0;
   if (JSON.stringify(expected) !== JSON.stringify(UNIT_MODULE)) {
     problems.push("lib/unit-modules.generated.ts is stale: run node scripts/build-curriculum-index.mjs");
   }
+  // The lesson player's navigation reads the index too: each course's unit
+  // order, the next lesson in every course and the course that owns a unit.
+  const li = await loadProjectTs(path.join(root, "lib/lesson-index.generated.ts"), root);
+  const nav = await loadProjectTs(path.join(root, "lib/lesson-nav.ts"), root);
+  for (const mod of curriculum.MODULES) {
+    if (JSON.stringify(li.MODULE_UNIT_IDS[mod.id]) !== JSON.stringify(mod.unitIds)) {
+      problems.push(`lib/lesson-index.generated.ts has stale units for ${mod.id}: run node scripts/build-curriculum-index.mjs`);
+    }
+    for (const { lesson } of curriculum.allLiveLessons()) {
+      if (nav.nextLiveLessonId(lesson.id, mod.id) !== curriculum.nextLessonId(lesson.id, mod.id)) {
+        problems.push(`lesson-nav's next lesson after ${lesson.id} in ${mod.id} disagrees with the curriculum`);
+      }
+    }
+  }
+  // Every live lesson but a course's last has somewhere to go, whatever
+  // course the learner last picked.
+  for (const { lesson, unit } of curriculum.allLiveLessons()) {
+    const own = nav.courseModuleOfUnit(unit.id);
+    const ownList = own ? curriculum.liveLessons(own).map((e) => e.lesson.id) : [];
+    const lastInOwn = ownList[ownList.length - 1] === lesson.id;
+    for (const mod of curriculum.MODULES) {
+      if (!lastInOwn && own && nav.nextLessonFor(lesson.id, mod.id, unit.id) === null && !curriculum.liveLessons(mod.id).some((e) => e.lesson.id === lesson.id)) {
+        problems.push(`lesson ${lesson.id} offers no next lesson when the learner's course is ${mod.id}`);
+      }
+    }
+  }
+  for (const unit of curriculum.COURSE.units) {
+    const want = curriculum.MODULES.find((m) => m.id !== curriculum.ALL_MODULE && m.id !== "sql-foundations" && m.unitIds.includes(unit.id))?.id ?? null;
+    if (nav.courseModuleOfUnit(unit.id) !== want) problems.push(`lesson-nav puts unit ${unit.id} in ${nav.courseModuleOfUnit(unit.id)}, the curriculum in ${want}`);
+  }
   // And the lesson index /learn and the dashboard read instead of the curriculum.
   const { LIVE_LESSONS, LESSON_INFO } = await loadProjectTs(path.join(root, "lib/lesson-index.generated.ts"), root);
   for (const mod of curriculum.MODULES) {

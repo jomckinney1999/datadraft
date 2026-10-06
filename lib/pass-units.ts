@@ -4,14 +4,17 @@
  * course is like before paying for the rest. The combined pathway isn't a
  * course of its own, so it doesn't make its units free.
  *
- * Separate from lib/season-pass.ts because it needs the curriculum.
+ * Reads each course's unit order from the generated lesson index, so the
+ * lesson player doesn't import the curriculum to ask (2026-10-06).
  */
 
-import { ALL_MODULE, MODULES } from "@/lib/curriculum";
+import { ALL_MODULE } from "@/lib/all-module";
+import { MODULE_UNIT_IDS } from "@/lib/lesson-index.generated";
 
 const FREE_UNITS = new Set(
-  MODULES.filter((m) => m.id !== ALL_MODULE)
-    .map((m) => m.unitIds[0])
+  Object.entries(MODULE_UNIT_IDS)
+    .filter(([moduleId]) => moduleId !== ALL_MODULE)
+    .map(([, unitIds]) => unitIds[0])
     .filter(Boolean),
 );
 

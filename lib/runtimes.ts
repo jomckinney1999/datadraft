@@ -18,7 +18,6 @@
  * upstream change can break grading for every learner at once.
  */
 
-import { buildSeedSql } from "@/lib/fantasy-data";
 
 export type Lang = "sql" | "python" | "r";
 
@@ -65,11 +64,15 @@ let sqlPromise: Promise<SqlDb> | null = null;
 async function getSql(): Promise<SqlDb> {
   if (!sqlPromise) {
     status.sql = "loading";
-    sqlPromise = import("sql.js")
-      .then((mod) => mod.default({ locateFile: () => "/sql-wasm.wasm" }))
-      .then((SQL) => {
+    // The dataset comes with the engine, never up front: this module is in
+    // the lesson player's bundle, and most lessons never run SQL code.
+    sqlPromise = Promise.all([
+      import("sql.js").then((mod) => mod.default({ locateFile: () => "/sql-wasm.wasm" })),
+      import("@/lib/fantasy-data"),
+    ])
+      .then(([SQL, data]) => {
         const db = new SQL.Database() as unknown as SqlDb;
-        db.exec(buildSeedSql());
+        db.exec(data.buildSeedSql());
         status.sql = "ready";
         return db;
       })

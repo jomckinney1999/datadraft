@@ -8,31 +8,35 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  ALL_MODULE,
-  MODULES,
-  moduleUnits,
-  type Lesson,
-} from "@/lib/curriculum";
-import { courseByModule } from "@/lib/courses";
 import { loadProgress } from "@/lib/progress";
 
-function moduleForUnit(unitId: string) {
-  return MODULES.find(
-    (m) =>
-      m.id !== ALL_MODULE &&
-      m.id !== "sql-foundations" &&
-      m.unitIds.includes(unitId),
-  );
-}
+/**
+ * The course this lesson belongs to, built on the server
+ * (app/learn/[lessonId]/page.tsx) so the player never imports the curriculum.
+ */
+export type OutlineData = {
+  moduleId: string;
+  title: string;
+  units: {
+    id: string;
+    title: string;
+    description?: string;
+    status: string;
+    lessons: { id: string; title: string }[];
+  }[];
+};
+
+type OutlineLesson = OutlineData["units"][number]["lessons"][number];
 
 export default function LessonOutline({
+  outline,
   lessonId,
   unitId,
   refreshKey,
   onNavigate,
   onClose,
 }: {
+  outline: OutlineData | null;
   lessonId: string;
   unitId: string;
   /** Bumps when a lesson is saved so checks update without leaving the page. */
@@ -41,11 +45,7 @@ export default function LessonOutline({
   /** Present on the phone drawer. The desktop rail has no close. */
   onClose?: () => void;
 }) {
-  const courseModule = useMemo(() => moduleForUnit(unitId), [unitId]);
-  const units = useMemo(
-    () => (courseModule ? moduleUnits(courseModule.id) : []),
-    [courseModule],
-  );
+  const units = useMemo(() => outline?.units ?? [], [outline]);
   const [completed, setCompleted] = useState<Set<string>>(new Set());
   const [openUnitId, setOpenUnitId] = useState(unitId);
 
@@ -62,10 +62,9 @@ export default function LessonOutline({
     row?.scrollIntoView({ block: "nearest" });
   }, [lessonId, openUnitId]);
 
-  if (!courseModule) return null;
+  if (!outline) return null;
 
-  const course = courseByModule(courseModule.id);
-  const title = course?.title ?? courseModule.name;
+  const title = outline.title;
   const live = units.filter((u) => u.status === "live");
   const allLessons = live.flatMap((u) => u.lessons);
   const doneCount = allLessons.filter((l) => completed.has(l.id)).length;
@@ -86,7 +85,7 @@ export default function LessonOutline({
     return true;
   }
 
-  function rowState(lesson: Lesson): "here" | "done" | "next" | "locked" {
+  function rowState(lesson: OutlineLesson): "here" | "done" | "next" | "locked" {
     if (lesson.id === lessonId) return "here";
     if (completed.has(lesson.id)) return "done";
     if (lesson.id === nextId) return "next";
@@ -277,7 +276,7 @@ export default function LessonOutline({
 
       <div className="border-t border-panel-border p-3">
         <Link
-          href={`/learn/track/${courseModule.id}`}
+          href={`/learn/track/${outline.moduleId}`}
           onClick={onNavigate}
           className="flex w-full items-center justify-center rounded-xl border border-panel-border px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-ink-soft hover:border-turf/40 hover:text-turf"
         >
