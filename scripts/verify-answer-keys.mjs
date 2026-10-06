@@ -1089,6 +1089,31 @@ for (const [label, ex] of formulaExercises) {
   }
 }
 
+// No `\\b` inside a template literal anywhere in the app. Next's server
+// minifier rewrites such a template as a string and turns the regex word
+// boundary into a backspace character, so the pattern silently stops
+// matching on the server only (it broke /field's hydration). Write the
+// pattern as a regex literal and use its .source instead.
+let templatesChecked = 0;
+{
+  const fs = await import("node:fs");
+  const TEMPLATE = /`(?:[^`\\]|\\.)*`/gs;
+  const WORD_BOUNDARY = /(?<!\\)\\\\b/;
+  for (const dir of ["lib", "components", "app"]) {
+    for (const f of fs.readdirSync(path.join(root, dir), { recursive: true })) {
+      if (!/\.tsx?$/.test(f)) continue;
+      const src = fs.readFileSync(path.join(root, dir, f), "utf8");
+      for (const m of src.matchAll(TEMPLATE)) {
+        templatesChecked++;
+        if (WORD_BOUNDARY.test(m[0])) {
+          const line = src.slice(0, m.index).split("\n").length;
+          problems.push(`${dir}/${f}:${line} has \\\\b inside a template literal; the server minifier turns it into a backspace. Use a regex literal's .source.`);
+        }
+      }
+    }
+  }
+}
+
 console.log(`brief previews checked : ${previews}`);
 console.log(`query answer keys checked: ${checked}`);
 console.log(`interview keys checked   : ${interviewChecked}`);
@@ -1107,6 +1132,7 @@ console.log(`query doctor cases        : ${doctorChecked} (known wrong answers, 
 console.log(`pattern guides            : ${guidesChecked} (one per interview pattern, each example in its pattern)`);
 console.log(`analyst path checks       : ${pathChecks} (catalog, patterns tickable, fresh and finished learners)`);
 console.log(`film room steps           : ${filmSteps} (every SQL answer replayed clause by clause, each step run)`);
+console.log(`template literals scanned : ${templatesChecked} (none with an escaped b, which the server minifier mangles)`);
 
 if (problems.length === 0) {
   console.log("\nAll answer keys run, return rows, and have no cutoff ties.");

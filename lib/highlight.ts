@@ -69,6 +69,15 @@ const SQL_TABLE_LEADERS = new Set([
   "with",
 ]);
 
+/**
+ * A number, written as a regex literal on purpose. With an escaped b inside
+ * a template literal, Next's server minifier turned the word boundary into a
+ * backspace character, so server-rendered editors never coloured a number
+ * and /field failed hydration (2026-10-05). A regex literal can't be
+ * misread that way; the verifier fails a template literal holding one.
+ */
+const NUMBER = /\b\d+(?:\.\d+)?\b/.source;
+
 /** A1, $A$1, AB12 — matched before the generic word rule so the $ stays attached. */
 const CELL_REF = /^\$?[A-Za-z]{1,3}\$?\d+$/;
 
@@ -95,7 +104,7 @@ function patternFor(lang: HighlightLang): RegExp {
     [
       `(${comment})`, // 1 comment
       `('(?:[^'\\\\\\n]|\\\\.)*'|"(?:[^"\\\\\\n]|\\\\.)*")`, // 2 string
-      `(\\b\\d+(?:\\.\\d+)?\\b)`, // 3 number
+      `(${NUMBER})`, // 3 number
       word, // 4 word (or cell reference, in Excel)
       `([^\\sA-Za-z0-9_]+)`, // 5 punctuation
     ].join("|"),

@@ -37,6 +37,8 @@ export type DoctorInput = {
 };
 
 const MAX_FINDINGS = 3;
+/** A word boundary for built regexes. Never an escaped b in a template literal: the server minifier turns it into a backspace. */
+const WB = /\b/.source;
 
 // ── Small helpers ─────────────────────────────────────────────────
 const lc = (s: string) => s.toLowerCase();
@@ -187,7 +189,7 @@ function diagnoseError(input: DoctorInput): Finding[] {
       });
     } else {
       const order = ["SELECT", "FROM", "WHERE", "GROUP BY", "HAVING", "ORDER BY", "LIMIT"];
-      const at = order.map((k) => sql.toUpperCase().search(new RegExp(`\\b${k.replace(" ", "\\s+")}\\b`)));
+      const at = order.map((k) => sql.toUpperCase().search(new RegExp(`${WB}${k.replace(" ", "\\s+")}${WB}`)));
       const seen = at.map((p, i) => ({ k: order[i], p })).filter((x) => x.p >= 0);
       const outOfOrder = seen.some((x, i) => i > 0 && x.p < seen[i - 1].p);
       out.push(
@@ -222,8 +224,8 @@ function whereOnLeftJoined(sql: string): boolean {
   const where = /\bWHERE\b([\s\S]*?)(\bGROUP\s+BY\b|\bORDER\s+BY\b|\bLIMIT\b|$)/i.exec(sql);
   if (!where) return false;
   const cond = where[1];
-  if (new RegExp(`\\b${alias}\\.\\w+\\s+IS\\s+(NOT\\s+)?NULL`, "i").test(cond)) return false;
-  return new RegExp(`\\b${alias}\\.\\w+`, "i").test(cond);
+  if (new RegExp(`${WB}${alias}\\.\\w+\\s+IS\\s+(NOT\\s+)?NULL`, "i").test(cond)) return false;
+  return new RegExp(`${WB}${alias}\\.\\w+`, "i").test(cond);
 }
 
 // ── Results ───────────────────────────────────────────────────────
