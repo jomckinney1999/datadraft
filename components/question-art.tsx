@@ -262,6 +262,13 @@ export const ART_TONE: Record<QuestionArt, Tone> = {
   "headline-sheet": "turf",
   "lightbulb-lineup": "gold",
   "quarter-bars": "ice",
+  "big-jump": "ice",
+  "high-bar": "gold",
+  "ceiling-line": "turf",
+  "two-helmets": "ice",
+  "box-lines": "gold",
+  "two-podium": "turf",
+  "fire-chain": "gold",
 };
 
 // ── Scenes, one per title idea ───────────────────────────────────
@@ -5585,6 +5592,138 @@ function QuarterBars() {
   );
 }
 
+/** Biggest Jump — a low bar and a tall one, a football leaping from one to the other. */
+function BigJump() {
+  return (
+    <g>
+      <Shadow y={134} rx={78} />
+      <path d="M20 128 H180" stroke={c("ink-muted")} strokeWidth="2.4" />
+      <rect x="34" y="104" width="34" height="24" rx="3" fill={c("ink-soft")} stroke={N} strokeWidth="2" />
+      <rect x="132" y="40" width="34" height="88" rx="3" fill={c("ice")} stroke={N} strokeWidth="2.2" />
+      <path d="M52 98 Q90 6 146 34" fill="none" stroke={c("gold")} strokeWidth="3" strokeDasharray="6 5" strokeLinecap="round" />
+      <Football x={104} y={30} rx={13} rot={20} />
+      <path d="M118 84 V58 M110 66 L118 56 L126 66" fill="none" stroke={c("turf")} strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** New Season High — high-jump uprights with the bar set at a new mark, the old marks below it. */
+function HighBar() {
+  return (
+    <g>
+      <Shadow y={134} rx={72} />
+      <path d="M44 128 V24 M156 128 V24" stroke={N} strokeWidth="5" strokeLinecap="round" />
+      <path d="M44 128 V24 M156 128 V24" stroke={c("ink-soft")} strokeWidth="3" strokeLinecap="round" />
+      {[104, 88, 74].map((y, i) => (
+        <path key={i} d={`M50 ${y} H150`} stroke={c("ink-muted", 0.6)} strokeWidth="2.4" strokeDasharray="5 5" />
+      ))}
+      <rect x="40" y="46" width="120" height="8" rx="4" fill={c("gold")} stroke={N} strokeWidth="2" />
+      <path d="M100 40 V22 M92 30 L100 20 L108 30" fill="none" stroke={c("turf")} strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
+      <Sparkle x={168} y={40} r={7} fill={c("gold")} />
+    </g>
+  );
+}
+
+/** The Ceiling — bars of every height under a dashed ceiling, one poking through it. */
+function CeilingLine() {
+  const bars = [44, 70, 52, 86, 60, 102, 48];
+  return (
+    <g>
+      <Shadow y={134} rx={80} />
+      <path d="M20 128 H180" stroke={c("ink-muted")} strokeWidth="2.4" />
+      {bars.map((h, i) => (
+        <rect key={i} x={28 + i * 21} y={128 - h} width="15" height={h} rx="2" fill={h > 90 ? c("gold") : c("turf")} stroke={N} strokeWidth="1.8" />
+      ))}
+      <path d="M16 40 H184" stroke={c("ice")} strokeWidth="3" strokeDasharray="8 5" />
+      <rect x="144" y="16" width="40" height="18" rx="4" fill={c("ice")} stroke={N} strokeWidth="1.8" />
+      <text x="164" y="29" textAnchor="middle" fontSize="10" fontWeight="900" fill={N} fontFamily={MONO}>
+        P90
+      </text>
+    </g>
+  );
+}
+
+/** Head to Head — two helmets facing each other across a VS. */
+function TwoHelmets() {
+  const helmet = (fill: string) => (
+    <g>
+      <path d="M-34 14 Q-40 -30 0 -34 Q34 -34 36 0 L36 12 L18 12 L14 22 L-26 22 Z" fill={fill} stroke={N} strokeWidth="2.6" strokeLinejoin="round" />
+      <path d="M-6 -33 Q-14 -6 -10 21" fill="none" stroke={c("ink", 0.55)} strokeWidth="4" />
+      <circle cx="6" cy="4" r="5" fill={c("night-100")} stroke={N} strokeWidth="1.8" />
+      <path d="M30 0 H44 M30 12 H44 M40 -6 V20" stroke={c("ink-soft")} strokeWidth="3" strokeLinecap="round" />
+    </g>
+  );
+  return (
+    <g>
+      <Shadow y={132} rx={84} />
+      <g transform="translate(54 82)">{helmet(c("ice"))}</g>
+      <g transform="translate(146 82) scale(-1 1)">{helmet(c("gold"))}</g>
+      <circle cx="100" cy="80" r="17" fill={c("night-100")} stroke={N} strokeWidth="2.4" />
+      <text x="100" y="86" textAnchor="middle" fontSize="14" fontWeight="900" fill={c("ink")} fontFamily={MONO}>
+        VS
+      </text>
+    </g>
+  );
+}
+
+/** Box Score Lines — a printout of name lines, each ending in a points figure. */
+function BoxLines() {
+  return (
+    <g>
+      <Shadow y={136} rx={64} />
+      <path d="M44 20 H156 V122 L148 128 L140 122 L132 128 L124 122 L116 128 L108 122 L100 128 L92 122 L84 128 L76 122 L68 128 L60 122 L52 128 L44 122 Z" fill={c("ink")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      {[0, 1, 2, 3].map((i) => (
+        <g key={i}>
+          <rect x="56" y={34 + i * 20} width={i === 0 ? 50 : 44 - i * 4} height="8" rx="2" fill={c("ink-muted", 0.7)} />
+          <rect x="120" y={34 + i * 20} width="26" height="8" rx="2" fill={i === 0 ? c("gold") : c("turf", 0.8)} stroke={N} strokeWidth="1" />
+        </g>
+      ))}
+      <text x="133" y="117" textAnchor="middle" fontSize="9" fontWeight="900" fill={c("night-100")} fontFamily={MONO}>
+        PTS
+      </text>
+    </g>
+  );
+}
+
+/** Top Two Games — a podium with only first and second places, a ball on each. */
+function TwoPodium() {
+  return (
+    <g>
+      <Shadow y={134} rx={70} />
+      <rect x="52" y="70" width="48" height="58" rx="3" fill={c("gold")} stroke={N} strokeWidth="2.4" />
+      <rect x="100" y="90" width="48" height="38" rx="3" fill={c("ink-soft")} stroke={N} strokeWidth="2.4" />
+      <text x="76" y="108" textAnchor="middle" fontSize="22" fontWeight="900" fill={N} fontFamily={MONO}>
+        1
+      </text>
+      <text x="124" y="118" textAnchor="middle" fontSize="18" fontWeight="900" fill={N} fontFamily={MONO}>
+        2
+      </text>
+      <Football x={76} y={56} rx={15} rot={-15} />
+      <Football x={124} y={77} rx={13} rot={15} />
+      <Sparkle x={44} y={46} r={6} fill={c("gold")} />
+    </g>
+  );
+}
+
+/** Hot Streak — a chain of game tiles, every link on fire. */
+function FireChain() {
+  return (
+    <g>
+      <Shadow y={134} rx={84} />
+      {[0, 1, 2, 3, 4].map((i) => (
+        <g key={i}>
+          <rect x={18 + i * 34} y="88" width="28" height="34" rx="4" fill={c("ink")} stroke={N} strokeWidth="2.2" />
+          <text x={32 + i * 34} y="110" textAnchor="middle" fontSize="10" fontWeight="900" fill={c("night-100")} fontFamily={MONO}>
+            15+
+          </text>
+          {i < 4 && <path d={`M${46 + i * 34} 105 H${52 + i * 34}`} stroke={c("gold")} strokeWidth="3" />}
+          <Flame x={32 + i * 34} y={86} s={0.42} outer={c("gold")} inner={c("ink")} />
+        </g>
+      ))}
+    </g>
+  );
+}
+
 const SCENES: Record<QuestionArt, () => JSX.Element> = {
   hammer: Hammer,
   quarterback: Quarterback,
@@ -5800,6 +5939,13 @@ const SCENES: Record<QuestionArt, () => JSX.Element> = {
   "headline-sheet": HeadlineSheet,
   "lightbulb-lineup": LightbulbLineup,
   "quarter-bars": QuarterBars,
+  "big-jump": BigJump,
+  "high-bar": HighBar,
+  "ceiling-line": CeilingLine,
+  "two-helmets": TwoHelmets,
+  "box-lines": BoxLines,
+  "two-podium": TwoPodium,
+  "fire-chain": FireChain,
 };
 
 export default function QuestionArt({

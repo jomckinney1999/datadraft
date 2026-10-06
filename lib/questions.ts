@@ -274,7 +274,14 @@ export type QuestionArt =
   | "full-kit"
   | "headline-sheet"
   | "lightbulb-lineup"
-  | "quarter-bars";
+  | "quarter-bars"
+  | "big-jump"
+  | "high-bar"
+  | "ceiling-line"
+  | "two-helmets"
+  | "box-lines"
+  | "two-podium"
+  | "fire-chain";
 
 export type Question = {
   id: string;
@@ -5910,6 +5917,183 @@ ORDER BY quarter;`,
     explain:
       "Q4 was more than double Q3 as the season and the holidays arrived, and Q2, the offseason, was the quietest. Work the change out from the unrounded totals: rounding first can move a percentage by a tenth.",
     art: "quarter-bars",
+  },
+  {
+    id: "py-biggest-jump",
+    title: "Biggest Jump",
+    difficulty: "medium",
+    lang: "python",
+    added: "2026-10-07",
+    tags: ["diff", "groupby", "idxmax"],
+    prompt:
+      "From one game to his next, whose points rose the most in 2024? Take each player's games in week order (a bye or a missed week isn't a game) and compare each game with the one before it.",
+    returns: "Three lines: the player, the week of the bigger game, and the jump rounded to 1 decimal.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# each game minus the one before it, per player\n",
+    expected: `w = weekly.sort_values(["player", "week"]).copy()
+w["jump"] = w.groupby("player")["points"].diff()
+best = w.loc[w["jump"].idxmax()]
+print(best["player"])
+print(best["week"])
+print(round(best["jump"], 1))`,
+    hint: "Sort by player and week, then groupby(\"player\")[\"points\"].diff() is each game minus the one before it. idxmax() gives the row of the biggest.",
+    explain:
+      "Ja'Marr Chase went from 11.3 to 55.4 in week 10. diff() inside a groupby is LAG() OVER (PARTITION BY player ORDER BY week): without the groupby, one player's first game would be compared with another player's last.",
+    art: "big-jump",
+  },
+  {
+    id: "py-new-season-high",
+    players: ["Lamar Jackson"],
+    title: "New Season High",
+    difficulty: "medium",
+    lang: "python",
+    added: "2026-10-07",
+    tags: ["cummax", "shift", "Running max"],
+    prompt:
+      "Follow Lamar Jackson's 2024 game by game. How many times did he set a new season high? His first game counts, and after that a game counts when it beats every game before it.",
+    returns: "One number.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# Lamar Jackson's new season highs\n",
+    expected: `s = weekly[weekly["player"] == "Lamar Jackson"].sort_values("week")["points"]
+print(int((s > s.cummax().shift()).sum()) + 1)`,
+    hint: "cummax() is the best so far. shift() it down a row to get the best before each game, count the games that beat it, and add one for the first game.",
+    explain:
+      "Five: 25.1 to open, then 26.0, 33.4, 34.4 and 36.1. cummax() is MAX() OVER (ORDER BY week) as a running value and shift() is LAG(), so this is the same idea as a SQL running max, one line each.",
+    art: "high-bar",
+  },
+  {
+    id: "py-better-than-usual",
+    title: "Better Than Usual (pandas)",
+    difficulty: "medium",
+    lang: "python",
+    added: "2026-10-07",
+    tags: ["groupby", "transform", "Filtering"],
+    prompt:
+      "A good week is relative: 20 points is a down day for some players and a career day for others. For each player, count the 2024 games where he beat his own 2024 average, and print the three players with the most.",
+    returns: "A dict of player to games, most first, then player A–Z.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# games above each player's own average\n",
+    expected: `w = weekly.copy()
+w["avg"] = w.groupby("player")["points"].transform("mean")
+above = w[w["points"] > w["avg"]].groupby("player").size().reset_index(name="games")
+top = above.sort_values(["games", "player"], ascending=[False, True]).head(3)
+print(top.set_index("player")["games"].to_dict())`,
+    hint: "groupby(\"player\")[\"points\"].transform(\"mean\") puts each player's average on every one of his rows. Keep the rows above it, count them per player, and sort by count then name.",
+    explain:
+      "transform() is the pandas version of AVG() OVER (PARTITION BY player): the average lands on every row instead of collapsing them, so each game can be compared with its own player's number.",
+    art: "above-usual",
+  },
+  {
+    id: "py-ceiling",
+    title: "The Ceiling",
+    difficulty: "medium",
+    lang: "python",
+    added: "2026-10-07",
+    tags: ["groupby", "quantile", "Percentiles"],
+    prompt:
+      "A player's ceiling is a great game, not his single best one. Measure each position's ceiling as the 90th percentile of its 2024 games: the score that only one game in ten beats.",
+    returns: "A dict of position to points, rounded to 1 decimal, positions A–Z.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# 90th percentile of game scores, by position\n",
+    expected: `print(weekly.groupby("position")["points"].quantile(0.9).round(1).to_dict())`,
+    hint: "groupby(\"position\")[\"points\"].quantile(0.9), then round(1) and to_dict().",
+    explain:
+      "Running backs and quarterbacks sit around 32, tight ends near 21. A percentile ignores the one freak game that a max() would report, which is why analysts quote p90 rather than the record.",
+    art: "ceiling-line",
+  },
+  {
+    id: "py-head-to-head",
+    players: ["Josh Allen", "Lamar Jackson"],
+    title: "Head to Head",
+    difficulty: "medium",
+    lang: "python",
+    added: "2026-10-07",
+    tags: ["merge", "Self-join", "Boolean mask"],
+    prompt:
+      "Two quarterbacks, one MVP argument. In the 2024 weeks when both Josh Allen and Lamar Jackson played, who outscored whom more often?",
+    returns: "Three lines: the weeks they both played, the weeks Allen scored more, and the weeks Jackson scored more.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# put their weeks side by side\n",
+    expected: `allen = weekly[weekly["player"] == "Josh Allen"][["week", "points"]]
+lamar = weekly[weekly["player"] == "Lamar Jackson"][["week", "points"]]
+both = allen.merge(lamar, on="week", suffixes=("_allen", "_lamar"))
+print(len(both))
+print((both["points_allen"] > both["points_lamar"]).sum())
+print((both["points_lamar"] > both["points_allen"]).sum())`,
+    hint: "Filter weekly to each player, keep week and points, and merge on week with suffixes so the two points columns keep apart. An inner merge keeps only the weeks they both played.",
+    explain:
+      "Fifteen shared weeks, Jackson ahead in nine. Merging a table with a filtered copy of itself is a self-join; the suffixes are the aliases, and the inner merge quietly drops each man's bye.",
+    art: "two-helmets",
+  },
+  {
+    id: "py-box-score-lines",
+    title: "Box Score Lines",
+    difficulty: "easy",
+    lang: "python",
+    added: "2026-10-07",
+    tags: ["f-strings", "sort_values", "Loops"],
+    prompt:
+      "The league newsletter wants the quarterbacks from df as lines it can paste, best season first, each like 'Lamar Jackson (BAL): 430.4 pts'.",
+    returns: "One line per quarterback, most points first.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# one f-string line per quarterback\n",
+    expected: `qbs = df[df["position"] == "QB"].sort_values("points", ascending=False)
+for _, row in qbs.iterrows():
+    print(f"{row['player']} ({row['team']}): {row['points']:.1f} pts")`,
+    hint: "Filter df to QBs and sort by points, highest first. Then loop and print an f-string: {points:.1f} always shows one decimal.",
+    explain:
+      ":.1f is the part that matters: printed bare, 315.0 might come out as 315 in another language or another dtype. Formatting at the last step, after sorting on the number, is the same rule as the SQL printf question.",
+    art: "box-lines",
+  },
+  {
+    id: "py-top-two-games",
+    title: "Top Two Games",
+    difficulty: "medium",
+    lang: "python",
+    added: "2026-10-07",
+    tags: ["groupby", "nlargest", "apply"],
+    prompt:
+      "For each position, what were the two best single games of 2024?",
+    returns: "A dict of position to a list of its two best scores, highest first, positions A–Z.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# two best games per position\n",
+    expected: `print(weekly.groupby("position")["points"].apply(lambda s: s.nlargest(2).tolist()).to_dict())`,
+    hint: "groupby(\"position\")[\"points\"], then apply a function that takes nlargest(2) of each group and turns it into a list.",
+    explain:
+      "Top-N per group is ROW_NUMBER() OVER (PARTITION BY position ORDER BY points DESC) <= 2 in SQL. In pandas it's nlargest inside a groupby, or sort_values then groupby().head(2).",
+    art: "two-podium",
+  },
+  {
+    id: "py-hot-streak",
+    title: "Hot Streak",
+    difficulty: "hard",
+    lang: "python",
+    added: "2026-10-07",
+    tags: ["cumsum", "groupby", "Gaps and islands"],
+    prompt:
+      "Who put together the longest run of 15-point games in 2024? Count games he played in a row, so a bye or a missed week doesn't break a run.",
+    returns: "Two lines: the player, and the length of the run.",
+    tables: [],
+    setup: PY_WEEKLY_SETUP,
+    starter: "# longest run of 15+ games, per player\n",
+    expected: `w = weekly.sort_values(["player", "week"]).copy()
+w["hot"] = w["points"] >= 15
+w["run_id"] = (~w["hot"]).groupby(w["player"]).cumsum()
+runs = w[w["hot"]].groupby(["player", "run_id"]).size()
+player, _ = runs.idxmax()
+print(player)
+print(runs.max())`,
+    hint: "Mark each game hot or not. A running count of the cold games, per player, stays the same through a hot run, so it labels the run: group by player and that label and count.",
+    explain:
+      "Jalen Hurts strung together eleven. Counting the breaks to label the runs is the gaps-and-islands trick, the same one SQL does with ROW_NUMBER differences.",
+    art: "fire-chain",
   },
 ];
 

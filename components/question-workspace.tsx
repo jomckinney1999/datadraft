@@ -386,9 +386,11 @@ export default function QuestionWorkspace({
         setOutcome({ text: mine.stdout || "(nothing printed)" });
         if (!grade) return;
         const key = await rt.runCode(lang, `${prelude}\n${question.expected}`);
+        // The same comparison the lessons use: line by line, spacing and
+        // NumPy's np.int64(...) wrappers ignored.
         const okP =
           Boolean(mine.stdout.trim()) &&
-          mine.stdout.trim() === (key.stdout ?? "").trim();
+          rt.outputsMatch(mine.stdout, key.stdout ?? "");
         finish(okP, okP ? null : printDiag(mine.stdout, key.stdout ?? ""));
       } finally {
         setBooting(false);

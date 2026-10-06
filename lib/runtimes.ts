@@ -201,14 +201,28 @@ function cleanError(err: unknown): string {
   return (meaningful ?? lines[lines.length - 1] ?? raw).trim().slice(0, 300);
 }
 
+// NumPy 2 prints a NumPy number with its type: dict(series) shows
+// {'WR': np.int64(8)} where series.to_dict() shows {'WR': 8}. Same answer,
+// so grading reads both as the plain value (2026-10-06: an exact match was
+// marking print(dict(df["position"].value_counts())) wrong).
+const NP_NUMBER = /np\.(?:u?int|float|complex|longdouble|clongdouble)\d*\(([^()]*)\)/g;
+const NP_TEXT = /np\.(?:str_|bytes_)\(('[^']*'|"[^"]*")\)/g;
+const NP_BOOL = /np\.(True|False)_/g;
+
+/** Printed output as grading reads it: NumPy's type wrappers dropped. */
+export function plainPrinted(s: string): string {
+  return s.replace(NP_NUMBER, "$1").replace(NP_TEXT, "$1").replace(NP_BOOL, "$1");
+}
+
 /**
  * Grading: run the learner's code and the reference solution in the same
  * runtime and compare what they printed. Whitespace-insensitive per line so
- * formatting differences don't fail a correct answer.
+ * formatting differences don't fail a correct answer, and blind to NumPy's
+ * type wrappers (see plainPrinted).
  */
 export function outputsMatch(a: string, b: string): boolean {
   const norm = (s: string) =>
-    s
+    plainPrinted(s)
       .split("\n")
       .map((l) => l.trim().replace(/\s+/g, " "))
       .filter(Boolean)

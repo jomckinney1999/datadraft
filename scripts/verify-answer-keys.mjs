@@ -981,6 +981,28 @@ for (const [label, ex] of pyExercises) {
   }
 }
 
+// NumPy 2 prints dict(series) as {'WR': np.int64(8)} where the key's
+// series.to_dict() prints {'WR': 8}. Grading (lib/runtimes.ts outputsMatch)
+// has to call those the same answer, and still tell a wrong one apart.
+// Checked on real Pyodide output, so a NumPy that prints differently shows up.
+{
+  const rt = await loadProjectTs(path.join(root, "lib/runtimes.ts"), root);
+  const qs = await loadProjectTs(path.join(root, "lib/questions.ts"), root);
+  const q = qs.QUESTIONS.find((x) => x.id === "py-count-by-position");
+  const key = await runPython(`${q.setup}
+${q.expected}`);
+  const wrapped = await runPython(`${q.setup}
+print(dict(df["position"].value_counts()))`);
+  const wrong = await runPython(`${q.setup}
+print(dict(df["team"].value_counts().head(4)))`);
+  if (!rt.outputsMatch(wrapped.stdout, key.stdout)) {
+    problems.push(`grading marks print(dict(series)) wrong against series.to_dict(): "${wrapped.stdout.trim()}" vs "${key.stdout.trim()}"`);
+  }
+  if (rt.outputsMatch(wrong.stdout, key.stdout)) {
+    problems.push("grading can't tell a wrong printed dict from the right one");
+  }
+}
+
 stage("Excel formula answer keys");
 // ── Excel formula answer keys ─────────────────────────────────
 // Evaluated by the SHIPPED engine (lib/excel-engine.ts), not a copy of it —
