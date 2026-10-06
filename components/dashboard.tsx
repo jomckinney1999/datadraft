@@ -77,7 +77,7 @@ export default function Dashboard({
     const steps = analystPath(readPathInputs(), catalog);
     const now = currentStep(steps);
     setPath(now ? { step: steps.indexOf(now) + 1, of: steps.length, title: now.title } : "done");
-  }, []);
+  }, [catalog]);
 
   const done = new Set(progress.completedLessons);
   const stats = statsFrom(progress);
