@@ -20,15 +20,17 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import type { QuestionDifficulty, QuestionLang } from "@/lib/questions";
+import type { Question, QuestionArt as QuestionArtId } from "@/lib/questions";
+// The list arrives as props from the server (app/questions/page.tsx): the
+// bank itself carries every answer key, setup prelude, hint and explanation,
+// and importing it here put all of that in this page's JavaScript.
 import {
   DIFFICULTY_XP,
   LANG_LABEL,
   LANG_WEIGHT,
-  QUESTIONS,
-  questionOfTheDay,
-  questionsIn,
-} from "@/lib/questions";
+  type QuestionDifficulty,
+  type QuestionLang,
+} from "@/lib/question-meta";
 import { EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
 import QuestionArt from "@/components/question-art";
 import DifficultyChip from "@/components/difficulty-chip";
@@ -37,7 +39,6 @@ import QotdCard from "@/components/qotd-card";
 import DuelCard from "@/components/duel-card";
 import PassTag from "@/components/pass-tag";
 import PrepArt, { hasPrepArt } from "@/components/prep-art";
-import { PATTERNS, questionsFor } from "@/lib/interview-patterns";
 import { FACTS } from "@/lib/lesson-facts.generated";
 import { DATASETS, datasetOf, type DatasetId } from "@/lib/practice-schemas";
 
@@ -76,19 +77,34 @@ function FlameIcon({ lit }: { lit: boolean }) {
   );
 }
 
+/** What the list shows for one question: no key, prelude or hints. */
+export type BankItem = Pick<Question, "id" | "title" | "lang" | "difficulty" | "tags" | "tables" | "prompt"> & {
+  art: QuestionArtId;
+};
+
+/** An interview pattern and the questions in it, worked out on the server. */
+export type BankPattern = { id: string; name: string; asks: string; ids: string[] };
+
 export default function QuestionBank({
   day,
+  list,
+  dailies,
+  patterns,
   initialPattern = null,
   initialData = null,
 }: {
   day: string;
+  list: BankItem[];
+  /** Today's question in each language, for the card. */
+  dailies: Record<QuestionLang, Question>;
+  patterns: BankPattern[];
   /** Deep link from hiring prep: `/questions?pattern=joins#interview`. */
   initialPattern?: string | null;
   /** Deep link from /data: `/questions?data=app`. */
   initialData?: string | null;
 }) {
   const seedPattern =
-    initialPattern && PATTERNS.some((p) => p.id === initialPattern) ? initialPattern : null;
+    initialPattern && patterns.some((p) => p.id === initialPattern) ? initialPattern : null;
   const seedData = DATASETS.find((d) => d.id === initialData)?.id ?? null;
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
   const [hydrated, setHydrated] = useState(false);
@@ -103,9 +119,9 @@ export default function QuestionBank({
   /** An interview pattern to narrow the list to (SQL only). */
   const [pattern, setPattern] = useState<string | null>(seedPattern);
   const patternIds = useMemo(() => {
-    const p = PATTERNS.find((x) => x.id === pattern);
-    return p ? new Set(questionsFor(p).map((q) => q.id)) : null;
-  }, [pattern]);
+    const p = patterns.find((x) => x.id === pattern);
+    return p ? new Set(p.ids) : null;
+  }, [pattern, patterns]);
 
   useEffect(() => {
     setProgress(loadProgress());
@@ -150,9 +166,9 @@ export default function QuestionBank({
   // With no language chosen, the daily on show is the SQL one — it is the
   // language everything else here assumes, and the only one that costs
   // nothing to start.
-  const qotd = questionOfTheDay(day, lang === "all" ? "sql" : lang);
+  const qotd = dailies[lang === "all" ? "sql" : lang];
 
-  const shown = QUESTIONS.filter((q) => {
+  const shown = list.filter((q) => {
     if (patternIds && !patternIds.has(q.id)) return false;
     if (lang !== "all" && q.lang !== lang) return false;
     if (diff !== "all" && q.difficulty !== diff) return false;
@@ -208,7 +224,7 @@ export default function QuestionBank({
         {hydrated && (
           <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
             {LANGS.map((l) => {
-              const pool = questionsIn(l);
+              const pool = list.filter((q) => q.lang === l);
               const done = pool.filter((q) => solved.has(q.id)).length;
               return (
                 <button
@@ -263,9 +279,9 @@ export default function QuestionBank({
             </div>
           </div>
           <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {PATTERNS.map((p) => {
-              const qs = questionsFor(p);
-              const done = qs.filter((q) => solved.has(q.id)).length;
+            {patterns.map((p) => {
+              const qs = p.ids;
+              const done = qs.filter((id) => solved.has(id)).length;
               const on = pattern === p.id;
               return (
                 <button
@@ -332,7 +348,7 @@ export default function QuestionBank({
                 onClick={() => setPattern(null)}
                 className="rounded-lg border border-turf bg-turf/15 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-turf"
               >
-                {PATTERNS.find((x) => x.id === pattern)?.name} ✕
+                {patterns.find((x) => x.id === pattern)?.name} ✕
               </button>
             </div>
           )}
@@ -497,7 +513,7 @@ export default function QuestionBank({
         )}
 
         <p className="mt-8 text-center font-mono text-[11px] text-ink-muted">
-          {QUESTIONS.length} questions across {LANGS.length} languages · Python
+          {list.length} questions across {LANGS.length} languages · Python
           and R download their runtime the first time you run one
         </p>
       </main>
