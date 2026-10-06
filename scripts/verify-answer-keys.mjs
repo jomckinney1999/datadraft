@@ -323,12 +323,16 @@ stage("Question bank (same seeded lesson DB)");
   const sources = ["components", "app"].flatMap((d) =>
     fs.readdirSync(path.join(root, d), { recursive: true }).filter((f) => /\.tsx$/.test(f)).map((f) => fs.readFileSync(path.join(root, d, f), "utf8")),
   );
-  for (const item of nav.NAV.flatMap((s) => [{ href: s.href }, ...s.groups.flatMap((g) => g.items)])) {
+  const index = await loadProjectTs(path.join(root, "lib/lesson-index.generated.ts"), root);
+  for (const item of nav.NAV.flatMap((s) => [{ href: s.href }, ...s.groups.flatMap((g) => [...g.items, ...(g.chips?.items ?? [])])])) {
     const [p, hash] = item.href.split("#");
     const build = /^\/projects\/([^/]+)$/.exec(p);
+    const track = /^\/learn\/track\/([^/]+)$/.exec(p);
     const real = build
       ? projects.PROJECTS.some((x) => x.id === build[1]) || fs.existsSync(path.join(root, "app", p, "page.tsx"))
-      : fs.existsSync(path.join(root, "app", p, "page.tsx"));
+      : track
+        ? (index.LIVE_LESSONS[track[1]]?.length ?? 0) > 0
+        : fs.existsSync(path.join(root, "app", p, "page.tsx"));
     if (!real) problems.push(`nav: ${item.href} isn't a page`);
     if (hash && !sources.some((src) => src.includes(`id="${hash}"`))) problems.push(`nav: ${item.href} points at #${hash}, which no page has`);
   }
@@ -1292,6 +1296,64 @@ let courseMapChecked = 0;
     const want = curriculum.MODULES.find((m) => m.id !== curriculum.ALL_MODULE && m.id !== "sql-foundations" && m.unitIds.includes(unit.id))?.id ?? null;
     if (nav.courseModuleOfUnit(unit.id) !== want) problems.push(`lesson-nav puts unit ${unit.id} in ${nav.courseModuleOfUnit(unit.id)}, the curriculum in ${want}`);
   }
+  // The big moments (lib/big-moments.ts): finishing a course's last lesson
+  // is the bucket, a unit's last lesson the game ball, anything else (or a
+  // replay of a cleared one) a touchdown, built the way the lesson player
+  // builds them, from the course outline and the live lesson index.
+  {
+    const bm = await loadProjectTs(path.join(root, "lib/big-moments.ts"), root);
+    const tenure = await loadProjectTs(path.join(root, "lib/tenure.ts"), root);
+    const li2 = await loadProjectTs(path.join(root, "lib/lesson-index.generated.ts"), root);
+    for (const mod of curriculum.MODULES) {
+      if (mod.id === curriculum.ALL_MODULE || mod.id === "sql-foundations") continue;
+      const courseLessons = li2.LIVE_LESSONS[mod.id] ?? [];
+      if (!courseLessons.length) continue;
+      const units = curriculum.moduleUnits(mod.id).map((u) => ({
+        id: u.id,
+        title: u.title,
+        lessons: u.lessons.map((l) => l.id).filter((id) => courseLessons.includes(id)),
+      }));
+      const course = { id: mod.id, title: mod.name, lessons: courseLessons };
+      const momentFor = (lessonId, before) => {
+        const unit = units.find((u) => u.lessons.includes(lessonId));
+        return bm.lessonMoment({
+          lessonId,
+          lessonTitle: lessonId,
+          unit: unit ?? null,
+          course,
+          before,
+          after: [...new Set([...before, lessonId])],
+        });
+      };
+      const last = courseLessons[courseLessons.length - 1];
+      const allButLast = courseLessons.filter((id) => id !== last);
+      if (momentFor(last, allButLast).kind !== "bucket") problems.push(`big moments: clearing ${mod.id} doesn't get the bucket`);
+      if (momentFor(last, courseLessons).kind !== "touchdown") problems.push(`big moments: replaying ${mod.id}'s last lesson replays the bucket`);
+      for (const u of units) {
+        if (!u.lessons.length) continue;
+        const end = u.lessons[u.lessons.length - 1];
+        const rest = u.lessons.filter((id) => id !== end);
+        const got = momentFor(end, rest);
+        if (got.kind !== "game-ball") problems.push(`big moments: clearing unit ${u.id} in ${mod.id} gets ${got.kind}, not the game ball`);
+        if (u.lessons.length > 1 && momentFor(u.lessons[0], []).kind !== "touchdown") {
+          problems.push(`big moments: the first lesson of unit ${u.id} isn't a plain touchdown`);
+        }
+      }
+    }
+    // Every rank above the first has a depth chart whose circled row is it.
+    for (const rank of tenure.RANKS.slice(1)) {
+      const m = bm.promotedMoment(rank, tenure.RANKS);
+      if (!m.chart || m.chart.rows[m.chart.to] !== rank.name || m.chart.rows.length < 2) {
+        problems.push(`big moments: the depth chart for ${rank.id} doesn't circle it`);
+      }
+    }
+    // The stage's sound cues and the holds cover the same kinds.
+    const stage = (await import("node:fs")).readFileSync(path.join(root, "components/big-moment-stage.tsx"), "utf8");
+    for (const kind of Object.keys(bm.MOMENT_HOLD)) {
+      if (!stage.includes(`${/^[a-z]+$/.test(kind) ? kind : `"${kind}"`}: [`)) problems.push(`big moments: ${kind} has no sound cues in big-moment-stage.tsx`);
+    }
+  }
+
   // And the lesson index /learn and the dashboard read instead of the curriculum.
   const { LIVE_LESSONS, LESSON_INFO } = await loadProjectTs(path.join(root, "lib/lesson-index.generated.ts"), root);
   for (const mod of curriculum.MODULES) {

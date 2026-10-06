@@ -30,6 +30,8 @@ import { NFLVERSE_CREDIT } from "@/lib/chart";
 import { shareText, withIdentity } from "@/lib/daily-share";
 import { loadProgress } from "@/lib/progress";
 import { shareIdentity } from "@/lib/tenure";
+import { gameMoment } from "@/lib/big-moments";
+import { useBigMoments } from "@/components/big-moment";
 import { DRAFT_SEASONS } from "@/lib/draft-seasons.generated";
 import { SITE_URL } from "@/lib/site";
 import {
@@ -1059,6 +1061,23 @@ function SeasonScreen({
   const [auto, setAuto] = useState(false);
   const me = league.slot;
   const roster = rosters(picks)[me];
+  const moments = useBigMoments();
+
+  // Win the final and Coach gets the bucket. Only when the final is played
+  // in front of you: a reload that resumes on week 16 has seen it already.
+  const lastWeek = useRef(week);
+  useEffect(() => {
+    if (week === FINAL_WEEK && lastWeek.current < FINAL_WEEK) {
+      const final = weekGame(result, me, FINAL_WEEK);
+      const mine = final ? (final.a === me ? final.pa : final.pb) : 0;
+      const theirs = final ? (final.a === me ? final.pb : final.pa) : 0;
+      if (final && mine > theirs) {
+        moments.play(gameMoment("bucket", `draft:${data.season}:${league.seed}:${me}`, "League champs!", `The ${data.season} season · Draft Room`));
+      }
+    }
+    lastWeek.current = week;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [week]);
 
   useEffect(() => {
     if (!auto) return;
@@ -1158,6 +1177,7 @@ function SeasonScreen({
 
         <Standings league={league} table={week === 0 ? standingsFrom([]) : table} me={me} />
       </div>
+      {moments.node}
     </div>
   );
 }

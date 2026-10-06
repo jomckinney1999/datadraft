@@ -38,6 +38,8 @@ import {
   type MockAnswer,
   type MockFormat,
 } from "@/lib/mock-interview";
+import { gameMoment } from "@/lib/big-moments";
+import { useBigMoments } from "@/components/big-moment";
 
 type Live = {
   v: 1;
@@ -110,6 +112,7 @@ export default function MockInterview({ pool }: { pool: Question[] }) {
   const liveRef = useRef<Live | null>(null);
   liveRef.current = live;
   const recorded = useRef<string | null>(null);
+  const moments = useBigMoments();
   // The interviewer's intro, once per format; the clock starts on its button.
   const [briefing, setBriefing] = useState<MockFormat | null>(null);
 
@@ -172,6 +175,11 @@ export default function MockInterview({ pool }: { pool: Question[] }) {
     write(HISTORY_KEY, next);
     setHistory(next);
     window.scrollTo({ top: 0 });
+    const verdict = verdictFor(l.answers);
+    if (verdict.band === "strong" || verdict.band === "pass") {
+      const name = MOCK_FORMATS.find((f) => f.id === l.format)?.name ?? "Mock screen";
+      moments.play(gameMoment("touchdown", `mock:${l.seed}`, verdict.band === "strong" ? "Strong pass!" : "You passed!", `${name} · ${row.solved} of ${row.of} solved`));
+    }
   }
 
   function leave() {
@@ -215,7 +223,13 @@ export default function MockInterview({ pool }: { pool: Question[] }) {
       </>
     );
   }
-  if (live.finishedAt) return <Report live={live} db={db} onAgain={leave} byId={byId} />;
+  if (live.finishedAt)
+    return (
+      <>
+        <Report live={live} db={db} onAgain={leave} byId={byId} />
+        {moments.node}
+      </>
+    );
   return <Screen live={live} setLive={setLive} db={db} now={now} onFinish={finish} byId={byId} />;
 }
 

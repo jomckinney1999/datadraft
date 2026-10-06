@@ -17,6 +17,10 @@ import type { Database, QueryExecResult } from "sql.js";
 // small generated index (2026-10-06).
 import { PERFECT_BONUS, XP_PER_EXERCISE, XP_RETRY } from "@/lib/xp";
 import { courseModuleOfUnit, nextLessonFor } from "@/lib/lesson-nav";
+import { LIVE_LESSONS } from "@/lib/lesson-index.generated";
+import { lessonMoment, promotedMoment, type Moment } from "@/lib/big-moments";
+import { preloadBigMoments, useBigMoments } from "@/components/big-moment";
+import { consumeRankUp, RANKS } from "@/lib/tenure";
 import type { OutlineData } from "@/components/lesson-outline";
 import type {
   Lesson,
@@ -204,6 +208,7 @@ export default function LessonPlayer({
     return r ? rowsFromResult(r.values) : [];
   }, [engineReady]);
   const savedRef = useRef(false);
+  const moments = useBigMoments();
   const { moduleId } = useModule();
   const router = useRouter();
 
@@ -547,16 +552,16 @@ export default function LessonPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIdx, phase]);
 
+  useEffect(() => {
+    if (phase === "exercise") preloadBigMoments();
+  }, [phase]);
+
   // lesson finished?
   useEffect(() => {
     if (phase === "exercise" && total > 0 && queue.length === 0) {
       setPhase("complete");
     }
   }, [phase, total, queue.length]);
-
-  useEffect(() => {
-    if (phase === "complete") playSfx("complete");
-  }, [phase]);
 
   const perfect = drive.downsBurned === 0 && Object.values(firstTry).every(Boolean);
   const finalXp = xp + (perfect && total > 0 ? PERFECT_BONUS : 0);
@@ -599,6 +604,27 @@ export default function LessonPlayer({
         setUnlocked(fresh);
         awardBadges(fresh.map((b) => b.id));
       }
+      // The big moment: the biggest thing this lesson finished (a course, a
+      // unit, or just the lesson), then a new rank if it brought one.
+      const courseLessons = outline ? LIVE_LESSONS[outline.moduleId] ?? [] : [];
+      const unitLessons =
+        outline?.units
+          .find((u) => u.id === entry.unit.id)
+          ?.lessons.map((l) => l.id)
+          .filter((id) => courseLessons.includes(id)) ?? [];
+      const earned: Moment[] = [
+        lessonMoment({
+          lessonId: entry.lesson.id,
+          lessonTitle: entry.lesson.title,
+          unit: unitLessons.length ? { id: entry.unit.id, title: entry.unit.title, lessons: unitLessons } : null,
+          course: outline && courseLessons.length ? { id: outline.moduleId, title: outline.title, lessons: courseLessons } : null,
+          before: before.completedLessons,
+          after: saved.completedLessons,
+        }),
+      ];
+      const promoted = consumeRankUp(saved);
+      if (promoted) earned.push(promotedMoment(promoted, RANKS));
+      moments.play(...earned);
       // Fire-and-forget: no-op when signed out, and a failed sync must never
       // block the completion screen the learner just earned.
       void pushProgress();
@@ -2447,6 +2473,7 @@ export default function LessonPlayer({
         </div>
       )}
     </main>
+    {moments.node}
     </div>
   );
 }

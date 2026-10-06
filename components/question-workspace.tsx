@@ -43,7 +43,9 @@ import {
 } from "@/lib/daily-share";
 import { PAYWALL_LIVE } from "@/lib/season-pass";
 import { waitlistJoined } from "@/lib/waitlist-memory";
-import { consumeRankUp, shareIdentity, tenureFrom, type Rank } from "@/lib/tenure";
+import { consumeRankUp, RANKS, shareIdentity, tenureFrom, type Rank } from "@/lib/tenure";
+import { promotedMoment } from "@/lib/big-moments";
+import { useBigMoments } from "@/components/big-moment";
 import type { CellValue } from "@/lib/excel-data";
 import type { Question } from "@/lib/questions";
 // Labels and prices from the small module, and the question's tables from
@@ -247,6 +249,7 @@ export default function QuestionWorkspace({
   const [offer, setOffer] = useState(false);
   const [afterDailyOffer, setAfterDailyOffer] = useState(false);
   const [rankUp, setRankUp] = useState<Rank | null>(null);
+  const moments = useBigMoments();
   const [nameDraft, setNameDraft] = useState("");
   const [needsName, setNeedsName] = useState(false);
   const [shareNote, setShareNote] = useState<string | null>(null);
@@ -434,7 +437,8 @@ export default function QuestionWorkspace({
         const promoted = consumeRankUp(progress);
         if (promoted) {
           setRankUp(promoted);
-          playSfx("unlock");
+          // The depth chart carries its own sound.
+          moments.play(promotedMoment(promoted, RANKS));
         }
         if (!progress.username?.trim()) setNeedsName(true);
         // Soft offer after the daily: waitlist while the paywall is off,
@@ -1007,6 +1011,7 @@ ${SITE_URL}/questions/${question.id}/vs/${encodeDailyResult(dailyNumber(day), tr
           )}
         </nav>
       </main>
+      {moments.node}
     </>
   );
 }

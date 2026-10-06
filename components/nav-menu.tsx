@@ -20,7 +20,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type FocusEvent } from "react";
-import type { NavSection } from "@/lib/nav";
+import type { NavChip, NavSection } from "@/lib/nav";
 import { badgeTone, NavIcon, navTone } from "@/components/nav-icons";
 import type { Tone } from "@/components/art-kit";
 
@@ -42,6 +42,51 @@ const GROUP_TONE: Record<string, string> = {
   "Your stuff": "text-gold",
   "Season Pass": "text-gold",
 };
+
+/** Each language keeps one accent, so SQL is always turf and Python ice. */
+const CHIP_TONE: Record<string, Tone> = {
+  "sql-fundamentals": "turf",
+  "sql-advanced": "turf",
+  python: "ice",
+  r: "ice",
+  excel: "turf",
+  stats: "gold",
+  viz: "gold",
+  tableau: "ice",
+  powerbi: "gold",
+  git: "turf",
+  ai: "ice",
+};
+
+const chipTone = (href: string): Tone => CHIP_TONE[href.split("/").pop() ?? ""] ?? "turf";
+
+/**
+ * A course as a small tile: a monogram square and the language's name. The
+ * course you're on is marked, so the menu doubles as "where am I".
+ */
+function Chip({ chip, current, onNavigate }: { chip: NavChip; current: boolean; onNavigate: () => void }) {
+  const tone = chipTone(chip.href);
+  return (
+    <Link
+      href={chip.href}
+      onClick={onNavigate}
+      title={chip.blurb}
+      aria-current={current ? "page" : undefined}
+      data-tone={tone}
+      className={`pop-tile group flex min-w-0 items-center gap-1.5 rounded-lg border bg-panel/60 py-1 pl-1 pr-1.5 ${
+        current ? "border-gold/70" : "border-panel-border/80"
+      }`}
+    >
+      <span
+        aria-hidden
+        className={`grid h-7 w-7 shrink-0 place-items-center rounded-md border font-mono text-[10.5px] font-bold tracking-tighter ${BADGE_STYLE[tone]}`}
+      >
+        {chip.mark}
+      </span>
+      <span className="truncate text-xs font-semibold text-ink">{chip.label}</span>
+    </Link>
+  );
+}
 
 function Badge({ text }: { text: string }) {
   const tone = badgeTone(text);
@@ -174,6 +219,20 @@ export function NavDropdown({
                       </li>
                     ))}
                   </ul>
+                  {g.chips && (
+                    <>
+                      <p className="mt-3 px-2 font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted">
+                        {g.chips.title}
+                      </p>
+                      <ul className="mt-1.5 grid grid-cols-2 gap-1.5">
+                        {g.chips.items.map((chip) => (
+                          <li key={chip.href} className="min-w-0">
+                            <Chip chip={chip} current={pathname === chip.href} onNavigate={() => setOpen(false)} />
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
@@ -194,6 +253,7 @@ export function NavDrawerSections({
   current: string | null;
   onNavigate: () => void;
 }) {
+  const pathname = usePathname();
   return (
     <div className="flex flex-col gap-2">
       {sections.map((s) => (
@@ -208,6 +268,20 @@ export function NavDrawerSections({
           >
             {s.label}
           </Link>
+          {s.groups
+            .filter((g) => g.chips)
+            .map((g) => (
+              <div key={g.title} className="ml-2 mt-1 mb-1.5 border-l border-panel-border/70 pl-2">
+                <p className="px-1 font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted">{g.chips!.title}</p>
+                <ul className="mt-1 grid grid-cols-2 gap-1 sm:grid-cols-3">
+                  {g.chips!.items.map((chip) => (
+                    <li key={chip.href} className="min-w-0">
+                      <Chip chip={chip} current={pathname === chip.href} onNavigate={onNavigate} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           {s.groups.length > 0 && (
             <ul className="ml-2 mt-1 space-y-0.5 border-l border-panel-border/70 pl-2">
               {s.groups

@@ -7,6 +7,8 @@
  * so the first Check click is what unlocks audio for the rest of the drive.
  */
 
+import { scheduleWhistle } from "./whistle";
+
 export type SfxKind =
   | "correct"
   | "first_down"
@@ -16,7 +18,13 @@ export type SfxKind =
   | "turnover"
   | "complete"
   | "ui"
-  | "unlock";
+  | "unlock"
+  // The big moments (components/big-moment.tsx).
+  | "whistle"
+  | "splash"
+  | "roar"
+  | "clack"
+  | "thump";
 
 const MUTE_KEY = "sqlsports-sfx-muted";
 const MUTE_EVENT = "sqlsports:sfx-mute";
@@ -106,6 +114,54 @@ function beep(c: AudioContext, t: Tone): void {
   g.connect(c.destination);
   osc.start(start);
   osc.stop(start + t.dur + 0.02);
+}
+
+type Noise = {
+  at: number;
+  dur: number;
+  /** Band-pass centre at the start and end of the burst (Hz). */
+  from: number;
+  to: number;
+  gain: number;
+  /** Band width: low Q is a wide hiss, high Q is nearly a pitch. */
+  q?: number;
+  /** Seconds to swell in; a splash is instant, a crowd is not. */
+  attack?: number;
+};
+
+let noiseBuf: AudioBuffer | null = null;
+
+/** Filtered white noise: the splash, the crowd, the clack of a magnet. */
+function hiss(c: AudioContext, n: Noise): void {
+  if (!noiseBuf || noiseBuf.sampleRate !== c.sampleRate) {
+    const len = Math.floor(c.sampleRate * 2.5);
+    noiseBuf = c.createBuffer(1, len, c.sampleRate);
+    const data = noiseBuf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+  }
+  const src = c.createBufferSource();
+  src.buffer = noiseBuf;
+  const bp = c.createBiquadFilter();
+  bp.type = "bandpass";
+  bp.Q.value = n.q ?? 0.8;
+  const start = c.currentTime + n.at;
+  bp.frequency.setValueAtTime(n.from, start);
+  bp.frequency.exponentialRampToValueAtTime(Math.max(40, n.to), start + n.dur);
+  const g = c.createGain();
+  g.gain.setValueAtTime(0.0001, start);
+  g.gain.exponentialRampToValueAtTime(n.gain, start + (n.attack ?? 0.01));
+  g.gain.exponentialRampToValueAtTime(0.0001, start + n.dur);
+  src.connect(bp);
+  bp.connect(g);
+  g.connect(c.destination);
+  src.start(start);
+  src.stop(start + n.dur + 0.05);
+}
+
+function noises(list: Noise[]): void {
+  const c = getCtx();
+  if (!c || isSfxMuted()) return;
+  for (const n of list) hiss(c, n);
 }
 
 function sequence(tones: Tone[]): void {
@@ -202,6 +258,45 @@ export function playSfx(kind: SfxKind): void {
         { freq: 523.25, at: 0.08, dur: 0.12, type: "triangle", gain: 0.16 },
         { freq: 784, at: 0.18, dur: 0.28, type: "triangle", gain: 0.2 },
       ]);
+      break;
+    case "whistle": {
+      // The title screen's whistle, through this context, so it plays
+      // wherever the lesson's first click already unlocked sound and obeys
+      // the mute switch like every other cue.
+      const c = getCtx();
+      if (!c || isSfxMuted()) return;
+      try {
+        scheduleWhistle(c, c.destination, c.currentTime + 0.02);
+      } catch {
+        /* sound is the garnish */
+      }
+      break;
+    }
+    case "splash":
+      // A bucket emptied over someone: a hard slap, then the pour hissing
+      // down and away.
+      noises([
+        { at: 0, dur: 0.18, from: 1800, to: 700, gain: 0.5, q: 0.6 },
+        { at: 0.04, dur: 1.1, from: 5200, to: 900, gain: 0.32, q: 0.5, attack: 0.05 },
+        { at: 0.5, dur: 0.7, from: 2600, to: 1400, gain: 0.12, q: 1.5, attack: 0.1 },
+      ]);
+      break;
+    case "roar":
+      // A crowd coming up out of its seats: low and wide, swelling in.
+      noises([
+        { at: 0, dur: 2.2, from: 700, to: 1100, gain: 0.16, q: 0.35, attack: 0.5 },
+        { at: 0.1, dur: 1.9, from: 1700, to: 2300, gain: 0.07, q: 0.7, attack: 0.6 },
+      ]);
+      break;
+    case "clack":
+      // A magnet slapped onto a whiteboard.
+      noises([{ at: 0, dur: 0.07, from: 3200, to: 2200, gain: 0.45, q: 2.2 }]);
+      sequence([{ freq: 180, to: 90, at: 0, dur: 0.09, type: "sine", gain: 0.2 }]);
+      break;
+    case "thump":
+      // A ball landing on the podium.
+      sequence([{ freq: 120, to: 55, at: 0, dur: 0.22, type: "sine", gain: 0.32 }]);
+      noises([{ at: 0, dur: 0.06, from: 900, to: 500, gain: 0.2, q: 1 }]);
       break;
   }
 }

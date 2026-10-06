@@ -194,3 +194,65 @@ export default function Referee({ className = "" }: { className?: string }) {
     </svg>
   );
 }
+
+/**
+ * The same referee signalling a touchdown, for the big moments
+ * (components/big-moment.tsx): both arms straight up, whistle in, cheeks
+ * puffed. One held pose, no pose swapping; the stinger animates the whole
+ * figure and `.ref-td-arms` / `.ref-td-sound` if it wants to.
+ */
+export function RefereeTouchdown({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 200 260" className={className} overflow="visible" aria-hidden>
+      <defs>
+        <clipPath id="bm-ref-torso">
+          <path d={TORSO} />
+        </clipPath>
+      </defs>
+      <ellipse cx="100" cy="251" rx="54" ry="7" fill={N} opacity="0.55" />
+      <path d="M72 192 L98 192 L96 238 L78 238 Z" fill={STRIPE} stroke={N} strokeWidth="4" strokeLinejoin="round" />
+      <path d="M102 192 L128 192 L122 238 L104 238 Z" fill={STRIPE} stroke={N} strokeWidth="4" strokeLinejoin="round" />
+      <path d="M68 244 Q68 235 79 235 L95 235 Q100 235 100 241 Q100 248 94 248 L73 248 Q68 248 68 244 Z" fill="#101619" stroke={N} strokeWidth="3.5" />
+      <path d="M132 244 Q132 235 121 235 L105 235 Q100 235 100 241 Q100 248 106 248 L127 248 Q132 248 132 244 Z" fill="#101619" stroke={N} strokeWidth="3.5" />
+
+      <g className="ref-td-arms">
+        <Arm shoulder={[68, 126]} elbow={[58, 86]} hand={[56, 42]} />
+        <Arm shoulder={[132, 126]} elbow={[142, 86]} hand={[144, 42]} />
+      </g>
+
+      <path d={TORSO} fill={SHIRT} />
+      <g clipPath="url(#bm-ref-torso)" fill={STRIPE}>
+        {[74, 87, 100, 113, 126].map((x) => (
+          <rect key={x} x={x - 3.5} y="108" width="7" height="100" />
+        ))}
+      </g>
+      <path d={TORSO} fill="none" stroke={N} strokeWidth="4" strokeLinejoin="round" />
+      <path d="M88 117 L100 129 L112 117" fill="none" stroke={STRIPE} strokeWidth="5" strokeLinejoin="round" />
+
+      <rect x="91" y="104" width="18" height="16" fill={SKIN} stroke={N} strokeWidth="3.5" />
+      <circle cx="70" cy="88" r="7" fill={SKIN} stroke={N} strokeWidth="3.5" />
+      <circle cx="130" cy="88" r="7" fill={SKIN} stroke={N} strokeWidth="3.5" />
+      <circle cx="72" cy="98" r="12" fill={SKIN} stroke={N} strokeWidth="3.5" />
+      <circle cx="128" cy="98" r="12" fill={SKIN} stroke={N} strokeWidth="3.5" />
+      <circle cx="100" cy="84" r="30" fill={SKIN} stroke={N} strokeWidth="4" />
+      <circle cx="100" cy="84" r="28" fill={SKIN} />
+      <circle cx="100" cy="93" r="4.5" fill={SKIN_SHADE} />
+      <ellipse cx="75" cy="100" rx="6" ry="3.8" fill={BLUSH} opacity="0.75" />
+      <ellipse cx="125" cy="100" rx="6" ry="3.8" fill={BLUSH} opacity="0.75" />
+      <path d={MOUSTACHE_D} fill={MOUSTACHE} />
+      <path d="M83 82 L92 86 L83 90 M117 82 L108 86 L117 90" fill="none" stroke={N} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M80 72 L95 77 M120 72 L105 77" fill="none" stroke={N} strokeWidth="3.2" strokeLinecap="round" />
+      <path d="M122 114 Q118 124 110 120" fill="none" stroke={c("turf")} strokeWidth="3.5" strokeLinecap="round" />
+      <Whistle x={98} y={106} />
+      <g className="ref-td-sound" fill="none" stroke={c("gold")} strokeWidth="4.5" strokeLinecap="round">
+        <path d="M136 98 Q142 108 136 118" />
+        <path d="M146 92 Q155 108 146 124" />
+      </g>
+
+      <path d="M68 74 Q68 44 100 44 Q132 44 132 74 Z" fill="#FFFFFF" stroke={N} strokeWidth="4" strokeLinejoin="round" />
+      <path d="M100 46 L100 72 M85 49 Q79 60 79 72 M115 49 Q121 60 121 72" fill="none" stroke={CAP_LINE} strokeWidth="2" />
+      <path d="M64 74 Q100 65 146 76 Q152 83 141 85 Q100 76 66 81 Q60 78 64 74 Z" fill="#FFFFFF" stroke={N} strokeWidth="4" strokeLinejoin="round" />
+      <circle cx="100" cy="44" r="3.5" fill="#FFFFFF" stroke={N} strokeWidth="2.5" />
+    </svg>
+  );
+}

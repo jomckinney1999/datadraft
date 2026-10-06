@@ -42,6 +42,8 @@ import {
 } from "@/lib/daily-share";
 import { loadProgress } from "@/lib/progress";
 import { shareIdentity } from "@/lib/tenure";
+import { gameMoment } from "@/lib/big-moments";
+import { useBigMoments } from "@/components/big-moment";
 
 const DAY_KEY = "sqlsports.duel.v1";
 const HISTORY_KEY = "sqlsports.duel.history.v1";
@@ -100,6 +102,8 @@ export default function StatDuel({
   const [hydrated, setHydrated] = useState(false);
   const [history, setHistory] = useState<History>({});
   const total = duel.rounds.length;
+  const moments = useBigMoments();
+  const celebrated = useRef(false);
   const finished = picks.length >= total;
   const scoreOf = (p: (0 | 1)[]) => p.filter((x, i) => duel.rounds[i] && x === winnerOf(duel.rounds[i])).length;
 
@@ -134,7 +138,14 @@ export default function StatDuel({
 
   function advance() {
     if (current < total - 1) setCurrent(current + 1);
-    else setCurrent(total);
+    else {
+      setCurrent(total);
+      // Five for five gets the ref, once: not on a review, not on a reload.
+      if (!celebrated.current && picks.length === total && scoreOf(picks) === total) {
+        celebrated.current = true;
+        moments.play(gameMoment("touchdown", `duel:${duel.day}`, "Perfect duel!", `Stat Duel #${duel.number} · ${total} for ${total}`));
+      }
+    }
   }
 
   // Keyboard: pick with ←/→ (or 1/2), continue with Enter. Never while typing.
@@ -236,6 +247,7 @@ export default function StatDuel({
           onReview={(i) => setCurrent(i)}
         />
       )}
+      {moments.node}
     </div>
   );
 }

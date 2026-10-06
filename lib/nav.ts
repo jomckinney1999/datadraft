@@ -19,7 +19,25 @@ export type NavItem = {
   badge?: string;
 };
 
-export type NavGroup = { title: string; items: NavItem[] };
+/**
+ * A compact link: a course you can jump straight into, shown as a small
+ * tile with a monogram rather than a full card, so eleven of them fit.
+ */
+export type NavChip = {
+  href: string;
+  label: string;
+  /** One to three characters on the tile, periodic-table style. */
+  mark: string;
+  /** The course's full name, for the tooltip. */
+  blurb: string;
+};
+
+export type NavGroup = {
+  title: string;
+  items: NavItem[];
+  /** Compact links under the items, with a caption of their own. */
+  chips?: { title: string; items: NavChip[] };
+};
 
 export type NavSection = {
   href: string;
@@ -75,6 +93,22 @@ export const NAV: NavSection[] = [
         items: [
           { href: "/learn", label: "All courses", blurb: "SQL, Python, Excel, R and more, one short lesson at a time" },
         ],
+        chips: {
+          title: "Pick a language",
+          items: [
+            { href: "/learn/track/sql-fundamentals", label: "SQL", mark: "Sq", blurb: "SQL Fundamentals" },
+            { href: "/learn/track/sql-advanced", label: "Advanced SQL", mark: "Sq+", blurb: "Advanced SQL" },
+            { href: "/learn/track/python", label: "Python", mark: "Py", blurb: "Python & pandas" },
+            { href: "/learn/track/r", label: "R", mark: "R", blurb: "R & the Tidyverse" },
+            { href: "/learn/track/excel", label: "Excel", mark: "Fx", blurb: "Excel for Analysts" },
+            { href: "/learn/track/stats", label: "Statistics", mark: "St", blurb: "Statistics That Hold Up" },
+            { href: "/learn/track/viz", label: "Visualization", mark: "Vz", blurb: "Chart choice, honest axes, bars, lines and scatters" },
+            { href: "/learn/track/tableau", label: "Tableau", mark: "Tb", blurb: "Tableau for Data Visualization" },
+            { href: "/learn/track/powerbi", label: "Power BI", mark: "Bi", blurb: "Power BI & DAX" },
+            { href: "/learn/track/git", label: "Git", mark: "Gt", blurb: "Git & GitHub" },
+            { href: "/learn/track/ai", label: "AI", mark: "Ai", blurb: "LLMs & AI for Analysts" },
+          ],
+        },
       },
       {
         title: "Sandboxes",
