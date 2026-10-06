@@ -1,0 +1,49 @@
+name: Check
+
+# Every push to main (which deploys) and every pull request: type-check,
+# lint, and run every answer key, quoted fact, generated index and guard in
+# scripts/verify-answer-keys.mjs. Vercel deploys a push either way; this is
+# what makes a broken key, a stale index or a type error loud (GitHub emails
+# the failure) instead of something a learner finds first.
+#
+# The weekly data job runs the same checks before it commits, and pushes made
+# with the workflow's own token don't start other workflows, so its commits
+# aren't checked twice.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+  pull_request:
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type-check
+        run: npx tsc --noEmit -p .
+
+      - name: Lint
+        run: npx next lint --quiet
+
+      - name: Check every answer key and every quoted number
+        run: node scripts/verify-answer-keys.mjs
