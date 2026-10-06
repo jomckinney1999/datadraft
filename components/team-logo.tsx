@@ -16,7 +16,7 @@
  */
 
 import { useState } from "react";
-import { teamAccent, teamLogo, teamName } from "@/lib/team-colors";
+import { teamAccent, teamCrest, teamLogo, teamName } from "@/lib/team-colors";
 
 export default function TeamLogo({
   abbr,
@@ -33,7 +33,11 @@ export default function TeamLogo({
 }) {
   const [failed, setFailed] = useState(false);
   if (!abbr) return null;
-  const src = teamLogo(abbr);
+  // ESPN's resized dark-background crest at twice the drawn size (sharp on
+  // a retina screen, 1–3 KB), not the 500px master (~130 KB each, a dozen to
+  // a scoreboard) whose dark marks, the Jets' green among them, vanished on
+  // this background (2026-10-06). Two sizes, so the browser cache is shared.
+  const src = teamCrest(abbr, size <= 32 ? 64 : 128) ?? teamLogo(abbr);
   const show = Boolean(src) && !failed;
 
   return (
