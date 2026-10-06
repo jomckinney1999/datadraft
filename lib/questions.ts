@@ -38,10 +38,9 @@
  * questions here stay deliberately short.
  */
 
-import { SCHEMA } from "@/lib/league-schema";
 import { FACTS } from "@/lib/lesson-facts.generated";
 import { WEEKLY_2024 } from "@/lib/question-frames.generated";
-import { EXTRA_SCHEMA, isLeagueOnly } from "@/lib/practice-schemas";
+import { isLeagueOnly } from "@/lib/practice-schemas";
 
 // Labels, prices and the two unions live in a small module so cards can use
 // them without importing the bank; re-exported here so nothing else changes.
@@ -6453,9 +6452,7 @@ export function getQuestion(id: string): Question | undefined {
 }
 
 /** Only the tables a question touches, so the schema panel stays short. */
-export function schemaFor(q: Question) {
-  return [...SCHEMA, ...EXTRA_SCHEMA].filter((t) => q.tables.includes(t.table));
-}
+export { schemaFor } from "@/lib/schema-for";
 
 // ── Question of the Day ────────────────────────────────────────
 //

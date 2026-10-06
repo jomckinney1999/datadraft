@@ -13,8 +13,7 @@
  * is the same screen.
  */
 
-import { QUESTIONS, type Question, type QuestionDifficulty } from "@/lib/questions";
-import { needsDownload } from "@/lib/practice-schemas";
+import type { Question, QuestionDifficulty } from "@/lib/questions";
 
 export type MockFormat = {
   id: "phone" | "technical";
@@ -51,15 +50,14 @@ function hash(s: string): number {
 }
 
 /** The SQL questions for a screen: one per difficulty in the mix, unsolved first. */
-export function pickScreen(format: MockFormat, seed: string, solved: string[]): Question[] {
+/** `pool` is lib/screen-pool.ts's list, built on the server. */
+export function pickScreen(format: MockFormat, seed: string, solved: string[], pool: Question[]): Question[] {
   const done = new Set(solved);
   const taken = new Set<string>();
   return format.mix.map((difficulty, i) => {
-    const pool = QUESTIONS.filter(
-      (q) => q.lang === "sql" && q.difficulty === difficulty && !taken.has(q.id) && !needsDownload(q.tables),
-    );
-    const fresh = pool.filter((q) => !done.has(q.id));
-    const from = fresh.length ? fresh : pool;
+    const level = pool.filter((q) => q.difficulty === difficulty && !taken.has(q.id));
+    const fresh = level.filter((q) => !done.has(q.id));
+    const from = fresh.length ? fresh : level;
     const ranked = from
       .map((q) => ({ q, k: hash(`${seed}:${i}:${q.id}`) }))
       .sort((a, b) => a.k - b.k);

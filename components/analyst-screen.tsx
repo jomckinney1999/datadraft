@@ -29,7 +29,9 @@ import { useLessonDb } from "@/components/mock-interview";
 import { usePass } from "@/lib/use-pass";
 import { FREE_ALLOWANCE } from "@/lib/season-pass";
 import { loadProgress, solveQuestion } from "@/lib/progress";
-import { DIFFICULTY_XP, getQuestion, schemaFor, type Question } from "@/lib/questions";
+import type { Question } from "@/lib/questions";
+import { DIFFICULTY_XP } from "@/lib/question-meta";
+import { schemaFor } from "@/lib/schema-for";
 import { diagnoseSql } from "@/lib/query-doctor";
 import { resultsMatch } from "@/lib/sql-grade";
 import {
@@ -80,9 +82,9 @@ function write(key: string, value: unknown) {
   }
 }
 
-function resolveSlot(ref: SlotRef): ScreenSlot | null {
+function resolveSlot(ref: SlotRef, byId: Map<string, Question>): ScreenSlot | null {
   if (ref.kind === "sql") {
-    const question = getQuestion(ref.id);
+    const question = byId.get(ref.id);
     return question ? { kind: "sql", question } : null;
   }
   const item = ANALYST_MC.find((m) => m.id === ref.id);
@@ -94,8 +96,9 @@ function finished(a: AnalystAnswer): boolean {
   return a.kind === "sql" ? a.solvedAt !== null : a.attempts > 0;
 }
 
-export default function AnalystScreen() {
+export default function AnalystScreen({ pool }: { pool: Question[] }) {
   const db = useLessonDb();
+  const byId = useMemo(() => new Map(pool.map((q) => [q.id, q])), [pool]);
   const [live, setLive] = useState<Live | null>(null);
   const [history, setHistory] = useState<HistoryRow[]>([]);
   const [now, setNow] = useState(() => Date.now());
@@ -110,9 +113,9 @@ export default function AnalystScreen() {
 
   useEffect(() => {
     const saved = read<Live>(LIVE_KEY);
-    if (saved && saved.v === 1 && saved.slots.every((s) => resolveSlot(s))) setLive(saved);
+    if (saved && saved.v === 1 && saved.slots.every((s) => resolveSlot(s, byId))) setLive(saved);
     setHistory(read<HistoryRow[]>(HISTORY_KEY) ?? []);
-  }, []);
+  }, [byId]);
 
   useEffect(() => {
     if (live) write(LIVE_KEY, live);
@@ -133,7 +136,7 @@ export default function AnalystScreen() {
     const bytes = new Uint8Array(4);
     crypto.getRandomValues(bytes);
     const seed = Array.from(bytes, (b) => b.toString(36)).join("");
-    const slots = pickAnalystScreen(format, seed, loadProgress().solvedQuestions);
+    const slots = pickAnalystScreen(format, seed, loadProgress().solvedQuestions, pool);
     const t = Date.now();
     setNow(t);
     setLive({
@@ -217,8 +220,8 @@ export default function AnalystScreen() {
       </>
     );
   }
-  if (live.finishedAt) return <Report live={live} db={db} onAgain={leave} />;
-  return <Screen live={live} setLive={setLive} db={db} now={now} onFinish={finish} />;
+  if (live.finishedAt) return <Report live={live} db={db} onAgain={leave} byId={byId} />;
+  return <Screen live={live} setLive={setLive} db={db} now={now} onFinish={finish} byId={byId} />;
 }
 
 // ── Lobby ─────────────────────────────────────────────────────────────
@@ -382,14 +385,16 @@ function Screen({
   db,
   now,
   onFinish,
+  byId,
 }: {
   live: Live;
   setLive: (fn: (l: Live | null) => Live | null) => void;
   db: Database | null;
   now: number;
   onFinish: () => void;
+  byId: Map<string, Question>;
 }) {
-  const slots = useMemo(() => live.slots.map((s) => resolveSlot(s)!), [live.slots]);
+  const slots = useMemo(() => live.slots.map((s) => resolveSlot(s, byId)!), [live.slots, byId]);
   const [at, setAt] = useState(() => Math.max(0, live.answers.findIndex((a) => !finished(a))));
   const [result, setResult] = useState<{ grid?: QueryExecResult; error?: string; verdict?: "right" | "wrong" } | null>(null);
   const slot = slots[at];
@@ -765,8 +770,18 @@ function Grid({ res }: { res: QueryExecResult }) {
 }
 
 // ── The report ────────────────────────────────────────────────────────
-function Report({ live, db, onAgain }: { live: Live; db: Database | null; onAgain: () => void }) {
-  const slots = live.slots.map((s) => resolveSlot(s)!);
+function Report({
+  live,
+  db,
+  onAgain,
+  byId,
+}: {
+  live: Live;
+  db: Database | null;
+  onAgain: () => void;
+  byId: Map<string, Question>;
+}) {
+  const slots = live.slots.map((s) => resolveSlot(s, byId)!);
   const verdict = analystVerdict(live.answers);
   const solved = live.answers.filter((a) => a.solvedAt !== null).length;
   const used = Math.round(((live.finishedAt ?? live.endsAt) - live.startedAt) / 1000);

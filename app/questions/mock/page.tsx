@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import AppNav from "@/components/app-nav";
 import MockInterview from "@/components/mock-interview";
+import { screenPool } from "@/lib/screen-pool";
 
 export const metadata: Metadata = {
   title: "Mock SQL screens — DataDraft",
@@ -13,7 +14,7 @@ export default function MockPage() {
     <>
       <AppNav back="/questions" backLabel="all questions" />
       <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-24 pt-8 sm:px-6">
-        <MockInterview />
+        <MockInterview pool={screenPool()} />
       </main>
     </>
   );

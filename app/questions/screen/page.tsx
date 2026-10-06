@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import AppNav from "@/components/app-nav";
 import AnalystScreen from "@/components/analyst-screen";
+import { screenPool } from "@/lib/screen-pool";
 
 export const metadata: Metadata = {
   title: "Analyst Screen — DataDraft",
@@ -13,7 +14,7 @@ export default function AnalystScreenPage() {
     <>
       <AppNav back="/questions/prep" backLabel="hiring prep" />
       <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-24 pt-8 sm:px-6">
-        <AnalystScreen />
+        <AnalystScreen pool={screenPool()} />
       </main>
     </>
   );

@@ -25,7 +25,9 @@ import { FREE_ALLOWANCE } from "@/lib/season-pass";
 import QueryDoctorPanel from "@/components/query-doctor-panel";
 import FilmRoom from "@/components/film-room";
 import { loadProgress, solveQuestion } from "@/lib/progress";
-import { DIFFICULTY_XP, getQuestion, schemaFor, type Question } from "@/lib/questions";
+import type { Question } from "@/lib/questions";
+import { DIFFICULTY_XP } from "@/lib/question-meta";
+import { schemaFor } from "@/lib/schema-for";
 import { diagnoseSql } from "@/lib/query-doctor";
 import { resultsMatch } from "@/lib/sql-grade";
 import {
@@ -96,8 +98,9 @@ export function useLessonDb(): Database | null {
   return db;
 }
 
-export default function MockInterview() {
+export default function MockInterview({ pool }: { pool: Question[] }) {
   const db = useLessonDb();
+  const byId = useMemo(() => new Map(pool.map((q) => [q.id, q])), [pool]);
   const [live, setLive] = useState<Live | null>(null);
   const [history, setHistory] = useState<HistoryRow[]>([]);
   const [now, setNow] = useState(() => Date.now());
@@ -112,9 +115,9 @@ export default function MockInterview() {
 
   useEffect(() => {
     const saved = read<Live>(LIVE_KEY);
-    if (saved && saved.v === 1 && saved.ids.every((id) => getQuestion(id))) setLive(saved);
+    if (saved && saved.v === 1 && saved.ids.every((id) => byId.has(id))) setLive(saved);
     setHistory(read<HistoryRow[]>(HISTORY_KEY) ?? []);
-  }, []);
+  }, [byId]);
 
   useEffect(() => {
     if (live) write(LIVE_KEY, live);
@@ -135,7 +138,7 @@ export default function MockInterview() {
     const bytes = new Uint8Array(4);
     crypto.getRandomValues(bytes);
     const seed = Array.from(bytes, (b) => b.toString(36)).join("");
-    const qs = pickScreen(format, seed, loadProgress().solvedQuestions);
+    const qs = pickScreen(format, seed, loadProgress().solvedQuestions, pool);
     const t = Date.now();
     setNow(t);
     setLive({
@@ -212,8 +215,8 @@ export default function MockInterview() {
       </>
     );
   }
-  if (live.finishedAt) return <Report live={live} db={db} onAgain={leave} />;
-  return <Screen live={live} setLive={setLive} db={db} now={now} onFinish={finish} />;
+  if (live.finishedAt) return <Report live={live} db={db} onAgain={leave} byId={byId} />;
+  return <Screen live={live} setLive={setLive} db={db} now={now} onFinish={finish} byId={byId} />;
 }
 
 // ── Lobby ─────────────────────────────────────────────────────────────
@@ -354,14 +357,16 @@ function Screen({
   db,
   now,
   onFinish,
+  byId,
 }: {
   live: Live;
   setLive: (fn: (l: Live | null) => Live | null) => void;
   db: Database | null;
   now: number;
   onFinish: () => void;
+  byId: Map<string, Question>;
 }) {
-  const questions = useMemo(() => live.ids.map((id) => getQuestion(id)!), [live.ids]);
+  const questions = useMemo(() => live.ids.map((id) => byId.get(id)!), [live.ids, byId]);
   const [at, setAt] = useState(() => Math.max(0, live.answers.findIndex((a) => a.solvedAt === null)));
   const [result, setResult] = useState<{ grid?: QueryExecResult; error?: string; verdict?: "right" | "wrong" } | null>(null);
   const q = questions[at];
@@ -565,8 +570,18 @@ function Grid({ res }: { res: QueryExecResult }) {
 }
 
 // ── The report ────────────────────────────────────────────────────────
-function Report({ live, db, onAgain }: { live: Live; db: Database | null; onAgain: () => void }) {
-  const questions = live.ids.map((id) => getQuestion(id)!);
+function Report({
+  live,
+  db,
+  onAgain,
+  byId,
+}: {
+  live: Live;
+  db: Database | null;
+  onAgain: () => void;
+  byId: Map<string, Question>;
+}) {
+  const questions = live.ids.map((id) => byId.get(id)!);
   const verdict = verdictFor(live.answers);
   const solved = live.answers.filter((a) => a.solvedAt !== null).length;
   const used = Math.round(((live.finishedAt ?? live.endsAt) - live.startedAt) / 1000);

@@ -9,8 +9,7 @@
  * OA always does.
  */
 
-import { QUESTIONS, type Question, type QuestionDifficulty } from "@/lib/questions";
-import { needsDownload } from "@/lib/practice-schemas";
+import type { Question, QuestionDifficulty } from "@/lib/questions";
 
 export type McSkill = "stats" | "wrangle" | "types" | "insight" | "ab";
 
@@ -301,15 +300,14 @@ export type ScreenSlot =
   | { kind: "mc"; item: McItem };
 
 /** Build a deterministic screen: SQL first (unsolved preferred), then MC covering distinct skills. */
-export function pickAnalystScreen(format: AnalystFormat, seed: string, solved: string[]): ScreenSlot[] {
+/** `pool` is lib/screen-pool.ts's list, built on the server. */
+export function pickAnalystScreen(format: AnalystFormat, seed: string, solved: string[], pool: Question[]): ScreenSlot[] {
   const done = new Set(solved);
   const takenSql = new Set<string>();
   const sqlSlots: ScreenSlot[] = format.sqlMix.map((difficulty, i) => {
-    const pool = QUESTIONS.filter(
-      (q) => q.lang === "sql" && q.difficulty === difficulty && !takenSql.has(q.id) && !needsDownload(q.tables),
-    );
-    const fresh = pool.filter((q) => !done.has(q.id));
-    const from = fresh.length ? fresh : pool;
+    const level = pool.filter((q) => q.difficulty === difficulty && !takenSql.has(q.id));
+    const fresh = level.filter((q) => !done.has(q.id));
+    const from = fresh.length ? fresh : level;
     const ranked = from.map((q) => ({ q, k: hash(`${seed}:sql:${i}:${q.id}`) })).sort((a, b) => a.k - b.k);
     const pick = ranked[0].q;
     takenSql.add(pick.id);
