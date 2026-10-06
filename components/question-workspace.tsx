@@ -599,7 +599,12 @@ export default function QuestionWorkspace({
                   This runs before your code. Same twenty players the SQL
                   questions use.
                 </p>
-                <pre className="mt-3 max-h-40 overflow-auto rounded-lg border border-panel-border bg-night/60 px-3 py-2 font-mono text-[11px] leading-relaxed text-ink-soft">
+                {/* Focusable so a keyboard can scroll it (axe, 2026-10-06). */}
+                <pre
+                  tabIndex={0}
+                  aria-label="The setup code that runs before yours"
+                  className="mt-3 max-h-40 overflow-auto rounded-lg border border-panel-border bg-night/60 px-3 py-2 font-mono text-[11px] leading-relaxed text-ink-soft"
+                >
                   {question.setup}
                 </pre>
               </div>

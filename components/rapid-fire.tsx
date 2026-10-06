@@ -33,12 +33,14 @@ function accentBorder(a: "turf" | "ice" | "gold") {
       ? "border-gold/50"
       : "border-turf/50";
 }
+// A 10% tint, not 15%: small ice text on a 15% ice wash measured 4.37:1,
+// under AA (axe, 2026-10-06).
 function accentBg(a: "turf" | "ice" | "gold") {
   return a === "ice"
-    ? "bg-ice/15 text-ice"
+    ? "bg-ice/10 text-ice"
     : a === "gold"
-      ? "bg-gold/15 text-gold"
-      : "bg-turf/15 text-turf";
+      ? "bg-gold/10 text-gold"
+      : "bg-turf/10 text-turf";
 }
 
 export default function RapidFire({

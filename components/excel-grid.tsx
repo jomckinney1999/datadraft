@@ -103,7 +103,12 @@ export default function ExcelGrid({
         </div>
       </div>
 
+      {/* Focusable, so a keyboard can scroll a sheet wider than the screen
+          (axe, 2026-10-06). */}
       <div
+        tabIndex={0}
+        role="region"
+        aria-label="Spreadsheet"
         className={
           expanded && base.length > 12
             ? "max-h-[min(70vh,32rem)] overflow-auto"
@@ -113,7 +118,9 @@ export default function ExcelGrid({
         <table className="w-full border-collapse text-left">
           <thead className="sticky top-0 z-[2]">
             <tr className="border-b border-panel-border bg-panel/95">
-              <th className="sticky left-0 z-10 w-9 border-r border-panel-border bg-panel px-1 py-1 font-mono text-[10px] text-ink-muted" />
+              <th className="sticky left-0 z-10 w-9 border-r border-panel-border bg-panel px-1 py-1 font-mono text-[10px] text-ink-muted">
+                <span className="sr-only">Row</span>
+              </th>
               {Array.from({ length: width }, (_, c) => (
                 <th
                   key={c}

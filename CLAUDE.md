@@ -213,6 +213,7 @@ An axe-core pass over sixteen pages (home, questions, a question, the bank's pat
 - **Icon-and-number buttons carry an `aria-label`** (the status chips), and every `role="progressbar"` has one too.
 - **A link inside running text is underlined**, not told apart by colour alone; turf, ice and gold on body text came out at 1.1–1.6:1.
 - **Every page has one `<h1>` and a `<main>`:** the lesson player's column is its `<main>`, named by a visually hidden `<h1>` with the lesson title (the finish screens have their own h1s), and the Hall of Fame's title is `/achievements`' h1. Heading levels don't skip (`/learn` has a hidden "All courses" h2 above the h3 cards). The landing page's top-of-page bar is a `<header>`, so its links sit in a landmark.
+- **A box that scrolls is focusable** (`tabIndex={0}` with a label): the Python/R setup prelude on a question and the spreadsheet grid's scroller, so a keyboard can scroll them. The grid's corner header carries a screen-reader-only "Row". A second pass on 2026-10-06 (the new guides, Python/R/Excel questions, Rapid Fire, the Spreadsheet, Viz Builder, DAX Lab, mock and Analyst screens) found these and a 4.37:1 chip on Rapid Fire (ice text on a 15% ice tint; it's 10% now).
 - **Exempt on purpose:** the dimmed text on a locked unit card. It's an inactive control, which WCAG's contrast rule excludes, and dimming is how it says locked.
 
 ## Analytics (2026-10-03)
