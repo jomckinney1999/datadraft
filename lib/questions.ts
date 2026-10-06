@@ -258,7 +258,15 @@ export type QuestionArt =
   | "piggy-repeat"
   | "rolling-wheel"
   | "kickoff-clock"
-  | "power-battery";
+  | "power-battery"
+  | "name-initial"
+  | "two-jerseys"
+  | "composite-key"
+  | "floor-ten"
+  | "above-usual"
+  | "torn-name"
+  | "september-page"
+  | "no-shootout";
 
 export type Question = {
   id: string;
@@ -5414,6 +5422,237 @@ FROM (
     explain:
       "Active days, not events: COUNT(DISTINCT date(event_time)) counts each day once however much someone did on it. Counting the groups needs a second query around the first.",
     art: "power-battery",
+  },
+  // ── Batch 4: strings, EXISTS and dates (added 2026-10-06) ──────────
+  //
+  // Names are where two sources disagree: the box score writes "Ja'Marr
+  // Chase", the play-by-play "J.Chase", and two different men can both be
+  // "T.Hill". Plus NOT EXISTS for "never" questions, a correlated subquery
+  // and a month that has to come from the schedule.
+  {
+    id: "initial-here",
+    title: "Initial Here",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["SUBSTR", "INSTR", "Strings"],
+    prompt:
+      "Play-by-play data doesn't write a player's full name, it writes the first initial, a full stop and the surname. Build that version of each of the twenty players' names: the first letter, a full stop, then everything after the first space.",
+    returns: "player, pbp_name — player A–Z. Twenty rows, one per player.",
+    tables: ["week_results"],
+    expected: `SELECT DISTINCT player,
+       SUBSTR(player, 1, 1) || '.' || SUBSTR(player, INSTR(player, ' ') + 1) AS pbp_name
+FROM week_results
+ORDER BY player;`,
+    orderMatters: true,
+    hint: "SUBSTR(text, start, length) cuts a piece out, INSTR(text, ' ') finds the first space, and || glues text together.",
+    explain:
+      "INSTR finds where the first name ends, and everything after it is the rest of the name however many words it has, so Amon-Ra St. Brown becomes A.St. Brown, exactly as the play-by-play writes him.",
+    art: "name-initial",
+  },
+  {
+    id: "two-t-hills",
+    title: "Two T.Hills",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["UNION", "Strings", "HAVING"],
+    prompt:
+      "Before you join two sources on a name you built, check the name is unique. Build each player's play-by-play name (first letter, a full stop, then everything after the first space) and find the ones that show up as a passer, rusher or receiver for more than one offense in the 2025 plays.",
+    returns: "player, pbp_name, teams (how many different posteam values) — player A–Z. Two rows.",
+    tables: ["week_results", "plays"],
+    expected: `WITH cast_names AS (
+  SELECT DISTINCT player,
+         SUBSTR(player, 1, 1) || '.' || SUBSTR(player, INSTR(player, ' ') + 1) AS pbp_name
+  FROM week_results
+),
+seen AS (
+  SELECT passer AS name, posteam FROM plays WHERE passer IS NOT NULL
+  UNION
+  SELECT rusher, posteam FROM plays WHERE rusher IS NOT NULL
+  UNION
+  SELECT receiver, posteam FROM plays WHERE receiver IS NOT NULL
+)
+SELECT c.player, c.pbp_name, COUNT(DISTINCT s.posteam) AS teams
+FROM cast_names c
+JOIN seen s ON s.name = c.pbp_name
+GROUP BY c.player, c.pbp_name
+HAVING COUNT(DISTINCT s.posteam) > 1
+ORDER BY c.player;`,
+    orderMatters: true,
+    hint: "Stack the three name columns into one list with UNION (each with its posteam), join the twenty built names to it, and keep the names with COUNT(DISTINCT posteam) > 1.",
+    explain:
+      "T.Hill is Tyreek Hill in Miami and Taysom Hill in New Orleans; B.Robinson is Bijan Robinson in Atlanta and Brian Robinson in San Francisco. Two people, one key, so a join on the name alone would hand Bijan another back's carries. (A trade would show up here too, which is just as worth knowing.)",
+    art: "two-jerseys",
+  },
+  {
+    id: "same-name-right-team",
+    title: "Right Name, Right Team",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["JOIN", "CTE", "Strings", "Conditional aggregation"],
+    prompt:
+      "Count each player's 2025 touches from the play-by-play without picking up a namesake. Match a play to a player only when his built name (first letter, a full stop, the rest of the name) is the rusher or the receiver AND the play's posteam and week match the team and week on his 2025 row in week_results. A carry is a run where he's the rusher; a target is a pass where he's the receiver.",
+    returns: "player, carries, targets, touches (carries plus targets) — most touches first, then player A–Z. Ten rows.",
+    tables: ["week_results", "plays"],
+    expected: `WITH cast_weeks AS (
+  SELECT player, team, week,
+         SUBSTR(player, 1, 1) || '.' || SUBSTR(player, INSTR(player, ' ') + 1) AS pbp_name
+  FROM week_results
+  WHERE season = 2025
+)
+SELECT c.player,
+       SUM(CASE WHEN p.rusher = c.pbp_name THEN 1 ELSE 0 END) AS carries,
+       SUM(CASE WHEN p.receiver = c.pbp_name THEN 1 ELSE 0 END) AS targets,
+       COUNT(*) AS touches
+FROM cast_weeks c
+JOIN plays p
+  ON p.week = c.week
+ AND p.posteam = c.team
+ AND (p.rusher = c.pbp_name OR p.receiver = c.pbp_name)
+WHERE p.play_type IN ('pass', 'run')
+GROUP BY c.player
+ORDER BY touches DESC, c.player
+LIMIT 10;`,
+    orderMatters: true,
+    hint: "Build the name on each 2025 row of week_results (player, team, week), then join plays ON week, posteam = team, and the name matching rusher or receiver. SUM a CASE for carries and another for targets; COUNT(*) is touches.",
+    explain:
+      "The team and the week are what make the key unique. Bijan's 390 touches are all Atlanta's, while matching on the name alone gives him 494, over a hundred of them Brian Robinson's in San Francisco. A composite key is how you join two sources that never agreed on an id.",
+    art: "composite-key",
+  },
+  {
+    id: "never-below-ten",
+    title: "Never Below Ten",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["Subquery", "NOT EXISTS"],
+    prompt:
+      "In a must-win week a floor matters more than a ceiling. Which players went the whole 2024 season without a single game under 10 points?",
+    returns: "player — A–Z. Four rows.",
+    tables: ["week_results"],
+    expected: `SELECT DISTINCT w.player
+FROM week_results w
+WHERE w.season = 2024
+  AND NOT EXISTS (
+    SELECT 1 FROM week_results x
+    WHERE x.player = w.player AND x.season = 2024 AND x.fantasy_pts < 10
+  )
+ORDER BY w.player;`,
+    orderMatters: true,
+    hint: "Keep a player with 2024 games when NOT EXISTS finds a 2024 game of his under 10 points.",
+    explain:
+      "NOT EXISTS asks it the way it's worded: is there any game that breaks the rule? GROUP BY player HAVING MIN(fantasy_pts) >= 10 gets the same four, and both say 'every game' as 'no game below', which is easier to get right.",
+    art: "floor-ten",
+  },
+  {
+    id: "better-than-usual",
+    title: "Better Than Usual",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["Subquery", "Correlated subquery", "GROUP BY"],
+    prompt:
+      "Some averages rest on a few huge games. In 2024, count each player's games that beat his own 2024 average, and find the three players who did it most often.",
+    returns: "player, games_above_own_avg — most first, then player A–Z. Three rows.",
+    tables: ["week_results"],
+    expected: `SELECT w.player, COUNT(*) AS games_above_own_avg
+FROM week_results w
+WHERE w.season = 2024
+  AND w.fantasy_pts > (
+    SELECT AVG(x.fantasy_pts) FROM week_results x
+    WHERE x.player = w.player AND x.season = 2024
+  )
+GROUP BY w.player
+ORDER BY games_above_own_avg DESC, w.player
+LIMIT 3;`,
+    orderMatters: true,
+    hint: "A correlated subquery in WHERE works out the player's own average for each row: (SELECT AVG(x.fantasy_pts) FROM week_results x WHERE x.player = w.player AND x.season = 2024).",
+    explain:
+      "The subquery runs for each outer row with that row's player plugged in, which is exactly what 'his own average' means. AVG(fantasy_pts) OVER (PARTITION BY player) in a CTE does the same job as a window.",
+    art: "above-usual",
+  },
+  {
+    id: "names-that-break",
+    title: "Names That Break",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["LIKE", "REPLACE", "Strings"],
+    prompt:
+      "Names with an apostrophe, a full stop or a hyphen are the ones that break a match between two sources. List the players whose names have any of the three, and a clean version of each: lowercase, apostrophes and full stops removed, hyphens turned into spaces.",
+    returns: "player, clean_name — player A–Z. Three rows.",
+    tables: ["week_results"],
+    expected: `SELECT DISTINCT player,
+       LOWER(REPLACE(REPLACE(REPLACE(player, '''', ''), '.', ''), '-', ' ')) AS clean_name
+FROM week_results
+WHERE player LIKE '%''%' OR player LIKE '%.%' OR player LIKE '%-%'
+ORDER BY player;`,
+    orderMatters: true,
+    hint: "Inside a SQL string, an apostrophe is written as two single quotes: LIKE '%''%'. Nest REPLACE three times, then wrap the lot in LOWER.",
+    explain:
+      "Doubling the quote is the bit that trips people up. Cleaning both sides the same way (lowercase, no punctuation) is the usual first move before matching names from two sources.",
+    art: "torn-name",
+  },
+  {
+    id: "september-stars",
+    title: "September Stars",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["JOIN", "Dates", "strftime"],
+    prompt:
+      "Who starts fast? week_results has no dates, but games does. For 2024, join each player's games to the schedule (same season and week, his team at home or away) and find the five best points-per-game in September.",
+    returns: "player, september_ppg (1 decimal) — highest first, then player A–Z. Five rows.",
+    tables: ["week_results", "games"],
+    expected: `SELECT w.player, ROUND(AVG(w.fantasy_pts), 1) AS september_ppg
+FROM week_results w
+JOIN games g
+  ON g.season = w.season
+ AND g.week = w.week
+ AND (g.home_team = w.team OR g.away_team = w.team)
+WHERE w.season = 2024 AND strftime('%m', g.gameday) = '09'
+GROUP BY w.player
+ORDER BY september_ppg DESC, w.player
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "JOIN games ON season, week and (home_team = team OR away_team = team), then keep strftime('%m', gameday) = '09'.",
+    explain:
+      "A calendar month isn't an NFL week, so the date has to come from somewhere, here the schedule. strftime returns text, so the month is '09', not 9.",
+    art: "september-page",
+  },
+  {
+    id: "never-in-a-shootout",
+    title: "Never in a Shootout",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-07",
+    tags: ["Subquery", "NOT EXISTS", "JOIN"],
+    prompt:
+      "Call a game a shootout when the two teams scored 60 or more between them. Which players were never in one in 2024, in any game they played?",
+    returns: "player — A–Z. Five rows.",
+    tables: ["week_results", "games"],
+    expected: `SELECT DISTINCT w.player
+FROM week_results w
+WHERE w.season = 2024
+  AND NOT EXISTS (
+    SELECT 1
+    FROM week_results x
+    JOIN games g
+      ON g.season = x.season
+     AND g.week = x.week
+     AND (g.home_team = x.team OR g.away_team = x.team)
+    WHERE x.player = w.player
+      AND x.season = 2024
+      AND g.home_score + g.away_score >= 60
+  )
+ORDER BY w.player;`,
+    orderMatters: true,
+    hint: "Inside NOT EXISTS, join the player's 2024 games to games (same season and week, his team home or away) and look for a combined score of 60 or more.",
+    explain:
+      "Some of these are about the schedule and some about health: Christian McCaffrey played four games in 2024, so he had few chances. A 'never' question is a NOT EXISTS question.",
+    art: "no-shootout",
   },
 ];
 

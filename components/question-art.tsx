@@ -246,6 +246,14 @@ export const ART_TONE: Record<QuestionArt, Tone> = {
   "rolling-wheel": "ice",
   "kickoff-clock": "gold",
   "power-battery": "turf",
+  "name-initial": "ice",
+  "two-jerseys": "gold",
+  "composite-key": "gold",
+  "floor-ten": "turf",
+  "above-usual": "ice",
+  "torn-name": "ice",
+  "september-page": "gold",
+  "no-shootout": "turf",
 };
 
 // ── Scenes, one per title idea ───────────────────────────────────
@@ -5218,6 +5226,182 @@ function PowerBattery() {
   );
 }
 
+// ── Batch 4: strings, EXISTS and dates (2026-10-06) ──────────────
+
+/** Initial Here — a full-name tag, an arrow, and the same name cut down to an initial. */
+function NameInitial() {
+  return (
+    <g>
+      <Shadow y={136} rx={80} />
+      <rect x="12" y="34" width="86" height="46" rx="6" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <rect x="12" y="34" width="86" height="14" rx="6" fill={c("ice")} stroke={N} strokeWidth="2" />
+      <text x="55" y="70" textAnchor="middle" fontSize="12" fontWeight="900" fill={N} fontFamily={MONO}>
+        FIRST LAST
+      </text>
+      <path d="M104 58 H128 M120 50 L130 58 L120 66" fill="none" stroke={c("gold")} strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="134" y="38" width="56" height="40" rx="6" fill={c("turf")} stroke={N} strokeWidth="2.4" />
+      <text x="162" y="64" textAnchor="middle" fontSize="13" fontWeight="900" fill={N} fontFamily={MONO}>
+        F.LAST
+      </text>
+      <path d="M30 104 H82 M30 116 H70" stroke={c("ink-muted")} strokeWidth="4" strokeLinecap="round" />
+      <path d="M142 104 H182" stroke={c("ink-muted")} strokeWidth="4" strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** Two T.Hills — two different jerseys, the same name bar across both backs. */
+function TwoJerseys() {
+  const jersey = (x: number, fill: string) => (
+    <g>
+      <path
+        d={`M${x - 26} 30 L${x - 40} 40 L${x - 52} 58 L${x - 42} 68 L${x - 34} 60 V124 H${x + 34} V60 L${x + 42} 68 L${x + 52} 58 L${x + 40} 40 L${x + 26} 30 Q${x} 40 ${x - 26} 30 Z`}
+        fill={fill}
+        stroke={N}
+        strokeWidth="2.4"
+        strokeLinejoin="round"
+      />
+      <rect x={x - 26} y="50" width="52" height="16" rx="3" fill={c("ink")} stroke={N} strokeWidth="1.6" />
+      <text x={x} y="62" textAnchor="middle" fontSize="11" fontWeight="900" fill={N} fontFamily={MONO}>
+        T.HILL
+      </text>
+    </g>
+  );
+  return (
+    <g>
+      <Shadow y={136} rx={84} />
+      {jersey(54, c("ice"))}
+      {jersey(146, c("gold"))}
+      <text x="100" y="104" textAnchor="middle" fontSize="28" fontWeight="900" fill={c("turf")} stroke={N} strokeWidth="1.2" fontFamily={SANS}>
+        ?
+      </text>
+    </g>
+  );
+}
+
+/** Right Name, Right Team — a key whose three teeth are name, team and week. */
+function CompositeKey() {
+  return (
+    <g>
+      <Shadow y={134} rx={74} />
+      <circle cx="46" cy="76" r="30" fill={c("gold")} stroke={N} strokeWidth="2.6" />
+      <circle cx="46" cy="76" r="12" fill={c("night-100")} stroke={N} strokeWidth="2.2" />
+      <rect x="72" y="68" width="112" height="16" rx="3" fill={c("gold")} stroke={N} strokeWidth="2.4" />
+      {[
+        [92, "NAME", c("ice")],
+        [124, "TEAM", c("turf")],
+        [156, "WEEK", c("ink-soft")],
+      ].map(([x, label, fill]) => (
+        <g key={label as string}>
+          <rect x={(x as number) - 12} y="84" width="24" height="26" rx="2" fill={fill as string} stroke={N} strokeWidth="2" />
+          <text x={x as number} y="124" textAnchor="middle" fontSize="8" fontWeight="900" fill={c("ink")} fontFamily={MONO}>
+            {label as string}
+          </text>
+        </g>
+      ))}
+      <Sparkle x={166} y={44} r={7} fill={c("gold")} />
+    </g>
+  );
+}
+
+/** Never Below Ten — every bar standing clear of a dashed floor marked 10. */
+function FloorTen() {
+  const bars = [62, 48, 74, 56, 66, 80];
+  return (
+    <g>
+      <Shadow y={132} rx={80} />
+      <path d="M20 128 H182" stroke={c("ink-muted")} strokeWidth="2.4" />
+      {bars.map((h, i) => (
+        <rect key={i} x={30 + i * 21} y={128 - h} width="15" height={h} rx="2" fill={i % 2 ? c("turf") : c("ice")} stroke={N} strokeWidth="1.8" />
+      ))}
+      <path d="M18 98 H184" stroke={c("gold")} strokeWidth="3" strokeDasharray="7 5" />
+      <rect x="150" y="104" width="34" height="18" rx="4" fill={c("gold")} stroke={N} strokeWidth="1.8" />
+      <text x="167" y="117" textAnchor="middle" fontSize="11" fontWeight="900" fill={N} fontFamily={MONO}>
+        10
+      </text>
+    </g>
+  );
+}
+
+/** Better Than Usual — a player's games as dots, the ones above his own average line lit. */
+function AboveUsual() {
+  const dots: [number, number][] = [
+    [24, 92], [42, 64], [60, 98], [78, 56], [96, 86], [114, 48], [132, 94], [150, 60], [168, 52],
+  ];
+  return (
+    <g>
+      <Shadow y={134} rx={80} />
+      <path d="M14 126 H186" stroke={c("ink-muted")} strokeWidth="2.4" />
+      <path d="M14 76 H186" stroke={c("ink-soft")} strokeWidth="2.6" strokeDasharray="7 5" />
+      <text x="186" y="90" textAnchor="end" fontSize="9" fontWeight="900" fill={c("ink-muted")} fontFamily={MONO}>
+        HIS AVG
+      </text>
+      <path d={`M${dots.map(([x, y]) => `${x} ${y}`).join(" L")}`} fill="none" stroke={c("ink-muted")} strokeWidth="1.6" />
+      {dots.map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r={y < 76 ? 7 : 5} fill={y < 76 ? c("gold") : c("ice", 0.6)} stroke={N} strokeWidth="1.8" />
+      ))}
+    </g>
+  );
+}
+
+/** Names That Break — a name tag torn in two at the apostrophe. */
+function TornName() {
+  return (
+    <g>
+      <Shadow y={134} rx={78} />
+      <g transform="rotate(-6 60 76)">
+        <path d="M14 46 H94 L88 60 L96 72 L86 86 L94 104 H14 Z" fill={c("ink")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+        <rect x="14" y="46" width="76" height="14" fill={c("ice")} stroke={N} strokeWidth="1.8" />
+        <text x="50" y="88" textAnchor="middle" fontSize="20" fontWeight="900" fill={N} fontFamily={MONO}>
+          JA&apos;
+        </text>
+      </g>
+      <g transform="rotate(8 140 80)">
+        <path d="M108 50 L114 64 L106 76 L116 90 L108 108 H188 V50 Z" fill={c("ink")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+        <rect x="112" y="50" width="76" height="14" fill={c("ice")} stroke={N} strokeWidth="1.8" />
+        <text x="150" y="92" textAnchor="middle" fontSize="18" fontWeight="900" fill={N} fontFamily={MONO}>
+          MARR
+        </text>
+      </g>
+      <path d="M100 30 L96 40 M104 30 L108 40" stroke={c("gold")} strokeWidth="3" strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** September Stars — a calendar page for SEP with a star and a ball on it. */
+function SeptemberPage() {
+  return (
+    <g>
+      <Shadow y={136} rx={60} />
+      <rect x="46" y="22" width="108" height="106" rx="6" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <rect x="46" y="22" width="108" height="28" rx="6" fill={c("gold")} stroke={N} strokeWidth="2.2" />
+      <text x="100" y="42" textAnchor="middle" fontSize="15" fontWeight="900" fill={N} fontFamily={MONO}>
+        SEP
+      </text>
+      <path d="M68 16 V30 M132 16 V30" stroke={N} strokeWidth="4" strokeLinecap="round" />
+      <path d={starPath(100, 84, 5, 26, 11, -90)} fill={c("gold")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <Football x={136} y={112} rx={13} rot={-20} />
+      <path d="M58 112 H82" stroke={c("ink-muted")} strokeWidth="4" strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** Never in a Shootout — a high-scoring scoreboard behind a no-entry sign. */
+function NoShootout() {
+  return (
+    <g>
+      <Shadow y={136} rx={70} />
+      <path d="M62 128 V112 M138 128 V112" stroke={N} strokeWidth="6" />
+      <rect x="28" y="26" width="144" height="88" rx="6" fill={c("night-100")} stroke={N} strokeWidth="2.6" />
+      <text x="86" y="78" textAnchor="middle" fontSize="28" fontWeight="900" fill={c("gold")} fontFamily={MONO}>
+        38–31
+      </text>
+      <circle cx="166" cy="104" r="22" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <circle cx="166" cy="104" r="16" fill="none" stroke={c("ice")} strokeWidth="4.5" />
+      <path d="M155 115 L177 93" stroke={c("ice")} strokeWidth="4.5" strokeLinecap="round" />
+    </g>
+  );
+}
+
 const SCENES: Record<QuestionArt, () => JSX.Element> = {
   hammer: Hammer,
   quarterback: Quarterback,
@@ -5417,6 +5601,14 @@ const SCENES: Record<QuestionArt, () => JSX.Element> = {
   "rolling-wheel": RollingWheel,
   "kickoff-clock": KickoffClock,
   "power-battery": PowerBattery,
+  "name-initial": NameInitial,
+  "two-jerseys": TwoJerseys,
+  "composite-key": CompositeKey,
+  "floor-ten": FloorTen,
+  "above-usual": AboveUsual,
+  "torn-name": TornName,
+  "september-page": SeptemberPage,
+  "no-shootout": NoShootout,
 };
 
 export default function QuestionArt({
