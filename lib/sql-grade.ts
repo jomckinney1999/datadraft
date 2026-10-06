@@ -18,9 +18,11 @@ export function normalizeResult(
     ),
   );
   if (!orderMatters) {
+    // Sort on the whole row as JSON, so ["a", "bc"] and ["ab", "c"] can't
+    // share a key and land in whichever order they arrived in.
     rows.sort((a, b) => {
-      const ka = a.join("");
-      const kb = b.join("");
+      const ka = JSON.stringify(a);
+      const kb = JSON.stringify(b);
       return ka < kb ? -1 : ka > kb ? 1 : 0;
     });
   }
