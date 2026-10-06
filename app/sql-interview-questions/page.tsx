@@ -4,7 +4,9 @@ import AppNav from "@/components/app-nav";
 import SiteFooter from "@/components/site-footer";
 import PrepArt, { hasPrepArt } from "@/components/prep-art";
 import { PATTERNS, questionsFor } from "@/lib/interview-patterns";
-import { GUIDES_BASE, guideForPattern } from "@/lib/pattern-guides";
+import { GUIDES_BASE, TOPIC_GUIDES, guideForPattern } from "@/lib/pattern-guides";
+import QuestionArt from "@/components/question-art";
+import { datasetOf } from "@/lib/practice-schemas";
 import { QUESTIONS, questionOfTheDay, leagueDay } from "@/lib/questions";
 import { PAYWALL_LIVE } from "@/lib/season-pass";
 import { SITE_URL } from "@/lib/site";
@@ -140,6 +142,35 @@ export default function SqlInterviewQuestions() {
             );
           })}
         </ol>
+
+        {/* ── Beyond the nine: guides to a kind of role ───── */}
+        <section className="mt-10">
+          <h2 className="font-display text-2xl font-bold text-ink">Interviewing at an app company?</h2>
+          <ul className="mt-4 grid gap-4 sm:grid-cols-2">
+            {TOPIC_GUIDES.map((g) => {
+              const n = QUESTIONS.filter((q) => q.lang === "sql" && datasetOf(q.tables) === g.dataset).length;
+              return (
+                <li key={g.slug}>
+                  <Link
+                    href={`${GUIDES_BASE}/${g.slug}`}
+                    className="surface lift group flex h-full overflow-hidden rounded-2xl border border-panel-border bg-panel transition-colors hover:border-turf/50"
+                  >
+                    <span className="relative w-36 shrink-0 border-r border-panel-border bg-night/50">
+                      <QuestionArt art={g.topic.art} className="absolute inset-0 h-full w-full" />
+                    </span>
+                    <span className="flex flex-1 flex-col p-4">
+                      <span className="font-display text-lg font-bold text-ink group-hover:text-turf">{g.topic.name}</span>
+                      <span className="mt-1 text-sm leading-snug text-ink-soft">{g.topic.asks}</span>
+                      <span className="mt-auto pt-3 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+                        {n} questions · read the guide →
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
 
         <section className="surface mt-10 rounded-2xl border border-panel-border bg-panel p-5 sm:p-7">
           <h2 className="font-display text-2xl font-bold text-ink">How to practise them</h2>

@@ -766,6 +766,19 @@ let guidesChecked = 0;
   for (const p of ip.PATTERNS) {
     if (!pg.guideForPattern(p.id)) problems.push(`Interview pattern "${p.name}" has no guide page (lib/pattern-guides.ts)`);
   }
+  // Topic guides practise a whole database; their example must be a SQL
+  // question on it, and their slugs share the URL space with the patterns.
+  const qs = await loadProjectTs(path.join(root, "lib/questions.ts"), root);
+  for (const g of pg.TOPIC_GUIDES) {
+    guidesChecked++;
+    if (slugs.has(g.slug)) problems.push(`Guide slug "${g.slug}" is used twice`);
+    slugs.add(g.slug);
+    const ex = qs.QUESTIONS.find((q) => q.id === g.example);
+    if (!ex || ex.lang !== "sql" || practiceSchemas.datasetOf(ex.tables) !== g.dataset) {
+      problems.push(`Topic guide "${g.slug}": worked example "${g.example}" isn't a SQL question on the ${g.dataset} database`);
+    }
+    if (g.mistakes.length < 3 || g.faq.length < 2) problems.push(`Topic guide "${g.slug}" needs 3+ mistakes and 2+ FAQs`);
+  }
 }
 
 // ── The analyst path ──────────────────────────────────────────
@@ -1192,7 +1205,7 @@ console.log(`prose facts checked       : ${factsChecked} (lib/lesson-facts.gener
 console.log(`stat duel rounds checked  : ${duelChecked} (180 days from launch, numbers vs their SQL)`);
 console.log(`draft room checks         : ${draftChecked} (scouting presets per season, drafts from every slot)`);
 console.log(`query doctor cases        : ${doctorChecked} (known wrong answers, the diagnosis a tutor would lead with)`);
-console.log(`pattern guides            : ${guidesChecked} (one per interview pattern, each example in its pattern)`);
+console.log(`pattern guides            : ${guidesChecked} (one per interview pattern plus topic guides, each example where it belongs)`);
 console.log(`analyst path checks       : ${pathChecks} (catalog, patterns tickable, fresh and finished learners)`);
 console.log(`film room steps           : ${filmSteps} (every SQL answer replayed clause by clause, each step run)`);
 console.log(`lesson → course map      : ${courseMapChecked} lessons (Hall of Fame course counts, without the curriculum)`);

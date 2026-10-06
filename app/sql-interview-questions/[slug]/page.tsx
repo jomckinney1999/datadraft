@@ -8,8 +8,17 @@ import QuestionArt from "@/components/question-art";
 import DifficultyChip from "@/components/difficulty-chip";
 import SqlBlock from "@/components/sql-block";
 import { patternOf, questionsFor } from "@/lib/interview-patterns";
-import { GUIDES_BASE, PATTERN_GUIDES, guideBySlug } from "@/lib/pattern-guides";
-import { QUESTIONS } from "@/lib/questions";
+import {
+  GUIDES_BASE,
+  PATTERN_GUIDES,
+  TOPIC_GUIDES,
+  guideBySlug,
+  topicGuideBySlug,
+  type PatternGuide,
+  type TopicGuide,
+} from "@/lib/pattern-guides";
+import { QUESTIONS, type Question } from "@/lib/questions";
+import { datasetOf } from "@/lib/practice-schemas";
 import { SITE_URL } from "@/lib/site";
 
 /**
@@ -18,21 +27,74 @@ import { SITE_URL } from "@/lib/site";
  * watch for, one worked example from the bank with its key, and every
  * practice question in the pattern. Content in lib/pattern-guides.ts; the
  * question list is computed from tags, so it grows with the bank.
+ *
+ * A topic guide (product analytics) is the same page: its practice list is a
+ * practice database instead of a tag set, and it sits outside the nine.
  */
+
+/** What the page needs, whichever kind of guide it is. */
+type GuideView = {
+  guide: PatternGuide | TopicGuide;
+  id: string;
+  name: string;
+  asks: string;
+  practice: Question[];
+  /** The bank, filtered to this guide's questions. */
+  bankHref: string;
+  /** "pattern 3 of 9", or the topic's own label. */
+  label: string;
+  art: "prep" | "question";
+  questionArt?: Question["art"];
+  prev?: PatternGuide;
+  next?: PatternGuide;
+};
+
+function viewFor(slug: string): GuideView | null {
+  const guide = guideBySlug(slug);
+  const pattern = guide && patternOf(guide.pattern);
+  if (guide && pattern) {
+    const index = PATTERN_GUIDES.findIndex((g) => g.slug === guide.slug);
+    return {
+      guide,
+      id: pattern.id,
+      name: pattern.name,
+      asks: pattern.asks,
+      practice: questionsFor(pattern),
+      bankHref: `/questions?pattern=${pattern.id}#interview`,
+      label: `pattern ${index + 1} of ${PATTERN_GUIDES.length}`,
+      art: "prep",
+      prev: PATTERN_GUIDES[index - 1],
+      next: PATTERN_GUIDES[index + 1],
+    };
+  }
+  const topic = topicGuideBySlug(slug);
+  if (!topic) return null;
+  return {
+    guide: topic,
+    id: topic.topic.id,
+    name: topic.topic.name,
+    asks: topic.topic.asks,
+    practice: QUESTIONS.filter((q) => q.lang === "sql" && datasetOf(q.tables) === topic.dataset),
+    bankHref: `/questions?data=${topic.dataset}`,
+    label: "for product analyst roles",
+    art: "question",
+    questionArt: topic.topic.art,
+  };
+}
 
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return PATTERN_GUIDES.map((g) => ({ slug: g.slug }));
+  return [...PATTERN_GUIDES, ...TOPIC_GUIDES].map((g) => ({ slug: g.slug }));
 }
 
 export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const guide = guideBySlug(params.slug);
-  const pattern = guide && patternOf(guide.pattern);
-  if (!guide || !pattern) return {};
+  const view = viewFor(params.slug);
+  if (!view) return {};
+  const { guide } = view;
   const url = `${SITE_URL}${GUIDES_BASE}/${guide.slug}`;
-  const n = questionsFor(pattern).length;
-  const image = `/api/og/card?${new URLSearchParams({ kind: "guide", t: pattern.name, n: String(n), s: pattern.asks })}`;
+  const n = view.practice.length;
+  const image = `/api/og/card?${new URLSearchParams({ kind: "guide", t: view.name, n: String(n), s: view.asks })}`;
   return {
     title: guide.metaTitle,
     description: guide.metaDescription,
@@ -49,14 +111,10 @@ function ld(data: unknown) {
 }
 
 export default function PatternGuidePage({ params }: { params: { slug: string } }) {
-  const guide = guideBySlug(params.slug);
-  const pattern = guide && patternOf(guide.pattern);
-  if (!guide || !pattern) notFound();
-
-  const index = PATTERN_GUIDES.findIndex((g) => g.slug === guide.slug);
-  const prev = PATTERN_GUIDES[index - 1];
-  const next = PATTERN_GUIDES[index + 1];
-  const practice = [...questionsFor(pattern)].sort((a, b) => ORDER[a.difficulty] - ORDER[b.difficulty]);
+  const view = viewFor(params.slug);
+  if (!view) notFound();
+  const { guide, prev, next } = view;
+  const practice = [...view.practice].sort((a, b) => ORDER[a.difficulty] - ORDER[b.difficulty]);
   const example = QUESTIONS.find((q) => q.id === guide.example);
   const counts = (["easy", "medium", "hard"] as const)
     .map((d) => [d, practice.filter((q) => q.difficulty === d).length] as const)
@@ -79,7 +137,7 @@ export default function PatternGuidePage({ params }: { params: { slug: string } 
             "@type": "BreadcrumbList",
             itemListElement: [
               { "@type": "ListItem", position: 1, name: "SQL interview questions", item: `${SITE_URL}${GUIDES_BASE}` },
-              { "@type": "ListItem", position: 2, name: pattern.name, item: url },
+              { "@type": "ListItem", position: 2, name: view.name, item: url },
             ],
           },
         ])}
@@ -89,16 +147,14 @@ export default function PatternGuidePage({ params }: { params: { slug: string } 
           <Link href={GUIDES_BASE} className="hover:text-turf">
             SQL interview questions
           </Link>{" "}
-          <span aria-hidden>›</span> <span className="text-ink-soft">{pattern.name}</span>
+          <span aria-hidden>›</span> <span className="text-ink-soft">{view.name}</span>
         </nav>
 
         {/* ── The pattern ─────────────────────────────────── */}
         <header className="surface mt-4 overflow-hidden rounded-3xl border border-panel-border bg-panel">
           <div className="grid gap-0 sm:grid-cols-[1.3fr_1fr]">
             <div className="p-5 sm:p-7">
-              <p className="label-broadcast text-turf">
-                pattern {index + 1} of {PATTERN_GUIDES.length}
-              </p>
+              <p className="label-broadcast text-turf">{view.label}</p>
               <h1 className="mt-2 font-display text-3xl font-bold leading-tight text-ink sm:text-4xl">{guide.h1}</h1>
               <p className="mt-3 text-base leading-relaxed text-ink-soft">{guide.lead}</p>
               <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -117,7 +173,7 @@ export default function PatternGuidePage({ params }: { params: { slug: string } 
                     Start with {practice[0].title}
                   </Link>
                   <Link
-                    href={`/questions?pattern=${pattern.id}#interview`}
+                    href={view.bankHref}
                     className="rounded-xl border border-panel-border px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-wider text-ink-soft hover:border-turf/50 hover:text-turf"
                   >
                     All {practice.length} in the bank
@@ -126,7 +182,10 @@ export default function PatternGuidePage({ params }: { params: { slug: string } 
               )}
             </div>
             <div className="relative min-h-[11rem] border-t border-panel-border bg-night/50 sm:border-l sm:border-t-0">
-              {hasPrepArt(pattern.id) && <PrepArt id={pattern.id} className="absolute inset-0 h-full w-full" />}
+              {view.art === "prep" && hasPrepArt(view.id) && <PrepArt id={view.id} className="absolute inset-0 h-full w-full" />}
+              {view.art === "question" && view.questionArt && (
+                <QuestionArt art={view.questionArt} className="absolute inset-0 h-full w-full" />
+              )}
             </div>
           </div>
         </header>
@@ -161,7 +220,9 @@ export default function PatternGuidePage({ params }: { params: { slug: string } 
             ))}
           </ul>
           <p className="mt-3 text-sm text-ink-muted">
-            Make one of these on a DataDraft question and Query Doctor names it, without giving away the answer.
+            {view.art === "prep"
+              ? "Make one of these on a DataDraft question and Query Doctor names it, without giving away the answer."
+              : "Get one of these wrong on a practice question and Query Doctor compares your result's shape with the answer's (missing columns, extra rows, a join that fanned out) without giving the answer away."}
           </p>
         </section>
 

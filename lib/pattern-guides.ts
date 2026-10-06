@@ -23,6 +23,9 @@
  * reader will be interviewed in.
  */
 
+import type { QuestionArt } from "@/lib/questions";
+import type { DatasetId } from "@/lib/practice-schemas";
+
 export type PatternGuide = {
   /** A pattern id from lib/interview-patterns.ts. */
   pattern: string;
@@ -463,4 +466,96 @@ export function guideBySlug(slug: string): PatternGuide | undefined {
 
 export function guideForPattern(patternId: string): PatternGuide | undefined {
   return PATTERN_GUIDES.find((g) => g.pattern === patternId);
+}
+
+/**
+ * A guide to a kind of job rather than a pattern (2026-10-06). Same page and
+ * the same parts, but its practice list is a whole practice database instead
+ * of a tag set: product analytics is DAU, retention and funnels on an event
+ * log, which is what Benchwarmer (lib/app-dataset.ts) exists for. It doesn't
+ * join the nine patterns, so the analyst path and the bank's pattern grid
+ * are unchanged. The verifier checks its example is a SQL question on its
+ * database.
+ */
+export type TopicGuide = Omit<PatternGuide, "pattern"> & {
+  topic: { id: string; name: string; asks: string; art: QuestionArt };
+  dataset: DatasetId;
+};
+
+export const TOPIC_GUIDES: TopicGuide[] = [
+  {
+    topic: {
+      id: "product-analytics",
+      name: "Product analytics",
+      asks: "Daily actives, retention, funnels, sessions and revenue, from an app's event log.",
+      art: "funnel-steps",
+    },
+    dataset: "app",
+    slug: "product-analytics",
+    h1: "Product analytics SQL interview questions",
+    metaTitle: "Product analytics SQL interview questions: DAU, retention, funnels, with answers",
+    metaDescription:
+      "What app companies ask in SQL screens: daily actives, day-7 retention, funnels, sessions and MRR. The traps interviewers watch for, a worked retention query, and practice questions on an event log you run in your browser.",
+    lead: "If the company has an app, the screen has an event log: one row per thing a user did. The job is counting the right thing, over the right window, for the right people.",
+    whyAsked:
+      "Because it's the work. A product analyst's week is daily actives, retention and funnels, and the SQL is rarely hard on its own. What a screen tests is whether you count users or events, pick the window before you write the WHERE, and can say who's in the denominator before you divide.",
+    shape: `-- Day-7 retention by signup cohort
+WITH cohort AS (
+  SELECT user_id, DATE(signup_at) AS signup_day
+  FROM users
+)
+SELECT c.signup_day,
+       COUNT(*) AS signups,
+       SUM(CASE WHEN EXISTS (
+             SELECT 1 FROM events e
+             WHERE e.user_id = c.user_id
+               AND DATE(e.event_time) = DATE(c.signup_day, '+7 days')
+           ) THEN 1 ELSE 0 END) AS retained_day_7
+FROM cohort c
+GROUP BY c.signup_day
+ORDER BY c.signup_day;`,
+    shapeNote:
+      "Date arithmetic is where dialects part ways: SQLite writes DATE(d, '+7 days'), Postgres d + INTERVAL '7 days', Snowflake DATEADD(day, 7, d) and BigQuery DATE_ADD(d, INTERVAL 7 DAY). Cutting a timestamp down to its day is DATE(ts) in SQLite and BigQuery, ts::date in Postgres, and TO_DATE(ts) in Snowflake.",
+    mistakes: [
+      {
+        title: "Counting events when the question says users",
+        body: "Active users is COUNT(DISTINCT user_id). COUNT(*) counts taps, and one keen user taps forty times a day.",
+      },
+      {
+        title: "Joining when you mean EXISTS",
+        body: "Join users to events to see who came back and every return visit becomes a row, so 'retained' can come out bigger than the cohort. EXISTS asks yes or no, once per person.",
+      },
+      {
+        title: "Adding up distinct counts",
+        body: "Monthly actives isn't the sum of daily actives: someone active on twenty days would count twenty times. Count each window on its own.",
+      },
+      {
+        title: "Trusting the log",
+        body: "Event logs carry duplicates from retried requests and gaps from outages. Compare COUNT(*) with a count of distinct rows before you report an event total, and say which one you used.",
+      },
+    ],
+    example: "day-seven",
+    faq: [
+      {
+        q: "What SQL do product analyst interviews ask?",
+        a: "The same handful of metrics: daily and monthly active users, retention by signup cohort, a conversion funnel, sessions built from raw events, and revenue such as MRR or churn. They come down to GROUP BY, COUNT(DISTINCT), date functions, EXISTS or a LEFT JOIN, and window functions like LAG and ROW_NUMBER.",
+      },
+      {
+        q: "How do you calculate retention in SQL?",
+        a: "Pick the cohort first, for example everyone who signed up in a given month. For each person, check whether they did anything on the day or in the window you care about, with EXISTS or a LEFT JOIN to deduplicated activity. Retained people over cohort size is the rate. Decide out loud whether day 7 means exactly the seventh day or any day in the first week, because the interviewer will ask.",
+      },
+      {
+        q: "How do you turn events into sessions in SQL?",
+        a: "Order each user's events by time and use LAG to fetch the previous event's time. A new session starts at a user's first event and wherever the gap is longer than your threshold, usually 30 minutes. Count those starts for the number of sessions, or take a running SUM of them to number each event's session.",
+      },
+      {
+        q: "Is the practice data real?",
+        a: "No, and it says so wherever it appears. Benchwarmer is a fantasy football app we made up, because no real app's event log can be published. It's generated to behave like product data does: a signup rush, weekend spikes, a funnel that leaks and duplicate events from a client that retries.",
+      },
+    ],
+  },
+];
+
+export function topicGuideBySlug(slug: string): TopicGuide | undefined {
+  return TOPIC_GUIDES.find((g) => g.slug === slug);
 }
