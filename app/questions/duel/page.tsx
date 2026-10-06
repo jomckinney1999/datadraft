@@ -24,7 +24,14 @@ export function generateMetadata({ searchParams }: Props): Metadata {
   return {
     title,
     description: DESCRIPTION,
-    openGraph: { title, description: DESCRIPTION, images: [{ url: image, width: 1200, height: 630 }] },
+    // A challenge link's og:url keeps its ?r=, or Facebook would follow the
+    // page's canonical (the bare duel) and preview that instead of the score.
+    openGraph: {
+      title,
+      description: DESCRIPTION,
+      url: result ? `/questions/duel?r=${searchParams.r}` : "/questions/duel",
+      images: [{ url: image, width: 1200, height: 630 }],
+    },
     twitter: { card: "summary_large_image", title, description: DESCRIPTION, images: [image] },
   };
 }

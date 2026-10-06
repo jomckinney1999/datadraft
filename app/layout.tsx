@@ -32,10 +32,17 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: TITLE,
   description: DESCRIPTION,
+  // "./" resolves against each route's own path (Next resolves a relative
+  // canonical with the pathname), so every page gets its own canonical URL
+  // without repeating it, query strings dropped. A page that sets its own
+  // `alternates` (the pattern guides) overrides this. Same for og:url, which
+  // pointed every page at the home page: a shared question link told
+  // Facebook and LinkedIn it was the home page.
+  alternates: { canonical: "./" },
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
-    url: SITE_URL,
+    url: "./",
     siteName: "DataDraft",
     type: "website",
     // A drawn card (app/api/og/card), not the 1.9 MB stadium photo: it

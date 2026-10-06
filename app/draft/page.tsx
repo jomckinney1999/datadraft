@@ -23,7 +23,13 @@ export function generateMetadata({ searchParams }: Props): Metadata {
   return {
     title,
     description: DESCRIPTION,
-    openGraph: { title, description: DESCRIPTION, images: [{ url: image, width: 1200, height: 630 }] },
+    // Keep ?r= on a challenge's og:url, or Facebook previews the bare page.
+    openGraph: {
+      title,
+      description: DESCRIPTION,
+      url: result ? `/draft?r=${searchParams.r}` : "/draft",
+      images: [{ url: image, width: 1200, height: 630 }],
+    },
     twitter: { card: "summary_large_image", title, description: DESCRIPTION, images: [image] },
   };
 }

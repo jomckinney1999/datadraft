@@ -30,7 +30,7 @@ export function generateMetadata({
   return {
     title,
     description: q.prompt,
-    openGraph: { title, description: q.prompt, images: [{ url: image, width: 1200, height: 630 }] },
+    openGraph: { title, description: q.prompt, url: "./", images: [{ url: image, width: 1200, height: 630 }] },
     twitter: { card: "summary_large_image", title, description: q.prompt, images: [image] },
   };
 }
