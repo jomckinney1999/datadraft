@@ -115,6 +115,11 @@ function printDiag(mine: string, key: string): string {
   if (!mine.trim()) {
     return "Nothing was printed. Grading compares printed output, so the answer has to come out of print().";
   }
+  // dplyr hands back a tibble, which prints a header, a row of column types
+  // and only three significant figures; the answers print a data frame.
+  if (/^# A tibble/m.test(mine) && !/^# A tibble/m.test(key)) {
+    return "That printed a tibble. The answer prints a data frame, which shows every digit: add %>% as.data.frame() before print().";
+  }
   const m = lines(mine);
   const k = lines(key);
   if (m !== k) return `You printed ${m} line${m === 1 ? "" : "s"}; the answer prints ${k}.`;
