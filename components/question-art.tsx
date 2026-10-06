@@ -229,6 +229,23 @@ export const ART_TONE: Record<QuestionArt, Tone> = {
   "yard-cow": "turf",
   "sack-qb": "ice",
   "marathon-chain": "turf",
+  "phone-sunday": "gold",
+  "dau-counter": "turf",
+  "peak-mountain": "ice",
+  "glue-phone": "turf",
+  "seven-calendar": "ice",
+  "funnel-steps": "gold",
+  "empty-lineup": "ice",
+  "channel-signs": "turf",
+  "stopwatch-thirty": "ice",
+  "first-footprint": "gold",
+  "double-tap": "ice",
+  "phone-laptop": "turf",
+  "join-hourglass": "gold",
+  "piggy-repeat": "turf",
+  "rolling-wheel": "ice",
+  "kickoff-clock": "gold",
+  "power-battery": "turf",
 };
 
 // ── Scenes, one per title idea ───────────────────────────────────
@@ -4813,6 +4830,394 @@ function MarathonChain() {
   );
 }
 
+// ── Benchwarmer, the practice app (2026-10-05) ───────────────────
+
+/** A phone outline; the scene draws on its screen. */
+function PhoneFrame({ x, y, w = 64, h = 112, children }: { x: number; y: number; w?: number; h?: number; children?: React.ReactNode }) {
+  return (
+    <g>
+      <rect x={x} y={y} width={w} height={h} rx="10" fill={c("night-100")} stroke={N} strokeWidth="2.4" />
+      <rect x={x + 5} y={y + 12} width={w - 10} height={h - 24} rx="3" fill={c("ink")} />
+      <rect x={x + w / 2 - 8} y={y + 5} width="16" height="3" rx="1.5" fill={c("ink-muted")} />
+      {children}
+    </g>
+  );
+}
+
+/** Game Day Traffic — a phone whose week chart spikes on Sunday. */
+function PhoneSunday() {
+  const bars = [62, 40, 34, 48, 39, 24, 32];
+  return (
+    <g>
+      <Shadow y={136} rx={60} />
+      <PhoneFrame x={68} y={16} w={64} h={114}>
+        {bars.map((h, i) => (
+          <rect key={i} x={76 + i * 7} y={116 - h} width="5" height={h} rx="1" fill={i === 0 ? c("gold") : i === 3 ? c("ice") : c("ink-muted")} stroke={N} strokeWidth="0.8" />
+        ))}
+        <text x="78" y="44" fontSize="7" fontWeight="900" fill={c("gold-dim")} fontFamily={MONO}>
+          SUN
+        </text>
+      </PhoneFrame>
+      <Football x={36} y={70} rx={18} rot={-20} />
+      <path d="M150 50 L164 40 M152 66 H170 M150 82 L164 92" stroke={c("gold")} strokeWidth="3" strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** Daily Actives — a tear-off calendar page above a row of little people. */
+function DauCounter() {
+  return (
+    <g>
+      <Shadow y={136} rx={70} />
+      <rect x="70" y="14" width="60" height="62" rx="5" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <rect x="70" y="14" width="60" height="16" rx="5" fill={c("turf")} stroke={N} strokeWidth="2" />
+      <text x="100" y="26" textAnchor="middle" fontSize="9" fontWeight="900" fill={N} fontFamily={MONO}>
+        TODAY
+      </text>
+      <text x="100" y="64" textAnchor="middle" fontSize="26" fontWeight="900" fill={N} fontFamily={SANS}>
+        75
+      </text>
+      {[0, 1, 2, 3, 4, 5].map((i) => {
+        const x = 36 + i * 26;
+        const col = [c("ice"), c("turf"), c("gold"), c("ice"), c("turf"), c("gold")][i];
+        return (
+          <g key={i}>
+            <circle cx={x} cy={100} r="8" fill={col} stroke={N} strokeWidth="1.8" />
+            <path d={`M${x - 11} 132 Q${x - 11} 112 ${x} 112 Q${x + 11} 112 ${x + 11} 132 Z`} fill={col} stroke={N} strokeWidth="1.8" strokeLinejoin="round" />
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
+/** Peak Week — a mountain with a flag on the summit. */
+function PeakMountain() {
+  return (
+    <g>
+      <Shadow y={136} rx={84} />
+      <path d="M8 132 L60 72 L80 90 L112 36 L150 92 L166 80 L194 132 Z" fill={c("ink-soft")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M98 60 L112 36 L126 60 L118 56 L112 64 L104 56 Z" fill={c("ink")} stroke={N} strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M112 36 V8" stroke={N} strokeWidth="3" />
+      <path d="M112 9 L138 15 L112 22 Z" fill={c("gold")} stroke={N} strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M20 120 L48 98 L70 108 L96 76" fill="none" stroke={c("turf")} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="5 4" />
+    </g>
+  );
+}
+
+/** Stickiness — a glue bottle, and a phone stuck fast to a hand-drawn heart of glue. */
+function GluePhone() {
+  return (
+    <g>
+      <Shadow y={136} rx={66} />
+      <path d="M36 132 V70 Q36 60 46 60 H66 Q76 60 76 70 V132 Z" fill={c("ink")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M50 60 L54 36 H58 L62 60 Z" fill={c("gold")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <rect x="40" y="84" width="32" height="26" rx="3" fill={c("gold")} stroke={N} strokeWidth="1.6" />
+      <text x="56" y="101" textAnchor="middle" fontSize="9" fontWeight="900" fill={N} fontFamily={MONO}>
+        GLUE
+      </text>
+      <path d="M56 36 Q60 26 70 30 Q80 34 90 30" fill="none" stroke={c("ink")} strokeWidth="3" strokeLinecap="round" />
+      <PhoneFrame x={112} y={24} w={56} h={98}>
+        <path d="M140 92 C120 78 122 60 132 60 Q137 60 140 67 Q143 60 148 60 C158 60 160 78 140 92 Z" fill={c("turf")} stroke={N} strokeWidth="1.8" strokeLinejoin="round" />
+      </PhoneFrame>
+      <path d="M108 118 Q104 128 110 132 M172 118 Q178 128 170 134 M140 122 V132" stroke={c("ink")} strokeWidth="3" strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** Day Seven — a calendar with day 1 and day 8 circled, seven hops between them. */
+function SevenCalendar() {
+  return (
+    <g>
+      <Shadow y={136} rx={64} />
+      <rect x="34" y="24" width="132" height="106" rx="6" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <rect x="34" y="24" width="132" height="20" rx="6" fill={c("ice")} stroke={N} strokeWidth="2" />
+      <path d="M58 18 V32 M142 18 V32" stroke={N} strokeWidth="4" strokeLinecap="round" />
+      {Array.from({ length: 21 }, (_, i) => (
+        <text key={i} x={48 + (i % 7) * 17.5} y={64 + Math.floor(i / 7) * 22} textAnchor="middle" fontSize="9" fontWeight="800" fill={c("ink-muted")} fontFamily={MONO}>
+          {i + 1}
+        </text>
+      ))}
+      <circle cx="48" cy="61" r="8" fill="none" stroke={c("gold")} strokeWidth="2.6" />
+      <circle cx="48" cy="83" r="8" fill="none" stroke={c("turf")} strokeWidth="2.6" />
+      <path d="M58 58 Q100 44 152 58 Q160 70 56 80" fill="none" stroke={c("turf")} strokeWidth="2.2" strokeDasharray="4 3" />
+      <text x="140" y="120" textAnchor="middle" fontSize="13" fontWeight="900" fill={c("turf-dim")} fontFamily={SANS}>
+        +7
+      </text>
+    </g>
+  );
+}
+
+/** The Funnel — a funnel in four bands, wide at the top, a drip at the bottom. */
+function FunnelSteps() {
+  const bands: [number, number, string][] = [
+    [80, 64, "turf"],
+    [64, 52, "ice"],
+    [52, 40, "gold"],
+    [40, 16, "gold-dim"],
+  ];
+  return (
+    <g>
+      <Shadow y={136} rx={44} />
+      {bands.map(([top, bottom, tone], i) => {
+        const y = 20 + i * 24;
+        return (
+          <path
+            key={i}
+            d={`M${100 - top} ${y} H${100 + top} L${100 + bottom} ${y + 24} H${100 - bottom} Z`}
+            fill={c(tone)}
+            stroke={N}
+            strokeWidth="2.2"
+            strokeLinejoin="round"
+          />
+        );
+      })}
+      <rect x="92" y="116" width="16" height="10" fill={c("gold-dim")} stroke={N} strokeWidth="2" />
+      <circle cx="100" cy="132" r="4" fill={c("gold")} stroke={N} strokeWidth="1.4" />
+      <text x="100" y="37" textAnchor="middle" fontSize="10" fontWeight="900" fill={N} fontFamily={MONO}>
+        420
+      </text>
+      <text x="100" y="109" textAnchor="middle" fontSize="10" fontWeight="900" fill={N} fontFamily={MONO}>
+        53
+      </text>
+    </g>
+  );
+}
+
+/** Empty Lineups — a lineup card with its slots left blank. */
+function EmptyLineup() {
+  const slots = ["QB", "RB", "RB", "WR", "WR", "TE"];
+  return (
+    <g>
+      <Shadow y={136} rx={56} />
+      <rect x="46" y="12" width="108" height="122" rx="6" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <rect x="46" y="12" width="108" height="18" rx="6" fill={c("turf")} stroke={N} strokeWidth="2" />
+      <text x="100" y="25" textAnchor="middle" fontSize="9" fontWeight="900" fill={N} fontFamily={MONO}>
+        LINEUP
+      </text>
+      {slots.map((s, i) => (
+        <g key={i}>
+          <rect x="54" y={36 + i * 16} width="22" height="12" rx="2" fill={c("ice")} stroke={N} strokeWidth="1.2" />
+          <text x="65" y={45 + i * 16} textAnchor="middle" fontSize="7" fontWeight="900" fill={N} fontFamily={MONO}>
+            {s}
+          </text>
+          <rect x="80" y={36 + i * 16} width="66" height="12" rx="2" fill="none" stroke={c("ink-muted")} strokeWidth="1.4" strokeDasharray="3 3" />
+        </g>
+      ))}
+      <text x="172" y="80" textAnchor="middle" fontSize="26" fontWeight="900" fill={c("gold")} fontFamily={SANS}>
+        ?
+      </text>
+    </g>
+  );
+}
+
+/** Channel Check — a signpost with arrows pointing different ways. */
+function ChannelSigns() {
+  return (
+    <g>
+      <Shadow y={136} rx={56} />
+      <rect x="96" y="20" width="8" height="114" fill={c("gold-dim")} stroke={N} strokeWidth="2" />
+      <path d="M104 26 H158 L170 36 L158 46 H104 Z" fill={c("turf")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M96 52 H42 L30 62 L42 72 H96 Z" fill={c("ice")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M104 78 H150 L162 88 L150 98 H104 Z" fill={c("gold")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M118 36 H150 M46 62 H86 M116 88 H144" stroke={N} strokeWidth="2.4" strokeLinecap="round" opacity="0.45" />
+      <circle cx="100" cy="18" r="6" fill={c("gold")} stroke={N} strokeWidth="2" />
+    </g>
+  );
+}
+
+/** Thirty-Minute Rule — a stopwatch with a 30-minute wedge lit. */
+function StopwatchThirty() {
+  return (
+    <g>
+      <Shadow y={136} rx={52} />
+      <rect x="92" y="14" width="16" height="12" rx="3" fill={c("gold")} stroke={N} strokeWidth="2" />
+      <path d="M140 34 L150 26" stroke={N} strokeWidth="5" strokeLinecap="round" />
+      <circle cx="100" cy="80" r="50" fill={c("ink")} stroke={N} strokeWidth="2.8" />
+      <path d={slicePath(100, 80, 42, 0, 180)} fill={c("ice", 0.45)} />
+      {Array.from({ length: 12 }, (_, i) => {
+        const a = (i * Math.PI) / 6;
+        return <path key={i} d={`M${r1(100 + Math.sin(a) * 38)} ${r1(80 - Math.cos(a) * 38)} L${r1(100 + Math.sin(a) * 44)} ${r1(80 - Math.cos(a) * 44)}`} stroke={N} strokeWidth="2" />;
+      })}
+      <path d="M100 80 V42 M100 80 V118" stroke={N} strokeWidth="3.4" strokeLinecap="round" />
+      <path d="M100 80 V118" stroke={c("gold")} strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="100" cy="80" r="5" fill={c("gold")} stroke={N} strokeWidth="1.6" />
+      <text x="124" y="84" textAnchor="middle" fontSize="13" fontWeight="900" fill={N} fontFamily={MONO}>
+        30
+      </text>
+    </g>
+  );
+}
+
+/** First Move — a sign-up door behind, and the first footprint stepping out. */
+function FirstFootprint() {
+  const foot = (x: number, y: number, rot: number, tone: string) => (
+    <g transform={`translate(${x} ${y}) rotate(${rot})`}>
+      <ellipse cx="0" cy="0" rx="9" ry="15" fill={c(tone)} stroke={N} strokeWidth="1.8" />
+      {[-6, -2, 2, 6].map((dx, i) => (
+        <circle key={i} cx={dx} cy={-20 + Math.abs(dx) * 0.4} r="2.6" fill={c(tone)} stroke={N} strokeWidth="1.2" />
+      ))}
+    </g>
+  );
+  return (
+    <g>
+      <Shadow y={136} rx={72} />
+      <rect x="22" y="22" width="52" height="96" rx="3" fill={c("night-100")} stroke={N} strokeWidth="2.4" />
+      <rect x="28" y="28" width="40" height="90" rx="2" fill={c("ice")} stroke={N} strokeWidth="2" />
+      <circle cx="60" cy="76" r="3" fill={N} />
+      <text x="48" y="48" textAnchor="middle" fontSize="8" fontWeight="900" fill={N} fontFamily={MONO}>
+        SIGN
+      </text>
+      <text x="48" y="58" textAnchor="middle" fontSize="8" fontWeight="900" fill={N} fontFamily={MONO}>
+        UP
+      </text>
+      {foot(98, 112, 70, "ink-muted")}
+      {foot(130, 92, 70, "gold")}
+      <path d="M150 74 L170 62 M164 60 L170 62 L168 68" fill="none" stroke={c("gold")} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** Double Taps — a finger tapping a phone, two ripples on the screen. */
+function DoubleTap() {
+  return (
+    <g>
+      <Shadow y={136} rx={54} />
+      <PhoneFrame x={56} y={14} w={70} h={120}>
+        <circle cx="91" cy="70" r="10" fill="none" stroke={c("ice")} strokeWidth="2.4" />
+        <circle cx="91" cy="70" r="20" fill="none" stroke={c("ice")} strokeWidth="2" opacity="0.6" />
+        <text x="74" y="44" textAnchor="middle" fontSize="14" fontWeight="900" fill={c("gold-dim")} fontFamily={SANS}>
+          ×2
+        </text>
+      </PhoneFrame>
+      <path d="M96 74 Q100 62 108 64 L112 66 V54 Q112 46 118 46 Q124 46 124 54 V78 Q140 76 146 86 L150 118 Q150 132 136 134 L114 134 Q100 132 96 114 Z" fill={c("ink-soft")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M112 66 V82 M124 78 V90" stroke={N} strokeWidth="1.6" opacity="0.4" />
+    </g>
+  );
+}
+
+/** Two Screens — a phone leaning on a laptop. */
+function PhoneLaptop() {
+  return (
+    <g>
+      <Shadow y={136} rx={80} />
+      <rect x="20" y="36" width="116" height="74" rx="5" fill={c("night-100")} stroke={N} strokeWidth="2.4" />
+      <rect x="27" y="43" width="102" height="60" rx="2" fill={c("ink")} />
+      <path d="M8 112 H148 L140 126 H16 Z" fill={c("ink-soft")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <rect x="36" y="52" width="40" height="8" rx="2" fill={c("turf")} />
+      <rect x="36" y="66" width="80" height="5" rx="2" fill={c("ink-muted")} />
+      <rect x="36" y="76" width="64" height="5" rx="2" fill={c("ink-muted")} />
+      <rect x="36" y="86" width="72" height="5" rx="2" fill={c("ink-muted")} />
+      <PhoneFrame x={146} y={52} w={42} h={78}>
+        <rect x="154" y="72" width="26" height="6" rx="2" fill={c("turf")} />
+        <rect x="154" y="84" width="20" height="4" rx="2" fill={c("ink-muted")} />
+        <rect x="154" y="92" width="24" height="4" rx="2" fill={c("ink-muted")} />
+      </PhoneFrame>
+      <path d="M134 30 Q150 14 166 30 M160 24 L166 30 L158 33" fill="none" stroke={c("gold")} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** Time to Join — an hourglass beside a league badge being stamped "joined". */
+function JoinHourglass() {
+  return (
+    <g>
+      <Shadow y={136} rx={72} />
+      <path d="M30 26 H76 M30 126 H76" stroke={N} strokeWidth="5" strokeLinecap="round" />
+      <path d="M36 28 Q36 62 53 76 Q36 90 36 124 H70 Q70 90 53 76 Q70 62 70 28 Z" fill={c("ice", 0.25)} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M43 46 H63 L53 70 Z M42 122 Q53 100 64 122 Z" fill={c("gold")} />
+      <path d="M128 18 L166 32 V70 Q166 102 128 122 Q90 102 90 70 V32 Z" fill={c("turf")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <Football x={128} y={58} rx={16} rot={-24} />
+      <rect x="100" y="80" width="56" height="18" rx="4" fill={c("gold")} stroke={N} strokeWidth="2" transform="rotate(-8 128 89)" />
+      <text x="128" y="93" textAnchor="middle" fontSize="10" fontWeight="900" fill={N} fontFamily={MONO} transform="rotate(-8 128 89)">
+        JOINED
+      </text>
+    </g>
+  );
+}
+
+/** Recurring Revenue — a piggy bank with a coin dropping in and a repeat arrow round it. */
+function PiggyRepeat() {
+  return (
+    <g>
+      <Shadow y={136} rx={64} />
+      <path d="M44 66 A60 52 0 1 1 52 108" fill="none" stroke={c("turf")} strokeWidth="3.2" strokeDasharray="6 5" strokeLinecap="round" />
+      <path d="M38 96 L50 110 L60 96" fill="none" stroke={c("turf")} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+      <ellipse cx="104" cy="88" rx="44" ry="32" fill={c("gold-dim")} stroke={N} strokeWidth="2.4" />
+      <path d="M78 116 V128 M92 118 V130 M116 118 V130 M130 116 V128" stroke={N} strokeWidth="6" strokeLinecap="round" />
+      <path d="M78 116 V128 M92 118 V130 M116 118 V130 M130 116 V128" stroke={c("gold-dim")} strokeWidth="3" strokeLinecap="round" />
+      <ellipse cx="146" cy="88" rx="10" ry="12" fill={c("gold")} stroke={N} strokeWidth="2" />
+      <circle cx="143" cy="85" r="1.8" fill={N} />
+      <circle cx="149" cy="85" r="1.8" fill={N} />
+      <path d="M120 60 L126 46 L134 62 Z" fill={c("gold-dim")} stroke={N} strokeWidth="2" strokeLinejoin="round" />
+      <circle cx="128" cy="76" r="3" fill={N} />
+      <rect x="92" y="56" width="22" height="5" rx="2" fill={N} />
+      <circle cx="103" cy="38" r="12" fill={c("gold")} stroke={N} strokeWidth="2" />
+      <text x="103" y="43" textAnchor="middle" fontSize="13" fontWeight="900" fill={N} fontFamily={SANS}>
+        $
+      </text>
+    </g>
+  );
+}
+
+/** Rolling Seven — a wheel of seven day-segments rolling along, one lit. */
+function RollingWheel() {
+  return (
+    <g>
+      <Shadow y={136} rx={70} />
+      <path d="M8 128 H192" stroke={c("ink-muted")} strokeWidth="2.4" strokeDasharray="6 5" />
+      <circle cx="104" cy="74" r="52" fill={c("ink")} stroke={N} strokeWidth="2.8" />
+      {Array.from({ length: 7 }, (_, i) => (
+        <path key={i} d={slicePath(104, 74, 46, i * (360 / 7) + 20, (i + 1) * (360 / 7) + 20)} fill={i === 0 ? c("gold") : i % 2 ? c("ice", 0.55) : c("turf", 0.55)} stroke={N} strokeWidth="1.6" />
+      ))}
+      <circle cx="104" cy="74" r="14" fill={c("night-100")} stroke={N} strokeWidth="2.4" />
+      <text x="104" y="79" textAnchor="middle" fontSize="14" fontWeight="900" fill={c("gold")} fontFamily={SANS}>
+        7
+      </text>
+      <path d="M22 60 H40 M14 76 H38 M22 92 H40" stroke={c("ink-muted")} strokeWidth="3" strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** Kickoff Rush — a clock at noon with a football swinging on its hands. */
+function KickoffClock() {
+  return (
+    <g>
+      <Shadow y={136} rx={56} />
+      <circle cx="100" cy="74" r="56" fill={c("ink")} stroke={N} strokeWidth="2.8" />
+      <circle cx="100" cy="74" r="48" fill="none" stroke={c("ink-muted")} strokeWidth="1.4" />
+      {Array.from({ length: 12 }, (_, i) => {
+        const a = (i * Math.PI) / 6;
+        return <path key={i} d={`M${r1(100 + Math.sin(a) * 42)} ${r1(74 - Math.cos(a) * 42)} L${r1(100 + Math.sin(a) * 49)} ${r1(74 - Math.cos(a) * 49)}`} stroke={N} strokeWidth={i % 3 === 0 ? 3.4 : 1.8} />;
+      })}
+      <path d="M100 74 V34" stroke={N} strokeWidth="5" strokeLinecap="round" />
+      <path d="M100 74 V40" stroke={c("gold")} strokeWidth="2.6" strokeLinecap="round" />
+      <path d="M100 74 V48" stroke={N} strokeWidth="7" strokeLinecap="round" />
+      <path d="M100 74 V50" stroke={c("turf")} strokeWidth="3.4" strokeLinecap="round" />
+      <circle cx="100" cy="74" r="6" fill={c("gold")} stroke={N} strokeWidth="2" />
+      <Football x={100} y={104} rx={16} />
+      <path d="M150 20 L158 12 M160 30 L172 26 M46 22 L38 14" stroke={c("gold")} strokeWidth="3" strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** Power Users — a battery charged right to the top, with a bolt. */
+function PowerBattery() {
+  return (
+    <g>
+      <Shadow y={136} rx={58} />
+      <rect x="54" y="30" width="92" height="102" rx="10" fill={c("night-100")} stroke={N} strokeWidth="2.6" />
+      <rect x="84" y="18" width="32" height="14" rx="3" fill={c("ink-soft")} stroke={N} strokeWidth="2.2" />
+      {[0, 1, 2, 3].map((i) => (
+        <rect key={i} x="62" y={106 - i * 22} width="76" height="18" rx="3" fill={c("turf")} stroke={N} strokeWidth="1.8" />
+      ))}
+      <path d="M106 42 L84 82 H100 L92 118 L118 72 H102 L112 42 Z" fill={c("gold")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <Sparkle x={36} y={50} r={7} fill={c("gold")} />
+      <Sparkle x={164} y={96} r={6} fill={c("gold")} />
+    </g>
+  );
+}
+
 const SCENES: Record<QuestionArt, () => JSX.Element> = {
   hammer: Hammer,
   quarterback: Quarterback,
@@ -4995,6 +5400,23 @@ const SCENES: Record<QuestionArt, () => JSX.Element> = {
   "yard-cow": YardCow,
   "sack-qb": SackQb,
   "marathon-chain": MarathonChain,
+  "phone-sunday": PhoneSunday,
+  "dau-counter": DauCounter,
+  "peak-mountain": PeakMountain,
+  "glue-phone": GluePhone,
+  "seven-calendar": SevenCalendar,
+  "funnel-steps": FunnelSteps,
+  "empty-lineup": EmptyLineup,
+  "channel-signs": ChannelSigns,
+  "stopwatch-thirty": StopwatchThirty,
+  "first-footprint": FirstFootprint,
+  "double-tap": DoubleTap,
+  "phone-laptop": PhoneLaptop,
+  "join-hourglass": JoinHourglass,
+  "piggy-repeat": PiggyRepeat,
+  "rolling-wheel": RollingWheel,
+  "kickoff-clock": KickoffClock,
+  "power-battery": PowerBattery,
 };
 
 export default function QuestionArt({

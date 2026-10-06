@@ -69,6 +69,11 @@ db.run((await loadProjectTs(path.join(root, "lib/practice-datasets.ts"), root)).
   db,
   JSON.parse((await import("node:fs")).readFileSync(path.join(root, "public/practice/plays-2025.json"), "utf8")),
 );
+// Benchwarmer, the invented app, likewise.
+(await loadProjectTs(path.join(root, "lib/app-dataset.ts"), root)).seedTables(
+  db,
+  JSON.parse((await import("node:fs")).readFileSync(path.join(root, "public/practice/benchwarmer-2025.json"), "utf8")),
+);
 const practiceSchemas = await loadProjectTs(path.join(root, "lib/practice-schemas.ts"), root);
 
 const problems = [];

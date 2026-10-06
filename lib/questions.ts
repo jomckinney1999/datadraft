@@ -240,7 +240,24 @@ export type QuestionArt =
   | "dome-sun"
   | "yard-cow"
   | "sack-qb"
-  | "marathon-chain";
+  | "marathon-chain"
+  | "phone-sunday"
+  | "dau-counter"
+  | "peak-mountain"
+  | "glue-phone"
+  | "seven-calendar"
+  | "funnel-steps"
+  | "empty-lineup"
+  | "channel-signs"
+  | "stopwatch-thirty"
+  | "first-footprint"
+  | "double-tap"
+  | "phone-laptop"
+  | "join-hourglass"
+  | "piggy-repeat"
+  | "rolling-wheel"
+  | "kickoff-clock"
+  | "power-battery";
 
 export type Question = {
   id: string;
@@ -4958,6 +4975,461 @@ LIMIT 3;`,
     explain:
       "Aggregating an aggregate needs two steps, because GROUP BY can only roll up once. A CTE (or a subquery in FROM) is the first roll-up, and the outer query is the second.",
     art: "marathon-chain",
+  },
+  // ── Benchwarmer: product analytics on an app's event log (added 2026-10-05) ──
+  //
+  // An INVENTED fantasy football app (lib/app-dataset.ts): users, events and
+  // subscriptions, the schema behind every "DAU, retention, funnel" screen.
+  // About 1% of events arrive twice, exactly, the way a retrying client logs
+  // them; the questions say when to count rows as logged.
+  {
+    id: "game-day-traffic",
+    title: "Game Day Traffic",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["Dates", "strftime", "GROUP BY"],
+    prompt:
+      "You've just joined Benchwarmer, a fantasy football app, and the on-call engineer wants to know which day the servers get hit hardest. Count the app_open events for each day of the week, rows as logged.",
+    returns: "weekday (strftime('%w'): '0' is Sunday … '6' is Saturday), opens — weekday order. Seven rows.",
+    tables: ["events"],
+    expected: `SELECT strftime('%w', event_time) AS weekday, COUNT(*) AS opens
+FROM events
+WHERE event_name = 'app_open'
+GROUP BY weekday
+ORDER BY weekday;`,
+    orderMatters: true,
+    hint: "strftime('%w', event_time) turns a timestamp into its day of the week, '0' to '6'. Filter to app_open, group by it and count.",
+    explain:
+      "Sunday is games and Wednesday is waivers, and the log shows both. Grouping timestamps by a part of the date is the first thing anyone does with an event log.",
+    art: "phone-sunday",
+  },
+  {
+    id: "daily-actives",
+    title: "Daily Actives",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["Dates", "COUNT", "DISTINCT"],
+    prompt:
+      "Daily active users (DAU) is the number every app dashboard opens on: how many different people did anything that day. Work it out for each day from Sunday 2 November to Saturday 8 November 2025.",
+    returns: "day (YYYY-MM-DD), dau — in date order. Seven rows.",
+    tables: ["events"],
+    expected: `SELECT date(event_time) AS day, COUNT(DISTINCT user_id) AS dau
+FROM events
+WHERE date(event_time) BETWEEN '2025-11-02' AND '2025-11-08'
+GROUP BY day
+ORDER BY day;`,
+    orderMatters: true,
+    hint: "date(event_time) drops the time of day. Group by that and count DISTINCT user_id, because one user makes many events.",
+    explain:
+      "COUNT(*) would count events, and an active user opens the app and taps around a dozen times. Active users is COUNT(DISTINCT user_id), which is why duplicates in the log can't inflate it.",
+    art: "dau-counter",
+  },
+  {
+    id: "peak-week",
+    title: "Peak Week",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["Dates", "strftime", "GROUP BY", "LIMIT"],
+    prompt:
+      "Marketing wants to know when Benchwarmer peaked. Using strftime('%W', event_time) as the week number, find the three weeks with the most weekly active users (different users with any event that week).",
+    returns: "week (two digits, from strftime('%W')), wau — most first, then week. Three rows.",
+    tables: ["events"],
+    expected: `SELECT strftime('%W', event_time) AS week, COUNT(DISTINCT user_id) AS wau
+FROM events
+GROUP BY week
+ORDER BY wau DESC, week
+LIMIT 3;`,
+    orderMatters: true,
+    hint: "Same as DAU, a week at a time: group by strftime('%W', event_time) and count distinct users.",
+    explain:
+      "The peak is early September, the week the draft-season signups were still new. Any active-user number depends on the window: the same app has a DAU, a WAU and a MAU, and they answer different questions.",
+    art: "peak-mountain",
+  },
+  {
+    id: "stickiness",
+    title: "Stickiness",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "Subquery", "Dates", "AVG"],
+    prompt:
+      "Stickiness is average DAU divided by MAU: of everyone who used the app this month, what share shows up on a typical day. Work it out for November 2025: the average DAU across November's days, the month's distinct active users, and the ratio.",
+    returns: "avg_dau (1 decimal), mau, stickiness_pct (100 × the unrounded average ÷ mau, 1 decimal). One row.",
+    tables: ["events"],
+    expected: `WITH daily AS (
+  SELECT date(event_time) AS day, COUNT(DISTINCT user_id) AS dau
+  FROM events
+  WHERE event_time >= '2025-11-01' AND event_time < '2025-12-01'
+  GROUP BY day
+),
+monthly AS (
+  SELECT COUNT(DISTINCT user_id) AS mau
+  FROM events
+  WHERE event_time >= '2025-11-01' AND event_time < '2025-12-01'
+)
+SELECT ROUND(AVG(d.dau), 1) AS avg_dau,
+       m.mau,
+       ROUND(100.0 * AVG(d.dau) / m.mau, 1) AS stickiness_pct
+FROM daily d
+CROSS JOIN monthly m
+GROUP BY m.mau;`,
+    orderMatters: true,
+    hint: "Two numbers at two grains: DAU per day (then averaged) and one distinct count for the whole month. Build each in its own CTE and put them side by side.",
+    explain:
+      "You can't get MAU by adding up DAU: someone active on twenty days would be counted twenty times. Distinct counts don't add, which is why each window is counted on its own.",
+    art: "glue-phone",
+  },
+  {
+    id: "day-seven",
+    title: "Day Seven",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "Subquery", "Dates", "Conditional aggregation"],
+    prompt:
+      "Day-7 retention: of the people who signed up, what share did anything in the app exactly seven days after their signup date? Break it down by signup month.",
+    returns: "signup_month (two digits), signups, active_day_7, d7_pct (1 decimal) — month order. Four rows.",
+    tables: ["users", "events"],
+    expected: `WITH d7 AS (
+  SELECT u.user_id, u.signup_date,
+         EXISTS (
+           SELECT 1 FROM events e
+           WHERE e.user_id = u.user_id
+             AND date(e.event_time) = date(u.signup_date, '+7 days')
+         ) AS active
+  FROM users u
+)
+SELECT strftime('%m', signup_date) AS signup_month,
+       COUNT(*) AS signups,
+       SUM(active) AS active_day_7,
+       ROUND(100.0 * SUM(active) / COUNT(*), 1) AS d7_pct
+FROM d7
+GROUP BY signup_month
+ORDER BY signup_month;`,
+    orderMatters: true,
+    hint: "For each user, check whether any event falls on date(signup_date, '+7 days'). EXISTS gives 1 or 0; then group by signup month and sum it.",
+    explain:
+      "A JOIN to events would return one row per event that day and inflate the count; EXISTS asks only whether there's at least one. August's cohort retains worst: people who sign up before the season starts have less reason to come back a week later.",
+    art: "seven-calendar",
+  },
+  {
+    id: "the-funnel",
+    title: "The Funnel",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["Conditional aggregation", "CASE", "COUNT"],
+    prompt:
+      "The product lead wants the funnel on one line: how many different users signed up, joined a league, set a lineup and upgraded (event_name 'signup', 'join_league', 'set_lineup', 'upgrade').",
+    returns: "signed_up, joined_league, set_lineup, upgraded. One row.",
+    tables: ["events"],
+    expected: `SELECT COUNT(DISTINCT CASE WHEN event_name = 'signup' THEN user_id END) AS signed_up,
+       COUNT(DISTINCT CASE WHEN event_name = 'join_league' THEN user_id END) AS joined_league,
+       COUNT(DISTINCT CASE WHEN event_name = 'set_lineup' THEN user_id END) AS set_lineup,
+       COUNT(DISTINCT CASE WHEN event_name = 'upgrade' THEN user_id END) AS upgraded
+FROM events;`,
+    orderMatters: true,
+    hint: "A CASE inside COUNT(DISTINCT …) returns the user_id only for the event you want and NULL otherwise, and COUNT ignores NULLs.",
+    explain:
+      "This is a pivot: four counts that would be four rows from a GROUP BY become four columns, which is the shape a funnel chart wants. DISTINCT matters, because someone sets a lineup every week.",
+    art: "funnel-steps",
+  },
+  {
+    id: "empty-lineups",
+    title: "Empty Lineups",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["Anti-join", "Subquery", "NOT EXISTS"],
+    prompt:
+      "Some people join a league and then never set a lineup, which is the leak the product team most wants to fix. How many different users have a join_league event but no set_lineup event at all?",
+    returns: "joined_never_set. One row.",
+    tables: ["events"],
+    expected: `SELECT COUNT(DISTINCT j.user_id) AS joined_never_set
+FROM events j
+WHERE j.event_name = 'join_league'
+  AND NOT EXISTS (
+    SELECT 1 FROM events s
+    WHERE s.user_id = j.user_id AND s.event_name = 'set_lineup'
+  );`,
+    orderMatters: true,
+    hint: "Start from the join_league events and keep the users for whom NOT EXISTS finds a set_lineup event. Count distinct users, since a join can be logged twice.",
+    explain:
+      "\"Has A but never B\" is an anti-join. NOT EXISTS reads the way the question does, and unlike NOT IN it can't be broken by a NULL in the subquery.",
+    art: "empty-lineup",
+  },
+  {
+    id: "channel-check",
+    title: "Channel Check",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["LEFT JOIN", "GROUP BY", "COUNT"],
+    prompt:
+      "Benchwarmer pays for paid_social signups and wants to know if they're worth it. For each acquisition channel, how many users signed up and how many upgraded to Pro (a row in subscriptions)?",
+    returns: "channel, users, upgraded, upgrade_pct (1 decimal) — highest upgrade_pct first, then channel A–Z. Five rows.",
+    tables: ["users", "subscriptions"],
+    expected: `SELECT u.channel,
+       COUNT(*) AS users,
+       COUNT(s.user_id) AS upgraded,
+       ROUND(100.0 * COUNT(s.user_id) / COUNT(*), 1) AS upgrade_pct
+FROM users u
+LEFT JOIN subscriptions s ON s.user_id = u.user_id
+GROUP BY u.channel
+ORDER BY upgrade_pct DESC, u.channel;`,
+    orderMatters: true,
+    hint: "LEFT JOIN users to subscriptions so the people who never upgraded stay in. COUNT(*) counts everyone; COUNT(s.user_id) counts only the rows that matched.",
+    explain:
+      "An inner join would drop everyone who didn't upgrade and every channel would show 100%. COUNT(column) skipping NULLs is what turns a LEFT JOIN into a rate.",
+    art: "channel-signs",
+  },
+  {
+    id: "thirty-minute-rule",
+    title: "Thirty-Minute Rule",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["LAG", "Gaps and islands", "Dedup", "CTE"],
+    prompt:
+      "The log has events, not sessions. The usual rule: a new session starts with a user's first event, or with any event more than 30 minutes after their previous one. Remove exact duplicate rows first, then count the sessions and the events, and work out events per session.",
+    returns: "sessions, events, events_per_session (2 decimals). One row.",
+    tables: ["events"],
+    expected: `WITH clean AS (
+  SELECT DISTINCT user_id, event_time, event_name, platform
+  FROM events
+),
+gaps AS (
+  SELECT user_id, event_time,
+         LAG(event_time) OVER (PARTITION BY user_id ORDER BY event_time) AS prev_time
+  FROM clean
+)
+SELECT SUM(prev_time IS NULL OR (julianday(event_time) - julianday(prev_time)) * 24 * 60 > 30) AS sessions,
+       COUNT(*) AS events,
+       ROUND(1.0 * COUNT(*) / SUM(prev_time IS NULL OR (julianday(event_time) - julianday(prev_time)) * 24 * 60 > 30), 2) AS events_per_session
+FROM gaps;`,
+    orderMatters: true,
+    hint: "SELECT DISTINCT * removes the duplicates. LAG(event_time) OVER (PARTITION BY user_id ORDER BY event_time) gives each event the one before it; julianday differences are in days, so × 24 × 60 for minutes. Each event that starts a session counts 1.",
+    explain:
+      "Sessionising is gaps and islands on time: LAG finds the gaps, and every gap over the threshold starts a new island. Leave the duplicates in and every retried event looks like a zero-second gap, which inflates events per session.",
+    art: "stopwatch-thirty",
+  },
+  {
+    id: "first-move",
+    title: "First Move",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["ROW_NUMBER", "PARTITION BY", "CTE"],
+    prompt:
+      "Every user's log starts with signup. What do people do right after? Find each user's second event (by event_time) and count how many users made each one.",
+    returns: "event_name, users — most first, then event_name A–Z. Two rows.",
+    tables: ["events"],
+    expected: `WITH ranked AS (
+  SELECT user_id, event_name,
+         ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY event_time) AS n
+  FROM events
+)
+SELECT event_name, COUNT(*) AS users
+FROM ranked
+WHERE n = 2
+GROUP BY event_name
+ORDER BY users DESC, event_name;`,
+    orderMatters: true,
+    hint: "ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY event_time) numbers each user's events from 1. Keep n = 2 and count by event_name.",
+    explain:
+      "\"The Nth thing per group\" is ROW_NUMBER inside a CTE, filtered outside it: a window function can't go in WHERE directly, because WHERE runs before the windows are computed.",
+    art: "first-footprint",
+  },
+  {
+    id: "double-taps",
+    title: "Double Taps",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["Dedup", "DISTINCT", "Subquery"],
+    prompt:
+      "The app retries a request when the network blips, and sometimes the first one got through too, so a few events are logged twice: same user, same time, same event, same platform. How many rows are in events, how many are left once exact duplicates are removed, and how many duplicates is that?",
+    returns: "total_rows, distinct_rows, duplicates. One row.",
+    tables: ["events"],
+    expected: `SELECT COUNT(*) AS total_rows,
+       (SELECT COUNT(*) FROM (SELECT DISTINCT user_id, event_time, event_name, platform FROM events)) AS distinct_rows,
+       COUNT(*) - (SELECT COUNT(*) FROM (SELECT DISTINCT user_id, event_time, event_name, platform FROM events)) AS duplicates
+FROM events;`,
+    orderMatters: true,
+    hint: "SELECT DISTINCT over every column keeps one copy of each row. Count that in a subquery and compare it with COUNT(*).",
+    explain:
+      "Check for duplicates before trusting any count from a log. Distinct users are safe from them; event counts, revenue and averages are not.",
+    art: "double-tap",
+  },
+  {
+    id: "two-screens",
+    title: "Two Screens",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "JOIN", "COUNT", "DISTINCT"],
+    prompt:
+      "Some people sign up on their phone and also use the website. For each signup platform (users.platform), how many users are there, and how many have events on more than one platform?",
+    returns: "signup_platform, users, multi_platform — platform A–Z. Three rows.",
+    tables: ["users", "events"],
+    expected: `WITH per_user AS (
+  SELECT user_id, COUNT(DISTINCT platform) AS platforms
+  FROM events
+  GROUP BY user_id
+)
+SELECT u.platform AS signup_platform,
+       COUNT(*) AS users,
+       SUM(p.platforms > 1) AS multi_platform
+FROM users u
+JOIN per_user p ON p.user_id = u.user_id
+GROUP BY u.platform
+ORDER BY u.platform;`,
+    orderMatters: true,
+    hint: "First COUNT(DISTINCT platform) per user from events. Then join to users and sum the users whose count is over 1.",
+    explain:
+      "Two grains again: platforms per user first, then users per signup platform. Nobody who signed up on the web uses the phone apps here, which is the kind of thing that only shows up once you split it.",
+    art: "phone-laptop",
+  },
+  {
+    id: "time-to-join",
+    title: "Time to Join",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["Dates", "julianday", "CTE", "JOIN"],
+    prompt:
+      "How long does it take a new user to join their first league? For the users who joined one, take the date of their first join_league event, measure the days from their signup_date, and average it by acquisition channel.",
+    returns: "channel, joined, avg_days (2 decimals) — fastest first, then channel A–Z. Five rows.",
+    tables: ["users", "events"],
+    expected: `WITH first_join AS (
+  SELECT user_id, MIN(event_time) AS joined_at
+  FROM events
+  WHERE event_name = 'join_league'
+  GROUP BY user_id
+)
+SELECT u.channel,
+       COUNT(*) AS joined,
+       ROUND(AVG(julianday(date(j.joined_at)) - julianday(u.signup_date)), 2) AS avg_days
+FROM users u
+JOIN first_join j ON j.user_id = u.user_id
+GROUP BY u.channel
+ORDER BY avg_days, u.channel;`,
+    orderMatters: true,
+    hint: "MIN(event_time) per user gives the first join. julianday(date(...)) - julianday(signup_date) is the gap in whole days.",
+    explain:
+      "Compare dates with dates: signup_date has no time of day, so take date() of the timestamp first, or a 9pm join on the signup day counts as most of a day.",
+    art: "join-hourglass",
+  },
+  {
+    id: "recurring-revenue",
+    title: "Recurring Revenue",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "LEFT JOIN", "NULL", "COALESCE"],
+    prompt:
+      "Monthly recurring revenue (MRR) is what every active subscription pays per month. A subscription is active on a day if it started on or before that day and either hasn't ended (ended is NULL) or ended after it. Work out the subscribers and MRR on the last day of September, October, November and December 2025.",
+    returns: "month_end (YYYY-MM-DD), subscribers, mrr (2 decimals) — in date order. Four rows.",
+    tables: ["subscriptions"],
+    expected: `WITH months AS (
+  SELECT '2025-09-30' AS month_end
+  UNION ALL SELECT '2025-10-31'
+  UNION ALL SELECT '2025-11-30'
+  UNION ALL SELECT '2025-12-31'
+)
+SELECT m.month_end,
+       COUNT(s.user_id) AS subscribers,
+       ROUND(COALESCE(SUM(s.monthly_price), 0), 2) AS mrr
+FROM months m
+LEFT JOIN subscriptions s
+  ON s.started <= m.month_end
+ AND (s.ended IS NULL OR s.ended > m.month_end)
+GROUP BY m.month_end
+ORDER BY m.month_end;`,
+    orderMatters: true,
+    hint: "Make a little table of the four month-ends (UNION ALL works), then LEFT JOIN subscriptions with the active-on-that-day condition in ON, and sum monthly_price.",
+    explain:
+      "The condition lives in ON, not WHERE, so a month with no subscribers would still get a row of zeros. And Pro went from 4.99 to 5.99 for new subscribers on 1 October, so MRR has to add up what each row actually pays, not count times a price.",
+    art: "piggy-repeat",
+  },
+  {
+    id: "rolling-seven",
+    title: "Rolling Seven",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["Dates", "CTE", "JOIN", "Moving average"],
+    prompt:
+      "Daily actives jump around with the game schedule, so dashboards show a rolling 7-day count instead: for each day, the distinct users active on that day or the six before it. Work it out for 1 to 7 December 2025.",
+    returns: "day (YYYY-MM-DD), active_7d — in date order. Seven rows.",
+    tables: ["events"],
+    expected: `WITH days AS (
+  SELECT DISTINCT date(event_time) AS day
+  FROM events
+  WHERE date(event_time) BETWEEN '2025-12-01' AND '2025-12-07'
+)
+SELECT d.day, COUNT(DISTINCT e.user_id) AS active_7d
+FROM days d
+JOIN events e
+  ON date(e.event_time) BETWEEN date(d.day, '-6 days') AND d.day
+GROUP BY d.day
+ORDER BY d.day;`,
+    orderMatters: true,
+    hint: "List the seven days, then join each one to every event in its 7-day window (date(day, '-6 days') to day) and count distinct users per day.",
+    explain:
+      "A window frame (ROWS 6 PRECEDING) can roll up a sum, but not a distinct count: the same user active on Monday and Friday must count once. Joining each day to its window is how you get a rolling distinct.",
+    art: "rolling-wheel",
+  },
+  {
+    id: "kickoff-rush",
+    title: "Kickoff Rush",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["Dates", "strftime", "GROUP BY", "LIMIT"],
+    prompt:
+      "When do people set their lineups on a Sunday? Count the set_lineup events on Sundays (strftime('%w') is '0') by hour of the day, rows as logged, and find the three busiest hours.",
+    returns: "hour (two digits, '00' to '23'), lineups — most first, then hour. Three rows.",
+    tables: ["events"],
+    expected: `SELECT strftime('%H', event_time) AS hour, COUNT(*) AS lineups
+FROM events
+WHERE event_name = 'set_lineup' AND strftime('%w', event_time) = '0'
+GROUP BY hour
+ORDER BY lineups DESC, hour
+LIMIT 3;`,
+    orderMatters: true,
+    hint: "Two strftime calls: '%w' in WHERE to keep Sundays, '%H' to group by the hour.",
+    explain:
+      "strftime returns text, so compare it with '0', not 0. Noon is the rush before the early games kick off.",
+    art: "kickoff-clock",
+  },
+  {
+    id: "power-users",
+    title: "Power Users",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["HAVING", "Subquery", "Dates", "DISTINCT"],
+    prompt:
+      "Call someone a power user if they were active on at least 15 different days in November 2025. How many power users does Benchwarmer have?",
+    returns: "power_users. One row.",
+    tables: ["events"],
+    expected: `SELECT COUNT(*) AS power_users
+FROM (
+  SELECT user_id
+  FROM events
+  WHERE event_time >= '2025-11-01' AND event_time < '2025-12-01'
+  GROUP BY user_id
+  HAVING COUNT(DISTINCT date(event_time)) >= 15
+);`,
+    orderMatters: true,
+    hint: "Group November's events by user, keep users with HAVING COUNT(DISTINCT date(event_time)) >= 15, and count the users that are left in an outer query.",
+    explain:
+      "Active days, not events: COUNT(DISTINCT date(event_time)) counts each day once however much someone did on it. Counting the groups needs a second query around the first.",
+    art: "power-battery",
   },
 ];
 

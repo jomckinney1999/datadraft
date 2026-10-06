@@ -10,6 +10,9 @@
  *            classic interview schema, so the bank stops being one dataset.
  *   plays  — REAL nflverse play-by-play, every snap of the 2025 regular
  *            season (2026-10-05). Rows fetched by lib/plays-dataset.ts.
+ *   app    — Benchwarmer, an INVENTED fantasy football app's event log
+ *            (2026-10-05), for product analytics. Rows fetched by
+ *            lib/app-dataset.ts.
  */
 
 import type { TableProvenance } from "@/lib/data-source";
@@ -39,8 +42,15 @@ export const PLAYS_SCHEMA: { table: string; columns: string[] }[] = [
 ];
 export const PLAYS_TABLES = PLAYS_SCHEMA.map((t) => t.table);
 
+export const APP_SCHEMA: { table: string; columns: string[] }[] = [
+  { table: "users", columns: ["user_id", "signup_date", "platform", "channel"] },
+  { table: "events", columns: ["user_id", "event_time", "event_name", "platform"] },
+  { table: "subscriptions", columns: ["user_id", "plan", "started", "ended", "monthly_price"] },
+];
+export const APP_TABLES = APP_SCHEMA.map((t) => t.table);
+
 /** Schemas beyond the league, for the question bank's schema panel. */
-export const EXTRA_SCHEMA = [...SHOP_SCHEMA, ...PLAYS_SCHEMA];
+export const EXTRA_SCHEMA = [...SHOP_SCHEMA, ...PLAYS_SCHEMA, ...APP_SCHEMA];
 
 const INVENTED =
   "Invented. Gridiron Goods is a made-up online fan store, built so you can practise on a schema that isn't the league, the way a real screen hands you one.";
@@ -79,11 +89,44 @@ export const PLAYS_PROVENANCE: TableProvenance = {
   note: "Real. nflverse's play-by-play for the 2025 regular season: one row per pass, run, punt and field goal (kickoffs, extra points, kneels, spikes and two-point tries left out). posteam is the offense and defteam the defense; yardline_100 is yards from the opponent's end zone; score_differential is the offense's score minus the defense's before the snap; first_down includes touchdowns; names are written the way the play-by-play writes them (J.Goff). epa is nflverse's expected points model, an estimate rather than a recorded stat. game_id matches the games table.",
 };
 
+const APP_INVENTED =
+  "Invented. Benchwarmer is a made-up fantasy football app, built so you can practise the product-analytics questions screens ask (daily actives, retention, funnels, sessions, revenue).";
+
+export const APP_PROVENANCE: TableProvenance[] = [
+  {
+    table: "users",
+    kind: "invented",
+    label: "invented",
+    note: `${APP_INVENTED} One row per user who signed up between August and November 2025: the platform they signed up on (ios, android or web) and the channel that brought them (organic, paid_social, referral, search or podcast).`,
+  },
+  {
+    table: "events",
+    kind: "invented",
+    label: "invented",
+    note: `${APP_INVENTED} One row per thing a user did, through 2025-12-31: signup, app_open, join_league, view_player, set_lineup, send_message, claim_waiver, make_trade, upgrade, cancel. event_time is 'YYYY-MM-DD HH:MM:SS'. About 1% of rows are exact duplicates, the way a retrying app logs them.`,
+  },
+  {
+    table: "subscriptions",
+    kind: "invented",
+    label: "invented",
+    note: `${APP_INVENTED} One row per user who upgraded to Pro: when it started, when it ended (NULL while it's active), and the monthly price, which went from 4.99 to 5.99 for subscriptions started on or after 2025-10-01.`,
+  },
+];
+
 /** Every table beyond the league, with its label. */
-export const EXTRA_PROVENANCE: TableProvenance[] = [...SHOP_PROVENANCE, PLAYS_PROVENANCE];
+export const EXTRA_PROVENANCE: TableProvenance[] = [...SHOP_PROVENANCE, PLAYS_PROVENANCE, ...APP_PROVENANCE];
 
 /** The credit line under a store question's tables, in place of the nflverse one. */
 export const SHOP_CREDIT = "Invented data: Gridiron Goods is a made-up store";
+
+/** The credit line under an app question's tables. */
+export const APP_CREDIT = "Invented data: Benchwarmer is a made-up app";
+
+/** The app as CSVs (written by scripts/build-app-dataset.mjs). */
+export const APP_DOWNLOADS = APP_SCHEMA.map((t) => ({
+  file: `/data/practice-app/${t.table}.csv`,
+  label: `${t.table}.csv`,
+}));
 
 /** The store as CSVs (written by scripts/build-shop-dataset.mjs). */
 export const SHOP_DOWNLOADS = SHOP_SCHEMA.map((t) => ({
@@ -93,6 +136,26 @@ export const SHOP_DOWNLOADS = SHOP_SCHEMA.map((t) => ({
 
 export function usesShop(tables: string[]): boolean {
   return tables.some((t) => SHOP_TABLES.includes(t));
+}
+
+export function usesApp(tables: string[]): boolean {
+  return tables.some((t) => APP_TABLES.includes(t));
+}
+
+/**
+ * The credit under a question's tables when every table it uses is invented,
+ * or null when it touches real data (which is credited to nflverse).
+ */
+export function inventedCredit(tables: string[]): { text: string; href: string } | null {
+  if (tables.length === 0 || !tables.every((t) => SHOP_TABLES.includes(t) || APP_TABLES.includes(t))) return null;
+  return usesApp(tables)
+    ? { text: APP_CREDIT, href: "/data#practice-app" }
+    : { text: SHOP_CREDIT, href: "/data#practice-store" };
+}
+
+/** Rows that are fetched rather than bundled; a timed screen leaves these out. */
+export function needsDownload(tables: string[]): boolean {
+  return usesPlays(tables) || usesApp(tables);
 }
 
 /** A question on the play-by-play, which is fetched (~0.8 MB) only for it. */

@@ -62,7 +62,7 @@ import { Objective, SceneLine } from "@/components/scene-line";
 import AppNav from "@/components/app-nav";
 import { FaceCluster } from "@/components/qotd-card";
 import { featuredPlayers } from "@/lib/question-players";
-import { isLeagueOnly, SHOP_CREDIT, usesPlays, usesShop } from "@/lib/practice-schemas";
+import { inventedCredit, usesApp, usesPlays, usesShop } from "@/lib/practice-schemas";
 import Coach, { celebrationFor } from "@/components/coach";
 import ExcelGrid from "@/components/excel-grid";
 import DifficultyChip from "@/components/difficulty-chip";
@@ -256,14 +256,17 @@ export default function QuestionWorkspace({
         usesShop(question.tables) ? import("@/lib/practice-datasets") : null,
         // The 2025 play-by-play (~0.8 MB), likewise.
         usesPlays(question.tables) ? import("@/lib/plays-dataset") : null,
+        // Benchwarmer's event log (~170 KB), likewise.
+        usesApp(question.tables) ? import("@/lib/app-dataset") : null,
       ])
-        .then(async ([SQL, data, practice, plays]) => {
+        .then(async ([SQL, data, practice, plays, app]) => {
           if (cancelled) return;
           const made = new SQL.Database();
           made.run(data.buildSeedSql());
           if (practice) made.run(practice.buildShopSeedSql());
           if (plays) await plays.loadPlays(made);
-          // The page may have moved on while the plays downloaded.
+          if (app) await app.loadApp(made);
+          // The page may have moved on while the rows downloaded.
           if (cancelled) {
             made.close();
             return;
@@ -429,9 +432,8 @@ export default function QuestionWorkspace({
   );
 
   const tables = schemaFor(question);
-  // A store question credits the invented store, not nflverse.
-  const storeOnly =
-    usesShop(question.tables) && !question.tables.some((t) => isLeagueOnly([t]));
+  // A question on invented data credits that dataset, not nflverse.
+  const invented = inventedCredit(question.tables);
   const weight = LANG_WEIGHT[question.lang];
   // A friend's link from an earlier day still works; it just isn't today's.
   const challengeIsToday = !!challenge && isQotd && challenge.number === dailyNumber(day);
@@ -554,9 +556,9 @@ export default function QuestionWorkspace({
                   ))}
                 </div>
                 <p className="mt-3 border-t border-panel-border pt-2 font-mono text-[10px] text-ink-muted">
-                  {storeOnly ? SHOP_CREDIT : SHORT_CREDIT} ·{" "}
+                  {invented ? invented.text : SHORT_CREDIT} ·{" "}
                   <Link
-                    href={storeOnly ? "/data#practice-store" : "/data"}
+                    href={invented ? invented.href : "/data"}
                     className="text-turf hover:underline"
                   >
                     where this comes from

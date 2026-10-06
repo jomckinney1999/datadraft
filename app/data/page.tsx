@@ -10,7 +10,14 @@ import {
 } from "@/lib/data-source";
 import ThemeToggle from "@/components/theme-toggle";
 import AppNav from "@/components/app-nav";
-import { PLAYS_PROVENANCE, SHOP_DOWNLOADS, SHOP_PROVENANCE } from "@/lib/practice-schemas";
+import {
+  APP_DOWNLOADS,
+  APP_PROVENANCE,
+  PLAYS_PROVENANCE,
+  SHOP_DOWNLOADS,
+  SHOP_PROVENANCE,
+} from "@/lib/practice-schemas";
+import type { TableProvenance } from "@/lib/data-source";
 
 export const metadata: Metadata = {
   title: "Where the data comes from — DataDraft",
@@ -125,55 +132,21 @@ export default function DataPage() {
           </div>
         </section>
 
-        {/* ── the practice store ── */}
-        <section id="practice-store" className="mt-10 scroll-mt-20">
-          <h2 className="font-display text-xl font-bold text-ink">
-            The practice store (invented)
-          </h2>
-          <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-            Some questions in the bank use a second database: Gridiron Goods, an
-            online fan store we made up. Its customers, orders and sales are
-            invented, and every question on it says so. It exists because a real
-            SQL screen hands you a schema you have never seen, usually a shop,
-            and practising only on one league makes the first unfamiliar table
-            harder than it needs to be. It is generated from a fixed seed, so
-            every answer stays put, and it is messy on purpose: missing states,
-            cancelled and returned orders, and a price rise halfway through the
-            year.
-          </p>
-          <div className="mt-4 space-y-2">
-            {SHOP_PROVENANCE.map((t) => (
-              <div
-                key={t.table}
-                className="surface flex flex-col gap-1.5 border border-panel-border bg-panel/30 p-4 sm:flex-row sm:items-start sm:gap-4"
-              >
-                <div className="flex shrink-0 items-center gap-2">
-                  <span className="border border-ice/60 bg-ice/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-ice">
-                    {t.label}
-                  </span>
-                  <code className="font-mono text-[12px] text-ink">
-                    {t.table}
-                  </code>
-                </div>
-                <p className="text-[13px] leading-relaxed text-ink-soft">
-                  {t.note.replace(/^Invented\. Gridiron Goods[^.]*\.\s*/, "")}
-                </p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {SHOP_DOWNLOADS.map((d) => (
-              <a
-                key={d.file}
-                href={d.file}
-                download
-                className="border border-panel-border px-3 py-1.5 font-mono text-[11px] text-ice transition-colors hover:border-ice/50 hover:bg-panel/60"
-              >
-                {d.label} ↓
-              </a>
-            ))}
-          </div>
-        </section>
+        {/* ── the invented practice data ── */}
+        <InventedDataset
+          id="practice-store"
+          title="The practice store (invented)"
+          intro="Some questions in the bank use a second database: Gridiron Goods, an online fan store we made up. Its customers, orders and sales are invented, and every question on it says so. It exists because a real SQL screen hands you a schema you have never seen, usually a shop, and practising only on one league makes the first unfamiliar table harder than it needs to be. It is generated from a fixed seed, so every answer stays put, and it is messy on purpose: missing states, cancelled and returned orders, and a price rise halfway through the year."
+          tables={SHOP_PROVENANCE}
+          downloads={SHOP_DOWNLOADS}
+        />
+        <InventedDataset
+          id="practice-app"
+          title="The practice app (invented)"
+          intro="The product-analytics questions use Benchwarmer, a fantasy football app we made up: its users, everything they did in the app, and who paid for Pro. Daily actives, retention, funnels, sessions and recurring revenue are what analyst screens at app companies ask about, and no real app's event log could be published, so this one is invented and labelled that way. It is generated from a fixed seed and shaped like real product data: a draft-season signup rush, Sunday spikes, a funnel that leaks, and duplicate events from a retrying client."
+          tables={APP_PROVENANCE}
+          downloads={APP_DOWNLOADS}
+        />
 
         {/* ── downloads ── */}
         <section className="mt-10">
@@ -247,5 +220,57 @@ export default function DataPage() {
         </div>
       </main>
     </>
+  );
+}
+
+function InventedDataset({
+  id,
+  title,
+  intro,
+  tables,
+  downloads,
+}: {
+  id: string;
+  title: string;
+  intro: string;
+  tables: TableProvenance[];
+  downloads: { file: string; label: string }[];
+}) {
+  return (
+    <section id={id} className="mt-10 scroll-mt-20">
+      <h2 className="font-display text-xl font-bold text-ink">{title}</h2>
+      <p className="mt-2 text-sm leading-relaxed text-ink-soft">{intro}</p>
+      <div className="mt-4 space-y-2">
+        {tables.map((t) => (
+          <div
+            key={t.table}
+            className="surface flex flex-col gap-1.5 border border-panel-border bg-panel/30 p-4 sm:flex-row sm:items-start sm:gap-4"
+          >
+            <div className="flex shrink-0 items-center gap-2">
+              <span className="border border-ice/60 bg-ice/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-ice">
+                {t.label}
+              </span>
+              <code className="font-mono text-[12px] text-ink">{t.table}</code>
+            </div>
+            <p className="text-[13px] leading-relaxed text-ink-soft">
+              {/* The section already says it's invented; drop the repeat. */}
+              {t.note.replace(/^Invented\.[^.]*\.\s*(\([^)]*\)\.\s*)?/, "")}
+            </p>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {downloads.map((d) => (
+          <a
+            key={d.file}
+            href={d.file}
+            download
+            className="border border-panel-border px-3 py-1.5 font-mono text-[11px] text-ice transition-colors hover:border-ice/50 hover:bg-panel/60"
+          >
+            {d.label} ↓
+          </a>
+        ))}
+      </div>
+    </section>
   );
 }
