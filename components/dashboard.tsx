@@ -17,13 +17,12 @@
  * something else on it.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import Coach from "@/components/coach";
 import AppNav from "@/components/app-nav";
 import TeamLogo from "@/components/team-logo";
 import Headshot from "@/components/headshot";
-import CourseArt from "@/components/course-art";
 import { COURSES } from "@/lib/courses";
 // The lesson index, not the curriculum (~560 KB): the dashboard lists
 // lessons, it never plays one.
@@ -33,7 +32,7 @@ import { BADGES, isEarned, nextEnshrinement, statsFrom } from "@/lib/achievement
 import { SHORT_CREDIT } from "@/lib/data-source";
 import { weekCaveat, type LiveBoard, type LivePerformer, type LiveWeek } from "@/lib/live-nfl";
 import type { Question } from "@/lib/questions";
-import UseCases from "@/components/use-cases";
+import UseCases, { type UseCaseArts } from "@/components/use-cases";
 import { analystPath, currentStep, readPathInputs, type PathCatalog } from "@/lib/analyst-path";
 import QotdCard from "@/components/qotd-card";
 import DuelCard from "@/components/duel-card";
@@ -59,8 +58,14 @@ export default function Dashboard({
   day,
   questionCount,
   catalog,
+  arts,
 }: {
   live: LiveWeek | null;
+  /** Every drawing on the page, rendered on the server: the four drawing
+   * kits are ~100 kB of JavaScript, and the page shows a handful of scenes.
+   * `courses` is keyed by course id, since which ones show depends on your
+   * progress (2026-10-06). */
+  arts: { duel: ReactNode; useCases: UseCaseArts; courses: Record<string, ReactNode> };
   qotd: Question;
   day: string;
   /** Counted on the server, so the bank isn't bundled to print one number. */
@@ -195,7 +200,7 @@ export default function Dashboard({
           {hydrated && upNextLesson && upNext && (
             <div className="mt-5 flex gap-3 overflow-hidden rounded-xl border border-turf/40 bg-turf/5 p-3 sm:p-4">
               <span className="hidden h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-panel-border bg-night/50 sm:block">
-                <CourseArt id={upNext.id} className="h-full w-full" />
+                {arts.courses[upNext.id]}
               </span>
               <div className="min-w-0 flex-1">
                 <p className="font-mono text-[10px] uppercase tracking-widest text-turf">Up next · {upNext.title}</p>
@@ -245,13 +250,14 @@ export default function Dashboard({
           </h2>
           <div className="mt-3 space-y-3">
             <QotdCard question={qotd} done={qotdDone} streak={progress.qotdStreak} hydrated={hydrated} variant="compact" />
-            <DuelCard day={day} compact />
+            <DuelCard day={day} compact art={arts.duel} />
           </div>
         </section>
 
         {/* ── What you can do here ──────────────────────────── */}
         <div style={{ ["--i" as string]: 2 }}>
           <UseCases
+            arts={arts.useCases}
             className="mt-8"
             questionCount={questionCount}
             qotdId={qotd.id}
@@ -298,7 +304,7 @@ export default function Dashboard({
                     return (
                       <li key={c.id} className="flex items-center gap-3">
                         <span className="h-12 w-16 shrink-0 overflow-hidden rounded-lg border border-panel-border bg-night/50">
-                          <CourseArt id={c.id} className="h-full w-full" />
+                          {arts.courses[c.id]}
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="flex items-baseline justify-between gap-3">

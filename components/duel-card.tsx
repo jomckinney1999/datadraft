@@ -8,9 +8,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import QuestionArt from "@/components/question-art";
+import type { ReactNode } from "react";
 
-export default function DuelCard({ day, compact = false }: { day: string; compact?: boolean }) {
+/** `art` is the scale drawing, rendered by the page so this card doesn't import the whole drawing kit. */
+export default function DuelCard({ day, compact = false, art }: { day: string; compact?: boolean; art: ReactNode }) {
   const [result, setResult] = useState<string | null>(null);
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function DuelCard({ day, compact = false }: { day: string; compac
       className="lift surface group flex items-center gap-4 overflow-hidden rounded-2xl border border-panel-border bg-panel p-3 pr-5 transition-colors hover:border-gold/50"
     >
       <span className={`shrink-0 overflow-hidden rounded-xl border border-panel-border bg-night/60 ${compact ? "h-14 w-20" : "h-20 w-28"}`}>
-        <QuestionArt art="scale" className="h-full w-full" />
+        {art}
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex flex-wrap items-center gap-2">

@@ -14,10 +14,13 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import QuestionArt from "@/components/question-art";
-import CourseArt from "@/components/course-art";
-import ProjectArt from "@/components/project-art";
-import PrepArt from "@/components/prep-art";
+
+/**
+ * The four cards' drawings, rendered on the server and passed in
+ * (app/dashboard/page.tsx): importing the four drawing kits here shipped
+ * every course, project, prep and question scene to draw four (2026-10-06).
+ */
+export type UseCaseArts = Record<"practice" | "course" | "fantasy" | "interview", ReactNode>;
 
 type Tone = "gold" | "turf" | "ice";
 
@@ -50,7 +53,9 @@ export default function UseCases({
   course,
   path = null,
   className = "",
+  arts,
 }: {
+  arts: UseCaseArts;
   questionCount: number;
   /** Today's SQL question, for the practice card's side door. */
   qotdId: string;
@@ -72,7 +77,7 @@ export default function UseCases({
         { href: "/learn/rapid", label: "Rapid Fire" },
       ],
       tone: "gold",
-      art: <QuestionArt art="chalkboard" className="h-full w-full" />,
+      art: arts.practice,
     },
     {
       id: "course",
@@ -85,7 +90,7 @@ export default function UseCases({
         { href: "/field", label: "Practice Field" },
       ],
       tone: "turf",
-      art: <CourseArt id="sql-fundamentals" className="h-full w-full" />,
+      art: arts.course,
     },
     {
       id: "fantasy",
@@ -98,7 +103,7 @@ export default function UseCases({
         { href: "/questions/duel", label: "Stat Duel" },
       ],
       tone: "ice",
-      art: <ProjectArt id="my-league-scorecard" className="h-full w-full" />,
+      art: arts.fantasy,
     },
     {
       id: "interview",
@@ -116,7 +121,7 @@ export default function UseCases({
         { href: "/questions/mock", label: "Mock screens" },
       ],
       tone: "gold",
-      art: <PrepArt id="technical" className="h-full w-full" />,
+      art: arts.interview,
     },
   ];
 

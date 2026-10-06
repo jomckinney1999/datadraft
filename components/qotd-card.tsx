@@ -21,7 +21,7 @@ import { FaceCluster } from "@/components/face-cluster";
 import type { Question } from "@/lib/questions";
 import { DIFFICULTY_XP, LANG_LABEL } from "@/lib/question-meta";
 import { featuredPlayers } from "@/lib/question-players";
-import QuestionArt from "@/components/question-art";
+import type { ReactNode } from "react";
 import DifficultyChip from "@/components/difficulty-chip";
 import DailyCountdown from "@/components/daily-countdown";
 
@@ -50,8 +50,13 @@ export default function QotdCard({
   streak = 0,
   hydrated = false,
   variant = "hero",
+  art = null,
 }: {
   question: Question;
+  /** The hero's drawing, rendered by the caller: importing the drawing kit
+   * here put every scene on the dashboard, which shows the compact card
+   * with no drawing at all (2026-10-06). */
+  art?: ReactNode;
   done?: boolean;
   streak?: number;
   /** Progress has loaded — until then the streak and tick are withheld. */
@@ -112,7 +117,7 @@ export default function QotdCard({
 
   return (
     <section className="qotd-hero overflow-hidden rounded-3xl">
-      <QuestionArt art={question.art} className="qotd-hero-art" />
+      {art}
       <div className="qotd-sheen" aria-hidden />
 
       <div className="relative grid items-center gap-8 p-6 sm:grid-cols-5 sm:p-9">

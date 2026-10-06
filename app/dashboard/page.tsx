@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import Dashboard from "@/components/dashboard";
+import QuestionArt from "@/components/question-art";
+import CourseArt from "@/components/course-art";
+import ProjectArt from "@/components/project-art";
+import PrepArt from "@/components/prep-art";
+import { COURSES } from "@/lib/courses";
 import { getLiveWeek } from "@/lib/live-nfl";
 import { QUESTIONS, leagueDay, questionOfTheDay } from "@/lib/questions";
 import { pathCatalog } from "@/lib/analyst-path-catalog";
@@ -25,6 +30,22 @@ export default async function DashboardPage() {
   // so the server and the browser agree on what "today" is.
   const day = leagueDay();
   return (
-    <Dashboard live={live} qotd={questionOfTheDay(day)} day={day} questionCount={QUESTIONS.length} catalog={pathCatalog()} />
+    <Dashboard
+      live={live}
+      qotd={questionOfTheDay(day)}
+      day={day}
+      questionCount={QUESTIONS.length}
+      catalog={pathCatalog()}
+      arts={{
+        duel: <QuestionArt art="scale" className="h-full w-full" />,
+        useCases: {
+          practice: <QuestionArt art="chalkboard" className="h-full w-full" />,
+          course: <CourseArt id="sql-fundamentals" className="h-full w-full" />,
+          fantasy: <ProjectArt id="my-league-scorecard" className="h-full w-full" />,
+          interview: <PrepArt id="technical" className="h-full w-full" />,
+        },
+        courses: Object.fromEntries(COURSES.map((c) => [c.id, <CourseArt key={c.id} id={c.id} className="h-full w-full" />])),
+      }}
+    />
   );
 }

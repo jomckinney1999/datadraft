@@ -213,6 +213,7 @@ export default function QuestionBank({
             done={qotdDone}
             streak={progress.qotdStreak}
             hydrated={hydrated}
+            art={<QuestionArt art={qotd.art} className="qotd-hero-art" />}
           />
           <p className="mt-3 text-center font-mono text-[10px] leading-relaxed text-ink-muted">
             Every language has its own daily. Solve any one of them and the
@@ -222,7 +223,7 @@ export default function QuestionBank({
               row: the Draft Room and the other games are in the Questions
               menu, and two big cards here pushed the bank off the screen. */}
           <div className="mt-4">
-            <DuelCard day={day} compact />
+            <DuelCard day={day} compact art={<QuestionArt art="scale" className="h-full w-full" />} />
           </div>
         </div>
 
