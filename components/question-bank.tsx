@@ -55,6 +55,29 @@ type DiffFilter = "all" | QuestionDifficulty;
 
 const LANGS: QuestionLang[] = ["sql", "python", "r", "excel"];
 
+/**
+ * Which language's daily shows is decided before the first paint (2026-10-06).
+ * All four dailies are in the HTML and CSS shows the one named by
+ * html[data-qlang] (globals.css). This script sets it while the page parses:
+ * a deep link's language if there is one, otherwise the remembered filter.
+ * Before, the SQL daily painted first and a returning Python learner watched
+ * it swap after hydration, pushing the page down (a 0.1 layout shift on a
+ * phone, mostly the faces appearing above the text).
+ */
+function qlangScript(forced: string | null): string {
+  const pick = forced ? JSON.stringify(forced) : `localStorage.getItem(${JSON.stringify(LANG_KEY)})`;
+  return `(function(){try{var l=${pick};if(l)document.documentElement.setAttribute("data-qlang",l);}catch(e){}})();`;
+}
+
+/** Keep html[data-qlang] in step with the filter once React owns it. */
+function showDaily(lang: string) {
+  try {
+    document.documentElement.setAttribute("data-qlang", lang);
+  } catch {
+    /* no DOM */
+  }
+}
+
 const LANG_TINT: Record<QuestionLang, string> = {
   sql: "border-turf bg-turf/15 text-turf",
   python: "border-ice bg-ice/15 text-ice",
@@ -134,13 +157,21 @@ export default function QuestionBank({
       // A deep-linked pattern wins over the remembered language filter.
       if (seedPattern) {
         window.localStorage.setItem(LANG_KEY, "sql");
+        showDaily("sql");
       } else if (seedData && seedData !== "league") {
         /* a dataset deep link is SQL for this visit; leave the memory alone */
+        showDaily("sql");
       } else if (seedLang) {
         window.localStorage.setItem(LANG_KEY, seedLang);
+        showDaily(seedLang);
       } else {
         const saved = window.localStorage.getItem(LANG_KEY);
-        if (saved && LANG_VALUES.includes(saved)) setLang(saved as QuestionLang);
+        if (saved && LANG_VALUES.includes(saved)) {
+          setLang(saved as QuestionLang);
+          showDaily(saved);
+        } else {
+          showDaily("all");
+        }
       }
     } catch {
       /* storage blocked — the default is fine */
@@ -155,6 +186,7 @@ export default function QuestionBank({
 
   function pickLang(next: LangFilter) {
     setLang(next);
+    showDaily(next);
     try {
       if (next === "all") window.localStorage.removeItem(LANG_KEY);
       else window.localStorage.setItem(LANG_KEY, next);
@@ -171,8 +203,7 @@ export default function QuestionBank({
 
   // With no language chosen, the daily on show is the SQL one — it is the
   // language everything else here assumes, and the only one that costs
-  // nothing to start.
-  const qotd = dailies[lang === "all" ? "sql" : lang];
+  // nothing to start. Which one shows is CSS on html[data-qlang] (qlangScript).
 
   const shown = list.filter((q) => {
     if (patternIds && !patternIds.has(q.id)) return false;
@@ -208,13 +239,24 @@ export default function QuestionBank({
 
         {/* ── Question of the Day ─────────────────────────── */}
         <div className="mt-6">
-          <QotdCard
-            question={qotd}
-            done={qotdDone}
-            streak={progress.qotdStreak}
-            hydrated={hydrated}
-            art={<QuestionArt art={qotd.art} className="qotd-hero-art" />}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: qlangScript(
+                seedPattern || (seedData && seedData !== "league") ? "sql" : seedLang,
+              ),
+            }}
           />
+          {LANGS.map((l) => (
+            <div key={l} data-qotd-lang={l}>
+              <QotdCard
+                question={dailies[l]}
+                done={qotdDone}
+                streak={progress.qotdStreak}
+                hydrated={hydrated}
+                art={<QuestionArt art={dailies[l].art} className="qotd-hero-art" />}
+              />
+            </div>
+          ))}
           <p className="mt-3 text-center font-mono text-[10px] leading-relaxed text-ink-muted">
             Every language has its own daily. Solve any one of them and the
             streak survives.

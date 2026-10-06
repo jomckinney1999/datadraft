@@ -127,7 +127,10 @@ export default function QotdCard({
               {LANG_LABEL[question.lang]} question of the day
             </span>
             <DifficultyChip difficulty={question.difficulty} />
-            {hydrated && !done && <span className="live-dot">Live</span>}
+            {/* Rendered from the start and hidden until progress loads, so
+                its space is held: appearing after hydration it wrapped this
+                row on a phone and pushed the card down (2026-10-06). */}
+            {!done && <span className={`live-dot ${hydrated ? "" : "invisible"}`}>Live</span>}
             <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
               +{xp} XP
             </span>
@@ -144,12 +147,12 @@ export default function QotdCard({
             <Link href={href} className="press btn-gold text-sm">
               {done ? "Solve it again →" : "Attempt now →"}
             </Link>
-            {hydrated && (
-              <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-ink-muted">
-                <FlameIcon lit={streak > 0} />
-                {streak} day{streak === 1 ? "" : "s"} running
-              </span>
-            )}
+            <span
+              className={`inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-ink-muted ${hydrated ? "" : "invisible"}`}
+            >
+              <FlameIcon lit={streak > 0} />
+              {streak} day{streak === 1 ? "" : "s"} running
+            </span>
             <DailyCountdown className="font-mono text-[11px] uppercase tracking-wider text-ink-muted" />
             {hydrated && done && (
               <span className="font-mono text-[11px] uppercase tracking-wider text-turf">

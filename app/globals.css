@@ -4295,3 +4295,18 @@ html[data-gate-opened] .gate-pop {
     }
   }
 }
+
+/* The question bank's daily card: all four languages are rendered and the
+   one named by html[data-qlang] shows, set before first paint by an inline
+   script (components/question-bank.tsx). No attribute, or "all", is SQL. */
+[data-qotd-lang] {
+  display: none;
+}
+html:not([data-qlang]) [data-qotd-lang="sql"],
+html[data-qlang="all"] [data-qotd-lang="sql"],
+html[data-qlang="sql"] [data-qotd-lang="sql"],
+html[data-qlang="python"] [data-qotd-lang="python"],
+html[data-qlang="r"] [data-qotd-lang="r"],
+html[data-qlang="excel"] [data-qotd-lang="excel"] {
+  display: block;
+}
