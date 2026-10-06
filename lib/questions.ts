@@ -6095,6 +6095,147 @@ print(runs.max())`,
       "Jalen Hurts strung together eleven. Counting the breaks to label the runs is the gaps-and-islands trick, the same one SQL does with ROW_NUMBER differences.",
     art: "fire-chain",
   },
+  {
+    id: "r-ceiling",
+    title: "The Ceiling (R)",
+    difficulty: "medium",
+    lang: "r",
+    added: "2026-10-07",
+    tags: ["dplyr", "quantile", "group_by"],
+    prompt:
+      "A player's ceiling is a great game, not his single best one. Measure each position's ceiling as the 90th percentile of its 2024 games in weekly: the score only one game in ten beats.",
+    returns: "A data frame with position and p90 (rounded to one decimal), positions A–Z.",
+    tables: [],
+    setup: R_WEEKLY_SETUP,
+    starter: "# quantile() inside summarise, per position\n",
+    expected: `weekly %>%
+  group_by(position) %>%
+  summarise(p90 = round(quantile(points, 0.9), 1)) %>%
+  as.data.frame() %>%
+  print()`,
+    hint: "group_by(position), then summarise(p90 = quantile(points, 0.9)). Round inside summarise and print it as a data frame.",
+    explain:
+      "Quarterbacks and running backs sit around 32, tight ends near 21. R's default quantile (type 7) is the same interpolation as pandas and Postgres's percentile_cont, so all three give the same answer.",
+    art: "ceiling-line",
+  },
+  {
+    id: "r-head-to-head",
+    players: ["Patrick Mahomes", "Jalen Hurts"],
+    title: "Head to Head (R)",
+    difficulty: "medium",
+    lang: "r",
+    added: "2026-10-07",
+    tags: ["dplyr", "inner_join", "Self-join"],
+    prompt:
+      "In the 2024 weeks when both Patrick Mahomes and Jalen Hurts played, who outscored whom more often?",
+    returns: "Three lines with cat(): the weeks they both played, the weeks Mahomes scored more, and the weeks Hurts scored more.",
+    tables: [],
+    setup: R_WEEKLY_SETUP,
+    starter: "# put their weeks side by side\n",
+    expected: `mahomes <- weekly %>% filter(player == "Patrick Mahomes") %>% select(week, points)
+hurts <- weekly %>% filter(player == "Jalen Hurts") %>% select(week, points)
+both <- inner_join(mahomes, hurts, by = "week", suffix = c("_mahomes", "_hurts"))
+cat(nrow(both), sum(both$points_mahomes > both$points_hurts), sum(both$points_hurts > both$points_mahomes), sep = "\\n")`,
+    hint: "Filter weekly to each player and keep week and points, then inner_join by week with suffix = c(\"_mahomes\", \"_hurts\"). sum() of a comparison counts the TRUEs.",
+    explain:
+      "Fourteen shared weeks, Hurts ahead in eleven. The suffixes play the part of table aliases, and the inner join drops the weeks either one sat out.",
+    art: "two-helmets",
+  },
+  {
+    id: "r-new-season-high",
+    players: ["Ja'Marr Chase"],
+    title: "New Season High (R)",
+    difficulty: "medium",
+    lang: "r",
+    added: "2026-10-07",
+    tags: ["cummax", "Running max", "pull"],
+    prompt:
+      "Follow Ja'Marr Chase's 2024 game by game. How many times did he set a new season high? His first game counts, and after that a game counts when it beats every game before it.",
+    returns: "One number, printed with print().",
+    tables: [],
+    setup: R_WEEKLY_SETUP,
+    starter: "# Chase's points in week order, then cummax()\n",
+    expected: `s <- weekly %>% filter(player == "Ja'Marr Chase") %>% arrange(week) %>% pull(points)
+print(sum(s > c(-Inf, head(cummax(s), -1))))`,
+    hint: "cummax(s) is the best so far. Shift it one place (c(-Inf, head(cummax(s), -1))) to get the best before each game, then count the games that beat it.",
+    explain:
+      "Four: 12.2 to open, then 29.8, 41.3 and the 55.4 in week 10. Starting the shifted series at -Inf is what makes the first game count without a special case.",
+    art: "high-bar",
+  },
+  {
+    id: "r-hot-streak",
+    title: "Hot Streak (R)",
+    difficulty: "hard",
+    lang: "r",
+    added: "2026-10-07",
+    tags: ["rle", "dplyr", "Gaps and islands"],
+    prompt:
+      "Who put together the longest runs of 15-point games in 2024? Count games he played in a row, so a bye or a missed week doesn't break a run, and show each player's longest.",
+    returns: "A data frame with player and longest, longest first, then player A–Z, three rows.",
+    tables: [],
+    setup: R_WEEKLY_SETUP,
+    starter: "# rle() on points >= 15, per player\n",
+    expected: `weekly %>%
+  arrange(player, week) %>%
+  group_by(player) %>%
+  summarise(longest = {
+    runs <- rle(points >= 15)
+    max(c(0, runs$lengths[runs$values]))
+  }) %>%
+  arrange(desc(longest), player) %>%
+  head(3) %>%
+  as.data.frame() %>%
+  print()`,
+    hint: "rle(points >= 15) splits a player's games into runs of TRUE and FALSE. runs$lengths[runs$values] are the hot runs; take the max (with a 0 for a player who never had one).",
+    explain:
+      "Jalen Hurts strung together eleven, Lamar Jackson ten, Josh Allen nine. rle() is R's built-in for runs; in SQL the same question takes the gaps-and-islands trick.",
+    art: "fire-chain",
+  },
+  {
+    id: "r-top-two-games",
+    title: "Top Two Games (R)",
+    difficulty: "medium",
+    lang: "r",
+    added: "2026-10-07",
+    tags: ["dplyr", "slice_max", "group_by"],
+    prompt:
+      "For each position, what were the two best single games of 2024, and whose were they?",
+    returns: "A data frame with position, player, week and points: positions A–Z, best game first within each.",
+    tables: [],
+    setup: R_WEEKLY_SETUP,
+    starter: "# two best games per position\n",
+    expected: `weekly %>%
+  group_by(position) %>%
+  slice_max(points, n = 2) %>%
+  ungroup() %>%
+  select(position, player, week, points) %>%
+  as.data.frame() %>%
+  print()`,
+    hint: "group_by(position), then slice_max(points, n = 2) keeps the top two in each group. ungroup() and select the four columns.",
+    explain:
+      "Josh Allen holds both quarterback spots and Ja'Marr Chase both receiver spots. slice_max keeps ties by default (with_ties = TRUE), so a tie for second would return three rows: worth knowing before a report quietly grows a row.",
+    art: "two-podium",
+  },
+  {
+    id: "r-receiver-lines",
+    title: "Receiver Lines",
+    difficulty: "easy",
+    lang: "r",
+    added: "2026-10-07",
+    tags: ["sprintf", "cat", "arrange"],
+    prompt:
+      "The newsletter wants the five best wide receivers in df as lines it can paste, best season first, each like \"Ja'Marr Chase (CIN): 403.0 pts\".",
+    returns: "Five lines, printed with cat() one per line.",
+    tables: [],
+    setup: R_WEEKLY_SETUP,
+    starter: "# sprintf() one line per receiver\n",
+    expected: `wrs <- df %>% filter(position == "WR") %>% arrange(desc(points)) %>% head(5)
+cat(sprintf("%s (%s): %.1f pts", wrs$player, wrs$team, wrs$points), sep = "\\n")`,
+    hint: "filter to WR, arrange(desc(points)), head(5). sprintf() works on whole columns at once; %.1f keeps one decimal. cat(…, sep = \"\\n\") prints one per line.",
+    explain:
+      "sprintf is vectorised, so one call builds all five lines; %.1f is what keeps 403.0 from printing as 403. It's the same printf the SQL Waiver Headline question uses.",
+    art: "box-lines",
+  },
 ];
 
 export const QUESTION_COUNT = QUESTIONS.length;
