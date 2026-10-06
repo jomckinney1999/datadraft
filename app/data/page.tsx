@@ -10,6 +10,7 @@ import {
 } from "@/lib/data-source";
 import ThemeToggle from "@/components/theme-toggle";
 import AppNav from "@/components/app-nav";
+import { EXTRA_PROVENANCE, SHOP_DOWNLOADS } from "@/lib/practice-schemas";
 
 export const metadata: Metadata = {
   title: "Where the data comes from — DataDraft",
@@ -118,6 +119,56 @@ export default function DataPage() {
                   {t.note}
                 </p>
               </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── the practice store ── */}
+        <section id="practice-store" className="mt-10 scroll-mt-20">
+          <h2 className="font-display text-xl font-bold text-ink">
+            The practice store (invented)
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+            Some questions in the bank use a second database: Gridiron Goods, an
+            online fan store we made up. Its customers, orders and sales are
+            invented, and every question on it says so. It exists because a real
+            SQL screen hands you a schema you have never seen, usually a shop,
+            and practising only on one league makes the first unfamiliar table
+            harder than it needs to be. It is generated from a fixed seed, so
+            every answer stays put, and it is messy on purpose: missing states,
+            cancelled and returned orders, and a price rise halfway through the
+            year.
+          </p>
+          <div className="mt-4 space-y-2">
+            {EXTRA_PROVENANCE.map((t) => (
+              <div
+                key={t.table}
+                className="surface flex flex-col gap-1.5 border border-panel-border bg-panel/30 p-4 sm:flex-row sm:items-start sm:gap-4"
+              >
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="border border-ice/60 bg-ice/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-ice">
+                    {t.label}
+                  </span>
+                  <code className="font-mono text-[12px] text-ink">
+                    {t.table}
+                  </code>
+                </div>
+                <p className="text-[13px] leading-relaxed text-ink-soft">
+                  {t.note.replace(/^Invented\. Gridiron Goods[^.]*\.\s*/, "")}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {SHOP_DOWNLOADS.map((d) => (
+              <a
+                key={d.file}
+                href={d.file}
+                download
+                className="border border-panel-border px-3 py-1.5 font-mono text-[11px] text-ice transition-colors hover:border-ice/50 hover:bg-panel/60"
+              >
+                {d.label} ↓
+              </a>
             ))}
           </div>
         </section>

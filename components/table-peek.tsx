@@ -21,10 +21,12 @@
 import { useState } from "react";
 import type { QueryExecResult } from "sql.js";
 import { PROVENANCE } from "@/lib/data-source";
+import { EXTRA_PROVENANCE } from "@/lib/practice-schemas";
 import TeamChip, { isTeamColumn } from "@/components/team-chip";
 
-const PROV = new Map(PROVENANCE.map((p) => [p.table, p]));
-const NOTE = new Map(PROVENANCE.map((p) => [p.table, p.note]));
+const ALL = [...PROVENANCE, ...EXTRA_PROVENANCE];
+const PROV = new Map(ALL.map((p) => [p.table, p]));
+const NOTE = new Map(ALL.map((p) => [p.table, p.note]));
 
 export default function TablePeek({
   tables,

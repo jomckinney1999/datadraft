@@ -24,6 +24,7 @@
  */
 
 import type { Question } from "@/lib/questions";
+import { LEAGUE_TABLES } from "@/lib/practice-schemas";
 import {
   PLAYER_HEADSHOTS,
   type PlayerHeadshot,
@@ -105,6 +106,10 @@ function hashId(id: string): number {
 }
 
 export function featuredPlayers(q: Question, max = 3): FeaturedPlayer[] {
+  // 0. A question on a practice schema (the store) isn't about any player,
+  //    so it shows no faces rather than three that mean nothing.
+  if (q.tables.length > 0 && !q.tables.some((t) => LEAGUE_TABLES.includes(t))) return [];
+
   // 1. Named by the author.
   if (q.players && q.players.length > 0) {
     const picked = q.players

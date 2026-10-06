@@ -196,6 +196,22 @@ export const ART_TONE: Record<QuestionArt, Tone> = {
   crosshairs: "gold",
   "which-week": "ice",
   "not-on-sheet": "gold",
+  "shopping-bag": "turf",
+  "rush-cart": "ice",
+  "cash-register": "gold",
+  "shop-window": "ice",
+  basket: "gold",
+  "welcome-mat": "turf",
+  "return-box": "ice",
+  "price-tag": "gold",
+  coupon: "turf",
+  "wallet-crown": "gold",
+  "two-dates": "ice",
+  "blank-form": "turf",
+  "free-truck": "ice",
+  "heart-jersey": "gold",
+  "coin-steps": "turf",
+  "signup-hourglass": "ice",
 };
 
 // ── Scenes, one per title idea ───────────────────────────────────
@@ -4091,6 +4107,319 @@ function NotOnSheet() {
   );
 }
 
+// ── Gridiron Goods, the practice store (2026-10-05) ──────────────
+
+/** Best Sellers — a shopping bag with a #1 tag and a ball peeking out. */
+function ShoppingBag() {
+  return (
+    <g>
+      <Shadow y={134} rx={52} />
+      <Football x={94} y={46} rx={16} rot={-24} />
+      <path d="M58 52 H142 L150 130 H50 Z" fill={c("turf")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M78 52 V44 Q78 28 100 28 Q122 28 122 44 V52" fill="none" stroke={N} strokeWidth="4" />
+      <path d="M78 52 V44 Q78 28 100 28 Q122 28 122 44 V52" fill="none" stroke={c("gold-dim")} strokeWidth="2" />
+      <path d="M58 52 H142" stroke={N} strokeWidth="2.4" />
+      <path d={starPath(100, 92, 5, 18, 8, -90)} fill={c("gold")} stroke={N} strokeWidth="1.8" strokeLinejoin="round" />
+      <text x="100" y="97" textAnchor="middle" fontSize="12" fontWeight="900" fill={N} fontFamily={SANS}>
+        1
+      </text>
+    </g>
+  );
+}
+
+/** Rush Season — a loaded shopping cart at full speed. */
+function RushCart() {
+  return (
+    <g>
+      <Shadow y={136} rx={60} />
+      <path d="M8 74 H30 M4 88 H32 M12 102 H36" stroke={c("ink-muted")} strokeWidth="3" strokeLinecap="round" />
+      <rect x="66" y="42" width="30" height="24" rx="2" fill={c("gold-dim")} stroke={N} strokeWidth="2" />
+      <rect x="96" y="34" width="34" height="32" rx="2" fill={c("ice")} stroke={N} strokeWidth="2" />
+      <rect x="130" y="46" width="22" height="20" rx="2" fill={c("turf")} stroke={N} strokeWidth="2" />
+      <path d="M40 40 H54 L66 108 H158 L170 66 H58" fill="none" stroke={N} strokeWidth="5" strokeLinejoin="round" />
+      <path d="M40 40 H54 L66 108 H158 L170 66 H58" fill="none" stroke={c("ink-soft")} strokeWidth="2.6" strokeLinejoin="round" />
+      <path d="M62 80 H166 M64 94 H162" stroke={c("ink-soft")} strokeWidth="2" />
+      <circle cx="78" cy="124" r="8" fill={c("night")} stroke={N} strokeWidth="2" />
+      <circle cx="148" cy="124" r="8" fill={c("night")} stroke={N} strokeWidth="2" />
+    </g>
+  );
+}
+
+/** Where the Money Is — a cash register with the drawer out. */
+function CashRegister() {
+  return (
+    <g>
+      <Shadow y={136} rx={62} />
+      <rect x="62" y="22" width="76" height="26" rx="4" fill={c("night")} stroke={N} strokeWidth="2.2" />
+      <text x="100" y="41" textAnchor="middle" fontSize="15" fontWeight="900" fill={c("turf")} fontFamily={MONO}>
+        $$$
+      </text>
+      <path d="M44 56 H156 L162 108 H38 Z" fill={c("ink-soft")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      {[0, 1, 2].flatMap((r) =>
+        [0, 1, 2, 3].map((col) => (
+          <rect key={`${r}-${col}`} x={60 + col * 20} y={64 + r * 13} width="15" height="9" rx="2" fill={col === 3 ? c("gold") : c("ink")} stroke={N} strokeWidth="1.3" />
+        )),
+      )}
+      <path d="M30 108 H170 V128 H30 Z" fill={c("gold-dim")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <rect x="44" y="112" width="26" height="12" rx="2" fill={c("turf")} stroke={N} strokeWidth="1.6" />
+      <rect x="76" y="112" width="26" height="12" rx="2" fill={c("turf")} stroke={N} strokeWidth="1.6" />
+      <circle cx="122" cy="118" r="6" fill={c("gold")} stroke={N} strokeWidth="1.6" />
+      <circle cx="140" cy="118" r="6" fill={c("gold")} stroke={N} strokeWidth="1.6" />
+    </g>
+  );
+}
+
+/** Window Shoppers — a shop window with goods inside, and someone outside just looking. */
+function ShopWindow() {
+  return (
+    <g>
+      <Shadow y={136} rx={70} />
+      <rect x="20" y="30" width="122" height="100" rx="3" fill={c("night-100")} stroke={N} strokeWidth="2.4" />
+      <path d="M16 30 L28 14 H134 L146 30 Z" fill={c("ice")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M40 14 L36 30 M60 14 L58 30 M80 14 L80 30 M100 14 L102 30 M120 14 L124 30" stroke={N} strokeWidth="1.6" opacity="0.5" />
+      <rect x="30" y="42" width="102" height="62" rx="2" fill={c("ice", 0.18)} stroke={N} strokeWidth="2" />
+      <path d="M40 50 L58 92 M50 48 L70 92" stroke={c("ink")} strokeWidth="2" opacity="0.35" />
+      <rect x="44" y="76" width="22" height="22" rx="2" fill={c("turf")} stroke={N} strokeWidth="1.6" />
+      <Football x={92} y={88} rx={12} />
+      <rect x="110" y="70" width="14" height="28" rx="2" fill={c("gold")} stroke={N} strokeWidth="1.6" />
+      <circle cx="166" cy="70" r="13" fill={c("ink-soft")} stroke={N} strokeWidth="2.2" />
+      <path d="M144 130 Q144 92 166 90 Q188 92 188 130 Z" fill={c("ink-soft")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M150 60 L138 52 M150 66 L136 66" stroke={c("gold")} strokeWidth="2.4" strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** Basket Size — a shopping basket with a cap, a mug and a ball in it. */
+function Basket() {
+  return (
+    <g>
+      <Shadow y={134} rx={62} />
+      <path d="M62 72 Q62 30 100 30 Q138 30 138 72" fill="none" stroke={N} strokeWidth="6" />
+      <path d="M62 72 Q62 30 100 30 Q138 30 138 72" fill="none" stroke={c("gold-dim")} strokeWidth="3" />
+      <Football x={78} y={66} rx={15} rot={-20} />
+      <rect x="96" y="54" width="20" height="24" rx="3" fill={c("ice")} stroke={N} strokeWidth="1.8" />
+      <path d="M116 60 Q126 60 126 68 Q126 76 116 76" fill="none" stroke={N} strokeWidth="2" />
+      <path d="M124 72 Q134 52 150 62 L148 74 Z" fill={c("turf")} stroke={N} strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M40 74 H160 L148 128 H52 Z" fill={c("gold")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M46 92 H154 M50 110 H150 M76 74 L80 128 M100 74 V128 M124 74 L120 128" stroke={N} strokeWidth="1.6" opacity="0.5" />
+    </g>
+  );
+}
+
+/** Come Back Soon — an open door and a mat that says welcome back. */
+function WelcomeMat() {
+  return (
+    <g>
+      <Shadow y={136} rx={70} />
+      <rect x="66" y="14" width="68" height="100" rx="3" fill={c("night-100")} stroke={N} strokeWidth="2.4" />
+      <path d="M66 14 L44 24 V122 L66 114 Z" fill={c("ice")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <circle cx="52" cy="70" r="2.6" fill={N} />
+      <path d="M34 116 H166 L176 134 H24 Z" fill={c("turf")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <text x="100" y="130" textAnchor="middle" fontSize="10" fontWeight="900" fill={N} fontFamily={MONO}>
+        WELCOME BACK
+      </text>
+      <path d="M150 50 Q166 40 160 26 M154 30 L160 24 L166 30" fill="none" stroke={c("gold")} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** Return to Sender — a parcel with a big return arrow curling back. */
+function ReturnBox() {
+  return (
+    <g>
+      <Shadow y={134} rx={58} />
+      <path d="M50 64 L100 48 L150 64 V118 L100 134 L50 118 Z" fill={c("gold-dim")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M50 64 L100 80 L150 64 M100 80 V134" fill="none" stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M74 56 L124 72" stroke={c("ink-soft")} strokeWidth="6" />
+      <rect x="110" y="92" width="28" height="18" rx="2" fill={c("ink")} stroke={N} strokeWidth="1.6" transform="rotate(-18 124 101)" />
+      <path d="M150 40 Q150 14 116 14 Q86 14 82 34" fill="none" stroke={N} strokeWidth="7" strokeLinecap="round" />
+      <path d="M150 40 Q150 14 116 14 Q86 14 82 34" fill="none" stroke={c("ice")} strokeWidth="4" strokeLinecap="round" />
+      <path d="M72 28 L82 40 L92 28" fill="none" stroke={c("ice")} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** Price Tag Trap — a jersey's tag with the old price crossed out under the new one. */
+function PriceTag() {
+  return (
+    <g>
+      <Shadow y={132} rx={64} />
+      <g transform="rotate(-12 100 80)">
+        <path d="M40 50 H140 L166 80 L140 110 H40 Z" fill={c("ink")} stroke={N} strokeWidth="2.6" strokeLinejoin="round" />
+        <circle cx="146" cy="80" r="6" fill={c("night-100")} stroke={N} strokeWidth="2" />
+        <text x="90" y="74" textAnchor="middle" fontSize="15" fontWeight="900" fill={c("ink-muted")} fontFamily={MONO}>
+          $109.99
+        </text>
+        <path d="M56 70 H124" stroke={c("gold")} strokeWidth="3" strokeLinecap="round" />
+        <text x="90" y="100" textAnchor="middle" fontSize="18" fontWeight="900" fill={c("turf-dim")} fontFamily={MONO}>
+          $119.99
+        </text>
+      </g>
+      <path d="M166 80 Q186 60 178 34" fill="none" stroke={c("ink-muted")} strokeWidth="2" />
+      <path d={starPath(30, 40, 4, 10, 4, 0)} fill={c("gold")} stroke={N} strokeWidth="1.4" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** Promo Codes — a coupon with a dashed edge and scissors cutting it out. */
+function Coupon() {
+  return (
+    <g>
+      <Shadow y={132} rx={68} />
+      <rect x="28" y="46" width="128" height="72" rx="6" fill={c("gold")} stroke={N} strokeWidth="2.4" />
+      <rect x="36" y="54" width="112" height="56" rx="4" fill="none" stroke={N} strokeWidth="1.8" strokeDasharray="5 4" />
+      <text x="92" y="84" textAnchor="middle" fontSize="20" fontWeight="900" fill={N} fontFamily={SANS}>
+        10% OFF
+      </text>
+      <text x="92" y="102" textAnchor="middle" fontSize="9" fontWeight="900" fill={N} fontFamily={MONO}>
+        CODE
+      </text>
+      <g transform="rotate(-30 166 46)">
+        <path d="M150 46 L184 40 M150 46 L184 52" stroke={N} strokeWidth="3.4" strokeLinecap="round" />
+        <circle cx="144" cy="38" r="7" fill="none" stroke={c("ice")} strokeWidth="3.4" />
+        <circle cx="144" cy="54" r="7" fill="none" stroke={c("ice")} strokeWidth="3.4" />
+      </g>
+    </g>
+  );
+}
+
+/** Big Spenders — a fat wallet wearing a crown. */
+function WalletCrown() {
+  return (
+    <g>
+      <Shadow y={134} rx={62} />
+      <rect x="54" y="62" width="92" height="20" rx="3" fill={c("turf")} stroke={N} strokeWidth="2" transform="rotate(-6 100 72)" />
+      <rect x="40" y="70" width="120" height="62" rx="10" fill={c("gold-dim")} stroke={N} strokeWidth="2.4" />
+      <path d="M118 88 H164 V114 H118 Q110 114 110 101 Q110 88 118 88 Z" fill={c("gold")} stroke={N} strokeWidth="2.2" />
+      <circle cx="124" cy="101" r="4" fill={N} />
+      <path d="M72 58 L76 30 L90 44 L100 24 L110 44 L124 30 L128 58 Z" fill={c("gold")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <circle cx="100" cy="24" r="3.4" fill={c("ice")} stroke={N} strokeWidth="1.4" />
+    </g>
+  );
+}
+
+/** Second Visit — a calendar with two days circled and an arrow between them. */
+function TwoDates() {
+  return (
+    <g>
+      <Shadow y={136} rx={62} />
+      <rect x="40" y="28" width="120" height="102" rx="6" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <rect x="40" y="28" width="120" height="20" rx="6" fill={c("turf")} stroke={N} strokeWidth="2" />
+      <path d="M62 22 V36 M138 22 V36" stroke={N} strokeWidth="4" strokeLinecap="round" />
+      {Array.from({ length: 20 }, (_, i) => (
+        <rect key={i} x={50 + (i % 5) * 21} y={56 + Math.floor(i / 5) * 17} width="16" height="12" rx="2" fill={c("ink-soft")} opacity="0.5" />
+      ))}
+      <circle cx="79" cy="79" r="11" fill="none" stroke={c("gold")} strokeWidth="3" />
+      <circle cx="142" cy="113" r="11" fill="none" stroke={c("ice")} strokeWidth="3" />
+      <path d="M88 86 Q118 90 132 106" fill="none" stroke={N} strokeWidth="4.5" strokeLinecap="round" />
+      <path d="M88 86 Q118 90 132 106" fill="none" stroke={c("gold")} strokeWidth="2.4" strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** Blank Fields — a sign-up form with two fields left empty. */
+function BlankForm() {
+  return (
+    <g>
+      <Shadow y={136} rx={52} />
+      <rect x="52" y="16" width="96" height="116" rx="5" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      {[0, 1, 2, 3].map((i) => (
+        <g key={i}>
+          <rect x="62" y={28 + i * 25} width="32" height="5" rx="2" fill={c("ink-muted")} />
+          <rect
+            x="62"
+            y={36 + i * 25}
+            width="76"
+            height="11"
+            rx="2"
+            fill={i === 1 || i === 3 ? "none" : c("ink-soft")}
+            stroke={i === 1 || i === 3 ? c("gold") : N}
+            strokeWidth={i === 1 || i === 3 ? 2 : 1.2}
+            strokeDasharray={i === 1 || i === 3 ? "4 3" : undefined}
+          />
+        </g>
+      ))}
+      <text x="160" y="72" fontSize="22" fontWeight="900" fill={c("gold")} fontFamily={SANS}>
+        ?
+      </text>
+      <text x="160" y="122" fontSize="22" fontWeight="900" fill={c("gold")} fontFamily={SANS}>
+        ?
+      </text>
+    </g>
+  );
+}
+
+/** Free Shipping — a delivery truck with a FREE sign on its side. */
+function FreeTruck() {
+  return (
+    <g>
+      <Shadow y={132} rx={72} />
+      <rect x="24" y="52" width="100" height="58" rx="4" fill={c("ink")} stroke={N} strokeWidth="2.4" />
+      <path d="M124 70 H152 L170 90 V110 H124 Z" fill={c("ice")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M132 76 H150 L160 88 H132 Z" fill={c("night-100")} stroke={N} strokeWidth="1.8" strokeLinejoin="round" />
+      <rect x="38" y="64" width="72" height="30" rx="4" fill={c("turf")} stroke={N} strokeWidth="2" />
+      <text x="74" y="85" textAnchor="middle" fontSize="18" fontWeight="900" fill={N} fontFamily={SANS}>
+        FREE
+      </text>
+      <circle cx="54" cy="114" r="11" fill={c("night")} stroke={N} strokeWidth="2.2" />
+      <circle cx="146" cy="114" r="11" fill={c("night")} stroke={N} strokeWidth="2.2" />
+      <path d="M6 70 H18 M2 84 H18 M8 98 H18" stroke={c("ink-muted")} strokeWidth="2.6" strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** Home Team Loyalty — a jersey with a heart on it. */
+function HeartJersey() {
+  return (
+    <g>
+      <Shadow y={136} rx={56} />
+      <path d="M74 24 L54 32 L30 56 L46 74 L60 62 V130 H140 V62 L154 74 L170 56 L146 32 L126 24 Q118 38 100 38 Q82 38 74 24 Z" fill={c("ice")} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M74 24 Q86 32 100 32 Q114 32 126 24" fill="none" stroke={N} strokeWidth="2" />
+      <path d="M100 112 C70 92 72 70 88 70 Q96 70 100 80 Q104 70 112 70 C128 70 130 92 100 112 Z" fill={c("gold")} stroke={N} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M60 116 H140" stroke={N} strokeWidth="1.6" opacity="0.4" />
+    </g>
+  );
+}
+
+/** Running Revenue — stacks of coins climbing like stairs, an arrow up the top. */
+function CoinSteps() {
+  const stack = (x: number, n: number) =>
+    Array.from({ length: n }, (_, i) => (
+      <ellipse key={`${x}-${i}`} cx={x} cy={124 - i * 9} rx="15" ry="5" fill={c("gold")} stroke={N} strokeWidth="1.8" />
+    ));
+  return (
+    <g>
+      <Shadow y={132} rx={74} />
+      {stack(40, 2)}
+      {stack(74, 4)}
+      {stack(108, 7)}
+      {stack(142, 10)}
+      <path d="M36 104 L72 86 L106 60 L140 32" fill="none" stroke={N} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M36 104 L72 86 L106 60 L140 32" fill="none" stroke={c("turf")} strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M130 30 L142 30 L140 42" fill="none" stroke={c("turf")} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** Signup to Sale — a sign-up card, an hourglass, and a cart on the far side. */
+function SignupHourglass() {
+  return (
+    <g>
+      <Shadow y={134} rx={78} />
+      <rect x="14" y="52" width="44" height="58" rx="4" fill={c("ink")} stroke={N} strokeWidth="2.2" />
+      <path d="M22 64 H50 M22 74 H44 M22 84 H50" stroke={N} strokeWidth="2" opacity="0.5" />
+      <rect x="22" y="94" width="28" height="10" rx="3" fill={c("turf")} stroke={N} strokeWidth="1.6" />
+      <path d="M82 36 H118 M82 128 H118" stroke={N} strokeWidth="5" strokeLinecap="round" />
+      <path d="M86 38 Q86 70 100 82 Q86 94 86 126 H114 Q114 94 100 82 Q114 70 114 38 Z" fill={c("ice", 0.25)} stroke={N} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M92 52 H108 L100 76 Z M90 124 Q100 106 110 124 Z" fill={c("gold")} />
+      <path d="M142 64 H150 L156 102 H186 L192 76 H152" fill="none" stroke={N} strokeWidth="3.6" strokeLinejoin="round" />
+      <path d="M142 64 H150 L156 102 H186 L192 76 H152" fill="none" stroke={c("ink-soft")} strokeWidth="1.8" strokeLinejoin="round" />
+      <circle cx="160" cy="112" r="5" fill={c("night")} stroke={N} strokeWidth="1.8" />
+      <circle cx="182" cy="112" r="5" fill={c("night")} stroke={N} strokeWidth="1.8" />
+    </g>
+  );
+}
+
 const SCENES: Record<QuestionArt, () => JSX.Element> = {
   hammer: Hammer,
   quarterback: Quarterback,
@@ -4240,6 +4569,22 @@ const SCENES: Record<QuestionArt, () => JSX.Element> = {
   crosshairs: Crosshairs,
   "which-week": WhichWeek,
   "not-on-sheet": NotOnSheet,
+  "shopping-bag": ShoppingBag,
+  "rush-cart": RushCart,
+  "cash-register": CashRegister,
+  "shop-window": ShopWindow,
+  basket: Basket,
+  "welcome-mat": WelcomeMat,
+  "return-box": ReturnBox,
+  "price-tag": PriceTag,
+  coupon: Coupon,
+  "wallet-crown": WalletCrown,
+  "two-dates": TwoDates,
+  "blank-form": BlankForm,
+  "free-truck": FreeTruck,
+  "heart-jersey": HeartJersey,
+  "coin-steps": CoinSteps,
+  "signup-hourglass": SignupHourglass,
 };
 
 export default function QuestionArt({

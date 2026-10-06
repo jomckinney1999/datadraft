@@ -80,7 +80,8 @@ export const SEASON_SPAN = `${FIRST} through week ${LATEST.week} of ${LATEST.sea
  */
 export type TableProvenance = {
   table: string;
-  kind: "real" | "drafted";
+  /** `invented`: the practice schemas in lib/practice-datasets.ts, made up and labelled so. */
+  kind: "real" | "drafted" | "invented";
   /** The chip text: a word or two. */
   label: string;
   note: string;

@@ -61,6 +61,10 @@ async function runPython(code) {
 const SQL = await initSqlJs();
 const db = new SQL.Database();
 db.run(data.buildSeedSql());
+// The practice store (lib/practice-datasets.ts): question keys on it run
+// here; lesson keys never name its tables, so it changes nothing for them.
+db.run((await loadProjectTs(path.join(root, "lib/practice-datasets.ts"), root)).buildShopSeedSql());
+const practiceSchemas = await loadProjectTs(path.join(root, "lib/practice-schemas.ts"), root);
 
 const problems = [];
 let checked = 0;
@@ -380,7 +384,7 @@ ${q.expected}`);
   }
 
   for (const t of q.tables) {
-    if (!data.SCHEMA.some((s) => s.table === t)) {
+    if (![...data.SCHEMA, ...practiceSchemas.EXTRA_SCHEMA].some((s) => s.table === t)) {
       problems.push(`${label} names table "${t}", which is not in the seeded schema`);
     }
   }

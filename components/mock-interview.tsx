@@ -79,10 +79,13 @@ export function useLessonDb(): Database | null {
     Promise.all([
       import("sql.js").then((m) => m.default({ locateFile: () => "/sql-wasm.wasm" })),
       import("@/lib/fantasy-data"),
-    ]).then(([SQL, data]) => {
+      // Screens draw from the whole bank, so the practice store comes too.
+      import("@/lib/practice-datasets"),
+    ]).then(([SQL, data, practice]) => {
       if (cancelled) return;
       made = new SQL.Database();
       made.run(data.buildSeedSql());
+      made.run(practice.buildShopSeedSql());
       setDb(made);
     });
     return () => {

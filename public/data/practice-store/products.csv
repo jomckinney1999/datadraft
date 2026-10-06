@@ -1,0 +1,33 @@
+product_id,name,category,team,price
+1,KC home jersey,jersey,KC,119.99
+2,KC hoodie,apparel,KC,64.99
+3,KC cap,headwear,KC,29.99
+4,BUF home jersey,jersey,BUF,119.99
+5,BUF hoodie,apparel,BUF,64.99
+6,BUF cap,headwear,BUF,29.99
+7,PHI home jersey,jersey,PHI,119.99
+8,PHI hoodie,apparel,PHI,64.99
+9,PHI cap,headwear,PHI,29.99
+10,DET home jersey,jersey,DET,119.99
+11,DET hoodie,apparel,DET,64.99
+12,DET cap,headwear,DET,29.99
+13,SF home jersey,jersey,SF,119.99
+14,SF hoodie,apparel,SF,64.99
+15,SF cap,headwear,SF,29.99
+16,BAL home jersey,jersey,BAL,119.99
+17,BAL hoodie,apparel,BAL,64.99
+18,BAL cap,headwear,BAL,29.99
+19,DAL home jersey,jersey,DAL,119.99
+20,DAL hoodie,apparel,DAL,64.99
+21,DAL cap,headwear,DAL,29.99
+22,GB home jersey,jersey,GB,119.99
+23,GB hoodie,apparel,GB,64.99
+24,GB cap,headwear,GB,29.99
+25,League champion mug,drinkware,,16.99
+26,Draft night poster,decor,,19.99
+27,"League trophy, small",trophies,,39.99
+28,"League trophy, large",trophies,,89.99
+29,"Gift card, $25",gift_card,,25
+30,"Gift card, $50",gift_card,,50
+31,Sideline beanie,headwear,,24.99
+32,Rain poncho,accessories,,9.99

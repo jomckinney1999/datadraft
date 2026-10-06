@@ -62,6 +62,7 @@ import { Objective, SceneLine } from "@/components/scene-line";
 import AppNav from "@/components/app-nav";
 import { FaceCluster } from "@/components/qotd-card";
 import { featuredPlayers } from "@/lib/question-players";
+import { isLeagueOnly, SHOP_CREDIT, usesShop } from "@/lib/practice-schemas";
 import Coach, { celebrationFor } from "@/components/coach";
 import ExcelGrid from "@/components/excel-grid";
 import DifficultyChip from "@/components/difficulty-chip";
@@ -251,11 +252,14 @@ export default function QuestionWorkspace({
           m.default({ locateFile: () => "/sql-wasm.wasm" }),
         ),
         import("@/lib/fantasy-data"),
+        // The practice store, only for a question that uses it.
+        usesShop(question.tables) ? import("@/lib/practice-datasets") : null,
       ])
-        .then(([SQL, data]) => {
+        .then(([SQL, data, practice]) => {
           if (cancelled) return;
           db = new SQL.Database();
           db.run(data.buildSeedSql());
+          if (practice) db.run(practice.buildShopSeedSql());
           dbRef.current = db;
           setReady(true);
         })
@@ -416,6 +420,9 @@ export default function QuestionWorkspace({
   );
 
   const tables = schemaFor(question);
+  // A store question credits the invented store, not nflverse.
+  const storeOnly =
+    usesShop(question.tables) && !question.tables.some((t) => isLeagueOnly([t]));
   const weight = LANG_WEIGHT[question.lang];
   // A friend's link from an earlier day still works; it just isn't today's.
   const challengeIsToday = !!challenge && isQotd && challenge.number === dailyNumber(day);
@@ -538,8 +545,11 @@ export default function QuestionWorkspace({
                   ))}
                 </div>
                 <p className="mt-3 border-t border-panel-border pt-2 font-mono text-[10px] text-ink-muted">
-                  {SHORT_CREDIT} ·{" "}
-                  <Link href="/data" className="text-turf hover:underline">
+                  {storeOnly ? SHOP_CREDIT : SHORT_CREDIT} ·{" "}
+                  <Link
+                    href={storeOnly ? "/data#practice-store" : "/data"}
+                    className="text-turf hover:underline"
+                  >
                     where this comes from
                   </Link>
                 </p>

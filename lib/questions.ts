@@ -41,6 +41,7 @@
 import { SCHEMA } from "@/lib/fantasy-data";
 import { FACTS } from "@/lib/lesson-facts.generated";
 import { WEEKLY_2024 } from "@/lib/question-frames.generated";
+import { EXTRA_SCHEMA, isLeagueOnly } from "@/lib/practice-schemas";
 
 export type QuestionDifficulty = "easy" | "medium" | "hard";
 
@@ -206,7 +207,23 @@ export type QuestionArt =
   | "twenty-cells"
   | "crosshairs"
   | "which-week"
-  | "not-on-sheet";
+  | "not-on-sheet"
+  | "shopping-bag"
+  | "rush-cart"
+  | "cash-register"
+  | "shop-window"
+  | "basket"
+  | "welcome-mat"
+  | "return-box"
+  | "price-tag"
+  | "coupon"
+  | "wallet-crown"
+  | "two-dates"
+  | "blank-form"
+  | "free-truck"
+  | "heart-jersey"
+  | "coin-steps"
+  | "signup-hourglass";
 
 export type Question = {
   id: string;
@@ -4034,6 +4051,426 @@ ORDER BY empty_weeks DESC, r.team_name;`,
       "You can't count missing rows directly, so you build every row that should exist and LEFT JOIN what does. Whatever comes back NULL is what's missing. It's the same move as a calendar of every day with the sales filled in.",
     art: "empty-seats",
   },
+  // ── Gridiron Goods: a schema that isn't the league (added 2026-10-05) ──
+  //
+  // An INVENTED online fan store (lib/practice-schemas.ts), because a real
+  // screen hands you tables you've never seen. Revenue counts delivered and
+  // shipped orders; a cancelled order never shipped. unit_price is what was
+  // charged that day, and jerseys went up on 2025-08-01.
+  {
+    id: "best-sellers",
+    title: "Best Sellers",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["JOIN", "GROUP BY", "SUM", "LIMIT"],
+    prompt:
+      "You've just joined Gridiron Goods, an online fan store, and the first thing the buyer asks is what actually sells. Find the five products that sold the most units, not counting cancelled orders.",
+    returns: "name, units — most units first, then name A–Z. Five rows.",
+    tables: ["order_items", "orders", "products"],
+    expected: `SELECT p.name, SUM(oi.quantity) AS units
+FROM order_items oi
+JOIN orders o ON o.order_id = oi.order_id
+JOIN products p ON p.product_id = oi.product_id
+WHERE o.status <> 'cancelled'
+GROUP BY p.product_id, p.name
+ORDER BY units DESC, p.name
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "Units live on order_items (quantity), names on products, and status on orders. Join all three, drop the cancelled ones, then SUM the quantity per product.",
+    explain:
+      "A new schema starts with one question: what is one row? Here an order_items row is one product on one order, so units are SUM(quantity), not COUNT(*): an order of two caps is one row and two units.",
+    art: "shopping-bag",
+  },
+  {
+    id: "rush-season",
+    title: "Rush Season",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["Dates", "strftime", "GROUP BY"],
+    prompt:
+      "The warehouse wants to know when to hire extra help. Using every order Gridiron Goods took in 2025, find the three busiest months by number of orders.",
+    returns: "month (two digits, like 09), orders — most orders first, then month. Three rows.",
+    tables: ["orders"],
+    expected: `SELECT strftime('%m', order_date) AS month, COUNT(*) AS orders
+FROM orders
+GROUP BY month
+ORDER BY orders DESC, month
+LIMIT 3;`,
+    orderMatters: true,
+    hint: "strftime('%m', order_date) gives the month as two digits. Group by it and count.",
+    explain:
+      "Every order counts here, cancelled ones too: the warehouse handled them. Whether a row belongs in the count depends on the question, which is why you read the question twice before writing WHERE.",
+    art: "rush-cart",
+  },
+  {
+    id: "where-the-money-is",
+    title: "Where the Money Is",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["JOIN", "GROUP BY", "SUM", "ROUND"],
+    prompt:
+      "Finance wants 2025 revenue by product category. Revenue is quantity times the price charged on the order line, for orders that were delivered or shipped.",
+    returns: "category, revenue (rounded to 2 decimals) — most revenue first, then category A–Z.",
+    tables: ["order_items", "orders", "products"],
+    expected: `SELECT p.category, ROUND(SUM(oi.quantity * oi.unit_price), 2) AS revenue
+FROM order_items oi
+JOIN orders o ON o.order_id = oi.order_id
+JOIN products p ON p.product_id = oi.product_id
+WHERE o.status IN ('delivered', 'shipped')
+GROUP BY p.category
+ORDER BY revenue DESC, p.category;`,
+    orderMatters: true,
+    hint: "Multiply quantity by unit_price on each line, then SUM by category. Keep only delivered and shipped orders.",
+    explain:
+      "Two decisions make a revenue number: which price (the one charged, on the line) and which orders (not cancelled, not returned). Write both down; a finance team will ask.",
+    art: "cash-register",
+  },
+  {
+    id: "window-shoppers",
+    title: "Window Shoppers",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["LEFT JOIN", "Anti-join", "NULL"],
+    prompt:
+      "Marketing wants to email everyone who made an account and never bought anything. How many customers have no orders at all?",
+    returns: "never_ordered — one number.",
+    tables: ["customers", "orders"],
+    expected: `SELECT COUNT(*) AS never_ordered
+FROM customers c
+LEFT JOIN orders o ON o.customer_id = c.customer_id
+WHERE o.order_id IS NULL;`,
+    orderMatters: true,
+    hint: "LEFT JOIN orders onto customers, then keep the rows where the order side IS NULL.",
+    explain:
+      "The anti-join: keep every customer, keep only the ones that matched nothing. NOT EXISTS gives the same count, and both beat NOT IN, which breaks the moment the list holds a NULL.",
+    art: "shop-window",
+  },
+  {
+    id: "basket-size",
+    title: "Basket Size",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "GROUP BY", "AVG", "JOIN"],
+    prompt:
+      "The app team thinks app shoppers spend more per order than web shoppers. For delivered and shipped orders, work out each order's total, then the average order value on each channel.",
+    returns: "channel, orders, avg_order_value (rounded to 2 decimals) — channel A–Z.",
+    tables: ["orders", "order_items"],
+    expected: `WITH totals AS (
+  SELECT o.order_id, o.channel, SUM(oi.quantity * oi.unit_price) AS total
+  FROM orders o
+  JOIN order_items oi ON oi.order_id = o.order_id
+  WHERE o.status IN ('delivered', 'shipped')
+  GROUP BY o.order_id, o.channel
+)
+SELECT channel, COUNT(*) AS orders, ROUND(AVG(total), 2) AS avg_order_value
+FROM totals
+GROUP BY channel
+ORDER BY channel;`,
+    orderMatters: true,
+    hint: "Two steps. First one row per order with its total (a CTE grouped by order). Then average those totals by channel.",
+    explain:
+      "Averaging the order lines directly would give the average line, not the average order. Building the right grain first (one row per order) is the whole move.",
+    art: "basket",
+  },
+  {
+    id: "come-back-soon",
+    title: "Come Back Soon",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "Conditional aggregation", "GROUP BY"],
+    prompt:
+      "Repeat buyers are the store's best customers. Among customers with at least one order that wasn't cancelled, how many ordered twice or more, and what percentage is that?",
+    returns: "buyers, repeat_buyers, repeat_pct (rounded to 1 decimal) — one row.",
+    tables: ["orders"],
+    expected: `WITH per_customer AS (
+  SELECT customer_id, COUNT(*) AS n
+  FROM orders
+  WHERE status <> 'cancelled'
+  GROUP BY customer_id
+)
+SELECT COUNT(*) AS buyers,
+       SUM(n >= 2) AS repeat_buyers,
+       ROUND(100.0 * SUM(n >= 2) / COUNT(*), 1) AS repeat_pct
+FROM per_customer;`,
+    orderMatters: true,
+    hint: "Count orders per customer in a CTE, then count the customers and SUM(n >= 2) over it.",
+    explain:
+      "SUM of a condition counts the rows where it's true. The denominator matters too: buyers, not every account, or the window shoppers drag the rate down.",
+    art: "welcome-mat",
+  },
+  {
+    id: "return-to-sender",
+    title: "Return to Sender",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["JOIN", "COUNT DISTINCT", "Conditional aggregation", "CASE"],
+    prompt:
+      "Returns cost money twice. For each product category, how many orders included it, and what percentage of those orders came back? Ignore cancelled orders.",
+    returns: "category, orders, return_pct (rounded to 1 decimal) — highest return_pct first, then category A–Z.",
+    tables: ["orders", "order_items", "products"],
+    expected: `SELECT p.category,
+       COUNT(DISTINCT o.order_id) AS orders,
+       ROUND(100.0 * COUNT(DISTINCT CASE WHEN o.status = 'returned' THEN o.order_id END)
+             / COUNT(DISTINCT o.order_id), 1) AS return_pct
+FROM orders o
+JOIN order_items oi ON oi.order_id = o.order_id
+JOIN products p ON p.product_id = oi.product_id
+WHERE o.status <> 'cancelled'
+GROUP BY p.category
+ORDER BY return_pct DESC, p.category;`,
+    orderMatters: true,
+    hint: "An order with two jerseys has two lines, so count orders with COUNT(DISTINCT order_id). For the returned ones, COUNT(DISTINCT CASE WHEN status = 'returned' THEN order_id END).",
+    explain:
+      "Joining orders to their lines multiplies each order by its line count. COUNT(DISTINCT) undoes the fan-out, and the CASE inside it counts only the orders that match.",
+    art: "return-box",
+  },
+  {
+    id: "price-tag-trap",
+    title: "Price Tag Trap",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["JOIN", "SUM", "Data quality"],
+    prompt:
+      "Someone's dashboard multiplies quantity by products.price to get jersey revenue. Jerseys went up on 2025-08-01. For delivered and shipped orders, show jersey revenue the right way (the price charged on the line) beside the dashboard's way.",
+    returns: "actual_revenue, at_todays_price (both rounded to 2 decimals) — one row.",
+    tables: ["order_items", "orders", "products"],
+    expected: `SELECT ROUND(SUM(oi.quantity * oi.unit_price), 2) AS actual_revenue,
+       ROUND(SUM(oi.quantity * p.price), 2) AS at_todays_price
+FROM order_items oi
+JOIN orders o ON o.order_id = oi.order_id
+JOIN products p ON p.product_id = oi.product_id
+WHERE o.status IN ('delivered', 'shipped') AND p.category = 'jersey';`,
+    orderMatters: true,
+    hint: "Same rows, two sums: one with oi.unit_price, one with p.price. Filter to category 'jersey'.",
+    explain:
+      "products.price is today's price; order_items.unit_price is history. Any time a price can change, revenue comes from the line, or every sale before the change is overstated.",
+    art: "price-tag",
+  },
+  {
+    id: "promo-codes",
+    title: "Promo Codes",
+    difficulty: "medium",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["COALESCE", "NULL", "GROUP BY"],
+    prompt:
+      "Which discount codes earned their keep? For delivered and shipped orders, show each code's orders and revenue, with orders that used no code grouped as 'none'.",
+    returns: "code, orders, revenue (rounded to 2 decimals) — most revenue first, then code A–Z.",
+    tables: ["orders", "order_items"],
+    expected: `SELECT COALESCE(o.discount_code, 'none') AS code,
+       COUNT(DISTINCT o.order_id) AS orders,
+       ROUND(SUM(oi.quantity * oi.unit_price), 2) AS revenue
+FROM orders o
+JOIN order_items oi ON oi.order_id = o.order_id
+WHERE o.status IN ('delivered', 'shipped')
+GROUP BY code
+ORDER BY revenue DESC, code;`,
+    orderMatters: true,
+    hint: "COALESCE(discount_code, 'none') turns the NULLs into a label you can group by. Count orders with COUNT(DISTINCT order_id), because the join repeats each order once per line.",
+    explain:
+      "GROUP BY would put the NULLs in a group of their own anyway, but a blank label reads as missing data in a report. COALESCE says what the blank means.",
+    art: "coupon",
+  },
+  {
+    id: "big-spenders",
+    title: "Big Spenders",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "ROW_NUMBER", "PARTITION BY", "JOIN"],
+    prompt:
+      "Marketing wants to thank the top customer in each of the four biggest states: CA, TX, FL and NY. Find each state's biggest spender on delivered and shipped orders.",
+    returns: "state, name, spent (rounded to 2 decimals) — state A–Z. If two customers tie, the lower customer_id wins.",
+    tables: ["customers", "orders", "order_items"],
+    expected: `WITH spend AS (
+  SELECT c.state, c.name, c.customer_id, SUM(oi.quantity * oi.unit_price) AS spent
+  FROM customers c
+  JOIN orders o ON o.customer_id = c.customer_id
+  JOIN order_items oi ON oi.order_id = o.order_id
+  WHERE o.status IN ('delivered', 'shipped') AND c.state IN ('CA', 'TX', 'FL', 'NY')
+  GROUP BY c.state, c.name, c.customer_id
+),
+ranked AS (
+  SELECT state, name, spent,
+         ROW_NUMBER() OVER (PARTITION BY state ORDER BY spent DESC, customer_id) AS rn
+  FROM spend
+)
+SELECT state, name, ROUND(spent, 2) AS spent
+FROM ranked
+WHERE rn = 1
+ORDER BY state;`,
+    orderMatters: true,
+    hint: "Total spend per customer in a CTE, then ROW_NUMBER() OVER (PARTITION BY state ORDER BY spent DESC, customer_id) and keep row 1.",
+    explain:
+      "Top-one-per-group is the window function interview staple. Group by customer_id, not just name: two customers can share a name, and here some do.",
+    art: "wallet-crown",
+  },
+  {
+    id: "second-visit",
+    title: "Second Visit",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "ROW_NUMBER", "Self-join", "julianday", "Dates"],
+    prompt:
+      "How long does it take a customer to come back? For customers with at least two orders that weren't cancelled, find the average number of days between their first and second order.",
+    returns: "customers, avg_days (rounded to 1 decimal) — one row.",
+    tables: ["orders"],
+    expected: `WITH numbered AS (
+  SELECT customer_id, order_date,
+         ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date, order_id) AS n
+  FROM orders
+  WHERE status <> 'cancelled'
+)
+SELECT COUNT(*) AS customers,
+       ROUND(AVG(julianday(b.order_date) - julianday(a.order_date)), 1) AS avg_days
+FROM numbered a
+JOIN numbered b ON b.customer_id = a.customer_id AND b.n = 2
+WHERE a.n = 1;`,
+    orderMatters: true,
+    hint: "Number each customer's orders with ROW_NUMBER (ties broken by order_id), then join order 1 to order 2 of the same customer and average the julianday difference.",
+    explain:
+      "Numbering rows and joining number 1 to number 2 turns 'first' and 'second' into columns. LAG does the same job: LAG(order_date) on the second order is the first.",
+    art: "two-dates",
+  },
+  {
+    id: "blank-fields",
+    title: "Blank Fields",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["NULL", "COUNT", "SUM"],
+    prompt:
+      "Before you segment customers by state or favourite team, check how complete those fields are. Count the customers, and how many are missing a state and a favourite team.",
+    returns: "customers, missing_state, missing_team — one row.",
+    tables: ["customers"],
+    expected: `SELECT COUNT(*) AS customers,
+       SUM(state IS NULL) AS missing_state,
+       SUM(favorite_team IS NULL) AS missing_team
+FROM customers;`,
+    orderMatters: true,
+    hint: "COUNT(*) counts every row. SUM(state IS NULL) counts the missing ones, because a true test is 1.",
+    explain:
+      "Check the blanks before you group by a column, or a chart of customers by state quietly loses a few percent of them into an unlabelled bar.",
+    art: "blank-form",
+  },
+  {
+    id: "free-shipping",
+    title: "Free Shipping",
+    difficulty: "easy",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["SUM", "Conditional aggregation", "WHERE"],
+    prompt:
+      "Shipping is free on orders over $75. How many orders that weren't cancelled shipped free, and what share is that?",
+    returns: "orders, free_shipping, free_pct (rounded to 1 decimal) — one row.",
+    tables: ["orders"],
+    expected: `SELECT COUNT(*) AS orders,
+       SUM(shipping = 0) AS free_shipping,
+       ROUND(100.0 * SUM(shipping = 0) / COUNT(*), 1) AS free_pct
+FROM orders
+WHERE status <> 'cancelled';`,
+    orderMatters: true,
+    hint: "shipping = 0 marks a free order. SUM(shipping = 0) counts them; multiply by 100.0 before dividing.",
+    explain:
+      "100.0 rather than 100 keeps the division decimal. In SQLite, integer divided by integer stays an integer, and a share comes out as 0.",
+    art: "free-truck",
+  },
+  {
+    id: "home-team-loyalty",
+    title: "Home Team Loyalty",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["JOIN", "Conditional aggregation", "HAVING", "NULL"],
+    prompt:
+      "Do fans buy their own team's gear? For customers with a favourite team, look at the team items they bought (orders not cancelled) and find what share was their own team's. Only count teams with at least 30 such items.",
+    returns: "team, items, own_team_pct (rounded to 1 decimal) — highest own_team_pct first, then team A–Z. Five rows.",
+    tables: ["customers", "orders", "order_items", "products"],
+    expected: `SELECT c.favorite_team AS team,
+       COUNT(*) AS items,
+       ROUND(100.0 * SUM(p.team = c.favorite_team) / COUNT(*), 1) AS own_team_pct
+FROM customers c
+JOIN orders o ON o.customer_id = c.customer_id
+JOIN order_items oi ON oi.order_id = o.order_id
+JOIN products p ON p.product_id = oi.product_id
+WHERE c.favorite_team IS NOT NULL AND p.team IS NOT NULL AND o.status <> 'cancelled'
+GROUP BY c.favorite_team
+HAVING COUNT(*) >= 30
+ORDER BY own_team_pct DESC, team
+LIMIT 5;`,
+    orderMatters: true,
+    hint: "Four tables, two NULL filters (no favourite team, no product team), then SUM(p.team = c.favorite_team) over COUNT(*) per favourite team.",
+    explain:
+      "Both NULL filters matter. A gift card has no team, so it isn't a vote for or against loyalty; leave it in and every percentage drops for a reason that has nothing to do with fans.",
+    art: "heart-jersey",
+  },
+  {
+    id: "running-revenue",
+    title: "Running Revenue",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "Running total", "Window", "strftime"],
+    prompt:
+      "Finance wants 2025 revenue month by month, with a running total beside it. Revenue is delivered and shipped orders, quantity times the price charged.",
+    returns: "month (two digits), revenue, running_total (both rounded to 2 decimals) — month order.",
+    tables: ["orders", "order_items"],
+    expected: `WITH monthly AS (
+  SELECT strftime('%m', o.order_date) AS month, SUM(oi.quantity * oi.unit_price) AS revenue
+  FROM orders o
+  JOIN order_items oi ON oi.order_id = o.order_id
+  WHERE o.status IN ('delivered', 'shipped')
+  GROUP BY month
+)
+SELECT month, ROUND(revenue, 2) AS revenue,
+       ROUND(SUM(revenue) OVER (ORDER BY month), 2) AS running_total
+FROM monthly
+ORDER BY month;`,
+    orderMatters: true,
+    hint: "Monthly totals in a CTE, then SUM(revenue) OVER (ORDER BY month) for the running total.",
+    explain:
+      "Round at the end, not in the CTE: rounding each month first and then adding them can leave the running total a cent off the real one.",
+    art: "coin-steps",
+  },
+  {
+    id: "signup-to-sale",
+    title: "Signup to Sale",
+    difficulty: "hard",
+    lang: "sql",
+    added: "2026-10-06",
+    tags: ["CTE", "julianday", "Dates", "JOIN", "NULL"],
+    prompt:
+      "Which marketing channel brings customers who buy fastest? For customers who have ordered, average the days from signing up to their first order, by how they heard about the store. Leave out customers with no referral recorded.",
+    returns: "source, customers, avg_days_to_first_order (rounded to 1 decimal) — fastest first, then source A–Z.",
+    tables: ["customers", "orders"],
+    expected: `WITH first_order AS (
+  SELECT customer_id, MIN(order_date) AS first_date
+  FROM orders
+  GROUP BY customer_id
+)
+SELECT c.referral AS source,
+       COUNT(*) AS customers,
+       ROUND(AVG(julianday(f.first_date) - julianday(c.signup_date)), 1) AS avg_days_to_first_order
+FROM customers c
+JOIN first_order f ON f.customer_id = c.customer_id
+WHERE c.referral IS NOT NULL
+GROUP BY c.referral
+ORDER BY avg_days_to_first_order, source;`,
+    orderMatters: true,
+    hint: "MIN(order_date) per customer in a CTE is the first order. Join it to customers and average julianday(first_date) - julianday(signup_date) by referral.",
+    explain:
+      "The inner JOIN quietly drops customers who never ordered, which is what you want here: there's no 'days to first order' for someone with no first order. Say so when you report it.",
+    art: "signup-hourglass",
+  },
 ];
 
 export const QUESTION_COUNT = QUESTIONS.length;
@@ -4044,7 +4481,7 @@ export function getQuestion(id: string): Question | undefined {
 
 /** Only the tables a question touches, so the schema panel stays short. */
 export function schemaFor(q: Question) {
-  return SCHEMA.filter((t) => q.tables.includes(t.table));
+  return [...SCHEMA, ...EXTRA_SCHEMA].filter((t) => q.tables.includes(t.table));
 }
 
 // ── Question of the Day ────────────────────────────────────────
@@ -4129,9 +4566,13 @@ export function questionOfTheDay(
  * free on its day once the Season Pass gate is on (lib/pass-gates.ts).
  */
 export function frontDoorQuestion(day: string = leagueDay()): { question: Question; isDaily: boolean } {
+  // League data only: the home page's panel boots the lesson database, and
+  // a first visit should meet the football, not the practice store.
   const daily = questionOfTheDay(day, "sql");
-  if (daily.difficulty === "easy") return { question: daily, isDaily: true };
-  const pool = questionsIn("sql").filter((q) => q.difficulty === "easy" && (!q.added || q.added <= day));
+  if (daily.difficulty === "easy" && isLeagueOnly(daily.tables)) return { question: daily, isDaily: true };
+  const pool = questionsIn("sql").filter(
+    (q) => q.difficulty === "easy" && isLeagueOnly(q.tables) && (!q.added || q.added <= day),
+  );
   return { question: pickForDay(pool, day), isDaily: false };
 }
 
