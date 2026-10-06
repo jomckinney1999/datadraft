@@ -400,15 +400,34 @@ export default function QuestionBank({
               </button>
             ))}
           </div>
-          {DATASETS.find((d) => d.id === data)?.invented && (
-            <p className="text-[12px] leading-relaxed text-ink-muted">
-              Invented data: a made-up {data === "store" ? "online store" : "fantasy football app"},
-              for practising on the kind of schema a screen hands you.{" "}
-              <Link href={DATASETS.find((d) => d.id === data)!.href} className="text-ice underline underline-offset-2 hover:text-ink">
-                What&apos;s in it →
-              </Link>
-            </p>
-          )}
+          {(() => {
+            const d = DATASETS.find((x) => x.id === data);
+            if (!d || (!d.invented && !d.guide)) return null;
+            return (
+              <p className="text-[12px] leading-relaxed text-ink-muted">
+                {d.invented && (
+                  <>
+                    Invented data: a made-up {data === "store" ? "online store" : "fantasy football app"},
+                    for practising on the kind of schema a screen hands you.{" "}
+                    <Link href={d.href} className="text-ice underline underline-offset-2 hover:text-ink">
+                      What&apos;s in it →
+                    </Link>{" "}
+                  </>
+                )}
+                {d.guide && (
+                  <>
+                    Interviewing for a {d.guide.role} role?{" "}
+                    <Link
+                      href={`/sql-interview-questions/${d.guide.slug}`}
+                      className="text-turf underline underline-offset-2 hover:text-ink"
+                    >
+                      Read the guide →
+                    </Link>
+                  </>
+                )}
+              </p>
+            );
+          })()}
 
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">

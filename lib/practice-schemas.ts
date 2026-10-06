@@ -165,11 +165,18 @@ export function usesPlays(tables: string[]): boolean {
 
 /** The databases a question can run on, for the bank's Data filter. */
 export type DatasetId = "league" | "plays" | "store" | "app";
-export const DATASETS: { id: DatasetId; label: string; invented: boolean; href: string }[] = [
+export const DATASETS: {
+  id: DatasetId;
+  label: string;
+  invented: boolean;
+  href: string;
+  /** The interview guide built on this database (lib/pattern-guides.ts TOPIC_GUIDES). */
+  guide?: { slug: string; role: string };
+}[] = [
   { id: "league", label: "League", invented: false, href: "/data" },
-  { id: "plays", label: "Play-by-play", invented: false, href: "/data" },
-  { id: "store", label: "Store", invented: true, href: "/data#practice-store" },
-  { id: "app", label: "App", invented: true, href: "/data#practice-app" },
+  { id: "plays", label: "Play-by-play", invented: false, href: "/data", guide: { slug: "sports-analytics", role: "sports analyst" } },
+  { id: "store", label: "Store", invented: true, href: "/data#practice-store", guide: { slug: "ecommerce", role: "e-commerce analyst" } },
+  { id: "app", label: "App", invented: true, href: "/data#practice-app", guide: { slug: "product-analytics", role: "product analyst" } },
 ];
 
 /** Which database a question runs on. Python, R and Excel are all league data. */

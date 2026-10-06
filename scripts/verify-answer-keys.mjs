@@ -766,6 +766,11 @@ let guidesChecked = 0;
   for (const p of ip.PATTERNS) {
     if (!pg.guideForPattern(p.id)) problems.push(`Interview pattern "${p.name}" has no guide page (lib/pattern-guides.ts)`);
   }
+  for (const d of practiceSchemas.DATASETS) {
+    if (d.guide && !pg.TOPIC_GUIDES.some((g) => g.slug === d.guide.slug && g.dataset === d.id)) {
+      problems.push(`Dataset "${d.id}" links to guide "${d.guide.slug}", which isn't a topic guide on that database`);
+    }
+  }
   // Topic guides practise a whole database; their example must be a SQL
   // question on it, and their slugs share the URL space with the patterns.
   const qs = await loadProjectTs(path.join(root, "lib/questions.ts"), root);
