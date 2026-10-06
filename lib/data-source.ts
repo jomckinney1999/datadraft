@@ -15,7 +15,10 @@
  * exactly how much of a table is real.
  */
 
-import { LATEST, LEAGUE_META, SEASONS_ON_FILE } from "@/lib/lesson-data.generated";
+// From the small facts file, not lesson-data.generated.ts: this module gives
+// the credit line to pages all over the site, and importing the dataset here
+// put ~140 KB of rows in every one of them (2026-10-06).
+import { LATEST, LEAGUE_META, SEASONS_ON_FILE } from "@/lib/lesson-facts.generated";
 
 export type DataSource = {
   id: string;

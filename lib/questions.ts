@@ -5446,19 +5446,11 @@ export function schemaFor(q: Question) {
 // of WebR on first run, and a landing page does not get to spend that before
 // anyone has asked for anything.
 
-const LEAGUE_TZ = "America/New_York";
 const MS_PER_DAY = 86_400_000;
 
-/** Today's date in the league's timezone, as YYYY-MM-DD. */
-export function leagueDay(now: Date = new Date()): string {
-  // en-CA formats as YYYY-MM-DD, which saves reassembling the parts by hand.
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: LEAGUE_TZ,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(now);
-}
+// The day itself lives in lib/league-day.ts (small, so clients can import it).
+export { leagueDay } from "@/lib/league-day";
+import { leagueDay } from "@/lib/league-day";
 
 /**
  * A stride co-prime with the pool size, so stepping by it visits every

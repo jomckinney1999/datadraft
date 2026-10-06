@@ -46,12 +46,10 @@ import { waitlistJoined } from "@/lib/waitlist-memory";
 import { consumeRankUp, shareIdentity, tenureFrom, type Rank } from "@/lib/tenure";
 import type { CellValue } from "@/lib/excel-data";
 import type { Question } from "@/lib/questions";
-import {
-  DIFFICULTY_XP,
-  LANG_LABEL,
-  LANG_WEIGHT,
-  schemaFor,
-} from "@/lib/questions";
+// Labels and prices from the small module, and the question's tables from
+// the server (lib/question-page.ts): importing them from lib/questions.ts put
+// every question, key and prelude in each question page's JavaScript.
+import { DIFFICULTY_XP, LANG_LABEL, LANG_WEIGHT } from "@/lib/question-meta";
 import { resultsMatch } from "@/lib/sql-grade";
 import { solveQuestion, loadProgress, setCallSign } from "@/lib/progress";
 import { SHORT_CREDIT } from "@/lib/data-source";
@@ -176,6 +174,7 @@ function ResultGrid({ res }: { res: QueryExecResult }) {
 
 export default function QuestionWorkspace({
   question,
+  tables,
   isQotd,
   day,
   prevDay,
@@ -187,6 +186,8 @@ export default function QuestionWorkspace({
   free = true,
 }: {
   question: Question;
+  /** The question's tables and columns, worked out on the server. */
+  tables: { table: string; columns: string[] }[];
   isQotd: boolean;
   /** A friend's daily result, from a /questions/<id>/vs/<n>-<tries> link. */
   challenge?: DailyResult | null;
@@ -314,7 +315,7 @@ export default function QuestionWorkspace({
       if (isSql) {
         const db = dbRef.current;
         if (!db) return;
-        const schema = schemaFor(question).map((t) => ({ name: t.table, columns: t.columns }));
+        const schema = tables.map((t) => ({ name: t.table, columns: t.columns }));
         let mine: QueryExecResult | undefined;
         try {
           mine = db.exec(code)[0];
@@ -431,7 +432,6 @@ export default function QuestionWorkspace({
     [code, question, isSql, isExcel, alreadySolved, isQotd, day, prevDay, locked, pass],
   );
 
-  const tables = schemaFor(question);
   // A question on invented data credits that dataset, not nflverse.
   const invented = inventedCredit(question.tables);
   const weight = LANG_WEIGHT[question.lang];

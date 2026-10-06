@@ -516,3 +516,10 @@ export const FACTS = {
     }
   }
 } as const;
+
+// The same three constants lesson-data.generated.ts carries, repeated here
+// so pages that only need a season or a week never import the dataset.
+// The verifier checks the two copies agree.
+export const SEASONS_ON_FILE: number[] = [2022,2023,2024,2025,2026];
+export const LATEST = {"season":2026,"week":3,"builtOn":"2026-09-30"} as const;
+export const LEAGUE_META = {"season":2024,"teams":5,"rounds":2,"wireWeek":10} as const;

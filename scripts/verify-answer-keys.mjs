@@ -1096,6 +1096,19 @@ for (const [label, ex] of formulaExercises) {
 // pattern as a regex literal and use its .source instead.
 let templatesChecked = 0;
 
+// lib/lesson-facts.generated.ts repeats three constants from the dataset so
+// the credit line doesn't import it. Both are written by the same builder;
+// fail if anyone edits one and not the other.
+{
+  const facts = await loadProjectTs(path.join(root, "lib/lesson-facts.generated.ts"), root);
+  const full = await loadProjectTs(path.join(root, "lib/lesson-data.generated.ts"), root);
+  for (const k of ["SEASONS_ON_FILE", "LATEST", "LEAGUE_META"]) {
+    if (JSON.stringify(facts[k]) !== JSON.stringify(full[k])) {
+      problems.push(`${k} differs between lesson-facts.generated.ts and lesson-data.generated.ts: rerun node scripts/build-lesson-dataset.mjs`);
+    }
+  }
+}
+
 // The Hall of Fame counts courses through lib/unit-modules.generated.ts, not
 // the curriculum. Check the map is current and that every lesson lands in the
 // course the curriculum puts it in.

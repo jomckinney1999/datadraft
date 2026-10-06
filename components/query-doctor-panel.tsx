@@ -14,7 +14,7 @@ import PassOffer from "@/components/pass-offer";
 import type { Finding } from "@/lib/query-doctor";
 import { usePass } from "@/lib/use-pass";
 import { spendDoctor } from "@/lib/pass-meter";
-import { leagueDay } from "@/lib/questions";
+import { leagueDay } from "@/lib/league-day";
 
 export default function QueryDoctorPanel({
   findings,

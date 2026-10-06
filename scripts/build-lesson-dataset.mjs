@@ -575,6 +575,13 @@ await writeFile(
 // database. Import from here rather than typing a number into a lesson.
 
 export const FACTS = ${JSON.stringify(facts, null, 2)} as const;
+
+// The same three constants lesson-data.generated.ts carries, repeated here
+// so pages that only need a season or a week never import the dataset.
+// The verifier checks the two copies agree.
+export const SEASONS_ON_FILE: number[] = ${JSON.stringify(SEASONS)};
+export const LATEST = ${JSON.stringify({ season: latestSeason, week: latestWeek, builtOn })} as const;
+export const LEAGUE_META = ${JSON.stringify({ season: LEAGUE_SEASON, teams: LEAGUE_TEAMS.length, rounds: LEAGUE_ROUNDS, wireWeek: WIRE_WEEK })} as const;
 `,
   "utf8",
 );

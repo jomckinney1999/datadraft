@@ -5,7 +5,7 @@
  * why this lives here and not beside them.
  */
 
-import { isDailyQuestion, leagueDay, questionsIn, type Question } from "@/lib/questions";
+import { isDailyQuestion, leagueDay, questionsIn, schemaFor, type Question } from "@/lib/questions";
 import { questionIsFree } from "@/lib/pass-gates";
 
 /** The day before `day`, for the streak check. */
@@ -26,6 +26,7 @@ export function workspaceProps(question: Question) {
   const prev = pool[(index - 1 + pool.length) % pool.length];
   return {
     question,
+    tables: schemaFor(question),
     isQotd: isDailyQuestion(day, question),
     day,
     prevDay: previousDay(day),
