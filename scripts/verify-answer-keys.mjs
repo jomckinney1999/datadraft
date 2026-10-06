@@ -28,6 +28,17 @@ import { loadTs as loadProjectTs } from "./load-ts.mjs";
 
 const root = process.cwd();
 
+// VERIFY_TRACE=1 writes each section's name to stderr as it starts, written
+// synchronously so it survives a crash. On Windows Node's WebAssembly has
+// segfaulted mid-run (exit 139, no message); the trace says where.
+const TRACE = Boolean(process.env.VERIFY_TRACE);
+const traceFd = 2;
+const { writeSync } = await import("node:fs");
+function stage(name) {
+  if (TRACE) writeSync(traceFd, `[verify] ${name} ${Math.round(process.memoryUsage().rss / 1e6)} MB
+`);
+}
+
 const data = await loadProjectTs(path.join(root, "lib/fantasy-data.ts"), root);
 const curriculum = await loadProjectTs(path.join(root, "lib/curriculum.ts"), root);
 const excel = await loadProjectTs(path.join(root, "lib/excel-engine.ts"), root);
@@ -76,6 +87,7 @@ db.run((await loadProjectTs(path.join(root, "lib/practice-datasets.ts"), root)).
 );
 const practiceSchemas = await loadProjectTs(path.join(root, "lib/practice-schemas.ts"), root);
 
+stage("Lesson keys");
 const problems = [];
 let checked = 0;
 let previews = 0;
@@ -156,6 +168,7 @@ for (const unit of curriculum.COURSE.units) {
   }
 }
 
+stage("Question bank (same seeded lesson DB)");
 // ── Question bank (same seeded lesson DB) ───────────────────
 //
 // A question is graded by comparing the learner's result grid to the key's,
@@ -474,6 +487,7 @@ for (const lang of ["sql", "python", "r", "excel"]) {
   }
 }
 
+stage("Facts the prose quotes");
 // ── Facts the prose quotes ────────────────────────────────────
 // Lesson text reads numbers from lib/lesson-facts.generated.ts instead of
 // typing them. The builder computes those in JavaScript; this re-derives each
@@ -553,6 +567,7 @@ let factsChecked = 0;
   );
 }
 
+stage("Stat Duel");
 // ── Stat Duel ─────────────────────────────────────────────────
 // Each round's numbers are computed in JavaScript and shown first; the SQL is
 // what "Prove it" shows and runs. Generate half a year of future days and
@@ -600,6 +615,7 @@ let duelChecked = 0;
   }
 }
 
+stage("Draft Room");
 // ── Draft Room ────────────────────────────────────────────────
 // The scouting database must never contain the season being drafted (that
 // would make the draft a lookup), every scouting preset has to run and
@@ -691,6 +707,7 @@ let draftChecked = 0;
   }
 }
 
+stage("Interview prep");
 // ── Interview prep ────────────────────────────────────────────
 // Every interview pattern needs enough questions to be practice, and Query
 // Doctor has to keep naming the right mistake for the classic wrong answers.
@@ -740,6 +757,7 @@ let doctorChecked = 0;
   }
 }
 
+stage("Pattern guides");
 // ── Pattern guides ────────────────────────────────────────────
 // Every interview pattern has a guide page, slugs are unique, and each
 // guide's worked example is a SQL question in its own pattern (its key is
@@ -786,6 +804,7 @@ let guidesChecked = 0;
   }
 }
 
+stage("The analyst path");
 // ── The analyst path ──────────────────────────────────────────
 // Its catalog has lessons and enough questions per pattern to tick, a fresh
 // learner starts on step one, and a learner who has done everything is
@@ -819,6 +838,7 @@ let pathChecks = 0;
   if (ap.currentStep(all) !== null) problems.push(`Analyst path: everything done still leaves "${ap.currentStep(all)?.title}" open`);
 }
 
+stage("Film Room");
 // ── Film Room ─────────────────────────────────────────────────
 // Every SQL answer can be replayed clause by clause (lib/sql-steps.ts). Each
 // step has to run on its own, and the last has to land on the key's result,
@@ -859,6 +879,7 @@ let filmSteps = 0;
   }
 }
 
+stage("Card art coverage");
 // ── Card art coverage ─────────────────────────────────────────
 // A course, build or case with no scene renders an empty picture slot on
 // its card. The scene maps live in TSX the loader does not transpile, so
@@ -899,6 +920,7 @@ let artChecked = 0;
   }
 }
 
+stage("Interview cases (dedicated seeds, not the lesson DB)");
 // ── Interview cases (dedicated seeds, not the lesson DB) ─────────────
 const interview = await loadProjectTs(
   path.join(root, "lib/interview-cases.ts"),
@@ -929,6 +951,7 @@ for (const c of interview.INTERVIEW_CASES) {
   }
 }
 
+stage("Python answer keys");
 // ── Python answer keys ────────────────────────────────────────────
 // R keys are not checked here: WebR has no supported Node build, so those
 // are verified in-browser instead. Anything skipped is reported below rather
@@ -958,6 +981,7 @@ for (const [label, ex] of pyExercises) {
   }
 }
 
+stage("Excel formula answer keys");
 // ── Excel formula answer keys ─────────────────────────────────
 // Evaluated by the SHIPPED engine (lib/excel-engine.ts), not a copy of it —
 // a re-implementation here would happily agree with itself while the real one
@@ -986,6 +1010,7 @@ for (const unit of curriculum.COURSE.units) {
 }
 problems.push(...sheetProblems);
 
+stage("Tableau-style and Power BI-style drills");
 // ── Tableau-style and Power BI-style drills ────────────────────
 // A viz key (lib/viz.ts) is a view; its SQL has to run, return rows, use
 // fields the data pane offers, and not stop a Top N on a tie, or a correct

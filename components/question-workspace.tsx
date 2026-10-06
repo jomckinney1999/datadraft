@@ -242,6 +242,15 @@ export default function QuestionWorkspace({
     setAlreadySolved(loadProgress().solvedQuestions.includes(question.id));
   }, [question.id]);
 
+  // Which extra databases this question seeds, as one string, so moving
+  // between questions that need different tables rebuilds the database
+  // rather than keeping one without them.
+  const extraTables = [
+    usesShop(question.tables) ? "shop" : "",
+    usesPlays(question.tables) ? "plays" : "",
+    usesApp(question.tables) ? "app" : "",
+  ].join(",");
+
   // SQL and Excel are local and cheap, so warm them immediately. Python and R
   // are not, so they wait for the learner to press something.
   useEffect(() => {
@@ -254,11 +263,11 @@ export default function QuestionWorkspace({
         ),
         import("@/lib/fantasy-data"),
         // The practice store, only for a question that uses it.
-        usesShop(question.tables) ? import("@/lib/practice-datasets") : null,
+        extraTables.includes("shop") ? import("@/lib/practice-datasets") : null,
         // The 2025 play-by-play (~0.8 MB), likewise.
-        usesPlays(question.tables) ? import("@/lib/plays-dataset") : null,
+        extraTables.includes("plays") ? import("@/lib/plays-dataset") : null,
         // Benchwarmer's event log (~170 KB), likewise.
-        usesApp(question.tables) ? import("@/lib/app-dataset") : null,
+        extraTables.includes("app") ? import("@/lib/app-dataset") : null,
       ])
         .then(async ([SQL, data, practice, plays, app]) => {
           if (cancelled) return;
@@ -299,7 +308,7 @@ export default function QuestionWorkspace({
     return () => {
       cancelled = true;
     };
-  }, [isSql, isExcel]);
+  }, [isSql, isExcel, extraTables]);
 
   /** Run the learner's work, and optionally grade it. */
   const attempt = useCallback(
