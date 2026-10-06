@@ -120,6 +120,15 @@ function printDiag(mine: string, key: string): string {
   if (/^# A tibble/m.test(mine) && !/^# A tibble/m.test(key)) {
     return "That printed a tibble. The answer prints a data frame, which shows every digit: add %>% as.data.frame() before print().";
   }
+  // A pandas Series ends on a "dtype: …" line; the keys print plain Python.
+  if (/^(Name: .*, )?dtype: /m.test(mine) && !/dtype: /.test(key)) {
+    const want = key.trim().startsWith("{")
+      ? "a dict: add .to_dict()"
+      : key.trim().startsWith("[")
+        ? "a list: add .tolist()"
+        : "plain values: pull them out with .iloc[0], int() or round()";
+    return `That printed a pandas Series (the dtype line at the end gives it away). The answer prints ${want}.`;
+  }
   const m = lines(mine);
   const k = lines(key);
   if (m !== k) return `You printed ${m} line${m === 1 ? "" : "s"}; the answer prints ${k}.`;
