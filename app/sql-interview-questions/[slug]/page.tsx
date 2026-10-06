@@ -76,7 +76,7 @@ function viewFor(slug: string): GuideView | null {
     asks: topic.topic.asks,
     practice: QUESTIONS.filter((q) => q.lang === "sql" && datasetOf(q.tables) === topic.dataset),
     bankHref: `/questions?data=${topic.dataset}`,
-    label: "for product analyst roles",
+    label: topic.topic.label,
     art: "question",
     questionArt: topic.topic.art,
   };

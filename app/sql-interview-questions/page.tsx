@@ -145,7 +145,7 @@ export default function SqlInterviewQuestions() {
 
         {/* ── Beyond the nine: guides to a kind of role ───── */}
         <section className="mt-10">
-          <h2 className="font-display text-2xl font-bold text-ink">Interviewing at an app company?</h2>
+          <h2 className="font-display text-2xl font-bold text-ink">Guides for the kind of company you&apos;re interviewing at</h2>
           <ul className="mt-4 grid gap-4 sm:grid-cols-2">
             {TOPIC_GUIDES.map((g) => {
               const n = QUESTIONS.filter((q) => q.lang === "sql" && datasetOf(q.tables) === g.dataset).length;

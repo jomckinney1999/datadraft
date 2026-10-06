@@ -478,7 +478,8 @@ export function guideForPattern(patternId: string): PatternGuide | undefined {
  * database.
  */
 export type TopicGuide = Omit<PatternGuide, "pattern"> & {
-  topic: { id: string; name: string; asks: string; art: QuestionArt };
+  /** label: the line above the h1, e.g. "for product analyst roles". */
+  topic: { id: string; name: string; asks: string; art: QuestionArt; label: string };
   dataset: DatasetId;
 };
 
@@ -489,6 +490,7 @@ export const TOPIC_GUIDES: TopicGuide[] = [
       name: "Product analytics",
       asks: "Daily actives, retention, funnels, sessions and revenue, from an app's event log.",
       art: "funnel-steps",
+      label: "for product analyst roles",
     },
     dataset: "app",
     slug: "product-analytics",
@@ -551,6 +553,142 @@ ORDER BY c.signup_day;`,
       {
         q: "Is the practice data real?",
         a: "No, and it says so wherever it appears. Benchwarmer is a fantasy football app we made up, because no real app's event log can be published. It's generated to behave like product data does: a signup rush, weekend spikes, a funnel that leaks and duplicate events from a client that retries.",
+      },
+    ],
+  },
+  {
+    topic: {
+      id: "ecommerce",
+      name: "E-commerce",
+      asks: "Revenue, order value, repeat buyers and returns, from a store's orders and order lines.",
+      art: "shopping-bag",
+      label: "for e-commerce analyst roles",
+    },
+    dataset: "store",
+    slug: "ecommerce",
+    h1: "E-commerce SQL interview questions",
+    metaTitle: "E-commerce SQL interview questions: orders, revenue, repeat customers, with answers",
+    metaDescription:
+      "Customers, products, orders and order lines: the schema SQL screens hand out more than any other. The traps interviewers watch for, a worked average-order-value query, and practice questions you run in your browser.",
+    lead: "Customers, products, orders and order lines: the four tables an online store runs on, and the schema SQL screens hand you more than any other.",
+    whyAsked:
+      "Almost every company sells something, so the questions transfer anywhere: revenue by category, average order value, repeat buyers, return rates, the best customer in each region. The traps are in the grain (an order isn't an order line) and in deciding which orders count as revenue before you add anything up.",
+    shape: `-- Revenue and average order value by month
+WITH order_totals AS (
+  SELECT o.order_id, o.order_date,
+         SUM(oi.quantity * oi.unit_price) AS order_total
+  FROM orders o
+  JOIN order_items oi ON oi.order_id = o.order_id
+  WHERE o.status <> 'cancelled'
+  GROUP BY o.order_id, o.order_date
+)
+SELECT strftime('%Y-%m', order_date) AS month,
+       COUNT(*) AS orders,
+       ROUND(SUM(order_total), 2) AS revenue,
+       ROUND(AVG(order_total), 2) AS avg_order_value
+FROM order_totals
+GROUP BY month
+ORDER BY month;`,
+    shapeNote:
+      "Grouping by month is strftime('%Y-%m', d) in SQLite, DATE_TRUNC('month', d) in Postgres and Snowflake, and DATE_TRUNC(d, MONTH) in BigQuery. The rest runs as written.",
+    mistakes: [
+      {
+        title: "Averaging lines instead of orders",
+        body: "AVG(quantity * unit_price) over order_items is the average line, not the average order. Total each order first, then average the totals.",
+      },
+      {
+        title: "Using today's price for yesterday's sale",
+        body: "Revenue is what was charged: the price on the order line, not products.price. Prices change, and the two disagree on every order placed before the change.",
+      },
+      {
+        title: "Counting cancelled orders as revenue",
+        body: "Decide which statuses count before you sum. A cancelled order never shipped; a returned one did and came back. Say which you left out.",
+      },
+      {
+        title: "Losing the customers who never ordered",
+        body: "An inner join from customers to orders drops everyone with no orders, so 'share of customers who bought' comes out at 100%. LEFT JOIN, then count the matches.",
+      },
+    ],
+    example: "basket-size",
+    faq: [
+      {
+        q: "What SQL questions come up for e-commerce analyst roles?",
+        a: "Revenue and order counts by period or category, average order value, repeat purchase rate, return or cancellation rates, top customers in each region (ranking within groups), and cohort questions such as days from signup to first order.",
+      },
+      {
+        q: "How do you calculate average order value in SQL?",
+        a: "Total each order first, SUM(quantity * unit_price) per order_id, over the orders that count as revenue. Then take AVG of those totals. Averaging the order lines directly gives the average line, which is smaller.",
+      },
+      {
+        q: "How do you find repeat customers in SQL?",
+        a: "Count orders per customer, then count the customers with two or more. Leave cancelled orders out first, or someone who cancelled and reordered counts as a repeat buyer.",
+      },
+      {
+        q: "Is the store data real?",
+        a: "No, and it says so wherever it appears. Gridiron Goods is an online fan store we made up, generated to be messy the way real store data is: missing states, cancelled and returned orders, and a price rise halfway through the year.",
+      },
+    ],
+  },
+  {
+    topic: {
+      id: "sports-analytics",
+      name: "Sports analytics",
+      asks: "Situational rates, drives, efficiency and EPA, from an NFL play-by-play log.",
+      art: "red-zone-flag",
+      label: "for sports analyst roles",
+    },
+    dataset: "plays",
+    slug: "sports-analytics",
+    h1: "Sports analytics SQL interview questions",
+    metaTitle: "Sports analytics SQL interview questions: play-by-play, situations and EPA, with answers",
+    metaDescription:
+      "What team and sports-media analyst screens ask: fourth-down decisions, red-zone trips, neutral pass rate, EPA per play. The traps interviewers watch for, a worked drive-level query, and practice questions on real NFL play-by-play.",
+    lead: "Teams and sports media hire analysts who can turn a play-by-play log into an argument: who goes for it on fourth down, who scores in the red zone, which offense is actually efficient.",
+    whyAsked:
+      "Play-by-play is where sports data gets hard. One row is a snap, but the questions are about drives, games and seasons, so every answer starts by choosing the grain. Screens test that, and the situational filters (down, distance, score, quarter) that turn a misleading comparison into a fair one.",
+    shape: `-- Fourth-and-short decisions by team
+SELECT posteam AS team,
+       COUNT(*) AS chances,
+       SUM(CASE WHEN play_type IN ('pass', 'run') THEN 1 ELSE 0 END) AS went_for_it,
+       ROUND(100.0 * SUM(CASE WHEN play_type IN ('pass', 'run') THEN 1 ELSE 0 END)
+             / COUNT(*), 1) AS go_pct
+FROM plays
+WHERE down = 4 AND ydstogo <= 2
+GROUP BY posteam
+ORDER BY go_pct DESC, team;`,
+    shapeNote:
+      "This runs as written in Postgres, Snowflake and BigQuery. SQLite also lets you SUM a comparison directly, SUM(play_type = 'pass'), which Postgres needs a cast for and BigQuery writes as COUNTIF.",
+    mistakes: [
+      {
+        title: "Counting snaps when the question is about drives",
+        body: "A red-zone trip is a drive, not a play. Roll plays up to one row per drive (game, offense, drive number) first, or a team with twelve red-zone snaps on one drive gets twelve trips.",
+      },
+      {
+        title: "Comparing teams in unfair situations",
+        body: "Pass rate while trailing by 20 is mostly the scoreboard. Analysts filter to neutral situations (early downs, a close score, the first three quarters) before comparing teams.",
+      },
+      {
+        title: "Crediting the wrong team",
+        body: "posteam is the offense on that snap. A pick-six is the defense's touchdown and a muffed punt is the receiving team's turnover, so check whose touchdown or turnover a row records before counting it.",
+      },
+      {
+        title: "Leaderboards topped by tiny samples",
+        body: "A back with ten carries can lead yards per carry. Put a minimum in HAVING and say what it is.",
+      },
+    ],
+    example: "red-zone-trips",
+    faq: [
+      {
+        q: "What SQL do sports analytics interviews ask?",
+        a: "Rates by team or player in a situation (third-down conversion, fourth-down aggressiveness, red-zone touchdown rate), efficiency such as EPA per play or yards per carry with a minimum sample, running totals over a season, and joins from plays to games for context like the roof or the final score.",
+      },
+      {
+        q: "What is EPA?",
+        a: "Expected points added: a model's estimate of how many points a play was worth, from the down, distance and field position before and after it. It's how analysts compare plays that gained the same yards in very different situations. It's a model's number, so say so when you use it.",
+      },
+      {
+        q: "Is the play-by-play real?",
+        a: "Yes. It's nflverse's play-by-play for the 2025 NFL regular season, every pass, run, punt and field goal, used under CC BY 4.0. Names are as the play-by-play writes them, like J.Goff.",
       },
     ],
   },
