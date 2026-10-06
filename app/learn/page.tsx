@@ -16,7 +16,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { COURSES, type Course } from "@/lib/courses";
-import { liveLessons, ALL_MODULE, getLesson } from "@/lib/curriculum";
+// The lesson index, not the curriculum: this page lists lessons, it never
+// plays one, and the curriculum is ~560 KB of JavaScript.
+import { ALL_MODULE } from "@/lib/all-module";
+import { LESSON_INFO, LIVE_LESSONS } from "@/lib/lesson-index.generated";
 import { loadProgress, type Progress, EMPTY_PROGRESS } from "@/lib/progress";
 import CourseArt from "@/components/course-art";
 import AppNav from "@/components/app-nav";
@@ -47,7 +50,7 @@ function FlameIcon() {
 }
 
 function builtCount(course: Course): number {
-  return course.moduleId ? liveLessons(course.moduleId).length : 0;
+  return course.moduleId ? (LIVE_LESSONS[course.moduleId] ?? []).length : 0;
 }
 
 function CourseCard({
@@ -59,8 +62,7 @@ function CourseCard({
 }) {
   const built = builtCount(course);
   const done = course.moduleId
-    ? liveLessons(course.moduleId).filter((e) => completed.has(e.lesson.id))
-        .length
+    ? (LIVE_LESSONS[course.moduleId] ?? []).filter((id) => completed.has(id)).length
     : 0;
   const isLive = course.status === "live";
   const accentBorder =
@@ -137,26 +139,26 @@ export default function CourseCatalogPage() {
   }, []);
 
   const completed = new Set(progress.completedLessons);
-  const allLessons = liveLessons(ALL_MODULE);
-  const allDone = allLessons.filter((e) => completed.has(e.lesson.id)).length;
+  const allLessons = LIVE_LESSONS[ALL_MODULE] ?? [];
+  const allDone = allLessons.filter((id) => completed.has(id)).length;
 
   // The course you are furthest into, so "pick up where you left off" beats
   // scanning ten cards for the one with a half-full bar on it.
   const inProgress = COURSES.filter((c) => c.moduleId && c.status === "live")
     .map((c) => {
-      const lessons = liveLessons(c.moduleId!);
-      const done = lessons.filter((l) => completed.has(l.lesson.id)).length;
+      const lessons = LIVE_LESSONS[c.moduleId!] ?? [];
+      const done = lessons.filter((id) => completed.has(id)).length;
       return {
         course: c,
         done,
         total: lessons.length,
-        next: lessons.find((l) => !completed.has(l.lesson.id)),
+        next: lessons.find((id) => !completed.has(id)),
       };
     })
     .filter((c) => c.done > 0 && c.done < c.total)
     .sort((a, b) => b.done - a.done)[0];
-  const resumeId = inProgress?.next?.lesson.id;
-  const resumeLesson = resumeId ? getLesson(resumeId) : undefined;
+  const resumeId = inProgress?.next;
+  const resumeLesson = resumeId ? LESSON_INFO[resumeId] : undefined;
 
   return (
     <>
@@ -180,7 +182,7 @@ export default function CourseCatalogPage() {
                   Pick up where you left off · {inProgress.course.title}
                 </p>
                 <p className="mt-1 font-display text-xl font-bold text-ink">
-                  {resumeLesson.lesson.title}
+                  {resumeLesson.title}
                 </p>
                 <p className="mt-1 text-sm text-ink-soft">
                   {inProgress.done}/{inProgress.total} lessons done

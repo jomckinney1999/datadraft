@@ -18,7 +18,7 @@
 
 import Link from "next/link";
 import type { Question } from "@/lib/questions";
-import { DIFFICULTY_XP, LANG_LABEL } from "@/lib/questions";
+import { DIFFICULTY_XP, LANG_LABEL } from "@/lib/question-meta";
 import { featuredPlayers, type FeaturedPlayer } from "@/lib/question-players";
 import { teamAccent } from "@/lib/team-colors";
 import Headshot from "@/components/headshot";

@@ -1095,6 +1095,46 @@ for (const [label, ex] of formulaExercises) {
 // matching on the server only (it broke /field's hydration). Write the
 // pattern as a regex literal and use its .source instead.
 let templatesChecked = 0;
+
+// The Hall of Fame counts courses through lib/unit-modules.generated.ts, not
+// the curriculum. Check the map is current and that every lesson lands in the
+// course the curriculum puts it in.
+let courseMapChecked = 0;
+{
+  const { UNIT_MODULE } = await loadProjectTs(path.join(root, "lib/unit-modules.generated.ts"), root);
+  const { courseOfLesson } = await loadProjectTs(path.join(root, "lib/achievements.ts"), root);
+  const expected = {};
+  for (const mod of curriculum.MODULES) {
+    if (mod.id === curriculum.ALL_MODULE) continue;
+    for (const unitId of mod.unitIds) if (!(unitId in expected)) expected[unitId] = mod.id;
+  }
+  if (JSON.stringify(expected) !== JSON.stringify(UNIT_MODULE)) {
+    problems.push("lib/unit-modules.generated.ts is stale: run node scripts/build-curriculum-index.mjs");
+  }
+  // And the lesson index /learn and the dashboard read instead of the curriculum.
+  const { LIVE_LESSONS, LESSON_INFO } = await loadProjectTs(path.join(root, "lib/lesson-index.generated.ts"), root);
+  for (const mod of curriculum.MODULES) {
+    const want = curriculum.liveLessons(mod.id).map((e) => e.lesson.id);
+    if (JSON.stringify(want) !== JSON.stringify(LIVE_LESSONS[mod.id])) {
+      problems.push(`lib/lesson-index.generated.ts is stale for ${mod.id}: run node scripts/build-curriculum-index.mjs`);
+    }
+    for (const id of want) {
+      const { lesson } = curriculum.getLesson(id);
+      const have = LESSON_INFO[id];
+      if (!have || have.title !== lesson.title || have.blurb !== lesson.blurb) {
+        problems.push(`lib/lesson-index.generated.ts has a stale title or blurb for ${id}: run node scripts/build-curriculum-index.mjs`);
+      }
+    }
+  }
+  for (const unit of curriculum.COURSE.units) {
+    for (const lesson of unit.lessons ?? []) {
+      courseMapChecked++;
+      const want = expected[unit.id];
+      const got = courseOfLesson(lesson.id);
+      if (want !== got) problems.push(`lesson ${lesson.id} counts toward course ${got ?? "none"}, but the curriculum puts it in ${want ?? "none"}`);
+    }
+  }
+}
 {
   const fs = await import("node:fs");
   const TEMPLATE = /`(?:[^`\\]|\\.)*`/gs;
@@ -1132,6 +1172,7 @@ console.log(`query doctor cases        : ${doctorChecked} (known wrong answers, 
 console.log(`pattern guides            : ${guidesChecked} (one per interview pattern, each example in its pattern)`);
 console.log(`analyst path checks       : ${pathChecks} (catalog, patterns tickable, fresh and finished learners)`);
 console.log(`film room steps           : ${filmSteps} (every SQL answer replayed clause by clause, each step run)`);
+console.log(`lesson → course map      : ${courseMapChecked} lessons (Hall of Fame course counts, without the curriculum)`);
 console.log(`template literals scanned : ${templatesChecked} (none with an escaped b, which the server minifier mangles)`);
 
 if (problems.length === 0) {

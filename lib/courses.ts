@@ -14,7 +14,7 @@
  * Keep those two honest about each other — the card shows both.
  */
 
-import { ALL_MODULE } from "./curriculum";
+import { ALL_MODULE } from "./all-module";
 
 export type CourseStatus = "live" | "building";
 

@@ -21,7 +21,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Database, QueryExecResult } from "sql.js";
 import type { Question } from "@/lib/questions";
-import { schemaFor } from "@/lib/questions";
 import { resultsMatch } from "@/lib/sql-grade";
 import CodeEditor from "@/components/code-editor";
 import QuestionArt from "@/components/question-art";
@@ -31,9 +30,13 @@ import { featuredPlayers } from "@/lib/question-players";
 
 export default function QotdPanel({
   question,
+  tables,
   isDaily = true,
 }: {
   question: Question;
+  /** The question's tables, worked out on the server: importing schemaFor here
+   * would put the whole question bank in the home page's JavaScript. */
+  tables: { table: string; columns: string[] }[];
   /** False when the home page shows its easy warm-up instead of the daily (frontDoorQuestion). */
   isDaily?: boolean;
 }) {
@@ -138,7 +141,6 @@ export default function QotdPanel({
     );
   }
 
-  const tables = schemaFor(question);
   const players = featuredPlayers(question, 3);
 
   return (

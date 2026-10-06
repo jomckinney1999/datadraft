@@ -13,6 +13,7 @@
 // or follow the all-in-one pathway.
 
 import { FINAL_UNITS } from "./finals";
+import { ALL_MODULE } from "./all-module";
 import {
   GIT_MORE_UNIT_IDS,
   MORE_UNITS,
@@ -7560,7 +7561,7 @@ export type Module = {
   unitIds: string[];
 };
 
-export const ALL_MODULE = "all";
+export { ALL_MODULE };
 
 export const MODULES: Module[] = [
   {

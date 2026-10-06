@@ -12,7 +12,7 @@
  * a thing they can go and do.
  */
 
-import { COURSE, MODULES, ALL_MODULE, type Unit } from "@/lib/curriculum";
+import { UNIT_MODULE } from "@/lib/unit-modules.generated";
 import type { Progress } from "@/lib/progress";
 
 export type Badge = {
@@ -140,33 +140,26 @@ export const BADGES: Badge[] = [
   },
 ];
 
-/** Which module each unit belongs to, for the "different courses" badge. */
-function unitToModule(): Map<string, string> {
-  const map = new Map<string, string>();
-  for (const mod of MODULES) {
-    if (mod.id === ALL_MODULE) continue;
-    for (const unitId of mod.unitIds) {
-      if (!map.has(unitId)) map.set(unitId, mod.id);
-    }
-  }
-  return map;
-}
+/** Longest first, so "r-wrangle-l1" belongs to r-wrangle, not r. */
+const UNIT_IDS = Object.keys(UNIT_MODULE).sort((a, b) => b.length - a.length);
 
-function lessonToUnit(): Map<string, string> {
-  const map = new Map<string, string>();
-  for (const unit of COURSE.units as Unit[]) {
-    for (const lesson of unit.lessons ?? []) map.set(lesson.id, unit.id);
-  }
-  return map;
+/**
+ * Which course a lesson belongs to, for the "different courses" badge. Every
+ * lesson id starts with its unit id and a dash, so the unit is the longest
+ * unit id that prefixes it, and the course comes from a small generated map
+ * rather than the whole curriculum: this runs in the nav's locker chip on
+ * every page (2026-10-05). The verifier checks it against the curriculum for
+ * every lesson.
+ */
+export function courseOfLesson(lessonId: string): string | undefined {
+  const unit = UNIT_IDS.find((u) => lessonId.startsWith(`${u}-`));
+  return unit ? UNIT_MODULE[unit] : undefined;
 }
 
 export function statsFrom(p: Progress): BadgeStats {
-  const lessonUnit = lessonToUnit();
-  const unitModule = unitToModule();
   const courses = new Set<string>();
   for (const id of p.completedLessons) {
-    const unit = lessonUnit.get(id);
-    const mod = unit ? unitModule.get(unit) : undefined;
+    const mod = courseOfLesson(id);
     if (mod) courses.add(mod);
   }
   return {

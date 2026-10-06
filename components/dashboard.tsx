@@ -25,7 +25,9 @@ import TeamLogo from "@/components/team-logo";
 import Headshot from "@/components/headshot";
 import CourseArt from "@/components/course-art";
 import { COURSES } from "@/lib/courses";
-import { liveLessons, getLesson } from "@/lib/curriculum";
+// The lesson index, not the curriculum (~560 KB): the dashboard lists
+// lessons, it never plays one.
+import { LESSON_INFO, LIVE_LESSONS } from "@/lib/lesson-index.generated";
 import { displayStreak, EMPTY_PROGRESS, loadProgress, type Progress } from "@/lib/progress";
 import { BADGES, isEarned, nextEnshrinement, statsFrom } from "@/lib/achievements";
 import { SHORT_CREDIT } from "@/lib/data-source";
@@ -82,23 +84,23 @@ export default function Dashboard({
 
   const courses: CourseProgress[] = COURSES.filter((c) => c.moduleId && c.status === "live")
     .map((c) => {
-      const lessons = liveLessons(c.moduleId!);
-      const doneCount = lessons.filter((l) => done.has(l.lesson.id)).length;
-      const next = lessons.find((l) => !done.has(l.lesson.id));
+      const lessons = LIVE_LESSONS[c.moduleId!] ?? [];
+      const doneCount = lessons.filter((id) => done.has(id)).length;
+      const next = lessons.find((id) => !done.has(id));
       return {
         id: c.id,
         moduleId: c.moduleId!,
         title: c.title,
         done: doneCount,
         total: lessons.length,
-        nextLessonId: next?.lesson.id ?? null,
+        nextLessonId: next ?? null,
       };
     })
     .filter((c) => c.total > 0);
 
   const started = courses.filter((c) => c.done > 0 && c.done < c.total);
   const upNext = started.sort((a, b) => b.done - a.done)[0] ?? courses.find((c) => c.done === 0) ?? null;
-  const upNextLesson = upNext?.nextLessonId ? getLesson(upNext.nextLessonId) : undefined;
+  const upNextLesson = upNext?.nextLessonId ? LESSON_INFO[upNext.nextLessonId] : undefined;
 
   const earned = BADGES.filter((b) => isEarned(b, stats)).length;
   const nextBadge = nextEnshrinement(stats);
@@ -197,8 +199,8 @@ export default function Dashboard({
               </span>
               <div className="min-w-0 flex-1">
                 <p className="font-mono text-[10px] uppercase tracking-widest text-turf">Up next · {upNext.title}</p>
-                <p className="mt-1 font-display text-lg font-bold text-ink">{upNextLesson.lesson.title}</p>
-                <p className="mt-0.5 line-clamp-2 text-sm text-ink-soft">{upNextLesson.lesson.blurb}</p>
+                <p className="mt-1 font-display text-lg font-bold text-ink">{upNextLesson.title}</p>
+                <p className="mt-0.5 line-clamp-2 text-sm text-ink-soft">{upNextLesson.blurb}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-3">
                   <Link href={`/learn/${upNext.nextLessonId}`} className="press btn-turf rounded-xl px-5 py-2.5 font-display text-sm font-bold text-night">
                     {stats.lessonsDone === 0 ? "Take the first snap" : "Continue"}

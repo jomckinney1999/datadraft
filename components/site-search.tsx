@@ -4,15 +4,18 @@
  * Site search — AnalystBuilder-shaped: a magnifying glass opens a panel, type
  * to filter pages / courses / projects / questions. ⌘/Ctrl+K opens it from
  * anywhere the button is mounted; Escape closes it.
+ *
+ * The index is fetched on intent (hover, focus, click or ⌘K), never on page
+ * load: it's built from the whole question bank and the course catalogue,
+ * and with the button in the nav on every page, importing it up front put
+ * about a megabyte of JavaScript on every page (2026-10-05).
  */
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import Link from "next/link";
-import {
-  SEARCH_SUGGESTIONS,
-  searchSite,
-  type SearchHit,
-} from "@/lib/site-search";
+import type { SearchHit } from "@/lib/site-search";
+
+type SearchIndex = typeof import("@/lib/site-search");
 
 const KIND_LABEL: Record<SearchHit["kind"], string> = {
   page: "Page",
@@ -35,9 +38,22 @@ export default function SiteSearch({
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listId = useId();
+  const [index, setIndex] = useState<SearchIndex | null>(null);
+  const loading = useRef(false);
 
-  const hits = q.trim() ? searchSite(q) : SEARCH_SUGGESTIONS;
-  const empty = Boolean(q.trim()) && hits.length === 0;
+  /** Start fetching the index; safe to call as often as you like. */
+  function warm() {
+    if (loading.current) return;
+    loading.current = true;
+    import("@/lib/site-search")
+      .then((m) => setIndex(m))
+      .catch(() => {
+        loading.current = false; // try again on the next hover or open
+      });
+  }
+
+  const hits = !index ? [] : q.trim() ? index.searchSite(q) : index.SEARCH_SUGGESTIONS;
+  const empty = Boolean(index) && Boolean(q.trim()) && hits.length === 0;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -52,6 +68,7 @@ export default function SiteSearch({
 
   useEffect(() => {
     if (!open) return;
+    warm();
     setQ("");
     setActive(0);
     const t = window.setTimeout(() => inputRef.current?.focus(), 20);
@@ -90,6 +107,8 @@ export default function SiteSearch({
       <button
         type="button"
         onClick={() => setOpen(true)}
+        onPointerEnter={warm}
+        onFocus={warm}
         aria-label="Search the site"
         title="Search (⌘K)"
         className={
@@ -147,7 +166,10 @@ export default function SiteSearch({
             </div>
 
             <ul id={listId} role="listbox" className="max-h-[min(22rem,50vh)] overflow-y-auto p-2">
-              {!q.trim() && (
+              {!index && (
+                <li className="px-3 py-6 text-center text-sm text-ink-muted">Loading the index…</li>
+              )}
+              {index && !q.trim() && (
                 <li className="px-2 py-1.5 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
                   Suggested
                 </li>

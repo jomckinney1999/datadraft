@@ -29,6 +29,7 @@ import {
   leagueDay,
   frontDoorQuestion,
   questionsIn,
+  schemaFor,
 } from "@/lib/questions";
 import { INTERVIEW_CASES } from "@/lib/interview-cases";
 import { COURSES } from "@/lib/courses";
@@ -340,7 +341,7 @@ export default async function Home() {
               </p>
             </div>
             <div className="reveal">
-              <QotdPanel question={qotd} isDaily={qotdIsDaily} />
+              <QotdPanel question={qotd} tables={schemaFor(qotd)} isDaily={qotdIsDaily} />
             </div>
             <p className="reveal mt-5 text-center text-sm text-ink-soft">
               Not ready to write SQL?{" "}

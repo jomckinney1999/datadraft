@@ -10,7 +10,6 @@
  */
 
 import { displayStreak, type KitAccent, type Progress } from "@/lib/progress";
-import { statsFrom } from "@/lib/achievements";
 
 export type { KitAccent };
 
@@ -115,20 +114,23 @@ export type Tenure = {
 /**
  * One number that rises when you keep coming back: lessons, questions, XP,
  * streaks, and days active. Caps keep a single grind from jumping the queue.
+ *
+ * Reads progress directly rather than through achievements' statsFrom: that
+ * maps lessons to courses through the whole curriculum, and the locker chip
+ * that shows this level is in the nav on every page (2026-10-05).
  */
 export function commitmentScore(p: Progress): number {
-  const stats = statsFrom(p);
   const streak = displayStreak(p);
   const solved = p.solvedQuestions.length;
   const xpPart = Math.min(p.xp, 8000) / 20;
   return Math.round(
-    stats.lessonsDone * 12 +
+    p.completedLessons.length * 12 +
       solved * 5 +
       xpPart +
       streak * 8 +
       Math.min(p.qotdStreak, 60) * 6 +
       p.daysActive * 5 +
-      stats.perfectLessons * 10 +
+      p.perfectLessons * 10 +
       Math.min(p.badges.length, 12) * 12,
   );
 }

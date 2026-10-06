@@ -43,16 +43,17 @@ import { FACTS } from "@/lib/lesson-facts.generated";
 import { WEEKLY_2024 } from "@/lib/question-frames.generated";
 import { EXTRA_SCHEMA, isLeagueOnly } from "@/lib/practice-schemas";
 
-export type QuestionDifficulty = "easy" | "medium" | "hard";
-
-/**
- * Which runtime grades this question.
- *
- * `sql` and `excel` run locally with no download. `python` pulls ~12 MB of
- * Pyodide and `r` ~30 MB of WebR, on first use only — which is why the
- * landing page's Question of the Day is pinned to SQL.
- */
-export type QuestionLang = "sql" | "python" | "r" | "excel";
+// Labels, prices and the two unions live in a small module so cards can use
+// them without importing the bank; re-exported here so nothing else changes.
+import {
+  DIFFICULTY_XP,
+  LANG_LABEL,
+  LANG_WEIGHT,
+  type QuestionDifficulty,
+  type QuestionLang,
+} from "@/lib/question-meta";
+export { DIFFICULTY_XP, LANG_LABEL, LANG_WEIGHT };
+export type { QuestionDifficulty, QuestionLang };
 
 /**
  * Which drawn scene sits on the card. One per idea in a title, and the
@@ -312,18 +313,6 @@ export const DIFFICULTY_LABEL: Record<QuestionDifficulty, string> = {
   hard: "Hard",
 };
 
-export const LANG_LABEL: Record<QuestionLang, string> = {
-  sql: "SQL",
-  python: "Python",
-  r: "R",
-  excel: "Excel",
-};
-
-/** Shown before a cold start, so a 30 MB download is never a surprise. */
-export const LANG_WEIGHT: Partial<Record<QuestionLang, string>> = {
-  python: "~12 MB first run",
-  r: "~30 MB first run",
-};
 
 /**
  * The 2024 season, as a literal, for the Python and R questions.
@@ -436,11 +425,6 @@ ${WEEKLY_COLS.map((c, i) => `  ${c} = ${rVec(WEEKLY_2024.map((r) => r[i]))}`).jo
 )
 `;
 
-export const DIFFICULTY_XP: Record<QuestionDifficulty, number> = {
-  easy: 10,
-  medium: 20,
-  hard: 35,
-};
 
 export const QUESTIONS: Question[] = [
   // ── Easy ──────────────────────────────────────────────────────
