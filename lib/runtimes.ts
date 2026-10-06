@@ -142,6 +142,15 @@ async function getR(): Promise<WebRShell> {
       const webR = new mod.WebR();
       await webR.init();
       await webR.installPackages(["dplyr"]);
+      // Tibbles print as data frames. A grouped summarise hands back a
+      // tibble, which prints a "# A tibble" header, a row of column types
+      // and three significant figures (32 where a data frame shows 32.0),
+      // so a right answer from a dplyr pipeline never matched a key that
+      // prints a data frame (2026-10-06). Every answer key prints data
+      // frames, so this changes nothing for them.
+      await webR.evalRString(
+        '{ print.tbl_df <- function(x, ...) { print(as.data.frame(x), ...); invisible(x) }; "ok" }',
+      );
       status.r = "ready";
       return webR as WebRShell;
     })().catch((err) => {
