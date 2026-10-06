@@ -81,12 +81,14 @@ export function FaceCluster({
         ))}
       </div>
       {names && (
-        <p className="max-w-[16rem] text-center font-mono text-[10px] uppercase leading-relaxed tracking-wider text-ink-muted">
-          {players.map((p, i) => (
-            <span key={p.name}>
+        // Each name stays on one line with its team, and the players sit
+        // apart: with only a space between them, "MIA A.J. BROWN" read as
+        // one name.
+        <p className="flex max-w-[18rem] flex-wrap justify-center gap-x-3 gap-y-0.5 text-center font-mono text-[10px] uppercase leading-relaxed tracking-wider text-ink-muted">
+          {players.map((p) => (
+            <span key={p.name} className="whitespace-nowrap">
               <span className="text-ink-soft">{p.name}</span>
               <span className="text-ink-muted"> · {p.team}</span>
-              {i < players.length - 1 ? " " : ""}
             </span>
           ))}
         </p>
