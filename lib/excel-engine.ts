@@ -167,6 +167,43 @@ function customFunctions(E: Errors): Record<string, (...args: unknown[]) => unkn
     if (!pool.includes(v)) return E.NA;
     return 1 + pool.filter((x) => (ascending ? x < v : x > v)).length;
   };
+  // Spread and percentiles, which the library doesn't have: STDEV, VAR,
+  // PERCENTILE and QUARTILE all came back #ERROR! before 2026-10-06. Sample
+  // (.S, and the old names) divides by n - 1, population (.P) by n, and a
+  // percentile interpolates between ranks the way PERCENTILE.INC does.
+  const variance = (sample: boolean) => (...args: unknown[]) => {
+    const n = numbers(args);
+    if (n.length < (sample ? 2 : 1)) return E.DIV0;
+    const mean = n.reduce((a, b) => a + b, 0) / n.length;
+    return n.reduce((a, b) => a + (b - mean) ** 2, 0) / (n.length - (sample ? 1 : 0));
+  };
+  const stdev = (sample: boolean) => (...args: unknown[]) => {
+    const v = variance(sample)(...args);
+    return typeof v === "number" ? Math.sqrt(v) : v;
+  };
+  const percentile = (input: unknown, k: number) => {
+    const n = numbers(input).sort((a, b) => a - b);
+    if (!n.length || !(k >= 0 && k <= 1)) return E.NUM;
+    const r = k * (n.length - 1);
+    const lo = Math.floor(r);
+    const hi = Math.min(lo + 1, n.length - 1);
+    return n[lo] + (r - lo) * (n[hi] - n[lo]);
+  };
+  const quartile = (...args: unknown[]) => {
+    const q = Number(scalar(args[1]));
+    if (![0, 1, 2, 3, 4].includes(q)) return E.NUM;
+    return percentile(args[0], q / 4);
+  };
+  // The most frequent number; on a tie, the one that appears first, as Excel
+  // does. #N/A when nothing repeats.
+  const mode = (...args: unknown[]) => {
+    const n = numbers(args);
+    const count = new Map<number, number>();
+    n.forEach((x) => count.set(x, (count.get(x) ?? 0) + 1));
+    let best: number | null = null;
+    for (const x of n) if ((count.get(x) ?? 0) > 1 && (best === null || (count.get(x) ?? 0) > (count.get(best) ?? 0))) best = x;
+    return best ?? E.NA;
+  };
   const ifs = (pick: (hits: number[]) => number) => (...args: unknown[]) => {
     const values = flatten(args[0]);
     const hits = matchingIndexes(args.slice(1))
@@ -272,6 +309,65 @@ function customFunctions(E: Errors): Record<string, (...args: unknown[]) => unkn
     MINIFS: ifs((hits) => Math.min(...hits)),
     RANK: rank,
     "RANK.EQ": rank,
+    // As Excel: multiply the arrays cell by cell and add, counting anything
+    // that isn't a number (TRUE included) as 0, which is why the idiom is
+    // --(range>=20). Arrays must be the same shape (#VALUE!), and an error
+    // in any cell is the answer. The library counted TRUE as 1 when there
+    // was only one array, and glued an #N/A onto the total as text.
+    SUMPRODUCT: (...args) => {
+      const arrays = args.map(grid);
+      const rows = arrays[0]?.length ?? 0;
+      const cols = arrays[0]?.[0]?.length ?? 0;
+      if (arrays.some((g) => g.length !== rows || g.some((r) => r.length !== cols))) return E.VALUE;
+      let total = 0;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          let product = 1;
+          for (const g of arrays) {
+            const v: unknown = g[r][c];
+            if (v && typeof v === "object" && "error" in v) return v;
+            product *= typeof v === "number" ? v : 0;
+          }
+          total += product;
+        }
+      }
+      return total;
+    },
+    STDEV: stdev(true),
+    "STDEV.S": stdev(true),
+    STDEVP: stdev(false),
+    "STDEV.P": stdev(false),
+    VAR: variance(true),
+    "VAR.S": variance(true),
+    VARP: variance(false),
+    "VAR.P": variance(false),
+    PERCENTILE: (...args) => percentile(args[0], Number(scalar(args[1]))),
+    "PERCENTILE.INC": (...args) => percentile(args[0], Number(scalar(args[1]))),
+    QUARTILE: quartile,
+    "QUARTILE.INC": quartile,
+    MODE: mode,
+    "MODE.SNGL": mode,
+    // Pearson correlation over the pairs where both cells are numbers.
+    CORREL: (...args) => {
+      const a = flatten(args[0]);
+      const b = flatten(args[1]);
+      if (a.length !== b.length) return E.NA;
+      const pairs = a
+        .map((x, i) => [x, b[i]] as const)
+        .filter((p): p is readonly [number, number] => typeof p[0] === "number" && typeof p[1] === "number");
+      if (pairs.length < 2) return E.DIV0;
+      const mx = pairs.reduce((s, p) => s + p[0], 0) / pairs.length;
+      const my = pairs.reduce((s, p) => s + p[1], 0) / pairs.length;
+      let sxy = 0;
+      let sxx = 0;
+      let syy = 0;
+      for (const [x, y] of pairs) {
+        sxy += (x - mx) * (y - my);
+        sxx += (x - mx) ** 2;
+        syy += (y - my) ** 2;
+      }
+      return sxx && syy ? sxy / Math.sqrt(sxx * syy) : E.DIV0;
+    },
     // Excel reads INDEX(one_row, n) as the nth column, and the library reads
     // it as the nth row and answers #REF!. Same for a one-column range. A row
     // or column of 0 returns the whole column or row. The library calls INDEX
@@ -350,10 +446,67 @@ async function getParser(): Promise<Parser> {
   return parserPromise;
 }
 
+type Operand = { val: unknown; isArray: boolean };
+type OperatorHooks = {
+  _applyInfix: (a: Operand, infix: string, b: Operand) => unknown;
+  _applyPrefix: (prefixes: string[], val: unknown, isArray: boolean) => unknown;
+};
+
+/** A value as rows of cells if it's an array or a range, else null. */
+function asGrid(v: unknown): unknown[][] | null {
+  if (!Array.isArray(v)) return null;
+  return v.map((row) => (Array.isArray(row) ? row : [row]));
+}
+
+/**
+ * Operators work cell by cell on arrays and ranges, as they do in Excel 365:
+ * =SUMPRODUCT((C2:C17="QB")*E2:E17) sums the quarterbacks' points. The
+ * library applies +, -, *, /, ^, &, comparisons and unary minus to the first
+ * cell of a range only, so before 2026-10-06 that formula gave 0 and
+ * =SUMPRODUCT(E2:E17*D2:D17) gave 430.4 x 17: a correct answer graded wrong.
+ * A single value, row or column stretches to meet the other side; cells
+ * past the end of a shorter array are #N/A, as in Excel. Scalars still go
+ * straight to the library.
+ */
+function arrayOperators(parser: Parser, NA: unknown): void {
+  const hooks = (parser as unknown as { utils: OperatorHooks }).utils;
+  const infix = hooks._applyInfix.bind(hooks);
+  const prefix = hooks._applyPrefix.bind(hooks);
+  hooks._applyInfix = (a, op, b) => {
+    const ga = asGrid(a.val);
+    const gb = asGrid(b.val);
+    if (!ga && !gb) return infix(a, op, b);
+    const x = ga ?? [[a.val]];
+    const y = gb ?? [[b.val]];
+    const rows = Math.max(x.length, y.length);
+    const cols = Math.max(x[0]?.length ?? 0, y[0]?.length ?? 0);
+    const at = (g: unknown[][], r: number, c: number) => {
+      const rr = g.length === 1 ? 0 : r;
+      const cc = (g[0]?.length ?? 0) === 1 ? 0 : c;
+      return rr < g.length && cc < (g[rr]?.length ?? 0) ? g[rr][cc] : NA;
+    };
+    return Array.from({ length: rows }, (_, r) =>
+      Array.from({ length: cols }, (_, c) =>
+        infix({ val: at(x, r, c), isArray: false }, op, { val: at(y, r, c), isArray: false }),
+      ),
+    );
+  };
+  // A minus sign turns TRUE/FALSE into 1/0 (=--TRUE is 1 in Excel); the
+  // library cancels a double minus and handed the boolean back unchanged.
+  const minus = (prefixes: string[], cell: unknown) =>
+    prefix(prefixes, prefixes.includes("-") && typeof cell === "boolean" ? Number(cell) : cell, false);
+  hooks._applyPrefix = (prefixes, val, isArray) => {
+    const g = asGrid(val);
+    if (!g) return isArray ? prefix(prefixes, val, isArray) : minus(prefixes, val);
+    return g.map((row) => row.map((cell) => minus(prefixes, cell)));
+  };
+}
+
 async function buildParser(book: Workbook): Promise<Parser> {
   const mod = await import("fast-formula-parser");
   const FormulaParser = (mod.default ?? mod) as new (cfg: unknown) => Parser;
-  return new FormulaParser({
+  const errors = (FormulaParser as unknown as { FormulaError: Errors }).FormulaError;
+  const parser = new FormulaParser({
     onCell: ({ sheet, row, col }: ParserPosition) =>
       readCell(book, sheet, row, col),
     onRange: (ref: RangeRef) => {
@@ -368,8 +521,10 @@ async function buildParser(book: Workbook): Promise<Parser> {
       }
       return rows;
     },
-    functions: customFunctions((FormulaParser as unknown as { FormulaError: Errors }).FormulaError),
+    functions: customFunctions(errors),
   });
+  arrayOperators(parser, errors.NA);
+  return parser;
 }
 
 let ready = false;

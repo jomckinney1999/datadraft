@@ -281,7 +281,8 @@ export type QuestionArt =
   | "two-helmets"
   | "box-lines"
   | "two-podium"
-  | "fire-chain";
+  | "fire-chain"
+  | "balance-scale";
 
 export type Question = {
   id: string;
@@ -6235,6 +6236,64 @@ cat(sprintf("%s (%s): %.1f pts", wrs$player, wrs$team, wrs$points), sep = "\\n")
     explain:
       "sprintf is vectorised, so one call builds all five lines; %.1f is what keeps 403.0 from printing as 403. It's the same printf the SQL Waiver Headline question uses.",
     art: "box-lines",
+  },
+  {
+    id: "xl-ceiling",
+    players: ["Lamar Jackson"],
+    title: "The Ceiling (Excel)",
+    difficulty: "medium",
+    lang: "excel",
+    added: "2026-10-07",
+    tags: ["PERCENTILE.INC", "ROUND", "Percentiles"],
+    prompt:
+      "A player's ceiling is a great game, not his single best one. On the Weeks sheet, Lamar Jackson is row 2, one column per week from B to S, blank when he didn't play. Find his 90th percentile game: the score only one game in ten beats.",
+    returns: "A single number to one decimal place.",
+    tables: [],
+    sheet: "Weeks",
+    starter: "=",
+    expected: "=ROUND(PERCENTILE.INC(B2:S2,0.9),1)",
+    hint: "PERCENTILE.INC(range, 0.9) gives the 90th percentile and skips the blank weeks. Wrap it in ROUND(…, 1).",
+    explain:
+      "33.8: better than all but his very best games, without letting one huge day stand for his season. PERCENTILE.INC (or the older PERCENTILE) interpolates the same way pandas, R and Postgres's percentile_cont do.",
+    art: "ceiling-line",
+  },
+  {
+    id: "xl-steady-hands",
+    players: ["Josh Allen", "Lamar Jackson"],
+    title: "Steady Hands (Excel)",
+    difficulty: "medium",
+    lang: "excel",
+    added: "2026-10-07",
+    tags: ["STDEV.S", "ROUND", "Spread"],
+    prompt:
+      "Two quarterbacks with similar seasons can be very different weeks to start. On the Weeks sheet, Lamar Jackson is row 2 and Josh Allen is row 4. How much bigger is Allen's week-to-week swing than Jackson's, measured as the sample standard deviation of their games?",
+    returns: "A single number to one decimal place: Allen's minus Jackson's.",
+    tables: [],
+    sheet: "Weeks",
+    starter: "=",
+    expected: "=ROUND(STDEV.S(B4:S4)-STDEV.S(B2:S2),1)",
+    hint: "STDEV.S(B4:S4) is Allen's, STDEV.S(B2:S2) is Jackson's. Both skip blank weeks. Subtract, then ROUND to one decimal.",
+    explain:
+      "Allen swings by about 11.5 points a week to Jackson's 6.2, nearly twice as much. STDEV.S divides by one less than the number of games (a sample); STDEV.P, which treats the games as the whole population, gives a slightly smaller number.",
+    art: "steady-hands",
+  },
+  {
+    id: "xl-average-of-averages",
+    title: "Average of Averages",
+    difficulty: "hard",
+    lang: "excel",
+    added: "2026-10-07",
+    tags: ["SUM", "ROUND", "Weighted average"],
+    prompt:
+      "What did the players on the Roster score per game, across every game they played between them? Column D is games and E is points.",
+    returns: "A single number to two decimal places.",
+    tables: [],
+    starter: "=",
+    expected: "=ROUND(SUM(E2:E17)/SUM(D2:D17),2)",
+    hint: "Per game across every game means all the points divided by all the games.",
+    explain:
+      "19.60. The tempting answer is the average of each player's points per game, AVERAGE(E2:E17/D2:D17), which gives 19.51: it counts a 13-game season as much as a 17-game one. An average of averages is only right when every group is the same size.",
+    art: "balance-scale",
   },
 ];
 

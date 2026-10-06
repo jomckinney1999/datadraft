@@ -269,6 +269,7 @@ export const ART_TONE: Record<QuestionArt, Tone> = {
   "box-lines": "gold",
   "two-podium": "turf",
   "fire-chain": "gold",
+  "balance-scale": "ice",
 };
 
 // ── Scenes, one per title idea ───────────────────────────────────
@@ -5724,6 +5725,33 @@ function FireChain() {
   );
 }
 
+/** Average of Averages — a balance with a big weight and a small one, tipped toward the big one. */
+function BalanceScale() {
+  return (
+    <g>
+      <Shadow y={136} rx={64} />
+      <path d="M100 128 V40" stroke={N} strokeWidth="6" strokeLinecap="round" />
+      <path d="M100 128 V40" stroke={c("ink-soft")} strokeWidth="3.4" strokeLinecap="round" />
+      <path d="M78 128 H122" stroke={N} strokeWidth="6" strokeLinecap="round" />
+      <g transform="rotate(10 100 44)">
+        <path d="M40 44 H160" stroke={c("gold")} strokeWidth="5" strokeLinecap="round" />
+        <path d="M48 44 L38 78 M48 44 L58 78 M152 44 L142 78 M152 44 L162 78" stroke={c("ink-muted")} strokeWidth="1.8" />
+        <path d="M34 78 H62 Q48 90 34 78 Z" fill={c("ink")} stroke={N} strokeWidth="2" />
+        <path d="M138 78 H166 Q152 90 138 78 Z" fill={c("ink")} stroke={N} strokeWidth="2" />
+        <rect x="41" y="64" width="14" height="14" rx="2" fill={c("ice")} stroke={N} strokeWidth="1.8" />
+        <rect x="139" y="48" width="26" height="30" rx="3" fill={c("ice")} stroke={N} strokeWidth="2" />
+        <text x="152" y="68" textAnchor="middle" fontSize="11" fontWeight="900" fill={N} fontFamily={MONO}>
+          17
+        </text>
+        <text x="48" y="75" textAnchor="middle" fontSize="7" fontWeight="900" fill={N} fontFamily={MONO}>
+          13
+        </text>
+      </g>
+      <circle cx="100" cy="44" r="6" fill={c("gold")} stroke={N} strokeWidth="2" />
+    </g>
+  );
+}
+
 const SCENES: Record<QuestionArt, () => JSX.Element> = {
   hammer: Hammer,
   quarterback: Quarterback,
@@ -5946,6 +5974,7 @@ const SCENES: Record<QuestionArt, () => JSX.Element> = {
   "box-lines": BoxLines,
   "two-podium": TwoPodium,
   "fire-chain": FireChain,
+  "balance-scale": BalanceScale,
 };
 
 export default function QuestionArt({

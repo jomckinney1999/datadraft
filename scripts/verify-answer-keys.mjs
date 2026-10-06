@@ -1103,6 +1103,30 @@ for (const [sheet, f, want] of [
   ["Roster", "=SUM(INDEX(B2:F17,0,4))", 5016.8],
   ["Weeks", "=INDEX(B1:S1,MATCH(MAX(B2:S2),B2:S2,0))", "W15"],
   ["Weeks", "=COUNTBLANK(B14:S14)", 4],
+  // Spread, percentiles and mode (added 2026-10-06), against Python's
+  // statistics module on the same cells.
+  ["Roster", "=ROUND(STDEV.S(E2:E17),4)", 65.5736],
+  ["Roster", "=ROUND(STDEV(E2:E17),4)", 65.5736],
+  ["Roster", "=ROUND(STDEV.P(E2:E17),4)", 63.4914],
+  ["Roster", "=ROUND(VAR.S(E2:E17),3)", 4299.896],
+  ["Roster", "=ROUND(VAR.P(E2:E17),4)", 4031.1525],
+  ["Roster", "=ROUND(PERCENTILE.INC(E2:E17,0.9),2)", 391.05],
+  ["Roster", "=ROUND(QUARTILE(E2:E17,1),3)", 257.875],
+  ["Roster", "=QUARTILE.INC(E2:E17,4)", 430.4],
+  ["Roster", "=MODE(D2:D17)", 17],
+  ["Roster", "=ROUND(CORREL(E2:E17,F2:F17),4)", 0.1214],
+  ["Weeks", "=ROUND(PERCENTILE(B2:S2,0.9),1)", 33.8],
+  ["Weeks", "=ROUND(STDEV.S(B2:S2),2)", 6.18],
+  // Operators cell by cell on ranges (Excel 365 arrays), 2026-10-06. Each
+  // is the same answer a SUMIFS or COUNTIF question already checks.
+  ["Roster", '=SUMPRODUCT((C2:C17="QB")*E2:E17)', 1407.4],
+  ["Roster", "=SUMPRODUCT(E2:E17*D2:D17)", 81046.8],
+  ["Roster", '=SUMPRODUCT(--(G2:G17="Jordan"),E2:E17)', 1902.9],
+  ["Weeks", "=SUMPRODUCT(--(B3:S3>=20))", 9],
+  ["Weeks", "=SUMPRODUCT((B2:S2>=20)*1)", 14],
+  ["Weeks", "=SUMPRODUCT((B2:S2>=20))", 0],
+  ["Roster", '=SUM((C2:C17="WR")*1)', 7],
+  ["Roster", "=E2-E3", 27.4],
 ]) {
   const res = await excel.evaluateFormula(f, sheet);
   if (res.error || !excel.valuesMatch(res.value, want)) {
