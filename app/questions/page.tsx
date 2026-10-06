@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 // without rendering this per request.
 export const revalidate = 3600;
 
-type Props = { searchParams: { pattern?: string; data?: string } };
+type Props = { searchParams: { pattern?: string; data?: string; lang?: string } };
 
 export default function QuestionsPage({ searchParams }: Props) {
   const day = leagueDay();
@@ -41,6 +41,7 @@ export default function QuestionsPage({ searchParams }: Props) {
       patterns={patterns}
       initialPattern={searchParams.pattern ?? null}
       initialData={searchParams.data ?? null}
+      initialLang={searchParams.lang ?? null}
     />
   );
 }

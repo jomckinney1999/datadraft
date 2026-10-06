@@ -92,6 +92,7 @@ export default function QuestionBank({
   patterns,
   initialPattern = null,
   initialData = null,
+  initialLang = null,
 }: {
   day: string;
   list: BankItem[];
@@ -102,14 +103,17 @@ export default function QuestionBank({
   initialPattern?: string | null;
   /** Deep link from /data: `/questions?data=app`. */
   initialData?: string | null;
+  /** ?lang=python, from the pandas guide: opens on that language and remembers it. */
+  initialLang?: string | null;
 }) {
   const seedPattern =
     initialPattern && patterns.some((p) => p.id === initialPattern) ? initialPattern : null;
   const seedData = DATASETS.find((d) => d.id === initialData)?.id ?? null;
+  const seedLang = initialLang && LANG_VALUES.includes(initialLang) ? (initialLang as QuestionLang) : null;
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
   const [hydrated, setHydrated] = useState(false);
   const [lang, setLang] = useState<LangFilter>(
-    seedPattern || (seedData && seedData !== "league") ? "sql" : "all",
+    seedPattern || (seedData && seedData !== "league") ? "sql" : seedLang ?? "all",
   );
   /** Which database (SQL only, apart from the league). */
   const [data, setData] = useState<"all" | DatasetId>(seedData ?? "all");
@@ -132,6 +136,8 @@ export default function QuestionBank({
         window.localStorage.setItem(LANG_KEY, "sql");
       } else if (seedData && seedData !== "league") {
         /* a dataset deep link is SQL for this visit; leave the memory alone */
+      } else if (seedLang) {
+        window.localStorage.setItem(LANG_KEY, seedLang);
       } else {
         const saved = window.localStorage.getItem(LANG_KEY);
         if (saved && LANG_VALUES.includes(saved)) setLang(saved as QuestionLang);
@@ -139,7 +145,7 @@ export default function QuestionBank({
     } catch {
       /* storage blocked — the default is fine */
     }
-  }, [seedPattern, seedData]);
+  }, [seedPattern, seedData, seedLang]);
 
   function pickData(next: "all" | DatasetId) {
     setData(next);

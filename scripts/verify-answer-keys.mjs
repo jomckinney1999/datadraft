@@ -802,6 +802,16 @@ let guidesChecked = 0;
     }
     if (g.mistakes.length < 3 || g.faq.length < 2) problems.push(`Topic guide "${g.slug}" needs 3+ mistakes and 2+ FAQs`);
   }
+  // The pandas guide: its example is a Python question, and it has some
+  // to practise on.
+  {
+    const g = pg.PANDAS_GUIDE;
+    guidesChecked++;
+    const ex = qs.QUESTIONS.find((q) => q.id === g.example);
+    if (!ex || ex.lang !== g.lang) problems.push(`Pandas guide: worked example "${g.example}" isn't a ${g.lang} question`);
+    if (!qs.QUESTIONS.some((q) => q.lang === g.lang)) problems.push("Pandas guide has no questions to practise on");
+    if (g.mistakes.length < 3 || g.faq.length < 2) problems.push("Pandas guide needs 3+ mistakes and 2+ FAQs");
+  }
 }
 
 stage("The analyst path");

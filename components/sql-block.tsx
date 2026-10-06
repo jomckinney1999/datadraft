@@ -5,15 +5,24 @@
  * as when you type it.
  */
 
-import { tokenize, TOKEN_CLASS } from "@/lib/highlight";
+import { tokenize, TOKEN_CLASS, type HighlightLang } from "@/lib/highlight";
 
-export default function SqlBlock({ sql, className = "" }: { sql: string; className?: string }) {
+export default function SqlBlock({
+  sql,
+  lang = "sql",
+  className = "",
+}: {
+  sql: string;
+  /** The pandas guide shows Python through the same block. */
+  lang?: HighlightLang;
+  className?: string;
+}) {
   return (
     <pre
       className={`overflow-x-auto rounded-xl border border-panel-border bg-night/60 px-4 py-3 font-mono text-[12.5px] leading-relaxed text-ink ${className}`}
     >
       <code>
-        {tokenize(sql, "sql").map((t, i) =>
+        {tokenize(sql, lang).map((t, i) =>
           t.kind === "plain" ? (
             t.text
           ) : (

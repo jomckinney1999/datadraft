@@ -697,3 +697,84 @@ ORDER BY go_pct DESC, team;`,
 export function topicGuideBySlug(slug: string): TopicGuide | undefined {
   return TOPIC_GUIDES.find((g) => g.slug === slug);
 }
+
+/**
+ * The pandas guide (/pandas-interview-questions, 2026-10-06): the same page
+ * as the SQL guides, for the Python round of an analyst screen. Its practice
+ * list is every Python question in the bank, so it grows with them, and its
+ * example is a Python question whose key is shown in full. The verifier
+ * checks both.
+ */
+export type LanguageGuide = Omit<PatternGuide, "pattern" | "slug"> & {
+  path: string;
+  name: string;
+  asks: string;
+  label: string;
+  lang: "python";
+};
+
+export const PANDAS_GUIDE: LanguageGuide = {
+  path: "/pandas-interview-questions",
+  name: "Pandas interview questions",
+  asks: "Filtering, groupby, merges and window-style calculations in pandas, the Python round of an analyst screen.",
+  label: "the Python round",
+  lang: "python",
+  h1: "Pandas interview questions for data analysts",
+  metaTitle: "Pandas interview questions for data analysts, with answers",
+  metaDescription:
+    "The pandas an analyst screen asks for: filtering, groupby, merge, running totals and reshaping. The mistakes interviewers watch for, a worked example, and practice questions you run in your browser on real NFL data.",
+  lead: "The Python round of an analyst screen is mostly pandas: filter a table, group it, join it, and print the answer. The code is short. The traps are in what each step hands back.",
+  whyAsked:
+    "Because a lot of analyst work happens in a notebook, not a SQL editor. A pandas round checks the same instincts as a SQL one (what's one row, which rows, grouped by what) and a few of its own: whether you know when you're holding a Series or a DataFrame, whether you sort before a running calculation, and whether a merge kept the rows you think it kept.",
+  shape: `import pandas as pd
+
+df = pd.read_csv("some_table.csv")
+
+result = (
+    df[df["status"] == "active"]             # WHERE
+      .groupby("group_col")["metric"]        # GROUP BY
+      .agg(["count", "mean"])                # the aggregates
+      .sort_values("mean", ascending=False)  # ORDER BY
+      .head(5)                               # LIMIT
+)
+print(result)`,
+  shapeNote:
+    "Every SQL clause has a pandas twin: WHERE is a boolean mask, GROUP BY is groupby, a JOIN is merge, and a window function is groupby with transform, shift, diff, cumsum or rolling. It's fine to say in the interview which SQL you're translating.",
+  mistakes: [
+    {
+      title: "A running calculation before sorting",
+      body: "cumsum, diff, shift and rolling work in whatever order the rows are in. Sort by the time column first, and do it within each group, or one player's first game gets compared with another's last.",
+    },
+    {
+      title: "A merge that multiplies rows",
+      body: "Merge on a key that repeats on both sides and every pairing becomes a row. Check len() before and after, or pass validate=\"one_to_one\" and let pandas tell you.",
+    },
+    {
+      title: "Not knowing what you're holding",
+      body: "df[\"col\"] is a Series and df[[\"col\"]] a DataFrame; groupby(...)[\"x\"].sum() hands back a Series indexed by the groups. Know which you have before you print it, index it or merge it.",
+    },
+    {
+      title: "Missing data in the maths",
+      body: "mean() and sum() skip NaN without a word, and a game that wasn't played is no row at all, not a zero. Say out loud whether a gap should count as nothing or as zero.",
+    },
+  ],
+  example: "py-biggest-jump",
+  faq: [
+    {
+      q: "What pandas do data analyst interviews ask?",
+      a: "Filtering with boolean masks, groupby with agg, merge, sorting, and the window-style tools: transform, shift, diff, cumsum and rolling. Expect a little exploring too (shape, dtypes, value_counts, isna), and pivot tables or reshaping in longer take-homes.",
+    },
+    {
+      q: "Should I answer in SQL or pandas?",
+      a: "Whichever the screen asks for, and if it's your choice, the one you're quicker in. The thinking is the same: what one row is, which rows, grouped by what, in what order. Many people write the SQL in their head and translate it, and saying so is fine.",
+    },
+    {
+      q: "How is the practice graded?",
+      a: "Your code runs in your browser in Pyodide, real Python with pandas, against the same table the answer uses, and what you print is compared with what the answer prints. Different code that prints the same thing passes.",
+    },
+    {
+      q: "Is the data real?",
+      a: "Yes. weekly is one row per game of the 2024 NFL season for twenty players, from nflverse's public data, and df is their season totals. The same rows are behind the SQL questions, so you can solve one in both languages.",
+    },
+  ],
+};
