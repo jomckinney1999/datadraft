@@ -1428,7 +1428,8 @@ let rollCallPy = 0;
     problems.push(`roll call: public/roll-call/${season}.json disagrees with lib/roll-call-data.generated.ts (rerun node scripts/build-roll-call-dataset.mjs)`);
   }
   const csvFile = path.join(root, "public", rc.PLAYER_WEEKS_CSV(season));
-  const csvLines = fs.existsSync(csvFile) ? fs.readFileSync(csvFile, "utf8").trim().split("\n") : [];
+  // A Windows checkout may hand back CRLF line endings.
+  const csvLines = fs.existsSync(csvFile) ? fs.readFileSync(csvFile, "utf8").trim().split(/\r?\n/) : [];
   const downloads = (await loadProjectTs(path.join(root, "lib/data-source.ts"), root)).DOWNLOADS;
   if (!downloads.some((d) => d.file === rc.PLAYER_WEEKS_CSV(season))) problems.push(`roll call: /data doesn't offer ${rc.PLAYER_WEEKS_CSV(season)} (lib/data-source.ts DOWNLOADS)`);
   if (csvLines[0] !== table.columns.join(",") || csvLines.length !== table.rows.length + 1) {
