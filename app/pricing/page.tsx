@@ -96,9 +96,11 @@ export default async function PricingPage() {
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-panel-border">
-                <th className="px-4 py-3 font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted"> </th>
+                <th className="px-4 py-3 font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted">
+                  <span className="sr-only">Feature</span>
+                </th>
                 <th className="px-4 py-3 font-mono text-[10px] font-bold uppercase tracking-widest text-turf">Free</th>
-                <th className="px-4 py-3 font-mono text-[10px] font-bold uppercase tracking-widest text-gold">Season Pass</th>
+                <th className="bg-gold/10 px-4 py-3 font-mono text-[10px] font-bold uppercase tracking-widest text-gold">★ Season Pass</th>
               </tr>
             </thead>
             <tbody>
@@ -106,7 +108,7 @@ export default async function PricingPage() {
                 <tr key={what} className="border-b border-panel-border/60 last:border-0 align-top">
                   <td className="px-4 py-3 text-ink">{what}</td>
                   <td className="px-4 py-3 text-ink-soft">{free}</td>
-                  <td className="px-4 py-3 text-ink">{pass}</td>
+                  <td className="bg-gold/5 px-4 py-3 font-medium text-ink">{pass}</td>
                 </tr>
               ))}
             </tbody>

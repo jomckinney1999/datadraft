@@ -928,6 +928,125 @@ body {
   box-shadow: 0 0 10px rgb(var(--c-gold) / calc(0.5 * var(--glow-strength)));
 }
 
+/* ── The Season Pass card ────────────────────────────────────
+   The one card on the pricing table that should look like the thing to
+   want: lit gold from above, a gold ring with a slow sweep of light round
+   it, and faint broadcast rays across the top. The glows multiply by
+   --glow-strength, so light mode keeps the ring and the warm wash and loses
+   the halo. It sets its own shadow, so don't add .surface or a shadow
+   utility beside it. */
+.pass-card {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(120% 55% at 50% 0%, rgb(var(--c-gold) / 0.17), transparent 62%),
+    linear-gradient(180deg, rgb(var(--c-panel-hover)), rgb(var(--c-panel)));
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / calc(0.08 * var(--glow-strength))),
+    0 34px 80px -34px rgb(var(--c-gold) / calc(0.6 * var(--glow-strength))),
+    0 0 140px -50px rgb(var(--c-gold) / calc(0.55 * var(--glow-strength))),
+    var(--shadow-float);
+}
+
+.pass-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--glow-angle),
+    rgb(var(--c-gold)) 0%,
+    rgb(var(--c-gold) / 0.45) 14%,
+    rgb(var(--c-gold-dim) / 0.55) 40%,
+    rgb(var(--c-turf) / 0.9) 58%,
+    rgb(var(--c-gold) / 0.45) 74%,
+    rgb(var(--c-gold)) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+  animation: glow-orbit 9s linear infinite;
+}
+
+.pass-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-image: repeating-linear-gradient(
+    115deg,
+    rgb(var(--c-gold)) 0px,
+    rgb(var(--c-gold)) 1px,
+    transparent 1px,
+    transparent 26px
+  );
+  opacity: 0.07;
+  -webkit-mask-image: linear-gradient(180deg, #000, transparent 38%);
+  mask-image: linear-gradient(180deg, #000, transparent 38%);
+  pointer-events: none;
+}
+
+/* Light mode has no glow to give it, so the card lifts on a warm shadow
+   instead: soft enough to read as paper under a lamp, not a coloured smear. */
+:root[data-theme="light"] .pass-card {
+  box-shadow:
+    0 28px 60px -28px rgb(var(--c-gold) / 0.45),
+    var(--shadow-float);
+}
+
+/* The ribbon that straddles the card's top edge. */
+.pass-ribbon {
+  background-image: linear-gradient(180deg, rgb(var(--c-gold)), rgb(var(--c-gold-dim)));
+  color: rgb(var(--c-night));
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.3),
+    0 6px 18px -6px rgb(var(--c-gold) / calc(0.7 * var(--glow-strength))),
+    0 1px 2px rgb(0 0 0 / 0.3);
+}
+
+/* The billing switch's sliding thumb. */
+.pass-thumb {
+  background-image: linear-gradient(180deg, rgb(var(--c-gold) / 0.24), rgb(var(--c-gold) / 0.12));
+  box-shadow:
+    inset 0 0 0 1px rgb(var(--c-gold) / 0.6),
+    0 6px 18px -8px rgb(var(--c-gold) / calc(0.6 * var(--glow-strength)));
+  transition: transform 260ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+/* A new price slides up into place when the billing switches. */
+@keyframes pass-price-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pass-price-in {
+  animation: pass-price-in 280ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pass-card::before,
+  .pass-price-in {
+    animation: none;
+  }
+
+  .pass-thumb {
+    transition: none;
+  }
+}
+
 .title-glow-turf {
   filter: drop-shadow(0 0 22px rgb(var(--c-turf) / calc(0.28 * var(--glow-strength))));
 }

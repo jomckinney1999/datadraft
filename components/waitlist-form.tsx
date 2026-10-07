@@ -16,12 +16,16 @@ export default function WaitlistForm({
   source,
   label = "Get notified",
   compact = false,
+  gold = false,
   onJoined,
 }: {
   interest: string;
   source: string;
   label?: string;
   compact?: boolean;
+  /** The primary call to action on a card (the Season Pass): a full-width
+   *  gold button under a roomy field, rather than the inline mono pair. */
+  gold?: boolean;
   /** Fires after a successful signup (or already-on). */
   onJoined?: () => void;
 }) {
@@ -80,11 +84,47 @@ export default function WaitlistForm({
   if (state === "done") {
     return (
       <p
-        className={`font-mono text-turf ${compact ? "text-[11px]" : "text-xs"}`}
+        className={
+          gold
+            ? "rounded-xl border border-turf/50 bg-turf/10 px-4 py-3 text-center text-sm font-semibold text-turf"
+            : `font-mono text-turf ${compact ? "text-[11px]" : "text-xs"}`
+        }
         role="status"
       >
         ✓ {message}
       </p>
+    );
+  }
+
+  if (gold) {
+    return (
+      <form onSubmit={submit} className="w-full">
+        <label className="sr-only" htmlFor={`waitlist-${interest}`}>
+          Email address
+        </label>
+        <input
+          id={`waitlist-${interest}`}
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@email.com"
+          autoComplete="email"
+          className="w-full rounded-xl border border-gold/40 bg-night/70 px-4 py-3 font-mono text-sm text-ink outline-none transition-colors placeholder:text-ink-muted focus:border-gold"
+        />
+        <button
+          type="submit"
+          disabled={state === "sending"}
+          className="press btn-gold mt-2 w-full py-3.5 text-sm disabled:opacity-60"
+        >
+          {state === "sending" ? "Adding…" : label}
+        </button>
+        {state === "error" && (
+          <p className="mt-2 text-center font-mono text-[11px] text-gold" role="alert">
+            {message}
+          </p>
+        )}
+      </form>
     );
   }
 
