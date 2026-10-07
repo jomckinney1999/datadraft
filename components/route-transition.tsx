@@ -21,6 +21,8 @@ import { useCallback, useEffect, useRef, useState, type ComponentType } from "re
 import {
   COVER_MS,
   MAX_HOLD_MS,
+  MOBILE_COVER_MS,
+  MOBILE_REVEAL_MS,
   REVEAL_MS,
   TRANSITION_EVENT,
   pathOf,
@@ -30,13 +32,20 @@ import {
 import { loadCurtain } from "@/components/route-transition-load";
 import type { CurtainProps } from "@/components/route-transition-curtain";
 
-type Run = { kind: TransitionKind; label: string; from: string; phase: "cover" | "reveal" };
+type Run = {
+  kind: TransitionKind;
+  label: string;
+  from: string;
+  phase: "cover" | "reveal";
+  mobile: boolean;
+};
 
 export default function RouteTransition() {
   const router = useRouter();
   const pathname = usePathname();
   const [run, setRun] = useState<Run | null>(null);
   const [Curtain, setCurtain] = useState<ComponentType<CurtainProps> | null>(null);
+  const curtainRef = useRef<ComponentType<CurtainProps> | null>(null);
   const runRef = useRef<Run | null>(null);
   const timers = useRef<number[]>([]);
 
@@ -55,8 +64,24 @@ export default function RouteTransition() {
       window.setTimeout(() => {
         runRef.current = null;
         setRun(null);
-      }, REVEAL_MS[r.kind]),
+      }, (r.mobile ? MOBILE_REVEAL_MS : REVEAL_MS)[r.kind]),
     );
+  }, []);
+
+  // A touchstart and click can land in the same frame. Fetching the drawing
+  // only on touchstart left a blank beat on phones while the chunk arrived.
+  // Warm that small chunk after mount on narrow screens, before anyone taps.
+  useEffect(() => {
+    if (!window.matchMedia("(max-width: 700px)").matches) return;
+    const id = window.setTimeout(() => {
+      void loadCurtain().then((m) => {
+        curtainRef.current = m.default;
+        setCurtain(() => m.default);
+      }).catch(() => {
+        /* A plain link still works if the optional drawing fails to load. */
+      });
+    }, 200);
+    return () => window.clearTimeout(id);
   }, []);
 
   useEffect(() => {
@@ -65,24 +90,33 @@ export default function RouteTransition() {
       ask.handled = true;
       if (runRef.current) return; // a second click while one runs
       const from = window.location.pathname;
-      const start: Run = { kind: ask.kind, label: ask.label, from, phase: "cover" };
+      const mobile = window.matchMedia("(max-width: 700px)").matches;
+      const start: Run = { kind: ask.kind, label: ask.label, from, phase: "cover", mobile };
       runRef.current = start;
-      router.prefetch(ask.href);
-      loadCurtain()
-        .then((m) => {
-          setCurtain(() => m.default);
-          setRun(start);
-          later(() => {
-            router.push(ask.href);
-            // Same page, new hash: no pathname change is coming.
-            if (pathOf(ask.href) === from) later(lift, 120);
-          }, COVER_MS[ask.kind]);
-          later(lift, COVER_MS[ask.kind] + MAX_HOLD_MS);
-        })
-        .catch(() => {
-          runRef.current = null;
+      const coverMs = (mobile ? MOBILE_COVER_MS : COVER_MS)[ask.kind];
+      const startRun = (View: ComponentType<CurtainProps>) => {
+        curtainRef.current = View;
+        setCurtain(() => View);
+        setRun(start);
+        later(() => {
           router.push(ask.href);
-        });
+          // Same page, new hash: no pathname change is coming.
+          if (pathOf(ask.href) === from) later(lift, 120);
+        }, coverMs);
+        later(lift, coverMs + MAX_HOLD_MS);
+      };
+
+      router.prefetch(ask.href);
+      if (curtainRef.current) {
+        startRun(curtainRef.current);
+      } else {
+        loadCurtain()
+          .then((m) => startRun(m.default))
+          .catch(() => {
+            runRef.current = null;
+            router.push(ask.href);
+          });
+      }
     };
     window.addEventListener(TRANSITION_EVENT, onAsk);
     const list = timers.current;

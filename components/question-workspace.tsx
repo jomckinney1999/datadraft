@@ -151,7 +151,14 @@ function valueDiag(mine: CellValue | boolean, key: CellValue | boolean): string 
   return "Right kind of value, wrong amount — check the range you pointed at.";
 }
 
-function ResultGrid({ res }: { res: QueryExecResult }) {
+function ResultGrid({ res, showTypes = false }: { res: QueryExecResult; showTypes?: boolean }) {
+  const typeAt = (index: number) => {
+    const value = res.values.map((row) => row[index]).find((cell) => cell !== null);
+    if (typeof value === "number") return Number.isInteger(value) ? "integer" : "number";
+    if (typeof value === "string") return "text";
+    if (value instanceof Uint8Array) return "blob";
+    return "null";
+  };
   return (
     <div className="max-h-56 overflow-auto rounded-lg border border-panel-border">
       <table className="w-full text-left font-mono text-[11px]">
@@ -162,7 +169,12 @@ function ResultGrid({ res }: { res: QueryExecResult }) {
                 key={c}
                 className="whitespace-nowrap px-3 py-1.5 font-semibold uppercase tracking-wider"
               >
-                {c}
+                <span className="block">{c}</span>
+                {showTypes && (
+                  <span className="mt-0.5 block text-[8px] font-normal normal-case tracking-normal text-ice">
+                    {typeAt(res.columns.indexOf(c))}
+                  </span>
+                )}
               </th>
             ))}
           </tr>
@@ -255,6 +267,7 @@ export default function QuestionWorkspace({
   const [shareNote, setShareNote] = useState<string | null>(null);
   /** SQL only: the query behind the result on screen, for the Film Room. */
   const [ranSql, setRanSql] = useState<string | null>(null);
+  const [tablePreviews, setTablePreviews] = useState<Record<string, QueryExecResult>>({});
   const getDb = useCallback(() => dbRef.current, []);
 
   useEffect(() => {
@@ -275,6 +288,7 @@ export default function QuestionWorkspace({
   useEffect(() => {
     let cancelled = false;
     if (isSql) {
+      setTablePreviews({});
       let db: Database | null = null;
       Promise.all([
         import("sql.js").then((m) =>
@@ -302,6 +316,13 @@ export default function QuestionWorkspace({
           }
           db = made;
           dbRef.current = made;
+          const previews: Record<string, QueryExecResult> = {};
+          for (const table of tables) {
+            const safeName = table.table.replace(/"/g, '""');
+            const result = made.exec(`SELECT * FROM "${safeName}" LIMIT 5;`)[0];
+            if (result) previews[table.table] = result;
+          }
+          setTablePreviews(previews);
           setReady(true);
         })
         .catch(() =>
@@ -327,7 +348,7 @@ export default function QuestionWorkspace({
     return () => {
       cancelled = true;
     };
-  }, [isSql, isExcel, extraTables]);
+  }, [isSql, isExcel, extraTables, question.id, tables]);
 
   /** Run the learner's work, and optionally grade it. */
   const attempt = useCallback(
@@ -569,16 +590,24 @@ export default function QuestionWorkspace({
                 a column name stops looking and guesses. */}
             {isSql && (
               <div className="surface mt-3 rounded-2xl border border-panel-border bg-panel p-5">
-                <p className="label-broadcast text-turf">the tables</p>
-                <div className="mt-3 space-y-3">
+                <p className="label-broadcast text-turf">5-row table preview</p>
+                <p className="mt-1 text-xs leading-relaxed text-ink-muted">
+                  See the column types and the shape of the real values before you query them.
+                </p>
+                <div className="mt-4 space-y-5">
                   {tables.map((t) => (
                     <div key={t.table}>
-                      <p className="font-mono text-[12px] font-bold text-ink">
-                        {t.table}
+                      <p className="mb-2 font-mono text-[11px] font-bold text-ink">
+                        <span className="text-ice">SELECT *</span> FROM {t.table}{" "}
+                        <span className="text-gold">LIMIT 5</span>
                       </p>
-                      <p className="mt-0.5 font-mono text-[11px] leading-relaxed text-ink-muted">
-                        {t.columns.join(" · ")}
-                      </p>
+                      {tablePreviews[t.table] ? (
+                        <ResultGrid res={tablePreviews[t.table]} showTypes />
+                      ) : (
+                        <div className="rounded-lg border border-panel-border bg-night/40 px-3 py-4 font-mono text-[10px] text-ink-muted">
+                          Loading rows…
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

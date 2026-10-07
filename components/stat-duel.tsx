@@ -275,6 +275,9 @@ function Round({
     <section className="mt-6" aria-live="polite">
       <div className="flex flex-wrap items-center justify-center gap-2">
         <span className="status-chip">Round {round.n} of {total}</span>
+        <span className="rounded-full border border-gold/40 bg-gold/10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-gold">
+          {round.category}
+        </span>
         <span className="status-chip">{round.scope}</span>
       </div>
       <h2 className="mx-auto mt-3 max-w-xl text-center font-display text-xl font-bold text-ink sm:text-2xl">

@@ -39,6 +39,9 @@ export type TransitionRequest = {
 export const COVER_MS: Record<TransitionKind, number> = { snap: 540, chart: 880 };
 /** Milliseconds to uncover the new page. */
 export const REVEAL_MS: Record<TransitionKind, number> = { snap: 580, chart: 640 };
+/** Phones use a shorter, simpler compositor-only version of each transition. */
+export const MOBILE_COVER_MS: Record<TransitionKind, number> = { snap: 360, chart: 480 };
+export const MOBILE_REVEAL_MS: Record<TransitionKind, number> = { snap: 320, chart: 340 };
 /** Never hold the curtain longer than this, whatever the network does. */
 export const MAX_HOLD_MS = 8000;
 

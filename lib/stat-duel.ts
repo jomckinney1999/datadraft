@@ -38,6 +38,8 @@ export type DuelSide = {
 export type DuelRound = {
   n: number;
   prompt: string;
+  /** A quick signal that the duel moves beyond fantasy scoring. */
+  category: "Fantasy scoring" | "Team scoring" | "Team records" | "Clutch";
   /** Short label for the period: "2025 season", "2026, weeks 1–3". */
   scope: string;
   /** What the number is, under it: "PPR pts", "pts allowed". */
@@ -106,6 +108,7 @@ type Built = {
   kind: "player" | "team";
   cands: Cand[];
   prompt: string;
+  category: DuelRound["category"];
   scope: string;
   unit: string;
   decimals: number;
@@ -149,6 +152,7 @@ const TEMPLATES: Record<string, (r: () => number) => Built | null> = {
       kind: "player",
       cands: playerLines(scope).map(([name, v]) => ({ name, team: v.team, position: v.position, value: v.tenths / 10 })),
       prompt: `Who scored more PPR points ${scope.phrase}?`,
+      category: "Fantasy scoring",
       scope: scope.label,
       unit: "PPR pts",
       decimals: 1,
@@ -173,6 +177,7 @@ const TEMPLATES: Record<string, (r: () => number) => Built | null> = {
       kind: "player",
       cands,
       prompt: `Who averaged more PPR points per game ${scope.phrase}?`,
+      category: "Fantasy scoring",
       scope: scope.label,
       unit: "PPR pts per game",
       decimals: 1,
@@ -189,6 +194,7 @@ const TEMPLATES: Record<string, (r: () => number) => Built | null> = {
       kind: "player",
       cands: playerLines(scope).map(([name, v]) => ({ name, team: v.team, position: v.position, value: v.max })),
       prompt: `Whose best single game was bigger ${scope.phrase}?`,
+      category: "Fantasy scoring",
       scope: scope.label,
       unit: "PPR pts, best game",
       decimals: 1,
@@ -205,6 +211,7 @@ const TEMPLATES: Record<string, (r: () => number) => Built | null> = {
       kind: "player",
       cands: playerLines(scope).map(([name, v]) => ({ name, team: v.team, position: v.position, value: v.big })),
       prompt: `Who had more 20-point games ${scope.phrase}?`,
+      category: "Fantasy scoring",
       scope: scope.label,
       unit: "games of 20+ pts",
       decimals: 0,
@@ -222,6 +229,7 @@ const TEMPLATES: Record<string, (r: () => number) => Built | null> = {
       kind: "player",
       cands: rows.map((x) => ({ name: x.player, team: x.team, position: x.position, value: x.fantasy_pts })),
       prompt: `Who scored more in week ${week} of ${season}?`,
+      category: "Fantasy scoring",
       scope: `Week ${week}, ${season}`,
       unit: "PPR pts that week",
       decimals: 1,
@@ -237,23 +245,70 @@ const TEMPLATES: Record<string, (r: () => number) => Built | null> = {
   teamAllowed(r) {
     return teamTemplate(COMPLETE[Math.floor(r() * COMPLETE.length)], false);
   },
+  teamWins(r) {
+    return teamMetricTemplate(COMPLETE[Math.floor(r() * COMPLETE.length)], "wins");
+  },
+  teamPointDiff(r) {
+    return teamMetricTemplate(COMPLETE[Math.floor(r() * COMPLETE.length)], "pointDiff");
+  },
+  teamHighScore(r) {
+    return teamMetricTemplate(COMPLETE[Math.floor(r() * COMPLETE.length)], "highScore");
+  },
+  teamThirty(r) {
+    return teamMetricTemplate(COMPLETE[Math.floor(r() * COMPLETE.length)], "thirty");
+  },
+  teamCloseWins(r) {
+    return teamMetricTemplate(COMPLETE[Math.floor(r() * COMPLETE.length)], "closeWins");
+  },
+  teamRoadWins(r) {
+    return teamMetricTemplate(COMPLETE[Math.floor(r() * COMPLETE.length)], "roadWins");
+  },
 };
 
-function teamTemplate(season: number, scored: boolean): Built {
-  const tot = new Map<string, { scored: number; allowed: number }>();
+type TeamLine = {
+  scored: number;
+  allowed: number;
+  wins: number;
+  highScore: number;
+  thirty: number;
+  closeWins: number;
+  roadWins: number;
+};
+
+function teamLines(season: number): Map<string, TeamLine> {
+  const totals = new Map<string, TeamLine>();
+  const add = (team: string, scored: number, allowed: number, road: boolean) => {
+    const line = totals.get(team) ?? {
+      scored: 0,
+      allowed: 0,
+      wins: 0,
+      highScore: 0,
+      thirty: 0,
+      closeWins: 0,
+      roadWins: 0,
+    };
+    line.scored += scored;
+    line.allowed += allowed;
+    line.highScore = Math.max(line.highScore, scored);
+    if (scored >= 30) line.thirty++;
+    if (scored > allowed) {
+      line.wins++;
+      if (scored - allowed <= 8) line.closeWins++;
+      if (road) line.roadWins++;
+    }
+    totals.set(team, line);
+  };
   for (const g of PACKED_GAMES) {
     const [, s, week, , , home, away, homeScore, awayScore] = g;
     if (s !== season || week > 18) continue;
-    for (const [team, f, a] of [
-      [home, homeScore, awayScore],
-      [away, awayScore, homeScore],
-    ] as [string, number, number][]) {
-      const cur = tot.get(team) ?? { scored: 0, allowed: 0 };
-      cur.scored += f;
-      cur.allowed += a;
-      tot.set(team, cur);
-    }
+    add(home, homeScore, awayScore, false);
+    add(away, awayScore, homeScore, true);
   }
+  return totals;
+}
+
+function teamTemplate(season: number, scored: boolean): Built {
+  const tot = teamLines(season);
   const col = scored ? "points_scored" : "points_allowed";
   return {
     kind: "team",
@@ -261,6 +316,7 @@ function teamTemplate(season: number, scored: boolean): Built {
     prompt: scored
       ? `Which team scored more points in the ${season} regular season?`
       : `Which defense allowed fewer points in the ${season} regular season?`,
+    category: "Team scoring",
     scope: `${season} season`,
     unit: scored ? "pts scored" : "pts allowed",
     decimals: 0,
@@ -271,15 +327,101 @@ function teamTemplate(season: number, scored: boolean): Built {
   };
 }
 
+type TeamMetric = "wins" | "pointDiff" | "highScore" | "thirty" | "closeWins" | "roadWins";
+
+const TEAM_METRICS: Record<
+  TeamMetric,
+  {
+    prompt: (season: number) => string;
+    category: DuelRound["category"];
+    unit: string;
+    column: string;
+    value: (line: TeamLine) => number;
+    sqlValue: string;
+  }
+> = {
+  wins: {
+    prompt: (season) => `Which team won more games in the ${season} regular season?`,
+    category: "Team records",
+    unit: "wins",
+    column: "wins",
+    value: (line) => line.wins,
+    sqlValue: "SUM(CASE WHEN scored > allowed THEN 1 ELSE 0 END)",
+  },
+  pointDiff: {
+    prompt: (season) => `Which team had the better point differential in ${season}?`,
+    category: "Team scoring",
+    unit: "point differential",
+    column: "point_differential",
+    value: (line) => line.scored - line.allowed,
+    sqlValue: "SUM(scored - allowed)",
+  },
+  highScore: {
+    prompt: (season) => `Which team posted the higher single-game score in ${season}?`,
+    category: "Team scoring",
+    unit: "pts, best game",
+    column: "high_score",
+    value: (line) => line.highScore,
+    sqlValue: "MAX(scored)",
+  },
+  thirty: {
+    prompt: (season) => `Which team scored 30+ points more often in ${season}?`,
+    category: "Team scoring",
+    unit: "games with 30+ pts",
+    column: "games_30_plus",
+    value: (line) => line.thirty,
+    sqlValue: "SUM(CASE WHEN scored >= 30 THEN 1 ELSE 0 END)",
+  },
+  closeWins: {
+    prompt: (season) => `Which team won more one-score games in ${season}?`,
+    category: "Clutch",
+    unit: "wins by 8 or fewer",
+    column: "one_score_wins",
+    value: (line) => line.closeWins,
+    sqlValue: "SUM(CASE WHEN scored > allowed AND scored - allowed <= 8 THEN 1 ELSE 0 END)",
+  },
+  roadWins: {
+    prompt: (season) => `Which team won more road games in ${season}?`,
+    category: "Team records",
+    unit: "road wins",
+    column: "road_wins",
+    value: (line) => line.roadWins,
+    sqlValue: "SUM(CASE WHEN venue = 'road' AND scored > allowed THEN 1 ELSE 0 END)",
+  },
+};
+
+function teamMetricTemplate(season: number, metric: TeamMetric): Built {
+  const spec = TEAM_METRICS[metric];
+  const totals = teamLines(season);
+  return {
+    kind: "team",
+    cands: Array.from(totals.entries()).map(([team, line]) => ({
+      name: team,
+      team,
+      position: null,
+      value: spec.value(line),
+    })),
+    prompt: spec.prompt(season),
+    category: spec.category,
+    scope: `${season} season`,
+    unit: spec.unit,
+    decimals: 0,
+    higherWins: true,
+    samePosition: false,
+    sql: (a, b) =>
+      `WITH team_games AS (\n  SELECT home_team AS team, home_score AS scored, away_score AS allowed, 'home' AS venue\n  FROM games WHERE season = ${season} AND week <= 18\n  UNION ALL\n  SELECT away_team, away_score, home_score, 'road'\n  FROM games WHERE season = ${season} AND week <= 18\n)\nSELECT team, ${spec.sqlValue} AS ${spec.column}\nFROM team_games\nWHERE team IN (${q(a)}, ${q(b)})\nGROUP BY team\nORDER BY ${spec.column} DESC;`,
+  };
+}
+
 type Band = "easy" | "medium" | "hard";
 
 /** Rounds get closer as the day goes on. */
 const SLOTS: { templates: string[]; band: Band }[] = [
   { templates: ["total", "best"], band: "easy" },
-  { templates: ["week", "best"], band: "medium" },
-  { templates: ["teamScored", "teamAllowed"], band: "medium" },
+  { templates: ["teamWins", "teamHighScore", "teamThirty"], band: "easy" },
+  { templates: ["teamScored", "teamAllowed", "teamPointDiff"], band: "medium" },
   { templates: ["avg", "big", "total"], band: "medium" },
-  { templates: ["total", "avg", "week"], band: "hard" },
+  { templates: ["teamCloseWins", "teamRoadWins", "teamPointDiff"], band: "hard" },
 ];
 
 const BANDS: Record<Band, [number, number]> = {
@@ -340,6 +482,7 @@ export function dailyDuel(day: string): Duel {
       rounds.push({
         n: i + 1,
         prompt: built.prompt,
+        category: built.category,
         scope: built.scope,
         unit: built.unit,
         decimals: built.decimals,
