@@ -207,6 +207,39 @@ Football stays the only sport for now. This records which sport comes next, why,
 - **Port order when it's time:** the dailies first (Roll Call and the Stat Duel are templates over one weekly-stats table plus SQL, days of work per sport), then a question batch, then art. Courses can stay football-flavoured for a long time. The `sport` column in Supabase already exists; build no more multi-sport plumbing ahead of the trigger.
 - Keep it off the public site until it's real, the same rule as Phase 11 in `docs/LAUNCH-PLAN.md`.
 
+## Jobs, matched to practice (planned 2026-10-07, not built)
+
+The owner asked whether a job board, scraping analyst jobs for people to find and apply to, would be another reason to visit. The answer recorded here: yes to jobs, but not a scraped board, and not as a daily hook.
+
+- **Not a scraper.** LinkedIn, Indeed and Glassdoor forbid scraping in their terms, and LinkedIn has sued scrapers. That's the wrong risk while legal review and the employer sign-off are still open. A plain list would also be a worse LinkedIn, the same "crowded shelf, no edge" reason the career kit was cut, and a generic feed is noisy: stale postings, duplicates, senior roles, and sportsbook jobs, which clash with the no-betting rule.
+- **Weekly, not daily.** The person we're for wants the job in 6 to 12 months and would check a job list weekly at most. The daily games stay the daily habit; jobs are a weekly one.
+- **Sourced from companies' own job-board feeds.** Greenhouse, Lever and Ashby publish public feeds that companies use to put listings on their own careers pages. Use a set list of about 100 to 300 companies: teams, leagues, sports media and fantasy apps (no sportsbooks), plus companies known to hire entry-level analysts. Check each provider's terms before building, the way the data licence was checked.
+- **Show the minimum and link out:** title, company, location and date posted, with the company's own page to apply. Don't republish whole job descriptions.
+- **The edge is matching each job to practice.** Tag each posting with the skills it asks for (SQL, window functions, Python, Tableau, A/B testing…) and link straight to them: "This one wants window functions → 12 questions and the guide." Add one line a week: "The skill most new postings asked for this week: joins (practise →)." No job board does this, and it is exactly our job.
+- **Fresh the way the data is fresh:** a daily job drops closed postings, the same pattern as the weekly data workflow.
+- **It's search traffic too.** "Entry-level data analyst jobs" and "sports analytics jobs" are big searches, like the interview guides.
+- **Where it lives:** a page in the Questions menu beside interview prep, not a fifth tab. It is not the retired career kit: no résumé help and no coaching, just a list that points at practice.
+- **Free, with the Pass later:** the list is free and sells the Season Pass's interview prep. "Jobs matched to what you've practised" could become a Pass feature.
+- **Never** "we'll get you a job" (the copy rule), never a sportsbook, and no personal data collected to show the list.
+
+**Order:**
+1. Analytics on and the first testers through. Without those there's no way to tell whether jobs bring people back better than another game would.
+2. A hand test: "5 analyst jobs this week, and the skill they share" in the weekly chart post and the newsletter, and ask the testers whether they'd use it.
+3. If people click, build the automated free page.
+4. Later, match jobs to each learner's own practice, as a Pass feature.
+
+## Tools for the faceless channels (planned 2026-10-07, not built)
+
+The content playbook (linked from Notion HQ) runs the brand anonymously, with Coach Blitz as the host. These are the site-side tools that make the weekly content batch faster, in build order:
+
+1. **`/go/<channel>` links** for each bio (`/go/tiktok`, `/go/youtube`, `/go/x`, `/go/instagram`, `/go/linkedin`, `/go/newsletter`): a redirect to the home page that `components/site-analytics.tsx` counts as `/~go-<channel>`, the same marker pattern as `?ref=chart`. It's small, and it's how we learn which channel brings people who come back. Needs analytics switched on to read.
+2. **Coach's pose pack:** every one of the sixteen moods as a transparent PNG, mouth closed and mouth open, plus the Rookie and the Ref, exported from the real components by a script (an unlinked `/brand` page and a headless browser, like the Notion cover). It feeds the PNGtuber rig described in the playbook.
+3. **Export-safe social cards** of each day's Roll Call and Stat Duel at 1080×1920 and 1080×1350: the brand style, team colours and abbreviations in place of logos, no player photos, the daily number and the credit line. They're safe to post because they republish nothing that belongs to anyone else.
+4. **A weekly brief:** after each data refresh, the newest week's ten most surprising numbers, each with the query that proves it, written as a Markdown file for Tuesday's chart post and the newsletter. The numbers come from the data, never typed, the same rule as `FACTS`.
+5. **"Coach reads your league" intake, later:** a form where a follower sends their own league or a SQL question for the series. It waits on a privacy policy that covers it and a brand inbox; until then it's DMs. Only the sender's own league, with the league's OK before managers' names are shown.
+
+**Posting waits on the anonymity fixes** in Notion: a brand inbox on our own domain, the business name instead of a home address in the legal drafts, and the code under a brand organization. Building the tools doesn't wait on them.
+
 ## Open questions / things to revisit
 
 - Exact price points within each range (e.g. is Career Track $1.5K flat, or tiered by cohort vs. 1:1 support level?)
@@ -217,6 +250,7 @@ Football stays the only sport for now. This records which sport comes next, why,
 - **Live code execution (decided 2026-08-10):** Ship it. Python and R run in-browser via Pyodide and WebR (`lib/runtimes.ts`), lazy-loaded only when a `code` exercise opens. SQL keeps `query` result-set grading. Remaining follow-ups: seed shared fantasy DataFrames into Pyodide/WebR (today those drills use inline toy data), and broaden `code` coverage beyond the first drills in units 7 and 11. Git/stats/viz stay on `mc`/`fill` — they aren't languages with a single REPL.
 - ~~Get a second sport's data in~~ and ~~what "in build" means for NBA/MLB~~: answered by "A second sport" above (2026-10-06). The sport picker is gone, so the site promises nothing.
 - **The retention number that triggers MLB.** Set it once Vercel Analytics is on.
+- **Whether jobs earn a page.** Decided by the hand test in "Jobs, matched to practice": clicks on the weekly five jobs, and whether testers say they'd come back for them.
 - **Whether the name still fits.** "DataDraft" now sells Python, R, Git, and statistics too. Renaming is expensive (domain, Vercel project, Stripe, legal docs) and wasn't part of the pivot decision — but the mismatch is real and deserves an explicit keep-or-change call.
 - Weekly Challenge & Leaderboard build-out (see above) — auth, database, content workflow, data source, and perks all still need real decisions.
 
