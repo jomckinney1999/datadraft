@@ -68,6 +68,12 @@ jobs:
         if: steps.after.outputs.new == 'true'
         run: node scripts/build-field-dataset.mjs
 
+      # Roll Call's lists come from the same weekly stats; the verifier checks
+      # every day's list against its SQL.
+      - name: Rebuild Roll Call
+        if: steps.after.outputs.new == 'true'
+        run: node scripts/build-roll-call-dataset.mjs
+
       # Lesson titles and blurbs can quote the data (FACTS), and /learn and the
       # dashboard read them from a generated index, so it's rebuilt with the data.
       - name: Rebuild the curriculum index
@@ -87,6 +93,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add lib/lesson-data.generated.ts lib/lesson-facts.generated.ts lib/player-teams.generated.ts lib/lesson-index.generated.ts lib/unit-modules.generated.ts public/data public/field-data.json
+          git add lib/lesson-data.generated.ts lib/lesson-facts.generated.ts lib/player-teams.generated.ts lib/lesson-index.generated.ts lib/unit-modules.generated.ts public/data public/field-data.json lib/roll-call-data.generated.ts public/roll-call
           git commit -m "Weekly data: ${{ steps.after.outputs.season }} through week ${{ steps.after.outputs.week }}"
           git push

@@ -112,6 +112,18 @@ const ICONS: Record<string, { tone: Tone; Scene: () => ReactNode }> = {
       </>
     ),
   },
+  // A clipboard of names, two ticked: name everyone on the list.
+  "/questions/roll-call": {
+    tone: "ice",
+    Scene: () => (
+      <>
+        <rect x="11" y="9" width="18" height="23" rx="2.5" fill={c("panel")} stroke={N} strokeWidth="1.4" />
+        <rect x="16" y="7" width="8" height="4" rx="1.2" fill={c("ice")} stroke={N} strokeWidth="1.1" />
+        <path d="M14 16 l1.6 1.6 l2.8 -3 M14 22 l1.6 1.6 l2.8 -3" fill="none" stroke={c("turf")} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M20.5 16 H26 M20.5 22 H26 M15 28 H26" stroke={c("ink-muted")} strokeWidth="1.6" strokeLinecap="round" />
+      </>
+    ),
+  },
   "/questions/duel": {
     tone: "gold",
     Scene: () => (

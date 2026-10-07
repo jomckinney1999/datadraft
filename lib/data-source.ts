@@ -148,4 +148,12 @@ export const DOWNLOADS = [
     label: "waiver_wire.csv",
     note: "Sleeper's real waiver wire, exactly as the lessons load it.",
   },
+  {
+    // Written with Roll Call's data (scripts/build-roll-call-dataset.mjs);
+    // the season is typed here so the credit line never imports the rows.
+    // The verifier fails if it falls behind ROLL_CALL_SEASON.
+    file: "/data/player_weeks_2026.csv",
+    label: "player_weeks_2026.csv",
+    note: "Every QB, RB, WR and TE game this season, refreshed weekly: the table behind Roll Call.",
+  },
 ];

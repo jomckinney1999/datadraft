@@ -26,6 +26,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     at(PANDAS_GUIDE.path, 0.8),
     at(EXCEL_GUIDE.path, 0.8),
     at("/questions/duel", 0.8, "daily"),
+    at("/questions/roll-call", 0.8, "daily"),
     at("/questions/mock", 0.7),
     at("/questions/prep", 0.7),
     at("/questions/screen", 0.7),

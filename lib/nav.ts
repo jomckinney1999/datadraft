@@ -77,6 +77,7 @@ export const NAV: NavSection[] = [
         title: "Play",
         items: [
           { href: "/questions/duel", label: "Stat Duel", blurb: "Five head-to-heads on real numbers", badge: "Daily" },
+          { href: "/questions/roll-call", label: "Roll Call", blurb: "Name every player on a real list, then see the SQL", badge: "Daily" },
           { href: "/draft", label: "Draft Room", blurb: "Draft a real season, scouting with SQL" },
           { href: "/learn/rapid", label: "Rapid Fire", blurb: "Twelve seconds a question, no typing" },
           { href: "/learn/arcade", label: "Arcade", blurb: "Pattern Call, Foul Call, Film Room Match — prep between drives" },

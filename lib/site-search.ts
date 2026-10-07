@@ -49,6 +49,7 @@ export const SEARCH_INDEX: SearchHit[] = (() => {
     hit("page", "/field", "Practice Field", "Free-play SQL on this season"),
     hit("page", "/excel", "Spreadsheet", "Real formulas on a real workbook"),
     hit("page", "/questions/duel", "Stat Duel", "Five head-to-heads on real numbers"),
+    hit("page", "/questions/roll-call", "Roll Call", "Name every player on a real list, then see the SQL", "trivia grid list name every player daily game"),
     hit("page", "/draft", "Draft Room", "Draft a real season, scouting with SQL"),
     hit("page", "/learn/rapid", "Rapid Fire", "Twelve seconds a question"),
     hit("page", "/learn/arcade", "Arcade", "Pattern Call, Foul Call, Film Room Match", "prep games foul pattern"),

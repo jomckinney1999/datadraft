@@ -1397,6 +1397,98 @@ let courseMapChecked = 0;
   }
 }
 
+// Roll Call (lib/roll-call.ts): every day's board is its SQL's result, in
+// order, on the same rows the browser loads; the browser's JSON and the
+// published CSV are the generated rows; the pandas version prints the same
+// names; every answer's team has a crest; a day comes out the same twice.
+// The R and Excel versions aren't run here (no Node WebR, no FILTER in the
+// engine); they mirror the SQL line for line.
+let rollCallChecked = 0;
+let rollCallPy = 0;
+{
+  const fs = await import("node:fs");
+  const rc = await loadProjectTs(path.join(root, "lib/roll-call.ts"), root);
+  const gen = await loadProjectTs(path.join(root, "lib/roll-call-data.generated.ts"), root);
+  const crests = await loadProjectTs(path.join(root, "lib/team-colors.ts"), root);
+  const share = await loadProjectTs(path.join(root, "lib/daily-share.ts"), root);
+  const season = gen.ROLL_CALL_SEASON;
+  const json = fs.readFileSync(path.join(root, `public/roll-call/${season}.json`), "utf8");
+  const table = JSON.parse(json);
+  const expanded = gen.ROLL_CALL_ROWS.map(([id, team, opp, week, ...nums]) => [
+    id,
+    gen.ROLL_CALL_PLAYERS[id][0],
+    gen.ROLL_CALL_PLAYERS[id][1],
+    team,
+    opp,
+    season,
+    week,
+    ...nums,
+  ]);
+  if (JSON.stringify(expanded) !== JSON.stringify(table.rows)) {
+    problems.push(`roll call: public/roll-call/${season}.json disagrees with lib/roll-call-data.generated.ts (rerun node scripts/build-roll-call-dataset.mjs)`);
+  }
+  const csvFile = path.join(root, "public", rc.PLAYER_WEEKS_CSV(season));
+  const csvLines = fs.existsSync(csvFile) ? fs.readFileSync(csvFile, "utf8").trim().split("\n") : [];
+  const downloads = (await loadProjectTs(path.join(root, "lib/data-source.ts"), root)).DOWNLOADS;
+  if (!downloads.some((d) => d.file === rc.PLAYER_WEEKS_CSV(season))) problems.push(`roll call: /data doesn't offer ${rc.PLAYER_WEEKS_CSV(season)} (lib/data-source.ts DOWNLOADS)`);
+  if (csvLines[0] !== table.columns.join(",") || csvLines.length !== table.rows.length + 1) {
+    problems.push(`roll call: ${rc.PLAYER_WEEKS_CSV(season)} is missing or stale (rerun node scripts/build-roll-call-dataset.mjs)`);
+  }
+
+  const rcDb = new SQL.Database();
+  rcDb.run(rc.seedSql(table.columns));
+  const ins = rcDb.prepare(`INSERT INTO player_weeks VALUES (${table.columns.map(() => "?").join(", ")})`);
+  for (const row of table.rows) ins.run(row);
+  ins.free();
+
+  const byTemplate = new Map();
+  for (let i = 0; i < 200; i++) {
+    const day = rc.addDays(share.DAILY_LAUNCH, i);
+    const p = rc.rollCallFor(day);
+    if (!p) continue;
+    rollCallChecked++;
+    if (JSON.stringify(rc.rollCallFor(day)) !== JSON.stringify(p)) problems.push(`roll call ${day}: came out differently twice`);
+    if (p.answers.length < rc.MIN_ANSWERS || p.answers.length > rc.MAX_ANSWERS) {
+      problems.push(`roll call ${day} (${p.key}): ${p.answers.length} answers, outside ${rc.MIN_ANSWERS}–${rc.MAX_ANSWERS}`);
+    }
+    if (day < (rc.weekOpens(p.week) ?? "9999")) problems.push(`roll call ${day}: uses week ${p.week} before it opens`);
+    let got = [];
+    try {
+      const res = rcDb.exec(p.code.sql)[0];
+      got = res ? res.values.map((r) => `${r[0]}|${r[1]}|${r[2]}`) : [];
+    } catch (e) {
+      problems.push(`roll call ${day} (${p.key}): the SQL errors: ${e.message}`);
+    }
+    const want = p.answers.map((a) => `${a.name}|${a.team}|${a.value}`);
+    if (JSON.stringify(got) !== JSON.stringify(want)) problems.push(`roll call ${day} (${p.key}): the SQL's list isn't the board`);
+    for (const a of p.answers) {
+      if (!crests.teamCrest(a.team)) problems.push(`roll call ${day}: no crest for ${a.team}`);
+    }
+    if (!byTemplate.has(p.template)) byTemplate.set(p.template, p);
+  }
+  if (!rollCallChecked && Object.keys(gen.ROLL_CALL_WEEK_ENDS).length) problems.push("roll call: weeks on file but no day has a list");
+
+  // The pandas version, once per kind of list, on the same rows (the CSV
+  // read is swapped for the JSON the browser loads; they're the same table).
+  const py = await getPy();
+  py.globals.set("RC_JSON", json);
+  for (const p of byTemplate.values()) {
+    const code = p.code.python.replace(
+      /^player_weeks = pd\.read_csv\(.*\)$/m,
+      'import json\n_t = json.loads(RC_JSON)\nplayer_weeks = pd.DataFrame(_t["rows"], columns=_t["columns"])',
+    );
+    const { stdout, error } = await runPython(code);
+    rollCallPy++;
+    if (error) {
+      problems.push(`roll call ${p.key}: the pandas version errors: ${error}`);
+      continue;
+    }
+    const lines = stdout.trim().split("\n").slice(1).map((l) => l.trim());
+    const ok = lines.length === p.answers.length && p.answers.every((a, i) => lines[i].startsWith(a.name));
+    if (!ok) problems.push(`roll call ${p.key}: the pandas version prints a different list`);
+  }
+}
+
 console.log(`brief previews checked : ${previews}`);
 console.log(`query answer keys checked: ${checked}`);
 console.log(`interview keys checked   : ${interviewChecked}`);
@@ -1410,6 +1502,7 @@ if (skippedR) console.log(`R keys skipped (no Node WebR): ${skippedR}`);
 console.log(`card art ids checked      : ${artChecked} (courses, builds, cases, units)`);
 console.log(`prose facts checked       : ${factsChecked} (lib/lesson-facts.generated.ts vs the database)`);
 console.log(`stat duel rounds checked  : ${duelChecked} (180 days from launch, numbers vs their SQL)`);
+console.log(`roll call days checked    : ${rollCallChecked} (200 days from launch, board vs its SQL; pandas run for ${rollCallPy} kinds of list)`);
 console.log(`draft room checks         : ${draftChecked} (scouting presets per season, drafts from every slot)`);
 console.log(`query doctor cases        : ${doctorChecked} (known wrong answers, the diagnosis a tutor would lead with)`);
 console.log(`pattern guides            : ${guidesChecked} (one per interview pattern plus topic guides, each example where it belongs)`);
