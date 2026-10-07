@@ -177,7 +177,7 @@ I can write code, lesson copy, docs, marketing copy, and data pipeline logic. I 
 **Depends on:** real traction (paying users, retention, a working Career Track cohort) from Phases 0–10. This is a dependency, not a deadline — don't start this phase to fill time; start it when the flagship has proven itself.
 
 - Additional language: Python is the natural next step — huge existing demand, reuses the same fantasy-football dataset built out in Phases 3–5.
-- Additional sport (basketball, soccer) for learners whose "Sunday obsession" isn't football.
+- Additional sport: **MLB first** (decided 2026-10-06; its season is the NFL off-season, and the dailies need something to run on from February to August), then NBA. Gated on a retention trigger and a licence check; the reasoning, order and trigger are in `docs/PLAN.md`, "A second sport".
 - AI/ML content eventually — predicting performance, not just querying it — the "coding, AI, tech" part of the long-term mission.
 - Keep this off the public marketing site until it's real, consistent with the existing decision in `docs/PLAN.md` not to overpromise a platform before the first product has proven itself.
 

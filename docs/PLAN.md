@@ -2,7 +2,7 @@
 
 This is the source of truth for product structure, pricing, and positioning decisions. Update it whenever the business model changes, *before* or alongside code changes — this is what future Claude/Cursor sessions read to understand why the landing page is shaped the way it is.
 
-Last updated: 2026-10-03 (**pricing and the offer**: two tiers plus a founding offer, Roadmap and Career Track retired, launch gates; see Product ladder and `docs/OFFER.md`). Before that, 2026-10-02: target user and messaging.
+Last updated: 2026-10-06 (**a second sport**: MLB next, after a retention trigger and a licence check; see "A second sport"). Before that, 2026-10-03: pricing and the offer (two tiers plus a founding offer, launch gates; see Product ladder and `docs/OFFER.md`), and 2026-10-02: target user and messaging.
 
 > **Read this first.** On 2026-09-30 the product narrowed (CLAUDE.md, "What this is"): four sections, football only, and no career kit, coaching playbooks or sport picker. Where this doc still describes those — the multi-sport vision, Career Track playbooks, `/resources` — it is history, kept for the reasoning, not the plan. The price ranges in the ladder are still the working assumption. Nothing is for sale yet.
 
@@ -192,6 +192,21 @@ Before building the real version, these need real decisions (not made yet):
 - **Data source**: is there a real live NFL stats feed to grade answers against, or are questions manually authored/verified each week using stats you look up yourself? (Note: the SQL sandbox's `week_results` data is entirely synthetic/generated — not a real stats feed — so it can't be the source of truth for a real weekly challenge without separate work.)
 - **Perks**: what do points actually unlock? (Free month of Practice, a badge, something else?)
 
+## A second sport: MLB, after a trigger (decided 2026-10-06)
+
+Football stays the only sport for now. This records which sport comes next, why, and what has to be true before it starts. It replaces the old "NBA/MLB in build" plan in Big picture vision.
+
+- **The reason is the calendar, not a bigger audience.** The bet is that people come back every day, and every daily (Roll Call, the Stat Duel, the Draft Room) runs on the NFL season, so from February to August there's nothing new. MLB's regular season (late March to early October) is almost exactly the NFL off-season, and it's played nearly every day, which suits the dailies ("Name every player who homered yesterday").
+- **Order:** MLB first. NBA second (October to June overlaps football for four months, but covers February to June). Soccer only as part of an international push around Fantasy Premier League. NHL and F1: no, small fantasy audiences among the people we're for, and unofficial data.
+- **The licence decides it, before data depth.** nflverse is CC BY 4.0, which allows commercial use with a credit line, and that is why football was easy. Before committing to a sport, its source must allow a paid product to show, query and let people download its data. Current understanding, to be verified (by a lawyer before anything is sold):
+  - MLB: Retrosheet (free with its required notice) and the Lahman database (CC BY-SA) look usable. Statcast / Baseball Savant belongs to MLB Advanced Media and needs checking before anything is built on it.
+  - NBA: the NBA Stats API is unofficial and NBA.com's terms are restrictive; hoopR mostly reads ESPN. It needs a permitted source.
+  - Soccer: FBref is Sports Reference, which doesn't allow redistribution. StatsBomb Open Data is free with credit, but it's mostly past competitions, not a weekly feed.
+- **The trigger:** don't start until the football dailies show they keep people: a stated number of weekly returning players, held across a full NFL season, read from Vercel Analytics once it's switched on. The owner sets the number then. If it's met, starting the MLB pipeline in January has it ready for Opening Day.
+- **Until then, fill the off-season inside football.** Throwback boards for Roll Call and the Stat Duel from past seasons (Roll Call needs the previous season's rows added), and the NFL's own off-season moments: free agency in March, the draft in April, which the Draft Room already rehearses. Far cheaper than a second sport, and it tests whether off-season dailies hold people at all.
+- **Port order when it's time:** the dailies first (Roll Call and the Stat Duel are templates over one weekly-stats table plus SQL, days of work per sport), then a question batch, then art. Courses can stay football-flavoured for a long time. The `sport` column in Supabase already exists; build no more multi-sport plumbing ahead of the trigger.
+- Keep it off the public site until it's real, the same rule as Phase 11 in `docs/LAUNCH-PLAN.md`.
+
 ## Open questions / things to revisit
 
 - Exact price points within each range (e.g. is Career Track $1.5K flat, or tiered by cohort vs. 1:1 support level?)
@@ -200,8 +215,8 @@ Before building the real version, these need real decisions (not made yet):
 - Certification: self-issued badge vs. something with outside credibility
 - **Founding-cohort mechanics**: what specifically triggers "out of early access" (a member count? a date? a funding/revenue milestone?), and how existing members get grandfathered in practice (a tagged account flag, a manually maintained list?). Decide before the first price increase, not after.
 - **Live code execution (decided 2026-08-10):** Ship it. Python and R run in-browser via Pyodide and WebR (`lib/runtimes.ts`), lazy-loaded only when a `code` exercise opens. SQL keeps `query` result-set grading. Remaining follow-ups: seed shared fantasy DataFrames into Pyodide/WebR (today those drills use inline toy data), and broaden `code` coverage beyond the first drills in units 7 and 11. Git/stats/viz stay on `mc`/`fill` — they aren't languages with a single REPL.
-- **Get a second sport's data in.** Every lesson example across all 11 units is football. The sport picker offers three. NBA/MLB need a real pipeline (`scripts/build-field-dataset.mjs` is the football template) before the picker means anything beyond a label.
-- **What "in build" means in calendar terms for NBA/MLB.** The site tells visitors those sports are coming; that's a promise with no date behind it. Decide the trigger for starting each.
+- ~~Get a second sport's data in~~ and ~~what "in build" means for NBA/MLB~~: answered by "A second sport" above (2026-10-06). The sport picker is gone, so the site promises nothing.
+- **The retention number that triggers MLB.** Set it once Vercel Analytics is on.
 - **Whether the name still fits.** "DataDraft" now sells Python, R, Git, and statistics too. Renaming is expensive (domain, Vercel project, Stripe, legal docs) and wasn't part of the pivot decision — but the mismatch is real and deserves an explicit keep-or-change call.
 - Weekly Challenge & Leaderboard build-out (see above) — auth, database, content workflow, data source, and perks all still need real decisions.
 
