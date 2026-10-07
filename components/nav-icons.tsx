@@ -4,19 +4,21 @@
  */
 
 import type { ReactNode } from "react";
-import { c, Football, N, type Tone } from "@/components/art-kit";
+import { c, Football, N, SANS, type Tone } from "@/components/art-kit";
 
 function Frame({
   tone,
+  small = false,
   children,
 }: {
   tone: Tone;
+  small?: boolean;
   children: ReactNode;
 }) {
   return (
     <svg
       viewBox="0 0 40 40"
-      className="nav-icon h-10 w-10 shrink-0"
+      className={`nav-icon shrink-0 ${small ? "h-8 w-8" : "h-10 w-10"}`}
       data-tone={tone}
       aria-hidden
     >
@@ -121,6 +123,142 @@ const ICONS: Record<string, { tone: Tone; Scene: () => ReactNode }> = {
         <rect x="16" y="7" width="8" height="4" rx="1.2" fill={c("ice")} stroke={N} strokeWidth="1.1" />
         <path d="M14 16 l1.6 1.6 l2.8 -3 M14 22 l1.6 1.6 l2.8 -3" fill="none" stroke={c("turf")} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M20.5 16 H26 M20.5 22 H26 M15 28 H26" stroke={c("ink-muted")} strokeWidth="1.6" strokeLinecap="round" />
+      </>
+    ),
+  },
+  // ── The languages in the Courses menu: each the idea its course's art
+  // draws (components/course-art.tsx), at icon size. Software logos are
+  // trademarks, so these draw the idea, never the logo.
+  "/learn/track/sql-fundamentals": {
+    tone: "turf",
+    Scene: () => (
+      <>
+        <path d="M11 14 V27 Q20 31 29 27 V14" fill={c("panel")} stroke={N} strokeWidth="1.5" />
+        <path d="M11 20.5 Q20 24 29 20.5" fill="none" stroke={c("turf")} strokeWidth="1.4" />
+        <ellipse cx="20" cy="14" rx="9" ry="3.4" fill={c("turf")} stroke={N} strokeWidth="1.5" />
+        <Football x={20} y={10} rx={5} rot={-12} />
+      </>
+    ),
+  },
+  "/learn/track/sql-advanced": {
+    tone: "ice",
+    Scene: () => (
+      <>
+        <rect x="7" y="9" width="13" height="12" rx="1.6" fill={c("panel")} stroke={N} strokeWidth="1.4" />
+        <path d="M7 13 H20" stroke={c("ice")} strokeWidth="2.2" />
+        <rect x="20" y="19" width="13" height="12" rx="1.6" fill={c("panel")} stroke={N} strokeWidth="1.4" />
+        <path d="M20 23 H33" stroke={c("gold")} strokeWidth="2.2" />
+        <path d="M16 21 Q17 25 22 25" fill="none" stroke={c("turf")} strokeWidth="2" strokeLinecap="round" />
+      </>
+    ),
+  },
+  "/learn/track/python": {
+    tone: "gold",
+    Scene: () => (
+      <>
+        <path d="M11 28 Q11 21 18 21 H22 Q29 21 29 15 Q29 10 23 10" fill="none" stroke={N} strokeWidth="6.5" strokeLinecap="round" />
+        <path d="M11 28 Q11 21 18 21 H22 Q29 21 29 15 Q29 10 23 10" fill="none" stroke={c("turf")} strokeWidth="4" strokeLinecap="round" />
+        <circle cx="21.5" cy="10" r="3.6" fill={c("turf")} stroke={N} strokeWidth="1.4" />
+        <circle cx="20.8" cy="9.2" r="0.9" fill={N} />
+        <path d="M17.6 10.6 L15.6 11.6 M17.6 10.6 L15.8 9.4" stroke={c("gold")} strokeWidth="0.9" strokeLinecap="round" />
+      </>
+    ),
+  },
+  "/learn/track/r": {
+    tone: "ice",
+    Scene: () => (
+      <>
+        <path d="M20 8 L30.4 14 V26 L20 32 L9.6 26 V14 Z" fill={c("ice")} stroke={N} strokeWidth="1.6" strokeLinejoin="round" />
+        <text x="20" y="25.2" textAnchor="middle" fontSize="13" fontWeight="900" fill={N} fontFamily={SANS}>
+          R
+        </text>
+      </>
+    ),
+  },
+  "/learn/track/excel": {
+    tone: "turf",
+    Scene: () => (
+      <>
+        <rect x="8" y="9" width="24" height="22" rx="2" fill={c("panel")} stroke={N} strokeWidth="1.4" />
+        <rect x="8" y="9" width="24" height="6" rx="2" fill={c("turf")} stroke={N} strokeWidth="1.4" />
+        <text x="12" y="14" fontSize="5" fontWeight="900" fontStyle="italic" fill={N} fontFamily={SANS}>
+          fx
+        </text>
+        <path d="M8 21 H32 M8 26 H32 M16 15 V31 M24 15 V31" stroke={c("ink", 0.4)} strokeWidth="0.9" />
+        <rect x="16.4" y="21.4" width="7.2" height="4.2" fill={c("gold")} opacity="0.85" />
+      </>
+    ),
+  },
+  "/learn/track/stats": {
+    tone: "turf",
+    Scene: () => (
+      <>
+        <path d="M7 29 H33" stroke={N} strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M8 28.5 Q14 28.5 16 21 Q20 6 24 21 Q26 28.5 32 28.5 Z" fill={c("turf", 0.45)} stroke={N} strokeWidth="1.4" strokeLinejoin="round" />
+        <path d="M20 11 V29" stroke={c("gold")} strokeWidth="1.4" strokeDasharray="2 1.6" />
+      </>
+    ),
+  },
+  "/learn/track/viz": {
+    tone: "gold",
+    Scene: () => (
+      <>
+        <rect x="9" y="22" width="5" height="8" rx="1" fill={c("ice")} stroke={N} strokeWidth="1.2" />
+        <rect x="17.5" y="17" width="5" height="13" rx="1" fill={c("turf")} stroke={N} strokeWidth="1.2" />
+        <rect x="26" y="11" width="5" height="19" rx="1" fill={c("gold")} stroke={N} strokeWidth="1.2" />
+        <path d="M8 19 L19 13 L29 7" fill="none" stroke={c("ink")} strokeWidth="1.4" strokeLinecap="round" strokeDasharray="2.4 1.8" />
+      </>
+    ),
+  },
+  "/learn/track/tableau": {
+    tone: "ice",
+    Scene: () => (
+      <>
+        <rect x="8" y="8" width="11" height="11" rx="1.6" fill={c("panel")} stroke={N} strokeWidth="1.3" />
+        <rect x="21" y="8" width="11" height="11" rx="1.6" fill={c("panel")} stroke={N} strokeWidth="1.3" />
+        <rect x="8" y="21" width="24" height="11" rx="1.6" fill={c("panel")} stroke={N} strokeWidth="1.3" />
+        <path d="M10.5 17 V13 M13.5 17 V11 M16.5 17 V14" stroke={c("ice")} strokeWidth="1.8" strokeLinecap="round" />
+        <circle cx="26.5" cy="13.5" r="3.4" fill={c("gold")} stroke={N} strokeWidth="1" />
+        <path d="M11 29 L17 24.5 L22 27 L29 23.5" fill="none" stroke={c("turf")} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </>
+    ),
+  },
+  "/learn/track/powerbi": {
+    tone: "gold",
+    Scene: () => (
+      <>
+        <path d="M8 26 A12 12 0 0 1 32 26" fill="none" stroke={N} strokeWidth="5" strokeLinecap="round" />
+        <path d="M8 26 A12 12 0 0 1 32 26" fill="none" stroke={c("panel")} strokeWidth="2.8" strokeLinecap="round" />
+        <path d="M8 26 A12 12 0 0 1 25 15.5" fill="none" stroke={c("gold")} strokeWidth="2.8" strokeLinecap="round" />
+        <path d="M20 26 L26 17" stroke={N} strokeWidth="1.8" strokeLinecap="round" />
+        <circle cx="20" cy="26" r="2" fill={c("ice")} stroke={N} strokeWidth="1" />
+        <path d="M18 34 L21 29 H19 L22 24" fill="none" stroke={c("gold")} strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round" />
+      </>
+    ),
+  },
+  "/learn/track/git": {
+    tone: "turf",
+    Scene: () => (
+      <>
+        <path d="M9 27 H31" stroke={N} strokeWidth="2.2" strokeLinecap="round" />
+        <path d="M13 27 Q15 15 20 15 Q25 15 27 27" fill="none" stroke={c("turf")} strokeWidth="2" strokeLinecap="round" />
+        <circle cx="13" cy="27" r="2.6" fill={c("ice")} stroke={N} strokeWidth="1.2" />
+        <circle cx="20" cy="15" r="2.6" fill={c("turf")} stroke={N} strokeWidth="1.2" />
+        <circle cx="27" cy="27" r="2.6" fill={c("gold")} stroke={N} strokeWidth="1.2" />
+      </>
+    ),
+  },
+  "/learn/track/ai": {
+    tone: "ice",
+    Scene: () => (
+      <>
+        <path d="M20 9 V12" stroke={N} strokeWidth="1.4" />
+        <circle cx="20" cy="8" r="1.8" fill={c("gold")} stroke={N} strokeWidth="1" />
+        <rect x="10" y="12" width="20" height="16" rx="4" fill={c("panel")} stroke={N} strokeWidth="1.5" />
+        <circle cx="16" cy="19" r="2.2" fill={c("ice")} stroke={N} strokeWidth="1" />
+        <circle cx="24" cy="19" r="2.2" fill={c("ice")} stroke={N} strokeWidth="1" />
+        <path d="M16 24 H24" stroke={N} strokeWidth="1.4" strokeLinecap="round" />
+        <path d="M31 30 l1 -2.4 l1 2.4 l2.4 1 l-2.4 1 l-1 2.4 l-1 -2.4 l-2.4 -1 Z" fill={c("gold")} stroke={N} strokeWidth="0.8" strokeLinejoin="round" />
       </>
     ),
   },
@@ -300,10 +438,10 @@ export function navTone(href: string): Tone {
   return (ICONS[href] ?? FALLBACK).tone;
 }
 
-export function NavIcon({ href }: { href: string }) {
+export function NavIcon({ href, small = false }: { href: string; small?: boolean }) {
   const { tone, Scene } = ICONS[href] ?? FALLBACK;
   return (
-    <Frame tone={tone}>
+    <Frame tone={tone} small={small}>
       <Scene />
     </Frame>
   );

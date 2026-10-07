@@ -43,46 +43,24 @@ const GROUP_TONE: Record<string, string> = {
   "Season Pass": "text-gold",
 };
 
-/** Each language keeps one accent, so SQL is always turf and Python ice. */
-const CHIP_TONE: Record<string, Tone> = {
-  "sql-fundamentals": "turf",
-  "sql-advanced": "turf",
-  python: "ice",
-  r: "ice",
-  excel: "turf",
-  stats: "gold",
-  viz: "gold",
-  tableau: "ice",
-  powerbi: "gold",
-  git: "turf",
-  ai: "ice",
-};
-
-const chipTone = (href: string): Tone => CHIP_TONE[href.split("/").pop() ?? ""] ?? "turf";
-
 /**
- * A course as a small tile: a monogram square and the language's name. The
- * course you're on is marked, so the menu doubles as "where am I".
+ * A course as a small tile: its drawn icon (components/nav-icons.tsx, the
+ * idea its course art draws) and the language's name. The course you're on
+ * is marked, so the menu doubles as "where am I".
  */
 function Chip({ chip, current, onNavigate }: { chip: NavChip; current: boolean; onNavigate: () => void }) {
-  const tone = chipTone(chip.href);
   return (
     <Link
       href={chip.href}
       onClick={onNavigate}
       title={chip.blurb}
       aria-current={current ? "page" : undefined}
-      data-tone={tone}
-      className={`pop-tile group flex min-w-0 items-center gap-1.5 rounded-lg border bg-panel/60 py-1 pl-1 pr-1.5 ${
+      data-tone={navTone(chip.href)}
+      className={`pop-tile group flex min-w-0 items-center gap-2 rounded-lg border bg-panel/60 py-1 pl-1 pr-1.5 ${
         current ? "border-gold/70" : "border-panel-border/80"
       }`}
     >
-      <span
-        aria-hidden
-        className={`grid h-7 w-7 shrink-0 place-items-center rounded-md border font-mono text-[10.5px] font-bold tracking-tighter ${BADGE_STYLE[tone]}`}
-      >
-        {chip.mark}
-      </span>
+      <NavIcon href={chip.href} small />
       <span className="truncate text-xs font-semibold text-ink">{chip.label}</span>
     </Link>
   );
