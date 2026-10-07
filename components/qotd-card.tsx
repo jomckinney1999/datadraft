@@ -16,7 +16,7 @@
  * the screen with "Up next" and must not win that argument.
  */
 
-import Link from "next/link";
+import TransitionLink from "@/components/transition-link";
 import { FaceCluster } from "@/components/face-cluster";
 import type { Question } from "@/lib/questions";
 import { DIFFICULTY_XP, LANG_LABEL } from "@/lib/question-meta";
@@ -100,17 +100,19 @@ export default function QotdCard({
               </p>
             )}
             <DailyCountdown className="mt-1 block font-mono text-[10px] uppercase tracking-widest text-ink-muted" />
-            <Link href={href} className="press btn-gold mt-2 inline-flex">
+            <TransitionLink href={href} transition="snap" label="Today's question" className="press btn-gold mt-2 inline-flex">
               {done ? "Replay" : `Solve · +${xp} XP`}
-            </Link>
+            </TransitionLink>
           </div>
         </div>
-        <Link
+        <TransitionLink
           href={href}
+          transition="snap"
+          label="Today's question"
           className="relative block border-t border-gold/20 px-4 py-3 text-center font-mono text-[11px] font-bold uppercase tracking-wider text-gold sm:hidden"
         >
           {done ? "Replay today's question" : "Solve today's question →"}
-        </Link>
+        </TransitionLink>
       </section>
     );
   }
@@ -144,9 +146,9 @@ export default function QotdCard({
           </p>
 
           <div className="mt-6 flex flex-wrap items-center gap-4">
-            <Link href={href} className="press btn-gold text-sm">
+            <TransitionLink href={href} transition="snap" label="Today's question" className="press btn-gold text-sm">
               {done ? "Solve it again →" : "Attempt now →"}
-            </Link>
+            </TransitionLink>
             <span
               className={`inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-ink-muted ${hydrated ? "" : "invisible"}`}
             >

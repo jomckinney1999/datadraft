@@ -24,7 +24,9 @@ export type SfxKind =
   | "splash"
   | "roar"
   | "clack"
-  | "thump";
+  | "thump"
+  // The page transitions (components/route-transition-curtain.tsx).
+  | "whoosh";
 
 const MUTE_KEY = "sqlsports-sfx-muted";
 const MUTE_EVENT = "sqlsports:sfx-mute";
@@ -292,6 +294,13 @@ export function playSfx(kind: SfxKind): void {
       // A magnet slapped onto a whiteboard.
       noises([{ at: 0, dur: 0.07, from: 3200, to: 2200, gain: 0.45, q: 2.2 }]);
       sequence([{ freq: 180, to: 90, at: 0, dur: 0.09, type: "sine", gain: 0.2 }]);
+      break;
+    case "whoosh":
+      // Air past a ball in flight: a band of noise swept up and away.
+      noises([
+        { at: 0, dur: 0.42, from: 500, to: 3600, gain: 0.2, q: 0.9, attack: 0.12 },
+        { at: 0.05, dur: 0.3, from: 1400, to: 5200, gain: 0.07, q: 1.6, attack: 0.08 },
+      ]);
       break;
     case "thump":
       // A ball landing on the podium.

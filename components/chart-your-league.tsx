@@ -42,7 +42,7 @@ export default function ChartYourLeague() {
             ))}
           </ul>
           <div className="reveal mt-7">
-            <StickerLink href="/projects/my-league-scorecard#your-league" tone="turf" icon="football" arrow>
+            <StickerLink href="/projects/my-league-scorecard#your-league" tone="turf" icon="football" arrow transition={{ kind: "chart", label: "Your league" }}>
               Chart your league
             </StickerLink>
           </div>

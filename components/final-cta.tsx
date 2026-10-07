@@ -37,10 +37,10 @@ export default function FinalCta({ qotdId }: { qotdId?: string }) {
           real season.
         </p>
         <div className="reveal mt-8 flex flex-wrap items-center justify-center gap-4">
-          <StickerLink href={qotdId ? `/questions/${qotdId}` : "/questions"} tone="gold" icon="question">
+          <StickerLink href={qotdId ? `/questions/${qotdId}` : "/questions"} tone="gold" icon="question" transition={{ kind: "snap", label: "Today's question" }}>
             Solve today&apos;s question
           </StickerLink>
-          <StickerLink href="/projects/my-league-scorecard#your-league" tone="turf" icon="football" arrow>
+          <StickerLink href="/projects/my-league-scorecard#your-league" tone="turf" icon="football" arrow transition={{ kind: "chart", label: "Your league" }}>
             Chart your league
           </StickerLink>
         </div>

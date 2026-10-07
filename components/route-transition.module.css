@@ -1,0 +1,305 @@
+/*
+ * The page transitions (components/route-transition-curtain.tsx). Beats are
+ * timed to COVER_MS / REVEAL_MS in lib/route-transition.ts: snap covers in
+ * 0.54s and clears in 0.58s; chart covers in 0.88s and clears in 0.64s.
+ * Transforms and opacity only.
+ */
+
+.root {
+  --in: 0.38s; /* when the destination sticker pops in */
+  position: fixed;
+  inset: 0;
+  z-index: 96;
+  overflow: hidden;
+  cursor: progress;
+  -webkit-tap-highlight-color: transparent;
+}
+.root[data-kind="chart"] {
+  --in: 0.7s;
+}
+
+.root [data-tone="turf"] {
+  --tone: var(--c-turf);
+}
+.root [data-tone="ice"] {
+  --tone: var(--c-ice);
+}
+.root [data-tone="gold"] {
+  --tone: var(--c-gold);
+}
+
+/* ── snap: the replay wipe ───────────────────────────────────────────
+   One train, 300vw long, left to right: trailing stripes, the curtain
+   (220vw, wide enough to cover any screen once skewed), leading stripes,
+   and the ball out front. Covered, the curtain spans -45vw to 175vw. */
+
+.train {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 300vw;
+  will-change: transform;
+  transform: translateX(-75vw);
+}
+.strip {
+  position: absolute;
+  top: -5%;
+  bottom: -5%;
+  left: 0;
+  width: 280vw;
+  display: flex;
+  transform: skewX(-14deg);
+}
+.strip i {
+  flex: 0 0 10vw;
+  background: rgb(var(--tone));
+  border-left: 4px solid rgb(var(--c-night));
+}
+.fill {
+  flex: 0 0 220vw;
+  border-left: 4px solid rgb(var(--c-night));
+  background:
+    repeating-linear-gradient(90deg, transparent 0 9.6vw, rgb(var(--c-ink) / 0.06) 9.6vw 10vw),
+    radial-gradient(ellipse 30% 60% at 34% 50%, rgb(var(--c-turf) / 0.16), transparent 70%),
+    rgb(var(--c-night));
+}
+.ball {
+  position: absolute;
+  left: 282vw;
+  top: 50%;
+  width: clamp(110px, 26vmin, 240px);
+  aspect-ratio: 40 / 28;
+  transform: translateY(-50%);
+}
+.ballSpin {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 6px 0 rgb(var(--c-night)));
+  animation: spiral 0.32s linear infinite;
+}
+/* speed lines behind the ball */
+.trail,
+.trail::before,
+.trail::after {
+  position: absolute;
+  right: 92%;
+  width: 34vw;
+  height: 5px;
+  border-radius: 999px;
+  background: linear-gradient(to left, rgb(var(--c-ink) / 0.75), transparent);
+}
+.trail {
+  top: 48%;
+}
+.trail::before,
+.trail::after {
+  content: "";
+  right: 0;
+}
+.trail::before {
+  top: -28px;
+  width: 24vw;
+}
+.trail::after {
+  top: 28px;
+  width: 28vw;
+}
+
+.root[data-phase="cover"] .train {
+  animation: train-in 0.54s cubic-bezier(0.65, 0, 0.3, 1) both;
+}
+.root[data-phase="reveal"] .train {
+  animation: train-out 0.58s cubic-bezier(0.6, 0, 0.35, 1) both;
+}
+
+/* ── chart: the bars that flood the screen ──────────────────────────── */
+
+.bars i {
+  position: absolute;
+  bottom: -2%;
+  left: calc(var(--i) * 12.5%);
+  width: calc(12.5% + 3px);
+  height: 104%;
+  border: 3px solid rgb(var(--c-night));
+  border-bottom: 0;
+  border-radius: 14px 14px 0 0;
+  background:
+    linear-gradient(90deg, transparent 0 70%, rgb(var(--c-night) / 0.14) 70%),
+    rgb(var(--tone));
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+/* Each bar reaches its height at 0.27s + 35ms a bar, holds there while the
+   trend line passes, then floods. The last one is full at ~0.85s. */
+.root[data-phase="cover"] .bars i {
+  animation: bar-rise 0.6s calc(var(--i) * 35ms) cubic-bezier(0.3, 0.8, 0.3, 1) both;
+}
+.root[data-phase="reveal"] .bars i {
+  animation: bar-off 0.4s calc(var(--i) * 30ms) cubic-bezier(0.6, 0, 0.4, 1) both;
+}
+.trend {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  clip-path: inset(0 100% 0 0);
+}
+.trend svg {
+  width: 100%;
+  height: 100%;
+}
+.root[data-phase="cover"] .trend {
+  animation:
+    wipe-on 0.28s 0.27s linear both,
+    fade-out 0.12s 0.56s ease-in forwards;
+}
+.root[data-phase="reveal"] .trend {
+  display: none;
+}
+
+/* ── where you're going ─────────────────────────────────────────────── */
+
+.label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.8rem 1.3rem 0.85rem 0.9rem;
+  border: 3px solid rgb(var(--c-night));
+  border-radius: 1.2rem;
+  background: rgb(var(--c-panel));
+  box-shadow: 0 6px 0 rgb(var(--c-night));
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+}
+.labelIcon {
+  display: block;
+  width: 2.6rem;
+  height: 2.6rem;
+  flex-shrink: 0;
+}
+.kicker {
+  display: block;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgb(var(--c-ink-muted));
+}
+.labelText {
+  display: block;
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: rgb(var(--c-ink));
+}
+.root[data-phase="cover"] .label {
+  animation:
+    pop-in 0.32s var(--in) cubic-bezier(0.34, 1.56, 0.64, 1) both,
+    bob 1.1s calc(var(--in) + 0.32s) ease-in-out infinite;
+}
+.root[data-phase="reveal"] .label {
+  animation: pop-out 0.16s ease-in both;
+}
+
+/* ── keyframes ─────────────────────────────────────────────────────── */
+
+@keyframes train-in {
+  from {
+    transform: translateX(-300vw);
+  }
+  to {
+    transform: translateX(-75vw);
+  }
+}
+@keyframes train-out {
+  from {
+    transform: translateX(-75vw);
+  }
+  to {
+    transform: translateX(140vw);
+  }
+}
+@keyframes spiral {
+  to {
+    transform: rotate(1turn);
+  }
+}
+@keyframes bar-rise {
+  0% {
+    transform: scaleY(0);
+  }
+  45% {
+    transform: scaleY(var(--h));
+  }
+  70% {
+    transform: scaleY(var(--h));
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+@keyframes bar-off {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translateY(-112%);
+  }
+}
+@keyframes wipe-on {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.6) rotate(-4deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+@keyframes bob {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, calc(-50% - 5px));
+  }
+}
+@keyframes pop-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.85);
+  }
+}
+
+@media (max-width: 480px) {
+  .labelText {
+    font-size: 1.2rem;
+  }
+}

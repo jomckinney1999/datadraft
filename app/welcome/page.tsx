@@ -13,6 +13,7 @@ import { COURSES } from "@/lib/courses";
 import { INTERVIEW_CASES } from "@/lib/interview-cases";
 import { liveProjects } from "@/lib/projects";
 import { QUESTION_COUNT, questionsIn } from "@/lib/questions";
+import TransitionLink from "@/components/transition-link";
 
 export const metadata: Metadata = {
   title: "Start here — DataDraft",
@@ -114,9 +115,9 @@ export default function WelcomePage() {
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-2">
             <TourButton className="press btn-gold" />
-            <Link href="/questions" className="press btn-turf">
+            <TransitionLink href="/questions" transition="snap" label="Today's question" className="press btn-turf">
               Solve today&apos;s question
-            </Link>
+            </TransitionLink>
           </div>
         </header>
 

@@ -12,6 +12,8 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import TransitionLink from "@/components/transition-link";
+import type { TransitionKind } from "@/lib/route-transition";
 import { c, Football, N, SANS } from "@/components/art-kit";
 
 /** A speech bubble with a question mark: "questions", said as a picture. */
@@ -55,17 +57,20 @@ export default function StickerLink({
   tone,
   icon,
   arrow = false,
+  transition,
   children,
 }: {
   href: string;
   tone: "turf" | "gold";
   icon: keyof typeof ICONS;
   arrow?: boolean;
+  /** A page transition on the way out, and the destination's name for it. */
+  transition?: { kind: TransitionKind; label: string };
   children: ReactNode;
 }) {
   const Icon = ICONS[icon];
-  return (
-    <Link href={href} className={`btn-sticker sticker-${tone}`}>
+  const inner = (
+    <>
       <span className="sticker-icon">
         <Icon />
       </span>
@@ -82,6 +87,16 @@ export default function StickerLink({
           />
         </svg>
       )}
+    </>
+  );
+  const className = `btn-sticker sticker-${tone}`;
+  return transition ? (
+    <TransitionLink href={href} transition={transition.kind} label={transition.label} className={className}>
+      {inner}
+    </TransitionLink>
+  ) : (
+    <Link href={href} className={className}>
+      {inner}
     </Link>
   );
 }

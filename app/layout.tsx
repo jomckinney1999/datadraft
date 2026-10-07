@@ -4,6 +4,7 @@ import "./globals.css";
 import { SITE_URL } from "@/lib/site";
 import SiteAnalytics from "@/components/site-analytics";
 import CoachEyes from "@/components/coach-eyes";
+import RouteTransition from "@/components/route-transition";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -100,6 +101,7 @@ export default function RootLayout({
         {children}
         <SiteAnalytics />
         <CoachEyes />
+        <RouteTransition />
       </body>
     </html>
   );

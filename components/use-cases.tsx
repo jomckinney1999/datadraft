@@ -13,6 +13,8 @@
  */
 
 import Link from "next/link";
+import TransitionLink from "@/components/transition-link";
+import type { TransitionKind } from "@/lib/route-transition";
 import type { ReactNode } from "react";
 
 /**
@@ -29,7 +31,7 @@ type UseCase = {
   title: string;
   pitch: string;
   bestFor: string;
-  primary: { href: string; label: string };
+  primary: { href: string; label: string; transition?: { kind: TransitionKind; label: string } };
   more: { href: string; label: string }[];
   tone: Tone;
   art: ReactNode;
@@ -97,7 +99,11 @@ export default function UseCases({
       title: "Fantasy football insights",
       pitch: "Load your Sleeper league and see who's actually good, who got lucky, and who left points on the bench.",
       bestFor: "Best if you came for your league. No code needed to start.",
-      primary: { href: "/projects/my-league-scorecard#your-league", label: "Chart your league" },
+      primary: {
+        href: "/projects/my-league-scorecard#your-league",
+        label: "Chart your league",
+        transition: { kind: "chart", label: "Your league" },
+      },
       more: [
         { href: "/draft", label: "Draft Room" },
         { href: "/questions/duel", label: "Stat Duel" },
@@ -146,12 +152,23 @@ export default function UseCases({
               <h3 className={`font-display text-lg font-bold ${TEXT[c.tone]}`}>{c.title}</h3>
               <p className="mt-1 text-sm leading-relaxed text-ink-soft">{c.pitch}</p>
               <p className="mt-1 text-xs text-ink-muted">{c.bestFor}</p>
-              <Link
-                href={c.primary.href}
-                className={`mt-3 inline-flex rounded-lg border px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors ${BUTTON[c.tone]}`}
-              >
-                {c.primary.label} →
-              </Link>
+              {c.primary.transition ? (
+                <TransitionLink
+                  href={c.primary.href}
+                  transition={c.primary.transition.kind}
+                  label={c.primary.transition.label}
+                  className={`mt-3 inline-flex rounded-lg border px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors ${BUTTON[c.tone]}`}
+                >
+                  {c.primary.label} →
+                </TransitionLink>
+              ) : (
+                <Link
+                  href={c.primary.href}
+                  className={`mt-3 inline-flex rounded-lg border px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors ${BUTTON[c.tone]}`}
+                >
+                  {c.primary.label} →
+                </Link>
+              )}
               <p className="mt-2 text-xs text-ink-muted">
                 Or{" "}
                 {c.more.map((m, i) => (
