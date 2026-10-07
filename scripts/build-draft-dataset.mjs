@@ -39,7 +39,7 @@ const POSITIONS = ["QB", "RB", "WR", "TE"];
 
 const STATS = "https://github.com/nflverse/nflverse-data/releases/download/stats_player";
 const PLAYERS_CSV = "https://github.com/nflverse/nflverse-data/releases/download/players/players.csv";
-const SCHEDULE_CSV = "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv";
+const SCHEDULE_CSV = "https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv";
 
 const num = (v) => {
   if (v === "" || v === undefined || v === null) return 0;

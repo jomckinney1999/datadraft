@@ -114,7 +114,7 @@ async function fetchSeason(season) {
 // played in. Betting columns (moneylines, spreads, totals) are never read:
 // see docs/PLAN.md, no gambling content.
 const SCHEDULE_URL =
-  "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv";
+  "https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv";
 
 async function fetchGames() {
   process.stdout.write("fetching schedules … ");

@@ -74,7 +74,7 @@ pd.set_option("display.width", 120)
 pd.set_option("display.max_columns", 20)
 
 STATS_URL = "https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_{}.csv"
-SCHEDULE_URL = "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv"
+SCHEDULE_URL = "https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv"
 POSITIONS = ["QB", "RB", "WR", "TE"]
 print("Ready.")
 """))

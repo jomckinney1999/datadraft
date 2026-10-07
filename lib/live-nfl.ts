@@ -24,7 +24,7 @@
 import { parse } from "csv-parse/sync";
 
 const SCHEDULES =
-  "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv";
+  "https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv";
 const WEEKLY = (season: number) =>
   `https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_${season}.csv`;
 
