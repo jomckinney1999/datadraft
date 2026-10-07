@@ -336,6 +336,11 @@ stage("Question bank (same seeded lesson DB)");
     if (!real) problems.push(`nav: ${item.href} isn't a page`);
     if (hash && !sources.some((src) => src.includes(`id="${hash}"`))) problems.push(`nav: ${item.href} points at #${hash}, which no page has`);
   }
+  // Every language chip in the Courses menu draws its own icon.
+  const icons = fs.readFileSync(path.join(root, "components/nav-icons.tsx"), "utf8");
+  for (const chip of nav.NAV.flatMap((s) => s.groups.flatMap((g) => g.chips?.items ?? []))) {
+    if (!icons.includes(`"${chip.href}": {`)) problems.push(`nav: the ${chip.label} chip has no icon in components/nav-icons.tsx`);
+  }
 }
 
 const questions = await loadProjectTs(path.join(root, "lib/questions.ts"), root);
@@ -1397,13 +1402,15 @@ let courseMapChecked = 0;
   }
 }
 
-// Roll Call (lib/roll-call.ts): every day's board is its SQL's result, in
-// order, on the same rows the browser loads; the browser's JSON and the
-// published CSV are the generated rows; the pandas version prints the same
-// names; every answer's team has a crest; a day comes out the same twice.
-// The R and Excel versions aren't run here (no Node WebR, no FILTER in the
-// engine); they mirror the SQL line for line.
+// Roll Call (lib/roll-call.ts): every list (each kind, at each week on file)
+// is its SQL's result, in order, on the same rows the browser loads; the
+// browser's JSON and the published CSV are the generated rows; the pandas
+// version prints the same names; every tile has a clue and its team a crest;
+// a day comes out the same twice, never repeats yesterday, and all eight
+// kinds come up. The R and Excel versions aren't run here (no Node WebR, no
+// GROUPBY in the engine); the R ones were run in real R when they changed.
 let rollCallChecked = 0;
+let rollCallLists = 0;
 let rollCallPy = 0;
 {
   const fs = await import("node:fs");
@@ -1442,51 +1449,85 @@ let rollCallPy = 0;
   for (const row of table.rows) ins.run(row);
   ins.free();
 
-  const byTemplate = new Map();
+  // A board is its SQL's result in order: the player column (wherever it
+  // sits) and the value in the last column.
+  const sqlMatches = (label, list) => {
+    let got = [];
+    try {
+      const res = rcDb.exec(list.code.sql)[0];
+      if (res) {
+        const pi = res.columns.indexOf("player");
+        got = res.values.map((r) => `${r[pi]}|${r[r.length - 1]}`);
+      }
+    } catch (e) {
+      problems.push(`roll call ${label}: the SQL errors: ${e.message}`);
+      return;
+    }
+    const want = list.answers.map((a) => `${a.name}|${a.value}`);
+    if (JSON.stringify(got) !== JSON.stringify(want)) problems.push(`roll call ${label}: the SQL's list isn't the board`);
+  };
+
+  // Every list every kind offers, at every cutoff week on file, not just the
+  // ones the next 200 days happen to pick.
+  const lists = new Map();
+  for (const w of Object.keys(gen.ROLL_CALL_WEEK_ENDS).map(Number)) {
+    for (const kind of rc.KINDS) {
+      for (const list of rc.listsFor(kind.id, w)) {
+        const label = `w${w} ${list.key}`;
+        lists.set(label, list);
+        rollCallLists++;
+        sqlMatches(label, list);
+        if (list.answers.length < rc.MIN_ANSWERS || list.answers.length > rc.MAX_ANSWERS) {
+          problems.push(`roll call ${label}: ${list.answers.length} answers, outside ${rc.MIN_ANSWERS}–${rc.MAX_ANSWERS}`);
+        }
+        for (const a of list.answers) {
+          if (!crests.teamCrest(a.team)) problems.push(`roll call ${label}: no crest for ${a.team}`);
+          if (!a.clue) problems.push(`roll call ${label}: ${a.name}'s tile has no clue`);
+        }
+      }
+    }
+  }
+
+  // The days: deterministic, never before a week opens, every kind in the
+  // rotation, and never the same list two days running.
+  const kindsSeen = new Set();
+  let yesterday = null;
   for (let i = 0; i < 200; i++) {
     const day = rc.addDays(share.DAILY_LAUNCH, i);
     const p = rc.rollCallFor(day);
     if (!p) continue;
     rollCallChecked++;
+    kindsSeen.add(p.kind);
     if (JSON.stringify(rc.rollCallFor(day)) !== JSON.stringify(p)) problems.push(`roll call ${day}: came out differently twice`);
-    if (p.answers.length < rc.MIN_ANSWERS || p.answers.length > rc.MAX_ANSWERS) {
-      problems.push(`roll call ${day} (${p.key}): ${p.answers.length} answers, outside ${rc.MIN_ANSWERS}–${rc.MAX_ANSWERS}`);
-    }
     if (day < (rc.weekOpens(p.week) ?? "9999")) problems.push(`roll call ${day}: uses week ${p.week} before it opens`);
-    let got = [];
-    try {
-      const res = rcDb.exec(p.code.sql)[0];
-      got = res ? res.values.map((r) => `${r[0]}|${r[1]}|${r[2]}`) : [];
-    } catch (e) {
-      problems.push(`roll call ${day} (${p.key}): the SQL errors: ${e.message}`);
-    }
-    const want = p.answers.map((a) => `${a.name}|${a.team}|${a.value}`);
-    if (JSON.stringify(got) !== JSON.stringify(want)) problems.push(`roll call ${day} (${p.key}): the SQL's list isn't the board`);
-    for (const a of p.answers) {
-      if (!crests.teamCrest(a.team)) problems.push(`roll call ${day}: no crest for ${a.team}`);
-    }
-    if (!byTemplate.has(p.template)) byTemplate.set(p.template, p);
+    if (yesterday === p.key) problems.push(`roll call ${day}: the same list as the day before (${p.key})`);
+    yesterday = p.key;
+    sqlMatches(`${day} (${p.key})`, p);
   }
   if (!rollCallChecked && Object.keys(gen.ROLL_CALL_WEEK_ENDS).length) problems.push("roll call: weeks on file but no day has a list");
+  const latest = Math.max(0, ...Object.keys(gen.ROLL_CALL_WEEK_ENDS).map(Number));
+  if (latest >= 4) {
+    for (const kind of rc.KINDS) if (!kindsSeen.has(kind.id)) problems.push(`roll call: the ${kind.id} lists never come up in 200 days`);
+  }
 
-  // The pandas version, once per kind of list, on the same rows (the CSV
-  // read is swapped for the JSON the browser loads; they're the same table).
+  // The pandas version of every list, on the same rows (the CSV read is
+  // swapped for the JSON the browser loads; they're the same table).
   const py = await getPy();
   py.globals.set("RC_JSON", json);
-  for (const p of byTemplate.values()) {
-    const code = p.code.python.replace(
+  for (const [label, list] of lists) {
+    const code = list.code.python.replace(
       /^player_weeks = pd\.read_csv\(.*\)$/m,
       'import json\n_t = json.loads(RC_JSON)\nplayer_weeks = pd.DataFrame(_t["rows"], columns=_t["columns"])',
     );
     const { stdout, error } = await runPython(code);
     rollCallPy++;
     if (error) {
-      problems.push(`roll call ${p.key}: the pandas version errors: ${error}`);
+      problems.push(`roll call ${label}: the pandas version errors: ${error}`);
       continue;
     }
     const lines = stdout.trim().split("\n").slice(1).map((l) => l.trim());
-    const ok = lines.length === p.answers.length && p.answers.every((a, i) => lines[i].startsWith(a.name));
-    if (!ok) problems.push(`roll call ${p.key}: the pandas version prints a different list`);
+    const ok = lines.length === list.answers.length && list.answers.every((a, i) => lines[i].includes(a.name));
+    if (!ok) problems.push(`roll call ${label}: the pandas version prints a different list`);
   }
 }
 
@@ -1503,7 +1544,7 @@ if (skippedR) console.log(`R keys skipped (no Node WebR): ${skippedR}`);
 console.log(`card art ids checked      : ${artChecked} (courses, builds, cases, units)`);
 console.log(`prose facts checked       : ${factsChecked} (lib/lesson-facts.generated.ts vs the database)`);
 console.log(`stat duel rounds checked  : ${duelChecked} (180 days from launch, numbers vs their SQL)`);
-console.log(`roll call days checked    : ${rollCallChecked} (200 days from launch, board vs its SQL; pandas run for ${rollCallPy} kinds of list)`);
+console.log(`roll call lists checked   : ${rollCallLists} lists at every week on file and ${rollCallChecked} days, board vs its SQL; pandas run for ${rollCallPy}`);
 console.log(`draft room checks         : ${draftChecked} (scouting presets per season, drafts from every slot)`);
 console.log(`query doctor cases        : ${doctorChecked} (known wrong answers, the diagnosis a tutor would lead with)`);
 console.log(`pattern guides            : ${guidesChecked} (one per interview pattern plus topic guides, each example where it belongs)`);

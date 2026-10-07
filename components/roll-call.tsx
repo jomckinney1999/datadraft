@@ -3,13 +3,15 @@
 /**
  * Roll Call, the game (lib/roll-call.ts has the lists and the rules).
  *
- * A prompt, a board of tiles (each answer's team crest and number, or a
- * question mark for the biggest games), a search box over everyone who played
- * this season, three strikes and a clock. Name a player on the list and his
- * tile turns over; name one who isn't and it's a strike. When the board is
- * full, the strikes run out or you give up, every tile turns over and the
- * answer comes four ways: SQL you can run and change on the page, and the
- * same list in pandas, dplyr and Excel, reading the published CSV.
+ * A prompt, a board of tiles (each answer's position, team crest, number and
+ * a clue that narrows it down: a rank, a week, an opponent; the biggest
+ * numbers hide their team), a search box over everyone who played this
+ * season, three strikes, three clue tokens that reveal a tile's initials,
+ * and a clock. Name a player on the list and his tile turns over; name one
+ * who isn't and it's a strike. When the board is full, the strikes run out
+ * or you give up, every tile turns over and the answer comes four ways: SQL
+ * you can run and change on the page, and the same list in pandas, dplyr and
+ * Excel, reading the published CSV.
  *
  * Progress is per browser (`sqlsports.rollcall.v1`), so a reload resumes;
  * a saved game for a different list (the data refreshed, or a new day)
@@ -30,7 +32,14 @@ import { NFLVERSE_CREDIT } from "@/lib/chart";
 import { shareText } from "@/lib/daily-share";
 import { SITE_URL } from "@/lib/site";
 import { playSfx } from "@/lib/sfx";
-import { PLAYER_WEEKS_CSV, ROLL_CALL_STRIKES, seedSql, type RollCallPuzzle } from "@/lib/roll-call";
+import {
+  PLAYER_WEEKS_CSV,
+  ROLL_CALL_CLUES,
+  ROLL_CALL_STRIKES,
+  initials,
+  seedSql,
+  type RollCallPuzzle,
+} from "@/lib/roll-call-meta";
 
 const KEY = "sqlsports.rollcall.v1";
 const HISTORY_KEY = "sqlsports.rollcall.history.v1";
@@ -39,12 +48,14 @@ type Saved = {
   key: string;
   found: string[];
   misses: { id: string; name: string }[];
+  /** Tiles whose initials a clue token revealed. */
+  clues: string[];
   startedAt: number | null;
   endedAt: number | null;
   gaveUp: boolean;
 };
 
-const fresh = (key: string): Saved => ({ key, found: [], misses: [], startedAt: null, endedAt: null, gaveUp: false });
+const fresh = (key: string): Saved => ({ key, found: [], misses: [], clues: [], startedAt: null, endedAt: null, gaveUp: false });
 
 function read<T>(k: string): T | null {
   try {
@@ -119,7 +130,7 @@ function Board({ puzzle, roster }: { puzzle: RollCallPuzzle; roster: [string, st
   // Resume today's board, or start this list fresh.
   useEffect(() => {
     const saved = read<Saved>(KEY);
-    if (saved && saved.key === puzzle.key) setGame(saved);
+    if (saved && saved.key === puzzle.key) setGame({ ...saved, clues: saved.clues ?? [] });
     setHydrated(true);
   }, [puzzle.key]);
 
@@ -215,6 +226,13 @@ function Board({ puzzle, roster }: { puzzle: RollCallPuzzle; roster: [string, st
     }
   }
 
+  function spendClue(id: string) {
+    if (over || game.clues.includes(id) || game.clues.length >= ROLL_CALL_CLUES) return;
+    const base = game.startedAt ? game : { ...game, startedAt: Date.now() };
+    save({ ...base, clues: [...base.clues, id] });
+    playSfx("ui");
+  }
+
   function giveUp() {
     if (over) return;
     finish({ ...game, startedAt: game.startedAt ?? Date.now(), gaveUp: true });
@@ -225,7 +243,7 @@ function Board({ puzzle, roster }: { puzzle: RollCallPuzzle; roster: [string, st
     const strikes = "✖".repeat(game.misses.length) || "no strikes";
     const text = [
       `DataDraft Roll Call #${puzzle.number} · ${game.found.length}/${total}${perfect ? " 🏆" : ""}`,
-      `${strikes} · ${clock(elapsed)}`,
+      `${strikes} · ${game.clues.length ? `💡${game.clues.length} · ` : ""}${clock(elapsed)}`,
       puzzle.prompt.replace(/^Name every /, "Every "),
       `${SITE_URL}/questions/roll-call`,
     ].join("\n");
@@ -240,12 +258,15 @@ function Board({ puzzle, roster }: { puzzle: RollCallPuzzle; roster: [string, st
           <div className="shrink-0">
             <p className="label-broadcast text-gold">roll call #{puzzle.number}</p>
             <p className="mt-0.5 font-mono text-[11px] text-ink-muted">{prettyDay(puzzle.day)}</p>
+            <p className="mt-2 inline-block rounded-full border border-ice/50 bg-ice/10 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-ice">
+              {puzzle.label}
+            </p>
           </div>
           <div className="min-w-0 flex-1 border-l-2 border-ice pl-3">
             <h1 className="font-display text-xl font-bold leading-snug text-ink sm:text-2xl">{puzzle.prompt}</h1>
             <p className="mt-1 text-xs text-ink-muted">
-              Each tile is a player: his team that week and his number. {puzzle.note} Pick names from the list; three
-              misses and the board turns over.
+              {puzzle.note} Pick names from the list: three misses and the board turns over, and {ROLL_CALL_CLUES} clues
+              (💡 on a tile) show a player&apos;s initials.
             </p>
           </div>
         </div>
@@ -266,6 +287,12 @@ function Board({ puzzle, roster }: { puzzle: RollCallPuzzle; roster: [string, st
                 ✖
               </span>
             ))}
+          </span>
+          <span
+            className="rounded-lg border border-panel-border bg-night/40 px-2.5 py-1.5 font-mono text-xs text-ink-soft"
+            aria-label={`${ROLL_CALL_CLUES - game.clues.length} clues left`}
+          >
+            💡 {ROLL_CALL_CLUES - game.clues.length}
           </span>
           <span className="rounded-lg border border-panel-border bg-night/40 px-2.5 py-1.5 font-mono text-xs text-ink-soft" aria-label="Time">
             ⏱ {hydrated ? clock(elapsed) : "0:00"}
@@ -342,18 +369,38 @@ function Board({ puzzle, roster }: { puzzle: RollCallPuzzle; roster: [string, st
         {puzzle.answers.map((a, i) => {
           const found = game.found.includes(a.id);
           const shown = found || (over && hydrated);
+          const clued = game.clues.includes(a.id);
+          const canClue = !over && hydrated && !clued && game.clues.length < ROLL_CALL_CLUES;
           return (
             <li
-              key={a.id}
-              className={`relative flex min-h-[6.5rem] flex-col items-center justify-center gap-1 rounded-xl border p-2 text-center transition-colors ${
+              key={`${a.id}-${i}`}
+              className={`relative flex min-h-[7.5rem] flex-col items-center justify-center gap-1 rounded-xl border p-2 text-center transition-colors ${
                 found
                   ? `border-turf/60 bg-turf/10 ${lastFound === a.id ? "animate-option-pop" : ""}`
                   : shown
                     ? "border-gold/40 bg-night/40"
                     : "surface border-panel-border bg-panel"
               }`}
-              aria-label={shown ? `${a.name}, ${a.team}, ${a.value} ${a.unit}${found ? "" : ", missed"}` : `Tile ${i + 1}: ${a.mystery ? "team hidden" : a.team}, ${a.value} ${a.unit}`}
+              aria-label={
+                shown
+                  ? `${a.name}, ${a.position}, ${a.team}, ${a.value} ${a.unit}, ${a.clue}${found ? "" : ", missed"}`
+                  : `Tile ${i + 1}: ${a.position}, ${a.mystery ? "team hidden" : a.team}, ${a.value} ${a.unit}, ${a.clue}${clued ? `, initials ${initials(a.name)}` : ""}`
+              }
             >
+              <span className="absolute left-1.5 top-1.5 rounded border border-panel-border bg-night/50 px-1 font-mono text-[9px] font-bold text-ink-muted" aria-hidden>
+                {a.position}
+              </span>
+              {canClue && !shown && (
+                <button
+                  type="button"
+                  onClick={() => spendClue(a.id)}
+                  aria-label={`Use a clue on tile ${i + 1}`}
+                  title="Use a clue: show this player's initials"
+                  className="absolute right-1 top-1 rounded-md px-1 text-[13px] leading-6 opacity-60 transition-opacity hover:opacity-100 focus-visible:opacity-100"
+                >
+                  💡
+                </button>
+              )}
               {shown ? (
                 <>
                   <Headshot name={a.name} src={a.headshot || null} size={44} className={found ? "" : "opacity-60"} />
@@ -362,6 +409,7 @@ function Board({ puzzle, roster }: { puzzle: RollCallPuzzle; roster: [string, st
                     <TeamLogo abbr={a.team} size={14} showCode={false} />
                     {a.team} · {a.value} {a.unit}
                   </span>
+                  <span className="font-mono text-[10px] text-ink-muted">{a.clue}</span>
                 </>
               ) : (
                 <>
@@ -370,12 +418,17 @@ function Board({ puzzle, roster }: { puzzle: RollCallPuzzle; roster: [string, st
                       ?
                     </span>
                   ) : (
-                    <TeamLogo abbr={a.team} size={36} showCode={false} />
+                    <span className="flex items-center gap-1.5">
+                      <TeamLogo abbr={a.team} size={36} showCode={false} />
+                      {puzzle.teamCodes && <span className="font-mono text-xs font-bold text-ink-soft">{a.team}</span>}
+                    </span>
                   )}
                   <span className="font-display text-xl font-bold text-ink">
                     {a.value}
                     <span className="ml-1 font-mono text-[10px] font-normal text-ink-muted">{a.unit}</span>
                   </span>
+                  {!puzzle.teamCodes && <span className="font-mono text-[10px] font-semibold text-ice">{a.clue}</span>}
+                  {clued && <span className="font-display text-sm font-bold tracking-wide text-gold">{initials(a.name)}</span>}
                 </>
               )}
             </li>
@@ -429,9 +482,13 @@ function Solve({ puzzle }: { puzzle: RollCallPuzzle }) {
   const [copied, setCopied] = useState<Tab | null>(null);
   const csv = PLAYER_WEEKS_CSV(puzzle.season);
 
+  const code = tab === "sql" ? puzzle.code.sql : puzzle.code[tab];
+
   async function copy(t: Tab) {
+    const text = puzzle.code[t];
+    if (text === null) return;
     try {
-      await navigator.clipboard.writeText(puzzle.code[t]);
+      await navigator.clipboard.writeText(text);
       setCopied(t);
       window.setTimeout(() => setCopied(null), 1500);
     } catch {
@@ -468,30 +525,37 @@ function Solve({ puzzle }: { puzzle: RollCallPuzzle }) {
         <SqlRun puzzle={puzzle} />
       ) : (
         <div className="mt-3">
-          <div className="overflow-hidden rounded-xl border border-panel-border">
-            <CodeEditor
-              value={puzzle.code[tab]}
-              onChange={() => {}}
-              lang={tab}
-              disabled
-              rows={puzzle.code[tab].split("\n").length + 1}
-              ariaLabel={`The ${tab === "r" ? "R" : tab === "excel" ? "Excel" : "Python"} version`}
-            />
-          </div>
+          {tab === "excel" && (
+            <p className="mb-2 rounded-lg border border-panel-border bg-night/40 px-3 py-2 text-xs leading-relaxed text-ink-soft">{puzzle.code.excelNote}</p>
+          )}
+          {code !== null && (
+            <div className="overflow-hidden rounded-xl border border-panel-border">
+              <CodeEditor
+                value={code}
+                onChange={() => {}}
+                lang={tab}
+                disabled
+                rows={code.split("\n").length + 1}
+                ariaLabel={`The ${tab === "r" ? "R" : tab === "excel" ? "Excel" : "Python"} version`}
+              />
+            </div>
+          )}
           <div className="mt-3 flex flex-wrap items-center gap-3">
-            <button type="button" onClick={() => copy(tab)} className="press btn-turf">
-              {copied === tab ? "Copied" : "Copy"}
-            </button>
+            {code !== null && (
+              <button type="button" onClick={() => copy(tab)} className="press btn-turf">
+                {copied === tab ? "Copied" : "Copy"}
+              </button>
+            )}
             <span className="text-xs text-ink-muted">
               {tab === "python" && <>Runs as-is in Colab or Jupyter: it reads the table straight from our site.</>}
               {tab === "r" && <>Runs as-is in RStudio or Posit Cloud with dplyr: it reads the table straight from our site.</>}
               {tab === "excel" && (
                 <>
-                  Excel 365. Download{" "}
+                  Download{" "}
                   <a href={csv} className="text-ice underline">
                     the table
                   </a>
-                  , make it a table named PlayerWeeks (Ctrl+T), then paste this in an empty cell.
+                  {code !== null ? ", then paste this in an empty cell." : " to try it."}
                 </>
               )}
             </span>
