@@ -5,8 +5,8 @@
 // database. Import from here rather than typing a number into a lesson.
 
 export const FACTS = {
-  "rows": 1238,
-  "gamesTable": 1151,
+  "rows": 1252,
+  "gamesTable": 1166,
   "players": 20,
   "seasons": [
     2022,
@@ -17,12 +17,12 @@ export const FACTS = {
   ],
   "latest": {
     "season": 2026,
-    "week": 4
+    "week": 5
   },
   "teams": 18,
   "playerTeamPairs": 26,
   "movers": 5,
-  "possibleGames": 72,
+  "possibleGames": 73,
   "maxGame": {
     "pts": 55.4,
     "games": [
@@ -38,29 +38,29 @@ export const FACTS = {
       }
     ]
   },
-  "over25": 285,
-  "boom30": 146,
+  "over25": 288,
+  "boom30": 149,
   "gamesPlayed": {
-    "Justin Jefferson": 64,
+    "Justin Jefferson": 65,
     "Patrick Mahomes": 67,
     "Saquon Barkley": 66,
-    "Josh Allen": 69,
-    "Davante Adams": 66,
-    "Ja'Marr Chase": 65,
+    "Josh Allen": 70,
+    "Davante Adams": 67,
+    "Ja'Marr Chase": 66,
     "Travis Kelce": 69,
     "A.J. Brown": 63,
-    "Jalen Hurts": 67,
-    "Amon-Ra St. Brown": 70,
+    "Jalen Hurts": 68,
+    "Amon-Ra St. Brown": 71,
     "Lamar Jackson": 62,
     "Tyreek Hill": 54,
-    "Christian McCaffrey": 58,
-    "Derrick Henry": 71,
-    "CeeDee Lamb": 66,
-    "George Kittle": 61,
-    "Puka Nacua": 46,
-    "Bijan Robinson": 55,
-    "Sam LaPorta": 46,
-    "Jahmyr Gibbs": 53
+    "Christian McCaffrey": 59,
+    "Derrick Henry": 72,
+    "CeeDee Lamb": 67,
+    "George Kittle": 62,
+    "Puka Nacua": 47,
+    "Bijan Robinson": 56,
+    "Sam LaPorta": 47,
+    "Jahmyr Gibbs": 54
   },
   "seasonPpg": {
     "A.J. Brown": [
@@ -104,7 +104,7 @@ export const FACTS = {
       ],
       [
         2026,
-        22.8
+        20.8
       ]
     ],
     "Bijan Robinson": [
@@ -122,7 +122,7 @@ export const FACTS = {
       ],
       [
         2026,
-        26.3
+        24.2
       ]
     ],
     "CeeDee Lamb": [
@@ -144,7 +144,7 @@ export const FACTS = {
       ],
       [
         2026,
-        28
+        23
       ]
     ],
     "Christian McCaffrey": [
@@ -166,7 +166,7 @@ export const FACTS = {
       ],
       [
         2026,
-        18.5
+        18.3
       ]
     ],
     "Davante Adams": [
@@ -188,7 +188,7 @@ export const FACTS = {
       ],
       [
         2026,
-        18.3
+        19
       ]
     ],
     "Derrick Henry": [
@@ -210,7 +210,7 @@ export const FACTS = {
       ],
       [
         2026,
-        22.7
+        22.4
       ]
     ],
     "George Kittle": [
@@ -232,7 +232,7 @@ export const FACTS = {
       ],
       [
         2026,
-        16.1
+        14.4
       ]
     ],
     "Ja'Marr Chase": [
@@ -254,7 +254,7 @@ export const FACTS = {
       ],
       [
         2026,
-        15.1
+        16
       ]
     ],
     "Jahmyr Gibbs": [
@@ -272,7 +272,7 @@ export const FACTS = {
       ],
       [
         2026,
-        29
+        30.7
       ]
     ],
     "Jalen Hurts": [
@@ -294,7 +294,7 @@ export const FACTS = {
       ],
       [
         2026,
-        16.8
+        16
       ]
     ],
     "Josh Allen": [
@@ -316,7 +316,7 @@ export const FACTS = {
       ],
       [
         2026,
-        28.1
+        28.6
       ]
     ],
     "Justin Jefferson": [
@@ -338,7 +338,7 @@ export const FACTS = {
       ],
       [
         2026,
-        15
+        15.9
       ]
     ],
     "Lamar Jackson": [
@@ -400,7 +400,7 @@ export const FACTS = {
       ],
       [
         2026,
-        20.1
+        25.9
       ]
     ],
     "Sam LaPorta": [
@@ -418,7 +418,7 @@ export const FACTS = {
       ],
       [
         2026,
-        14.2
+        15.3
       ]
     ],
     "Saquon Barkley": [
@@ -521,5 +521,5 @@ export const FACTS = {
 // so pages that only need a season or a week never import the dataset.
 // The verifier checks the two copies agree.
 export const SEASONS_ON_FILE: number[] = [2022,2023,2024,2025,2026];
-export const LATEST = {"season":2026,"week":4,"builtOn":"2026-10-06"} as const;
+export const LATEST = {"season":2026,"week":5,"builtOn":"2026-10-13"} as const;
 export const LEAGUE_META = {"season":2024,"teams":5,"rounds":2,"wireWeek":10} as const;
