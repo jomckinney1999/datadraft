@@ -39,11 +39,43 @@ export type TransitionRequest = {
 export const COVER_MS: Record<TransitionKind, number> = { snap: 540, chart: 880 };
 /** Milliseconds to uncover the new page. */
 export const REVEAL_MS: Record<TransitionKind, number> = { snap: 580, chart: 640 };
-/** Phones use a shorter, simpler compositor-only version of each transition. */
-export const MOBILE_COVER_MS: Record<TransitionKind, number> = { snap: 360, chart: 480 };
-export const MOBILE_REVEAL_MS: Record<TransitionKind, number> = { snap: 320, chart: 340 };
+/**
+ * Phones, tablets and anything with a finger for a pointer get a lighter,
+ * shorter version of each transition. The CSS uses the same media query, so
+ * the timings and the drawing can't disagree. Width alone missed a phone in
+ * landscape and every iPad, which got the desktop version.
+ */
+export const LIGHT_QUERY = "(max-width: 700px), (pointer: coarse)";
+export const LIGHT_COVER_MS: Record<TransitionKind, number> = { snap: 360, chart: 520 };
+export const LIGHT_REVEAL_MS: Record<TransitionKind, number> = { snap: 340, chart: 380 };
 /** Never hold the curtain longer than this, whatever the network does. */
 export const MAX_HOLD_MS = 8000;
+
+/** On <html> while a curtain is up; TRANSITION_END_EVENT fires when it's gone. */
+export const CURTAIN_ATTR = "data-curtain";
+export const TRANSITION_END_EVENT = "datadraft:transition-end";
+
+/**
+ * Resolves once no curtain is up. A page that boots something heavy on
+ * arrival (the question workspace's database) waits for it, so the work
+ * lands after the reveal rather than in the middle of it: on a phone, a
+ * 100ms seed during the reveal was the hitch people saw. Never waits longer
+ * than `maxMs`, so a lost event can't hold a page back.
+ */
+export function transitionSettled(maxMs = 2500): Promise<void> {
+  if (typeof document === "undefined" || !document.documentElement.hasAttribute(CURTAIN_ATTR)) {
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => {
+    const done = () => {
+      window.removeEventListener(TRANSITION_END_EVENT, done);
+      window.clearTimeout(timer);
+      resolve();
+    };
+    const timer = window.setTimeout(done, maxMs);
+    window.addEventListener(TRANSITION_END_EVENT, done);
+  });
+}
 
 /** Ask for a transition. False means nobody took it: navigate normally. */
 export function requestTransition(kind: TransitionKind, href: string, label: string): boolean {

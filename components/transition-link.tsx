@@ -12,6 +12,7 @@ import Link from "next/link";
 import type { ComponentProps, MouseEvent } from "react";
 import { requestTransition, type TransitionKind } from "@/lib/route-transition";
 import { loadCurtain } from "@/components/route-transition-load";
+import { warmSfx } from "@/lib/sfx";
 
 type Props = Omit<ComponentProps<typeof Link>, "href"> & {
   href: string;
@@ -31,7 +32,20 @@ export default function TransitionLink({ href, transition, label, onClick, ...re
     onClick?.(e);
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Inside the press: the sound is ready (and, on iOS, allowed) before the
+    // curtain's first frame instead of being built during it.
+    warmSfx();
     if (requestTransition(transition, href, label)) e.preventDefault();
   };
-  return <Link {...rest} href={href} onClick={go} onPointerEnter={warm} onFocus={warm} onTouchStart={warm} />;
+  return (
+    <Link
+      {...rest}
+      href={href}
+      onClick={go}
+      onPointerEnter={warm}
+      onFocus={warm}
+      onTouchStart={warm}
+      onPointerDown={warmSfx}
+    />
+  );
 }

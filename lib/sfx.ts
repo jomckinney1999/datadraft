@@ -45,6 +45,16 @@ function getCtx(): AudioContext | null {
   return ctx;
 }
 
+/**
+ * Build (or wake) the audio context ahead of a sound, from inside a press.
+ * Creating one takes tens of milliseconds on a phone, and done as a page
+ * transition started it delayed the transition's first frame; a press is
+ * also the only time iOS lets audio start. Muted visitors never get one.
+ */
+export function warmSfx(): void {
+  if (!isSfxMuted()) getCtx();
+}
+
 export function isSfxMuted(): boolean {
   if (typeof window === "undefined") return false;
   try {
@@ -161,14 +171,16 @@ function hiss(c: AudioContext, n: Noise): void {
 }
 
 function noises(list: Noise[]): void {
+  if (isSfxMuted()) return;
   const c = getCtx();
-  if (!c || isSfxMuted()) return;
+  if (!c) return;
   for (const n of list) hiss(c, n);
 }
 
 function sequence(tones: Tone[]): void {
+  if (isSfxMuted()) return;
   const c = getCtx();
-  if (!c || isSfxMuted()) return;
+  if (!c) return;
   for (const t of tones) beep(c, t);
 }
 

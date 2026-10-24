@@ -37,11 +37,18 @@ const BAR_TONES = ["turf", "ice", "gold", "turf", "ice", "gold", "turf", "gold"]
 
 export default function RouteTransitionCurtain({ kind, label, phase }: CurtainProps) {
   useEffect(() => {
-    playSfx("whoosh");
-    if (kind === "chart") {
-      const t = window.setTimeout(() => playSfx("first_down"), 160);
-      return () => window.clearTimeout(t);
-    }
+    // After the first frame is on screen. This effect runs before paint (it
+    // comes from a click), and building audio nodes here held the curtain's
+    // first frame back on phones.
+    const timers: number[] = [];
+    const raf = requestAnimationFrame(() => {
+      timers.push(window.setTimeout(() => playSfx("whoosh"), 0));
+      if (kind === "chart") timers.push(window.setTimeout(() => playSfx("first_down"), 160));
+    });
+    return () => {
+      cancelAnimationFrame(raf);
+      timers.forEach((t) => window.clearTimeout(t));
+    };
   }, [kind]);
 
   if (typeof document === "undefined") return null;

@@ -14,16 +14,23 @@
  *
  * If the new page hasn't arrived in MAX_HOLD_MS the curtain lifts anyway.
  * A transition can make a click slower; it must never make it stick.
+ *
+ * While it's up, <html> carries CURTAIN_ATTR, and TRANSITION_END_EVENT fires
+ * when it's gone, so the arriving page can hold its heavy work until then
+ * (transitionSettled() in lib/route-transition.ts).
  */
 
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
 import {
   COVER_MS,
+  CURTAIN_ATTR,
+  LIGHT_COVER_MS,
+  LIGHT_QUERY,
+  LIGHT_REVEAL_MS,
   MAX_HOLD_MS,
-  MOBILE_COVER_MS,
-  MOBILE_REVEAL_MS,
   REVEAL_MS,
+  TRANSITION_END_EVENT,
   TRANSITION_EVENT,
   pathOf,
   type TransitionKind,
@@ -37,7 +44,17 @@ type Run = {
   label: string;
   from: string;
   phase: "cover" | "reveal";
-  mobile: boolean;
+  /** The light version (LIGHT_QUERY): phones, tablets, touch screens. */
+  light: boolean;
+};
+
+const setCurtainFlag = (kind: TransitionKind | null) => {
+  const root = document.documentElement;
+  if (kind) root.setAttribute(CURTAIN_ATTR, kind);
+  else if (root.hasAttribute(CURTAIN_ATTR)) {
+    root.removeAttribute(CURTAIN_ATTR);
+    window.dispatchEvent(new Event(TRANSITION_END_EVENT));
+  }
 };
 
 export default function RouteTransition() {
@@ -64,15 +81,16 @@ export default function RouteTransition() {
       window.setTimeout(() => {
         runRef.current = null;
         setRun(null);
-      }, (r.mobile ? MOBILE_REVEAL_MS : REVEAL_MS)[r.kind]),
+        setCurtainFlag(null);
+      }, (r.light ? LIGHT_REVEAL_MS : REVEAL_MS)[r.kind]),
     );
   }, []);
 
   // A touchstart and click can land in the same frame. Fetching the drawing
   // only on touchstart left a blank beat on phones while the chunk arrived.
-  // Warm that small chunk after mount on narrow screens, before anyone taps.
+  // Warm that small chunk after mount on touch screens, before anyone taps.
   useEffect(() => {
-    if (!window.matchMedia("(max-width: 700px)").matches) return;
+    if (!window.matchMedia(LIGHT_QUERY).matches) return;
     const id = window.setTimeout(() => {
       void loadCurtain().then((m) => {
         curtainRef.current = m.default;
@@ -90,14 +108,15 @@ export default function RouteTransition() {
       ask.handled = true;
       if (runRef.current) return; // a second click while one runs
       const from = window.location.pathname;
-      const mobile = window.matchMedia("(max-width: 700px)").matches;
-      const start: Run = { kind: ask.kind, label: ask.label, from, phase: "cover", mobile };
+      const light = window.matchMedia(LIGHT_QUERY).matches;
+      const start: Run = { kind: ask.kind, label: ask.label, from, phase: "cover", light };
       runRef.current = start;
-      const coverMs = (mobile ? MOBILE_COVER_MS : COVER_MS)[ask.kind];
+      const coverMs = (light ? LIGHT_COVER_MS : COVER_MS)[ask.kind];
       const startRun = (View: ComponentType<CurtainProps>) => {
         curtainRef.current = View;
         setCurtain(() => View);
         setRun(start);
+        setCurtainFlag(ask.kind);
         later(() => {
           router.push(ask.href);
           // Same page, new hash: no pathname change is coming.
@@ -114,6 +133,7 @@ export default function RouteTransition() {
           .then((m) => startRun(m.default))
           .catch(() => {
             runRef.current = null;
+            setCurtainFlag(null);
             router.push(ask.href);
           });
       }
@@ -123,6 +143,7 @@ export default function RouteTransition() {
     return () => {
       window.removeEventListener(TRANSITION_EVENT, onAsk);
       for (const t of list.splice(0)) window.clearTimeout(t);
+      setCurtainFlag(null);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, lift]);

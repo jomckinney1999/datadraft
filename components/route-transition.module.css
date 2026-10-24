@@ -1,7 +1,8 @@
 /*
  * The page transitions (components/route-transition-curtain.tsx). Beats are
  * timed to COVER_MS / REVEAL_MS in lib/route-transition.ts: snap covers in
- * 0.54s and clears in 0.58s; chart covers in 0.88s and clears in 0.64s.
+ * 0.54s and clears in 0.58s; chart covers in 0.88s and clears in 0.64s. The
+ * light version at the bottom has its own (LIGHT_COVER_MS / LIGHT_REVEAL_MS).
  * Transforms and opacity only.
  */
 
@@ -299,72 +300,88 @@
 }
 
 /*
- * Phones get the same idea in fewer layers and about half the time. The
- * desktop snap train is 300vw wide and the chart draws a clipped SVG over
- * eight bars; both are smooth on a laptop but can miss frames while mobile
- * Safari is also mounting the next route.
+ * The light version, for phones, tablets and any touch screen: the same
+ * query as LIGHT_QUERY in lib/route-transition.ts, so a landscape phone or
+ * an iPad (both wider than 700px) don't get the desktop one. The desktop
+ * train is a skewed strip three screens wide; at a phone's pixel density
+ * that's a huge layer to raster while the next page mounts, and mobile
+ * Safari dropped frames on it. This train is a screen and a third wide and
+ * never skewed, but it keeps the stripes on both edges (without them the
+ * wipe was a blank panel, and in light mode a pale panel over a pale page
+ * read as the page glitching) and the football out in front, minus its
+ * drop-shadow: a filter on a spinning layer is repainted every frame. The
+ * chart keeps its bars at their real heights before the flood, but not the
+ * clipped trend line, which isn't composited.
  */
-@keyframes mobile-wipe-in {
-  from { transform: translateX(-102%); }
-  to { transform: none; }
+@keyframes light-train-in {
+  from {
+    transform: translateX(-136vw);
+  }
+  to {
+    transform: translateX(-18vw);
+  }
 }
-@keyframes mobile-wipe-out {
-  from { transform: none; }
-  to { transform: translateX(102%); }
-}
-@keyframes mobile-bar-in {
-  from { transform: scaleY(0); }
-  to { transform: scaleY(1); }
+@keyframes light-train-out {
+  from {
+    transform: translateX(-18vw);
+  }
+  to {
+    transform: translateX(118vw);
+  }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 700px), (pointer: coarse) {
   .root {
     --in: 0.2s;
   }
   .root[data-kind="chart"] {
-    --in: 0.27s;
+    --in: 0.32s;
   }
 
+  /* [stripes 18vw][curtain 100vw][stripes 18vw], resting at -18vw so the
+     curtain covers the screen and both sets of stripes are just off it. */
   .root[data-kind="snap"] .train {
-    width: 100vw;
-    transform: translateX(-102%);
+    width: 136vw;
+    transform: translateX(-18vw);
   }
   .root[data-kind="snap"] .strip {
-    inset: 0;
-    width: 100%;
+    top: 0;
+    bottom: 0;
+    width: 136vw;
     transform: none;
-    display: block;
   }
-  .root[data-kind="snap"] .strip i,
-  .root[data-kind="snap"] .ball {
-    display: none;
+  .root[data-kind="snap"] .strip i {
+    flex-basis: 6vw;
+    border-left-width: 3px;
   }
   .root[data-kind="snap"] .fill {
-    position: absolute;
-    inset: 0;
-    display: block;
-    border: 0;
-    background:
-      linear-gradient(135deg, rgb(var(--c-gold) / 0.16), transparent 34%),
-      linear-gradient(315deg, rgb(var(--c-turf) / 0.18), transparent 42%),
-      rgb(var(--c-night));
+    flex-basis: 100vw;
+    border-left-width: 3px;
+  }
+  .root[data-kind="snap"] .ball {
+    left: 136vw;
+    width: clamp(84px, 24vw, 150px);
+  }
+  .root[data-kind="snap"] .ballSpin {
+    filter: none;
   }
   .root[data-kind="snap"][data-phase="cover"] .train {
-    animation: mobile-wipe-in 0.36s cubic-bezier(0.65, 0, 0.3, 1) both;
+    animation: light-train-in 0.36s cubic-bezier(0.65, 0, 0.3, 1) both;
   }
   .root[data-kind="snap"][data-phase="reveal"] .train {
-    animation: mobile-wipe-out 0.32s cubic-bezier(0.6, 0, 0.35, 1) both;
+    animation: light-train-out 0.34s cubic-bezier(0.6, 0, 0.35, 1) both;
   }
 
   .root[data-kind="chart"][data-phase="cover"] .bars i {
-    animation: mobile-bar-in 0.34s calc(var(--i) * 18ms) cubic-bezier(0.3, 0.8, 0.3, 1) both;
+    animation: bar-rise 0.4s calc(var(--i) * 16ms) cubic-bezier(0.3, 0.8, 0.3, 1) both;
   }
   .root[data-kind="chart"][data-phase="reveal"] .bars i {
-    animation: bar-off 0.25s calc(var(--i) * 12ms) cubic-bezier(0.6, 0, 0.4, 1) both;
+    animation: bar-off 0.28s calc(var(--i) * 14ms) cubic-bezier(0.6, 0, 0.4, 1) both;
   }
   .root[data-kind="chart"] .trend {
     display: none;
   }
+  /* One pop, no endless bob: one less animation on the busiest frames. */
   .root[data-phase="cover"] .label {
     animation: pop-in 0.24s var(--in) cubic-bezier(0.34, 1.3, 0.64, 1) both;
   }
