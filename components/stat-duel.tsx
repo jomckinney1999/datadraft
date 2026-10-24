@@ -17,12 +17,20 @@
  * score to beat. The link's preview card is drawn by /api/og/duel.
  *
  * Keys: ← / 1 picks the left card, → / 2 the right, Enter moves on.
+ *
+ * The reveal is the fun part, so it's staged (2026-10-24): both numbers
+ * count up like a scoreboard, a tug-of-war bar shows how close it was
+ * ("Photo finish" to "Blowout"), the gap is put in football terms (yards in
+ * football fields and first downs, points in touchdowns) and a run of right
+ * calls shows as a streak. All of it is arithmetic on the two numbers shown,
+ * never a fact from anywhere else. The counting is off under reduced motion.
  */
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Database, QueryExecResult } from "sql.js";
-import type { Duel, DuelRound, DuelSide } from "@/lib/stat-duel";
+import type { Duel, DuelCategory, DuelRound, DuelSide } from "@/lib/stat-duel";
+import { seedSql } from "@/lib/roll-call-meta";
 import { PLAYER_HEADSHOTS } from "@/lib/player-headshots.generated";
 import Headshot from "@/components/headshot";
 import TeamLogo from "@/components/team-logo";
@@ -82,6 +90,76 @@ const winnerOf = (r: DuelRound): 0 | 1 =>
 
 const dayBefore = (day: string) =>
   new Date(Date.parse(`${day}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
+
+/** Each category's tag: an icon and one of the three accents. */
+const CATEGORY: Record<DuelCategory, { icon: string; cls: string }> = {
+  Fantasy: { icon: "📈", cls: "border-ice/40 bg-ice/10 text-ice" },
+  Passing: { icon: "🎯", cls: "border-ice/40 bg-ice/10 text-ice" },
+  Rushing: { icon: "💨", cls: "border-turf/40 bg-turf/10 text-turf" },
+  Receiving: { icon: "🙌", cls: "border-gold/40 bg-gold/10 text-gold" },
+  Touchdowns: { icon: "🏈", cls: "border-turf/40 bg-turf/10 text-turf" },
+  "Big games": { icon: "💥", cls: "border-gold/40 bg-gold/10 text-gold" },
+  "Team scoring": { icon: "🏟️", cls: "border-ice/40 bg-ice/10 text-ice" },
+  "Team records": { icon: "🏆", cls: "border-gold/40 bg-gold/10 text-gold" },
+  Clutch: { icon: "⏱️", cls: "border-turf/40 bg-turf/10 text-turf" },
+};
+
+function CategoryTag({ category }: { category: DuelCategory }) {
+  const c = CATEGORY[category] ?? CATEGORY.Fantasy;
+  return (
+    <span className={`rounded-full border px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider ${c.cls}`}>
+      <span aria-hidden>{c.icon}</span> {category}
+    </span>
+  );
+}
+
+/** Counts from 0 up to `target` like a scoreboard when `run` turns on. */
+function useCountUp(target: number, run: boolean): number {
+  const [value, setValue] = useState(target);
+  useEffect(() => {
+    if (!run || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setValue(target);
+      return;
+    }
+    let raf = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const k = Math.min(1, (now - start) / 650);
+      setValue(target * (1 - Math.pow(1 - k, 3)));
+      if (k < 1) raf = requestAnimationFrame(tick);
+    };
+    setValue(0);
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, run]);
+  return value;
+}
+
+/** How far apart the two were, relative to the bigger one. */
+const closeness = (r: DuelRound) =>
+  Math.abs(r.a.value - r.b.value) / Math.max(Math.abs(r.a.value), Math.abs(r.b.value), 1);
+
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+/** The gap, in football terms. Arithmetic on the two numbers, nothing else. */
+function gapLine(r: DuelRound): string | null {
+  const gap = Math.abs(r.a.value - r.b.value);
+  if (/yds/.test(r.unit)) {
+    if (gap >= 100) return `That's ${(gap / 100).toFixed(1)} football fields apart.`;
+    if (gap >= 10) return `${plural(Math.floor(gap / 10), "first down's", "first downs'")} worth of yards.`;
+    return "Less than a first down in it.";
+  }
+  if (/touchdowns|TD passes/.test(r.unit)) return gap === 1 ? "One trip to the end zone apart." : `${gap} trips to the end zone apart.`;
+  if (/PPR/.test(r.unit)) {
+    if (gap < 1) return "Less than a point in it.";
+    if (gap >= 6) return `About ${plural(Math.round(gap / 6), "touchdown's", "touchdowns'")} worth of fantasy points.`;
+    return null;
+  }
+  if (/^pts|point differential/.test(r.unit) && gap >= 7) {
+    return `About ${plural(Math.round(gap / 7), "touchdown", "touchdowns")} apart over the season.`;
+  }
+  return null;
+}
 
 const prettyDay = (day: string) =>
   new Date(`${day}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
@@ -172,6 +250,9 @@ export default function StatDuel({
 
   const score = picks.filter((p, i) => duel.rounds[i] && p === winnerOf(duel.rounds[i])).length;
   const showSummary = hydrated && finished && current >= total;
+  /** Right calls in a row going into the round on screen. */
+  let streak = 0;
+  for (let i = Math.min(current, picks.length) - 1; i >= 0 && picks[i] === winnerOf(duel.rounds[i]); i--) streak++;
 
   return (
     <div className="mx-auto w-full max-w-3xl">
@@ -229,6 +310,7 @@ export default function StatDuel({
           key={duel.rounds[current].n}
           round={duel.rounds[current]}
           total={total}
+          streak={streak}
           picked={picks[current]}
           onPick={pick}
           onNext={advance}
@@ -255,6 +337,7 @@ export default function StatDuel({
 function Round({
   round,
   total,
+  streak,
   picked,
   onPick,
   onNext,
@@ -262,6 +345,7 @@ function Round({
 }: {
   round: DuelRound;
   total: number;
+  streak: number;
   picked: 0 | 1 | undefined;
   onPick: (s: 0 | 1) => void;
   onNext: () => void;
@@ -270,28 +354,39 @@ function Round({
   const revealed = picked !== undefined;
   const win = winnerOf(round);
   const right = revealed && picked === win;
+  // Only a pick made just now counts up; reviewing an old round shows it settled.
+  const [fresh, setFresh] = useState(false);
+  const choose = (s: 0 | 1) => {
+    if (revealed) return;
+    setFresh(true);
+    onPick(s);
+  };
+  const gap = gapLine(round);
 
   return (
     <section className="mt-6" aria-live="polite">
       <div className="flex flex-wrap items-center justify-center gap-2">
         <span className="status-chip">Round {round.n} of {total}</span>
-        <span className="rounded-full border border-gold/40 bg-gold/10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-gold">
-          {round.category}
-        </span>
+        <CategoryTag category={round.category} />
         <span className="status-chip">{round.scope}</span>
+        {streak >= 2 && (
+          <span className="rounded-full border border-gold/50 bg-gold/10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-gold">
+            <span aria-hidden>🔥</span> {streak} in a row
+          </span>
+        )}
       </div>
       <h2 className="mx-auto mt-3 max-w-xl text-center font-display text-xl font-bold text-ink sm:text-2xl">
         {round.prompt}
       </h2>
 
       <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-stretch gap-2 sm:gap-4">
-        <Card side={round.a} round={round} index={0} picked={picked} win={win} onPick={onPick} />
+        <Card side={round.a} round={round} index={0} picked={picked} win={win} onPick={choose} count={fresh} />
         <div className="flex items-center">
           <span className="rounded-full border-2 border-night bg-gold px-2 py-1 font-display text-xs font-bold text-night shadow-[0_3px_0_0_rgb(var(--c-night))]">
             VS
           </span>
         </div>
-        <Card side={round.b} round={round} index={1} picked={picked} win={win} onPick={onPick} />
+        <Card side={round.b} round={round} index={1} picked={picked} win={win} onPick={choose} count={fresh} />
       </div>
       {!revealed && (
         <p className="mt-3 hidden text-center font-mono text-[10px] uppercase tracking-widest text-ink-muted sm:block">
@@ -301,12 +396,13 @@ function Round({
 
       {revealed && (
         <div className="mt-6">
-          <div className="flex items-center justify-center gap-3">
+          <CloseMeter round={round} />
+          <div className="mt-4 flex items-center justify-center gap-3">
             <Coach mood={right ? celebrationFor(`duel-${round.n}-${round.prompt}`) : "sad"} size={56} />
             <p className={`font-display text-lg font-bold ${right ? "text-turf" : "text-gold"}`}>
-              {right ? "Called it." : "Not this time."}{" "}
+              {right ? (streak >= 2 ? `Called it. That's ${streak + 1} straight.` : "Called it.") : "Not this time."}{" "}
               <span className="font-sans text-sm font-normal text-ink-soft">
-                {(win === 0 ? round.a : round.b).name} by {formatGap(round)}.
+                {(win === 0 ? round.a : round.b).name} by {formatGap(round)}.{gap ? ` ${gap}` : ""}
               </span>
             </p>
           </div>
@@ -322,6 +418,31 @@ function Round({
   );
 }
 
+/** The tug of war: each side's share of the two numbers, and a verdict. */
+function CloseMeter({ round }: { round: DuelRound }) {
+  const c = closeness(round);
+  const verdict = c < 0.05 ? "Photo finish" : c < 0.15 ? "Close call" : c < 0.4 ? "Clear winner" : "Blowout";
+  // A share only means something for two positive totals where more wins.
+  const bar = round.higherWins && round.a.value > 0 && round.b.value > 0;
+  const shareA = bar ? round.a.value / (round.a.value + round.b.value) : 0.5;
+  const win = winnerOf(round);
+  return (
+    <div className="mx-auto max-w-md">
+      <p className="text-center font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted">{verdict}</p>
+      {bar && (
+        <div
+          className="mt-1.5 flex h-3 overflow-hidden rounded-full border border-panel-border bg-night/40"
+          role="img"
+          aria-label={`${round.a.name} ${Math.round(shareA * 100)}%, ${round.b.name} ${100 - Math.round(shareA * 100)}%`}
+        >
+          <span className={`h-full ${win === 0 ? "bg-turf" : "bg-panel-border"}`} style={{ width: `${shareA * 100}%` }} />
+          <span className={`h-full flex-1 ${win === 1 ? "bg-turf" : "bg-panel-border"}`} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function formatGap(r: DuelRound): string {
   const gap = Math.abs(r.a.value - r.b.value);
   return `${gap.toFixed(r.decimals)} ${r.unit.replace(/, best game$/, "").replace(/ that week$/, "")}`;
@@ -334,6 +455,7 @@ function Card({
   picked,
   win,
   onPick,
+  count,
 }: {
   side: DuelSide;
   round: DuelRound;
@@ -341,11 +463,14 @@ function Card({
   picked: 0 | 1 | undefined;
   win: 0 | 1;
   onPick: (s: 0 | 1) => void;
+  /** Count the number up (a pick made just now). */
+  count: boolean;
 }) {
   const revealed = picked !== undefined;
   const isWinner = revealed && win === index;
   const isPick = picked === index;
-  const shot = side.kind === "player" ? PLAYER_HEADSHOTS[side.name]?.url ?? null : null;
+  const shot = side.kind === "player" ? side.headshot ?? PLAYER_HEADSHOTS[side.name]?.url ?? null : null;
+  const shown = useCountUp(side.value, revealed && count);
 
   return (
     <button
@@ -386,7 +511,14 @@ function Card({
         }`}
         aria-hidden={!revealed}
       >
-        {revealed ? side.value.toFixed(round.decimals) : "?"}
+        {revealed ? (
+          <>
+            <span className="sr-only">{side.value.toFixed(round.decimals)}</span>
+            <span aria-hidden>{shown.toFixed(round.decimals)}</span>
+          </>
+        ) : (
+          "?"
+        )}
       </span>
       {revealed && <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">{round.unit}</span>}
       {revealed && isWinner && (
@@ -425,12 +557,24 @@ function ProveIt({ round }: { round: DuelRound }) {
   async function goLive() {
     setBusy(true);
     try {
-      const [SQL, data] = await Promise.all([
+      const [SQL, data, box] = await Promise.all([
         import("sql.js").then((m) => m.default({ locateFile: () => "/sql-wasm.wasm" })),
         import("@/lib/fantasy-data"),
+        // A box-score round's table, the same file Roll Call runs on.
+        round.source === "player_weeks" && round.dataUrl
+          ? fetch(round.dataUrl).then((r) => r.json() as Promise<{ columns: string[]; rows: (string | number)[][] }>)
+          : null,
       ]);
       const db = new SQL.Database();
       db.run(data.buildSeedSql());
+      if (box) {
+        db.run(seedSql(box.columns));
+        const insert = db.prepare(`INSERT INTO player_weeks VALUES (${box.columns.map(() => "?").join(", ")})`);
+        db.run("BEGIN");
+        for (const row of box.rows) insert.run(row);
+        db.run("COMMIT");
+        insert.free();
+      }
       dbRef.current = db;
       setLive(true);
       exec(sql);
@@ -445,7 +589,11 @@ function ProveIt({ round }: { round: DuelRound }) {
     <div className="surface mt-5 rounded-2xl border border-panel-border bg-panel p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="label-broadcast text-ice">prove it</p>
-        <p className="font-mono text-[10px] text-ink-muted">The query behind this round, on the same real data the questions use</p>
+        <p className="font-mono text-[10px] text-ink-muted">
+          {round.source === "player_weeks"
+            ? "The query behind this round, on this season's real box scores"
+            : "The query behind this round, on the same real data the questions use"}
+        </p>
       </div>
       <div className="mt-2 overflow-hidden rounded-xl border border-panel-border">
         <CodeEditor value={sql} onChange={setSql} lang="sql" rows={Math.min(12, sql.split("\n").length + 1)} ariaLabel="The SQL behind this round" disabled={!live} />
@@ -470,7 +618,9 @@ function ProveIt({ round }: { round: DuelRound }) {
                 shareText="Settled it with one SQL query."
               />
             )}
-            <span className="font-mono text-[10px] text-ink-muted">Change it — try a third player, or another season.</span>
+            <span className="font-mono text-[10px] text-ink-muted">
+              Change it — try a third player, or another {round.source === "player_weeks" ? "week" : "season"}.
+            </span>
           </>
         )}
       </div>
@@ -668,7 +818,7 @@ function Summary({
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm text-ink">{r.prompt}</span>
                   <span className="block font-mono text-[10px] text-ink-muted">
-                    {r.a.name} {r.a.value.toFixed(r.decimals)} · {r.b.name} {r.b.value.toFixed(r.decimals)} · {r.scope}
+                    {r.category} · {r.a.name} {r.a.value.toFixed(r.decimals)} · {r.b.name} {r.b.value.toFixed(r.decimals)} · {r.scope}
                   </span>
                 </span>
                 <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">see SQL</span>

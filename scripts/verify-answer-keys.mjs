@@ -582,9 +582,24 @@ stage("Stat Duel");
 // what "Prove it" shows and runs. Generate half a year of future days and
 // fail on any disagreement between the two, a tie, a mismatched position, a
 // first row that isn't the answer, or a day that can't fill five rounds.
+// Box-score rounds run on `player_weeks`, seeded from the same JSON the
+// browser fetches for "Run it yourself"; from DUEL_V2 a day never repeats a
+// category and always has box-score rounds when the season has a week in.
 let duelChecked = 0;
 {
   const duel = await loadProjectTs(path.join(root, "lib/stat-duel.ts"), root);
+  const fsDuel = await import("node:fs");
+  const boxTable = JSON.parse(fsDuel.readFileSync(path.join(root, "public", duel.BOX_DATA_URL), "utf8"));
+  const boxDb = new SQL.Database();
+  boxDb.run(
+    `CREATE TABLE player_weeks (${boxTable.columns
+      .map((c) => `${c} ${["player_id", "player", "position", "team", "opponent"].includes(c) ? "TEXT" : c === "fantasy_points_ppr" ? "REAL" : "INTEGER"}`)
+      .join(", ")});`,
+  );
+  const boxIns = boxDb.prepare(`INSERT INTO player_weeks VALUES (${boxTable.columns.map(() => "?").join(", ")})`);
+  for (const row of boxTable.rows) boxIns.run(row);
+  boxIns.free();
+  const runFor = (r) => (r.source === "player_weeks" ? boxDb.exec(r.sql)[0] : run(r.sql));
   const start = Date.parse(`${duel.DUEL_LAUNCH}T00:00:00Z`);
   for (let d = 0; d < 180; d++) {
     const day = new Date(start + d * 86_400_000).toISOString().slice(0, 10);
@@ -595,12 +610,17 @@ let duelChecked = 0;
     }
     const names = today.rounds.flatMap((r) => [r.a.name, r.b.name]);
     if (new Set(names).size !== names.length) problems.push(`Stat Duel ${day}: a name appears in two rounds`);
+    if (day >= duel.DUEL_V2) {
+      const cats = today.rounds.map((r) => r.category);
+      if (new Set(cats).size !== cats.length) problems.push(`Stat Duel ${day}: a category twice (${cats.join(", ")})`);
+      if (!today.rounds.some((r) => r.source === "player_weeks")) problems.push(`Stat Duel ${day}: no box-score round`);
+    }
     for (const r of today.rounds) {
       duelChecked++;
       const tag = `Stat Duel ${day} round ${r.n}`;
       let res;
       try {
-        res = run(r.sql);
+        res = runFor(r);
       } catch (e) {
         problems.push(`${tag} SQL failed: ${e.message}`);
         continue;
