@@ -57,6 +57,8 @@ import { solveQuestion, loadProgress, setCallSign } from "@/lib/progress";
 import { SHORT_CREDIT } from "@/lib/data-source";
 import { playSfx } from "@/lib/sfx";
 import CodeEditor from "@/components/code-editor";
+import TablePreview from "@/components/table-preview";
+import { transitionSettled } from "@/lib/route-transition";
 import { Objective, SceneLine } from "@/components/scene-line";
 import AppNav from "@/components/app-nav";
 import { FaceCluster } from "@/components/face-cluster";
@@ -151,14 +153,7 @@ function valueDiag(mine: CellValue | boolean, key: CellValue | boolean): string 
   return "Right kind of value, wrong amount — check the range you pointed at.";
 }
 
-function ResultGrid({ res, showTypes = false }: { res: QueryExecResult; showTypes?: boolean }) {
-  const typeAt = (index: number) => {
-    const value = res.values.map((row) => row[index]).find((cell) => cell !== null);
-    if (typeof value === "number") return Number.isInteger(value) ? "integer" : "number";
-    if (typeof value === "string") return "text";
-    if (value instanceof Uint8Array) return "blob";
-    return "null";
-  };
+function ResultGrid({ res }: { res: QueryExecResult }) {
   return (
     <div className="max-h-56 overflow-auto rounded-lg border border-panel-border">
       <table className="w-full text-left font-mono text-[11px]">
@@ -169,12 +164,7 @@ function ResultGrid({ res, showTypes = false }: { res: QueryExecResult; showType
                 key={c}
                 className="whitespace-nowrap px-3 py-1.5 font-semibold uppercase tracking-wider"
               >
-                <span className="block">{c}</span>
-                {showTypes && (
-                  <span className="mt-0.5 block text-[8px] font-normal normal-case tracking-normal text-ice">
-                    {typeAt(res.columns.indexOf(c))}
-                  </span>
-                )}
+                {c}
               </th>
             ))}
           </tr>
@@ -267,7 +257,6 @@ export default function QuestionWorkspace({
   const [shareNote, setShareNote] = useState<string | null>(null);
   /** SQL only: the query behind the result on screen, for the Film Room. */
   const [ranSql, setRanSql] = useState<string | null>(null);
-  const [tablePreviews, setTablePreviews] = useState<Record<string, QueryExecResult>>({});
   const getDb = useCallback(() => dbRef.current, []);
 
   useEffect(() => {
@@ -288,7 +277,6 @@ export default function QuestionWorkspace({
   useEffect(() => {
     let cancelled = false;
     if (isSql) {
-      setTablePreviews({});
       let db: Database | null = null;
       Promise.all([
         import("sql.js").then((m) =>
@@ -301,6 +289,9 @@ export default function QuestionWorkspace({
         extraTables.includes("plays") ? import("@/lib/plays-dataset") : null,
         // Benchwarmer's event log (~170 KB), likewise.
         extraTables.includes("app") ? import("@/lib/app-dataset") : null,
+        // Arriving through a page transition: seed after the curtain lifts,
+        // or the seed lands mid-reveal and stutters it on a phone.
+        transitionSettled(),
       ])
         .then(async ([SQL, data, practice, plays, app]) => {
           if (cancelled) return;
@@ -316,13 +307,6 @@ export default function QuestionWorkspace({
           }
           db = made;
           dbRef.current = made;
-          const previews: Record<string, QueryExecResult> = {};
-          for (const table of tables) {
-            const safeName = table.table.replace(/"/g, '""');
-            const result = made.exec(`SELECT * FROM "${safeName}" LIMIT 5;`)[0];
-            if (result) previews[table.table] = result;
-          }
-          setTablePreviews(previews);
           setReady(true);
         })
         .catch(() =>
@@ -348,7 +332,7 @@ export default function QuestionWorkspace({
     return () => {
       cancelled = true;
     };
-  }, [isSql, isExcel, extraTables, question.id, tables]);
+  }, [isSql, isExcel, extraTables]);
 
   /** Run the learner's work, and optionally grade it. */
   const attempt = useCallback(
@@ -590,27 +574,7 @@ export default function QuestionWorkspace({
                 a column name stops looking and guesses. */}
             {isSql && (
               <div className="surface mt-3 rounded-2xl border border-panel-border bg-panel p-5">
-                <p className="label-broadcast text-turf">5-row table preview</p>
-                <p className="mt-1 text-xs leading-relaxed text-ink-muted">
-                  See the column types and the shape of the real values before you query them.
-                </p>
-                <div className="mt-4 space-y-5">
-                  {tables.map((t) => (
-                    <div key={t.table}>
-                      <p className="mb-2 font-mono text-[11px] font-bold text-ink">
-                        <span className="text-ice">SELECT *</span> FROM {t.table}{" "}
-                        <span className="text-gold">LIMIT 5</span>
-                      </p>
-                      {tablePreviews[t.table] ? (
-                        <ResultGrid res={tablePreviews[t.table]} showTypes />
-                      ) : (
-                        <div className="rounded-lg border border-panel-border bg-night/40 px-3 py-4 font-mono text-[10px] text-ink-muted">
-                          Loading rows…
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                <TablePreview tables={tables} ready={ready} run={(q) => dbRef.current?.exec(q)[0]} />
                 <p className="mt-3 border-t border-panel-border pt-2 font-mono text-[10px] text-ink-muted">
                   {invented ? invented.text : SHORT_CREDIT} ·{" "}
                   <Link

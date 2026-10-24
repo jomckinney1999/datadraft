@@ -16,6 +16,7 @@ import Link from "next/link";
 import type { Database, QueryExecResult } from "sql.js";
 import CodeEditor from "@/components/code-editor";
 import DifficultyChip from "@/components/difficulty-chip";
+import TablePreview from "@/components/table-preview";
 import PassTag from "@/components/pass-tag";
 import PassOffer from "@/components/pass-offer";
 import Cutscene, { markSceneSeen, sceneSeen, type Beat } from "@/components/cutscene";
@@ -482,13 +483,8 @@ function Screen({
             <p className="font-mono text-[10px] uppercase tracking-widest text-ice">Return</p>
             <p className="mt-1 text-sm leading-relaxed text-ink-soft">{q.returns}</p>
           </div>
-          <div className="mt-4 space-y-2">
-            {schemaFor(q).map((t) => (
-              <div key={t.table} className="rounded-lg border border-panel-border bg-night/40 p-2.5">
-                <p className="font-mono text-[11px] font-bold text-ink">{t.table}</p>
-                <p className="mt-0.5 font-mono text-[11px] leading-relaxed text-ink-muted">{t.columns.join(", ")}</p>
-              </div>
-            ))}
+          <div className="mt-4">
+            <TablePreview tables={schemaFor(q)} ready={!!db} run={(sql) => db?.exec(sql)[0]} />
           </div>
         </section>
 

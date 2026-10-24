@@ -23,6 +23,7 @@ import type { Database, QueryExecResult } from "sql.js";
 import type { Question } from "@/lib/questions";
 import { resultsMatch } from "@/lib/sql-grade";
 import CodeEditor from "@/components/code-editor";
+import TablePreview from "@/components/table-preview";
 import DifficultyChip from "@/components/difficulty-chip";
 import { FaceCluster } from "@/components/face-cluster";
 import { featuredPlayers } from "@/lib/question-players";
@@ -179,13 +180,9 @@ export default function QotdPanel({
           {question.returns}
         </p>
 
-        <p className="mt-3 font-mono text-[11px] leading-relaxed text-ink-muted">
-          {tables.map((t) => (
-            <span key={t.table} className="mr-3 inline-block">
-              <span className="text-ink">{t.table}</span>({t.columns.join(", ")})
-            </span>
-          ))}
-        </p>
+        <div className="mt-3">
+          <TablePreview tables={tables} ready={ready} run={(q) => dbRef.current?.exec(q)[0]} />
+        </div>
 
         <div
           className="mt-3"
