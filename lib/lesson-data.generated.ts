@@ -11,7 +11,7 @@
 export const SEASONS_ON_FILE: number[] = [2022,2023,2024,2025,2026];
 
 /** The newest season's last completed week at build time, and the build date. */
-export const LATEST = {"season":2026,"week":6,"builtOn":"2026-10-20"} as const;
+export const LATEST = {"season":2026,"week":7,"builtOn":"2026-10-27"} as const;
 
 /**
  * The example fantasy league, from Sleeper (see the builder for endpoints).
@@ -1316,6 +1316,21 @@ export const PACKED_WEEKS: PackedWeek[] = [
   [5,"LA","WR",2026,6,6.9],
   [0,"NE","WR",2026,6,5.7],
   [6,"BAL","RB",2026,6,5],
+  [3,"DAL","WR",2026,7,24.4],
+  [1,"DET","WR",2026,7,24.2],
+  [4,"SF","RB",2026,7,22],
+  [15,"LA","WR",2026,7,21.8],
+  [9,"DET","RB",2026,7,17.3],
+  [2,"ATL","RB",2026,7,17.2],
+  [8,"CIN","WR",2026,7,17.2],
+  [17,"PHI","RB",2026,7,15.1],
+  [7,"SF","TE",2026,7,14.8],
+  [12,"MIN","WR",2026,7,8.4],
+  [18,"KC","TE",2026,7,8.4],
+  [0,"NE","WR",2026,7,7.8],
+  [14,"KC","QB",2026,7,6],
+  [6,"BAL","RB",2026,7,5.9],
+  [16,"DET","TE",2026,7,2.8],
 ];
 
 /**
@@ -2509,29 +2524,43 @@ export const PACKED_GAMES: PackedGame[] = [
   ["2026_06_BUF_LV",2026,6,"2026-10-18","Sunday","LV","BUF",30,33,"dome","unknown",null],
   ["2026_06_DAL_GB",2026,6,"2026-10-18","Sunday","GB","DAL",23,13,"outdoors","unknown",null],
   ["2026_06_WAS_SF",2026,6,"2026-10-19","Monday","SF","WAS",23,17,"outdoors","unknown",null],
+  ["2026_07_NE_CHI",2026,7,"2026-10-22","Thursday","CHI","NE",30,24,"outdoors","unknown",null],
+  ["2026_07_PIT_NO",2026,7,"2026-10-25","Sunday","NO","PIT",10,16,"dome","unknown",null],
+  ["2026_07_SF_ATL",2026,7,"2026-10-25","Sunday","ATL","SF",29,20,"open","unknown",null],
+  ["2026_07_CIN_BAL",2026,7,"2026-10-25","Sunday","BAL","CIN",13,35,"outdoors","unknown",null],
+  ["2026_07_TB_CAR",2026,7,"2026-10-25","Sunday","CAR","TB",13,43,"outdoors","unknown",null],
+  ["2026_07_NYG_HOU",2026,7,"2026-10-25","Sunday","HOU","NYG",21,27,"closed","unknown",null],
+  ["2026_07_IND_MIN",2026,7,"2026-10-25","Sunday","MIN","IND",16,10,"dome","unknown",null],
+  ["2026_07_MIA_NYJ",2026,7,"2026-10-25","Sunday","NYJ","MIA",25,28,"outdoors","unknown",null],
+  ["2026_07_CLE_TEN",2026,7,"2026-10-25","Sunday","TEN","CLE",24,27,"outdoors","unknown",null],
+  ["2026_07_DEN_ARI",2026,7,"2026-10-25","Sunday","ARI","DEN",16,30,"closed","unknown",null],
+  ["2026_07_GB_DET",2026,7,"2026-10-25","Sunday","DET","GB",20,17,"dome","unknown",null],
+  ["2026_07_LA_LV",2026,7,"2026-10-25","Sunday","LV","LA",21,35,"dome","unknown",null],
+  ["2026_07_KC_SEA",2026,7,"2026-10-25","Sunday","SEA","KC",20,3,"outdoors","unknown",null],
+  ["2026_07_DAL_PHI",2026,7,"2026-10-26","Monday","PHI","DAL",21,38,"outdoors","unknown",null],
 ];
 
 /** [player, team, position, season, games, points] — real season totals. */
 export const SEASON_TOTALS: [string, string, string, number, number, number][] = [
+  ["Jahmyr Gibbs","DET","RB",2026,6,171],
   ["Josh Allen","BUF","QB",2026,6,161.3],
-  ["Jahmyr Gibbs","DET","RB",2026,5,153.7],
-  ["CeeDee Lamb","DAL","WR",2026,6,131.1],
-  ["Bijan Robinson","ATL","RB",2026,6,128.5],
-  ["Christian McCaffrey","SF","RB",2026,6,122],
-  ["Derrick Henry","BAL","RB",2026,6,116.8],
-  ["Amon-Ra St. Brown","DET","WR",2026,5,104.2],
+  ["CeeDee Lamb","DAL","WR",2026,7,155.5],
+  ["Bijan Robinson","ATL","RB",2026,7,145.7],
+  ["Christian McCaffrey","SF","RB",2026,7,144],
+  ["Amon-Ra St. Brown","DET","WR",2026,6,128.4],
+  ["Derrick Henry","BAL","RB",2026,7,122.7],
+  ["Puka Nacua","LA","WR",2026,5,113.6],
+  ["George Kittle","SF","TE",2026,7,104.5],
   ["Davante Adams","LA","WR",2026,6,102],
-  ["Patrick Mahomes","KC","QB",2026,5,94.1],
-  ["Puka Nacua","LA","WR",2026,4,91.8],
-  ["George Kittle","SF","TE",2026,6,89.7],
+  ["Patrick Mahomes","KC","QB",2026,6,100.1],
+  ["Ja'Marr Chase","CIN","WR",2026,6,97.1],
   ["Jalen Hurts","PHI","QB",2026,5,80],
-  ["Ja'Marr Chase","CIN","WR",2026,5,79.9],
+  ["Sam LaPorta","DET","TE",2026,6,79.4],
   ["Lamar Jackson","BAL","QB",2026,4,79.1],
-  ["Sam LaPorta","DET","TE",2026,5,76.6],
-  ["Justin Jefferson","MIN","WR",2026,4,63.7],
-  ["Travis Kelce","KC","TE",2026,5,61.9],
-  ["Saquon Barkley","PHI","RB",2026,4,23],
-  ["A.J. Brown","NE","WR",2026,2,11.3],
+  ["Justin Jefferson","MIN","WR",2026,5,72.1],
+  ["Travis Kelce","KC","TE",2026,6,70.3],
+  ["Saquon Barkley","PHI","RB",2026,5,38.1],
+  ["A.J. Brown","NE","WR",2026,3,19.1],
   ["Christian McCaffrey","SF","RB",2025,17,416.6],
   ["Puka Nacua","LA","WR",2025,16,375],
   ["Bijan Robinson","ATL","RB",2025,17,370.8],
