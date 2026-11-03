@@ -5,8 +5,8 @@
 // database. Import from here rather than typing a number into a lesson.
 
 export const FACTS = {
-  "rows": 1278,
-  "gamesTable": 1194,
+  "rows": 1291,
+  "gamesTable": 1208,
   "players": 20,
   "seasons": [
     2022,
@@ -17,12 +17,12 @@ export const FACTS = {
   ],
   "latest": {
     "season": 2026,
-    "week": 7
+    "week": 8
   },
   "teams": 18,
   "playerTeamPairs": 26,
   "movers": 5,
-  "possibleGames": 75,
+  "possibleGames": 76,
   "maxGame": {
     "pts": 55.4,
     "games": [
@@ -38,29 +38,29 @@ export const FACTS = {
       }
     ]
   },
-  "over25": 289,
-  "boom30": 150,
+  "over25": 292,
+  "boom30": 151,
   "gamesPlayed": {
-    "Justin Jefferson": 66,
-    "Patrick Mahomes": 69,
-    "Saquon Barkley": 67,
-    "Josh Allen": 71,
+    "Justin Jefferson": 67,
+    "Patrick Mahomes": 70,
+    "Saquon Barkley": 68,
+    "Josh Allen": 72,
     "Davante Adams": 68,
-    "Ja'Marr Chase": 67,
-    "Travis Kelce": 71,
+    "Ja'Marr Chase": 68,
+    "Travis Kelce": 72,
     "A.J. Brown": 65,
     "Jalen Hurts": 68,
-    "Amon-Ra St. Brown": 72,
+    "Amon-Ra St. Brown": 73,
     "Lamar Jackson": 62,
     "Tyreek Hill": 54,
     "Christian McCaffrey": 61,
-    "Derrick Henry": 74,
-    "CeeDee Lamb": 69,
+    "Derrick Henry": 75,
+    "CeeDee Lamb": 70,
     "George Kittle": 64,
-    "Puka Nacua": 49,
-    "Bijan Robinson": 58,
-    "Sam LaPorta": 48,
-    "Jahmyr Gibbs": 55
+    "Puka Nacua": 50,
+    "Bijan Robinson": 59,
+    "Sam LaPorta": 49,
+    "Jahmyr Gibbs": 56
   },
   "seasonPpg": {
     "A.J. Brown": [
@@ -104,7 +104,7 @@ export const FACTS = {
       ],
       [
         2026,
-        21.4
+        20.1
       ]
     ],
     "Bijan Robinson": [
@@ -122,7 +122,7 @@ export const FACTS = {
       ],
       [
         2026,
-        20.8
+        19.2
       ]
     ],
     "CeeDee Lamb": [
@@ -144,7 +144,7 @@ export const FACTS = {
       ],
       [
         2026,
-        22.2
+        21
       ]
     ],
     "Christian McCaffrey": [
@@ -210,7 +210,7 @@ export const FACTS = {
       ],
       [
         2026,
-        17.5
+        17.1
       ]
     ],
     "George Kittle": [
@@ -254,7 +254,7 @@ export const FACTS = {
       ],
       [
         2026,
-        16.2
+        18.3
       ]
     ],
     "Jahmyr Gibbs": [
@@ -272,7 +272,7 @@ export const FACTS = {
       ],
       [
         2026,
-        28.5
+        28
       ]
     ],
     "Jalen Hurts": [
@@ -316,7 +316,7 @@ export const FACTS = {
       ],
       [
         2026,
-        26.9
+        26.8
       ]
     ],
     "Justin Jefferson": [
@@ -382,7 +382,7 @@ export const FACTS = {
       ],
       [
         2026,
-        16.7
+        17.9
       ]
     ],
     "Puka Nacua": [
@@ -400,7 +400,7 @@ export const FACTS = {
       ],
       [
         2026,
-        22.7
+        23.1
       ]
     ],
     "Sam LaPorta": [
@@ -418,7 +418,7 @@ export const FACTS = {
       ],
       [
         2026,
-        13.2
+        12.3
       ]
     ],
     "Saquon Barkley": [
@@ -440,7 +440,7 @@ export const FACTS = {
       ],
       [
         2026,
-        7.6
+        8.4
       ]
     ],
     "Travis Kelce": [
@@ -521,5 +521,5 @@ export const FACTS = {
 // so pages that only need a season or a week never import the dataset.
 // The verifier checks the two copies agree.
 export const SEASONS_ON_FILE: number[] = [2022,2023,2024,2025,2026];
-export const LATEST = {"season":2026,"week":7,"builtOn":"2026-10-27"} as const;
+export const LATEST = {"season":2026,"week":8,"builtOn":"2026-11-03"} as const;
 export const LEAGUE_META = {"season":2024,"teams":5,"rounds":2,"wireWeek":10} as const;
