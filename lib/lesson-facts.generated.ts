@@ -5,8 +5,8 @@
 // database. Import from here rather than typing a number into a lesson.
 
 export const FACTS = {
-  "rows": 1291,
-  "gamesTable": 1208,
+  "rows": 1306,
+  "gamesTable": 1223,
   "players": 20,
   "seasons": [
     2022,
@@ -17,12 +17,12 @@ export const FACTS = {
   ],
   "latest": {
     "season": 2026,
-    "week": 8
+    "week": 9
   },
   "teams": 18,
   "playerTeamPairs": 26,
   "movers": 5,
-  "possibleGames": 76,
+  "possibleGames": 77,
   "maxGame": {
     "pts": 55.4,
     "games": [
@@ -38,29 +38,29 @@ export const FACTS = {
       }
     ]
   },
-  "over25": 292,
-  "boom30": 151,
+  "over25": 296,
+  "boom30": 154,
   "gamesPlayed": {
-    "Justin Jefferson": 67,
-    "Patrick Mahomes": 70,
-    "Saquon Barkley": 68,
-    "Josh Allen": 72,
+    "Justin Jefferson": 68,
+    "Patrick Mahomes": 71,
+    "Saquon Barkley": 69,
+    "Josh Allen": 73,
     "Davante Adams": 68,
-    "Ja'Marr Chase": 68,
-    "Travis Kelce": 72,
+    "Ja'Marr Chase": 69,
+    "Travis Kelce": 73,
     "A.J. Brown": 65,
     "Jalen Hurts": 68,
-    "Amon-Ra St. Brown": 73,
+    "Amon-Ra St. Brown": 74,
     "Lamar Jackson": 62,
     "Tyreek Hill": 54,
-    "Christian McCaffrey": 61,
-    "Derrick Henry": 75,
-    "CeeDee Lamb": 70,
-    "George Kittle": 64,
-    "Puka Nacua": 50,
-    "Bijan Robinson": 59,
-    "Sam LaPorta": 49,
-    "Jahmyr Gibbs": 56
+    "Christian McCaffrey": 62,
+    "Derrick Henry": 76,
+    "CeeDee Lamb": 71,
+    "George Kittle": 65,
+    "Puka Nacua": 51,
+    "Bijan Robinson": 60,
+    "Sam LaPorta": 50,
+    "Jahmyr Gibbs": 57
   },
   "seasonPpg": {
     "A.J. Brown": [
@@ -104,7 +104,7 @@ export const FACTS = {
       ],
       [
         2026,
-        20.1
+        19.7
       ]
     ],
     "Bijan Robinson": [
@@ -122,7 +122,7 @@ export const FACTS = {
       ],
       [
         2026,
-        19.2
+        20
       ]
     ],
     "CeeDee Lamb": [
@@ -144,7 +144,7 @@ export const FACTS = {
       ],
       [
         2026,
-        21
+        22.4
       ]
     ],
     "Christian McCaffrey": [
@@ -166,7 +166,7 @@ export const FACTS = {
       ],
       [
         2026,
-        20.6
+        20.8
       ]
     ],
     "Davante Adams": [
@@ -210,7 +210,7 @@ export const FACTS = {
       ],
       [
         2026,
-        17.1
+        15.8
       ]
     ],
     "George Kittle": [
@@ -232,7 +232,7 @@ export const FACTS = {
       ],
       [
         2026,
-        14.9
+        14.3
       ]
     ],
     "Ja'Marr Chase": [
@@ -254,7 +254,7 @@ export const FACTS = {
       ],
       [
         2026,
-        18.3
+        20
       ]
     ],
     "Jahmyr Gibbs": [
@@ -272,7 +272,7 @@ export const FACTS = {
       ],
       [
         2026,
-        28
+        26.2
       ]
     ],
     "Jalen Hurts": [
@@ -316,7 +316,7 @@ export const FACTS = {
       ],
       [
         2026,
-        26.8
+        25.1
       ]
     ],
     "Justin Jefferson": [
@@ -338,7 +338,7 @@ export const FACTS = {
       ],
       [
         2026,
-        14.4
+        13.6
       ]
     ],
     "Lamar Jackson": [
@@ -382,7 +382,7 @@ export const FACTS = {
       ],
       [
         2026,
-        17.9
+        17.8
       ]
     ],
     "Puka Nacua": [
@@ -400,7 +400,7 @@ export const FACTS = {
       ],
       [
         2026,
-        23.1
+        24.8
       ]
     ],
     "Sam LaPorta": [
@@ -418,7 +418,7 @@ export const FACTS = {
       ],
       [
         2026,
-        12.3
+        11.6
       ]
     ],
     "Saquon Barkley": [
@@ -462,7 +462,7 @@ export const FACTS = {
       ],
       [
         2026,
-        11.7
+        12.4
       ]
     ],
     "Tyreek Hill": [
@@ -521,5 +521,5 @@ export const FACTS = {
 // so pages that only need a season or a week never import the dataset.
 // The verifier checks the two copies agree.
 export const SEASONS_ON_FILE: number[] = [2022,2023,2024,2025,2026];
-export const LATEST = {"season":2026,"week":8,"builtOn":"2026-11-03"} as const;
+export const LATEST = {"season":2026,"week":9,"builtOn":"2026-11-10"} as const;
 export const LEAGUE_META = {"season":2024,"teams":5,"rounds":2,"wireWeek":10} as const;
