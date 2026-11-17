@@ -72,13 +72,15 @@ Overall picture: **freelance work + DataDraft** — two things, not three. An ea
 
 **This replaces "Andy".** The earlier persona was a career-changer paying $1–5K a year for coaching and application support. The person is the same — fan turning career-changer — but the product no longer sells coaching, so what they pay for is practice that sticks and projects worth showing, not a human reading their resume.
 
-## Messaging (decided 2026-10-02)
+## Messaging (decided 2026-10-02, headline widened 2026-11-17)
 
-The line everything ladders up to: **"You're already the numbers person in your league. Make it your job."** Three supporting ideas, in their words:
+The line everything ladders up to: **"You already love sports. Put it to work."** Three supporting ideas, in their words:
 
-1. **Identity** — the commissioner with the 40-tab spreadsheet, the one who brings stats to the group chat. That is already analyst behaviour.
-2. **Fun first** — practise on the stats you already argue about; chart who got lucky in your own league.
-3. **Career payoff** — a portfolio an interviewer remembers ("I modelled my fantasy league"), built ninety seconds a day.
+1. **Identity** — the fan who reads the box score first, the commissioner with the 40-tab spreadsheet, the one who brings stats to the group chat. That is already analyst behaviour.
+2. **Fun first** — practise on the stats you already follow; chart who got lucky in your own league.
+3. **Work payoff** — the SQL, Python and Excel your job runs on, learned on Sundays and used on Mondays; and for anyone going for an analyst job, a portfolio an interviewer remembers ("I modelled my fantasy league"), built ninety seconds a day.
+
+**Why it changed (2026-11-17, the owner's call).** The first line was "You're already the numbers person in your league. Make it your job." It spoke only to people chasing an analyst job, but the person above already includes the ones who want to become the data person at their current company, and a fan whose work runs on spreadsheets gets the same value without changing careers. The new line keeps the setup and punchline shape and the football lens, and widens the payoff from a new job to the job you have. The Season Pass is unchanged: it's still for the ones going for the job. `docs/OFFER.md`'s draft launch email still opens on the old line; rewrite it when the launch copy is next touched.
 
 Rules: talk to one person, not four audiences. The two asks everywhere are **Solve today's question** (90 seconds, no signup) and **Chart your league**. Use their vocabulary — league, waivers, start/sit, the group chat, commissioner — and never promise a job; promise the skills and the story.
 

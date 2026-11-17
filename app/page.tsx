@@ -121,7 +121,7 @@ const TONE: Record<string, string> = {
 };
 
 const AUDIENCE =
-  "the commissioner with the 40-tab spreadsheet · the one who brings stats to the group chat · Excel pros who know SQL is next · anyone who's said “I want to get into data” · ";
+  "the fan who reads the box score first · the commissioner with the 40-tab spreadsheet · Excel pros who know SQL is next · anyone who wants their Sunday to help their Monday · ";
 
 export default async function Home() {
   const day = leagueDay();
@@ -219,21 +219,27 @@ export default async function Home() {
               Free beta
             </Link>
 
-            {/* One person, in their own words: the fantasy league's numbers
-                person, who wants it to be their job (docs/PLAN.md, Target
-                user). Not "everyone who might learn SQL". */}
+            {/* The promise (docs/PLAN.md, Messaging, 2026-11-17): you already
+                love sports, so learn the skills your job uses on the games
+                you follow. It was "You're already the numbers person in your
+                league. Make it your job." until then; the owner widened it
+                from people chasing an analyst job to anyone whose work runs
+                on data. */}
             {/* A setup and a punchline, so the two lines are sized apart on
                 purpose (about 1.5x at every width) and sit close together.
-                Line 1 balances its break, so a phone never leaves "league."
-                alone on a line. Line 2 never wraps — the tile belongs to the
-                phrase — so on phones it's sized to the screen: the line runs
-                about 9x its font size, hence (100vw - the gutters) / 9.1. */}
+                Line 1 balances its break, so a phone never strands a word.
+                Line 2 never wraps (the tile belongs to the phrase), so on
+                phones it's sized to the screen: "Put it to work" plus the
+                tile runs 7.7 times its font size and the heading is the
+                screen less 42px of gutters, hence (100vw - 2.75rem) / 7.9.
+                Change the words and re-measure: "Make it work for you" ran
+                11x, which shrank it to the size of line 1 on a phone. */}
             <h1 className="reveal mt-6 font-display font-bold tracking-tight text-pop">
               <span className="mx-auto block max-w-3xl text-[1.6rem] leading-[1.12] [text-wrap:balance] sm:text-[2.4rem] md:text-[2.6rem] lg:text-[3.1rem]">
-                You&apos;re already the numbers person in your league.
+                You already love sports.
               </span>
-              <span className="mt-2 block whitespace-nowrap text-[length:min(calc((100vw_-_2rem)/9.1),2.75rem)] leading-[1.05] sm:mt-3 sm:text-[3.6rem] md:text-6xl lg:text-7xl">
-                <span className="title-glow-turf text-turf">Make it your job</span> <HeadlineTile />
+              <span className="mt-2 block whitespace-nowrap text-[length:min(calc((100vw_-_2.75rem)/7.9),2.75rem)] leading-[1.05] sm:mt-3 sm:text-[3.6rem] md:text-6xl lg:text-7xl">
+                <span className="title-glow-turf text-turf">Put it to work</span> <HeadlineTile />
               </span>
             </h1>
 
@@ -241,9 +247,8 @@ export default async function Home() {
               Practice <span className="text-ink">SQL</span>,{" "}
               <span className="text-ink">Python</span> and{" "}
               <span className="text-ink">Excel</span> on real NFL stats, the
-              same ones you argue about every Sunday. Chart who got lucky in
-              your own league, and build a portfolio an interviewer will
-              actually remember.
+              same ones you follow every Sunday. Chart who got lucky in your
+              own league, then take the skills to work on Monday.
             </p>
 
             <div className="reveal mt-8 flex flex-wrap items-center justify-center gap-4">

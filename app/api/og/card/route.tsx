@@ -148,9 +148,9 @@ export async function GET(req: Request) {
         <div style={{ display: "flex", flexDirection: "column" }}>
           <span style={{ fontSize: 30, color: OG.gold, letterSpacing: 4 }}>LEETCODE FOR FOOTBALL DATA</span>
           <span style={{ fontSize: 84, fontWeight: 700, lineHeight: 1.05, marginTop: 12 }}>
-            You&apos;re already the numbers person in your league.
+            You already love sports.
           </span>
-          <span style={{ fontSize: 84, fontWeight: 700, lineHeight: 1.05, color: OG.turf }}>Make it your job.</span>
+          <span style={{ fontSize: 84, fontWeight: 700, lineHeight: 1.05, color: OG.turf }}>Put it to work.</span>
         </div>
       </OgFrame>
     ),
