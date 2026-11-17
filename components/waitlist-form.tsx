@@ -115,7 +115,7 @@ export default function WaitlistForm({
         <button
           type="submit"
           disabled={state === "sending"}
-          className="press btn-gold mt-2 w-full py-3.5 text-sm disabled:opacity-60"
+          className="press btn-gold mt-2 w-full whitespace-normal py-3.5 text-center text-sm leading-snug disabled:opacity-60"
         >
           {state === "sending" ? "Adding…" : label}
         </button>

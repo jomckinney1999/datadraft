@@ -67,7 +67,7 @@ export default function LiveWeekStrip({ live }: { live: LiveWeek | null }) {
           )}
         </div>
 
-        <div className="mt-10 grid gap-4 lg:grid-cols-5">
+        <div className="mt-10 grid grid-cols-1 gap-4 lg:grid-cols-5">
           {/* Scores */}
           {games.length > 0 && (
             <div className="reveal surface rounded-2xl border border-panel-border bg-panel p-5 lg:col-span-3">

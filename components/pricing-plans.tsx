@@ -161,7 +161,7 @@ export default function PricingPlans({ foundingOpen, foundingLeft }: { foundingO
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:items-center md:gap-5">
+      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:items-center md:gap-5">
         <section aria-label="Season Pass" className="pass-card flex flex-col rounded-3xl p-6 pt-8 sm:p-8 sm:pt-10">
           <p className="pass-ribbon absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-4 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wider">
             ★ {ribbon}
@@ -244,7 +244,7 @@ export default function PricingPlans({ foundingOpen, foundingLeft }: { foundingO
                 type="button"
                 onClick={buy}
                 disabled={busy}
-                className="press btn-gold w-full py-3.5 text-sm disabled:opacity-60"
+                className="press btn-gold w-full whitespace-normal py-3.5 text-center text-sm leading-snug disabled:opacity-60"
               >
                 {busy ? "Opening checkout…" : plan === "founding" ? "Become a founding member" : "Get the Season Pass"}
               </button>
