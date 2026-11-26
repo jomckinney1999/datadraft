@@ -59,7 +59,8 @@ import { playSfx } from "@/lib/sfx";
 import CodeEditor from "@/components/code-editor";
 import TablePreview from "@/components/table-preview";
 import { transitionSettled } from "@/lib/route-transition";
-import { Objective, SceneLine } from "@/components/scene-line";
+import { SceneLine } from "@/components/scene-line";
+import { QuestionTask } from "@/components/question-task";
 import AppNav from "@/components/app-nav";
 import { FaceCluster } from "@/components/face-cluster";
 import { featuredPlayers } from "@/lib/question-players";
@@ -539,19 +540,24 @@ export default function QuestionWorkspace({
                 <h1 className="mt-2 font-display text-2xl font-bold text-ink">
                   {question.title}
                 </h1>
-                {/* The situation, delivered like a scene; the task, as an
-                    objective that ticks when it's solved. */}
+                {/* The task first, said plainly and set big; the answer's
+                    shape under it; then Coach with the situation around it.
+                    The story used to carry the ask ("Settle it."), and
+                    people read past it. */}
+                <QuestionTask
+                  ask={question.ask}
+                  returns={question.returns}
+                  expected={isSql ? question.expected : undefined}
+                  done={alreadySolved || verdict === "right"}
+                  className="mt-4"
+                />
+
                 <SceneLine
                   mood={alreadySolved || verdict === "right" ? celebrationFor(question.id) : "think"}
-                  className="mt-3"
+                  className="mt-4"
                 >
                   {question.prompt}
                 </SceneLine>
-
-                <Objective done={alreadySolved || verdict === "right"} className="mt-4">
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">Return </span>
-                  {question.returns}
-                </Objective>
 
                 <div className="mt-4 flex flex-wrap gap-1.5">
                   {question.tags.map((t) => (
@@ -741,7 +747,7 @@ export default function QuestionWorkspace({
                 </div>
               )}
               {outcome?.error && isSql && findings && (
-                <QueryDoctorPanel findings={findings} sql={code} prompt={question.prompt} returns={question.returns} />
+                <QueryDoctorPanel findings={findings} sql={code} prompt={`${question.ask} ${question.prompt}`} returns={question.returns} />
               )}
 
               {verdict === "wrong" && (
@@ -757,7 +763,7 @@ export default function QuestionWorkspace({
                       <span className="text-ink">{question.returns}</span>
                     </p>
                     {isSql && findings?.length ? (
-                      <QueryDoctorPanel findings={findings} sql={code} prompt={question.prompt} returns={question.returns} />
+                      <QueryDoctorPanel findings={findings} sql={code} prompt={`${question.ask} ${question.prompt}`} returns={question.returns} />
                     ) : (
                       diag && (
                         <p className="mt-2 rounded-lg border border-ice/30 bg-night/40 px-3 py-2 font-mono text-[12px] leading-relaxed text-ice">

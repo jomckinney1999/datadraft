@@ -101,7 +101,7 @@ function FlameIcon({ lit }: { lit: boolean }) {
 }
 
 /** What the list shows for one question: no key, prelude or hints. */
-export type BankItem = Pick<Question, "id" | "title" | "lang" | "difficulty" | "tags" | "tables" | "prompt"> & {
+export type BankItem = Pick<Question, "id" | "title" | "lang" | "difficulty" | "tags" | "tables" | "prompt" | "ask"> & {
   art: QuestionArtId;
 };
 
@@ -216,7 +216,8 @@ export default function QuestionBank({
     return (
       q.title.toLowerCase().includes(needle) ||
       q.tags.some((t) => t.toLowerCase().includes(needle)) ||
-      q.prompt.toLowerCase().includes(needle)
+      q.prompt.toLowerCase().includes(needle) ||
+      q.ask.toLowerCase().includes(needle)
     );
   });
 
@@ -549,8 +550,10 @@ export default function QuestionBank({
                         </span>
                       )}
                     </span>
-                    <span className="mt-0.5 block truncate text-[13px] text-ink-muted">
-                      {q.tags.join(" · ")}
+                    {/* What it asks, not just what it's called: a list of
+                        titles made people open five to find one. */}
+                    <span className="mt-0.5 block line-clamp-2 text-[13px] leading-snug text-ink-soft sm:line-clamp-1">
+                      {q.ask}
                     </span>
                   </span>
                   <span className="flex shrink-0 items-center gap-2 sm:gap-3">

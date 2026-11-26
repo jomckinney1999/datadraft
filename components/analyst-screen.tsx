@@ -15,6 +15,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { QuestionTask } from "@/components/question-task";
 import Link from "next/link";
 import type { Database, QueryExecResult } from "sql.js";
 import CodeEditor from "@/components/code-editor";
@@ -588,11 +589,8 @@ function SqlSlot({
           <DifficultyChip difficulty={q.difficulty} />
         </div>
         <h2 className="mt-2 font-display text-xl font-bold text-ink">{q.title}</h2>
-        <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">{q.prompt}</p>
-        <div className="mt-4 rounded-xl border border-ice/30 bg-ice/5 p-3">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-ice">Return</p>
-          <p className="mt-1 text-sm leading-relaxed text-ink-soft">{q.returns}</p>
-        </div>
+        <QuestionTask ask={q.ask} returns={q.returns} expected={q.expected} size="md" className="mt-3" />
+        <p className="mt-3 text-sm leading-relaxed text-ink-muted">{q.prompt}</p>
         <div className="mt-4">
           <TablePreview tables={schemaFor(q)} ready={!!db} run={(sql) => db?.exec(sql)[0]} />
         </div>
@@ -929,7 +927,8 @@ function SqlReportItem({ q, n, answer, db }: { q: Question; n: number; answer: A
               : "not attempted"}
         </span>
       </div>
-      <p className="mt-2 text-sm leading-relaxed text-ink-soft">{q.prompt}</p>
+      <p className="mt-2 text-sm font-semibold leading-relaxed text-ink">{q.ask}</p>
+      <p className="mt-1 text-sm leading-relaxed text-ink-soft">{q.prompt}</p>
       <p className="mt-1 text-xs text-ink-muted">Return: {q.returns}</p>
 
       {answer.lastSql.trim() && (
@@ -944,7 +943,7 @@ function SqlReportItem({ q, n, answer, db }: { q: Question; n: number; answer: A
         </div>
       )}
       {!solved && findings.length > 0 && (
-        <QueryDoctorPanel findings={findings} sql={answer.lastSql} prompt={q.prompt} returns={q.returns} />
+        <QueryDoctorPanel findings={findings} sql={answer.lastSql} prompt={`${q.ask} ${q.prompt}`} returns={q.returns} />
       )}
 
       <div className="mt-3 flex flex-wrap items-center gap-3">

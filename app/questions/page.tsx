@@ -28,8 +28,8 @@ export default function QuestionsPage({ searchParams }: Props) {
   const day = leagueDay();
   // Worked out here and passed down, so the page's JavaScript carries a
   // list, not the bank (2026-10-06).
-  const list: BankItem[] = QUESTIONS.map(({ id, title, lang, difficulty, tags, tables, art, prompt }) => ({
-    id, title, lang, difficulty, tags, tables, art, prompt,
+  const list: BankItem[] = QUESTIONS.map(({ id, title, lang, difficulty, tags, tables, art, prompt, ask }) => ({
+    id, title, lang, difficulty, tags, tables, art, prompt, ask,
   }));
   const dailies = Object.fromEntries(LANGS.map((l) => [l, forCard(questionOfTheDay(day, l))])) as Record<QuestionLang, Question>;
   const patterns: BankPattern[] = PATTERNS.map((p) => ({ id: p.id, name: p.name, asks: p.asks, ids: questionsFor(p).map((q) => q.id) }));

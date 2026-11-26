@@ -17,6 +17,7 @@
  */
 
 import TransitionLink from "@/components/transition-link";
+import { QuestionTask } from "@/components/question-task";
 import { FaceCluster } from "@/components/face-cluster";
 import type { Question } from "@/lib/questions";
 import { DIFFICULTY_XP, LANG_LABEL } from "@/lib/question-meta";
@@ -89,8 +90,8 @@ export default function QotdCard({
             <p className="mt-1 font-display text-lg font-bold text-ink">
               {question.title}
             </p>
-            <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-ink-soft">
-              {question.prompt}
+            <p className="mt-1 line-clamp-2 text-sm font-semibold leading-relaxed text-ink">
+              {question.ask}
             </p>
           </div>
           <div className="hidden shrink-0 text-right sm:block">
@@ -141,7 +142,8 @@ export default function QotdCard({
           <h2 className="mt-4 font-display text-3xl font-bold leading-[1.05] text-pop sm:text-5xl">
             {question.title}
           </h2>
-          <p className="mt-4 max-w-md text-[15px] leading-relaxed text-ink-soft">
+          <QuestionTask ask={question.ask} returns={question.returns} size="md" className="mt-5 max-w-xl" />
+          <p className="mt-3 max-w-md text-sm leading-relaxed text-ink-muted">
             {question.prompt}
           </p>
 

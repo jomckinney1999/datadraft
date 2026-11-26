@@ -368,6 +368,15 @@ for (const q of questions.QUESTIONS) {
     problems.push(`${label} has no \`returns\` line — grading compares output, so the learner must be told exactly what to produce`);
   }
 
+  // The ask is the headline of the question card: one sentence that says
+  // what to find. A long one stops being a headline and turns back into the
+  // prompt it was written to clarify.
+  if (!q.ask || !q.ask.trim()) {
+    problems.push(`${label} has no \`ask\` — the card's task line, one plain sentence of what to find`);
+  } else if (q.ask.length > 160) {
+    problems.push(`${label} \`ask\` is ${q.ask.length} characters; keep it under 160 so it reads as one line of task`);
+  }
+
   // Python and R are graded on printed output against a shared prelude, so
   // the prelude is part of the answer key and a missing one silently grades
   // every learner wrong.

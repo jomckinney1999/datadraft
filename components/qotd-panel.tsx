@@ -18,6 +18,7 @@
  */
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { QuestionTask } from "@/components/question-task";
 import Link from "next/link";
 import type { Database, QueryExecResult } from "sql.js";
 import type { Question } from "@/lib/questions";
@@ -170,14 +171,9 @@ export default function QotdPanel({
       </div>
 
       <div className="relative px-5 py-4">
-        <p className="text-[15px] leading-relaxed text-ink-soft">
+        <QuestionTask ask={question.ask} returns={question.returns} expected={question.expected} size="md" />
+        <p className="mt-3 text-sm leading-relaxed text-ink-muted">
           {question.prompt}
-        </p>
-        <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-ice">
-            Return
-          </span>{" "}
-          {question.returns}
         </p>
 
         <div className="mt-3">

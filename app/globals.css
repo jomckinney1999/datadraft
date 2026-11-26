@@ -4429,3 +4429,51 @@ html[data-qlang="r"] [data-qotd-lang="r"],
 html[data-qlang="excel"] [data-qotd-lang="excel"] {
   display: block;
 }
+
+/* ── The task card ─────────────────────────────────────────────
+   The question's one-sentence ask (components/question-task.tsx), set as
+   the loudest thing on a question: a gold-lit card with a gold rail down its
+   left edge and a warm halo, the answer's shape in an inset ice panel under
+   it, and column names as code chips. Solved turns it turf. The halo
+   multiplies by --glow-strength so light mode keeps the ring and the wash and
+   loses the smear. In the components layer so a utility beside it wins. */
+@layer components {
+  .task-card {
+    --task: var(--c-gold);
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border: 1px solid rgb(var(--task) / 0.55);
+    background:
+      radial-gradient(110% 80% at 0% 0%, rgb(var(--task) / 0.16), transparent 60%),
+      linear-gradient(180deg, rgb(var(--c-panel-hover)), rgb(var(--c-panel)));
+    box-shadow:
+      inset 4px 0 0 0 rgb(var(--task)),
+      inset 0 1px 0 0 rgb(255 255 255 / calc(0.08 * var(--glow-strength))),
+      0 18px 48px -26px rgb(var(--task) / calc(0.7 * var(--glow-strength))),
+      var(--shadow-surface);
+    transition: border-color 300ms ease, box-shadow 300ms ease;
+  }
+  .task-card[data-done] {
+    --task: var(--c-turf);
+  }
+  .task-returns {
+    border: 1px solid rgb(var(--c-ice) / 0.3);
+    background: rgb(var(--c-ice) / 0.07);
+  }
+  .task-col {
+    display: inline-block;
+    margin: 0 0.1em;
+    padding: 0 0.4em;
+    border-radius: 0.35rem;
+    border: 1px solid rgb(var(--c-ice) / 0.4);
+    background: rgb(var(--c-night) / 0.5);
+    font-family: theme("fontFamily.mono");
+    font-size: 0.85em;
+    line-height: 1.6;
+    color: rgb(var(--c-ice));
+  }
+  :root[data-theme="light"] .task-col {
+    background: rgb(var(--c-ice) / 0.1);
+  }
+}
